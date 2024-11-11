@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,15 @@ import org.springframework.util.Assert;
  *         lobCreator.setBlobAsBinaryStream(ps, 2, contentStream, contentLength);
  *         lobCreator.setClobAsString(ps, 3, description);
  *       }
- *     }
- * );</pre>
+ *     });
+ * </pre>
  *
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see org.springframework.jdbc.support.lob.LobCreator
+ * @deprecated as of 6.2, in favor of {@link SqlBinaryValue} and {@link SqlCharacterValue}
  */
+@Deprecated(since = "6.2")
 public abstract class AbstractLobCreatingPreparedStatementCallback implements PreparedStatementCallback<Integer> {
 
 	private final LobHandler lobHandler;

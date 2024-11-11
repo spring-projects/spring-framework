@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.server;
 
+import java.util.Locale;
+
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -106,7 +109,7 @@ public class ResponseStatusException extends ErrorResponseException {
 	}
 
 	/**
-	 * Return headers to add to the error response, e.g. "Allow", "Accept", etc.
+	 * Return headers to add to the error response, for example, "Allow", "Accept", etc.
 	 * <p>By default, delegates to {@link #getResponseHeaders()} for backwards
 	 * compatibility.
 	 */
@@ -117,7 +120,7 @@ public class ResponseStatusException extends ErrorResponseException {
 
 	/**
 	 * Return headers associated with the exception that should be added to the
-	 * error response, e.g. "Allow", "Accept", etc.
+	 * error response, for example, "Allow", "Accept", etc.
 	 * <p>The default implementation in this class returns empty headers.
 	 * @since 5.1.13
 	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
@@ -125,6 +128,23 @@ public class ResponseStatusException extends ErrorResponseException {
 	@Deprecated(since = "6.0")
 	public HttpHeaders getResponseHeaders() {
 		return HttpHeaders.EMPTY;
+	}
+
+	@Override
+	public ProblemDetail updateAndGetBody(@Nullable MessageSource messageSource, Locale locale) {
+		super.updateAndGetBody(messageSource, locale);
+
+		// The reason may be a code (consistent with ResponseStatusExceptionResolver)
+
+		if (messageSource != null && getReason() != null && getReason().equals(getBody().getDetail())) {
+			Object[] arguments = getDetailMessageArguments(messageSource, locale);
+			String resolved = messageSource.getMessage(getReason(), arguments, null, locale);
+			if (resolved != null) {
+				getBody().setDetail(resolved);
+			}
+		}
+
+		return getBody();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Sam Brannen
  * @since 3.2
  */
-@SuppressWarnings("javadoc")
 @RunWith(Suite.class)
 @SuiteClasses({ TestClass1.class, TestClass2.class, TestClass3.class, TestClass4.class })
 public class Spr8849Tests {

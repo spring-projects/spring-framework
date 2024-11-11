@@ -142,6 +142,7 @@ public final class GeneratedClass {
 
 	private TypeSpec.Builder apply() {
 		TypeSpec.Builder type = getBuilder(this.type);
+		type.addAnnotation(Generated.class);
 		this.methods.doWithMethodSpecs(type::addMethod);
 		this.declaredClasses.values().forEach(declaredClass ->
 				type.addType(declaredClass.apply().build()));

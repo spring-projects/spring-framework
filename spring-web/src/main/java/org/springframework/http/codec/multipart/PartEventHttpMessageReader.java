@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.LoggingCodecSupport;
+import org.springframework.http.codec.multipart.MultipartParser.HeadersToken;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -154,31 +155,23 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 
 			AtomicInteger partCount = new AtomicInteger();
 			return allPartsTokens
-					.windowUntil(t -> t instanceof MultipartParser.HeadersToken, true)
-					.concatMap(partTokens -> {
-						if (tooManyParts(partCount)) {
-							return Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
-									this.maxParts + " allowed)"));
-						}
-						else {
-							return partTokens.switchOnFirst((signal, flux) -> {
-								if (signal.hasValue()) {
-									MultipartParser.HeadersToken headersToken = (MultipartParser.HeadersToken) signal.get();
-									Assert.state(headersToken != null, "Signal should be headers token");
-
-									HttpHeaders headers = headersToken.headers();
-									Flux<MultipartParser.BodyToken> bodyTokens =
-											flux.filter(t -> t instanceof MultipartParser.BodyToken)
-													.cast(MultipartParser.BodyToken.class);
-									return createEvents(headers, bodyTokens);
-								}
-								else {
+					.windowUntil(HeadersToken.class::isInstance, true)
+					.concatMap(partTokens -> partTokens
+							.switchOnFirst((signal, flux) -> {
+								if (!signal.hasValue()) {
 									// complete or error signal
 									return flux.cast(PartEvent.class);
 								}
-							});
-						}
-					});
+								else if (tooManyParts(partCount)) {
+									return Mono.error(new DecodingException("Too many parts (" + partCount.get() +
+											"/" + this.maxParts + " allowed)"));
+								}
+								MultipartParser.HeadersToken headersToken = (MultipartParser.HeadersToken) signal.get();
+								Assert.state(headersToken != null, "Signal should be headers token");
+
+								HttpHeaders headers = headersToken.headers();
+								return createEvents(headers, flux.ofType(MultipartParser.BodyToken.class));
+							}));
 		});
 	}
 

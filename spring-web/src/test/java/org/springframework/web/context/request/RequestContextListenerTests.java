@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class RequestContextListenerTests {
+class RequestContextListenerTests {
 
 	@Test
-	public void requestContextListenerWithSameThread() {
+	void requestContextListenerWithSameThread() {
 		RequestContextListener listener = new RequestContextListener();
 		MockServletContext context = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(context);
@@ -51,7 +51,7 @@ public class RequestContextListenerTests {
 	}
 
 	@Test
-	public void requestContextListenerWithSameThreadAndAttributesGone() {
+	void requestContextListenerWithSameThreadAndAttributesGone() {
 		RequestContextListener listener = new RequestContextListener();
 		MockServletContext context = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(context);
@@ -72,7 +72,7 @@ public class RequestContextListenerTests {
 	}
 
 	@Test
-	public void requestContextListenerWithDifferentThread() {
+	void requestContextListenerWithDifferentThread() {
 		final RequestContextListener listener = new RequestContextListener();
 		final MockServletContext context = new MockServletContext();
 		final MockHttpServletRequest request = new MockHttpServletRequest(context);
@@ -87,12 +87,8 @@ public class RequestContextListenerTests {
 				"test", runnable, RequestAttributes.SCOPE_REQUEST);
 
 		// Execute requestDestroyed callback in different thread.
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				listener.requestDestroyed(new ServletRequestEvent(context, request));
-			}
-		};
+		Thread thread = new Thread(() -> listener.requestDestroyed(
+				new ServletRequestEvent(context, request)));
 		thread.start();
 		try {
 			thread.join();

@@ -38,9 +38,7 @@ import org.springframework.test.context.aot.DisabledInAotMode;
  */
 @RunWith(SpringRunner.class)
 @TestExecutionListeners({})
-// Since this test class does not load an ApplicationContext,
-// this test class simply is not supported for AOT processing.
-@DisabledInAotMode
+@DisabledInAotMode("Does not load an ApplicationContext and thus not supported for AOT processing")
 public class StandardJUnit4FeaturesSpringRunnerTests extends StandardJUnit4FeaturesTests {
 
 	/* All tests are in the parent class... */

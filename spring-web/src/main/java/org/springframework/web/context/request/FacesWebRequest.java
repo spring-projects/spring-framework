@@ -58,6 +58,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeRequest(@Nullable Class<T> requiredType) {
 		if (requiredType != null) {
@@ -70,6 +71,7 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	}
 
 	@Override
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeResponse(@Nullable Class<T> requiredType) {
 		if (requiredType != null) {

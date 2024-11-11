@@ -188,7 +188,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	/**
 	 * The dispatcher type {@code jakarta.servlet.DispatcherType.ASYNC} means a
 	 * filter can be invoked in more than one thread over the course of a single
-	 * request. Some filters only need to filter the initial thread (e.g. request
+	 * request. Some filters only need to filter the initial thread (for example, request
 	 * wrapping) while others may need to be invoked at least once in each
 	 * additional thread for example for setting up thread locals or to perform
 	 * final processing at the very end.
@@ -232,7 +232,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	/**
 	 * Typically an ERROR dispatch happens after the REQUEST dispatch completes,
 	 * and the filter chain starts anew. On some servers however the ERROR
-	 * dispatch may be nested within the REQUEST dispatch, e.g. as a result of
+	 * dispatch may be nested within the REQUEST dispatch, for example, as a result of
 	 * calling {@code sendError} on the response. In that case we are still in
 	 * the filter chain, on the same thread, but the request and response have
 	 * been switched to the original, unwrapped ones.

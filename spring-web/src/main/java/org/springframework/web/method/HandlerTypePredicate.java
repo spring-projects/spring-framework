@@ -110,7 +110,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 	}
 
 	/**
-	 * Match handlers declared under a base package, e.g. "org.example".
+	 * Match handlers declared under a base package, for example, "org.example".
 	 * @param packages one or more base package names
 	 */
 	public static HandlerTypePredicate forBasePackage(String... packages) {
@@ -163,7 +163,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 		private final List<Class<? extends Annotation>> annotations = new ArrayList<>();
 
 		/**
-		 * Match handlers declared under a base package, e.g. "org.example".
+		 * Match handlers declared under a base package, for example, "org.example".
 		 * @param packages one or more base package classes
 		 */
 		public Builder basePackage(String... packages) {

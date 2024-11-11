@@ -34,7 +34,7 @@ import java.util.function.BiConsumer;
  * @param <T> the result type returned by this Future's {@code get} method
  * @deprecated as of 6.0, in favor of {@link CompletableFuture}
  */
-@Deprecated(since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
 public interface ListenableFuture<T> extends Future<T> {
 
 	/**
@@ -43,7 +43,8 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * @deprecated as of 6.0, in favor of
 	 * {@link CompletableFuture#whenComplete(BiConsumer)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	void addCallback(ListenableFutureCallback<? super T> callback);
 
 	/**
@@ -54,7 +55,8 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * @deprecated as of 6.0, in favor of
 	 * {@link CompletableFuture#whenComplete(BiConsumer)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback);
 
 
@@ -62,6 +64,7 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * Expose this {@link ListenableFuture} as a JDK {@link CompletableFuture}.
 	 * @since 5.0
 	 */
+	@SuppressWarnings("NullAway")
 	default CompletableFuture<T> completable() {
 		CompletableFuture<T> completable = new DelegatingCompletableFuture<>(this);
 		addCallback(completable::complete, completable::completeExceptionally);

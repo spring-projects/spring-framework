@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link EncodedResourceResolver}.
+ * Tests for {@link EncodedResourceResolver}.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
@@ -47,17 +47,15 @@ public class EncodedResourceResolverTests {
 
 	private List<Resource> locations;
 
-	private Cache cache;
-
 	@BeforeEach
-	public void setup() {
-		this.cache = new ConcurrentMapCache("resourceCache");
+	void setup() {
+		Cache cache = new ConcurrentMapCache("resourceCache");
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
 		List<ResourceResolver> resolvers = new ArrayList<>();
-		resolvers.add(new CachingResourceResolver(this.cache));
+		resolvers.add(new CachingResourceResolver(cache));
 		resolvers.add(new EncodedResourceResolver());
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
@@ -70,7 +68,7 @@ public class EncodedResourceResolverTests {
 
 
 	@Test
-	public void resolveGzipped(GzippedFiles gzippedFiles) {
+	void resolveGzipped(GzippedFiles gzippedFiles) {
 		String file = "js/foo.js";
 		gzippedFiles.create(file);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -88,7 +86,7 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	public void resolveGzippedWithVersion(GzippedFiles gzippedFiles) {
+	void resolveGzippedWithVersion(GzippedFiles gzippedFiles) {
 		gzippedFiles.create("foo.css");
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -102,7 +100,7 @@ public class EncodedResourceResolverTests {
 	}
 
 	@Test
-	public void resolveFromCacheWithEncodingVariants(GzippedFiles gzippedFiles) {
+	void resolveFromCacheWithEncodingVariants(GzippedFiles gzippedFiles) {
 		// 1. Resolve, and cache .gz variant
 		String file = "js/foo.js";
 		gzippedFiles.create(file);

@@ -1,8 +1,8 @@
 [[spring-testing-annotation-testpropertysource]]
 = `@TestPropertySource`
 
-`@TestPropertySource` is a class-level annotation that you can use to configure the
-locations of properties files and inlined properties to be added to the set of
+`@TestPropertySource` is an annotation that can be applied to a test class to configure
+the locations of properties files and inlined properties to be added to the set of
 `PropertySources` in the `Environment` for an `ApplicationContext` loaded for an
 integration test.
 
@@ -12,7 +12,7 @@ The following example demonstrates how to declare a properties file from the cla
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -24,7 +24,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -42,7 +42,7 @@ The following example demonstrates how to declare inlined properties:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = { "timezone = GMT", "port: 4242" }) // <1>
@@ -54,7 +54,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>

@@ -20,7 +20,7 @@
 
 	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean" lazy-init="true"/>
 
-	<bean name="spring:mbean=another" class="org.springframework.jmx.export.MBeanExporterTests$Person" lazy-init="true">
+	<bean name="spring:mbean=another" class="org.springframework.context.testfixture.jmx.export.Person" lazy-init="true">
 		<property name="name" value="Juergen Hoeller"/>
 	</bean>
 

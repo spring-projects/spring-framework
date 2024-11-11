@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class MarshallingViewTests {
 	}
 
 	@Test
-	void renderInvalidModelKey() throws Exception {
+	void renderInvalidModelKey() {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		view.setModelKey("invalidKey");
@@ -122,7 +122,7 @@ class MarshallingViewTests {
 	}
 
 	@Test
-	void renderNullModelValue() throws Exception {
+	void renderNullModelValue() {
 		String modelKey = "key";
 		Map<String, Object> model = new HashMap<>();
 		model.put(modelKey, null);
@@ -137,7 +137,7 @@ class MarshallingViewTests {
 	}
 
 	@Test
-	void renderModelKeyUnsupported() throws Exception {
+	void renderModelKeyUnsupported() {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		view.setModelKey(modelKey);
@@ -192,7 +192,7 @@ class MarshallingViewTests {
 	}
 
 	@Test
-	void testRenderUnsupportedModel() throws Exception {
+	void testRenderUnsupportedModel() {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		Map<String, Object> model = new HashMap<>();

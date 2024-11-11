@@ -65,7 +65,7 @@ with less potential for errors. For example, you do not need to invoke the `proc
 method on the `JoinPoint` used for around advice, and, hence, you cannot fail to invoke it.
 
 All advice parameters are statically typed so that you work with advice parameters of
-the appropriate type (e.g. the type of the return value from a method execution) rather
+the appropriate type (for example, the type of the return value from a method execution) rather
 than `Object` arrays.
 
 The concept of join points matched by pointcuts is the key to AOP, which distinguishes

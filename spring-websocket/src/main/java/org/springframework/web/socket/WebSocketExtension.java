@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  * <a href="https://tools.ietf.org/html/rfc7230#section-3.2">RFC 7230 section 3.2</a></p>
  *
  * <p>Note that the order of extensions in HTTP headers defines their order of execution,
- * e.g. extensions "foo, bar" will be executed as "bar(foo(message))".</p>
+ * for example, extensions "foo, bar" will be executed as "bar(foo(message))".</p>
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
@@ -72,7 +72,7 @@ public class WebSocketExtension {
 		Assert.hasLength(name, "Extension name must not be empty");
 		this.name = name;
 		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
+			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
 			map.putAll(parameters);
 			this.parameters = Collections.unmodifiableMap(map);
 		}

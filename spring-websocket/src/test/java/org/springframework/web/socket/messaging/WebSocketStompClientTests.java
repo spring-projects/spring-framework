@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link WebSocketStompClient}.
+ * Tests for {@link WebSocketStompClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Injae Kim
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
 class WebSocketStompClientTests {
@@ -86,7 +87,7 @@ class WebSocketStompClientTests {
 
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		WebSocketClient webSocketClient = mock();
 		this.stompClient = new TestWebSocketStompClient(webSocketClient);
 		this.stompClient.setTaskScheduler(this.taskScheduler);
@@ -100,7 +101,7 @@ class WebSocketStompClientTests {
 
 
 	@Test
-	void webSocketHandshakeFailure() throws Exception {
+	void webSocketHandshakeFailure() {
 		connect();
 
 		IllegalStateException handshakeFailure = new IllegalStateException("simulated exception");
@@ -212,6 +213,29 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
+	void sendWebSocketMessageExceedOutboundMessageSizeLimit() throws Exception {
+		stompClient.setOutboundMessageSizeLimit(30);
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
+		accessor.setDestination("/topic/foo");
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
+
+		getTcpConnection().sendAsync(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
+
+		ArgumentCaptor<TextMessage> textMessageCaptor = ArgumentCaptor.forClass(TextMessage.class);
+		verify(this.webSocketSession, times(2)).sendMessage(textMessageCaptor.capture());
+		TextMessage textMessage = textMessageCaptor.getAllValues().get(0);
+		assertThat(textMessage).isNotNull();
+		assertThat(textMessage.getPayload()).isEqualTo("SEND\ndestination:/topic/foo\nco");
+		assertThat(textMessage.getPayload().getBytes().length).isEqualTo(30);
+
+		textMessage = textMessageCaptor.getAllValues().get(1);
+		assertThat(textMessage).isNotNull();
+		assertThat(textMessage.getPayload()).isEqualTo("ntent-length:7\n\npayload\0");
+		assertThat(textMessage.getPayload().getBytes().length).isEqualTo(24);
+	}
+
+
+	@Test
 	void sendWebSocketBinary() throws Exception {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/b");
@@ -229,7 +253,51 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
-	void heartbeatDefaultValue() throws Exception {
+	void sendWebSocketBinaryExceedOutboundMessageSizeLimit() throws Exception {
+		stompClient.setOutboundMessageSizeLimit(50);
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
+		accessor.setDestination("/b");
+		accessor.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
+
+		getTcpConnection().sendAsync(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
+
+		ArgumentCaptor<BinaryMessage> binaryMessageCaptor = ArgumentCaptor.forClass(BinaryMessage.class);
+		verify(this.webSocketSession, times(2)).sendMessage(binaryMessageCaptor.capture());
+		BinaryMessage binaryMessage = binaryMessageCaptor.getAllValues().get(0);
+		assertThat(binaryMessage).isNotNull();
+		assertThat(new String(binaryMessage.getPayload().array(), StandardCharsets.UTF_8))
+				.isEqualTo("SEND\ndestination:/b\ncontent-type:application/octet");
+		assertThat(binaryMessage.getPayload().array().length).isEqualTo(50);
+
+		binaryMessage = binaryMessageCaptor.getAllValues().get(1);
+		assertThat(binaryMessage).isNotNull();
+		assertThat(new String(binaryMessage.getPayload().array(), StandardCharsets.UTF_8))
+				.isEqualTo("-stream\ncontent-length:7\n\npayload\0");
+		assertThat(binaryMessage.getPayload().array().length).isEqualTo(34);
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void reassembleReceivedIFragmentedFrames() throws Exception {
+		WebSocketHandler handler = connect();
+		handler.handleMessage(this.webSocketSession, new TextMessage("SEND\ndestination:/topic/foo\nco"));
+		handler.handleMessage(this.webSocketSession, new TextMessage("ntent-length:7\n\npayload\0"));
+
+		ArgumentCaptor<Message> receiveMessageCaptor = ArgumentCaptor.forClass(Message.class);
+		verify(this.stompSession).handleMessage(receiveMessageCaptor.capture());
+		Message<byte[]> receiveMessage = receiveMessageCaptor.getValue();
+		assertThat(receiveMessage).isNotNull();
+
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(receiveMessage);
+		assertThat(headers.toNativeHeaderMap()).hasSize(2);
+		assertThat(headers.getContentLength()).isEqualTo(7);
+		assertThat(headers.getDestination()).isEqualTo("/topic/foo");
+		assertThat(new String(receiveMessage.getPayload())).isEqualTo("payload");
+	}
+
+	@Test
+	void heartbeatDefaultValue() {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock());
 		assertThat(stompClient.getDefaultHeartbeat()).isEqualTo(new long[] {0, 0});
 
@@ -238,7 +306,7 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
-	void heartbeatDefaultValueWithScheduler() throws Exception {
+	void heartbeatDefaultValueWithScheduler() {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock());
 		stompClient.setTaskScheduler(mock());
 		assertThat(stompClient.getDefaultHeartbeat()).isEqualTo(new long[] {10000, 10000});
@@ -248,7 +316,7 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
-	void heartbeatDefaultValueSetWithoutScheduler() throws Exception {
+	void heartbeatDefaultValueSetWithoutScheduler() {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock());
 		stompClient.setDefaultHeartbeat(new long[] {5, 5});
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -302,7 +370,9 @@ class WebSocketStompClientTests {
 		tcpConnection.onReadInactivity(mock(), 2L);
 		tcpConnection.onWriteInactivity(mock(), 2L);
 
-		this.webSocketHandlerCaptor.getValue().afterConnectionClosed(this.webSocketSession, CloseStatus.NORMAL);
+		WebSocketHandler handler = this.webSocketHandlerCaptor.getValue();
+		TcpConnection<?> connection = (TcpConnection<?>) WebSocketHandlerDecorator.unwrap(handler);
+		connection.close();
 
 		verify(future, times(2)).cancel(true);
 		verifyNoMoreInteractions(future);

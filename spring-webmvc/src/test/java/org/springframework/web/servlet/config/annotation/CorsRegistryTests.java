@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,32 +32,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class CorsRegistryTests {
+class CorsRegistryTests {
 
 	private CorsRegistry registry;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.registry = new CorsRegistry();
 	}
 
 	@Test
-	public void noMapping() {
-		assertThat(this.registry.getCorsConfigurations().isEmpty()).isTrue();
+	void noMapping() {
+		assertThat(this.registry.getCorsConfigurations()).isEmpty();
 	}
 
 	@Test
-	public void multipleMappings() {
+	void multipleMappings() {
 		this.registry.addMapping("/foo");
 		this.registry.addMapping("/bar");
 		assertThat(this.registry.getCorsConfigurations()).hasSize(2);
 	}
 
 	@Test
-	public void customizedMapping() {
+	void customizedMapping() {
 		this.registry.addMapping("/foo").allowedOrigins("https://domain2.com", "https://domain2.com")
-				.allowedMethods("DELETE").allowCredentials(false).allowedHeaders("header1", "header2")
-				.exposedHeaders("header3", "header4").maxAge(3600);
+				.allowedMethods("DELETE").allowCredentials(true).allowPrivateNetwork(true)
+				.allowedHeaders("header1", "header2").exposedHeaders("header3", "header4").maxAge(3600);
 		Map<String, CorsConfiguration> configs = this.registry.getCorsConfigurations();
 		assertThat(configs).hasSize(1);
 		CorsConfiguration config = configs.get("/foo");
@@ -65,12 +65,13 @@ public class CorsRegistryTests {
 		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("DELETE"));
 		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
 		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header3", "header4"));
-		assertThat(config.getAllowCredentials()).isFalse();
+		assertThat(config.getAllowCredentials()).isTrue();
+		assertThat(config.getAllowPrivateNetwork()).isTrue();
 		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(3600));
 	}
 
 	@Test
-	public void allowCredentials() {
+	void allowCredentials() {
 		this.registry.addMapping("/foo").allowCredentials(true);
 		CorsConfiguration config = this.registry.getCorsConfigurations().get("/foo");
 		assertThat(config.getAllowedOrigins())
@@ -95,6 +96,7 @@ public class CorsRegistryTests {
 		assertThat(config.getAllowedHeaders()).isEqualTo(Collections.singletonList("*"));
 		assertThat(config.getExposedHeaders()).isEmpty();
 		assertThat(config.getAllowCredentials()).isNull();
+		assertThat(config.getAllowPrivateNetwork()).isNull();
 		assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(1800));
 	}
 }

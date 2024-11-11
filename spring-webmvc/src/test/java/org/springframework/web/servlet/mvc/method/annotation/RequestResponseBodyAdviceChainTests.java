@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -47,7 +49,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link RequestResponseBodyAdviceChain}.
+ * Tests for {@link RequestResponseBodyAdviceChain}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -68,7 +70,6 @@ class RequestResponseBodyAdviceChainTests {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void requestBodyAdvice() throws IOException {
 		RequestBodyAdvice requestAdvice = mock();
 		ResponseBodyAdvice<String> responseAdvice = mock();
@@ -91,7 +92,6 @@ class RequestResponseBodyAdviceChainTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void responseBodyAdvice() {
 		RequestBodyAdvice requestAdvice = mock();
 		ResponseBodyAdvice<String> responseAdvice = mock();
@@ -111,7 +111,7 @@ class RequestResponseBodyAdviceChainTests {
 
 	@Test
 	void controllerAdvice() {
-		Object adviceBean = new ControllerAdviceBean(new MyControllerAdvice());
+		Object adviceBean = createControllerAdviceBean(MyControllerAdvice.class);
 		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Collections.singletonList(adviceBean));
 
 		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
@@ -122,13 +122,20 @@ class RequestResponseBodyAdviceChainTests {
 
 	@Test
 	void controllerAdviceNotApplicable() {
-		Object adviceBean = new ControllerAdviceBean(new TargetedControllerAdvice());
+		Object adviceBean = createControllerAdviceBean(TargetedControllerAdvice.class);
 		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(Collections.singletonList(adviceBean));
 
 		String actual = (String) chain.beforeBodyWrite(this.body, this.returnType, this.contentType,
 				this.converterType, this.request, this.response);
 
 		assertThat(actual).isEqualTo(this.body);
+	}
+
+	private ControllerAdviceBean createControllerAdviceBean(Class<?> beanType) {
+		StaticApplicationContext applicationContext = new StaticApplicationContext();
+		applicationContext.registerSingleton(beanType.getSimpleName(), beanType);
+		ControllerAdvice controllerAdvice = AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class);
+		return new ControllerAdviceBean(beanType.getSimpleName(), applicationContext, controllerAdvice);
 	}
 
 

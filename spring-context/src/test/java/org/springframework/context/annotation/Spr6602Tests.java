@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  */
-public class Spr6602Tests {
+class Spr6602Tests {
 
 	@Test
-	public void testXmlBehavior() throws Exception {
+	void testXmlBehavior() throws Exception {
 		doAssertions(new ClassPathXmlApplicationContext("Spr6602Tests-context.xml", Spr6602Tests.class));
 	}
 
 	@Test
-	public void testConfigurationClassBehavior() throws Exception {
+	void testConfigurationClassBehavior() throws Exception {
 		doAssertions(new AnnotationConfigApplicationContext(FooConfig.class));
 	}
 
-	private void doAssertions(ApplicationContext ctx) throws Exception {
+	private void doAssertions(ApplicationContext ctx) {
 		Foo foo = ctx.getBean(Foo.class);
 
 		Bar bar1 = ctx.getBean(Bar.class);
@@ -65,7 +65,7 @@ public class Spr6602Tests {
 	public static class FooConfig {
 
 		@Bean
-		public Foo foo() throws Exception {
+		public Foo foo() {
 			return new Foo(barFactory().getObject());
 		}
 
@@ -93,7 +93,7 @@ public class Spr6602Tests {
 	public static class BarFactory implements FactoryBean<Bar> {
 
 		@Override
-		public Bar getObject() throws Exception {
+		public Bar getObject() {
 			return new Bar();
 		}
 

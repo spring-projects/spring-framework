@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcCall}.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
+ * @author Giuseppe Milicia
  * @since 2.5
  */
 public interface CallMetaDataProvider {
@@ -54,6 +56,12 @@ public interface CallMetaDataProvider {
 	 */
 	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, @Nullable String catalogName,
 			@Nullable String schemaName, @Nullable String procedureName) throws SQLException;
+
+	/**
+	 * Get the call parameter meta-data that is currently used.
+	 * @return a List of {@link CallParameterMetaData}
+	 */
+	List<CallParameterMetaData> getCallParameterMetaData();
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta-data currently used.
@@ -101,6 +109,14 @@ public interface CallMetaDataProvider {
 	String parameterNameToUse(@Nullable String parameterName);
 
 	/**
+	 * Return the name of the named parameter to use for binding the given parameter name.
+	 * @param parameterName the name of the parameter to bind
+	 * @return the name of the named parameter to use for binding the given parameter name
+	 * @since 6.1.2
+	 */
+	String namedParameterBindingToUse(@Nullable String parameterName);
+
+	/**
 	 * Create a default out parameter based on the provided meta-data.
 	 * <p>This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
@@ -135,6 +151,11 @@ public interface CallMetaDataProvider {
 	String getUserName();
 
 	/**
+	 * Are we using the meta-data for the procedure columns?
+	 */
+	boolean isProcedureColumnMetaDataUsed();
+
+	/**
 	 * Does this database support returning ResultSets that should be retrieved with the JDBC call:
 	 * {@link java.sql.Statement#getResultSet()}?
 	 */
@@ -153,22 +174,11 @@ public interface CallMetaDataProvider {
 	int getRefCursorSqlType();
 
 	/**
-	 * Are we using the meta-data for the procedure columns?
-	 */
-	boolean isProcedureColumnMetaDataUsed();
-
-	/**
 	 * Should we bypass the return parameter with the specified name?
 	 * <p>This allows the database specific implementation to skip the processing
 	 * for specific results returned by the database call.
 	 */
 	boolean byPassReturnParameter(String parameterName);
-
-	/**
-	 * Get the call parameter meta-data that is currently used.
-	 * @return a List of {@link CallParameterMetaData}
-	 */
-	List<CallParameterMetaData> getCallParameterMetaData();
 
 	/**
 	 * Does the database support the use of catalog name in procedure calls?

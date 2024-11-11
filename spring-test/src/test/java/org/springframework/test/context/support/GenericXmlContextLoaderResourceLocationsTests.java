@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Unit test which verifies proper
@@ -51,9 +50,9 @@ class GenericXmlContextLoaderResourceLocationsTests {
 	private static final Log logger = LogFactory.getLog(GenericXmlContextLoaderResourceLocationsTests.class);
 
 
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("contextConfigurationLocationsData")
-	void assertContextConfigurationLocations(Class<?> testClass, String[] expectedLocations) throws Exception {
+	void assertContextConfigurationLocations(Class<?> testClass, String[] expectedLocations) {
 		ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
 		String[] configuredLocations = contextConfig.value();
 		ContextConfigurationAttributes configAttributes =
@@ -98,7 +97,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 	}
 
 	private static Arguments args(Class<?> testClass, String[] expectedLocations) {
-		return arguments(named(testClass.getSimpleName(), testClass), expectedLocations);
+		return argumentSet(testClass.getSimpleName(), testClass, expectedLocations);
 	}
 
 	private static String[] array(String... elements) {

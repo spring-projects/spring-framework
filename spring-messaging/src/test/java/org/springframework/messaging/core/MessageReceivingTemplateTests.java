@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,23 +32,23 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for receiving operations in {@link AbstractMessagingTemplate}.
+ * Tests for receiving operations in {@link AbstractMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
  * @see MessageRequestReplyTemplateTests
  */
-public class MessageReceivingTemplateTests {
+class MessageReceivingTemplateTests {
 
 	private TestMessagingTemplate template;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.template = new TestMessagingTemplate();
 	}
 
 	@Test
-	public void receive() {
+	void receive() {
 		Message<?> expected = new GenericMessage<>("payload");
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(expected);
@@ -59,13 +59,13 @@ public class MessageReceivingTemplateTests {
 	}
 
 	@Test
-	public void receiveMissingDefaultDestination() {
+	void receiveMissingDefaultDestination() {
 		assertThatIllegalStateException().isThrownBy(
 				this.template::receive);
 	}
 
 	@Test
-	public void receiveFromDestination() {
+	void receiveFromDestination() {
 		Message<?> expected = new GenericMessage<>("payload");
 		this.template.setReceiveMessage(expected);
 		Message<?> actual = this.template.receive("somewhere");
@@ -75,7 +75,7 @@ public class MessageReceivingTemplateTests {
 	}
 
 	@Test
-	public void receiveAndConvert() {
+	void receiveAndConvert() {
 		Message<?> expected = new GenericMessage<>("payload");
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(expected);
@@ -86,7 +86,7 @@ public class MessageReceivingTemplateTests {
 	}
 
 	@Test
-	public void receiveAndConvertFromDestination() {
+	void receiveAndConvertFromDestination() {
 		Message<?> expected = new GenericMessage<>("payload");
 		this.template.setReceiveMessage(expected);
 		String payload = this.template.receiveAndConvert("somewhere", String.class);
@@ -96,7 +96,7 @@ public class MessageReceivingTemplateTests {
 	}
 
 	@Test
-	public void receiveAndConvertFailed() {
+	void receiveAndConvertFailed() {
 		Message<?> expected = new GenericMessage<>("not a number test");
 		this.template.setReceiveMessage(expected);
 		this.template.setMessageConverter(new GenericMessageConverter());
@@ -107,7 +107,7 @@ public class MessageReceivingTemplateTests {
 	}
 
 	@Test
-	public void receiveAndConvertNoConverter() {
+	void receiveAndConvertNoConverter() {
 		Message<?> expected = new GenericMessage<>("payload");
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(expected);

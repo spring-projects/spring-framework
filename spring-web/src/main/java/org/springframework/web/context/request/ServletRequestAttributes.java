@@ -143,6 +143,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -242,6 +243,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveReference(String key) {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return this.request;

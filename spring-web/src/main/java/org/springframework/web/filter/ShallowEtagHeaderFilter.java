@@ -43,7 +43,7 @@ import org.springframework.web.util.WebUtils;
  * not sent, but rather a {@code 304 "Not Modified"} status instead.
  *
  * <p>Since the ETag is based on the response content, the response
- * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
+ * (for example, a {@link org.springframework.web.servlet.View}) is still rendered.
  * As such, this filter only saves bandwidth, not server performance.
  *
  * <p>State-changing HTTP methods and other HTTP conditional request headers such as

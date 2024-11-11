@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Default value separator: {@value}. */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
+	/** Default escape character: {@code '\'}. */
+	public static final Character DEFAULT_ESCAPE_CHARACTER = '\\';
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
@@ -110,6 +112,10 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
 	@Nullable
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
+
+	/** Defaults to {@link #DEFAULT_ESCAPE_CHARACTER}. */
+	@Nullable
+	protected Character escapeCharacter = DEFAULT_ESCAPE_CHARACTER;
 
 	protected boolean trimValues = false;
 
@@ -152,6 +158,17 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	}
 
 	/**
+	 * Specify the escape character to use to ignore placeholder prefix
+	 * or value separator, or {@code null} if no escaping should take
+	 * place.
+	 * <p>Default is {@link #DEFAULT_ESCAPE_CHARACTER}.
+	 * @since 6.2
+	 */
+	public void setEscapeCharacter(@Nullable Character escsEscapeCharacter) {
+		this.escapeCharacter = escsEscapeCharacter;
+	}
+
+	/**
 	 * Specify whether to trim resolved values before applying them,
 	 * removing superfluous whitespace from the beginning and end.
 	 * <p>Default is {@code false}.
@@ -163,7 +180,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/**
 	 * Set a value that should be treated as {@code null} when resolved
-	 * as a placeholder value: e.g. "" (empty String) or "null".
+	 * as a placeholder value: for example, "" (empty String) or "null".
 	 * <p>Note that this will only apply to full property values,
 	 * not to parts of concatenated values.
 	 * <p>By default, no such null value is defined. This means that
@@ -211,7 +228,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 		this.beanFactory = beanFactory;
 	}
 
-
+	@SuppressWarnings("NullAway")
 	protected void doProcessProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
 			StringValueResolver valueResolver) {
 

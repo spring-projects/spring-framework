@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
+import org.springframework.beans.factory.support.RegisteredBean.InstantiationDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
@@ -44,7 +45,8 @@ public class ManagementConfiguration {
 	@Bean
 	static BeanRegistrationAotProcessor beanRegistrationAotProcessor() {
 		return registeredBean -> {
-			Executable factoryMethod = registeredBean.resolveConstructorOrFactoryMethod();
+			InstantiationDescriptor instantiationDescriptor = registeredBean.resolveInstantiationDescriptor();
+			Executable factoryMethod = instantiationDescriptor.executable();
 			// Make AOT contribution for @Managed @Bean methods.
 			if (AnnotatedElementUtils.hasAnnotation(factoryMethod, Managed.class)) {
 				return new AotContribution(createManagementContext());

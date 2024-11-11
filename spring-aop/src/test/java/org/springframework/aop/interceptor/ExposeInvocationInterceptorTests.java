@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class ExposeInvocationInterceptorTests {
+class ExposeInvocationInterceptorTests {
 
 	@Test
-	public void testXmlConfig() {
+	void testXmlConfig() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(ExposeInvocationInterceptorTests.class, "context.xml"));

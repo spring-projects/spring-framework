@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
@@ -71,6 +72,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	}
 
 	@Override
+	public Map<String, Object> getAttributes() {
+		return getDelegate().getAttributes();
+	}
+
+	@Override
 	public RequestPath getPath() {
 		return getDelegate().getPath();
 	}
@@ -113,6 +119,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 		return getDelegate().getBody();
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [delegate=" + getDelegate() + "]";
+	}
+
 
 	/**
 	 * Return the native request of the underlying server API, if possible,
@@ -130,15 +141,8 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 			return getNativeRequest(serverHttpRequestDecorator.getDelegate());
 		}
 		else {
-			throw new IllegalArgumentException(
-					"Can't find native request in " + request.getClass().getName());
+			throw new IllegalArgumentException("Cannot find native request in " + request.getClass().getName());
 		}
-	}
-
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " [delegate=" + getDelegate() + "]";
 	}
 
 }

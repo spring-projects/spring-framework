@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
@@ -24,12 +26,14 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link UriBuilderFactoryArgumentResolver}.
+ * Tests for {@link UriBuilderFactoryArgumentResolver}.
  *
  * @author Olga Maciaszek-Sharma
  */
+@SuppressWarnings({"DataFlowIssue", "OptionalAssignedToNull"})
 class UriBuilderFactoryArgumentResolverTests {
 
 	private final TestExchangeAdapter client = new TestExchangeAdapter();
@@ -49,24 +53,65 @@ class UriBuilderFactoryArgumentResolverTests {
 	}
 
 	@Test
-	void ignoreNullUriBuilderFactory(){
-		this.service.execute(null);
+	void nullUriBuilderFactory() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.service.execute(null))
+				.withMessage("UriBuilderFactory is required");
+	}
+
+	@Test
+	void nullUriBuilderFactoryWithNullable(){
+		this.service.executeNullable(null);
 
 		assertThat(getRequestValues().getUriBuilderFactory()).isEqualTo(null);
 		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
 		assertThat(getRequestValues().getUri()).isNull();
 	}
 
+	@Test
+	void nullUriBuilderFactoryWithOptional(){
+		this.service.executeOptional(null);
+
+		assertThat(getRequestValues().getUriBuilderFactory()).isEqualTo(null);
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
+		assertThat(getRequestValues().getUri()).isNull();
+	}
+
+	@Test
+	void emptyOptionalUriBuilderFactory(){
+		this.service.executeOptional(Optional.empty());
+
+		assertThat(getRequestValues().getUriBuilderFactory()).isEqualTo(null);
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
+		assertThat(getRequestValues().getUri()).isNull();
+	}
+
+	@Test
+	void optionalUriBuilderFactory(){
+		UriBuilderFactory factory = new DefaultUriBuilderFactory("https://example.com");
+		this.service.executeOptional(Optional.of(factory));
+
+		assertThat(getRequestValues().getUriBuilderFactory()).isEqualTo(factory);
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
+		assertThat(getRequestValues().getUri()).isNull();
+	}
 
 	private HttpRequestValues getRequestValues() {
 		return this.client.getRequestValues();
 	}
 
 
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface Service {
 
 		@GetExchange("/path")
-		void execute(@Nullable UriBuilderFactory uri);
+		void execute(UriBuilderFactory uri);
+
+		@GetExchange("/path")
+		void executeNullable(@Nullable UriBuilderFactory uri);
+
+		@GetExchange("/path")
+		void executeOptional(Optional<UriBuilderFactory> uri);
 
 	}
 }

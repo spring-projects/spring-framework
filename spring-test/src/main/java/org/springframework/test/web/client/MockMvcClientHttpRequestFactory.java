@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
-
 
 /**
  * A {@link ClientHttpRequestFactory} for requests executed via {@link MockMvc}.
@@ -74,6 +74,14 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 
 			HttpStatusCode status = HttpStatusCode.valueOf(servletResponse.getStatus());
 			byte[] body = servletResponse.getContentAsByteArray();
+			if (body.length == 0) {
+				String error = servletResponse.getErrorMessage();
+				if (StringUtils.hasLength(error)) {
+					// sendError message as default body
+					body = error.getBytes(StandardCharsets.UTF_8);
+				}
+			}
+
 			MockClientHttpResponse clientResponse = new MockClientHttpResponse(body, status);
 			clientResponse.getHeaders().putAll(getResponseHeaders(servletResponse));
 			return clientResponse;

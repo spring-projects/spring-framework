@@ -20,7 +20,7 @@ Consider the following example, which shows a simple `PersonForm` model with two
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonForm {
 		private String name;
@@ -30,7 +30,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonForm(
 			private val name: String,
@@ -45,7 +45,7 @@ Bean Validation lets you declare constraints as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonForm {
 
@@ -60,7 +60,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonForm(
 		@get:NotNull @get:Size(max=64)
@@ -94,7 +94,7 @@ bean, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -110,7 +110,7 @@ Java::
 
 XML::
 +
-[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
@@ -134,7 +134,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.Validator;
 
@@ -148,7 +148,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.Validator;
 
@@ -171,7 +171,7 @@ For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.validation.Validator;
 
@@ -185,7 +185,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.validation.Validator
 
@@ -196,7 +196,7 @@ Kotlin::
 
 When used as `org.springframework.validation.Validator`, `LocalValidatorFactoryBean`
 invokes the underlying `jakarta.validation.Validator`, and then adapts
-``ContraintViolation``s to ``FieldError``s, and registers them with the `Errors` object
+``ConstraintViolation``s to ``FieldError``s, and registers them with the `Errors` object
 passed into the `validate` method.
 
 
@@ -226,7 +226,7 @@ The following example shows a custom `@Constraint` declaration followed by an as
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -237,7 +237,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -250,7 +250,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.ConstraintValidator;
 
@@ -265,7 +265,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.ConstraintValidator
 
@@ -287,32 +287,7 @@ As the preceding example shows, a `ConstraintValidator` implementation can have 
 You can integrate the method validation feature of Bean Validation into a
 Spring context through a `MethodValidationPostProcessor` bean definition:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-	@Configuration
-	public class AppConfig {
-
-		@Bean
-		public MethodValidationPostProcessor validationPostProcessor() {
-			return new MethodValidationPostProcessor();
-		}
-	}
-
-----
-
-XML::
-+
-[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
-----
-======
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
 
 To be eligible for Spring-driven method validation, target classes need to be annotated
 with Spring's `@Validated` annotation, which can optionally also declare the validation
@@ -341,40 +316,11 @@ xref:web/webflux/ann-rest-exceptions.adoc[Error Responses] sections.
 === Method Validation Exceptions
 
 By default, `jakarta.validation.ConstraintViolationException` is raised with the set of
-``ConstraintViolation``s returned by `jakarata.validation.Validator`. As an alternative,
+``ConstraintViolation``s returned by `jakarta.validation.Validator`. As an alternative,
 you can have `MethodValidationException` raised instead with ``ConstraintViolation``s
 adapted to `MessageSourceResolvable` errors. To enable set the following flag:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-	@Configuration
-	public class AppConfig {
-
-		@Bean
-		public MethodValidationPostProcessor validationPostProcessor() {
-			MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
-			processor.setAdaptConstraintViolations(true);
-			return processor;
-		}
-	}
-
-----
-
-XML::
-+
-[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor">
-		<property name="adaptConstraintViolations" value="true"/>
-	</bean>
-----
-======
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
 
 `MethodValidationException` contains a list of ``ParameterValidationResult``s which
 group errors by method parameter, and each exposes a `MethodParameter`, the argument
@@ -398,7 +344,7 @@ Given the following class declarations:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	record Person(@Size(min = 1, max = 10) String name) {
 	}
@@ -414,7 +360,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@JvmRecord
 	internal data class Person(@Size(min = 1, max = 10) val name: String)
@@ -429,24 +375,24 @@ Kotlin::
 ----
 ======
 
-A `ConstraintViolation` on `Person.name()` is adapted to a `FieldErrro` with the following:
+A `ConstraintViolation` on `Person.name()` is adapted to a `FieldError` with the following:
 
-- Error codes `"Size.student.name"`, `"Size.name"`, `"Size.java.lang.String"`, and `"Size"`
+- Error codes `"Size.person.name"`, `"Size.name"`, `"Size.java.lang.String"`, and `"Size"`
 - Message arguments `"name"`, `10`, and `1` (the field name and the constraint attributes)
 - Default message "size must be between 1 and 10"
 
 To customize the default message, you can add properties to
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundles using any of the above errors codes and message arguments. Note also that the
-message argument `"name"` is itself a `MessagreSourceResolvable` with error codes
-`"student.name"` and `"name"` and can customized too. For example:
+message argument `"name"` is itself a `MessageSourceResolvable` with error codes
+`"person.name"` and `"name"` and can be customized too. For example:
 
 Properties::
 +
-[source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
-Size.student.name=Please, provide a {0} that is between {2} and {1} characters long
-student.name=username
+Size.person.name=Please, provide a {0} that is between {2} and {1} characters long
+person.name=username
 ----
 
 A `ConstraintViolation` on the `degrees` method parameter is adapted to a
@@ -460,7 +406,7 @@ To customize the above default message, you can add a property such as:
 
 Properties::
 +
-[source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 Max.degrees=You cannot provide more than {1} {0}
 ----
@@ -491,7 +437,7 @@ logic after binding to a target object:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Foo target = new Foo();
 	DataBinder binder = new DataBinder(target);
@@ -509,7 +455,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val target = Foo()
 	val binder = DataBinder(target)

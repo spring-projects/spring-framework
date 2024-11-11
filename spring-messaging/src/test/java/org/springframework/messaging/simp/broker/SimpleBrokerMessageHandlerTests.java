@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link SimpleBrokerMessageHandler}.
+ * Tests for {@link SimpleBrokerMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -82,14 +82,14 @@ public class SimpleBrokerMessageHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.messageHandler = new SimpleBrokerMessageHandler(
 				this.clientInChannel, this.clientOutChannel, this.brokerChannel, Collections.emptyList());
 	}
 
 
 	@Test
-	public void subscribePublish() {
+	void subscribePublish() {
 		startSession("sess1");
 		startSession("sess2");
 
@@ -114,7 +114,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void subscribeDisconnectPublish() {
+	void subscribeDisconnectPublish() {
 		String sess1 = "sess1";
 		String sess2 = "sess2";
 
@@ -152,7 +152,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void connect() {
+	void connect() {
 		String id = "sess1";
 
 		Message<String> connectMessage = startSession(id);
@@ -166,7 +166,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void heartbeatValueWithAndWithoutTaskScheduler() {
+	void heartbeatValueWithAndWithoutTaskScheduler() {
 		assertThat(this.messageHandler.getHeartbeatValue()).isNull();
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 
@@ -175,7 +175,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void startWithHeartbeatValueWithoutTaskScheduler() {
+	void startWithHeartbeatValueWithoutTaskScheduler() {
 		this.messageHandler.setHeartbeatValue(new long[] {10000, 10000});
 		assertThatIllegalArgumentException().isThrownBy(
 				this.messageHandler::start);
@@ -201,7 +201,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void startWithOneZeroHeartbeatValue() {
+	void startWithOneZeroHeartbeatValue() {
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.setHeartbeatValue(new long[] {0, 10000});
 		this.messageHandler.start();
@@ -210,7 +210,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void readInactivity() throws Exception {
+	void readInactivity() throws Exception {
 		this.messageHandler.setHeartbeatValue(new long[] {0, 1});
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.start();
@@ -241,7 +241,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void writeInactivity() throws Exception {
+	void writeInactivity() throws Exception {
 		this.messageHandler.setHeartbeatValue(new long[] {1, 0});
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.start();
@@ -272,7 +272,7 @@ public class SimpleBrokerMessageHandlerTests {
 	}
 
 	@Test
-	public void readWriteIntervalCalculation() throws Exception {
+	void readWriteIntervalCalculation() throws Exception {
 		this.messageHandler.setHeartbeatValue(new long[] {1, 1});
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.start();

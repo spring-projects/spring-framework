@@ -60,6 +60,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);

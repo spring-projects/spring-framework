@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Thomas Risberg
  */
-public class TableMetaDataContextTests {
+class TableMetaDataContextTests {
 
 	private DataSource dataSource = mock();
 
@@ -56,14 +56,14 @@ public class TableMetaDataContextTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 
 
 	@Test
-	public void testMatchInParametersAndSqlTypeInfoWrapping() throws Exception {
+	void testMatchInParametersAndSqlTypeInfoWrapping() throws Exception {
 		final String TABLE = "customers";
 		final String USER = "me";
 
@@ -119,7 +119,7 @@ public class TableMetaDataContextTests {
 	}
 
 	@Test
-	public void testTableWithSingleColumnGeneratedKey() throws Exception {
+	void testTableWithSingleColumnGeneratedKey() throws Exception {
 		final String TABLE = "customers";
 		final String USER = "me";
 

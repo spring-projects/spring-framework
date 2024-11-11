@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package org.springframework.aot.hint;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -229,8 +227,8 @@ class BindingReflectionHintsRegistrarTests {
 	@Test
 	void registerTypeForSerializationWithEnum() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleEnum.class);
-		assertThat(this.hints.reflection().typeHints()).singleElement()
-				.satisfies(typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleEnum.class)));
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleEnum.class).withMemberCategories(
+				MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS)).accepts(this.hints);
 	}
 
 	@Test
@@ -289,7 +287,8 @@ class BindingReflectionHintsRegistrarTests {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithJacksonCustomStrategy.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(PropertyNamingStrategies.UpperSnakeCaseStrategy.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
 				.accepts(this.hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleRecordWithJacksonCustomStrategy.Builder.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleRecordWithJacksonCustomStrategy.Builder.class)
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS))
 				.accepts(this.hints);
 	}
 
@@ -443,7 +442,7 @@ class BindingReflectionHintsRegistrarTests {
 		}
 
 		@Override
-		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) {
 			return null;
 		}
 	}
@@ -456,7 +455,7 @@ class BindingReflectionHintsRegistrarTests {
 		}
 
 		@Override
-		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) {
 			return null;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,12 +98,14 @@ public final class ReactiveTypeDescriptor {
 	 */
 	public Object getEmptyValue() {
 		Assert.state(this.emptySupplier != null, "Empty values not supported");
-		return this.emptySupplier.get();
+		Object emptyValue = this.emptySupplier.get();
+		Assert.notNull(emptyValue, "Invalid null return value from emptySupplier");
+		return emptyValue;
 	}
 
 	/**
 	 * Whether the underlying operation is deferred and needs to be started
-	 * explicitly, e.g. via subscribing (or similar), or whether it is triggered
+	 * explicitly, for example, via subscribing (or similar), or whether it is triggered
 	 * without the consumer having any control.
 	 * @since 5.2.7
 	 */

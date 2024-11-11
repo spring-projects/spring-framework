@@ -19,14 +19,56 @@ of the classpath -- for example, deployed within the application's JAR file.
 The following table lists all currently supported Spring properties.
 
 .Supported Spring Properties
+[cols="1,1"]
 |===
 | Name | Description
+
+| `spring.aop.ajc.ignore`
+| Instructs Spring to ignore ajc-compiled aspects for Spring AOP proxying, restoring traditional
+Spring behavior for scenarios where both weaving and AspectJ auto-proxying are enabled. See
+{spring-framework-api}++/aop/aspectj/annotation/AbstractAspectJAdvisorFactory.html#IGNORE_AJC_PROPERTY_NAME++[`AbstractAspectJAdvisorFactory`]
+for details.
+
+| `spring.aot.enabled`
+| Indicates the application should run with AOT generated artifacts. See
+xref:core/aot.adoc[Ahead of Time Optimizations] and 
+{spring-framework-api}++/aot/AotDetector.html#AOT_ENABLED++[`AotDetector`]
+for details.
 
 | `spring.beaninfo.ignore`
 | Instructs Spring to use the `Introspector.IGNORE_ALL_BEANINFO` mode when calling the
 JavaBeans `Introspector`. See
-{spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
+{spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`StandardBeanInfoFactory`]
 for details.
+
+| `spring.cache.reactivestreams.ignore`
+| Instructs Spring's caching infrastructure to ignore the presence of Reactive Streams,
+in particular Reactor's `Mono`/`Flux` in `@Cacheable` method return type declarations. See
+{spring-framework-api}++/cache/interceptor/CacheAspectSupport.html#IGNORE_REACTIVESTREAMS_PROPERTY_NAME++[`CacheAspectSupport`]
+for details.
+
+| `spring.classformat.ignore`
+| Instructs Spring to ignore class format exceptions during classpath scanning, in
+particular for unsupported class file versions. See
+{spring-framework-api}++/context/annotation/ClassPathScanningCandidateComponentProvider.html#IGNORE_CLASSFORMAT_PROPERTY_NAME++[`ClassPathScanningCandidateComponentProvider`]
+for details.
+
+| `spring.context.checkpoint`
+| Property that specifies a common context checkpoint. See
+xref:integration/checkpoint-restore.adoc#_automatic_checkpointrestore_at_startup[Automatic checkpoint/restore at startup] and
+{spring-framework-api}++/context/support/DefaultLifecycleProcessor.html#CHECKPOINT_PROPERTY_NAME++[`DefaultLifecycleProcessor`]
+for details.
+
+| `spring.context.exit`
+| Property for terminating the JVM when the context reaches a specific phase. See
+xref:integration/checkpoint-restore.adoc#_automatic_checkpointrestore_at_startup[Automatic checkpoint/restore at startup] and
+{spring-framework-api}++/context/support/DefaultLifecycleProcessor.html#EXIT_PROPERTY_NAME++[`DefaultLifecycleProcessor`]
+for details.
+
+| `spring.context.expression.maxLength`
+| The maximum length for
+xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
+expressions used in XML bean definitions, `@Value`, etc.
 
 | `spring.expression.compiler.mode`
 | The mode to use when compiling expressions for the

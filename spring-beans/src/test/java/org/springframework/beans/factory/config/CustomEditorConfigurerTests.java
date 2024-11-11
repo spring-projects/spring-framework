@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 31.07.2004
  */
-public class CustomEditorConfigurerTests {
+class CustomEditorConfigurerTests {
 
 	@Test
-	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
+	void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
@@ -70,7 +70,7 @@ public class CustomEditorConfigurerTests {
 	}
 
 	@Test
-	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
+	void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<>();
@@ -90,7 +90,7 @@ public class CustomEditorConfigurerTests {
 	}
 
 	@Test
-	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
+	void testCustomEditorConfigurerWithRequiredTypeArray() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<>();

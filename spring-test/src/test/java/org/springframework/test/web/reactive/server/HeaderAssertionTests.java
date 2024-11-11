@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link HeaderAssertions}.
+ * Tests for {@link HeaderAssertions}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -103,6 +103,17 @@ class HeaderAssertionTests {
 				.satisfies(ex -> assertThat(ex).hasMessage("Response header " +
 						"'Content-Type'=[application/json;charset=UTF-8] does not match " +
 						"[.*ISO-8859-1.*]"));
+	}
+
+	@Test
+	void valueMatchesWithNonexistentHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.valueMatches("Content-XYZ", ".*ISO-8859-1.*"))
+				.withMessage("Response header 'Content-XYZ' not found");
 	}
 
 	@Test

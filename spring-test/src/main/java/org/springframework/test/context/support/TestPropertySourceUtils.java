@@ -90,7 +90,7 @@ public abstract class TestPropertySourceUtils {
 
 		TestPropertySourceAttributes previousAttributes = null;
 		// Iterate over all aggregate levels, where each level is represented by
-		// a list of merged annotations found at that level (e.g., on a test
+		// a list of merged annotations found at that level (for example, on a test
 		// class in the class hierarchy).
 		for (List<MergedAnnotation<TestPropertySource>> aggregatedAnnotations :
 				findRepeatableAnnotations(testClass, TestPropertySource.class)) {
@@ -135,6 +135,7 @@ public abstract class TestPropertySourceUtils {
 		return mergedAttributes;
 	}
 
+	@SuppressWarnings("NullAway")
 	private static boolean duplicationDetected(TestPropertySourceAttributes currentAttributes,
 			@Nullable TestPropertySourceAttributes previousAttributes) {
 
@@ -459,6 +460,7 @@ public abstract class TestPropertySourceUtils {
 		private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
 		@Override
+		@Nullable
 		public Object put(Object key, Object value) {
 			if (key instanceof String str) {
 				return this.map.put(str, value);

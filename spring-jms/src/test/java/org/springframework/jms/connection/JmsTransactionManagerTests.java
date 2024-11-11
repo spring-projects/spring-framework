@@ -48,17 +48,17 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @since 26.07.2004
  */
-public class JmsTransactionManagerTests {
+class JmsTransactionManagerTests {
 
 	@AfterEach
-	public void verifyTransactionSynchronizationManagerState() {
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+	void verifyTransactionSynchronizationManagerState() {
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 	}
 
 
 	@Test
-	public void testTransactionCommit() throws JMSException {
+	void testTransactionCommit() throws JMSException {
 		ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -81,7 +81,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testTransactionRollback() throws JMSException {
+	void testTransactionRollback() throws JMSException {
 		ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -104,7 +104,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testParticipatingTransactionWithCommit() throws JMSException {
+	void testParticipatingTransactionWithCommit() throws JMSException {
 		ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -137,7 +137,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testParticipatingTransactionWithRollbackOnly() throws JMSException {
+	void testParticipatingTransactionWithRollbackOnly() throws JMSException {
 		ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -172,7 +172,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testSuspendedTransaction() throws JMSException {
+	void testSuspendedTransaction() throws JMSException {
 		final ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -213,7 +213,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testTransactionSuspension() throws JMSException {
+	void testTransactionSuspension() throws JMSException {
 		final ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -254,7 +254,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testTransactionCommitWithMessageProducer() throws JMSException {
+	void testTransactionCommitWithMessageProducer() throws JMSException {
 		Destination dest = new StubQueue();
 
 		ConnectionFactory cf = mock();
@@ -282,7 +282,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testLazyTransactionalSession() throws JMSException {
+	void testLazyTransactionalSession() throws JMSException {
 		ConnectionFactory cf = mock();
 		Connection con = mock();
 		final Session session = mock();
@@ -307,7 +307,7 @@ public class JmsTransactionManagerTests {
 	}
 
 	@Test
-	public void testLazyWithoutSessionAccess() {
+	void testLazyWithoutSessionAccess() {
 		ConnectionFactory cf = mock();
 
 		JmsTransactionManager tm = new JmsTransactionManager(cf);

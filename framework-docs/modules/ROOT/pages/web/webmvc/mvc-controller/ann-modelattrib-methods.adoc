@@ -28,7 +28,7 @@ The following example shows a `@ModelAttribute` method:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ModelAttribute
 	public void populateModel(@RequestParam String number, Model model) {
@@ -39,7 +39,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ModelAttribute
 	fun populateModel(@RequestParam number: String, model: Model) {
@@ -55,7 +55,7 @@ The following example adds only one attribute:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ModelAttribute
 	public Account addAccount(@RequestParam String number) {
@@ -65,7 +65,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ModelAttribute
 	fun addAccount(@RequestParam number: String): Account {
@@ -90,7 +90,7 @@ unless the return value is a `String` that would otherwise be interpreted as a v
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")
@@ -102,7 +102,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")

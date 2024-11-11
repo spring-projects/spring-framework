@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	 * different operand types.
 	 */
 	@Test
-	public void compilingMathematicalExpressionsWithDifferentOperandTypes() throws Exception {
+	void compilingMathematicalExpressionsWithDifferentOperandTypes() {
 		NumberHolder nh = new NumberHolder();
 		expression = parser.parseExpression("(T(Integer).valueOf(payload).doubleValue())/18D");
 		Object o = expression.getValue(nh);
@@ -135,7 +135,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void inlineLists() throws Exception {
+	void inlineLists() {
 		expression = parser.parseExpression("{'abcde','ijklm'}[0].substring({1,3,4}[0],{1,3,4}[1])");
 		Object o = expression.getValue();
 		assertThat(o).isEqualTo("bc");
@@ -178,7 +178,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void inlineNestedLists() throws Exception {
+	void inlineNestedLists() {
 		expression = parser.parseExpression("{'abcde',{'ijklm','nopqr'}}[1][0].substring({1,3,4}[0],{1,3,4}[1])");
 		Object o = expression.getValue();
 		assertThat(o).isEqualTo("jk");
@@ -221,7 +221,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void stringConcatenation() throws Exception {
+	void stringConcatenation() {
 		expression = parser.parseExpression("'hello' + getWorld() + ' spring'");
 		Greeter g = new Greeter();
 		Object o = expression.getValue(g);
@@ -266,7 +266,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void complexExpressionPerformance() throws Exception {
+	void complexExpressionPerformance() {
 		Payload payload = new Payload();
 		Expression expression = parser.parseExpression("DR[0].DRFixedSection.duration lt 0.1");
 		boolean b = false;
@@ -274,14 +274,14 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		// warmup
 		for (int i = 0; i < count; i++) {
-			b = expression.getValue(payload, Boolean.TYPE);
+			b = expression.getValue(payload, boolean.class);
 		}
 
 		log("timing interpreted: ");
 		for (int i = 0; i < iterations; i++) {
 			long stime = System.currentTimeMillis();
 			for (int j = 0; j < count; j++) {
-				b = expression.getValue(payload, Boolean.TYPE);
+				b = expression.getValue(payload, boolean.class);
 			}
 			long etime = System.currentTimeMillis();
 			long interpretedSpeed = (etime - stime);
@@ -292,12 +292,12 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		compile(expression);
 		boolean bc = false;
-		expression.getValue(payload, Boolean.TYPE);
+		expression.getValue(payload, boolean.class);
 		log("timing compiled: ");
 		for (int i = 0; i < iterations; i++) {
 			long stime = System.currentTimeMillis();
 			for (int j = 0; j < count; j++) {
-				bc = expression.getValue(payload, Boolean.TYPE);
+				bc = expression.getValue(payload, boolean.class);
 			}
 			long etime = System.currentTimeMillis();
 			long compiledSpeed = (etime - stime);
@@ -316,7 +316,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		// Verify if the input changes, the result changes
 		payload.DR[0].DRFixedSection.duration = 0.04d;
-		bc = expression.getValue(payload, Boolean.TYPE);
+		bc = expression.getValue(payload, boolean.class);
 		assertThat(bc).isTrue();
 	}
 
@@ -327,7 +327,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void compilingMethodReference() throws Exception {
+	void compilingMethodReference() {
 		long interpretedTotal = 0, compiledTotal = 0;
 		long stime,etime;
 		String interpretedResult = null,compiledResult = null;
@@ -380,7 +380,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 
 	@Test
-	public void compilingPropertyReferenceField() throws Exception {
+	void compilingPropertyReferenceField() {
 		long interpretedTotal = 0, compiledTotal = 0, stime, etime;
 		String interpretedResult = null, compiledResult = null;
 
@@ -426,7 +426,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void compilingPropertyReferenceNestedField() throws Exception {
+	void compilingPropertyReferenceNestedField() {
 		long interpretedTotal = 0, compiledTotal = 0, stime, etime;
 		String interpretedResult = null, compiledResult = null;
 
@@ -472,7 +472,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void compilingPropertyReferenceNestedMixedFieldGetter() throws Exception {
+	void compilingPropertyReferenceNestedMixedFieldGetter() {
 		long interpretedTotal = 0, compiledTotal = 0, stime, etime;
 		String interpretedResult = null, compiledResult = null;
 
@@ -517,7 +517,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void compilingNestedMixedFieldPropertyReferenceMethodReference() throws Exception {
+	void compilingNestedMixedFieldPropertyReferenceMethodReference() {
 		long interpretedTotal = 0, compiledTotal = 0, stime, etime;
 		String interpretedResult = null, compiledResult = null;
 
@@ -564,7 +564,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void compilingPropertyReferenceGetter() throws Exception {
+	void compilingPropertyReferenceGetter() {
 		long interpretedTotal = 0, compiledTotal = 0, stime, etime;
 		String interpretedResult = null, compiledResult = null;
 

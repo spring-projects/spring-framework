@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-
 
 /**
  * {@link org.springframework.web.server.WebFilter} that creates {@link Observation observations}
@@ -121,14 +120,15 @@ public class ServerHttpObservationFilter implements WebFilter {
 					DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
 		}
 
-		@Override
-		public void doOnSubscription() throws Throwable {
-			this.observation.start();
-		}
 
 		@Override
 		public Context addToContext(Context originalContext) {
 			return originalContext.put(ObservationThreadLocalAccessor.KEY, this.observation);
+		}
+
+		@Override
+		public void doFirst() throws Throwable {
+			this.observation.start();
 		}
 
 		@Override
@@ -142,16 +142,7 @@ public class ServerHttpObservationFilter implements WebFilter {
 		@Override
 		public void doOnComplete() throws Throwable {
 			if (this.observationRecorded.compareAndSet(false, true)) {
-				ServerHttpResponse response = this.observationContext.getResponse();
-				if (response.isCommitted()) {
-					this.observation.stop();
-				}
-				else {
-					response.beforeCommit(() -> {
-						this.observation.stop();
-						return Mono.empty();
-					});
-				}
+				doOnTerminate(this.observationContext);
 			}
 		}
 
@@ -162,7 +153,22 @@ public class ServerHttpObservationFilter implements WebFilter {
 					this.observationContext.setConnectionAborted(true);
 				}
 				this.observationContext.setError(error);
-				this.observation.stop();
+				doOnTerminate(this.observationContext);
+			}
+		}
+
+		private void doOnTerminate(ServerRequestObservationContext context) {
+			ServerHttpResponse response = context.getResponse();
+			if (response != null) {
+				if (response.isCommitted()) {
+					this.observation.stop();
+				}
+				else {
+					response.beforeCommit(() -> {
+						this.observation.stop();
+						return Mono.empty();
+					});
+				}
 			}
 		}
 	}

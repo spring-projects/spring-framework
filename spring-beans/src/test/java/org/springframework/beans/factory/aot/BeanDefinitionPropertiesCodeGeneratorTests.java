@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.beans.factory.aot;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -28,12 +28,13 @@ import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
 import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
@@ -50,6 +51,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.aot.CustomPropertyValue;
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
@@ -88,6 +90,21 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void setPrimaryWhenTrue() {
 		this.beanDefinition.setPrimary(true);
 		compile((actual, compiled) -> assertThat(actual.isPrimary()).isTrue());
+	}
+
+	@Test
+	void setFallbackWhenFalse() {
+		this.beanDefinition.setFallback(false);
+		compile((actual, compiled) -> {
+			assertThat(compiled.getSourceFile()).doesNotContain("setFallback");
+			assertThat(actual.isFallback()).isFalse();
+		});
+	}
+
+	@Test
+	void setFallbackWhenTrue() {
+		this.beanDefinition.setFallback(true);
+		compile((actual, compiled) -> assertThat(actual.isFallback()).isTrue());
 	}
 
 	@Test
@@ -258,11 +275,11 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile((actual, compiled) -> {
 			ConstructorArgumentValues argumentValues = actual.getConstructorArgumentValues();
 			List<ValueHolder> values = argumentValues.getGenericArgumentValues();
-			assertThat(values.get(0)).satisfies(assertValueHolder(String.class, null, null));
-			assertThat(values.get(1)).satisfies(assertValueHolder(2, Long.class, null));
-			assertThat(values.get(2)).satisfies(assertValueHolder("value", null, "param1"));
-			assertThat(values.get(3)).satisfies(assertValueHolder("another", CharSequence.class, "param2"));
-			assertThat(values).hasSize(4);
+			assertThat(values).satisfiesExactly(
+					assertValueHolder(String.class, null, null),
+					assertValueHolder(2, Long.class, null),
+					assertValueHolder("value", null, "param1"),
+					assertValueHolder("another", CharSequence.class, "param2"));
 			assertThat(argumentValues.getIndexedArgumentValues()).isEmpty();
 		});
 	}
@@ -311,7 +328,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().contains("myService")).isTrue();
 			assertThat(actual.getPropertyValues().get("myService"))
 					.isInstanceOfSatisfying(RuntimeBeanReference.class,
-						beanReference -> assertThat(beanReference.getBeanName()).isEqualTo("test"));
+							beanReference -> assertThat(beanReference.getBeanName()).isEqualTo("test"));
 		});
 	}
 
@@ -322,8 +339,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.getPropertyValues().add("value", managedList);
 		compile((actual, compiled) -> {
 			Object value = actual.getPropertyValues().get("value");
-			assertThat(value).isInstanceOf(ManagedList.class);
-			assertThat(((List<?>) value).get(0)).isInstanceOf(BeanReference.class);
+			assertThat(value).isInstanceOf(ManagedList.class).asInstanceOf(InstanceOfAssertFactories.LIST)
+					.singleElement().isInstanceOf(BeanReference.class);
 		});
 	}
 
@@ -334,8 +351,9 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.getPropertyValues().add("value", managedSet);
 		compile((actual, compiled) -> {
 			Object value = actual.getPropertyValues().get("value");
-			assertThat(value).isInstanceOf(ManagedSet.class);
-			assertThat(((Set<?>) value).iterator().next()).isInstanceOf(BeanReference.class);
+			assertThat(value).isInstanceOf(ManagedSet.class)
+					.asInstanceOf(InstanceOfAssertFactories.COLLECTION)
+					.singleElement().isInstanceOf(BeanReference.class);
 		});
 	}
 
@@ -346,8 +364,9 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.getPropertyValues().add("value", managedMap);
 		compile((actual, compiled) -> {
 			Object value = actual.getPropertyValues().get("value");
-			assertThat(value).isInstanceOf(ManagedMap.class);
-			assertThat(((Map<?, ?>) value).get("test")).isInstanceOf(BeanReference.class);
+			assertThat(value).isInstanceOf(ManagedMap.class)
+					.asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+					.hasEntrySatisfying("test", ref -> assertThat(ref).isInstanceOf(BeanReference.class));
 		});
 	}
 
@@ -361,8 +380,23 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("prefix")).isEqualTo("Hello");
 			assertThat(actual.getPropertyValues().get("name")).isEqualTo("World");
 		});
-		assertHasMethodInvokeHints(PropertyValuesFactoryBean.class, "setPrefix", "setName" );
+		assertHasMethodInvokeHints(PropertyValuesFactoryBean.class, "setPrefix", "setName");
 		assertHasDeclaredFieldsHint(PropertyValuesFactoryBean.class);
+	}
+
+	@Test
+	void propertyValuesWhenCustomValuesUsingDelegate() {
+		this.beanDefinition.setTargetType(PropertyValuesBean.class);
+		this.beanDefinition.getPropertyValues().add("test", new CustomPropertyValue("test"));
+		this.beanDefinition.getPropertyValues().add("spring", new CustomPropertyValue("framework"));
+		compile(value -> true, List.of(new CustomPropertyValue.ValueCodeGeneratorDelegate()), (actual, compiled) -> {
+			assertThat(actual.getPropertyValues().get("test")).isInstanceOfSatisfying(CustomPropertyValue.class,
+					customPropertyValue -> assertThat(customPropertyValue.value()).isEqualTo("test"));
+			assertThat(actual.getPropertyValues().get("spring")).isInstanceOfSatisfying(CustomPropertyValue.class,
+					customPropertyValue -> assertThat(customPropertyValue.value()).isEqualTo("framework"));
+		});
+		assertHasMethodInvokeHints(PropertyValuesBean.class, "setTest", "setSpring");
+		assertHasDeclaredFieldsHint(PropertyValuesBean.class);
 	}
 
 	@Test
@@ -412,9 +446,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		this.beanDefinition.addQualifier(new AutowireCandidateQualifier("com.example.Another", ChronoUnit.SECONDS));
 		compile((actual, compiled) -> {
 			List<AutowireCandidateQualifier> qualifiers = new ArrayList<>(actual.getQualifiers());
-			assertThat(qualifiers.get(0)).satisfies(isQualifierFor("com.example.Qualifier", "id"));
-			assertThat(qualifiers.get(1)).satisfies(isQualifierFor("com.example.Another", ChronoUnit.SECONDS));
-			assertThat(qualifiers).hasSize(2);
+			assertThat(qualifiers).satisfiesExactly(isQualifierFor("com.example.Qualifier", "id"),
+					isQualifierFor("com.example.Another", ChronoUnit.SECONDS));
 		});
 	}
 
@@ -440,28 +473,36 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Nested
 	class InitDestroyMethodTests {
 
-		private final String privateInitMethod = InitDestroyBean.class.getName() + ".privateInit";
-		private final String privateDestroyMethod = InitDestroyBean.class.getName() + ".privateDestroy";
+		private static final String privateInitMethod = InitDestroyBean.class.getName() + ".privateInit";
 
-		@BeforeEach
-		void setTargetType() {
-			beanDefinition.setTargetType(InitDestroyBean.class);
-		}
+		private static final String privateDestroyMethod = InitDestroyBean.class.getName() + ".privateDestroy";
 
 		@Test
 		void noInitMethod() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).isNull());
 		}
 
 		@Test
 		void singleInitMethod() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setInitMethodName("init");
 			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("init"));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "init");
 		}
 
 		@Test
+		void singleInitMethodFromInterface() {
+			beanDefinition.setTargetType(InitializableTestBean.class);
+			beanDefinition.setInitMethodName("initialize");
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("initialize"));
+			assertHasMethodInvokeHints(InitializableTestBean.class, "initialize");
+			assertHasMethodInvokeHints(Initializable.class, "initialize");
+		}
+
+		@Test
 		void privateInitMethod() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setInitMethodName(privateInitMethod);
 			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly(privateInitMethod));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "privateInit");
@@ -469,6 +510,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		@Test
 		void multipleInitMethods() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setInitMethodNames("init", privateInitMethod);
 			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("init", privateInitMethod));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "init", "privateInit");
@@ -476,12 +518,14 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		@Test
 		void noDestroyMethod() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).isNull());
 			assertReflectionOnPublisher();
 		}
 
 		@Test
 		void singleDestroyMethod() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setDestroyMethodName("destroy");
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy"));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy");
@@ -489,7 +533,18 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		}
 
 		@Test
+		void singleDestroyMethodFromInterface() {
+			beanDefinition.setTargetType(DisposableTestBean.class);
+			beanDefinition.setDestroyMethodName("dispose");
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("dispose"));
+			assertHasMethodInvokeHints(DisposableTestBean.class, "dispose");
+			assertHasMethodInvokeHints(Disposable.class, "dispose");
+			assertReflectionOnPublisher();
+		}
+
+		@Test
 		void privateDestroyMethod() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setDestroyMethodName(privateDestroyMethod);
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly(privateDestroyMethod));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "privateDestroy");
@@ -498,6 +553,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		@Test
 		void multipleDestroyMethods() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
 			beanDefinition.setDestroyMethodNames("destroy", privateDestroyMethod);
 			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy", privateDestroyMethod));
 			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy", "privateDestroy");
@@ -512,8 +568,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
 		assertThat(methodNames).allMatch(methodName -> RuntimeHintsPredicates.reflection()
-			.onMethod(beanType, methodName).invoke()
-			.test(this.generationContext.getRuntimeHints()));
+				.onMethod(beanType, methodName).invoke()
+				.test(this.generationContext.getRuntimeHints()));
 	}
 
 	private void assertHasDeclaredFieldsHint(Class<?> beanType) {
@@ -526,12 +582,18 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile(attribute -> true, result);
 	}
 
-	private void compile(Predicate<String> attributeFilter, BiConsumer<RootBeanDefinition, Compiled> result) {
+	private void compile(Predicate<String> attributeFilter,
+			BiConsumer<RootBeanDefinition, Compiled> result) {
+		compile(attributeFilter, Collections.emptyList(), result);
+	}
+
+	private void compile(Predicate<String> attributeFilter, List<Delegate> additionalDelegates,
+			BiConsumer<RootBeanDefinition, Compiled> result) {
 		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
 		GeneratedClass generatedClass = this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
 		BeanDefinitionPropertiesCodeGenerator codeGenerator = new BeanDefinitionPropertiesCodeGenerator(
 				this.generationContext.getRuntimeHints(), attributeFilter,
-				generatedClass.getMethods(), (name, value) -> null);
+				generatedClass.getMethods(), additionalDelegates, (name, value) -> null);
 		CodeBlock generatedCode = codeGenerator.generateCode(this.beanDefinition);
 		typeBuilder.set(type -> {
 			type.addModifiers(Modifier.PUBLIC);
@@ -565,6 +627,31 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		@SuppressWarnings("unused")
 		private void privateDestroy() {
+		}
+
+	}
+
+	public interface Initializable {
+
+		void initialize();
+	}
+
+	static class InitializableTestBean implements Initializable {
+
+		@Override
+		public void initialize() {
+		}
+	}
+
+	public interface Disposable {
+
+		void dispose();
+	}
+
+	static class DisposableTestBean implements Disposable {
+
+		@Override
+		public void dispose() {
 		}
 
 	}
@@ -621,7 +708,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		@Nullable
 		@Override
-		public String getObject() throws Exception {
+		public String getObject() {
 			return getPrefix() + " " + getName();
 		}
 

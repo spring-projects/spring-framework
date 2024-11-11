@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * Simply switch the {@link #setSessionTransacted "sessionTransacted"} flag
 	 * to "true" in order to use a locally transacted JMS Session for the entire
 	 * receive processing, including any Session operations performed by a
-	 * {@link SessionAwareMessageListener} (e.g. sending a response message). This
+	 * {@link SessionAwareMessageListener} (for example, sending a response message). This
 	 * allows for fully synchronized Spring transactions based on local JMS
 	 * transactions, similar to what
 	 * {@link org.springframework.jms.connection.JmsTransactionManager} provides. Check
@@ -259,7 +259,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			catch (RuntimeException ex) {
 				// Typically a late persistence exception from a listener-used resource
 				// -> handle it as listener exception, not as an infrastructure problem.
-				// E.g. a database locking failure should not lead to listener shutdown.
+				// For example, a database locking failure should not lead to listener shutdown.
 				handleListenerException(ex);
 			}
 			return messageReceived;
@@ -315,6 +315,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			}
 			Message message = receiveMessage(consumerToUse);
 			if (message != null) {
+				boolean exposeResource = (!transactional && isExposeListenerSession() &&
+						!TransactionSynchronizationManager.hasResource(obtainConnectionFactory()));
 				Observation observation = createObservation(message).start();
 				Observation.Scope scope = observation.openScope();
 				if (logger.isDebugEnabled()) {
@@ -322,14 +324,12 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
 							sessionToUse + "]");
 				}
-				messageReceived(invoker, sessionToUse);
-				boolean exposeResource = (!transactional && isExposeListenerSession() &&
-						!TransactionSynchronizationManager.hasResource(obtainConnectionFactory()));
-				if (exposeResource) {
-					TransactionSynchronizationManager.bindResource(
-							obtainConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
-				}
 				try {
+					messageReceived(invoker, sessionToUse);
+					if (exposeResource) {
+						TransactionSynchronizationManager.bindResource(
+								obtainConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
+					}
 					doExecuteListener(sessionToUse, message);
 				}
 				catch (Throwable ex) {
@@ -339,7 +339,13 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 						}
 						status.setRollbackOnly();
 					}
-					handleListenerException(ex);
+					try {
+						handleListenerException(ex);
+					}
+					catch (Throwable throwable) {
+						observation.error(throwable);
+						throw throwable;
+					}
 					// Rethrow JMSException to indicate an infrastructure problem
 					// that may have to trigger recovery...
 					if (ex instanceof JMSException jmsException) {

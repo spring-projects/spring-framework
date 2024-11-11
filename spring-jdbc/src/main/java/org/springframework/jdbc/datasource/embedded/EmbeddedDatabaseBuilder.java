@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,13 +112,27 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Set the type of embedded database.
+	 * Set the type of embedded database. Consider using {@link #setDatabaseConfigurer}
+	 * if customization of the connections properties is necessary.
 	 * <p>Defaults to HSQL if not called.
 	 * @param databaseType the type of embedded database to build
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder setType(EmbeddedDatabaseType databaseType) {
 		this.databaseFactory.setDatabaseType(databaseType);
+		return this;
+	}
+
+	/**
+	 * Set the {@linkplain EmbeddedDatabaseConfigurer configurer} to use to
+	 * configure the embedded database, as an alternative to {@link #setType}.
+	 * @param configurer the configurer of the embedded database
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 6.2
+	 * @see EmbeddedDatabaseConfigurers
+	 */
+	public EmbeddedDatabaseBuilder setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
+		this.databaseFactory.setDatabaseConfigurer(configurer);
 		return this;
 	}
 

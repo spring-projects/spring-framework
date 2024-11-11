@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,14 @@ inline fun <reified T : Any> RestClient.RequestBodySpec.bodyWithType(body: T): R
 inline fun <reified T : Any> RestClient.ResponseSpec.body(): T? =
 	body(object : ParameterizedTypeReference<T>() {})
 
+/**
+ * Extension for [RestClient.ResponseSpec.body] providing a `requiredBody<Foo>()` variant with a non-nullable
+ * return value.
+ * @throws NoSuchElementException if there is no response body
+ * @since 6.2
+ */
+inline fun <reified T : Any> RestClient.ResponseSpec.requiredBody(): T =
+    body(object : ParameterizedTypeReference<T>() {}) ?: throw NoSuchElementException("Response body is required")
 
 /**
  * Extension for [RestClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant

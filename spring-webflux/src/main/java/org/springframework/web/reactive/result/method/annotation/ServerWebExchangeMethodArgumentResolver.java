@@ -80,6 +80,7 @@ public class ServerWebExchangeMethodArgumentResolver extends HandlerMethodArgume
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgumentValue(
 			MethodParameter methodParameter, BindingContext context, ServerWebExchange exchange) {
 

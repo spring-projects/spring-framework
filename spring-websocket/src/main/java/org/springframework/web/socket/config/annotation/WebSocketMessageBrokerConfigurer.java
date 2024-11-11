@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.socket.config.annotation;
 
 import java.util.List;
 
+import org.springframework.context.SmartLifecycle;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
@@ -26,7 +28,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 
 /**
  * Defines methods for configuring message handling with simple messaging
- * protocols (e.g. STOMP) from WebSocket clients.
+ * protocols (for example, STOMP) from WebSocket clients.
  *
  * <p>Typically used to customize the configuration provided via
  * {@link EnableWebSocketMessageBroker @EnableWebSocketMessageBroker}.
@@ -92,7 +94,7 @@ public interface WebSocketMessageBrokerConfigurer {
 
 	/**
 	 * Configure the message converters to use when extracting the payload of
-	 * messages in annotated methods and when sending messages (e.g. through the
+	 * messages in annotated methods and when sending messages (for example, through the
 	 * "broker" SimpMessagingTemplate).
 	 * <p>The provided list, initially empty, can be used to add message converters
 	 * while the boolean return value is used to determine if default message should
@@ -108,6 +110,22 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * Configure message broker options.
 	 */
 	default void configureMessageBroker(MessageBrokerRegistry registry) {
+	}
+
+	/**
+	 * Return the {@link SmartLifecycle#getPhase() phase} that WebSocket message
+	 * handling beans of type {@link SmartLifecycle} should run in.
+	 * <p>The default implementation returns {@code null} which allows other
+	 * configurers to decide. As soon as any configurer returns a value, that
+	 * value is used. If no configurer returns a value, then 0 is used.
+	 * <p>It is recommended to use a phase value such as 0 in order to ensure that
+	 * components start before the web server in Spring Boot application.
+	 * @since 6.1.4
+	 * @see SmartLifecycle
+	 */
+	@Nullable
+	default Integer getPhase() {
+		return null;
 	}
 
 }

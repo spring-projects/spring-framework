@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link MessageMappingMessageHandler}.
+ * Tests for {@link MessageMappingMessageHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("ALL")
@@ -64,56 +65,56 @@ public class MessageMappingMessageHandlerTests {
 
 
 	@Test
-	public void handleString() {
+	void handleString() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("string", "abcdef")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("abcdef::response"));
 	}
 
 	@Test
-	public void handleMonoString() {
+	void handleMonoString() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("monoString", "abcdef")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("abcdef::response"));
 	}
 
 	@Test
-	public void handleFluxString() {
+	void handleFluxString() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("fluxString", "abc", "def", "ghi")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Arrays.asList("abc::response", "def::response", "ghi::response"));
 	}
 
 	@Test
-	public void handleWithPlaceholderInMapping() {
+	void handleWithPlaceholderInMapping() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("path123", "abcdef")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("abcdef::response"));
 	}
 
 	@Test
-	public void handleWithDestinationVariable() {
+	void handleWithDestinationVariable() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("destination.test", "abcdef")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("test::abcdef::response"));
 	}
 
 	@Test
-	public void handleException() {
+	void handleException() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("exception", "abc")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("rejected::handled"));
 	}
 
 	@Test
-	public void handleErrorSignal() {
+	void handleErrorSignal() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("errorSignal", "abc")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("rejected::handled"));
 	}
 
 	@Test
-	public void unhandledExceptionShouldFlowThrough() {
+	void unhandledExceptionShouldFlowThrough() {
 
 		GenericMessage<?> message = new GenericMessage<>(new Object(),
 				Collections.singletonMap(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,6 +242,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Initialize the mapping meta-data for the given class.
 	 * @param mappedClass the mapped class
+	 * @see #setMappedClass
+	 * @see BeanUtils#getPropertyDescriptors
+	 * @see #mappedNames(PropertyDescriptor)
 	 */
 	protected void initialize(Class<T> mappedClass) {
 		this.mappedClass = mappedClass;
@@ -250,11 +253,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
 			if (pd.getWriteMethod() != null) {
-				String lowerCaseName = lowerCaseName(pd.getName());
-				this.mappedProperties.put(lowerCaseName, pd);
-				String underscoreName = underscoreName(pd.getName());
-				if (!lowerCaseName.equals(underscoreName)) {
-					this.mappedProperties.put(underscoreName, pd);
+				Set<String> mappedNames = mappedNames(pd);
+				for (String mappedName : mappedNames) {
+					this.mappedProperties.put(mappedName, pd);
 				}
 				this.mappedPropertyNames.add(pd.getName());
 			}
@@ -271,6 +272,26 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			this.mappedProperties.remove(lowerCaseName(propertyName));
 			this.mappedProperties.remove(underscoreName(propertyName));
 		}
+	}
+
+	/**
+	 * Determine the mapped names for the given property.
+	 * <p>Subclasses may override this method to customize the mapped names,
+	 * adding to or removing from the set determined by this base method
+	 * (which returns the property name in lower-case and underscore-based
+	 * form), or replacing the set completely.
+	 * @param pd the property descriptor discovered on initialization
+	 * @return a set of mapped names
+	 * @since 6.1.4
+	 * @see #initialize
+	 * @see #lowerCaseName
+	 * @see #underscoreName
+	 */
+	protected Set<String> mappedNames(PropertyDescriptor pd) {
+		Set<String> mappedNames = new HashSet<>(4);
+		mappedNames.add(lowerCaseName(pd.getName()));
+		mappedNames.add(underscoreName(pd.getName()));
+		return mappedNames;
 	}
 
 	/**

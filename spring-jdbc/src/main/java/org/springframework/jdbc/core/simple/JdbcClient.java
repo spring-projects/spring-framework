@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ public interface JdbcClient {
 		 * <p>The given parameter object will define all named parameters
 		 * based on its JavaBean properties, record components, or raw fields.
 		 * A Map instance can be provided as a complete parameter source as well.
-		 * @param namedParamObject a custom parameter object (e.g. a JavaBean,
+		 * @param namedParamObject a custom parameter object (for example, a JavaBean,
 		 * record class, or field holder) with named properties serving as
 		 * statement parameters
 		 * @return this statement specification (for chaining)
@@ -282,20 +282,24 @@ public interface JdbcClient {
 
 		/**
 		 * Execute the provided SQL statement as an update.
+		 * <p>This method requires support for generated keys in the JDBC driver.
 		 * @param generatedKeyHolder a KeyHolder that will hold the generated keys
 		 * (typically a {@link org.springframework.jdbc.support.GeneratedKeyHolder})
 		 * @return the number of rows affected
 		 * @see java.sql.PreparedStatement#executeUpdate()
+		 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 		 */
 		int update(KeyHolder generatedKeyHolder);
 
 		/**
 		 * Execute the provided SQL statement as an update.
+		 * <p>This method requires support for generated keys in the JDBC driver.
 		 * @param generatedKeyHolder a KeyHolder that will hold the generated keys
 		 * (typically a {@link org.springframework.jdbc.support.GeneratedKeyHolder})
 		 * @param keyColumnNames names of the columns that will have keys generated for them
 		 * @return the number of rows affected
 		 * @see java.sql.PreparedStatement#executeUpdate()
+		 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 		 */
 		int update(KeyHolder generatedKeyHolder, String... keyColumnNames);
 	}
@@ -339,11 +343,25 @@ public interface JdbcClient {
 
 		/**
 		 * Retrieve a single value result.
-		 * @return the single row represented as its single column value
+		 * <p>Note: As of 6.2, this will enforce non-null result values
+		 * as originally designed (just accidentally not enforced before).
+		 * (never {@code null})
+		 * @see #optionalValue()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
 		default Object singleValue() {
 			return DataAccessUtils.requiredSingleResult(singleColumn());
+		}
+
+		/**
+		 * Retrieve a single value result, if available, as an {@link Optional} handle.
+		 * @return an Optional handle with the single column value from the single row
+		 * @since 6.2
+		 * @see #singleValue()
+		 * @see DataAccessUtils#optionalResult(Collection)
+		 */
+		default Optional<Object> optionalValue() {
+			return DataAccessUtils.optionalResult(singleColumn());
 		}
 	}
 
@@ -359,7 +377,7 @@ public interface JdbcClient {
 		 * Retrieve the result as a lazily resolved stream of mapped objects,
 		 * retaining the order from the original database result.
 		 * @return the result Stream, containing mapped objects, needing to be
-		 * closed once fully processed (e.g. through a try-with-resources clause)
+		 * closed once fully processed (for example, through a try-with-resources clause)
 		 */
 		Stream<T> stream();
 
@@ -381,23 +399,25 @@ public interface JdbcClient {
 		}
 
 		/**
-		 * Retrieve a single result, if available, as an {@link Optional} handle.
-		 * @return an Optional handle with a single result object or none
-		 * @see #list()
-		 * @see DataAccessUtils#optionalResult(Collection)
-		 */
-		default Optional<T> optional() {
-			return DataAccessUtils.optionalResult(list());
-		}
-
-		/**
 		 * Retrieve a single result as a required object instance.
+		 * <p>Note: As of 6.2, this will enforce non-null result values
+		 * as originally designed (just accidentally not enforced before).
 		 * @return the single result object (never {@code null})
-		 * @see #list()
+		 * @see #optional()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
 		default T single() {
 			return DataAccessUtils.requiredSingleResult(list());
+		}
+
+		/**
+		 * Retrieve a single result, if available, as an {@link Optional} handle.
+		 * @return an Optional handle with a single result object or none
+		 * @see #single()
+		 * @see DataAccessUtils#optionalResult(Collection)
+		 */
+		default Optional<T> optional() {
+			return DataAccessUtils.optionalResult(list());
 		}
 	}
 

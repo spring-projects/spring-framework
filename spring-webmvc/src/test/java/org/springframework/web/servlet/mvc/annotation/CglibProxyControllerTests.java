@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class CglibProxyControllerTests {
+class CglibProxyControllerTests {
 
 	private DispatcherServlet servlet;
 
 
 	@Test
-	public void typeLevel() throws Exception {
+	void typeLevel() throws Exception {
 		initServlet(TypeLevelImpl.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
@@ -60,7 +60,7 @@ public class CglibProxyControllerTests {
 	}
 
 	@Test
-	public void methodLevel() throws Exception {
+	void methodLevel() throws Exception {
 		initServlet(MethodLevelImpl.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
@@ -70,7 +70,7 @@ public class CglibProxyControllerTests {
 	}
 
 	@Test
-	public void typeAndMethodLevel() throws Exception {
+	void typeAndMethodLevel() throws Exception {
 		initServlet(TypeAndMethodLevelImpl.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/bookings");
@@ -80,7 +80,6 @@ public class CglibProxyControllerTests {
 	}
 
 
-	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerClass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override

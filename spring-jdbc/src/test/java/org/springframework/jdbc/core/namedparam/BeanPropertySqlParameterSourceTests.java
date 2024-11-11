@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,26 +32,26 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class BeanPropertySqlParameterSourceTests {
+class BeanPropertySqlParameterSourceTests {
 
 	@Test
-	public void withNullBeanPassedToCtor() {
+	void withNullBeanPassedToCtor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new BeanPropertySqlParameterSource(null));
 	}
 
 	@Test
-	public void getValueWhereTheUnderlyingBeanHasNoSuchProperty() {
+	void getValueWhereTheUnderlyingBeanHasNoSuchProperty() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				source.getValue("thisPropertyDoesNotExist"));
 	}
 
 	@Test
-	public void successfulPropertyAccess() {
+	void successfulPropertyAccess() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
-		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("name")).isTrue();
-		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("age")).isTrue();
+		assertThat(Arrays.asList(source.getReadablePropertyNames())).contains("name");
+		assertThat(Arrays.asList(source.getReadablePropertyNames())).contains("age");
 		assertThat(source.getValue("name")).isEqualTo("tb");
 		assertThat(source.getValue("age")).isEqualTo(99);
 		assertThat(source.getSqlType("name")).isEqualTo(Types.VARCHAR);
@@ -59,7 +59,7 @@ public class BeanPropertySqlParameterSourceTests {
 	}
 
 	@Test
-	public void successfulPropertyAccessWithOverriddenSqlType() {
+	void successfulPropertyAccessWithOverriddenSqlType() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		source.registerSqlType("age", Types.NUMERIC);
 		assertThat(source.getValue("name")).isEqualTo("tb");
@@ -69,26 +69,26 @@ public class BeanPropertySqlParameterSourceTests {
 	}
 
 	@Test
-	public void hasValueWhereTheUnderlyingBeanHasNoSuchProperty() {
+	void hasValueWhereTheUnderlyingBeanHasNoSuchProperty() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
 		assertThat(source.hasValue("thisPropertyDoesNotExist")).isFalse();
 	}
 
 	@Test
-	public void getValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
+	void getValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				source.getValue("noOp"));
 	}
 
 	@Test
-	public void hasValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
+	void hasValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
 		assertThat(source.hasValue("noOp")).isFalse();
 	}
 
 	@Test
-	public void toStringShowsParameterDetails() {
+	void toStringShowsParameterDetails() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		assertThat(source.toString())
 			.startsWith("BeanPropertySqlParameterSource {")
@@ -98,7 +98,7 @@ public class BeanPropertySqlParameterSourceTests {
 	}
 
 	@Test
-	public void toStringShowsCustomSqlType() {
+	void toStringShowsCustomSqlType() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		source.registerSqlType("name", Integer.MAX_VALUE);
 		assertThat(source.toString())
@@ -109,7 +109,7 @@ public class BeanPropertySqlParameterSourceTests {
 	}
 
 	@Test
-	public void toStringDoesNotShowTypeUnknown() {
+	void toStringDoesNotShowTypeUnknown() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		assertThat(source.toString())
 				.startsWith("BeanPropertySqlParameterSource {")

@@ -11,7 +11,7 @@ The following example uses a `@RequestBody` argument:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	public void handle(@RequestBody Account account) {
@@ -21,7 +21,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	fun handle(@RequestBody account: Account) {
@@ -37,7 +37,7 @@ and fully non-blocking reading and (client-to-server) streaming.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	public void handle(@RequestBody Mono<Account> account) {
@@ -47,7 +47,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	fun handle(@RequestBody accounts: Flow<Account>) {
@@ -70,7 +70,7 @@ related operators:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	public void handle(@Valid @RequestBody Mono<Account> account) {
@@ -80,7 +80,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	fun handle(@Valid @RequestBody account: Mono<Account>) {
@@ -96,7 +96,7 @@ that case the request body must not be a `Mono`, and will be resolved first:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	public void handle(@Valid @RequestBody Account account, Errors errors) {
@@ -106,7 +106,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/accounts")
 	fun handle(@Valid @RequestBody account: Mono<Account>) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,18 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	 * @return the HTTP status as {@code HttpStatusCode} value (never {@code null})
 	 */
 	HttpStatusCode getStatusCode();
+
+	/**
+	 * Return the HTTP status code as an integer.
+	 * @return the HTTP status as an integer value
+	 * @since 5.0.6
+	 * @see #getStatusCode()
+	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
+	 */
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int getRawStatusCode() {
+		return getStatusCode().value();
+	}
 
 	/**
 	 * Return a read-only map of response cookies received from the server.

@@ -24,7 +24,7 @@ The following example shows how to create a transaction manager and configure th
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// construct an appropriate transaction manager
 	DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
@@ -35,7 +35,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// construct an appropriate transaction manager
 	val txManager = DataSourceTransactionManager(getDataSource())

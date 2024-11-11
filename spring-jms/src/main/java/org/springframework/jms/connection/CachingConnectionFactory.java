@@ -240,6 +240,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * Checks for a cached Session for the given mode.
 	 */
 	@Override
+	@Nullable
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
 		if (!this.active) {
 			return null;

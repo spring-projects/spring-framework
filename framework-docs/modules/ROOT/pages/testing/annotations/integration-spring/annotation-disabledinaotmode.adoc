@@ -1,7 +1,7 @@
 [[spring-testing-annotation-disabledinaotmode]]
 = `@DisabledInAotMode`
 
-`@DisabledInAotMode` signals that an annotated test class is disabled in Spring AOT
+`@DisabledInAotMode` signals that the annotated test class is disabled in Spring AOT
 (ahead-of-time) mode, which means that the `ApplicationContext` for the test class will
 not be processed for AOT optimizations at build time.
 

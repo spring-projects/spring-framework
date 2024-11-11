@@ -127,7 +127,7 @@ class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			String path = request.getURI().getPath();
 			return switch (path) {
 				case "/write-and-flush" -> response.writeAndFlushWith(
-						testInterval(Duration.ofMillis(50), 2)
+						testInterval(Duration.ofMillis(1), 2)
 								.map(longValue -> wrap("data" + longValue + "\n", response))
 								.map(Flux::just)
 								.mergeWith(Flux.never()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
-public class ClassPathXmlApplicationContextTests {
+class ClassPathXmlApplicationContextTests {
 
 	private static final String PATH = "/org/springframework/context/support/";
 	private static final String RESOURCE_CONTEXT = PATH + "ClassPathXmlApplicationContextTests-resource.xml";
@@ -134,7 +135,7 @@ public class ClassPathXmlApplicationContextTests {
 	}
 
 	@Test
-	void contextWithInvalidValueType() throws IOException {
+	void contextWithInvalidValueType() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				new String[] {INVALID_VALUE_TYPE_CONTEXT}, false);
 		assertThatExceptionOfType(BeanCreationException.class)
@@ -223,6 +224,10 @@ public class ClassPathXmlApplicationContextTests {
 		Service service = ctx.getBean("service", Service.class);
 		assertThat(service.getResources()).containsExactlyInAnyOrder(contextA, contextB, contextC);
 		assertThat(service.getResourceSet()).containsExactlyInAnyOrder(contextA, contextB, contextC);
+
+		Service service3 = ctx.getBean("service3", Service.class);
+		assertThat(service3.getResources()).containsOnly(new ClassPathResource(FQ_CONTEXT_A));
+		assertThat(service3.getResourceSet()).containsOnly(new ClassPathResource(FQ_CONTEXT_A));
 		ctx.close();
 	}
 
@@ -312,17 +317,13 @@ public class ClassPathXmlApplicationContextTests {
 		assertThat(beanNamesForType[0]).isEqualTo("myMessageSource");
 
 		Map<?, StaticMessageSource> beansOfType = ctx.getBeansOfType(StaticMessageSource.class);
-		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).singleElement().isSameAs(myMessageSource);
 		beansOfType = ctx.getBeansOfType(StaticMessageSource.class, true, true);
-		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).singleElement().isSameAs(myMessageSource);
 		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class);
-		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).singleElement().isSameAs(myMessageSource);
 		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class, true, true);
-		assertThat(beansOfType).hasSize(1);
-		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
+		assertThat(beansOfType.values()).singleElement().isSameAs(myMessageSource);
 	}
 
 	@Test

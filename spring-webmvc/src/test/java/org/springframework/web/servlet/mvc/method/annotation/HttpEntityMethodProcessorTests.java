@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +83,7 @@ public class HttpEntityMethodProcessorTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
@@ -97,9 +98,9 @@ public class HttpEntityMethodProcessorTests {
 
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 		String content = "{\"name\" : \"Jad\"}";
-		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContent(content.getBytes(StandardCharsets.UTF_8));
 		this.servletRequest.setContentType("application/json");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
@@ -131,9 +132,9 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 	@Test
-	public void resolveGenericArgument() throws Exception {
+	void resolveGenericArgument() throws Exception {
 		String content = "[{\"name\" : \"Jad\"}, {\"name\" : \"Robert\"}]";
-		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContent(content.getBytes(StandardCharsets.UTF_8));
 		this.servletRequest.setContentType("application/json");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
@@ -150,13 +151,13 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 	@Test
-	public void resolveArgumentTypeVariable() throws Exception {
+	void resolveArgumentTypeVariable() throws Exception {
 		Method method = MySimpleParameterizedController.class.getMethod("handleDto", HttpEntity.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
 
 		String content = "{\"name\" : \"Jad\"}";
-		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContent(content.getBytes(StandardCharsets.UTF_8));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
@@ -318,7 +319,7 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 
-	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+	private static final class ValidatingBinderFactory implements WebDataBinderFactory {
 
 		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName) {

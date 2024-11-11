@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class JndiDataSourceLookupTests {
+class JndiDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "Love is like a stove, burns you when it's hot";
 
 	@Test
-	public void testSunnyDay() throws Exception {
+	void testSunnyDay() {
 		final DataSource expectedDataSource = new StubDataSource();
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
@@ -48,7 +48,7 @@ public class JndiDataSourceLookupTests {
 	}
 
 	@Test
-	public void testNoDataSourceAtJndiLocation() throws Exception {
+	void testNoDataSourceAtJndiLocation() {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
 			protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {

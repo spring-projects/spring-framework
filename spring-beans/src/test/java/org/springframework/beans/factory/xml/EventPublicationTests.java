@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-@SuppressWarnings("rawtypes")
 class EventPublicationTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -50,7 +49,7 @@ class EventPublicationTests {
 
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);
 		reader.setSourceExtractor(new PassThroughSourceExtractor());
@@ -58,10 +57,9 @@ class EventPublicationTests {
 	}
 
 	@Test
-	void defaultsEventReceived() throws Exception {
+	void defaultsEventReceived() {
 		List<DefaultsDefinition> defaultsList = this.eventListener.getDefaults();
-		assertThat(defaultsList).isNotEmpty();
-		assertThat(defaultsList.get(0)).isInstanceOf(DocumentDefaultsDefinition.class);
+		assertThat(defaultsList).element(0).isInstanceOf(DocumentDefaultsDefinition.class);
 		DocumentDefaultsDefinition defaults = (DocumentDefaultsDefinition) defaultsList.get(0);
 		assertThat(defaults.getLazyInit()).isEqualTo("true");
 		assertThat(defaults.getAutowire()).isEqualTo("constructor");
@@ -72,7 +70,7 @@ class EventPublicationTests {
 	}
 
 	@Test
-	void beanEventReceived() throws Exception {
+	void beanEventReceived() {
 		ComponentDefinition componentDefinition1 = this.eventListener.getComponentDefinition("testBean");
 		assertThat(componentDefinition1).isInstanceOf(BeanComponentDefinition.class);
 		assertThat(componentDefinition1.getBeanDefinitions()).hasSize(1);
@@ -98,7 +96,7 @@ class EventPublicationTests {
 	}
 
 	@Test
-	void aliasEventReceived() throws Exception {
+	void aliasEventReceived() {
 		List<AliasDefinition> aliases = this.eventListener.getAliases("testBean");
 		assertThat(aliases).hasSize(2);
 		AliasDefinition aliasDefinition1 = aliases.get(0);
@@ -110,7 +108,7 @@ class EventPublicationTests {
 	}
 
 	@Test
-	void importEventReceived() throws Exception {
+	void importEventReceived() {
 		List<ImportDefinition> imports = this.eventListener.getImports();
 		assertThat(imports).hasSize(1);
 		ImportDefinition importDefinition = imports.get(0);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Stephane Nicoll
  */
-public class JCacheErrorHandlerTests {
+class JCacheErrorHandlerTests {
 
 	private Cache cache;
 
@@ -61,7 +61,7 @@ public class JCacheErrorHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cache = context.getBean("mockCache", Cache.class);
 		this.errorCache = context.getBean("mockErrorCache", Cache.class);
@@ -72,7 +72,7 @@ public class JCacheErrorHandlerTests {
 
 
 	@Test
-	public void getFail() {
+	void getFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		willThrow(exception).given(this.cache).get(key);
@@ -82,7 +82,7 @@ public class JCacheErrorHandlerTests {
 	}
 
 	@Test
-	public void getPutNewElementFail() {
+	void getPutNewElementFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		given(this.cache.get(key)).willReturn(null);
@@ -93,7 +93,7 @@ public class JCacheErrorHandlerTests {
 	}
 
 	@Test
-	public void getFailPutExceptionFail() {
+	void getFailPutExceptionFail() {
 		UnsupportedOperationException exceptionOnPut = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		given(this.cache.get(key)).willReturn(null);
@@ -110,7 +110,7 @@ public class JCacheErrorHandlerTests {
 	}
 
 	@Test
-	public void putFail() {
+	void putFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		willThrow(exception).given(this.cache).put(key, 234L);
@@ -120,7 +120,7 @@ public class JCacheErrorHandlerTests {
 	}
 
 	@Test
-	public void evictFail() {
+	void evictFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		willThrow(exception).given(this.cache).evict(key);
@@ -130,7 +130,7 @@ public class JCacheErrorHandlerTests {
 	}
 
 	@Test
-	public void clearFail() {
+	void clearFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
 		willThrow(exception).given(this.cache).clear();
 
@@ -183,7 +183,7 @@ public class JCacheErrorHandlerTests {
 
 		private static final IllegalStateException TEST_EXCEPTION = new IllegalStateException("Test exception");
 
-		private AtomicLong counter = new AtomicLong();
+		private final AtomicLong counter = new AtomicLong();
 
 		@CacheResult
 		public Object get(long id) {

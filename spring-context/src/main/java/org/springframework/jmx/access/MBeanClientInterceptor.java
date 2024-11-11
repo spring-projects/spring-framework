@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,7 +348,7 @@ public class MBeanClientInterceptor
 
 
 	/**
-	 * Route the invocation to the configured managed resource..
+	 * Route the invocation to the configured managed resource.
 	 * @param invocation the {@code MethodInvocation} to re-route
 	 * @return the value returned as a result of the re-routed invocation
 	 * @throws Throwable an invocation error propagated to the user
@@ -439,7 +439,7 @@ public class MBeanClientInterceptor
 			throw ex.getTargetError();
 		}
 		catch (RuntimeOperationsException ex) {
-			// This one is only thrown by the JMX 1.2 RI, not by the JDK 1.5 JMX code.
+			// This one is only thrown by the JMX 1.2 RI, not by the JDK JMX code.
 			RuntimeException rex = ex.getTargetException();
 			if (rex instanceof RuntimeMBeanException runtimeMBeanException) {
 				throw runtimeMBeanException.getTargetException();

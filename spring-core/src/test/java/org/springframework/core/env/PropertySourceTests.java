@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PropertySource} implementations.
+ * Tests for {@link PropertySource} implementations.
  *
  * @author Chris Beams
  * @since 3.1
@@ -48,21 +48,20 @@ class PropertySourceTests {
 		MapPropertySource mps = new MapPropertySource("mps", map1);
 		assertThat(mps).isEqualTo(mps);
 
-		assertThat(new MapPropertySource("x", map1).equals(new MapPropertySource("x", map1))).isTrue();
-		assertThat(new MapPropertySource("x", map1).equals(new MapPropertySource("x", map2))).isTrue();
-		assertThat(new MapPropertySource("x", map1).equals(new PropertiesPropertySource("x", props1))).isTrue();
-		assertThat(new MapPropertySource("x", map1).equals(new PropertiesPropertySource("x", props2))).isTrue();
+		assertThat(new MapPropertySource("x", map1)).isEqualTo(new MapPropertySource("x", map1));
+		assertThat(new MapPropertySource("x", map1)).isEqualTo(new MapPropertySource("x", map2));
+		assertThat(new MapPropertySource("x", map1)).isEqualTo(new PropertiesPropertySource("x", props1));
+		assertThat(new MapPropertySource("x", map1)).isEqualTo(new PropertiesPropertySource("x", props2));
 
-		assertThat(new MapPropertySource("x", map1).equals(new Object())).isFalse();
-		assertThat(new MapPropertySource("x", map1).equals("x")).isFalse();
-		assertThat(new MapPropertySource("x", map1).equals(new MapPropertySource("y", map1))).isFalse();
-		assertThat(new MapPropertySource("x", map1).equals(new MapPropertySource("y", map2))).isFalse();
-		assertThat(new MapPropertySource("x", map1).equals(new PropertiesPropertySource("y", props1))).isFalse();
-		assertThat(new MapPropertySource("x", map1).equals(new PropertiesPropertySource("y", props2))).isFalse();
+		assertThat(new MapPropertySource("x", map1)).isNotEqualTo(new Object());
+		assertThat(new MapPropertySource("x", map1)).isNotEqualTo("x");
+		assertThat(new MapPropertySource("x", map1)).isNotEqualTo(new MapPropertySource("y", map1));
+		assertThat(new MapPropertySource("x", map1)).isNotEqualTo(new MapPropertySource("y", map2));
+		assertThat(new MapPropertySource("x", map1)).isNotEqualTo(new PropertiesPropertySource("y", props1));
+		assertThat(new MapPropertySource("x", map1)).isNotEqualTo(new PropertiesPropertySource("y", props2));
 	}
 
 	@Test
-	@SuppressWarnings("serial")
 	void collectionsOperations() {
 		Map<String, Object> map1 = Map.of("a", "b");
 		Map<String, Object> map2 = Map.of("c", "d");
@@ -71,8 +70,8 @@ class PropertySourceTests {
 		ps1.getSource();
 		List<PropertySource<?>> propertySources = new ArrayList<>();
 		assertThat(propertySources.add(ps1)).isTrue();
-		assertThat(propertySources.contains(ps1)).isTrue();
-		assertThat(propertySources.contains(PropertySource.named("ps1"))).isTrue();
+		assertThat(propertySources).contains(ps1);
+		assertThat(propertySources).contains(PropertySource.named("ps1"));
 
 		PropertySource<?> ps1replacement = new MapPropertySource("ps1", map2); // notice - different map
 		assertThat(propertySources.add(ps1replacement)).isTrue(); // true because linkedlist allows duplicates

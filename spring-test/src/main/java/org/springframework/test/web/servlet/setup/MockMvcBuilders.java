@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.setup;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.function.RouterFunction;
 
 /**
  * The main class to import in order to access all available {@link MockMvcBuilder MockMvcBuilders}.
@@ -74,6 +75,25 @@ public final class MockMvcBuilders {
 	 */
 	public static StandaloneMockMvcBuilder standaloneSetup(Object... controllers) {
 		return new StandaloneMockMvcBuilder(controllers);
+	}
+
+	/**
+	 * Build a {@link MockMvc} instance by registering one or more
+	 * {@link RouterFunction RouterFunction} instances and configuring Spring
+	 * MVC infrastructure programmatically.
+	 * <p>This allows full control over the instantiation and initialization of
+	 * router functions and their dependencies, similar to plain unit tests while
+	 * also making it possible to test one router function at a time.
+	 * <p>When this builder is used, the minimum infrastructure required by the
+	 * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
+	 * to serve requests with router functions is created automatically
+	 * and can be customized, resulting in configuration that is equivalent to
+	 * what MVC Java configuration provides except using builder-style methods.
+	 * @param routerFunctions one or more {@code RouterFunction} instances to test
+	 * @since 6.2
+	 */
+	public static RouterFunctionMockMvcBuilder routerFunctions(RouterFunction<?>... routerFunctions) {
+		return new RouterFunctionMockMvcBuilder(routerFunctions);
 	}
 
 }

@@ -39,7 +39,7 @@ public class DecodingException extends CodecException {
 	 * Create a new DecodingException.
 	 * @param msg the detail message
 	 */
-	public DecodingException(String msg) {
+	public DecodingException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -48,7 +48,7 @@ public class DecodingException extends CodecException {
 	 * @param msg the detail message
 	 * @param cause root cause for the exception, if any
 	 */
-	public DecodingException(String msg, @Nullable Throwable cause) {
+	public DecodingException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

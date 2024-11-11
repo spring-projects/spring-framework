@@ -2,16 +2,29 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
+	    xmlns:cache="http://www.springframework.org/schema/cache"
+		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+				http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+	   			http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
 	<aop:aspectj-autoproxy/>
 
-	<bean id="myAspect" class="org.springframework.aop.aspectj.autoproxy.CodeStyleAspect"
-			factory-method="aspectOf">
+	<context:spring-configured/>
+
+	<cache:annotation-driven mode="aspectj"/>
+
+	<bean id="cacheManager" class="org.springframework.cache.support.NoOpCacheManager"/>
+
+	<bean id="myAspect" class="org.springframework.aop.aspectj.autoproxy.CodeStyleAspect" factory-method="aspectOf">
 		<property name="foo" value="bar"/>
 	</bean>
 
-	<bean id="otherBean" class="java.lang.Object"/>
+	<bean id="otherBean" class="org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring"/>
+
+	<bean id="yetAnotherBean" class="org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring"/>
+
+	<bean id="configuredBean" class="org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring" lazy-init="true"/>
 
 </beans>

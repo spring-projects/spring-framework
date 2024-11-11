@@ -56,7 +56,7 @@ how to use the `@Repository` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository // <1>
 	public class SomeMovieFinder implements MovieFinder {
@@ -67,7 +67,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository // <1>
 	class SomeMovieFinder : MovieFinder {
@@ -89,7 +89,7 @@ annotations. The following example works for a JPA repository:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	public class JpaMovieFinder implements MovieFinder {
@@ -103,7 +103,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	class JpaMovieFinder : MovieFinder {
@@ -124,7 +124,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	public class HibernateMovieFinder implements MovieFinder {
@@ -142,7 +142,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	class HibernateMovieFinder(private val sessionFactory: SessionFactory) : MovieFinder {
@@ -160,7 +160,7 @@ and other data access support classes (such as `SimpleJdbcCall` and others) by u
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	public class JdbcMovieFinder implements MovieFinder {
@@ -178,7 +178,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	class JdbcMovieFinder(dataSource: DataSource) : MovieFinder {

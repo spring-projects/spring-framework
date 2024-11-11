@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,9 @@ public interface ClientHttpRequestInterceptor {
 	 * wrap} the request to filter HTTP attributes.</li>
 	 * <li>Optionally modify the body of the request.</li>
 	 * <ul>
-	 * <li><strong>Either</strong>
-	 * <li>execute the request using
-	 * {@link ClientHttpRequestExecution#execute(org.springframework.http.HttpRequest, byte[])},</li>
-	 * <li><strong>or</strong></li>
-	 * <li>do not execute the request to block the execution altogether.</li>
+	 * <li><strong>either</strong> execute the request using
+	 * {@link ClientHttpRequestExecution#execute(HttpRequest, byte[])}</li>
+	 * <li><strong>or</strong> do not execute the request to block the execution altogether</li>
 	 * </ul>
 	 * <li>Optionally wrap the response to filter HTTP attributes.</li>
 	 * </ol>

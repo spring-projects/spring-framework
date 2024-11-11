@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,75 +29,75 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  */
-public class URIEditorTests {
+class URIEditorTests {
 
 	@Test
-	public void standardURI() {
+	void standardURI() {
 		doTestURI("mailto:juergen.hoeller@interface21.com");
 	}
 
 	@Test
-	public void withNonExistentResource() {
+	void withNonExistentResource() {
 		doTestURI("gonna:/freak/in/the/morning/freak/in/the.evening");
 	}
 
 	@Test
-	public void standardURL() {
+	void standardURL() {
 		doTestURI("https://www.springframework.org");
 	}
 
 	@Test
-	public void standardURLWithFragment() {
+	void standardURLWithFragment() {
 		doTestURI("https://www.springframework.org#1");
 	}
 
 	@Test
-	public void standardURLWithWhitespace() {
+	void standardURLWithWhitespace() {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("  https://www.springframework.org  ");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uri.toString()).isEqualTo("https://www.springframework.org");
 	}
 
 	@Test
-	public void classpathURL() {
+	void classpathURL() {
 		PropertyEditor uriEditor = new URIEditor(getClass().getClassLoader());
 		uriEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.getScheme()).doesNotStartWith("classpath");
 	}
 
 	@Test
-	public void classpathURLWithWhitespace() {
+	void classpathURLWithWhitespace() {
 		PropertyEditor uriEditor = new URIEditor(getClass().getClassLoader());
 		uriEditor.setAsText("  classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class  ");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.getScheme()).doesNotStartWith("classpath");
 	}
 
 	@Test
-	public void classpathURLAsIs() {
+	void classpathURLAsIs() {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("classpath:test.txt");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.getScheme()).startsWith("classpath");
 	}
 
 	@Test
-	public void setAsTextWithNull() {
+	void setAsTextWithNull() {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText(null);
 		assertThat(uriEditor.getValue()).isNull();
@@ -105,28 +105,28 @@ public class URIEditorTests {
 	}
 
 	@Test
-	public void getAsTextReturnsEmptyStringIfValueNotSet() {
+	void getAsTextReturnsEmptyStringIfValueNotSet() {
 		PropertyEditor uriEditor = new URIEditor();
 		assertThat(uriEditor.getAsText()).isEmpty();
 	}
 
 	@Test
-	public void encodeURI() {
+	void encodeURI() {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("https://example.com/spaces and \u20AC");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.toASCIIString()).isEqualTo("https://example.com/spaces%20and%20%E2%82%AC");
 	}
 
 	@Test
-	public void encodeAlreadyEncodedURI() {
+	void encodeAlreadyEncodedURI() {
 		PropertyEditor uriEditor = new URIEditor(false);
 		uriEditor.setAsText("https://example.com/spaces%20and%20%E2%82%AC");
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
 		assertThat(uri.toASCIIString()).isEqualTo("https://example.com/spaces%20and%20%E2%82%AC");
@@ -137,7 +137,7 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText(uriSpec);
 		Object value = uriEditor.getValue();
-		assertThat(value instanceof URI).isTrue();
+		assertThat(value).isInstanceOf(URI.class);
 		URI uri = (URI) value;
 		assertThat(uri.toString()).isEqualTo(uriSpec);
 	}

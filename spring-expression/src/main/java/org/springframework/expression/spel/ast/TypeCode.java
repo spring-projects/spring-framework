@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,42 +33,42 @@ public enum TypeCode {
 	/**
 	 * A {@code boolean}.
 	 */
-	BOOLEAN(Boolean.TYPE),
+	BOOLEAN(boolean.class),
 
 	/**
 	 * A {@code char}.
 	 */
-	CHAR(Character.TYPE),
+	CHAR(char.class),
 
 	/**
 	 * A {@code byte}.
 	 */
-	BYTE(Byte.TYPE),
+	BYTE(byte.class),
 
 	/**
 	 * A {@code short}.
 	 */
-	SHORT(Short.TYPE),
+	SHORT(short.class),
 
 	/**
 	 * An {@code int}.
 	 */
-	INT(Integer.TYPE),
+	INT(int.class),
 
 	/**
 	 * A {@code long}.
 	 */
-	LONG(Long.TYPE),
+	LONG(long.class),
 
 	/**
 	 * A {@code float}.
 	 */
-	FLOAT(Float.TYPE),
+	FLOAT(float.class),
 
 	/**
 	 * A {@code double}.
 	 */
-	DOUBLE(Double.TYPE);
+	DOUBLE(double.class);
 
 
 	private final Class<?> type;

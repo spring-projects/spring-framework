@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	 * specification, only kicking in for "multipart/form-data" requests.
 	 * <p>Default is "false", trying to process any request with a "multipart/"
 	 * content type as far as the underlying Servlet container supports it
-	 * (which works on e.g. Tomcat but not on Jetty). For consistent portability
+	 * (which works on, for example, Tomcat but not on Jetty). For consistent portability
 	 * and in particular for consistent custom handling of non-form multipart
 	 * request types outside of Spring's {@link MultipartResolver} mechanism,
 	 * switch this flag to "true": Only "multipart/form-data" requests will be
@@ -116,13 +116,10 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		if (!(request instanceof AbstractMultipartHttpServletRequest abstractMultipartHttpServletRequest) ||
 				abstractMultipartHttpServletRequest.isResolved()) {
-			// To be on the safe side: explicitly delete the parts,
-			// but only actual file parts (for Resin compatibility)
+
 			try {
 				for (Part part : request.getParts()) {
-					if (request.getFile(part.getName()) != null) {
-						part.delete();
-					}
+					part.delete();
 				}
 			}
 			catch (Throwable ex) {

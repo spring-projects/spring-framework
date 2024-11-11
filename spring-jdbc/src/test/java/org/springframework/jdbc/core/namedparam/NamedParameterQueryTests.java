@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.verify;
  * @author Thomas Risberg
  * @author Phillip Webb
  */
-public class NamedParameterQueryTests {
+class NamedParameterQueryTests {
 
 	private Connection connection = mock();
 
@@ -60,7 +60,7 @@ public class NamedParameterQueryTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		given(dataSource.getConnection()).willReturn(connection);
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
 		given(resultSetMetaData.getColumnLabel(1)).willReturn("age");
@@ -69,7 +69,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@AfterEach
-	public void verifyClose() throws Exception {
+	void verifyClose() throws Exception {
 		verify(preparedStatement).close();
 		verify(resultSet).close();
 		verify(connection).close();
@@ -77,7 +77,7 @@ public class NamedParameterQueryTests {
 
 
 	@Test
-	public void testQueryForListWithParamMap() throws Exception {
+	void testQueryForListWithParamMap() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getObject(1)).willReturn(11, 12);
@@ -96,7 +96,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithParamMapAndEmptyResult() throws Exception {
+	void testQueryForListWithParamMapAndEmptyResult() throws Exception {
 		given(resultSet.next()).willReturn(false);
 
 		MapSqlParameterSource params = new MapSqlParameterSource();
@@ -110,7 +110,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithParamMapAndSingleRowAndColumn() throws Exception {
+	void testQueryForListWithParamMapAndSingleRowAndColumn() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getObject(1)).willReturn(11);
@@ -127,7 +127,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
+	void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(11);
@@ -137,14 +137,13 @@ public class NamedParameterQueryTests {
 		List<Integer> li = template.queryForList("SELECT AGE FROM CUSTMR WHERE ID < :id",
 				params, Integer.class);
 
-		assertThat(li.size()).as("All rows returned").isEqualTo(1);
-		assertThat(li.get(0)).as("First row is Integer").isEqualTo(11);
+		assertThat(li).containsExactly(11);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
 		verify(preparedStatement).setObject(1, 3);
 	}
 
 	@Test
-	public void testQueryForMapWithParamMapAndSingleRowAndColumn() throws Exception {
+	void testQueryForMapWithParamMapAndSingleRowAndColumn() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getObject(1)).willReturn(11);
@@ -159,7 +158,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithParamMapAndRowMapper() throws Exception {
+	void testQueryForObjectWithParamMapAndRowMapper() throws Exception {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
 
@@ -174,7 +173,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithMapAndInteger() throws Exception {
+	void testQueryForObjectWithMapAndInteger() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
@@ -190,7 +189,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithParamMapAndInteger() throws Exception {
+	void testQueryForObjectWithParamMapAndInteger() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
@@ -206,7 +205,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithParamMapAndList() throws Exception {
+	void testQueryForObjectWithParamMapAndList() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
@@ -221,7 +220,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithParamMapAndListOfExpressionLists() throws Exception {
+	void testQueryForObjectWithParamMapAndListOfExpressionLists() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
@@ -240,7 +239,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForIntWithParamMap() throws Exception {
+	void testQueryForIntWithParamMap() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
@@ -255,7 +254,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForLongWithParamBean() throws Exception {
+	void testQueryForLongWithParamBean() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getLong(1)).willReturn(87L);
@@ -269,7 +268,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForLongWithParamBeanWithCollection() throws Exception {
+	void testQueryForLongWithParamBeanWithCollection() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getLong(1)).willReturn(87L);
@@ -284,7 +283,7 @@ public class NamedParameterQueryTests {
 	}
 
 	@Test
-	public void testQueryForLongWithParamRecord() throws Exception {
+	void testQueryForLongWithParamRecord() throws Exception {
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getLong(1)).willReturn(87L);

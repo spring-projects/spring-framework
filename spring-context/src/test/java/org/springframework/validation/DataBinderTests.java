@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
- * Unit tests for {@link DataBinder}.
+ * Tests for {@link DataBinder}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -447,7 +447,7 @@ class DataBinderTests {
 
 		conversionService.addFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				throw new RuntimeException(text);
 			}
 			@Override
@@ -480,7 +480,7 @@ class DataBinderTests {
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		try {
 			binder.bind(pvs);
-			assertThat(tb.getIntegerList().get(0)).isEqualTo(1);
+			assertThat(tb.getIntegerList()).containsExactly(1);
 			assertThat(binder.getBindingResult().getFieldValue("integerList[0]")).isEqualTo("1");
 		}
 		finally {
@@ -502,7 +502,7 @@ class DataBinderTests {
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		try {
 			binder.bind(pvs);
-			assertThat(tb.getIntegerList().isEmpty()).isTrue();
+			assertThat(tb.getIntegerList()).isEmpty();
 			assertThat(binder.getBindingResult().getFieldValue("integerList[0]")).isEqualTo("1x2");
 			assertThat(binder.getBindingResult().hasFieldErrors("integerList[0]")).isTrue();
 		}
@@ -650,7 +650,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				throw new RuntimeException(text);
 			}
 			@Override
@@ -1022,7 +1022,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				return "prefix" + text;
 			}
 			@Override
@@ -1061,7 +1061,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<Integer>() {
 			@Override
-			public Integer parse(String text, Locale locale) throws ParseException {
+			public Integer parse(String text, Locale locale) {
 				return 99;
 			}
 			@Override
@@ -1085,7 +1085,7 @@ class DataBinderTests {
 
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
-			public String parse(String text, Locale locale) throws ParseException {
+			public String parse(String text, Locale locale) {
 				return "prefix" + text;
 			}
 			@Override
@@ -2007,9 +2007,7 @@ class DataBinderTests {
 		assertThat(binder.getBindingResult().hasErrors()).isFalse();
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) form.getF().get("list");
-		assertThat(list.get(0)).isEqualTo("firstValue");
-		assertThat(list.get(1)).isEqualTo("secondValue");
-		assertThat(list).hasSize(2);
+		assertThat(list).containsExactly("firstValue", "secondValue");
 	}
 
 	@Test
@@ -2043,7 +2041,7 @@ class DataBinderTests {
 
 		binder.bind(pvs);
 		assertThat(tb.getIntegerList()).hasSize(257);
-		assertThat(tb.getIntegerList().get(256)).isEqualTo(Integer.valueOf(1));
+		assertThat(tb.getIntegerList()).element(256).isEqualTo(1);
 		assertThat(binder.getBindingResult().getFieldValue("integerList[256]")).isEqualTo(1);
 	}
 
@@ -2056,7 +2054,7 @@ class DataBinderTests {
 			.withMessageContaining("DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
 	}
 
-	@Test // SPR-15009
+	@Test  // SPR-15009
 	void setCustomMessageCodesResolverBeforeInitializeBindingResultForBeanPropertyAccess() {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -2073,7 +2071,7 @@ class DataBinderTests {
 		assertThat(((BeanWrapper) binder.getInternalBindingResult().getPropertyAccessor()).getAutoGrowCollectionLimit()).isEqualTo(512);
 	}
 
-	@Test // SPR-15009
+	@Test  // SPR-15009
 	void setCustomMessageCodesResolverBeforeInitializeBindingResultForDirectFieldAccess() {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -2127,7 +2125,7 @@ class DataBinderTests {
 			.withMessageContaining("DataBinder is already initialized with MessageCodesResolver");
 	}
 
-	@Test // gh-24347
+	@Test  // gh-24347
 	void overrideBindingResultType() {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");

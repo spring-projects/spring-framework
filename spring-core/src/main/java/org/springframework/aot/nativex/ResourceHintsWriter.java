@@ -17,6 +17,7 @@
 package org.springframework.aot.nativex;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,13 @@ class ResourceHintsWriter {
 
 	public static final ResourceHintsWriter INSTANCE = new ResourceHintsWriter();
 
+	private static final Comparator<ResourcePatternHint> RESOURCE_PATTERN_HINT_COMPARATOR =
+			Comparator.comparing(ResourcePatternHint::getPattern);
+
+	private static final Comparator<ResourceBundleHint> RESOURCE_BUNDLE_HINT_COMPARATOR =
+			Comparator.comparing(ResourceBundleHint::getBaseName);
+
+
 	public void write(BasicJsonWriter writer, ResourceHints hints) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		addIfNotEmpty(attributes, "resources", toAttributes(hints));
@@ -53,15 +61,21 @@ class ResourceHintsWriter {
 
 	private Map<String, Object> toAttributes(ResourceHints hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		addIfNotEmpty(attributes, "includes", hint.resourcePatternHints().map(ResourcePatternHints::getIncludes)
-				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
-		addIfNotEmpty(attributes, "excludes", hint.resourcePatternHints().map(ResourcePatternHints::getExcludes)
-				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
+		addIfNotEmpty(attributes, "includes", hint.resourcePatternHints()
+				.map(ResourcePatternHints::getIncludes).flatMap(List::stream).distinct()
+				.sorted(RESOURCE_PATTERN_HINT_COMPARATOR)
+				.map(this::toAttributes).toList());
+		addIfNotEmpty(attributes, "excludes", hint.resourcePatternHints()
+				.map(ResourcePatternHints::getExcludes).flatMap(List::stream).distinct()
+				.sorted(RESOURCE_PATTERN_HINT_COMPARATOR)
+				.map(this::toAttributes).toList());
 		return attributes;
 	}
 
 	private void handleResourceBundles(Map<String, Object> attributes, Stream<ResourceBundleHint> resourceBundles) {
-		addIfNotEmpty(attributes, "bundles", resourceBundles.map(this::toAttributes).toList());
+		addIfNotEmpty(attributes, "bundles", resourceBundles
+				.sorted(RESOURCE_BUNDLE_HINT_COMPARATOR)
+				.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(ResourceBundleHint hint) {

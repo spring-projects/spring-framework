@@ -262,7 +262,7 @@ application/astound			asn
 
 # SPECIAL EMBEDDED OBJECT
 
-# OLE script e.g. Visual Basic (Ncompass)
+# OLE script, for example, Visual Basic (Ncompass)
 application/x-olescript			axs
 # OLE Object (Microsoft/NCompass)
 application/x-oleobject			ods

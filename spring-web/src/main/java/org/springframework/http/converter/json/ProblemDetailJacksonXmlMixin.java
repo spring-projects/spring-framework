@@ -44,33 +44,33 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
  * @since 6.0.5
  */
 @JsonInclude(NON_EMPTY)
-@JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.RFC_7807_NAMESPACE)
+@JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.NAMESPACE)
 public interface ProblemDetailJacksonXmlMixin {
 
-	/** RFC 7807 namespace. */
-	String RFC_7807_NAMESPACE = "urn:ietf:rfc:7807";
+	/** RFC 7807 (obsoleted by RFC 9457) namespace. */
+	String NAMESPACE = "urn:ietf:rfc:7807";
 
 
-	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	URI getType();
 
-	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	String getTitle();
 
-	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	int getStatus();
 
-	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	String getDetail();
 
-	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	URI getInstance();
 
 	@JsonAnySetter
 	void setProperty(String name, @Nullable Object value);
 
 	@JsonAnyGetter
-	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	Map<String, Object> getProperties();
 
 }

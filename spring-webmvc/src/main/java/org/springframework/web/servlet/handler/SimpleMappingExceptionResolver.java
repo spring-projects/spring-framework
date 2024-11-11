@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,17 +69,17 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 
 	/**
 	 * Set the mappings between exception class names and error view names.
-	 * The exception class name can be a substring, with no wildcard support at present.
-	 * A value of "ServletException" would match {@code jakarta.servlet.ServletException}
-	 * and subclasses, for example.
-	 * <p><b>NB:</b> Consider carefully how
-	 * specific the pattern is, and whether to include package information (which isn't mandatory).
-	 * For example, "Exception" will match nearly anything, and will probably hide other rules.
-	 * "java.lang.Exception" would be correct if "Exception" was meant to define a rule for all
-	 * checked exceptions. With more unusual exception names such as "BaseBusinessException"
-	 * there's no need to use a FQN.
-	 * @param mappings exception patterns (can also be fully qualified class names) as keys,
-	 * and error view names as values
+	 * <p>The exception class name can be a substring, with no wildcard support
+	 * at present. For example, a value of "ServletException" would match
+	 * {@code jakarta.servlet.ServletException} and subclasses.
+	 * <p><b>NB:</b> Consider carefully how specific the pattern is and whether
+	 * to include package information (which isn't mandatory). For example,
+	 * "Exception" will match nearly anything and will probably hide other rules.
+	 * "java.lang.Exception" would be correct if "Exception" was meant to define
+	 * a rule for all checked exceptions. With more unique exception names such
+	 * as "BaseBusinessException" there's no need to use a fully-qualified class name.
+	 * @param mappings exception patterns (can also be fully-qualified class names)
+	 * as keys, and error view names as values
 	 */
 	public void setExceptionMappings(Properties mappings) {
 		this.exceptionMappings = mappings;

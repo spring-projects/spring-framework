@@ -50,6 +50,15 @@ import org.springframework.lang.Nullable;
 public interface BeanRegistrationAotProcessor {
 
 	/**
+	 * The name of an attribute that can be
+	 * {@link org.springframework.core.AttributeAccessor#setAttribute set} on a
+	 * {@link org.springframework.beans.factory.config.BeanDefinition} to signal
+	 * that its registration should not be processed.
+	 * @since 6.2
+	 */
+	String IGNORE_REGISTRATION_ATTRIBUTE = "aotProcessingIgnoreRegistration";
+
+	/**
 	 * Process the given {@link RegisteredBean} instance ahead-of-time and
 	 * return a contribution or {@code null}.
 	 * <p>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.MessageCondition;
 
 /**
- * {@link MessageCondition} for SImple Messaging Protocols. Encapsulates the following
+ * {@link MessageCondition} for Simple Messaging Protocols. Encapsulates the following
  * request mapping conditions:
  * <ol>
  * <li>{@link SimpMessageTypeMessageCondition}

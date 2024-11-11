@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,9 +84,7 @@ class SpringFactoriesLoaderTests {
 	@Test
 	void loadWhenDuplicateRegistrationsPresentReturnsListInCorrectOrder() {
 		List<DummyFactory> factories = SpringFactoriesLoader.forDefaultResourceLocation().load(DummyFactory.class);
-		assertThat(factories).hasSize(2);
-		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
-		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
+		assertThat(factories).hasExactlyElementsOfTypes(MyDummyFactory1.class, MyDummyFactory2.class);
 	}
 
 	@Test
@@ -118,10 +116,8 @@ class SpringFactoriesLoaderTests {
 		ArgumentResolver resolver = ArgumentResolver.of(String.class, "injected");
 		List<DummyFactory> factories = SpringFactoriesLoader.forDefaultResourceLocation(LimitedClassLoader.constructorArgumentFactories)
 					.load(DummyFactory.class, resolver);
-		assertThat(factories).hasSize(3);
-		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
-		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
-		assertThat(factories.get(2)).isInstanceOf(ConstructorArgsDummyFactory.class);
+		assertThat(factories).hasExactlyElementsOfTypes(MyDummyFactory1.class, MyDummyFactory2.class,
+				ConstructorArgsDummyFactory.class);
 		assertThat(factories).extracting(DummyFactory::getString).containsExactly("Foo", "Bar", "injected");
 	}
 
@@ -142,18 +138,14 @@ class SpringFactoriesLoaderTests {
 		FailureHandler failureHandler = FailureHandler.logging(logger);
 		List<DummyFactory> factories = SpringFactoriesLoader.forDefaultResourceLocation(LimitedClassLoader.multipleArgumentFactories)
 					.load(DummyFactory.class, failureHandler);
-		assertThat(factories).hasSize(2);
-		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
-		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
+		assertThat(factories).hasExactlyElementsOfTypes(MyDummyFactory1.class, MyDummyFactory2.class);
 	}
 
 	@Test
 	void loadFactoriesLoadsFromDefaultLocation() {
 		List<DummyFactory> factories = SpringFactoriesLoader.loadFactories(
 				DummyFactory.class, null);
-		assertThat(factories).hasSize(2);
-		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
-		assertThat(factories.get(1)).isInstanceOf(MyDummyFactory2.class);
+		assertThat(factories).hasExactlyElementsOfTypes(MyDummyFactory1.class, MyDummyFactory2.class);
 	}
 
 	@Test
@@ -167,8 +159,7 @@ class SpringFactoriesLoaderTests {
 	void loadForResourceLocationLoadsFactories() {
 		List<DummyFactory> factories = SpringFactoriesLoader.forResourceLocation(
 				"META-INF/custom/custom-spring.factories").load(DummyFactory.class);
-		assertThat(factories).hasSize(1);
-		assertThat(factories.get(0)).isInstanceOf(MyDummyFactory1.class);
+		assertThat(factories).hasExactlyElementsOfTypes(MyDummyFactory1.class);
 	}
 
 	@Test
@@ -220,8 +211,7 @@ class SpringFactoriesLoaderTests {
 			RuntimeException cause = new RuntimeException();
 			handler.handleFailure(DummyFactory.class, MyDummyFactory1.class.getName(), cause);
 			assertThat(failures).containsExactly(cause);
-			assertThat(messages).hasSize(1);
-			assertThat(messages.get(0)).startsWith("Unable to instantiate factory class");
+			assertThat(messages).singleElement().asString().startsWith("Unable to instantiate factory class");
 		}
 	}
 

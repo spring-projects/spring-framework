@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.context;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
@@ -35,6 +38,10 @@ import jakarta.servlet.ServletContextListener;
  * @see org.springframework.web.WebApplicationInitializer
  */
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
+
+	@Nullable
+	private ServletContext servletContext;
+
 
 	/**
 	 * Create a new {@code ContextLoaderListener} that will create a web application
@@ -54,6 +61,19 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 * @see #contextDestroyed(ServletContextEvent)
 	 */
 	public ContextLoaderListener() {
+	}
+
+	/**
+	 * Create a new {@code ContextLoaderListener} with the given application context,
+	 * initializing it with the {@link ServletContextEvent}-provided
+	 * {@link ServletContext} reference which is spec-restricted in terms of capabilities.
+	 * <p>It is generally preferable to initialize the application context with a
+	 * {@link org.springframework.web.WebApplicationInitializer#onStartup}-given reference
+	 * which is usually fully capable.
+	 * @see #ContextLoaderListener(WebApplicationContext, ServletContext)
+	 */
+	public ContextLoaderListener(WebApplicationContext rootContext) {
+		super(rootContext);
 	}
 
 	/**
@@ -85,12 +105,15 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 * WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE} and the Spring
 	 * application context will be closed when the {@link #contextDestroyed} lifecycle
 	 * method is invoked on this listener.
-	 * @param context the application context to manage
+	 * @param rootContext the application context to manage
+	 * @param servletContext the ServletContext to initialize with
+	 * @since 6.2
 	 * @see #contextInitialized(ServletContextEvent)
 	 * @see #contextDestroyed(ServletContextEvent)
 	 */
-	public ContextLoaderListener(WebApplicationContext context) {
-		super(context);
+	public ContextLoaderListener(WebApplicationContext rootContext, ServletContext servletContext) {
+		super(rootContext);
+		this.servletContext = servletContext;
 	}
 
 
@@ -99,7 +122,8 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
-		initWebApplicationContext(event.getServletContext());
+		ServletContext scToUse = getServletContextToUse(event);
+		initWebApplicationContext(scToUse);
 	}
 
 
@@ -108,8 +132,17 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
-		closeWebApplicationContext(event.getServletContext());
-		ContextCleanupListener.cleanupAttributes(event.getServletContext());
+		ServletContext scToUse = getServletContextToUse(event);
+		closeWebApplicationContext(scToUse);
+		ContextCleanupListener.cleanupAttributes(scToUse);
+	}
+
+	/**
+	 * Preferably use a fully-capable local ServletContext instead of
+	 * the spec-restricted ServletContextEvent-provided reference.
+	 */
+	private ServletContext getServletContextToUse(ServletContextEvent event) {
+		return (this.servletContext != null ? this.servletContext : event.getServletContext());
 	}
 
 }

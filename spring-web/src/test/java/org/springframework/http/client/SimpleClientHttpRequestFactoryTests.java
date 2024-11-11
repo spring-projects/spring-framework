@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 
 	@Override
 	@Test
-	public void httpMethods() throws Exception {
+	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertThatExceptionOfType(ProtocolException.class).isThrownBy(() ->
 				assertHttpMethod("patch", HttpMethod.PATCH));
 	}
 
 	@Test
-	public void prepareConnectionWithRequestBody() throws Exception {
+	void prepareConnectionWithRequestBody() throws Exception {
 		URI uri = new URI("https://example.com");
 		testRequestBodyAllowed(uri, "GET", false);
 		testRequestBodyAllowed(uri, "HEAD", false);
@@ -72,7 +72,7 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 	}
 
 	@Test
-	public void deleteWithoutBodyDoesNotRaiseException() throws Exception {
+	void deleteWithoutBodyDoesNotRaiseException() throws Exception {
 		HttpURLConnection connection = new TestHttpURLConnection(new URL("https://example.com"));
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
 		SimpleClientHttpRequest request = new SimpleClientHttpRequest(connection, 4096);
@@ -105,17 +105,17 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		}
 	}
 
-
-	@Test // SPR-13225
+	@Test  // SPR-13225
 	public void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock();
 		given(urlConnection.getRequestMethod()).willReturn("GET");
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);
 		SimpleClientHttpRequest.addHeaders(urlConnection, headers);
+
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
-
 
 
 	private static class TestHttpURLConnection extends HttpURLConnection {
@@ -125,7 +125,7 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		}
 
 		@Override
-		public void connect() throws IOException {
+		public void connect() {
 		}
 
 		@Override
@@ -138,7 +138,7 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			return new ByteArrayInputStream(new byte[0]);
 		}
 	}

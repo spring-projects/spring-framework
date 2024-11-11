@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
- * Unit tests for {@link PropertiesFactoryBean}.
+ * Tests for {@link PropertiesFactoryBean}.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 01.11.2003
  */
-public class PropertiesFactoryBeanTests {
+class PropertiesFactoryBeanTests {
 
 	private static final Class<?> CLASS = PropertiesFactoryBeanTests.class;
 	private static final Resource TEST_PROPS = qualifiedResource(CLASS, "test.properties");
 	private static final Resource TEST_PROPS_XML = qualifiedResource(CLASS, "test.properties.xml");
 
 	@Test
-	public void testWithPropertiesFile() throws Exception {
+	void testWithPropertiesFile() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 		pfb.afterPropertiesSet();
@@ -48,7 +48,7 @@ public class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	public void testWithPropertiesXmlFile() throws Exception {
+	void testWithPropertiesXmlFile() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS_XML);
 		pfb.afterPropertiesSet();
@@ -57,7 +57,7 @@ public class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	public void testWithLocalProperties() throws Exception {
+	void testWithLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
@@ -68,7 +68,7 @@ public class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	public void testWithPropertiesFileAndLocalProperties() throws Exception {
+	void testWithPropertiesFileAndLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 		Properties localProps = new Properties();
@@ -82,7 +82,7 @@ public class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	public void testWithPropertiesFileAndMultipleLocalProperties() throws Exception {
+	void testWithPropertiesFileAndMultipleLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 
@@ -111,7 +111,7 @@ public class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	public void testWithPropertiesFileAndLocalPropertiesAndLocalOverride() throws Exception {
+	void testWithPropertiesFileAndLocalPropertiesAndLocalOverride() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 		Properties localProps = new Properties();
@@ -126,7 +126,7 @@ public class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	public void testWithPrototype() throws Exception {
+	void testWithPrototype() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setSingleton(false);
 		pfb.setLocation(TEST_PROPS);

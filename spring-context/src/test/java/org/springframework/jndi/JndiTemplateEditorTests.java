@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class JndiTemplateEditorTests {
+class JndiTemplateEditorTests {
 
 	@Test
-	public void testNullIsIllegalArgument() {
+	void testNullIsIllegalArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new JndiTemplateEditor().setAsText(null));
 	}
 
 	@Test
-	public void testEmptyStringMeansNullEnvironment() {
+	void testEmptyStringMeansNullEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
@@ -42,7 +42,7 @@ public class JndiTemplateEditorTests {
 	}
 
 	@Test
-	public void testCustomEnvironment() {
+	void testCustomEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		// These properties are meaningless for JNDI, but we don't worry about that:
 		// the underlying JNDI implementation will throw exceptions when the user tries

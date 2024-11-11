@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,28 +28,28 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link DefaultServerWebExchange}.
+ * Tests for {@link DefaultServerWebExchange}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class DefaultServerWebExchangeTests {
+class DefaultServerWebExchangeTests {
 
 	@Test
-	public void transformUrlDefault() {
+	void transformUrlDefault() {
 		ServerWebExchange exchange = createExchange();
 		assertThat(exchange.transformUrl("/foo")).isEqualTo("/foo");
 	}
 
 	@Test
-	public void transformUrlWithEncoder() {
+	void transformUrlWithEncoder() {
 		ServerWebExchange exchange = createExchange();
 		exchange.addUrlTransformer(s -> s + "?nonce=123");
 		assertThat(exchange.transformUrl("/foo")).isEqualTo("/foo?nonce=123");
 	}
 
 	@Test
-	public void transformUrlWithMultipleEncoders() {
+	void transformUrlWithMultipleEncoders() {
 		ServerWebExchange exchange = createExchange();
 		exchange.addUrlTransformer(s -> s + ";p=abc");
 		exchange.addUrlTransformer(s -> s + "?q=123");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.view.freemarker;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.Map;
 
 import freemarker.template.Configuration;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +29,6 @@ import reactor.test.StepVerifier;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.reactive.result.view.ZeroDemandResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -92,11 +91,11 @@ class FreeMarkerViewTests {
 	}
 
 	@Test
-	void checkResourceExists() throws Exception {
+	void checkResourceExists() {
 		freeMarkerView.setConfiguration(this.freeMarkerConfig);
 		freeMarkerView.setUrl("test.ftl");
 
-		assertThat(freeMarkerView.checkResourceExists(Locale.US)).isTrue();
+		assertThat(freeMarkerView.resourceExists(Locale.US).block(Duration.ofSeconds(1))).isTrue();
 	}
 
 	@Test
@@ -125,8 +124,7 @@ class FreeMarkerViewTests {
 		freeMarkerView.setConfiguration(this.freeMarkerConfig);
 		freeMarkerView.setUrl("test.ftl");
 
-		ModelMap model = new ExtendedModelMap();
-		model.addAttribute("hello", "hi FreeMarker");
+		Map<String, Object> model = Map.of("hello", "hi FreeMarker");
 		freeMarkerView.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
@@ -148,8 +146,7 @@ class FreeMarkerViewTests {
 		freeMarkerView.setConfiguration(this.freeMarkerConfig);
 		freeMarkerView.setUrl("test.ftl");
 
-		ModelMap model = new ExtendedModelMap();
-		model.addAttribute("hello", "hi FreeMarker");
+		Map<String, Object> model = Map.of("hello", "hi FreeMarker");
 		freeMarkerView.render(model, null, exchange).subscribe();
 
 		response.cancelWrite();

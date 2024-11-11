@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ class R2dbcDataClassRowMapperTests {
 
 	@Test
 	void staticQueryWithDataClass() {
-		MockRow mockRow = MOCK_ROW; // uses name, age, birth_date
 		DataClassRowMapper<ConstructorPerson> mapper = new DataClassRowMapper<>(ConstructorPerson.class);
 
-		ConstructorPerson person = mapper.apply(mockRow);
+		// uses name, age, birth_date
+		ConstructorPerson person = mapper.apply(MOCK_ROW);
 
 		assertThat(person.name).as("name").isEqualTo("Bubba");
 		assertThat(person.age).as("age").isEqualTo(22L);
@@ -63,9 +63,10 @@ class R2dbcDataClassRowMapperTests {
 
 	@Test
 	void staticQueryWithDataRecord() {
-		MockRow mockRow = MOCK_ROW; // uses name, age, birth_date, balance
 		DataClassRowMapper<RecordPerson> mapper = new DataClassRowMapper<>(RecordPerson.class);
-		RecordPerson person = mapper.apply(mockRow);
+
+		// uses name, age, birth_date, balance
+		RecordPerson person = mapper.apply(MOCK_ROW);
 
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);

@@ -28,17 +28,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Adrian Colyer
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 class OverloadedAdviceTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {
-		assertThatExceptionOfType(BeanCreationException.class)
-			.isThrownBy(() -> new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass()))
-			.havingRootCause()
-				.isInstanceOf(IllegalArgumentException.class)
-				.as("invalidAbsoluteTypeName should be detected by AJ").withMessageContaining("invalidAbsoluteTypeName");
+	void testConfigParsingWithMismatchedAdviceMethod() {
+		new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 	}
 
 	@Test

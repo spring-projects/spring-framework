@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Test annotation for use with JUnit 4 to indicate that a test method has to finish
  * execution in a {@linkplain #millis() specified time period}.
  *
- * <p>If the text execution takes longer than the specified time period, then
+ * <p>If the test execution takes longer than the specified time period, then
  * the test is considered to have failed.
  *
  * <p>Note that the time period includes execution of the test method itself,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link GenericMessagingTemplate}.
+ * Tests for {@link GenericMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
  * @author Gary Russell
  */
-public class GenericMessagingTemplateTests {
+class GenericMessagingTemplateTests {
 
 	private GenericMessagingTemplate template;
 
@@ -61,7 +61,7 @@ public class GenericMessagingTemplateTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.messageChannel = new StubMessageChannel();
 		this.template = new GenericMessagingTemplate();
 		this.template.setDefaultDestination(this.messageChannel);
@@ -71,7 +71,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	@Test
-	public void sendWithTimeout() {
+	void sendWithTimeout() {
 		SubscribableChannel channel = mock();
 		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		willAnswer(invocation -> {
@@ -90,7 +90,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	@Test
-	public void sendWithTimeoutMutable() {
+	void sendWithTimeoutMutable() {
 		SubscribableChannel channel = mock();
 		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		willAnswer(invocation -> {
@@ -109,7 +109,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	@Test
-	public void sendAndReceive() {
+	void sendAndReceive() {
 		SubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
 		channel.subscribe(message -> {
 			MessageChannel replyChannel = (MessageChannel) message.getHeaders().getReplyChannel();
@@ -121,7 +121,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	@Test
-	public void sendAndReceiveTimeout() throws InterruptedException {
+	void sendAndReceiveTimeout() throws InterruptedException {
 		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -147,7 +147,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	@Test
-	public void sendAndReceiveVariableTimeout() throws InterruptedException {
+	void sendAndReceiveVariableTimeout() throws InterruptedException {
 		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -177,7 +177,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	@Test
-	public void sendAndReceiveVariableTimeoutCustomHeaders() throws InterruptedException {
+	void sendAndReceiveVariableTimeoutCustomHeaders() throws InterruptedException {
 		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -209,7 +209,7 @@ public class GenericMessagingTemplateTests {
 	}
 
 	private MessageHandler createLateReplier(final CountDownLatch latch, final AtomicReference<Throwable> failure) {
-		MessageHandler handler = message -> {
+		return message -> {
 			try {
 				Thread.sleep(500);
 				MessageChannel replyChannel = (MessageChannel) message.getHeaders().getReplyChannel();
@@ -231,11 +231,10 @@ public class GenericMessagingTemplateTests {
 				latch.countDown();
 			}
 		};
-		return handler;
 	}
 
 	@Test
-	public void convertAndSendWithSimpMessageHeaders() {
+	void convertAndSendWithSimpMessageHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setHeader("key", "value");
 		accessor.setLeaveMutable(true);

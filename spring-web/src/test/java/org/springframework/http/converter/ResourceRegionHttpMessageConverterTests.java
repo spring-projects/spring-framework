@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ import static org.mockito.Mockito.mock;
  *
  * @author Brian Clozel
  */
-public class ResourceRegionHttpMessageConverterTests {
+class ResourceRegionHttpMessageConverterTests {
 
 	private final ResourceRegionHttpMessageConverter converter = new ResourceRegionHttpMessageConverter();
 
 	@Test
-	public void canReadResource() {
+	void canReadResource() {
 		assertThat(converter.canRead(Resource.class, MediaType.APPLICATION_OCTET_STREAM)).isFalse();
 		assertThat(converter.canRead(Resource.class, MediaType.ALL)).isFalse();
 		assertThat(converter.canRead(List.class, MediaType.APPLICATION_OCTET_STREAM)).isFalse();
@@ -57,14 +57,14 @@ public class ResourceRegionHttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWriteResource() {
+	void canWriteResource() {
 		assertThat(converter.canWrite(ResourceRegion.class, null, MediaType.APPLICATION_OCTET_STREAM)).isTrue();
 		assertThat(converter.canWrite(ResourceRegion.class, null, MediaType.ALL)).isTrue();
 		assertThat(converter.canWrite(Object.class, null, MediaType.ALL)).isFalse();
 	}
 
 	@Test
-	public void canWriteResourceCollection() {
+	void canWriteResourceCollection() {
 		Type resourceRegionList = new ParameterizedTypeReference<List<ResourceRegion>>() {}.getType();
 		assertThat(converter.canWrite(resourceRegionList, null, MediaType.APPLICATION_OCTET_STREAM)).isTrue();
 		assertThat(converter.canWrite(resourceRegionList, null, MediaType.ALL)).isTrue();
@@ -76,7 +76,7 @@ public class ResourceRegionHttpMessageConverterTests {
 	}
 
 	@Test
-	public void shouldWritePartialContentByteRange() throws Exception {
+	void shouldWritePartialContentByteRange() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
 		ResourceRegion region = HttpRange.createByteRange(0, 5).toResourceRegion(body);
@@ -85,13 +85,12 @@ public class ResourceRegionHttpMessageConverterTests {
 		HttpHeaders headers = outputMessage.getHeaders();
 		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(headers.getContentLength()).isEqualTo(6L);
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).hasSize(1);
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0)).isEqualTo("bytes 0-5/39");
+		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).containsExactly("bytes 0-5/39");
 		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo("Spring");
 	}
 
 	@Test
-	public void shouldWritePartialContentByteRangeNoEnd() throws Exception {
+	void shouldWritePartialContentByteRangeNoEnd() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
 		ResourceRegion region = HttpRange.createByteRange(7).toResourceRegion(body);
@@ -100,13 +99,12 @@ public class ResourceRegionHttpMessageConverterTests {
 		HttpHeaders headers = outputMessage.getHeaders();
 		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(headers.getContentLength()).isEqualTo(32L);
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).hasSize(1);
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0)).isEqualTo("bytes 7-38/39");
+		assertThat(headers.get(HttpHeaders.CONTENT_RANGE)).containsExactly("bytes 7-38/39");
 		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo("Framework test resource content.");
 	}
 
 	@Test
-	public void partialContentMultipleByteRanges() throws Exception {
+	void partialContentMultipleByteRanges() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
 		List<HttpRange> rangeList = HttpRange.parseRanges("bytes=0-5,7-15,17-20,22-38");
@@ -145,7 +143,7 @@ public class ResourceRegionHttpMessageConverterTests {
 	}
 
 	@Test
-	public void partialContentMultipleByteRangesInRandomOrderAndOverlapping() throws Exception {
+	void partialContentMultipleByteRangesInRandomOrderAndOverlapping() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
 		List<HttpRange> rangeList = HttpRange.parseRanges("bytes=7-15,0-5,17-20,20-29");

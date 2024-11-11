@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	/**
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
+	@SuppressWarnings("NullAway")
 	public ServerCodecConfigurer getCodecConfigurer() {
 		if (this.codecConfigurer == null) {
 			setCodecConfigurer(ServerCodecConfigurer.create());
@@ -374,13 +375,13 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		}
 
 		@Override
-		public void doOnSubscription() throws Throwable {
-			this.observation.start();
+		public Context addToContext(Context originalContext) {
+			return originalContext.put(ObservationThreadLocalAccessor.KEY, this.observation);
 		}
 
 		@Override
-		public Context addToContext(Context originalContext) {
-			return originalContext.put(ObservationThreadLocalAccessor.KEY, this.observation);
+		public void doFirst() throws Throwable {
+			this.observation.start();
 		}
 
 		@Override
@@ -394,12 +395,27 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		@Override
 		public void doOnComplete() throws Throwable {
 			if (this.observationRecorded.compareAndSet(false, true)) {
-				ServerHttpResponse response = this.observationContext.getResponse();
 				Throwable throwable = (Throwable) this.observationContext.getAttributes()
 						.get(ExceptionHandlingWebHandler.HANDLED_WEB_EXCEPTION);
 				if (throwable != null) {
 					this.observation.error(throwable);
 				}
+				doOnTerminate(this.observationContext);
+			}
+		}
+
+		@Override
+		public void doOnError(Throwable error) throws Throwable {
+			if (this.observationRecorded.compareAndSet(false, true)) {
+				this.observationContext.setError(error);
+				doOnTerminate(this.observationContext);
+			}
+		}
+
+
+		private void doOnTerminate(ServerRequestObservationContext context) {
+			ServerHttpResponse response = context.getResponse();
+			if (response != null) {
 				if (response.isCommitted()) {
 					this.observation.stop();
 				}
@@ -409,14 +425,6 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 						return Mono.empty();
 					});
 				}
-			}
-		}
-
-		@Override
-		public void doOnError(Throwable error) throws Throwable {
-			if (this.observationRecorded.compareAndSet(false, true)) {
-				this.observationContext.setError(error);
-				this.observation.stop();
 			}
 		}
 	}

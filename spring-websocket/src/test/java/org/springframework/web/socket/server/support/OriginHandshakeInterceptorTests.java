@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,19 @@ import static org.mockito.Mockito.mock;
  *
  * @author Sebastien Deleuze
  */
-public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
+class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	private final Map<String, Object> attributes = new HashMap<>();
 	private final WebSocketHandler wsHandler = mock();
 
 
 	@Test
-	public void invalidInput() {
+	void invalidInput() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new OriginHandshakeInterceptor(null));
 	}
 
 	@Test
-	public void originValueMatch() throws Exception {
+	void originValueMatch() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
 		List<String> allowed = Collections.singletonList("https://mydomain1.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
@@ -61,7 +61,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void originValueNoMatch() throws Exception {
+	void originValueNoMatch() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
 		List<String> allowed = Collections.singletonList("https://mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
@@ -70,7 +70,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void originListMatch() throws Exception {
+	void originListMatch() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.example");
 		List<String> allowed = Arrays.asList("https://mydomain1.example", "https://mydomain2.example", "http://mydomain3.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
@@ -79,7 +79,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void originListNoMatch() throws Exception {
+	void originListNoMatch() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://www.mydomain4.example/");
 		List<String> allowed = Arrays.asList("https://mydomain1.example", "https://mydomain2.example", "http://mydomain3.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
@@ -88,7 +88,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void originNoMatchWithNullHostileCollection() throws Exception {
+	void originNoMatchWithNullHostileCollection() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://www.mydomain4.example/");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		Set<String> allowedOrigins = new ConcurrentSkipListSet<>();
@@ -99,7 +99,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void originMatchAll() throws Exception {
+	void originMatchAll() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		interceptor.setAllowedOrigins(Collections.singletonList("*"));
@@ -108,7 +108,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void sameOriginMatchWithEmptyAllowedOrigins() throws Exception {
+	void sameOriginMatchWithEmptyAllowedOrigins() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
 		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Collections.emptyList());
@@ -117,7 +117,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void sameOriginMatchWithAllowedOrigins() throws Exception {
+	void sameOriginMatchWithAllowedOrigins() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
 		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(List.of("http://mydomain1.example"));
@@ -126,7 +126,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	public void sameOriginNoMatch() throws Exception {
+	void sameOriginNoMatch() throws Exception {
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain3.example");
 		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Collections.emptyList());

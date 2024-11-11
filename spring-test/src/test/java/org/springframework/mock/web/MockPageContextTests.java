@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for the {@code MockPageContext} class.
+ * Tests for the {@code MockPageContext} class.
  *
  * @author Rick Evans
  */
@@ -35,7 +35,7 @@ class MockPageContextTests {
 	private final MockPageContext ctx = new MockPageContext();
 
 	@Test
-	void setAttributeWithNoScopeUsesPageScope() throws Exception {
+	void setAttributeWithNoScopeUsesPageScope() {
 		ctx.setAttribute(key, value);
 		assertThat(ctx.getAttribute(key, PageContext.PAGE_SCOPE)).isEqualTo(value);
 		assertThat(ctx.getAttribute(key, PageContext.APPLICATION_SCOPE)).isNull();
@@ -44,7 +44,7 @@ class MockPageContextTests {
 	}
 
 	@Test
-	void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() throws Exception {
+	void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() {
 		ctx.setAttribute(key, value, PageContext.APPLICATION_SCOPE);
 		ctx.removeAttribute(key);
 

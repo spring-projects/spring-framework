@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,6 @@ public class LockMixin extends DelegatingIntroductionInterceptor implements Lock
 		this.locked = false;
 	}
 
-	/**
-	 * @see test.mixin.AopProxyTests.Lockable#locked()
-	 */
 	@Override
 	public boolean locked() {
 		return this.locked;
@@ -54,10 +51,8 @@ public class LockMixin extends DelegatingIntroductionInterceptor implements Lock
 
 	/**
 	 * Note that we need to override around advice.
-	 * If the method is a setter and we're locked, prevent execution.
-	 * Otherwise let super.invoke() handle it, and do normal
-	 * Lockable(this) then target behaviour.
-	 * @see org.aopalliance.MethodInterceptor#invoke(org.aopalliance.MethodInvocation)
+	 * If the method is a setter, and we're locked, prevent execution.
+	 * Otherwise, let super.invoke() handle it.
 	 */
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {

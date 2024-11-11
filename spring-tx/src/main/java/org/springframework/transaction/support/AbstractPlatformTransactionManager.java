@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.springframework.util.Assert;
  * </ul>
  *
  * <p>Subclasses have to implement specific template methods for specific
- * states of a transaction, e.g.: begin, suspend, resume, commit, rollback.
+ * states of a transaction, for example: begin, suspend, resume, commit, rollback.
  * The most important of them are abstract and must be provided by a concrete
  * implementation; for the rest, defaults are provided, so overriding is optional.
  *
@@ -67,7 +67,7 @@ import org.springframework.util.Assert;
  * that get invoked at transaction completion time. This is mainly used internally
  * by the data access support classes for JDBC, Hibernate, JPA, etc when running
  * within a JTA transaction: They register resources that are opened within the
- * transaction for closing at transaction completion time, allowing e.g. for reuse
+ * transaction for closing at transaction completion time, allowing, for example, for reuse
  * of the same Hibernate Session within the transaction. The same mechanism can
  * also be leveraged for custom synchronization needs in an application.
  *
@@ -188,7 +188,7 @@ public abstract class AbstractPlatformTransactionManager
 	 * Specify the default timeout that this transaction manager should apply
 	 * if there is no timeout specified at the transaction level, in seconds.
 	 * <p>Default is the underlying transaction infrastructure's default timeout,
-	 * e.g. typically 30 seconds in case of a JTA provider, indicated by the
+	 * for example, typically 30 seconds in case of a JTA provider, indicated by the
 	 * {@code TransactionDefinition.TIMEOUT_DEFAULT} value.
 	 * @see org.springframework.transaction.TransactionDefinition#TIMEOUT_DEFAULT
 	 */
@@ -228,7 +228,7 @@ public abstract class AbstractPlatformTransactionManager
 	/**
 	 * Set whether existing transactions should be validated before participating
 	 * in them.
-	 * <p>When participating in an existing transaction (e.g. with
+	 * <p>When participating in an existing transaction (for example, with
 	 * PROPAGATION_REQUIRED or PROPAGATION_SUPPORTS encountering an existing
 	 * transaction), this outer transaction's characteristics will apply even
 	 * to the inner transaction scope. Validation will detect incompatible
@@ -255,7 +255,7 @@ public abstract class AbstractPlatformTransactionManager
 	/**
 	 * Set whether to globally mark an existing transaction as rollback-only
 	 * after a participating transaction failed.
-	 * <p>Default is "true": If a participating transaction (e.g. with
+	 * <p>Default is "true": If a participating transaction (for example, with
 	 * PROPAGATION_REQUIRED or PROPAGATION_SUPPORTS encountering an existing
 	 * transaction) fails, the transaction will be globally marked as rollback-only.
 	 * The only possible outcome of such a transaction is a rollback: The
@@ -491,7 +491,8 @@ public abstract class AbstractPlatformTransactionManager
 			}
 		}
 
-		// Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.
+		// PROPAGATION_REQUIRED, PROPAGATION_SUPPORTS, PROPAGATION_MANDATORY:
+		// regular participation in existing transaction.
 		if (debugEnabled) {
 			logger.debug("Participating in existing transaction");
 		}
@@ -571,7 +572,7 @@ public abstract class AbstractPlatformTransactionManager
 	/**
 	 * Initialize transaction synchronization as appropriate.
 	 */
-	private void prepareSynchronization(DefaultTransactionStatus status, TransactionDefinition definition) {
+	protected void prepareSynchronization(DefaultTransactionStatus status, TransactionDefinition definition) {
 		if (status.isNewSynchronization()) {
 			TransactionSynchronizationManager.setActualTransactionActive(status.hasTransaction());
 			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
@@ -1079,7 +1080,7 @@ public abstract class AbstractPlatformTransactionManager
 	 * <p>The returned object will usually be specific to the concrete transaction
 	 * manager implementation, carrying corresponding transaction state in a
 	 * modifiable fashion. This object will be passed into the other template
-	 * methods (e.g. doBegin and doCommit), either directly or as part of a
+	 * methods (for example, doBegin and doCommit), either directly or as part of a
 	 * DefaultTransactionStatus instance.
 	 * <p>The returned object should contain information about any existing
 	 * transaction, that is, a transaction that has already started before the

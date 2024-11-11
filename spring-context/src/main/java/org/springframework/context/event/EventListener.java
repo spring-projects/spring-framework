@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,8 +133,16 @@ public @interface EventListener {
 	String condition() default "";
 
 	/**
+	 * Whether the event should be handled by default, without any special
+	 * pre-conditions such as an active transaction. Declared here for overriding
+	 * in composed annotations such as {@code TransactionalEventListener}.
+	 * @since 6.2
+	 */
+	boolean defaultExecution() default true;
+
+	/**
 	 * An optional identifier for the listener, defaulting to the fully-qualified
-	 * signature of the declaring method (e.g. "mypackage.MyClass.myMethod()").
+	 * signature of the declaring method (for example, "mypackage.MyClass.myMethod()").
 	 * @since 5.3.5
 	 * @see SmartApplicationListener#getListenerId()
 	 * @see ApplicationEventMulticaster#removeApplicationListeners(Predicate)

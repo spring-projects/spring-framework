@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Juergen Hoeller
  */
-public class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
+class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Autowired
 	private EntityManagerFactory entityManagerFactory2;
@@ -47,7 +47,7 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends Abstract
 
 	@Override
 	@Test
-	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		boolean condition = this.entityManagerFactory instanceof EntityManagerFactoryInfo;
 		assertThat(condition).as("Must have introduced config interface").isTrue();
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.entityManagerFactory;
@@ -57,7 +57,7 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends Abstract
 	}
 
 	@Test
-	public void testEntityManagerFactory2() {
+	void testEntityManagerFactory2() {
 		EntityManager em = this.entityManagerFactory2.createEntityManager();
 		try {
 			assertThatIllegalArgumentException().isThrownBy(() ->

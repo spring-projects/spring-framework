@@ -21,7 +21,7 @@ shows this approach:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages",fold="none"]
 ----
 	package fiona.apple;
 
@@ -60,7 +60,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages",fold="none"]
 ----
 	package fiona.apple
 
@@ -137,7 +137,7 @@ the reworked example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages",fold="none"]
 ----
 	package fiona.apple;
 
@@ -160,7 +160,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages",fold="none"]
 ----
 	package fiona.apple
 
@@ -201,7 +201,7 @@ the original class. Consider the following example:
 		<!-- inject dependencies here as required -->
 	</bean>
 
-	<!-- commandProcessor uses statefulCommandHelper -->
+	<!-- commandManager uses myCommand prototype bean -->
 	<bean id="commandManager" class="fiona.apple.CommandManager">
 		<lookup-method name="createCommand" bean="myCommand"/>
 	</bean>
@@ -220,7 +220,7 @@ method through the `@Lookup` annotation, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public abstract class CommandManager {
 
@@ -237,7 +237,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	abstract class CommandManager {
 
@@ -260,7 +260,7 @@ declared return type of the lookup method:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public abstract class CommandManager {
 
@@ -277,7 +277,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	abstract class CommandManager {
 
@@ -324,7 +324,7 @@ the following class, which has a method called `computeValue` that we want to ov
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyValueCalculator {
 
@@ -338,7 +338,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyValueCalculator {
 
@@ -358,7 +358,7 @@ interface provides the new method definition, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	/**
 	 * meant to be used to override the existing computeValue(String)
@@ -377,7 +377,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	/**
 	 * meant to be used to override the existing computeValue(String)

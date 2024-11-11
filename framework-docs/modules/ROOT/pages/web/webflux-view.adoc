@@ -2,10 +2,17 @@
 = View Technologies
 [.small]#xref:web/webmvc-view.adoc[See equivalent in the Servlet stack]#
 
-The use of view technologies in Spring WebFlux is pluggable. Whether you decide to
+The rendering of views in Spring WebFlux is pluggable. Whether you decide to
 use Thymeleaf, FreeMarker, or some other view technology is primarily a matter of a
 configuration change. This chapter covers the view technologies integrated with Spring
-WebFlux. We assume you are already familiar with xref:web/webflux/dispatcher-handler.adoc#webflux-viewresolution[View Resolution].
+WebFlux.
+
+For more context on view rendering, please see xref:web/webflux/dispatcher-handler.adoc#webflux-viewresolution[View Resolution].
+
+WARNING: The views of a Spring WebFlux application live within internal trust boundaries
+of the application. Views have access to beans in the application context, and as
+such, we do not recommend use the Spring WebFlux template support in applications where
+the templates are editable by external sources, since this can have security implications.
 
 
 
@@ -51,7 +58,7 @@ The following example shows how to configure FreeMarker as a view technology:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -75,7 +82,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -116,7 +123,7 @@ a `java.util.Properties` object, and the `freemarkerVariables` property requires
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -139,7 +146,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -261,7 +268,7 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -286,7 +293,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -329,7 +336,7 @@ The following example shows how to set a custom render function:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -354,7 +361,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -407,6 +414,81 @@ Check out the Spring Framework unit tests,
 {spring-framework-code}/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
 {spring-framework-code}/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
 for more configuration examples.
+
+
+
+
+[[webflux-view-fragments]]
+== HTML Fragment
+[.small]#xref:web/webmvc-view/mvc-fragments.adoc[See equivalent in the Servlet stack]#
+
+https://htmx.org/[HTMX] and https://turbo.hotwired.dev/[Hotwire Turbo] emphasize an
+HTML-over-the-wire approach where clients receive server updates in HTML rather than in JSON.
+This allows the benefits of an SPA (single page app) without having to write much or even
+any JavaScript. For a good overview and to learn more, please visit their respective
+websites.
+
+In Spring WebFlux, view rendering typically involves specifying one view and one model.
+However, in HTML-over-the-wire a common capability is to send multiple HTML fragments that
+the browser can use to update different parts of the page. For this, controller methods
+can return `Collection<Fragment>`. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping
+	List<Fragment> handle() {
+		return List.of(Fragment.create("posts"), Fragment.create("comments"));
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping
+	fun handle(): List<Fragment> {
+		return listOf(Fragment.create("posts"), Fragment.create("comments"))
+	}
+----
+======
+
+The same can be done also by returning the dedicated type `FragmentsRendering`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping
+	FragmentsRendering handle() {
+		return FragmentsRendering.with("posts").fragment("comments").build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping
+	fun handle(): FragmentsRendering {
+		return FragmentsRendering.with("posts").fragment("comments").build()
+	}
+----
+======
+
+Each fragment can have an independent model, and that model inherits attributes from the
+shared model for the request.
+
+HTMX and Hotwire Turbo support streaming updates over SSE (server-sent events).
+A controller can create `FragmentsRendering` with a `Flux<Fragment>`, or with any other
+reactive producer adaptable to a Reactive Streams `Publisher` via `ReactiveAdapterRegistry`.
+It is also possible to return `Flux<Fragment>` directly without the `FragmentsRendering`
+wrapper.
 
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -38,16 +38,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Dave Syer
  */
-public class CompositeFilterTests {
+class CompositeFilterTests {
 
 	@Test
-	public void testCompositeFilter() throws ServletException, IOException {
+	void testCompositeFilter() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 		MockFilter targetFilter = new MockFilter();
 		MockFilterConfig proxyConfig = new MockFilterConfig(sc);
 
 		CompositeFilter filterProxy = new CompositeFilter();
-		filterProxy.setFilters(Arrays.asList(targetFilter));
+		filterProxy.setFilters(List.of(targetFilter));
 		filterProxy.init(proxyConfig);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -67,7 +67,7 @@ public class CompositeFilterTests {
 		public FilterConfig filterConfig;
 
 		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
+		public void init(FilterConfig filterConfig) {
 			this.filterConfig = filterConfig;
 		}
 

@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  * supports both XML configuration files and Groovy scripts simultaneously.
  *
  * <p>Placing an empty {@code @ContextConfiguration} annotation on a test class signals
- * that default resource locations (e.g., XML configuration files or Groovy scripts)
+ * that default resource locations (for example, XML configuration files or Groovy scripts)
  * or default
  * {@linkplain org.springframework.context.annotation.Configuration configuration classes}
  * should be detected. Furthermore, if a specific {@link ContextLoader} or
@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  * {@code @ContextConfiguration}, a concrete subclass of
  * {@code AbstractDelegatingSmartContextLoader} will be used as the default loader,
  * thus providing automatic support for either path-based resource locations
- * (e.g., XML configuration files and Groovy scripts) or annotated classes,
+ * (for example, XML configuration files and Groovy scripts) or annotated classes,
  * but not both simultaneously.
  *
  * <p>A test class may optionally declare neither path-based resource locations

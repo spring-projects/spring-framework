@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.util;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +63,9 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	/** Transient to optimize serialization. */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
-	private transient Object monitor = new Object();
+	private final Lock concurrencyLock = new ReentrantLock();
+
+	private final Condition concurrencyCondition = this.concurrencyLock.newCondition();
 
 	private int concurrencyLimit = UNBOUNDED_CONCURRENCY;
 
@@ -109,7 +114,8 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 		}
 		if (this.concurrencyLimit > 0) {
 			boolean debug = logger.isDebugEnabled();
-			synchronized (this.monitor) {
+			this.concurrencyLock.lock();
+			try {
 				boolean interrupted = false;
 				while (this.concurrencyCount >= this.concurrencyLimit) {
 					if (interrupted) {
@@ -121,7 +127,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 								" has reached limit " + this.concurrencyLimit + " - blocking");
 					}
 					try {
-						this.monitor.wait();
+						this.concurrencyCondition.await();
 					}
 					catch (InterruptedException ex) {
 						// Re-interrupt current thread, to allow other threads to react.
@@ -134,6 +140,9 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 				}
 				this.concurrencyCount++;
 			}
+			finally {
+				this.concurrencyLock.unlock();
+			}
 		}
 	}
 
@@ -144,12 +153,16 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	protected void afterAccess() {
 		if (this.concurrencyLimit >= 0) {
 			boolean debug = logger.isDebugEnabled();
-			synchronized (this.monitor) {
+			this.concurrencyLock.lock();
+			try {
 				this.concurrencyCount--;
 				if (debug) {
 					logger.debug("Returning from throttle at concurrency count " + this.concurrencyCount);
 				}
-				this.monitor.notify();
+				this.concurrencyCondition.signal();
+			}
+			finally {
+				this.concurrencyLock.unlock();
 			}
 		}
 	}
@@ -165,7 +178,6 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
-		this.monitor = new Object();
 	}
 
 }

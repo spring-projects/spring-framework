@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Rick Evans
  */
-public class TagWriterTests {
+class TagWriterTests {
 
 	private final StringWriter data = new StringWriter();
 
@@ -34,7 +34,7 @@ public class TagWriterTests {
 
 
 	@Test
-	public void simpleTag() throws Exception {
+	void simpleTag() throws Exception {
 		this.writer.startTag("br");
 		this.writer.endTag();
 
@@ -42,7 +42,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void emptyTag() throws Exception {
+	void emptyTag() throws Exception {
 		this.writer.startTag("input");
 		this.writer.writeAttribute("type", "text");
 		this.writer.endTag();
@@ -51,7 +51,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void simpleBlockTag() throws Exception {
+	void simpleBlockTag() throws Exception {
 		this.writer.startTag("textarea");
 		this.writer.appendValue("foobar");
 		this.writer.endTag();
@@ -60,7 +60,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void blockTagWithAttributes() throws Exception {
+	void blockTagWithAttributes() throws Exception {
 		this.writer.startTag("textarea");
 		this.writer.writeAttribute("width", "10");
 		this.writer.writeAttribute("height", "20");
@@ -71,7 +71,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void nestedTags() throws Exception {
+	void nestedTags() throws Exception {
 		this.writer.startTag("span");
 		this.writer.writeAttribute("style", "foo");
 		this.writer.startTag("strong");
@@ -83,7 +83,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void multipleNestedTags() throws Exception {
+	void multipleNestedTags() throws Exception {
 		this.writer.startTag("span");
 		this.writer.writeAttribute("class", "highlight");
 		{
@@ -103,7 +103,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void writeInterleavedWithForceBlock() throws Exception {
+	void writeInterleavedWithForceBlock() throws Exception {
 		this.writer.startTag("span");
 		this.writer.forceBlock();
 		this.data.write("Rob Harrop"); // interleaved writing
@@ -113,7 +113,7 @@ public class TagWriterTests {
 	}
 
 	@Test
-	public void appendingValue() throws Exception {
+	void appendingValue() throws Exception {
 		this.writer.startTag("span");
 		this.writer.appendValue("Rob ");
 		this.writer.appendValue("Harrop");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link CompositeRequestCondition}.
+ * Tests for {@link CompositeRequestCondition}.
  *
  * @author Rossen Stoyanchev
  */
-public class CompositeRequestConditionTests {
+class CompositeRequestConditionTests {
 
 	private ParamsRequestCondition param1;
 	private ParamsRequestCondition param2;
@@ -43,7 +43,7 @@ public class CompositeRequestConditionTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		this.param1 = new ParamsRequestCondition("param1");
 		this.param2 = new ParamsRequestCondition("param2");
 		this.param3 = this.param1.combine(this.param2);
@@ -55,7 +55,7 @@ public class CompositeRequestConditionTests {
 
 
 	@Test
-	public void combine() {
+	void combine() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1, this.header1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param2, this.header2);
 		CompositeRequestCondition cond3 = new CompositeRequestCondition(this.param3, this.header3);
@@ -64,7 +64,7 @@ public class CompositeRequestConditionTests {
 	}
 
 	@Test
-	public void combineEmpty() {
+	void combineEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
 		CompositeRequestCondition notEmpty = new CompositeRequestCondition(this.param1);
 
@@ -74,7 +74,7 @@ public class CompositeRequestConditionTests {
 	}
 
 	@Test
-	public void combineDifferentLength() {
+	void combineDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -82,7 +82,7 @@ public class CompositeRequestConditionTests {
 	}
 
 	@Test
-	public void match() {
+	void match() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?param1=paramValue1").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
@@ -96,19 +96,19 @@ public class CompositeRequestConditionTests {
 	}
 
 	@Test
-	public void noMatch() {
+	void noMatch() {
 		CompositeRequestCondition cond = new CompositeRequestCondition(this.param1);
 		assertThat(cond.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isNull();
 	}
 
 	@Test
-	public void matchEmpty() {
+	void matchEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
 		assertThat(empty.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isSameAs(empty);
 	}
 
 	@Test
-	public void compare() {
+	void compare() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond3 = new CompositeRequestCondition(this.param3);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
@@ -118,7 +118,7 @@ public class CompositeRequestConditionTests {
 	}
 
 	@Test
-	public void compareEmpty() {
+	void compareEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
 		CompositeRequestCondition notEmpty = new CompositeRequestCondition(this.param1);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
@@ -129,7 +129,7 @@ public class CompositeRequestConditionTests {
 	}
 
 	@Test
-	public void compareDifferentLength() {
+	void compareDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
 		assertThatIllegalArgumentException().isThrownBy(() ->

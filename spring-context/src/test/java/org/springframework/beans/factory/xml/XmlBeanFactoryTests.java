@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
@@ -56,6 +61,8 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.IndexedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
@@ -725,7 +732,7 @@ class XmlBeanFactoryTests {
 		InitAndIB iib = (InitAndIB) xbf.getBean("init-and-ib");
 		assertThat(InitAndIB.constructed).isTrue();
 		assertThat(iib.afterPropertiesSetInvoked && iib.initMethodInvoked).isTrue();
-		assertThat(!iib.destroyed && !iib.customDestroyed).isTrue();
+		assertThat(iib.destroyed && !iib.customDestroyed).isFalse();
 		xbf.destroySingletons();
 		assertThat(iib.destroyed && iib.customDestroyed).isTrue();
 		xbf.destroySingletons();
@@ -746,7 +753,7 @@ class XmlBeanFactoryTests {
 		InitAndIB iib = (InitAndIB) xbf.getBean("ib-same-init");
 		assertThat(InitAndIB.constructed).isTrue();
 		assertThat(iib.afterPropertiesSetInvoked && !iib.initMethodInvoked).isTrue();
-		assertThat(!iib.destroyed && !iib.customDestroyed).isTrue();
+		assertThat(iib.destroyed && !iib.customDestroyed).isFalse();
 		xbf.destroySingletons();
 		assertThat(iib.destroyed && !iib.customDestroyed).isTrue();
 		xbf.destroySingletons();
@@ -842,7 +849,7 @@ class XmlBeanFactoryTests {
 
 		DependenciesBean rod5 = (DependenciesBean) xbf.getBean("rod5");
 		// Should not have been autowired
-		assertThat((Object) rod5.getSpouse()).isNull();
+		assertThat(rod5.getSpouse()).isNull();
 
 		BeanFactory appCtx = (BeanFactory) xbf.getBean("childAppCtx");
 		assertThat(appCtx.containsBean("rod1")).isTrue();
@@ -944,7 +951,7 @@ class XmlBeanFactoryTests {
 		catch (BeanCreationException ex) {
 			ex.printStackTrace();
 			assertThat(ex.toString()).contains("touchy");
-			assertThat((Object) ex.getRelatedCauses()).isNull();
+			assertThat(ex.getRelatedCauses()).isNull();
 		}
 	}
 
@@ -1336,6 +1343,15 @@ class XmlBeanFactoryTests {
 		assertThat(dos.lastArg).isEqualTo(s2);
 	}
 
+	@Test  // gh-31826
+	void replaceNonOverloadedInterfaceMethodWithoutSpecifyingExplicitArgTypes() {
+		try (ConfigurableApplicationContext context =
+				new ClassPathXmlApplicationContext(DELEGATION_OVERRIDES_CONTEXT.getPath())) {
+			EchoService echoService = context.getBean(EchoService.class);
+			assertThat(echoService.echo("foo", "bar")).containsExactly("bar", "foo");
+		}
+	}
+
 	@Test
 	void lookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
@@ -1595,7 +1611,7 @@ class XmlBeanFactoryTests {
 		public Object lastArg;
 
 		@Override
-		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
+		public Object reimplement(Object obj, Method method, Object[] args) {
 			assertThat(args).hasSize(1);
 			assertThat(method.getName()).isEqualTo("doSomething");
 			lastArg = args[0];
@@ -1652,7 +1668,7 @@ class XmlBeanFactoryTests {
 		}
 
 		/** Init method */
-		public void customInit() throws IOException {
+		public void customInit() {
 			assertThat(this.afterPropertiesSetInvoked).isTrue();
 			if (this.initMethodInvoked) {
 				throw new IllegalStateException("Already customInitialized");
@@ -1890,4 +1906,21 @@ class XmlBeanFactoryTests {
 		}
 	}
 
+}
+
+interface EchoService {
+
+	String[] echo(Object... objects);
+}
+
+class ReverseArrayMethodReplacer implements MethodReplacer {
+
+	@Override
+	public Object reimplement(Object obj, Method method, Object[] args) {
+		List<String> list = Arrays.stream((Object[]) args[0])
+				.map(Object::toString)
+				.collect(Collectors.toCollection(ArrayList::new));
+		Collections.reverse(list);
+		return list.toArray(String[]::new);
+	}
 }

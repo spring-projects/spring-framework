@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class MethodValidationTests {
+class MethodValidationTests {
 
 	private static final Person mockPerson = mock(Person.class);
 
@@ -208,7 +208,7 @@ public class MethodValidationTests {
 					assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 					assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
 
-					assertThat(ex.getAllValidationResults()).hasSize(2);
+					assertThat(ex.getParameterValidationResults()).hasSize(2);
 
 					assertBeanResult(ex.getBeanResults().get(0), "student", Collections.singletonList(
 							"""
@@ -220,7 +220,7 @@ public class MethodValidationTests {
 
 					assertValueResult(ex.getValueResults().get(0), 2, "123", Collections.singletonList(
 							"""
-						org.springframework.context.support.DefaultMessageSourceResolvable: \
+						org.springframework.validation.beanvalidation.MethodValidationAdapter$ViolationMessageSourceResolvable: \
 						codes [Size.validController#handle.myHeader,Size.myHeader,Size.java.lang.String,Size]; \
 						arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
 						codes [validController#handle.myHeader,myHeader]; arguments []; default message [myHeader],10,5]; \
@@ -245,7 +245,7 @@ public class MethodValidationTests {
 					assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 					assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
 
-					assertThat(ex.getAllValidationResults()).hasSize(2);
+					assertThat(ex.getParameterValidationResults()).hasSize(2);
 
 					assertBeanResult(ex.getBeanResults().get(0), "personList", Collections.singletonList(
 							"""
@@ -339,7 +339,7 @@ public class MethodValidationTests {
 	@SuppressWarnings("unchecked")
 	private static <T> HandlerMethod handlerMethod(T controller, Consumer<T> mockCallConsumer) {
 		Method method = ResolvableMethod.on((Class<T>) controller.getClass()).mockCall(mockCallConsumer).method();
-		return new HandlerMethod(controller, method);
+		return new HandlerMethod(controller, method).createWithValidateFlags();
 	}
 
 	private static MockServerHttpRequest.BodyBuilder request() {
@@ -360,9 +360,15 @@ public class MethodValidationTests {
 
 		assertThat(result.getMethodParameter().getParameterIndex()).isEqualTo(parameterIndex);
 		assertThat(result.getArgument()).isEqualTo(argument);
-		assertThat(result.getResolvableErrors())
+
+		List<MessageSourceResolvable> resolvableErrors = result.getResolvableErrors();
+		assertThat(resolvableErrors)
 				.extracting(MessageSourceResolvable::toString)
 				.containsExactlyInAnyOrderElementsOf(errors);
+
+		resolvableErrors.forEach(error ->
+				assertThat(result.unwrap(error, ConstraintViolation.class)).isNotNull());
+
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,28 +29,28 @@ import static org.mockito.Mockito.mock;
  *
  * @author Stephane Nicoll
  */
-public class DeferredImportSelectorTests {
+class DeferredImportSelectorTests {
 
 	@Test
-	public void entryEqualsSameInstance() {
+	void entryEqualsSameInstance() {
 		AnnotationMetadata metadata = mock();
 		Group.Entry entry = new Group.Entry(metadata, "com.example.Test");
 		assertThat(entry).isEqualTo(entry);
 	}
 
 	@Test
-	public void entryEqualsSameMetadataAndClassName() {
+	void entryEqualsSameMetadataAndClassName() {
 		AnnotationMetadata metadata = mock();
 		assertThat(new Group.Entry(metadata, "com.example.Test")).isEqualTo(new Group.Entry(metadata, "com.example.Test"));
 	}
 
 	@Test
-	public void entryEqualDifferentMetadataAndSameClassName() {
+	void entryEqualDifferentMetadataAndSameClassName() {
 		assertThat(new Group.Entry(mock(), "com.example.Test")).isNotEqualTo(new Group.Entry(mock(), "com.example.Test"));
 	}
 
 	@Test
-	public void entryEqualSameMetadataAnDifferentClassName() {
+	void entryEqualSameMetadataAnDifferentClassName() {
 		AnnotationMetadata metadata = mock();
 		assertThat(new Group.Entry(metadata, "com.example.AnotherTest")).isNotEqualTo(new Group.Entry(metadata, "com.example.Test"));
 	}

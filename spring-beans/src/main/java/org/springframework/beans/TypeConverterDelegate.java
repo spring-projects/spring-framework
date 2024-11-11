@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer
+ * @author Yanming Zhou
  * @since 2.0
  * @see BeanWrapperImpl
  * @see SimpleTypeConverter
@@ -178,13 +179,13 @@ class TypeConverterDelegate {
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.componentType());
 				}
 				else if (convertedValue.getClass().isArray()) {
-					if (Array.getLength(convertedValue) == 1) {
-						convertedValue = Array.get(convertedValue, 0);
-						standardConversion = true;
-					}
-					else if (Collection.class.isAssignableFrom(requiredType)) {
+					if (Collection.class.isAssignableFrom(requiredType)) {
 						convertedValue = convertToTypedCollection(CollectionUtils.arrayToList(convertedValue),
 								propertyName, requiredType, typeDescriptor);
+						standardConversion = true;
+					}
+					else if (Array.getLength(convertedValue) == 1) {
+						convertedValue = Array.get(convertedValue, 0);
 						standardConversion = true;
 					}
 				}
@@ -314,7 +315,7 @@ class TypeConverterDelegate {
 		}
 
 		if (convertedValue == currentConvertedValue) {
-			// Try field lookup as fallback: for JDK 1.5 enum or custom enum
+			// Try field lookup as fallback: for Java enum or custom enum
 			// with values defined as static fields. Resulting value still needs
 			// to be checked, hence we don't return it right away.
 			try {

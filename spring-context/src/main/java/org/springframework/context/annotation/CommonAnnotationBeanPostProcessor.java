@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -35,6 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aot.generate.AccessControl;
+import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -43,20 +51,28 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.javapoet.ClassName;
+import org.springframework.javapoet.CodeBlock;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -65,7 +81,7 @@ import org.springframework.util.StringValueResolver;
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that supports common Java annotations out of the box, in particular the common
  * annotations in the {@code jakarta.annotation} package. These common Java
- * annotations are supported in many Jakarta EE technologies (e.g. JSF and JAX-RS).
+ * annotations are supported in many Jakarta EE technologies (for example, JSF and JAX-RS).
  *
  * <p>This post-processor includes support for the {@link jakarta.annotation.PostConstruct}
  * and {@link jakarta.annotation.PreDestroy} annotations - as init annotation
@@ -133,7 +149,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final boolean jndiPresent = ClassUtils.isPresent(
 			"javax.naming.InitialContext", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 
-	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
 
 	@Nullable
 	private static final Class<? extends Annotation> jakartaResourceType;
@@ -299,11 +315,44 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
+	@Nullable
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		BeanRegistrationAotContribution parentAotContribution = super.processAheadOfTime(registeredBean);
+		Class<?> beanClass = registeredBean.getBeanClass();
+		String beanName = registeredBean.getBeanName();
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		InjectionMetadata metadata = findResourceMetadata(beanName, beanClass,
+				beanDefinition.getPropertyValues());
+		Collection<LookupElement> injectedElements = getInjectedElements(metadata,
+				beanDefinition.getPropertyValues());
+		if (!ObjectUtils.isEmpty(injectedElements)) {
+			AotContribution aotContribution = new AotContribution(beanClass, injectedElements,
+					getAutowireCandidateResolver(registeredBean));
+			return BeanRegistrationAotContribution.concat(parentAotContribution, aotContribution);
+		}
+		return parentAotContribution;
+	}
+
+	@Nullable
+	private AutowireCandidateResolver getAutowireCandidateResolver(RegisteredBean registeredBean) {
+		if (registeredBean.getBeanFactory() instanceof DefaultListableBeanFactory lbf) {
+			return lbf.getAutowireCandidateResolver();
+		}
+		return null;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Collection<LookupElement> getInjectedElements(InjectionMetadata metadata, PropertyValues propertyValues) {
+		return (Collection) metadata.getInjectedElements(propertyValues);
+	}
+
+	@Override
 	public void resetBeanDefinition(String beanName) {
 		this.injectionMetadataCache.remove(beanName);
 	}
 
 	@Override
+	@Nullable
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}
@@ -323,6 +372,29 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
 		}
 		return pvs;
+	}
+
+	/**
+	 * <em>Native</em> processing method for direct calls with an arbitrary target
+	 * instance, resolving all of its fields and methods which are annotated with
+	 * one of the supported 'resource' annotation types.
+	 * @param bean the target instance to process
+	 * @throws BeanCreationException if resource injection failed
+	 * @since 6.1.3
+	 */
+	public void processInjection(Object bean) throws BeanCreationException {
+		Class<?> clazz = bean.getClass();
+		InjectionMetadata metadata = findResourceMetadata(clazz.getName(), clazz, null);
+		try {
+			metadata.inject(bean, null, null);
+		}
+		catch (BeanCreationException ex) {
+			throw ex;
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(
+					"Injection of resource dependencies failed for class [" + clazz + "]", ex);
+		}
 	}
 
 
@@ -387,8 +459,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
 					return;
 				}
-				if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-					if (ejbAnnotationType != null && bridgedMethod.isAnnotationPresent(ejbAnnotationType)) {
+				if (ejbAnnotationType != null && bridgedMethod.isAnnotationPresent(ejbAnnotationType)) {
+					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@EJB annotation is not supported on static methods");
 						}
@@ -398,7 +470,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
 					}
-					else if (jakartaResourceType != null && bridgedMethod.isAnnotationPresent(jakartaResourceType)) {
+				}
+				else if (jakartaResourceType != null && bridgedMethod.isAnnotationPresent(jakartaResourceType)) {
+					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@Resource annotation is not supported on static methods");
 						}
@@ -411,7 +485,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							currElements.add(new ResourceElement(method, bridgedMethod, pd));
 						}
 					}
-					else if (javaxResourceType != null && bridgedMethod.isAnnotationPresent(javaxResourceType)) {
+				}
+				else if (javaxResourceType != null && bridgedMethod.isAnnotationPresent(javaxResourceType)) {
+					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@Resource annotation is not supported on static methods");
 						}
@@ -452,15 +528,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				return element.lookupType;
 			}
 			@Override
-			public boolean isStatic() {
-				return false;
-			}
-			@Override
 			public Object getTarget() {
 				return getResource(element, requestingBeanName);
-			}
-			@Override
-			public void releaseTarget(Object target) {
 			}
 		};
 
@@ -606,11 +675,22 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		 */
 		public final DependencyDescriptor getDependencyDescriptor() {
 			if (this.isField) {
-				return new LookupDependencyDescriptor((Field) this.member, this.lookupType);
+				return new ResourceElementResolver.LookupDependencyDescriptor(
+						(Field) this.member, this.lookupType, isLazyLookup());
 			}
 			else {
-				return new LookupDependencyDescriptor((Method) this.member, this.lookupType);
+				return new ResourceElementResolver.LookupDependencyDescriptor(
+						(Method) this.member, this.lookupType, isLazyLookup());
 			}
+		}
+
+		/**
+		 * Determine whether this dependency is marked for lazy lookup.
+		 * The default is {@code false}.
+		 * @since 6.1.2
+		 */
+		boolean isLazyLookup() {
+			return false;
 		}
 	}
 
@@ -658,6 +738,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
 					getResource(this, requestingBeanName));
 		}
+
+		@Override
+		boolean isLazyLookup() {
+			return this.lazyLookup;
+		}
 	}
 
 
@@ -703,6 +788,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
 					getResource(this, requestingBeanName));
+		}
+
+		@Override
+		boolean isLazyLookup() {
+			return this.lazyLookup;
 		}
 	}
 
@@ -764,26 +854,142 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	/**
-	 * Extension of the DependencyDescriptor class,
-	 * overriding the dependency type with the specified resource type.
+	 * {@link BeanRegistrationAotContribution} to inject resources on fields and methods.
 	 */
-	private static class LookupDependencyDescriptor extends DependencyDescriptor {
+	private static class AotContribution implements BeanRegistrationAotContribution {
 
-		private final Class<?> lookupType;
+		private static final String REGISTERED_BEAN_PARAMETER = "registeredBean";
 
-		public LookupDependencyDescriptor(Field field, Class<?> lookupType) {
-			super(field, true);
-			this.lookupType = lookupType;
-		}
+		private static final String INSTANCE_PARAMETER = "instance";
 
-		public LookupDependencyDescriptor(Method method, Class<?> lookupType) {
-			super(new MethodParameter(method, 0), true);
-			this.lookupType = lookupType;
+		private final Class<?> target;
+
+		private final Collection<LookupElement> lookupElements;
+
+		@Nullable
+		private final AutowireCandidateResolver candidateResolver;
+
+		AotContribution(Class<?> target, Collection<LookupElement> lookupElements,
+				@Nullable AutowireCandidateResolver candidateResolver) {
+
+			this.target = target;
+			this.lookupElements = lookupElements;
+			this.candidateResolver = candidateResolver;
 		}
 
 		@Override
-		public Class<?> getDependencyType() {
-			return this.lookupType;
+		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.addForFeatureComponent("ResourceAutowiring", this.target, type -> {
+						type.addJavadoc("Resource autowiring for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			GeneratedMethod generateMethod = generatedClass.getMethods().add("apply", method -> {
+				method.addJavadoc("Apply resource autowiring.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(generatedClass.getName(),
+						generationContext.getRuntimeHints()));
+			});
+			beanRegistrationCode.addInstancePostProcessor(generateMethod.toMethodReference());
+
+			registerHints(generationContext.getRuntimeHints());
+		}
+
+		private CodeBlock generateMethodCode(ClassName targetClassName, RuntimeHints hints) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			for (LookupElement lookupElement : this.lookupElements) {
+				code.addStatement(generateMethodStatementForElement(
+						targetClassName, lookupElement, hints));
+			}
+			code.addStatement("return $L", INSTANCE_PARAMETER);
+			return code.build();
+		}
+
+		private CodeBlock generateMethodStatementForElement(ClassName targetClassName,
+				LookupElement lookupElement, RuntimeHints hints) {
+
+			Member member = lookupElement.getMember();
+			if (member instanceof Field field) {
+				return generateMethodStatementForField(
+						targetClassName, field, lookupElement, hints);
+			}
+			if (member instanceof Method method) {
+				return generateMethodStatementForMethod(
+						targetClassName, method, lookupElement, hints);
+			}
+			throw new IllegalStateException(
+					"Unsupported member type " + member.getClass().getName());
+		}
+
+		private CodeBlock generateMethodStatementForField(ClassName targetClassName,
+				Field field, LookupElement lookupElement, RuntimeHints hints) {
+
+			hints.reflection().registerField(field);
+			CodeBlock resolver = generateFieldResolverCode(field, lookupElement);
+			AccessControl accessControl = AccessControl.forMember(field);
+			if (!accessControl.isAccessibleFrom(targetClassName)) {
+				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
+						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
+			}
+			return CodeBlock.of("$L.$L = $L.resolve($L)", INSTANCE_PARAMETER,
+					field.getName(), resolver, REGISTERED_BEAN_PARAMETER);
+		}
+
+		private CodeBlock generateFieldResolverCode(Field field, LookupElement lookupElement) {
+			if (lookupElement.isDefaultName) {
+				return CodeBlock.of("$T.$L($S)", ResourceElementResolver.class,
+						"forField", field.getName());
+			}
+			else {
+				return CodeBlock.of("$T.$L($S, $S)", ResourceElementResolver.class,
+						"forField", field.getName(), lookupElement.getName());
+			}
+		}
+
+		private CodeBlock generateMethodStatementForMethod(ClassName targetClassName,
+				Method method, LookupElement lookupElement, RuntimeHints hints) {
+
+			CodeBlock resolver = generateMethodResolverCode(method, lookupElement);
+			AccessControl accessControl = AccessControl.forMember(method);
+			if (!accessControl.isAccessibleFrom(targetClassName)) {
+				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
+				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
+						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
+			}
+			hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
+			return CodeBlock.of("$L.$L($L.resolve($L))", INSTANCE_PARAMETER,
+					method.getName(), resolver, REGISTERED_BEAN_PARAMETER);
+
+		}
+
+		private CodeBlock generateMethodResolverCode(Method method, LookupElement lookupElement) {
+			if (lookupElement.isDefaultName) {
+				return CodeBlock.of("$T.$L($S, $T.class)", ResourceElementResolver.class,
+						"forMethod", method.getName(), lookupElement.getLookupType());
+			}
+			else {
+				return CodeBlock.of("$T.$L($S, $T.class, $S)", ResourceElementResolver.class,
+						"forMethod", method.getName(), lookupElement.getLookupType(), lookupElement.getName());
+			}
+		}
+
+		private void registerHints(RuntimeHints runtimeHints) {
+			this.lookupElements.forEach(lookupElement ->
+					registerProxyIfNecessary(runtimeHints, lookupElement.getDependencyDescriptor()));
+		}
+
+		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
+			if (this.candidateResolver != null) {
+				Class<?> proxyClass =
+						this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
+				if (proxyClass != null) {
+					ClassHintUtils.registerProxyIfNecessary(proxyClass, runtimeHints);
+				}
+			}
 		}
 	}
 

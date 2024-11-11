@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Override
 	@BeforeEach
-	public void setup() {
+	protected void setup() {
 		super.setup();
 
 		Map<String, Object> attributes = Collections.emptyMap();
@@ -147,7 +147,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestXhr() throws Exception {
+	void handleTransportRequestXhr() {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -162,7 +162,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-12226
-	void handleTransportRequestXhrAllowedOriginsMatch() throws Exception {
+	void handleTransportRequestXhrAllowedOriginsMatch() {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.example", "https://mydomain2.example"));
@@ -173,7 +173,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-12226
-	void handleTransportRequestXhrAllowedOriginsNoMatch() throws Exception {
+	void handleTransportRequestXhrAllowedOriginsNoMatch() {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.example", "https://mydomain2.example"));
@@ -184,7 +184,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-13464
-	void handleTransportRequestXhrSameOrigin() throws Exception {
+	void handleTransportRequestXhrSameOrigin() {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(List.of("https://mydomain1.example"));
@@ -196,7 +196,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-13545
-	void handleInvalidTransportType() throws Exception {
+	void handleInvalidTransportType() {
 		String sockJsPath = sessionUrlPrefix + "invalid";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(List.of("https://mydomain1.example"));
@@ -208,7 +208,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestXhrOptions() throws Exception {
+	void handleTransportRequestXhrOptions() {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("OPTIONS", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -220,7 +220,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestNoSuitableHandler() throws Exception {
+	void handleTransportRequestNoSuitableHandler() {
 		String sockJsPath = sessionUrlPrefix + "eventsource";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -229,7 +229,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestXhrSend() throws Exception {
+	void handleTransportRequestXhrSend() {
 		String sockJsPath = sessionUrlPrefix + "xhr_send";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -258,7 +258,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestXhrSendWithDifferentUser() throws Exception {
+	void handleTransportRequestXhrSendWithDifferentUser() {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -281,7 +281,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestWebsocket() throws Exception {
+	void handleTransportRequestWebsocket() {
 		TransportHandlingSockJsService wsService = new TransportHandlingSockJsService(
 				this.taskScheduler, this.wsTransportHandler);
 		String sockJsPath = "/websocket";
@@ -306,7 +306,7 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test
-	void handleTransportRequestIframe() throws Exception {
+	void handleTransportRequestIframe() {
 		String sockJsPath = "/iframe.html";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);

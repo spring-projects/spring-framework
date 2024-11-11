@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,82 +26,82 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class BeanDefinitionTests {
+class BeanDefinitionTests {
 
 	@Test
-	public void beanDefinitionEquality() {
+	void beanDefinitionEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);
 		bd.setLazyInit(true);
 		bd.setScope("request");
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.setAbstract(true);
 		otherBd.setLazyInit(true);
 		otherBd.setScope("request");
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
-	public void beanDefinitionEqualityWithPropertyValues() {
+	void beanDefinitionEqualityWithPropertyValues() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().add("name", "myName");
 		bd.getPropertyValues().add("age", "99");
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
 		otherBd.getPropertyValues().add("name", "myName");
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.getPropertyValues().add("age", "11");
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.getPropertyValues().add("age", "99");
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
-	public void beanDefinitionEqualityWithConstructorArguments() {
+	void beanDefinitionEqualityWithConstructorArguments() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
 		otherBd.getConstructorArgumentValues().addGenericArgumentValue("test");
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 9);
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
-	public void beanDefinitionEqualityWithTypedConstructorArguments() {
+	void beanDefinitionEqualityWithTypedConstructorArguments() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test", "int");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5, "long");
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
 		otherBd.getConstructorArgumentValues().addGenericArgumentValue("test", "int");
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5, "int");
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5, "long");
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
-	public void genericBeanDefinitionEquality() {
+	void genericBeanDefinitionEquality() {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setParentName("parent");
 		bd.setScope("request");
@@ -111,45 +111,45 @@ public class BeanDefinitionTests {
 		otherBd.setScope("request");
 		otherBd.setAbstract(true);
 		otherBd.setLazyInit(true);
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.setParentName("parent");
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 
 		bd.getPropertyValues();
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 
 		bd.getConstructorArgumentValues();
-		assertThat(bd.equals(otherBd)).isTrue();
-		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd).isEqualTo(otherBd);
+		assertThat(otherBd).isEqualTo(bd);
 		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
-	public void beanDefinitionHolderEquality() {
+	void beanDefinitionHolderEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);
 		bd.setLazyInit(true);
 		bd.setScope("request");
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(bd, "bd");
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
-		assertThat(!bd.equals(otherBd)).isTrue();
-		assertThat(!otherBd.equals(bd)).isTrue();
+		assertThat(bd).isNotEqualTo(otherBd);
+		assertThat(otherBd).isNotEqualTo(bd);
 		otherBd.setAbstract(true);
 		otherBd.setLazyInit(true);
 		otherBd.setScope("request");
 		BeanDefinitionHolder otherHolder = new BeanDefinitionHolder(bd, "bd");
-		assertThat(holder.equals(otherHolder)).isTrue();
-		assertThat(otherHolder.equals(holder)).isTrue();
+		assertThat(holder).isEqualTo(otherHolder);
+		assertThat(otherHolder).isEqualTo(holder);
 		assertThat(holder.hashCode()).isEqualTo(otherHolder.hashCode());
 	}
 
 	@Test
-	public void beanDefinitionMerging() {
+	void beanDefinitionMerging() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);

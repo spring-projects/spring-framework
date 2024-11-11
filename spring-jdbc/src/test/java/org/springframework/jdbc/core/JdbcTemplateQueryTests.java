@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.verify;
  * @author Rob Winch
  * @since 19.12.2004
  */
-public class JdbcTemplateQueryTests {
+class JdbcTemplateQueryTests {
 
 	private DataSource dataSource = mock();
 
@@ -66,7 +66,7 @@ public class JdbcTemplateQueryTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		given(this.dataSource.getConnection()).willReturn(this.connection);
 		given(this.connection.createStatement()).willReturn(this.statement);
 		given(this.connection.prepareStatement(anyString())).willReturn(this.preparedStatement);
@@ -81,7 +81,7 @@ public class JdbcTemplateQueryTests {
 
 
 	@Test
-	public void testQueryForList() throws Exception {
+	void testQueryForList() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
 		given(this.resultSet.next()).willReturn(true, true, false);
 		given(this.resultSet.getObject(1)).willReturn(11, 12);
@@ -95,7 +95,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithEmptyResult() throws Exception {
+	void testQueryForListWithEmptyResult() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
 		given(this.resultSet.next()).willReturn(false);
 		List<Map<String, Object>> li = this.template.queryForList(sql);
@@ -106,7 +106,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithSingleRowAndColumn() throws Exception {
+	void testQueryForListWithSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
@@ -119,20 +119,19 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithIntegerElement() throws Exception {
+	void testQueryForListWithIntegerElement() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(11);
 		List<Integer> li = this.template.queryForList(sql, Integer.class);
-		assertThat(li).as("All rows returned").hasSize(1);
-		assertThat(li.get(0)).as("Element is Integer").isEqualTo(11);
+		assertThat(li).containsExactly(11);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 		verify(this.connection).close();
 	}
 
 	@Test
-	public void testQueryForMapWithSingleRowAndColumn() throws Exception {
+	void testQueryForMapWithSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
@@ -144,7 +143,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
+	void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
 		String sql = "select pass from t_account where first_name='Alef'";
 		given(this.resultSet.next()).willReturn(true, true, false);
 		given(this.resultSet.getString(1)).willReturn("pass");
@@ -156,11 +155,11 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithRowMapper() throws Exception {
+	void testQueryForObjectWithRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		Object o = this.template.queryForObject(sql, (RowMapper<Integer>) (rs, rowNum) -> rs.getInt(1));
+		Object o = this.template.queryForObject(sql, (rs, rowNum) -> rs.getInt(1));
 		assertThat(o).as("Correct result type").isInstanceOf(Integer.class);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -168,7 +167,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForStreamWithRowMapper() throws Exception {
+	void testQueryForStreamWithRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -186,7 +185,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithString() throws Exception {
+	void testQueryForObjectWithString() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getString(1)).willReturn("myvalue");
@@ -197,7 +196,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithBigInteger() throws Exception {
+	void testQueryForObjectWithBigInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1, BigInteger.class)).willReturn(new BigInteger("22"));
@@ -208,7 +207,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithBigDecimal() throws Exception {
+	void testQueryForObjectWithBigDecimal() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getBigDecimal(1)).willReturn(new BigDecimal("22.5"));
@@ -219,7 +218,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithInteger() throws Exception {
+	void testQueryForObjectWithInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -230,7 +229,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithIntegerAndNull() throws Exception {
+	void testQueryForObjectWithIntegerAndNull() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(0);
@@ -242,7 +241,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForInt() throws Exception {
+	void testQueryForInt() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -254,7 +253,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForIntPrimitive() throws Exception {
+	void testQueryForIntPrimitive() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -266,7 +265,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForLong() throws Exception {
+	void testQueryForLong() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
@@ -278,7 +277,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForLongPrimitive() throws Exception {
+	void testQueryForLongPrimitive() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
@@ -290,12 +289,12 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithArgs() throws Exception {
+	void testQueryForListWithArgs() throws Exception {
 		doTestQueryForListWithArgs("SELECT AGE FROM CUSTMR WHERE ID < ?");
 	}
 
 	@Test
-	public void testQueryForListIsNotConfusedByNamedParameterPrefix() throws Exception {
+	void testQueryForListIsNotConfusedByNamedParameterPrefix() throws Exception {
 		doTestQueryForListWithArgs("SELECT AGE FROM PREFIX:CUSTMR WHERE ID < ?");
 	}
 
@@ -313,7 +312,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithArgsAndEmptyResult() throws Exception {
+	void testQueryForListWithArgsAndEmptyResult() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 		given(this.resultSet.next()).willReturn(false);
 		List<Map<String, Object>> li = this.template.queryForList(sql, 3);
@@ -325,7 +324,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithArgsAndSingleRowAndColumn() throws Exception {
+	void testQueryForListWithArgsAndSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
@@ -339,13 +338,12 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForListWithArgsAndIntegerElementAndSingleRowAndColumn() throws Exception {
+	void testQueryForListWithArgsAndIntegerElementAndSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(11);
 		List<Integer> li = this.template.queryForList(sql, Integer.class, 3);
-		assertThat(li).as("All rows returned").hasSize(1);
-		assertThat(li.get(0)).as("First row is Integer").isEqualTo(11);
+		assertThat(li).containsExactly(11);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -353,7 +351,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForMapWithArgsAndSingleRowAndColumn() throws Exception {
+	void testQueryForMapWithArgsAndSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
@@ -366,7 +364,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithArgsAndRowMapper() throws Exception {
+	void testQueryForObjectWithArgsAndRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -379,7 +377,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForStreamWithArgsAndRowMapper() throws Exception {
+	void testQueryForStreamWithArgsAndRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -398,7 +396,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForObjectWithArgsAndInteger() throws Exception {
+	void testQueryForObjectWithArgsAndInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -411,7 +409,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForIntWithArgs() throws Exception {
+	void testQueryForIntWithArgs() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
@@ -424,7 +422,7 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
-	public void testQueryForLongWithArgs() throws Exception {
+	void testQueryForLongWithArgs() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);

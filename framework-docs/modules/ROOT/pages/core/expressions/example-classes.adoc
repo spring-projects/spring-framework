@@ -3,11 +3,13 @@
 
 This section lists the classes used in the examples throughout this chapter.
 
+== `Inventor`
+
 [tabs]
 ======
-Inventor.Java::
+Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.spring.samples.spel.inventor;
 
@@ -80,9 +82,9 @@ Inventor.Java::
 	}
 ----
 
-Inventor.kt::
+Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.spring.samples.spel.inventor
 
@@ -95,11 +97,13 @@ Inventor.kt::
 ----
 ======
 
+== `PlaceOfBirth`
+
 [tabs]
 ======
-PlaceOfBirth.java::
+Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.spring.samples.spel.inventor;
 
@@ -135,9 +139,9 @@ PlaceOfBirth.java::
 	}
 ----
 
-PlaceOfBirth.kt::
+Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.spring.samples.spel.inventor
 
@@ -145,11 +149,13 @@ PlaceOfBirth.kt::
 ----
 ======
 
+== `Society`
+
 [tabs]
 ======
-Society.java::
+Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.spring.samples.spel.inventor;
 
@@ -192,9 +198,9 @@ Society.java::
 	}
 ----
 
-Society.kt::
+Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.spring.samples.spel.inventor
 

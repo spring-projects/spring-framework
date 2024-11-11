@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,16 +297,19 @@ public abstract class ExtendedEntityManagerCreator {
 			// Invocation on EntityManager interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of EntityManager proxy.
 					return hashCode();
-				case "getTargetEntityManager":
+				}
+				case "getTargetEntityManager" -> {
 					// Handle EntityManagerProxy interface.
 					return this.target;
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					// Handle JPA 2.0 unwrap method - could be a proxy match.
 					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass == null) {
@@ -315,13 +318,13 @@ public abstract class ExtendedEntityManagerCreator {
 					else if (targetClass.isInstance(proxy)) {
 						return proxy;
 					}
-					break;
-				case "isOpen":
+				}
+				case "isOpen" -> {
 					if (this.containerManaged) {
 						return true;
 					}
-					break;
-				case "close":
+				}
+				case "close" -> {
 					if (this.containerManaged) {
 						throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
 					}
@@ -332,22 +335,23 @@ public abstract class ExtendedEntityManagerCreator {
 						synch.closeOnCompletion = true;
 						return null;
 					}
-					break;
-				case "getTransaction":
+				}
+				case "getTransaction" -> {
 					if (this.synchronizedWithTransaction) {
 						throw new IllegalStateException(
 								"Cannot obtain local EntityTransaction from a transaction-synchronized EntityManager");
 					}
-					break;
-				case "joinTransaction":
+				}
+				case "joinTransaction" -> {
 					doJoinTransaction(true);
 					return null;
-				case "isJoinedToTransaction":
+				}
+				case "isJoinedToTransaction" -> {
 					// Handle JPA 2.1 isJoinedToTransaction method for the non-JTA case.
 					if (!this.jta) {
 						return TransactionSynchronizationManager.hasResource(this.target);
 					}
-					break;
+				}
 			}
 
 			// Do automatic joining if required. Excludes toString, equals, hashCode calls.

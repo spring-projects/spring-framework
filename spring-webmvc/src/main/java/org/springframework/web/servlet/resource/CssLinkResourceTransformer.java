@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A {@link ResourceTransformer} implementation that modifies links in a CSS
- * file to match the public URL paths that should be exposed to clients (e.g.
+ * file to match the public URL paths that should be exposed to clients (for example,
  * with an MD5 content-based hash inserted in the URL).
  *
  * <p>The implementation looks for links in CSS {@code @import} statements and
@@ -128,7 +128,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	 */
 	protected abstract static class AbstractLinkParser implements LinkParser {
 
-		/** Return the keyword to use to search for links, e.g. "@import", "url(" */
+		/** Return the keyword to use to search for links, for example, "@import", "url(". */
 		protected abstract String getKeyword();
 
 		@Override

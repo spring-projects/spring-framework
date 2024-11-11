@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -59,13 +60,12 @@ import org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStr
  *
  * <p>Performs initial validation of the WebSocket handshake request - possibly rejecting it
  * through the appropriate HTTP status code - while also allowing its subclasses to override
- * various parts of the negotiation process (e.g. origin validation, sub-protocol negotiation,
+ * various parts of the negotiation process (for example, origin validation, sub-protocol negotiation,
  * extensions negotiation, etc).
  *
  * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
  * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update
- * the response as necessary and initialize the WebSocket. Currently, supported servers are
- * Jetty 9.0-9.3, Tomcat 7.0.47+ and 8.x, Undertow 1.0-1.3, GlassFish 4.1+, WebLogic 12.1.3+.
+ * the response as necessary and initialize the WebSocket.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -155,7 +155,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	public void setSupportedProtocols(String... protocols) {
 		this.supportedProtocols.clear();
 		for (String protocol : protocols) {
-			this.supportedProtocols.add(protocol.toLowerCase());
+			this.supportedProtocols.add(protocol.toLowerCase(Locale.ROOT));
 		}
 	}
 
@@ -330,10 +330,10 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
 		List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
 		for (String protocol : requestedProtocols) {
-			if (handlerProtocols.contains(protocol.toLowerCase())) {
+			if (handlerProtocols.contains(protocol.toLowerCase(Locale.ROOT))) {
 				return protocol;
 			}
-			if (this.supportedProtocols.contains(protocol.toLowerCase())) {
+			if (this.supportedProtocols.contains(protocol.toLowerCase(Locale.ROOT))) {
 				return protocol;
 			}
 		}

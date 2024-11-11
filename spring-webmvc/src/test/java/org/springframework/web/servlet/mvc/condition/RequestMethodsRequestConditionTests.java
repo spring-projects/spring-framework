@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,24 +38,24 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class RequestMethodsRequestConditionTests {
+class RequestMethodsRequestConditionTests {
 
 	@Test
-	public void getMatchingCondition() {
+	void getMatchingCondition() {
 		testMatch(new RequestMethodsRequestCondition(GET), GET);
 		testMatch(new RequestMethodsRequestCondition(GET, POST), GET);
 		testNoMatch(new RequestMethodsRequestCondition(GET), POST);
 	}
 
 	@Test
-	public void getMatchingConditionWithHttpHead() {
+	void getMatchingConditionWithHttpHead() {
 		testMatch(new RequestMethodsRequestCondition(HEAD), HEAD);
 		testMatch(new RequestMethodsRequestCondition(GET), GET);
 		testNoMatch(new RequestMethodsRequestCondition(POST), HEAD);
 	}
 
 	@Test
-	public void getMatchingConditionWithEmptyConditions() {
+	void getMatchingConditionWithEmptyConditions() {
 		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition();
 		for (RequestMethod method : RequestMethod.values()) {
 			if (method != OPTIONS) {
@@ -67,14 +67,14 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	public void getMatchingConditionWithCustomMethod() {
+	void getMatchingConditionWithCustomMethod() {
 		HttpServletRequest request = new MockHttpServletRequest("PROPFIND", "");
 		assertThat(new RequestMethodsRequestCondition().getMatchingCondition(request)).isNotNull();
 		assertThat(new RequestMethodsRequestCondition(GET, POST).getMatchingCondition(request)).isNull();
 	}
 
 	@Test
-	public void getMatchingConditionWithCorsPreFlight() throws Exception {
+	void getMatchingConditionWithCorsPreFlight() {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "");
 		request.addHeader("Origin", "https://example.com");
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT");
@@ -85,7 +85,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test // SPR-14410
-	public void getMatchingConditionWithHttpOptionsInErrorDispatch() throws Exception {
+	public void getMatchingConditionWithHttpOptionsInErrorDispatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/path");
 		request.setDispatcherType(DispatcherType.ERROR);
 
@@ -97,7 +97,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		RequestMethodsRequestCondition c1 = new RequestMethodsRequestCondition(GET, HEAD);
 		RequestMethodsRequestCondition c2 = new RequestMethodsRequestCondition(POST);
 		RequestMethodsRequestCondition c3 = new RequestMethodsRequestCondition();
@@ -118,7 +118,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	public void combine() {
+	void combine() {
 		RequestMethodsRequestCondition condition1 = new RequestMethodsRequestCondition(GET);
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(POST);
 

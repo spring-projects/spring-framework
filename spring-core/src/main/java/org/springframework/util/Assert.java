@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 
 /**
@@ -57,6 +58,7 @@ import org.springframework.lang.Nullable;
  * @author Sam Brannen
  * @author Colin Sampaleanu
  * @author Rob Harrop
+ * @author Sebastien Deleuze
  * @since 1.1.2
  */
 public abstract class Assert {
@@ -71,6 +73,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalStateException if {@code expression} is {@code false}
 	 */
+	@Contract("false, _ -> fail")
 	public static void state(boolean expression, String message) {
 		if (!expression) {
 			throw new IllegalStateException(message);
@@ -92,6 +95,7 @@ public abstract class Assert {
 	 * @throws IllegalStateException if {@code expression} is {@code false}
 	 * @since 5.0
 	 */
+	@Contract("false, _ -> fail")
 	public static void state(boolean expression, Supplier<String> messageSupplier) {
 		if (!expression) {
 			throw new IllegalStateException(nullSafeGet(messageSupplier));
@@ -106,6 +110,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if {@code expression} is {@code false}
 	 */
+	@Contract("false, _ -> fail")
 	public static void isTrue(boolean expression, String message) {
 		if (!expression) {
 			throw new IllegalArgumentException(message);
@@ -124,6 +129,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if {@code expression} is {@code false}
 	 * @since 5.0
 	 */
+	@Contract("false, _ -> fail")
 	public static void isTrue(boolean expression, Supplier<String> messageSupplier) {
 		if (!expression) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -137,6 +143,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object is not {@code null}
 	 */
+	@Contract("!null, _ -> fail")
 	public static void isNull(@Nullable Object object, String message) {
 		if (object != null) {
 			throw new IllegalArgumentException(message);
@@ -154,6 +161,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not {@code null}
 	 * @since 5.0
 	 */
+	@Contract("!null, _ -> fail")
 	public static void isNull(@Nullable Object object, Supplier<String> messageSupplier) {
 		if (object != null) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -167,6 +175,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object is {@code null}
 	 */
+	@Contract("null, _ -> fail")
 	public static void notNull(@Nullable Object object, String message) {
 		if (object == null) {
 			throw new IllegalArgumentException(message);
@@ -185,6 +194,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is {@code null}
 	 * @since 5.0
 	 */
+	@Contract("null, _ -> fail")
 	public static void notNull(@Nullable Object object, Supplier<String> messageSupplier) {
 		if (object == null) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -200,6 +210,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the text is empty
 	 * @see StringUtils#hasLength
 	 */
+	@Contract("null, _ -> fail")
 	public static void hasLength(@Nullable String text, String message) {
 		if (!StringUtils.hasLength(text)) {
 			throw new IllegalArgumentException(message);
@@ -220,6 +231,7 @@ public abstract class Assert {
 	 * @since 5.0
 	 * @see StringUtils#hasLength
 	 */
+	@Contract("null, _ -> fail")
 	public static void hasLength(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasLength(text)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -235,6 +247,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the text does not contain valid text content
 	 * @see StringUtils#hasText
 	 */
+	@Contract("null, _ -> fail")
 	public static void hasText(@Nullable String text, String message) {
 		if (!StringUtils.hasText(text)) {
 			throw new IllegalArgumentException(message);
@@ -255,6 +268,7 @@ public abstract class Assert {
 	 * @since 5.0
 	 * @see StringUtils#hasText
 	 */
+	@Contract("null, _ -> fail")
 	public static void hasText(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasText(text)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -303,6 +317,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object array is {@code null} or contains no elements
 	 */
+	@Contract("null, _ -> fail")
 	public static void notEmpty(@Nullable Object[] array, String message) {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(message);
@@ -321,6 +336,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object array is {@code null} or contains no elements
 	 * @since 5.0
 	 */
+	@Contract("null, _ -> fail")
 	public static void notEmpty(@Nullable Object[] array, Supplier<String> messageSupplier) {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -376,6 +392,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the collection is {@code null} or
 	 * contains no elements
 	 */
+	@Contract("null, _ -> fail")
 	public static void notEmpty(@Nullable Collection<?> collection, String message) {
 		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(message);
@@ -395,6 +412,7 @@ public abstract class Assert {
 	 * contains no elements
 	 * @since 5.0
 	 */
+	@Contract("null, _ -> fail")
 	public static void notEmpty(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
 		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -450,6 +468,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the map is {@code null} or contains no entries
 	 */
+	@Contract("null, _ -> fail")
 	public static void notEmpty(@Nullable Map<?, ?> map, String message) {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(message);
@@ -468,6 +487,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the map is {@code null} or contains no entries
 	 * @since 5.0
 	 */
+	@Contract("null, _ -> fail")
 	public static void notEmpty(@Nullable Map<?, ?> map, Supplier<String> messageSupplier) {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
@@ -486,6 +506,7 @@ public abstract class Assert {
 	 * of the offending object's type will be appended.
 	 * @throws IllegalArgumentException if the object is not an instance of type
 	 */
+	@Contract("_, null, _ -> fail")
 	public static void isInstanceOf(Class<?> type, @Nullable Object obj, String message) {
 		notNull(type, "Type to check against must not be null");
 		if (!type.isInstance(obj)) {
@@ -505,6 +526,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not an instance of type
 	 * @since 5.0
 	 */
+	@Contract("_, null, _ -> fail")
 	public static void isInstanceOf(Class<?> type, @Nullable Object obj, Supplier<String> messageSupplier) {
 		notNull(type, "Type to check against must not be null");
 		if (!type.isInstance(obj)) {
@@ -519,6 +541,7 @@ public abstract class Assert {
 	 * @param obj the object to check
 	 * @throws IllegalArgumentException if the object is not an instance of type
 	 */
+	@Contract("_, null -> fail")
 	public static void isInstanceOf(Class<?> type, @Nullable Object obj) {
 		isInstanceOf(type, obj, "");
 	}
@@ -535,6 +558,7 @@ public abstract class Assert {
 	 * offending subtype will be appended.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
+	@Contract("_, null, _ -> fail")
 	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType, String message) {
 		notNull(superType, "Supertype to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
@@ -554,6 +578,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 * @since 5.0
 	 */
+	@Contract("_, null, _ -> fail")
 	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType, Supplier<String> messageSupplier) {
 		notNull(superType, "Supertype to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
@@ -568,7 +593,8 @@ public abstract class Assert {
 	 * @param subType the subtype to check
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
-	public static void isAssignable(Class<?> superType, Class<?> subType) {
+	@Contract("_, null -> fail")
+	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType) {
 		isAssignable(superType, subType, "");
 	}
 

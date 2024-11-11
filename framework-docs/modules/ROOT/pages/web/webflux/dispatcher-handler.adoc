@@ -29,7 +29,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext context = ...
 	HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context).build();
@@ -37,7 +37,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val context: ApplicationContext = ...
 	val handler = WebHttpHandlerBuilder.applicationContext(context).build()
@@ -170,7 +170,7 @@ A `HandlerAdapter` may expose its exception handling mechanism as a
 
 A `HandlerAdapter` may also choose to implement `DispatchExceptionHandler`. In that case
 `DispatcherHandler` will apply it to exceptions that arise before a handler is mapped,
-e.g. during handler mapping, or earlier, e.g. in a `WebFilter`.
+for example, during handler mapping, or earlier, for example, in a `WebFilter`.
 
 See also xref:web/webflux/controller/ann-exceptions.adoc[Exceptions] in the "`Annotated Controller`" section or
 xref:web/webflux/reactive-spring.adoc#webflux-exception-handler[Exceptions] in the WebHandler API section.
@@ -184,8 +184,10 @@ xref:web/webflux/reactive-spring.adoc#webflux-exception-handler[Exceptions] in t
 View resolution enables rendering to a browser with an HTML template and a model without
 tying you to a specific view technology. In Spring WebFlux, view resolution is
 supported through a dedicated xref:web/webflux/dispatcher-handler.adoc#webflux-resulthandling[HandlerResultHandler] that uses
-  `ViewResolver` instances to map a String (representing a logical view name) to a `View`
+`ViewResolver` instances to map a String (representing a logical view name) to a `View`
 instance. The `View` is then used to render the response.
+
+Web applications need to use a xref:web/webflux-view.adoc[View rendering library] to support this use case.
 
 
 [[webflux-viewresolution-handling]]
@@ -237,6 +239,9 @@ The net effect is the same as if the controller had returned a `RedirectView` or
 operate in terms of logical view names. A view name such as
 `redirect:/some/resource` is relative to the current application, while a view name such as
 `redirect:https://example.com/arbitrary/path` redirects to an absolute URL.
+
+NOTE: xref:web/webmvc/mvc-servlet/viewresolver.adoc#mvc-redirecting-forward-prefix[Unlike the Servlet stack],
+Spring WebFlux does not support "FORWARD" dispatches, so `forward:` prefixes are not supported as a result.
 
 
 [[webflux-multiple-representations]]

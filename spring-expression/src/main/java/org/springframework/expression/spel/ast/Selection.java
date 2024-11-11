@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,12 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Represents selection over a map or collection.
- * For example: {1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'} returns [2, 4, 6, 8, 10]
  *
- * <p>Basically a subset of the input data is returned based on the
- * evaluation of the expression supplied as selection criteria.
+ * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this)]</code> evaluates
+ * to {@code [2, 4, 6, 8, 10]}.
+ *
+ * <p>Basically a subset of the input data is returned based on the evaluation of
+ * the expression supplied as selection criteria.
  *
  * @author Andy Clement
  * @author Mark Fisher
@@ -76,6 +78,15 @@ public class Selection extends SpelNodeImpl {
 	}
 
 
+	/**
+	 * Does this node represent a null-safe selection operation?
+	 * @since 6.1.6
+	 */
+	@Override
+	public final boolean isNullSafe() {
+		return this.nullSafe;
+	}
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		return getValueRef(state).getValue();
@@ -88,7 +99,6 @@ public class Selection extends SpelNodeImpl {
 		SpelNodeImpl selectionCriteria = this.children[0];
 
 		if (operand instanceof Map<?, ?> mapdata) {
-			// TODO don't lose generic info for the new map
 			Map<Object, Object> result = new HashMap<>();
 			Object lastKey = null;
 
@@ -100,11 +110,10 @@ public class Selection extends SpelNodeImpl {
 					Object val = selectionCriteria.getValueInternal(state).getValue();
 					if (val instanceof Boolean b) {
 						if (b) {
+							result.put(entry.getKey(), entry.getValue());
 							if (this.variant == FIRST) {
-								result.put(entry.getKey(), entry.getValue());
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);
 							}
-							result.put(entry.getKey(), entry.getValue());
 							lastKey = entry.getKey();
 						}
 					}
@@ -120,29 +129,28 @@ public class Selection extends SpelNodeImpl {
 			}
 
 			if ((this.variant == FIRST || this.variant == LAST) && result.isEmpty()) {
-				return new ValueRef.TypedValueHolderValueRef(new TypedValue(null), this);
+				return new ValueRef.TypedValueHolderValueRef(TypedValue.NULL, this);
 			}
 
 			if (this.variant == LAST) {
 				Map<Object, Object> resultMap = new HashMap<>();
 				Object lastValue = result.get(lastKey);
-				resultMap.put(lastKey,lastValue);
-				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap),this);
+				resultMap.put(lastKey, lastValue);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap), this);
 			}
 
-			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);
 		}
 
 		if (operand instanceof Iterable || ObjectUtils.isArray(operand)) {
-			Iterable<?> data = (operand instanceof Iterable<?> iterable ?
-					iterable : Arrays.asList(ObjectUtils.toObjectArray(operand)));
+			Iterable<?> data = (operand instanceof Iterable<?> iterable ? iterable :
+					Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
-			int index = 0;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", index);
+					state.enterScope();
 					Object val = selectionCriteria.getValueInternal(state).getValue();
 					if (val instanceof Boolean b) {
 						if (b) {
@@ -156,7 +164,6 @@ public class Selection extends SpelNodeImpl {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 					}
-					index++;
 				}
 				finally {
 					state.exitScope();

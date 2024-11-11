@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link StatusAssertions}.
+ * Tests for {@link StatusAssertions}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -93,8 +93,7 @@ class StatusAssertionTests {
 		assertions.is1xxInformational();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test
@@ -105,8 +104,7 @@ class StatusAssertionTests {
 		assertions.is2xxSuccessful();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is5xxServerError());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is5xxServerError);
 	}
 
 	@Test
@@ -117,8 +115,7 @@ class StatusAssertionTests {
 		assertions.is3xxRedirection();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test
@@ -129,8 +126,7 @@ class StatusAssertionTests {
 		assertions.is4xxClientError();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test
@@ -141,8 +137,7 @@ class StatusAssertionTests {
 		assertions.is5xxServerError();
 
 		// Wrong series
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.is2xxSuccessful());
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(assertions::is2xxSuccessful);
 	}
 
 	@Test

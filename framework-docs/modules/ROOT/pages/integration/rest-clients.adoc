@@ -13,12 +13,12 @@ The Spring Framework provides the following choices for making calls to REST end
 == `RestClient`
 
 The `RestClient` is a synchronous HTTP client that offers a modern, fluent API.
-It offers an abstraction over HTTP libraries that allows for convenient conversion from Java object to HTTP request, and creation of objects from the HTTP response.
+It offers an abstraction over HTTP libraries that allows for convenient conversion from a Java object to an HTTP request, and the creation of objects from an HTTP response.
 
 === Creating a `RestClient`
 
 The `RestClient` is created using one of the static `create` methods.
-You can also use `builder` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, a default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
+You can also use `builder()` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
 
 Once created (or built), the `RestClient` can be used safely by multiple threads.
 
@@ -28,7 +28,7 @@ The following sample shows how to create a default `RestClient`, and how to buil
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 RestClient defaultClient = RestClient.create();
 
@@ -38,6 +38,7 @@ RestClient customClient = RestClient.builder()
   .baseUrl("https://example.com")
   .defaultUriVariables(Map.of("variable", "foo"))
   .defaultHeader("My-Header", "Foo")
+  .defaultCookie("My-Cookie", "Bar")
   .requestInterceptor(myCustomInterceptor)
   .requestInitializer(myCustomInitializer)
   .build();
@@ -45,16 +46,17 @@ RestClient customClient = RestClient.builder()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 val defaultClient = RestClient.create()
 
 val customClient = RestClient.builder()
   .requestFactory(HttpComponentsClientHttpRequestFactory())
-  .messageConverters(converters -> converters.add(MyCustomMessageConverter()))
+  .messageConverters { converters -> converters.add(MyCustomMessageConverter()) }
   .baseUrl("https://example.com")
-  .defaultUriVariables(Map.of("variable", "foo"))
+  .defaultUriVariables(mapOf("variable" to "foo"))
   .defaultHeader("My-Header", "Foo")
+  .defaultCookie("My-Cookie", "Bar")
   .requestInterceptor(myCustomInterceptor)
   .requestInitializer(myCustomInitializer)
   .build()
@@ -64,41 +66,68 @@ val customClient = RestClient.builder()
 === Using the `RestClient`
 
 When making an HTTP request with the `RestClient`, the first thing to specify is which HTTP method to use.
-This can be done with `method(HttpMethod)`, or with the convenience methods `get()`, `head()`, `post()`, and so on.
+This can be done with `method(HttpMethod)` or with the convenience methods `get()`, `head()`, `post()`, and so on.
 
 ==== Request URL
 
 Next, the request URI can be specified with the `uri` methods.
-This step is optional, and can be skipped if the `RestClient` is configured with a default URI.
-The URL is typically specified as `String`, with optional URI template variables.
-String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
+This step is optional and can be skipped if the `RestClient` is configured with a default URI.
+The URL is typically specified as a `String`, with optional URI template variables.
+The following example configures a GET request to `https://example.com/orders/42`:
 
-The URL can also be provided with a function, or as `java.net.URI`, both of which are not encoded.
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+int id = 42;
+restClient.get()
+  .uri("https://example.com/orders/{id}", id)
+  ....
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+val id = 42
+restClient.get()
+  .uri("https://example.com/orders/{id}", id)
+  ...
+----
+======
+
+A function can also be used for more controls, such as specifying xref:web/webmvc/mvc-uri-building.adoc[request parameters].
+
+String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
+The URL can also be provided with a function or as a `java.net.URI`, both of which are not encoded.
 For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-building.adoc[URI Links].
 
 ==== Request headers and body
 
-If necessary, the HTTP request can be manipulated, by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
-For HTTP request that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
+If necessary, the HTTP request can be manipulated by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
+For HTTP requests that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
 
 The request body itself can be set by `body(Object)`, which internally uses <<rest-message-conversion>>.
 Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.
 Finally, the body can be set to a callback function that writes to an `OutputStream`.
 
 ==== Retrieving the response
+
 Once the request has been set up, the HTTP response is accessed by invoking `retrieve()`.
-The response body can be accessed by using `body(Class)`, or `body(ParameterizedTypeReference)` for parameterized types like lists.
-The `body` method converts the response contents into various types, for instance bytes can be converted into a `String`, JSON into objects using Jackson, and so on (see <<rest-message-conversion>>).
+The response body can be accessed by using `body(Class)` or `body(ParameterizedTypeReference)` for parameterized types like lists.
+The `body` method converts the response contents into various types – for instance, bytes can be converted into a `String`, JSON can be converted into objects using Jackson, and so on (see <<rest-message-conversion>>).
 
 The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body.
 
-This sample shows how `RestClient` can be used to perform a simple GET request.
+This sample shows how `RestClient` can be used to perform a simple `GET` request.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 String result = restClient.get() <1>
   .uri("https://example.com") <2>
@@ -115,7 +144,7 @@ System.out.println(result); <5>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result= restClient.get() <1>
   .uri("https://example.com") <2>
@@ -137,7 +166,7 @@ Access to the response status code and headers is provided through `ResponseEnti
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 ResponseEntity<String> result = restClient.get() <1>
   .uri("https://example.com") <1>
@@ -154,7 +183,7 @@ System.out.println("Contents: " + result.getBody()); <3>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result = restClient.get() <1>
   .uri("https://example.com") <1>
@@ -171,13 +200,13 @@ println("Contents: " + result.body) <3>
 ======
 
 `RestClient` can convert JSON to objects, using the Jackson library.
-Note the usage of uri variables in this sample, and that the `Accept` header is set to JSON.
+Note the usage of URI variables in this sample and that the `Accept` header is set to JSON.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 int id = ...;
 Pet pet = restClient.get()
@@ -192,7 +221,7 @@ Pet pet = restClient.get()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val id = ...
 val pet = restClient.get()
@@ -212,7 +241,7 @@ In the next sample, `RestClient` is used to perform a POST request that contains
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 Pet pet = ... <1>
 ResponseEntity<Void> response = restClient.post() <2>
@@ -230,7 +259,7 @@ ResponseEntity<Void> response = restClient.post() <2>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val pet: Pet = ... <1>
 val response = restClient.post() <2>
@@ -248,20 +277,21 @@ val response = restClient.post() <2>
 ======
 
 ==== Error handling
+
 By default, `RestClient` throws a subclass of `RestClientException` when retrieving a response with a 4xx or 5xx status code.
-This behavior can be overriden using `onStatus`.
+This behavior can be overridden using `onStatus`.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 String result = restClient.get() <1>
   .uri("https://example.com/this-url-does-not-exist") <1>
   .retrieve()
   .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> { <2>
-      throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()) <3>
+      throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()); <3>
   })
   .body(String.class);
 ----
@@ -271,7 +301,7 @@ String result = restClient.get() <1>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result = restClient.get() <1>
   .uri("https://example.com/this-url-does-not-exist") <1>
@@ -286,14 +316,15 @@ val result = restClient.get() <1>
 ======
 
 ==== Exchange
-For more advanced scenarios, the `RestClient` gives access to the underlying HTTP request and response through the `exchange` method, which can be used instead of `retrieve()`.
-Status handlers are not applied when you exchange, because the exchange function already provides access to the full response, allowing you to perform any error handling necessary.
+
+For more advanced scenarios, the `RestClient` gives access to the underlying HTTP request and response through the `exchange()` method, which can be used instead of `retrieve()`.
+Status handlers are not applied when use `exchange()`, because the exchange function already provides access to the full response, allowing you to perform any error handling necessary.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 Pet result = restClient.get()
   .uri("https://petclinic.example.com/pets/{id}", id)
@@ -314,7 +345,7 @@ Pet result = restClient.get()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result = restClient.get()
   .uri("https://petclinic.example.com/pets/{id}", id)
@@ -336,68 +367,8 @@ val result = restClient.get()
 
 [[rest-message-conversion]]
 === HTTP Message Conversion
-[.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs[See equivalent in the Reactive stack]#
 
-The `spring-web` module contains the `HttpMessageConverter` interface for reading and writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
-`HttpMessageConverter` instances are used on the client side (for example, in the `RestClient`) and on the server side (for example, in Spring MVC REST controllers).
-
-Concrete implementations for the main media (MIME) types are provided in the framework and are, by default, registered with the `RestClient` and `RestTemplate` on the client side and with `RequestMappingHandlerAdapter` on the server side (see xref:web/webmvc/mvc-config/message-converters.adoc[Configuring Message Converters]).
-
-Several implementations of `HttpMessageConverter` are described below.
-Refer to the {spring-framework-api}/http/converter/HttpMessageConverter.html[`HttpMessageConverter` Javadoc] for the complete list.
-For all converters, a default media type is used, but you can override it by setting the `supportedMediaTypes`  property.
-
-[[rest-message-converters-tbl]]
-.HttpMessageConverter Implementations
-[cols="1,3"]
-|===
-| MessageConverter | Description
-
-| `StringHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write `String` instances from the HTTP request and response.
-By default, this converter supports all text media types(`text/{asterisk}`) and writes with a `Content-Type` of `text/plain`.
-
-| `FormHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write form data from the HTTP request and response.
-By default, this converter reads and writes the `application/x-www-form-urlencoded` media type.
-Form data is read from and written into a `MultiValueMap<String, String>`.
-The converter can also write (but not read) multipart data read from a `MultiValueMap<String, Object>`.
-By default, `multipart/form-data` is supported.
-Additional multipart subtypes can be supported for writing form data.
-Consult the javadoc for `FormHttpMessageConverter` for further details.
-
-| `ByteArrayHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write byte arrays from the HTTP request and response.
-By default, this converter supports all media types (`{asterisk}/{asterisk}`) and writes with a `Content-Type` of `application/octet-stream`.
-You can override this by setting the `supportedMediaTypes` property and overriding `getContentType(byte[])`.
-
-| `MarshallingHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write XML by using Spring's `Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
-This converter requires a `Marshaller` and `Unmarshaller` before it can be used.
-You can inject these through constructor or bean properties.
-By default, this converter supports `text/xml` and `application/xml`.
-
-| `MappingJackson2HttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write JSON by using Jackson's `ObjectMapper`.
-You can customize JSON mapping as needed through the use of Jackson's provided annotations.
-When you need further control (for cases where custom JSON serializers/deserializers need to be provided for specific types), you can inject a custom `ObjectMapper` through the `ObjectMapper` property.
-By default, this converter supports `application/json`.
-
-| `MappingJackson2XmlHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write XML by using {jackson-github-org}/jackson-dataformat-xml[Jackson XML] extension's `XmlMapper`.
-You can customize XML mapping as needed through the use of JAXB or Jackson's provided annotations.
-When you need further control (for cases where custom XML serializers/deserializers need to be provided for specific types), you can inject a custom `XmlMapper` through the `ObjectMapper` property.
-By default, this converter supports `application/xml`.
-
-| `SourceHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write `javax.xml.transform.Source` from the HTTP request and response.
-Only `DOMSource`, `SAXSource`, and `StreamSource` are supported.
-By default, this converter supports `text/xml` and `application/xml`.
-
-|===
-
-By default, `RestClient` and `RestTemplate` register all built-in message converters, depending on the availability of underlying libraries on the classpath.
-You can also set the message converters to use explicitly, by using `messageConverters` on the `RestClient` builder, or via the `messageConverters` property of `RestTemplate`.
+xref:web/webmvc/message-converters.adoc#message-converters[See the supported HTTP message converters in the dedicated section].
 
 ==== Jackson JSON Views
 
@@ -437,13 +408,13 @@ parts.add("xmlPart", new HttpEntity<>(myBean, headers));
 ----
 
 In most cases, you do not have to specify the `Content-Type` for each part.
-The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource` based on the file extension.
+The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource`, based on the file extension.
 If necessary, you can explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
-Once the `MultiValueMap` is ready, you can use it as the body of a POST request, using  `RestClient.post().body(parts)` (or `RestTemplate.postForObject`).
+Once the `MultiValueMap` is ready, you can use it as the body of a `POST` request, using  `RestClient.post().body(parts)` (or `RestTemplate.postForObject`).
 
 If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set to `multipart/form-data` by the `FormHttpMessageConverter`.
-If the `MultiValueMap` has `String` values the `Content-Type` defaults to `application/x-www-form-urlencoded`.
+If the `MultiValueMap` has `String` values, the `Content-Type` defaults to `application/x-www-form-urlencoded`.
 If necessary the `Content-Type` may also be set explicitly.
 
 [[rest-request-factories]]
@@ -453,16 +424,19 @@ To execute the HTTP request, `RestClient` uses a client HTTP library.
 These libraries are adapted via the `ClientRequestFactory` interface.
 Various implementations are available:
 
-* `JdkClientHttpRequestFactory` for Java's `HttpClient`,
-* `HttpComponentsClientHttpRequestFactory` for use with Apache HTTP Components `HttpClient`,
-* `JettyClientHttpRequestFactory` for Jetty's `HttpClient`,
-* `ReactorNettyClientRequestFactory` for Reactor Netty's `HttpClient`,
-* `SimpleClientHttpRequestFactory` as a simple default.
+* `JdkClientHttpRequestFactory` for Java's `HttpClient`
+* `HttpComponentsClientHttpRequestFactory` for use with Apache HTTP Components `HttpClient`
+* `JettyClientHttpRequestFactory` for Jetty's `HttpClient`
+* `ReactorNettyClientRequestFactory` for Reactor Netty's `HttpClient`
+* `SimpleClientHttpRequestFactory` as a simple default
 
 
 If no request factory is specified when the `RestClient` was built, it will use the Apache or Jetty `HttpClient` if they are available on the classpath.
 Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
 Finally, it will resort to the simple default.
+
+TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (for example, 401).
+If this is an issue, use any of the alternative request factories.
 
 [[rest-webclient]]
 == `WebClient`
@@ -473,12 +447,12 @@ synchronous, asynchronous, and streaming scenarios.
 
 `WebClient` supports the following:
 
-* Non-blocking I/O.
-* Reactive Streams back pressure.
-* High concurrency with fewer hardware resources.
-* Functional-style, fluent API that takes advantage of Java 8 lambdas.
-* Synchronous and asynchronous interactions.
-* Streaming up to or streaming down from a server.
+* Non-blocking I/O
+* Reactive Streams back pressure
+* High concurrency with fewer hardware resources
+* Functional-style, fluent API that takes advantage of Java 8 lambdas
+* Synchronous and asynchronous interactions
+* Streaming up to or streaming down from a server
 
 See xref:web/webflux-webclient.adoc[WebClient] for more details.
 
@@ -848,17 +822,17 @@ It can be used to migrate from the latter to the former.
 .toEntity(ParameterizedTypeReference)` footnote:request-entity[]
 
 
-| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Object...)`
+| `execute(String, HttpMethod, RequestCallback, ResponseExtractor, Object...)`
 | `method(HttpMethod)
 .uri(String, Object...)
 .exchange(ExchangeFunction)`
 
-| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Map)`
+| `execute(String, HttpMethod, RequestCallback, ResponseExtractor, Map)`
 | `method(HttpMethod)
 .uri(String, Map)
 .exchange(ExchangeFunction)`
 
-| `execute(URI, HttpMethod method, RequestCallback, ResponseExtractor)`
+| `execute(URI, HttpMethod, RequestCallback, ResponseExtractor)`
 | `method(HttpMethod)
 .uri(URI)
 .exchange(ExchangeFunction)`
@@ -906,8 +880,8 @@ For `WebClient`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
-	WebClientAdapter adapter = WebClientAdapter.forClient(webClient)
+	WebClient webClient = WebClient.builder().baseUrl("https://api.github.com/").build();
+	WebClientAdapter adapter = WebClientAdapter.create(webClient);
 	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 
 	RepositoryService service = factory.createClient(RepositoryService.class);
@@ -966,12 +940,17 @@ method parameters:
 | `@RequestHeader`
 | Add a request header or multiple headers. The argument may be a `Map<String, ?>` or
   `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
-  individual value. Type conversion is supported for non-String values.
+  individual value. Type conversion is supported for non-String values. This overrides
+  the annotation's `headers` attribute.
 
 | `@PathVariable`
 | Add a variable for expand a placeholder in the request URL. The argument may be a
   `Map<String, ?>` with multiple variables, or an individual value. Type conversion
   is supported for non-String values.
+
+| `@RequestAttribute`
+| Provide an `Object` to add as a request attribute. Only supported by `RestClient`
+  and `WebClient`.
 
 | `@RequestBody`
 | Provide the body of the request either as an Object to be serialized, or a
@@ -989,7 +968,7 @@ method parameters:
 
 | `@RequestPart`
 | Add a request part, which may be a String (form field), `Resource` (file part),
-  Object (entity to be encoded, e.g. as JSON), `HttpEntity` (part content and headers),
+  Object (entity to be encoded, for example, as JSON), `HttpEntity` (part content and headers),
   a Spring `Part`, or Reactive Streams `Publisher` of any of the above.
 
 | `MultipartFile`
@@ -1002,6 +981,11 @@ method parameters:
   individual value. Type conversion is supported for non-String values.
 
 |===
+
+Method parameters cannot be `null` unless the `required` attribute (where available on a
+parameter annotation) is set to `false`, or the parameter is marked optional as determined by
+{spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
+
 
 
 [[rest-http-interface-return-values]]
@@ -1078,11 +1062,34 @@ underlying HTTP client, which operates at a lower level and provides more contro
 
 
 [[rest-http-interface-exceptions]]
-=== Exception Handling
+=== Error Handling
 
-By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status
-codes. To customize this, you can register a response status handler that applies to all
-responses performed through the client:
+To customize error response handling, you need to configure the underlying HTTP client.
+
+For `RestClient`:
+
+By default, `RestClient` raises `RestClientException` for 4xx and 5xx HTTP status codes.
+To customize this, register a response status handler that applies to all responses
+performed through the client:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RestClient restClient = RestClient.builder()
+			.defaultStatusHandler(HttpStatusCode::isError, (request, response) -> ...)
+			.build();
+
+	RestClientAdapter adapter = RestClientAdapter.create(restClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+----
+
+For more details and options, such as suppressing error status codes, see the Javadoc of
+`defaultStatusHandler` in `RestClient.Builder`.
+
+For `WebClient`:
+
+By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status codes.
+To customize this, register a response status handler that applies to all responses
+performed through the client:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -1090,10 +1097,28 @@ responses performed through the client:
 			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
 			.build();
 
-	WebClientAdapter clientAdapter = WebClientAdapter.forClient(webClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory
-			.builder(clientAdapter).build();
+	WebClientAdapter adapter = WebClientAdapter.create(webClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(adapter).build();
 ----
 
 For more details and options, such as suppressing error status codes, see the Javadoc of
 `defaultStatusHandler` in `WebClient.Builder`.
+
+For `RestTemplate`:
+
+By default, `RestTemplate` raises `RestClientException` for 4xx and 5xx HTTP status codes.
+To customize this, register an error handler that applies to all responses
+performed through the client:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.setErrorHandler(myErrorHandler);
+
+    RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+    HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+----
+
+For more details and options, see the Javadoc of `setErrorHandler` in `RestTemplate` and
+the `ResponseErrorHandler` hierarchy.
+

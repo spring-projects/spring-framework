@@ -65,7 +65,7 @@ examples (one for Java configuration and one for XML configuration) show how to 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	public class ProductDaoImpl implements ProductDao {
@@ -77,7 +77,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	class ProductDaoImpl : ProductDao {

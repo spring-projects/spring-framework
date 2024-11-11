@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,16 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for the {@link CharArrayPropertyEditor} class.
+ * Tests for {@link CharArrayPropertyEditor}.
  *
  * @author Rick Evans
  */
-public class CharArrayPropertyEditorTests {
+class CharArrayPropertyEditorTests {
 
 	private final PropertyEditor charEditor = new CharArrayPropertyEditor();
 
 	@Test
-	public void sunnyDaySetAsText() throws Exception {
+	void sunnyDaySetAsText() {
 		final String text = "Hideous towns make me throw... up";
 		charEditor.setAsText(text);
 
@@ -46,7 +46,7 @@ public class CharArrayPropertyEditorTests {
 	}
 
 	@Test
-	public void getAsTextReturnsEmptyStringIfValueIsNull() throws Exception {
+	void getAsTextReturnsEmptyStringIfValueIsNull() {
 		assertThat(charEditor.getAsText()).isEmpty();
 
 		charEditor.setAsText(null);

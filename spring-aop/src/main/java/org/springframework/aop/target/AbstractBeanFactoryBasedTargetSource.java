@@ -153,16 +153,6 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 		}
 	}
 
-	@Override
-	public boolean isStatic() {
-		return false;
-	}
-
-	@Override
-	public void releaseTarget(Object target) throws Exception {
-		// Nothing to do here.
-	}
-
 
 	/**
 	 * Copy configuration from the other AbstractBeanFactoryBasedTargetSource object.

@@ -27,14 +27,19 @@ The target class should have a single public constructor or a single non-public 
 with arguments. If there are multiple constructors, then a default constructor if present
 is used.
 
-By default, constructor parameter names are used to look up argument values, but you can
-configure a `NameResolver`. Spring MVC and WebFlux both rely to allow customizing the name
-of the value to bind through an `@BindParam` annotation on constructor parameters.
+By default, argument values are looked up via constructor parameter names. Spring MVC and
+WebFlux support a custom name mapping through the `@BindParam` annotation on constructor
+parameters or fields if present. If necessary, you can also configure a `NameResolver` on
+`DataBinder` to customize the argument name to use.
 
 xref:beans-beans-conventions[Type conversion] is applied as needed to convert user input.
 If the constructor parameter is an object, it is constructed recursively in the same
 manner, but through a nested property path. That means constructor binding creates both
 the target object and any objects it contains.
+
+Constructor binding supports `List`, `Map`, and array arguments either converted from
+a single string, for example, comma-separated list, or based on indexed keys such as
+`accounts[2].name` or `account[KEY].name`.
 
 Binding and conversion errors are reflected in the `BindingResult` of the `DataBinder`.
 If the target is created successfully, then `target` is set to the created instance
@@ -90,13 +95,12 @@ details. The below table shows some examples of these conventions:
 | Indicates the nested property `name` of the property `account` that corresponds to
   (for example) the `getAccount().setName()` or `getAccount().getName()` methods.
 
-| `account[2]`
+| `accounts[2]`
 | Indicates the _third_ element of the indexed property `account`. Indexed properties
   can be of type `array`, `list`, or other naturally ordered collection.
 
-| `account[COMPANYNAME]`
-| Indicates the value of the map entry indexed by the `COMPANYNAME` key of the `account` `Map`
-  property.
+| `accounts[KEY]`
+| Indicates the value of the map entry indexed by the `KEY` value.
 |===
 
 (This next section is not vitally important to you if you do not plan to work with
@@ -111,7 +115,7 @@ properties:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Company {
 
@@ -138,7 +142,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Company {
 		var name: String? = null
@@ -151,7 +155,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Employee {
 
@@ -179,7 +183,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Employee {
 		var name: String? = null
@@ -195,7 +199,7 @@ the properties of instantiated ``Company``s and ``Employee``s:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	BeanWrapper company = new BeanWrapperImpl(new Company());
 	// setting the company name..
@@ -215,7 +219,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val company = BeanWrapperImpl(Company())
 	// setting the company name..
@@ -375,7 +379,7 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SomethingBeanInfo extends SimpleBeanInfo {
 
@@ -399,7 +403,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class SomethingBeanInfo : SimpleBeanInfo() {
 
@@ -463,7 +467,7 @@ another class called `DependsOnExoticType`, which needs `ExoticType` set as a pr
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example;
 
@@ -488,7 +492,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example
 
@@ -518,7 +522,7 @@ The `PropertyEditor` implementation could look similar to the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example;
 
@@ -535,7 +539,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example
 
@@ -589,7 +593,7 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package com.foo.editors.spring;
 
@@ -607,7 +611,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package com.foo.editors.spring
 
@@ -657,7 +661,7 @@ example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinde
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	public class RegisterUserController {
@@ -679,7 +683,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	class RegisterUserController(

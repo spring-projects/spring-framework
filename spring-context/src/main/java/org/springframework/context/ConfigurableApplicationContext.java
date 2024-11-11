@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context;
 
 import java.io.Closeable;
+import java.util.concurrent.Executor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -52,6 +53,16 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
 	 */
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
+
+	/**
+	 * The name of the {@link Executor bootstrap executor} bean in the context.
+	 * If none is supplied, no background bootstrapping will be active.
+	 * @since 6.2
+	 * @see java.util.concurrent.Executor
+	 * @see org.springframework.core.task.TaskExecutor
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setBootstrapExecutor
+	 */
+	String BOOTSTRAP_EXECUTOR_BEAN_NAME = "bootstrapExecutor";
 
 	/**
 	 * Name of the ConversionService bean in the factory.
@@ -213,8 +224,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * on JVM shutdown unless it has already been closed at that time.
 	 * <p>This method can be called multiple times. Only one shutdown hook
 	 * (at max) will be registered for each context instance.
-	 * <p>As of Spring Framework 5.2, the {@linkplain Thread#getName() name} of
-	 * the shutdown hook thread should be {@link #SHUTDOWN_HOOK_THREAD_NAME}.
+	 * <p>The {@linkplain Thread#getName() name} of the shutdown hook thread
+	 * should be {@link #SHUTDOWN_HOOK_THREAD_NAME}.
 	 * @see java.lang.Runtime#addShutdownHook
 	 * @see #close()
 	 */
@@ -230,6 +241,18 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	@Override
 	void close();
+
+	/**
+	 * Return whether this context has been closed already, that is,
+	 * whether {@link #close()} has been called on an active context
+	 * in order to initiate its shutdown.
+	 * <p>Note: This does not indicate whether context shutdown has completed.
+	 * Use {@link #isActive()} for differentiating between those scenarios:
+	 * a context becomes inactive once it has been fully shut down and the
+	 * original {@code close()} call has returned.
+	 * @since 6.2
+	 */
+	boolean isClosed();
 
 	/**
 	 * Determine whether this application context is active, that is,

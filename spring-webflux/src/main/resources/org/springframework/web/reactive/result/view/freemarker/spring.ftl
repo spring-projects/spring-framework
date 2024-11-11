@@ -64,8 +64,8 @@
  * bind
  *
  * Exposes a BindStatus object for the given bind path, which can be
- * a bean (e.g. "person") to get global errors, or a bean property
- * (e.g. "person.name") to get field errors. Can be called multiple times
+ * a bean (for example, "person") to get global errors, or a bean property
+ * (for example, "person.name") to get field errors. Can be called multiple times
  * within a form to bind to multiple command objects and/or field names.
  *
  * This macro will participate in the default HTML escape setting for the given

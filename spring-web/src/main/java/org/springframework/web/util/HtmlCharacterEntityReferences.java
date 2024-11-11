@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * HTML 4.0 standard.
  *
  * <p>A complete description of the HTML 4.0 character set can be found
- * at https://www.w3.org/TR/html4/charset.html.
+ * at <a href="https://www.w3.org/TR/html4/charset.html">https://www.w3.org/TR/html4/charset.html</a>.
  *
  * @author Juergen Hoeller
  * @author Martin Kersten
@@ -134,18 +134,14 @@ class HtmlCharacterEntityReferences {
 	@Nullable
 	public String convertToReference(char character, String encoding) {
 		if (encoding.startsWith("UTF-")){
-			switch (character){
-				case '<':
-					return "&lt;";
-				case '>':
-					return "&gt;";
-				case '"':
-					return "&quot;";
-				case '&':
-					return "&amp;";
-				case '\'':
-					return "&#39;";
-			}
+			return switch (character){
+				case '<' -> "&lt;";
+				case '>' -> "&gt;";
+				case '"' -> "&quot;";
+				case '&' -> "&amp;";
+				case '\'' -> "&#39;";
+				default -> null;
+			};
 		}
 		else if (character < 1000 || (character >= 8000 && character < 10000)) {
 			int index = (character < 1000 ? character : character - 7000);

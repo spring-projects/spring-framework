@@ -69,6 +69,7 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		if (!headers.isEmpty()) {
 			this.request.headers(httpFields -> {

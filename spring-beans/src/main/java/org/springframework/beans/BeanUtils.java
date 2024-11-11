@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,11 +33,9 @@ import java.util.Map;
 import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
-import kotlin.jvm.JvmInline;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
-import kotlin.reflect.full.KAnnotatedElements;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -127,7 +126,7 @@ public abstract class BeanUtils {
 	 * The cause may notably indicate a {@link NoSuchMethodException} if no
 	 * primary/default constructor was found, a {@link NoClassDefFoundError}
 	 * or other {@link LinkageError} in case of an unresolvable class definition
-	 * (e.g. due to a missing dependency at runtime), or an exception thrown
+	 * (for example, due to a missing dependency at runtime), or an exception thrown
 	 * from the constructor invocation itself.
 	 * @see Constructor#newInstance
 	 */
@@ -226,9 +225,10 @@ public abstract class BeanUtils {
 
 	/**
 	 * Return a resolvable constructor for the provided class, either a primary or single
-	 * public constructor with arguments, or a single non-public constructor with arguments,
-	 * or simply a default constructor. Callers have to be prepared to resolve arguments
-	 * for the returned constructor's parameters, if any.
+	 * public constructor with arguments, a single non-public constructor with arguments
+	 * or simply a default constructor.
+	 * <p>Callers have to be prepared to resolve arguments for the returned constructor's
+	 * parameters, if any.
 	 * @param clazz the class to check
 	 * @throws IllegalStateException in case of no unique constructor found at all
 	 * @since 5.3
@@ -250,7 +250,7 @@ public abstract class BeanUtils {
 			// No public constructors -> check non-public
 			ctors = clazz.getDeclaredConstructors();
 			if (ctors.length == 1) {
-				// A single non-public constructor, e.g. from a non-public record type
+				// A single non-public constructor, for example, from a non-public record type
 				return (Constructor<T>) ctors[0];
 			}
 		}
@@ -270,17 +270,31 @@ public abstract class BeanUtils {
 	/**
 	 * Return the primary constructor of the provided class. For Kotlin classes, this
 	 * returns the Java constructor corresponding to the Kotlin primary constructor
-	 * (as defined in the Kotlin specification). Otherwise, in particular for non-Kotlin
-	 * classes, this simply returns {@code null}.
+	 * (as defined in the Kotlin specification). For Java records, this returns the
+	 * canonical constructor. Otherwise, this simply returns {@code null}.
 	 * @param clazz the class to check
 	 * @since 5.0
-	 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
+	 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin constructors</a>
+	 * @see <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.10.4">Record constructor declarations</a>
 	 */
 	@Nullable
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
 			return KotlinDelegate.findPrimaryConstructor(clazz);
+		}
+		if (clazz.isRecord()) {
+			try {
+				// Use the canonical constructor which is always present
+				RecordComponent[] components = clazz.getRecordComponents();
+				Class<?>[] paramTypes = new Class<?>[components.length];
+				for (int i = 0; i < components.length; i++) {
+					paramTypes[i] = components[i].getType();
+				}
+				return clazz.getDeclaredConstructor(paramTypes);
+			}
+			catch (NoSuchMethodException ignored) {
+			}
 		}
 		return null;
 	}
@@ -540,7 +554,7 @@ public abstract class BeanUtils {
 
 	/**
 	 * Find a JavaBeans PropertyEditor following the 'Editor' suffix convention
-	 * (e.g. "mypackage.MyDomainClass" &rarr; "mypackage.MyDomainClassEditor").
+	 * (for example, "mypackage.MyDomainClass" &rarr; "mypackage.MyDomainClassEditor").
 	 * <p>Compatible to the standard JavaBeans convention as implemented by
 	 * {@link java.beans.PropertyEditorManager} but isolated from the latter's
 	 * registered default editors for primitive types.
@@ -562,7 +576,7 @@ public abstract class BeanUtils {
 				}
 			}
 			catch (Throwable ex) {
-				// e.g. AccessControlException on Google App Engine
+				// for example, AccessControlException on Google App Engine
 				return null;
 			}
 		}
@@ -605,6 +619,22 @@ public abstract class BeanUtils {
 			}
 		}
 		return Object.class;
+	}
+
+	/**
+	 * Determine whether the specified property has a unique write method,
+	 * i.e. is writable but does not declare overloaded setter methods.
+	 * @param pd the PropertyDescriptor for the property
+	 * @return {@code true} if writable and unique, {@code false} otherwise
+	 * @since 6.1.4
+	 */
+	public static boolean hasUniqueWriteMethod(PropertyDescriptor pd) {
+		if (pd instanceof GenericTypeAwarePropertyDescriptor gpd) {
+			return gpd.hasUniqueWriteMethod();
+		}
+		else {
+			return (pd.getWriteMethod() != null);
+		}
 	}
 
 	/**
@@ -858,8 +888,7 @@ public abstract class BeanUtils {
 				if (primaryCtor == null) {
 					return null;
 				}
-				if (kClass.isValue() && !KAnnotatedElements
-						.findAnnotations(kClass, JvmClassMappingKt.getKotlinClass(JvmInline.class)).isEmpty()) {
+				if (KotlinDetector.isInlineClass(clazz)) {
 					Constructor<?>[] constructors = clazz.getDeclaredConstructors();
 					Assert.state(constructors.length == 1,
 							"Kotlin value classes annotated with @JvmInline are expected to have a single JVM constructor");

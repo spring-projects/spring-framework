@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,10 @@ public interface ITestBean extends AgeHolder {
 	String getName();
 
 	void setName(String name);
+
+	default void applyName(Object name) {
+		setName(String.valueOf(name));
+	}
 
 	ITestBean getSpouse();
 

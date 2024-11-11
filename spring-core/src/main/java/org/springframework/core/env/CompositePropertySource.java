@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Composite {@link PropertySource} implementation that iterates over a set of
  * {@link PropertySource} instances. Necessary in cases where multiple property sources
- * share the same name, e.g. when multiple values are supplied to {@code @PropertySource}.
+ * share the same name, for example, when multiple values are supplied to {@code @PropertySource}.
  *
  * <p>As of Spring 4.1.2, this class extends {@link EnumerablePropertySource} instead
  * of plain {@link PropertySource}, exposing {@link #getPropertyNames()} based on the
@@ -89,7 +90,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 			namesList.add(names);
 			total += names.length;
 		}
-		Set<String> allNames = new LinkedHashSet<>(total);
+		Set<String> allNames = CollectionUtils.newLinkedHashSet(total);
 		namesList.forEach(names -> Collections.addAll(allNames, names));
 		return StringUtils.toStringArray(allNames);
 	}

@@ -415,7 +415,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Subclasses can invoke this method to populate the MessagingAdviceBean cache
-	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
+	 * (for example, to support "global" {@code @MessageExceptionHandler}).
 	 * @since 4.2
 	 */
 	protected void registerExceptionHandlerAdvice(
@@ -522,6 +522,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		handleMatch(bestMatch.mapping, bestMatch.handlerMethod, lookupDestination, message);
 	}
 
+	@SuppressWarnings("NullAway")
 	private void addMatchesToCollection(Collection<T> mappingsToCheck, Message<?> message, List<Match> matches) {
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);

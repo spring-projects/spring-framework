@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public interface AutowireCandidateResolver {
 	 * <p>The default implementation checks {@link DependencyDescriptor#isRequired()}.
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return whether the descriptor is marked as required or possibly indicating
-	 * non-required status some other way (e.g. through a parameter annotation)
+	 * non-required status some other way (for example, through a parameter annotation)
 	 * @since 5.0
 	 * @see DependencyDescriptor#isRequired()
 	 */
@@ -70,6 +70,18 @@ public interface AutowireCandidateResolver {
 	 */
 	default boolean hasQualifier(DependencyDescriptor descriptor) {
 		return false;
+	}
+
+	/**
+	 * Determine whether a target bean name is suggested for the given dependency
+	 * (typically - but not necessarily - declared with a single-value qualifier).
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return the qualifier value, if any
+	 * @since 6.2
+	 */
+	@Nullable
+	default String getSuggestedName(DependencyDescriptor descriptor) {
+		return null;
 	}
 
 	/**

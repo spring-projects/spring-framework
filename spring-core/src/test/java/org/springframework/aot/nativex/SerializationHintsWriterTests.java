@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.core.env.Environment;
  *
  * @author Sebastien Deleuze
  */
-public class SerializationHintsWriterTests {
+class SerializationHintsWriterTests {
 
 	@Test
 	void shouldWriteEmptyHint() throws JSONException {
@@ -52,8 +52,8 @@ public class SerializationHintsWriterTests {
 	@Test
 	void shouldWriteMultipleHints() throws JSONException {
 		SerializationHints hints = new SerializationHints()
-				.registerType(TypeReference.of(String.class))
-				.registerType(TypeReference.of(Environment.class));
+				.registerType(TypeReference.of(Environment.class))
+				.registerType(TypeReference.of(String.class));
 		assertEquals("""
 				[
 					{ "name": "java.lang.String" },
@@ -75,7 +75,7 @@ public class SerializationHintsWriterTests {
 		StringWriter out = new StringWriter();
 		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
 		SerializationHintsWriter.INSTANCE.write(writer, hints);
-		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.NON_EXTENSIBLE);
+		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.STRICT);
 	}
 
 }

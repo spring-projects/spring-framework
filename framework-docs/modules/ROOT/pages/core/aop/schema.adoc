@@ -136,7 +136,7 @@ parameters of the matching names, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public void monitor(Object service) {
 		// ...
@@ -145,7 +145,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	fun monitor(service: Any) {
 		// ...
@@ -282,14 +282,14 @@ example, you can declare the method signature as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public void doAccessCheck(Object retVal) {...
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	fun doAccessCheck(retVal: Any) {...
 ----
@@ -340,14 +340,14 @@ The type of this parameter constrains matching in the same way as described for
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public void doRecoveryActions(DataAccessException dataAccessEx) {...
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	fun doRecoveryActions(dataAccessEx: DataAccessException) {...
 ----
@@ -421,7 +421,7 @@ The implementation of the `doBasicProfiling` advice can be exactly the same as i
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
 		// start stopwatch
@@ -433,7 +433,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	fun doBasicProfiling(pjp: ProceedingJoinPoint): Any? {
 		// start stopwatch
@@ -475,7 +475,7 @@ some around advice used in conjunction with a number of strongly typed parameter
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package com.xyz.service;
 
@@ -494,7 +494,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package com.xyz.service
 
@@ -521,7 +521,7 @@ proceed with the method call. The presence of this parameter is an indication th
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package com.xyz;
 
@@ -545,7 +545,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package com.xyz
 
@@ -610,7 +610,7 @@ Consider the following driver script:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public class Boot {
 
@@ -624,7 +624,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("beans.xml")
@@ -714,7 +714,7 @@ The class that backs the `usageTracking` bean would then contain the following m
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public void recordUsage(UsageTracked usageTracked) {
 		usageTracked.incrementUseCount();
@@ -723,7 +723,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	fun recordUsage(usageTracked: UsageTracked) {
 		usageTracked.incrementUseCount()
@@ -742,14 +742,14 @@ following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	val usageTracked = context.getBean("myService", UsageTracked.class)
 ----
@@ -829,7 +829,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public class ConcurrentOperationExecutor implements Ordered {
 
@@ -869,7 +869,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	class ConcurrentOperationExecutor : Ordered {
 
@@ -953,7 +953,7 @@ to annotate the implementation of service operations, as the following example s
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	// marker annotation
@@ -963,7 +963,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Retention(AnnotationRetention.RUNTIME)
 	// marker annotation

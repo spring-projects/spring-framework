@@ -1,7 +1,7 @@
 [[testcontext-application-events]]
 = Application Events
 
-Since Spring Framework 5.3.3, the TestContext framework provides support for recording
+The TestContext framework provides support for recording
 xref:core/beans/context-introduction.adoc#context-functionality-events[application events] published in the
 `ApplicationContext` so that assertions can be performed against those events within
 tests. All events published during the execution of a single test are made available via
@@ -32,7 +32,7 @@ published while invoking a method in a Spring-managed component:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@SpringJUnitConfig(/* ... */)
 	@RecordApplicationEvents // <1>
@@ -60,7 +60,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@SpringJUnitConfig(/* ... */)
 	@RecordApplicationEvents // <1>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,18 +67,12 @@ public abstract class TagUtils {
 	 */
 	public static int getScope(String scope) {
 		Assert.notNull(scope, "Scope to search for cannot be null");
-		if (scope.equals(SCOPE_REQUEST)) {
-			return PageContext.REQUEST_SCOPE;
-		}
-		else if (scope.equals(SCOPE_SESSION)) {
-			return PageContext.SESSION_SCOPE;
-		}
-		else if (scope.equals(SCOPE_APPLICATION)) {
-			return PageContext.APPLICATION_SCOPE;
-		}
-		else {
-			return PageContext.PAGE_SCOPE;
-		}
+		return switch (scope) {
+			case SCOPE_REQUEST -> PageContext.REQUEST_SCOPE;
+			case SCOPE_SESSION -> PageContext.SESSION_SCOPE;
+			case SCOPE_APPLICATION -> PageContext.APPLICATION_SCOPE;
+			default -> PageContext.PAGE_SCOPE;
+		};
 	}
 
 	/**

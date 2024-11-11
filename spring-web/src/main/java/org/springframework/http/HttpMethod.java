@@ -129,7 +129,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 
 	/**
-	 * Return the name of this method, e.g. "GET", "POST".
+	 * Return the name of this method, for example, "GET", "POST".
 	 */
 	public String name() {
 		return this.name;

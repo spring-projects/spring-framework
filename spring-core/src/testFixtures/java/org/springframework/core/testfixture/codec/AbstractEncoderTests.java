@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,14 +67,14 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 	 * Subclasses should implement this method to test {@link Encoder#canEncode}.
 	 */
 	@Test
-	public abstract void canEncode() throws Exception;
+	protected abstract void canEncode() throws Exception;
 
 	/**
 	 * Subclasses should implement this method to test {@link Encoder#encode}, possibly using
 	 * {@link #testEncodeAll} or other helper methods.
 	 */
 	@Test
-	public abstract void encode() throws Exception;
+	protected abstract void encode() throws Exception;
 
 
 	/**
@@ -251,7 +251,7 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 		return dataBuffer -> {
 			String actual = dataBuffer.toString(UTF_8);
 			release(dataBuffer);
-			assertThat(actual).isEqualTo(expected);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 		};
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,20 +46,20 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public class MethodInvocationProceedingJoinPointTests {
+class MethodInvocationProceedingJoinPointTests {
 
 	@Test
-	public void testingBindingWithJoinPoint() {
+	void testingBindingWithJoinPoint() {
 		assertThatIllegalStateException().isThrownBy(AbstractAspectJAdvice::currentJoinPoint);
 	}
 
 	@Test
-	public void testingBindingWithProceedingJoinPoint() {
+	void testingBindingWithProceedingJoinPoint() {
 		assertThatIllegalStateException().isThrownBy(AbstractAspectJAdvice::currentJoinPoint);
 	}
 
 	@Test
-	public void testCanGetMethodSignatureFromJoinPoint() {
+	void testCanGetMethodSignatureFromJoinPoint() {
 		final Object raw = new TestBean();
 		// Will be set by advice during a method call
 		final int newAge = 23;
@@ -118,7 +118,7 @@ public class MethodInvocationProceedingJoinPointTests {
 	}
 
 	@Test
-	public void testCanGetSourceLocationFromJoinPoint() {
+	void testCanGetSourceLocationFromJoinPoint() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
@@ -135,7 +135,7 @@ public class MethodInvocationProceedingJoinPointTests {
 	}
 
 	@Test
-	public void testCanGetStaticPartFromJoinPoint() {
+	void testCanGetStaticPartFromJoinPoint() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
@@ -152,7 +152,7 @@ public class MethodInvocationProceedingJoinPointTests {
 	}
 
 	@Test
-	public void toShortAndLongStringFormedCorrectly() throws Exception {
+	void toShortAndLongStringFormedCorrectly() {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);

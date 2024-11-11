@@ -10,18 +10,22 @@ by default, exactly in the following order:
   annotation for "`before`" modes.
 * `ApplicationEventsTestExecutionListener`: Provides support for
   xref:testing/testcontext-framework/application-events.adoc[`ApplicationEvents`].
+* `BeanOverrideTestExecutionListener`: Provides support for xref:testing/testcontext-framework/bean-overriding.adoc[] .
 * `DependencyInjectionTestExecutionListener`: Provides dependency injection for the test
   instance.
 * `MicrometerObservationRegistryTestExecutionListener`: Provides support for
   Micrometer's `ObservationRegistry`.
 * `DirtiesContextTestExecutionListener`: Handles the `@DirtiesContext` annotation for
   "`after`" modes.
+* `CommonCachesTestExecutionListener`: Clears resource caches in the test's
+  `ApplicationContext` if necessary.
 * `TransactionalTestExecutionListener`: Provides transactional test execution with
   default rollback semantics.
 * `SqlScriptsTestExecutionListener`: Runs SQL scripts configured by using the `@Sql`
   annotation.
 * `EventPublishingTestExecutionListener`: Publishes test execution events to the test's
   `ApplicationContext` (see xref:testing/testcontext-framework/test-execution-events.adoc[Test Execution Events]).
+* `MockitoResetTestExecutionListener`: Resets mocks as configured by `@MockitoBean` or `@MockitoSpyBean`.
 
 [[testcontext-tel-config-registering-tels]]
 == Registering `TestExecutionListener` Implementations
@@ -43,7 +47,7 @@ following.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Switch to default listeners
 	@TestExecutionListeners(
@@ -57,7 +61,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Switch to default listeners
 	@TestExecutionListeners(
@@ -80,12 +84,12 @@ become cumbersome if a custom listener needs to be used across an entire test su
 issue is addressed through support for automatic discovery of default
 `TestExecutionListener` implementations through the `SpringFactoriesLoader` mechanism.
 
-Specifically, the `spring-test` module declares all core default `TestExecutionListener`
+For example, the `spring-test` module declares all core default `TestExecutionListener`
 implementations under the `org.springframework.test.context.TestExecutionListener` key in
-its `META-INF/spring.factories` properties file. Third-party frameworks and developers
-can contribute their own `TestExecutionListener` implementations to the list of default
-listeners in the same manner through their own `META-INF/spring.factories` properties
-file.
+its {spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[`META-INF/spring.factories`
+properties file]. Third-party frameworks and developers can contribute their own
+`TestExecutionListener` implementations to the list of default listeners in the same
+manner through their own `spring.factories` files.
 
 [[testcontext-tel-config-ordering]]
 == Ordering `TestExecutionListener` Implementations
@@ -114,7 +118,7 @@ listeners. The following listing demonstrates this style of configuration:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestExecutionListeners({
@@ -133,7 +137,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(
@@ -181,7 +185,7 @@ be replaced with the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(
@@ -195,7 +199,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(
@@ -207,4 +211,3 @@ Kotlin::
 	}
 ----
 ======
-

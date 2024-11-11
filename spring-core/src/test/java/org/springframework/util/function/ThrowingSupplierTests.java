@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class ThrowingSupplierTests {
 		ThrowingSupplier<Object> modified = supplier.throwing(
 				IllegalStateException::new);
 		assertThatIllegalStateException().isThrownBy(
-				() -> modified.get()).withCauseInstanceOf(IOException.class);
+				modified::get).withCauseInstanceOf(IOException.class);
 	}
 
 	@Test
@@ -74,14 +74,14 @@ class ThrowingSupplierTests {
 		ThrowingSupplier<Object> supplier = ThrowingSupplier.of(
 				this::throwIOException, IllegalStateException::new);
 		assertThatIllegalStateException().isThrownBy(
-				() -> supplier.get()).withCauseInstanceOf(IOException.class);
+				supplier::get).withCauseInstanceOf(IOException.class);
 	}
 
 	private Object throwIOException() throws IOException {
 		throw new IOException();
 	}
 
-	private Object throwIllegalArgumentException() throws IOException {
+	private Object throwIllegalArgumentException() {
 		throw new IllegalArgumentException();
 	}
 

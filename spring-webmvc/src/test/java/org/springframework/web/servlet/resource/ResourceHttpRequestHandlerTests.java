@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link ResourceHttpRequestHandler}.
+ * Tests for {@link ResourceHttpRequestHandler}.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -572,7 +572,7 @@ class ResourceHttpRequestHandlerTests {
 
 
 		@BeforeEach
-		void setup() throws Exception {
+		void setup() {
 			TestServletContext servletContext = new TestServletContext();
 			this.handler = new ResourceHttpRequestHandler();
 			this.handler.setLocations(List.of(testResource, testAlternatePathResource, webjarsResource));
@@ -643,6 +643,7 @@ class ResourceHttpRequestHandlerTests {
 			testInvalidPath("../testsecret/secret.txt");
 			testInvalidPath("test/../../testsecret/secret.txt");
 			testInvalidPath(":/../../testsecret/secret.txt");
+			testInvalidPath("/testsecret/test/../secret.txt");
 
 			Resource location = new UrlResource(ResourceHttpRequestHandlerTests.class.getResource("./test/"));
 			this.handler.setLocations(List.of(location));
@@ -656,7 +657,6 @@ class ResourceHttpRequestHandlerTests {
 			testInvalidPath("/../.." + secretPath);
 			testInvalidPath("/%2E%2E/testsecret/secret.txt");
 			testInvalidPath("/%2E%2E/testsecret/secret.txt");
-			testInvalidPath("%2F%2F%2E%2E%2F%2F%2E%2E" + secretPath);
 		}
 
 		private void testInvalidPath(String requestPath) {

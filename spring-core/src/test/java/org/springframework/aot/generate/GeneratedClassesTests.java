@@ -16,7 +16,6 @@
 
 package org.springframework.aot.generate;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -158,8 +157,7 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	void writeToInvokeTypeSpecCustomizer() throws IOException {
+	void writeToInvokeTypeSpecCustomizer() {
 		Consumer<TypeSpec.Builder> typeSpecCustomizer = mock();
 		this.generatedClasses.addForFeatureComponent("one", TestComponent.class, typeSpecCustomizer);
 		verifyNoInteractions(typeSpecCustomizer);

@@ -34,7 +34,7 @@ class MonthFormatter implements Formatter<Month> {
 
 	@Override
 	public Month parse(String text, Locale locale) throws ParseException {
-		return Month.valueOf(text.toUpperCase());
+		return Month.valueOf(text.toUpperCase(Locale.ROOT));
 	}
 
 	@Override

@@ -1,0 +1,19 @@
+<!-- tag::snippet[] -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:websocket="http://www.springframework.org/schema/websocket"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket
+		https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+	<websocket:handlers>
+		<websocket:mapping path="/myHandler" handler="myHandler"/>
+		<websocket:sockjs/>
+	</websocket:handlers>
+
+	<bean id="myHandler" class="org.springframework.docs.web.websocket.websocketserverhandler.MyHandler"/>
+
+</beans>
+<!-- end::snippet[] -->

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * Unit tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
+ * Tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
  * forces the predicted type of a FactoryBean, effectively preventing retrieval of the
  * bean from calls to #getBeansOfType(FactoryBean.class). The implementation of
  * {@link AbstractBeanFactory#isFactoryBean(String, RootBeanDefinition)} now ensures that
@@ -40,65 +40,60 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Oliver Gierke
  */
-public class Spr8954Tests {
+class Spr8954Tests {
 
 	private DefaultListableBeanFactory bf;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));
 		bf.addBeanPostProcessor(new PredictingBPP());
 	}
 
 	@Test
-	public void repro() {
+	void repro() {
 		assertThat(bf.getBean("foo")).isInstanceOf(Foo.class);
 		assertThat(bf.getBean("&foo")).isInstanceOf(FooFactoryBean.class);
 		assertThat(bf.isTypeMatch("&foo", FactoryBean.class)).isTrue();
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(fbBeans).hasSize(1);
-		assertThat(fbBeans.keySet()).contains("&foo");
+		assertThat(fbBeans).containsOnlyKeys("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(aiBeans).hasSize(1);
-		assertThat(aiBeans.keySet()).contains("&foo");
+		assertThat(aiBeans).containsOnlyKeys("&foo");
 	}
 
 	@Test
-	public void findsBeansByTypeIfNotInstantiated() {
+	void findsBeansByTypeIfNotInstantiated() {
 		assertThat(bf.isTypeMatch("&foo", FactoryBean.class)).isTrue();
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(fbBeans.size()).isEqualTo(1);
-		assertThat(fbBeans.keySet().iterator().next()).isEqualTo("&foo");
+		assertThat(fbBeans).containsOnlyKeys("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(aiBeans).hasSize(1);
-		assertThat(aiBeans.keySet()).contains("&foo");
+		assertThat(aiBeans).containsOnlyKeys("&foo");
 	}
 
 	/**
 	 * SPR-10517
 	 */
 	@Test
-	public void findsFactoryBeanNameByTypeWithoutInstantiation() {
+	void findsFactoryBeanNameByTypeWithoutInstantiation() {
 		String[] names = bf.getBeanNamesForType(AnInterface.class, false, false);
 		assertThat(Arrays.asList(names)).contains("&foo");
 
 		Map<String, AnInterface> beans = bf.getBeansOfType(AnInterface.class, false, false);
-		assertThat(beans).hasSize(1);
-		assertThat(beans.keySet()).contains("&foo");
+		assertThat(beans).containsOnlyKeys("&foo");
 	}
 
 
 	static class FooFactoryBean implements FactoryBean<Foo>, AnInterface {
 
 		@Override
-		public Foo getObject() throws Exception {
+		public Foo getObject() {
 			return new Foo();
 		}
 

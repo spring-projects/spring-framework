@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.mail.javamail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -38,6 +39,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
@@ -72,7 +74,7 @@ class JavaMailSenderTests {
 		simpleMessage.setTo("you@mail.org");
 		simpleMessage.setCc("he@mail.org", "she@mail.org");
 		simpleMessage.setBcc("us@mail.org", "them@mail.org");
-		Date sentDate = new GregorianCalendar(2004, 1, 1).getTime();
+		Date sentDate = new GregorianCalendar(2004, Calendar.FEBRUARY, 1).getTime();
 		simpleMessage.setSentDate(sentDate);
 		simpleMessage.setSubject("my subject");
 		simpleMessage.setText("my text");
@@ -270,6 +272,25 @@ class JavaMailSenderTests {
 	}
 
 	@Test
+	void javaMailSenderWithMimeMessageHelperAndCustomResource() throws Exception {
+		sender.setHost("host");
+		sender.setUsername("username");
+		sender.setPassword("password");
+
+		MimeMessageHelper message = new MimeMessageHelper(sender.createMimeMessage(), true);
+		message.setTo("you@mail.org");
+		message.addInline("id", new ByteArrayResource(new byte[] {1, 2, 3}));
+
+		sender.send(message.getMimeMessage());
+
+		assertThat(sender.transport.getConnectedHost()).isEqualTo("host");
+		assertThat(sender.transport.getConnectedUsername()).isEqualTo("username");
+		assertThat(sender.transport.getConnectedPassword()).isEqualTo("password");
+		assertThat(sender.transport.isCloseCalled()).isTrue();
+		assertThat(sender.transport.getSentMessages()).containsExactly(message.getMimeMessage());
+	}
+
+	@Test
 	void javaMailSenderWithParseExceptionOnSimpleMessage() {
 		SimpleMailMessage simpleMessage = new SimpleMailMessage();
 		simpleMessage.setFrom("");
@@ -305,7 +326,7 @@ class JavaMailSenderTests {
 		MimeMessage mimeMessage = sender.createMimeMessage();
 		mimeMessage.setSubject("custom");
 		mimeMessage.setRecipient(RecipientType.TO, new InternetAddress("you@mail.org"));
-		mimeMessage.setSentDate(new GregorianCalendar(2005, 3, 1).getTime());
+		mimeMessage.setSentDate(new GregorianCalendar(2005, Calendar.APRIL, 1).getTime());
 		sender.send(mimeMessage);
 
 		assertThat(sender.transport.getConnectedHost()).isEqualTo("host");
@@ -386,9 +407,9 @@ class JavaMailSenderTests {
 			assertThat(sender.transport.isCloseCalled()).isTrue();
 			assertThat(sender.transport.getSentMessages()).hasSize(1);
 			assertThat(sender.transport.getSentMessage(0).getAllRecipients()[0]).isEqualTo(new InternetAddress("she@mail.org"));
-			assertThat(ex.getFailedMessages().keySet()).containsExactly(simpleMessage1);
-			Exception subEx = ex.getFailedMessages().values().iterator().next();
-			assertThat(subEx).isInstanceOf(MessagingException.class).hasMessage("failed");
+			assertThat(ex.getFailedMessages()).containsOnlyKeys(simpleMessage1);
+			assertThat(ex.getFailedMessages().get(simpleMessage1))
+					.isInstanceOf(MessagingException.class).hasMessage("failed");
 		}
 	}
 
@@ -413,9 +434,9 @@ class JavaMailSenderTests {
 			assertThat(sender.transport.getConnectedPassword()).isEqualTo("password");
 			assertThat(sender.transport.isCloseCalled()).isTrue();
 			assertThat(sender.transport.getSentMessages()).containsExactly(mimeMessage2);
-			assertThat(ex.getFailedMessages().keySet()).containsExactly(mimeMessage1);
-			Exception subEx = ex.getFailedMessages().values().iterator().next();
-			assertThat(subEx).isInstanceOf(MessagingException.class).hasMessage("failed");
+			assertThat(ex.getFailedMessages()).containsOnlyKeys(mimeMessage1);
+			assertThat(ex.getFailedMessages().get(mimeMessage1))
+					.isInstanceOf(MessagingException.class).hasMessage("failed");
 		}
 	}
 
@@ -456,7 +477,7 @@ class JavaMailSenderTests {
 		private String connectedUsername = null;
 		private String connectedPassword = null;
 		private boolean closeCalled = false;
-		private List<Message> sentMessages = new ArrayList<>();
+		private final List<Message> sentMessages = new ArrayList<>();
 
 		private MockTransport(Session session, URLName urlName) {
 			super(session, urlName);
@@ -504,7 +525,7 @@ class JavaMailSenderTests {
 
 		@Override
 		public synchronized void close() throws MessagingException {
-			if ("".equals(connectedHost)) {
+			if (this.connectedHost.isEmpty()) {
 				throw new MessagingException("close failure");
 			}
 			this.closeCalled = true;
@@ -523,7 +544,7 @@ class JavaMailSenderTests {
 				throw new MessagingException("No sentDate specified");
 			}
 			if (message.getSubject() != null && message.getSubject().contains("custom")) {
-				assertThat(message.getSentDate()).isEqualTo(new GregorianCalendar(2005, 3, 1).getTime());
+				assertThat(message.getSentDate()).isEqualTo(new GregorianCalendar(2005, Calendar.APRIL, 1).getTime());
 			}
 			this.sentMessages.add(message);
 		}

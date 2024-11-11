@@ -18,7 +18,10 @@ asciidoc:
     # FIXME: The package is not renamed
     chomp: 'all'
     fold: 'all'
+    table-stripes: 'odd'
     include-java: 'example$docs-src/main/java/org/springframework/docs'
+    include-kotlin: 'example$docs-src/main/kotlin/org/springframework/docs'
+    include-xml: 'example$docs-src/main/resources/org/springframework/docs'
     spring-site: 'https://spring.io'
     spring-site-blog: '{spring-site}/blog'
     spring-site-cve: "{spring-site}/security"
@@ -39,7 +42,8 @@ asciidoc:
     spring-framework-reference: '{spring-framework-docs-root}/{spring-version}/reference'
     #
     # Other Spring portfolio projects
-    spring-boot-docs: '{docs-site}/spring-boot/docs/current/reference/html'
+    spring-boot-docs: '{docs-site}/spring-boot'
+    spring-boot-docs-ref: '{spring-boot-docs}/reference'
     spring-boot-issues: '{spring-github-org}/spring-boot/issues'
     # TODO add more projects / links or just build up on {docs-site}?
     # TODO rename the below using new conventions
@@ -69,6 +73,9 @@ asciidoc:
     kotlin-coroutines-api: '{kotlin-site}/api/kotlinx.coroutines'
     kotlin-github-org: 'https://github.com/Kotlin'
     kotlin-issues: 'https://youtrack.jetbrains.com/issue'
+    micrometer-docs: 'https://docs.micrometer.io/micrometer/reference'
+    micrometer-context-propagation-docs: 'https://docs.micrometer.io/context-propagation/reference'
+    petclinic-github-org: 'https://github.com/spring-petclinic'
     reactive-streams-site: 'https://www.reactive-streams.org'
     reactive-streams-spec: 'https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#specification'
     reactor-github-org: 'https://github.com/reactor'
@@ -87,3 +94,4 @@ asciidoc:
     stackoverflow-spring-tag: "{stackoverflow-questions}/tagged/spring"
     stackoverflow-spring-kotlin-tags: "{stackoverflow-spring-tag}+kotlin"
     testcontainers-site: 'https://www.testcontainers.org'
+    vavr-docs: 'https://vavr-io.github.io/vavr-docs'

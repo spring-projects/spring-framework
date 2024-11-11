@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,30 +55,30 @@ public class DefaultListableBeanFactoryBenchmark {
 			RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 
 			switch (this.mode) {
-				case "simple":
-					break;
-				case "dependencyCheck":
+				case "simple" -> {
+				}
+				case "dependencyCheck" -> {
 					rbd = new RootBeanDefinition(LifecycleBean.class);
 					rbd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 					this.beanFactory.addBeanPostProcessor(new LifecycleBean.PostProcessor());
-					break;
-				case "constructor":
+				}
+				case "constructor" -> {
 					rbd.getConstructorArgumentValues().addGenericArgumentValue("juergen");
 					rbd.getConstructorArgumentValues().addGenericArgumentValue("99");
-					break;
-				case "constructorArgument":
+				}
+				case "constructorArgument" -> {
 					rbd.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("spouse"));
 					this.beanFactory.registerBeanDefinition("test", rbd);
 					this.beanFactory.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-					break;
-				case "properties":
+				}
+				case "properties" -> {
 					rbd.getPropertyValues().add("name", "juergen");
 					rbd.getPropertyValues().add("age", "99");
-					break;
-				case "resolvedProperties":
+				}
+				case "resolvedProperties" -> {
 					rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 					this.beanFactory.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-					break;
+				}
 			}
 			rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 			this.beanFactory.registerBeanDefinition("test", rbd);

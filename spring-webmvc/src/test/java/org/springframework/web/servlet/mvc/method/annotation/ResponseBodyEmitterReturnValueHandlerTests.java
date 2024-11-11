@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,20 +56,20 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
- * Unit tests for {@link ResponseBodyEmitterReturnValueHandler}.
+ * Tests for {@link ResponseBodyEmitterReturnValueHandler}.
  *
  * @author Rossen Stoyanchev
  */
 class ResponseBodyEmitterReturnValueHandlerTests {
 
-	private ResponseBodyEmitterReturnValueHandler handler =
+	private final ResponseBodyEmitterReturnValueHandler handler =
 			new ResponseBodyEmitterReturnValueHandler(List.of(new MappingJackson2HttpMessageConverter()));
 
-	private MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletResponse response = new MockHttpServletResponse();
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private NativeWebRequest webRequest = new ServletWebRequest(this.request, this.response);
+	private final NativeWebRequest webRequest = new ServletWebRequest(this.request, this.response);
 
 	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
@@ -93,12 +93,15 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(ResponseEntity.class, ResponseBodyEmitter.class))).isTrue();
 
-		assertThat(this.handler.supportsReturnType(
-				on(TestController.class).resolveReturnType(Flux.class, String.class))).isTrue();
+		ResolvableType stringFlux = forClassWithGenerics(Flux.class, String.class);
 
 		assertThat(this.handler.supportsReturnType(
-				on(TestController.class).resolveReturnType(forClassWithGenerics(ResponseEntity.class,
-								forClassWithGenerics(Flux.class, String.class))))).isTrue();
+				on(TestController.class).resolveReturnType(stringFlux))).isTrue();
+
+		ResolvableType responseEntityStringFlux = forClassWithGenerics(ResponseEntity.class, stringFlux);
+
+		assertThat(this.handler.supportsReturnType(
+				on(TestController.class).resolveReturnType(responseEntityStringFlux))).isTrue();
 	}
 
 	@Test

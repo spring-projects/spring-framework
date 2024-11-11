@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,7 @@ class BeanNameAutoProxyCreatorTests {
 		int age = 5;
 		tb.setAge(age);
 		assertThat(tb.getAge()).isEqualTo(age);
-		boolean condition = tb instanceof TimeStamped;
-		assertThat(condition).as("Introduction was made").isTrue();
+		assertThat(tb).as("Introduction was made").isInstanceOf(TimeStamped.class);
 		assertThat(((TimeStamped) tb).getTimeStamp()).isEqualTo(0);
 		assertThat(nop.getCount()).isEqualTo(3);
 		assertThat(tb.getName()).isEqualTo("introductionUsingJdk");
@@ -98,8 +97,9 @@ class BeanNameAutoProxyCreatorTests {
 		// Can still mod second object
 		tb2.setAge(12);
 		// But can't mod first
-		assertThatExceptionOfType(LockedException.class).as("mixin should have locked this object").isThrownBy(() ->
-				tb.setAge(6));
+		assertThatExceptionOfType(LockedException.class)
+				.as("mixin should have locked this object")
+				.isThrownBy(() -> tb.setAge(6));
 	}
 
 	@Test
@@ -131,8 +131,9 @@ class BeanNameAutoProxyCreatorTests {
 		// Can still mod second object
 		tb2.setAge(12);
 		// But can't mod first
-		assertThatExceptionOfType(LockedException.class).as("mixin should have locked this object").isThrownBy(() ->
-				tb.setAge(6));
+		assertThatExceptionOfType(LockedException.class)
+				.as("mixin should have locked this object")
+				.isThrownBy(() -> tb.setAge(6));
 	}
 
 	@Test
@@ -198,7 +199,7 @@ class BeanNameAutoProxyCreatorTests {
 class CreatesTestBean implements FactoryBean<Object> {
 
 	@Override
-	public Object getObject() throws Exception {
+	public Object getObject() {
 		return new TestBean();
 	}
 

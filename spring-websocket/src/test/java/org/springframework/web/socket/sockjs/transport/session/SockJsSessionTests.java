@@ -187,7 +187,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 		this.session.close();
 
 		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
-		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.closeFrameGoAway());
+		assertThat(this.session.getSockJsFramesWritten()).element(0).isEqualTo(SockJsFrame.closeFrameGoAway());
 
 		assertThat(this.session.getNumberOfLastActiveTimeUpdates()).isEqualTo(1);
 		assertThat(this.session.didCancelHeartbeat()).isTrue();
@@ -236,7 +236,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 		this.session.writeFrame(SockJsFrame.openFrame());
 
 		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
-		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.openFrame());
+		assertThat(this.session.getSockJsFramesWritten()).element(0).isEqualTo(SockJsFrame.openFrame());
 	}
 
 	@Test
@@ -256,7 +256,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 		this.session.sendHeartbeat();
 
 		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
-		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.heartbeatFrame());
+		assertThat(this.session.getSockJsFramesWritten()).element(0).isEqualTo(SockJsFrame.heartbeatFrame());
 
 		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);

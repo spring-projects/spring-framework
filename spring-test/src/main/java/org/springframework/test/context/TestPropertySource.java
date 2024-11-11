@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
- * {@code @TestPropertySource} is a class-level annotation that is used to
- * configure the {@link #locations} of properties files and inlined
+ * {@code @TestPropertySource} is an annotation that can be applied to a test
+ * class to configure the {@link #locations} of properties files and inlined
  * {@link #properties} to be added to the {@code Environment}'s set of
  * {@code PropertySources} for an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
@@ -40,7 +40,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * operating system's environment or Java system properties as well as property
  * sources added by the application declaratively via
  * {@link org.springframework.context.annotation.PropertySource @PropertySource}
- * or programmatically (e.g., via an
+ * or programmatically (for example, via an
  * {@link org.springframework.context.ApplicationContextInitializer ApplicationContextInitializer}
  * or some other means). Thus, test property sources can be used to selectively
  * override properties defined in system and application property sources.
@@ -128,7 +128,7 @@ public @interface TestPropertySource {
 	 * test class is defined. A path starting with a slash will be treated as an
 	 * <em>absolute</em> classpath resource, for example:
 	 * {@code "/org/example/test.xml"}. A path which references a
-	 * URL (e.g., a path prefixed with
+	 * URL (for example, a path prefixed with
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.

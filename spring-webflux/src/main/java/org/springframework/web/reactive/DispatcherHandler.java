@@ -171,9 +171,10 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 		}
 		return resultMono.flatMap(result -> {
 			Mono<Void> voidMono = handleResult(exchange, result, "Handler " + result.getHandler());
-			if (result.getExceptionHandler() != null) {
+			DispatchExceptionHandler exceptionHandler = result.getExceptionHandler();
+			if (exceptionHandler != null) {
 				voidMono = voidMono.onErrorResume(ex ->
-						result.getExceptionHandler().handleError(exchange, ex).flatMap(result2 ->
+						exceptionHandler.handleError(exchange, ex).flatMap(result2 ->
 								handleResult(exchange, result2, "Exception handler " +
 										result2.getHandler() + ", error=\"" + ex.getMessage() + "\"")));
 			}

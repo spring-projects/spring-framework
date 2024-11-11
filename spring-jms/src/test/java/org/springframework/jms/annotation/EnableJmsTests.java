@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jms.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import jakarta.jms.JMSException;
 import jakarta.jms.MessageListener;
 import org.junit.jupiter.api.Test;
 
@@ -103,24 +102,20 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void containerAreStartedByDefault() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsDefaultContainerFactoryConfig.class, DefaultBean.class);
-		JmsListenerContainerTestFactory factory =
-				context.getBean(JmsListenerContainerTestFactory.class);
+		JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
 		assertThat(container.isAutoStartup()).isTrue();
 		assertThat(container.isStarted()).isTrue();
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void containerCanBeStarterViaTheRegistry() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsAutoStartupFalseConfig.class, DefaultBean.class);
-		JmsListenerContainerTestFactory factory =
-				context.getBean(JmsListenerContainerTestFactory.class);
+		JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
 		assertThat(container.isAutoStartup()).isFalse();
 		assertThat(container.isStarted()).isFalse();
@@ -131,13 +126,13 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 
 	@Override
 	@Test
-	void jmsHandlerMethodFactoryConfiguration() throws JMSException {
+	void jmsHandlerMethodFactoryConfiguration() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsHandlerMethodFactoryConfig.class, ValidationBean.class);
 
-		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
-				testJmsHandlerMethodFactoryConfiguration(context))
-			.withCauseInstanceOf(MethodArgumentNotValidException.class);
+		assertThatExceptionOfType(ListenerExecutionFailedException.class)
+				.isThrownBy(() -> testJmsHandlerMethodFactoryConfiguration(context))
+				.withCauseInstanceOf(MethodArgumentNotValidException.class);
 	}
 
 	@Override
@@ -159,19 +154,20 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	@Test
 	void composedJmsListeners() {
 		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-			EnableJmsDefaultContainerFactoryConfig.class, ComposedJmsListenersBean.class)) {
-			JmsListenerContainerTestFactory simpleFactory = context.getBean("jmsListenerContainerFactory",
-				JmsListenerContainerTestFactory.class);
+				EnableJmsDefaultContainerFactoryConfig.class, ComposedJmsListenersBean.class)) {
+
+			JmsListenerContainerTestFactory simpleFactory =
+					context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 			assertThat(simpleFactory.getListenerContainers()).hasSize(2);
 
-			MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
-				"first").getEndpoint();
+			MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint)
+					simpleFactory.getListenerContainer("first").getEndpoint();
 			assertThat(first.getId()).isEqualTo("first");
 			assertThat(first.getDestination()).isEqualTo("orderQueue");
 			assertThat(first.getConcurrency()).isNull();
 
-			MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
-				"second").getEndpoint();
+			MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint)
+					simpleFactory.getListenerContainer("second").getEndpoint();
 			assertThat(second.getId()).isEqualTo("second");
 			assertThat(second.getDestination()).isEqualTo("billingQueue");
 			assertThat(second.getConcurrency()).isEqualTo("2-10");
@@ -179,12 +175,11 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void unknownFactory() {
 		 // not found
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class))
-			.withMessageContaining("customFactory");
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class))
+				.withMessageContaining("customFactory");
 	}
 
 	@Test

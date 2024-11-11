@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link SimpleCommandLinePropertySource}.
+ * Tests for {@link SimpleCommandLinePropertySource}.
  *
  * @author Chris Beams
  * @author Sam Brannen
@@ -122,8 +122,7 @@ class SimpleCommandLinePropertySourceTests {
 
 		@SuppressWarnings("unchecked")
 		List<String> nonOptionArgsList = env.getProperty("nonOptionArgs", List.class);
-		assertThat(nonOptionArgsList.get(0)).isEqualTo("noa1");
-		assertThat(nonOptionArgsList.get(1)).isEqualTo("noa2");
+		assertThat(nonOptionArgsList).containsExactly("noa1", "noa2");
 	}
 
 }

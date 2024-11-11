@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ import org.springframework.util.ClassUtils;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.0
  * @see MarshallingHttpMessageConverter
  */
@@ -70,6 +71,9 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	private boolean processExternalEntities = false;
 
+	@Nullable
+	private volatile SAXParserFactory sourceParserFactory;
+
 
 	/**
 	 * Indicate whether DTD parsing should be supported.
@@ -77,6 +81,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	 */
 	public void setSupportDtd(boolean supportDtd) {
 		this.supportDtd = supportDtd;
+		this.sourceParserFactory = null;
 	}
 
 	/**
@@ -97,6 +102,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		if (processExternalEntities) {
 			this.supportDtd = true;
 		}
+		this.sourceParserFactory = null;
 	}
 
 	/**
@@ -115,7 +121,9 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	@Override
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
-		return (AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && canWrite(mediaType));
+		boolean supportedType = (JAXBElement.class.isAssignableFrom(clazz) ||
+				AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null);
+		return (supportedType && canWrite(mediaType));
 	}
 
 	@Override
@@ -156,11 +164,18 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		if (source instanceof StreamSource streamSource) {
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
-				SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-				saxParserFactory.setNamespaceAware(true);
-				saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-				String featureName = "http://xml.org/sax/features/external-general-entities";
-				saxParserFactory.setFeature(featureName, isProcessExternalEntities());
+				// By default, Spring will prevent the processing of external entities.
+				// This is a mitigation against XXE attacks.
+				SAXParserFactory saxParserFactory = this.sourceParserFactory;
+				if (saxParserFactory == null) {
+					saxParserFactory = SAXParserFactory.newInstance();
+					saxParserFactory.setNamespaceAware(true);
+					saxParserFactory.setFeature(
+							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+					saxParserFactory.setFeature(
+							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+					this.sourceParserFactory = saxParserFactory;
+				}
 				SAXParser saxParser = saxParserFactory.newSAXParser();
 				XMLReader xmlReader = saxParser.getXMLReader();
 				if (!isProcessExternalEntities()) {
@@ -179,18 +194,27 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	@Override
-	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws Exception {
+	protected void writeToResult(Object value, HttpHeaders headers, Result result) throws Exception {
 		try {
-			Class<?> clazz = ClassUtils.getUserClass(o);
+			Class<?> clazz = getMarshallerType(value);
 			Marshaller marshaller = createMarshaller(clazz);
 			setCharset(headers.getContentType(), marshaller);
-			marshaller.marshal(o, result);
+			marshaller.marshal(value, result);
 		}
 		catch (MarshalException ex) {
 			throw ex;
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static Class<?> getMarshallerType(Object value) {
+		if (value instanceof JAXBElement<?> jaxbElement) {
+			return jaxbElement.getDeclaredType();
+		}
+		else {
+			return ClassUtils.getUserClass(value);
 		}
 	}
 

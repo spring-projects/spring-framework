@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 
 /**
- * Unit tests for {@link DefaultRSocketRequester}.
+ * Tests for {@link DefaultRSocketRequester}.
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultRSocketRequesterTests {
+class DefaultRSocketRequesterTests {
 
 	private static final Duration MILLIS_10 = Duration.ofMillis(10);
 
@@ -64,14 +64,14 @@ public class DefaultRSocketRequesterTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.rsocket = new TestRSocket();
 		this.requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
 	}
 
 
 	@Test
-	public void sendMono() {
+	void sendMono() {
 
 		// data(Object)
 		testSendMono(spec -> spec.data("bodyA"), "bodyA");
@@ -95,7 +95,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void sendFlux() {
+	void sendFlux() {
 		String[] values = new String[] {"bodyA", "bodyB", "bodyC"};
 		Flux<String> stringFlux = Flux.fromArray(values).delayElements(MILLIS_10);
 
@@ -132,7 +132,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void sendWithoutData() {
+	void sendWithoutData() {
 		this.requester.route("toA").send().block(Duration.ofSeconds(5));
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
@@ -141,7 +141,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void testSendWithAsyncMetadata() {
+	void testSendWithAsyncMetadata() {
 
 		MimeType compositeMimeType =
 				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -171,7 +171,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void retrieveMono() {
+	void retrieveMono() {
 		String value = "bodyA";
 		this.rsocket.setPayloadMonoToReturn(Mono.delay(MILLIS_10).thenReturn(toPayload(value)));
 		Mono<String> response = this.requester.route("").data("").retrieveMono(String.class);
@@ -181,7 +181,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void retrieveMonoVoid() {
+	void retrieveMonoVoid() {
 		AtomicBoolean consumed = new AtomicBoolean();
 		Mono<Payload> mono = Mono.delay(MILLIS_10).thenReturn(toPayload("bodyA")).doOnSuccess(p -> consumed.set(true));
 		this.rsocket.setPayloadMonoToReturn(mono);
@@ -192,7 +192,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void retrieveMonoWithoutData() {
+	void retrieveMonoWithoutData() {
 		this.requester.route("toA").retrieveMono(String.class).block(Duration.ofSeconds(5));
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestResponse");
@@ -201,7 +201,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void retrieveFlux() {
+	void retrieveFlux() {
 		String[] values = new String[] {"bodyA", "bodyB", "bodyC"};
 		this.rsocket.setPayloadFluxToReturn(Flux.fromArray(values).delayElements(MILLIS_10).map(this::toPayload));
 		Flux<String> response = this.requester.route("").data("").retrieveFlux(String.class);
@@ -211,7 +211,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void retrieveFluxVoid() {
+	void retrieveFluxVoid() {
 		AtomicBoolean consumed = new AtomicBoolean();
 		Flux<Payload> flux = Flux.just("bodyA", "bodyB")
 				.delayElements(MILLIS_10).map(this::toPayload).doOnComplete(() -> consumed.set(true));
@@ -223,7 +223,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void retrieveFluxWithoutData() {
+	void retrieveFluxWithoutData() {
 		this.requester.route("toA").retrieveFlux(String.class).blockLast(Duration.ofSeconds(5));
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestStream");
@@ -232,7 +232,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void fluxToMonoIsRejected() {
+	void fluxToMonoIsRejected() {
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.requester.route("").data(Flux.just("a", "b")).retrieveMono(String.class))
 				.withMessage("No RSocket interaction with Flux request and Mono response.");

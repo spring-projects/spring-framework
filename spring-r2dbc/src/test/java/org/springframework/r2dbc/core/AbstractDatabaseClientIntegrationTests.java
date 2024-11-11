@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.List;
 import java.util.Map;
 
 import io.r2dbc.spi.ConnectionFactory;
@@ -76,7 +77,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 
 
 	@Test
-	public void executeInsert() {
+	void executeInsert() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
@@ -97,7 +98,26 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void executeInsertWithMap() {
+	void executeInsertWithList() {
+		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
+				.bindValues(List.of(42055, Parameters.in("SCHAUFELRADBAGGER"), Parameters.in(Integer.class)))
+				.fetch().rowsUpdated()
+				.as(StepVerifier::create)
+				.expectNext(1L)
+				.verifyComplete();
+
+		databaseClient.sql("SELECT id FROM legoset")
+				.mapValue(Integer.class)
+				.first()
+				.as(StepVerifier::create)
+				.assertNext(actual -> assertThat(actual).isEqualTo(42055))
+				.verifyComplete();
+	}
+
+	@Test
+	void executeInsertWithMap() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
@@ -118,7 +138,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void executeInsertWithRecords() {
+	void executeInsertWithRecords() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
@@ -137,7 +157,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldTranslateDuplicateKeyException() {
+	void shouldTranslateDuplicateKeyException() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		executeInsert();
@@ -156,7 +176,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void executeDeferred() {
+	void executeDeferred() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql(() -> "INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
@@ -176,7 +196,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldEmitGeneratedKey() {
+	void shouldEmitGeneratedKey() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql(

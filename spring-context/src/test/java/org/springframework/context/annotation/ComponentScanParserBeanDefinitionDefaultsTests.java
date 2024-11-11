@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Mark Fisher
  * @author Chris Beams
  */
-public class ComponentScanParserBeanDefinitionDefaultsTests {
+class ComponentScanParserBeanDefinitionDefaultsTests {
 
 	private static final String TEST_BEAN_NAME = "componentScanParserBeanDefinitionDefaultsTests.DefaultsTestBean";
 
@@ -38,12 +38,12 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		DefaultsTestBean.INIT_COUNT = 0;
 	}
 
 	@Test
-	public void testDefaultLazyInit() {
+	void testDefaultLazyInit() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultWithNoOverridesTests.xml");
@@ -54,7 +54,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testLazyInitTrue() {
+	void testLazyInitTrue() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultLazyInitTrueTests.xml");
@@ -67,7 +67,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testLazyInitFalse() {
+	void testLazyInitFalse() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultLazyInitFalseTests.xml");
@@ -78,7 +78,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testDefaultAutowire() {
+	void testDefaultAutowire() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultWithNoOverridesTests.xml");
@@ -90,7 +90,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testAutowireNo() {
+	void testAutowireNo() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireNoTests.xml");
@@ -102,7 +102,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testAutowireConstructor() {
+	void testAutowireConstructor() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireConstructorTests.xml");
@@ -115,7 +115,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testAutowireByType() {
+	void testAutowireByType() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireByTypeTests.xml");
@@ -124,7 +124,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testAutowireByName() {
+	void testAutowireByName() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultAutowireByNameTests.xml");
@@ -137,7 +137,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testDefaultDependencyCheck() {
+	void testDefaultDependencyCheck() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultWithNoOverridesTests.xml");
@@ -149,7 +149,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testDefaultInitAndDestroyMethodsNotDefined() {
+	void testDefaultInitAndDestroyMethodsNotDefined() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultWithNoOverridesTests.xml");
@@ -161,7 +161,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testDefaultInitAndDestroyMethodsDefined() {
+	void testDefaultInitAndDestroyMethodsDefined() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultInitAndDestroyMethodsTests.xml");
@@ -173,7 +173,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 	@Test
-	public void testDefaultNonExistingInitAndDestroyMethodsDefined() {
+	void testDefaultNonExistingInitAndDestroyMethodsDefined() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(LOCATION_PREFIX + "defaultNonExistingInitAndDestroyMethodsTests.xml");

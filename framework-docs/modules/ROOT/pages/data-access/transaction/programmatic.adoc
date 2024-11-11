@@ -37,7 +37,7 @@ a transaction. You can then pass an instance of your custom `TransactionCallback
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleService implements Service {
 
@@ -63,7 +63,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// use constructor-injection to supply the PlatformTransactionManager
 	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
@@ -87,7 +87,7 @@ with an anonymous class, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 		protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -99,7 +99,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
 		override fun doInTransactionWithoutResult(status: TransactionStatus) {
@@ -118,7 +118,7 @@ Code within the callback can roll the transaction back by calling the
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
@@ -135,7 +135,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
 
@@ -165,7 +165,7 @@ a specific `TransactionTemplate:`
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleService implements Service {
 
@@ -184,7 +184,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
 
@@ -240,7 +240,7 @@ the `TransactionalOperator` resembles the next example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleService implements Service {
 
@@ -265,7 +265,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// use constructor-injection to supply the ReactiveTransactionManager
 	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
@@ -293,7 +293,7 @@ method on the supplied `ReactiveTransaction` object, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	transactionalOperator.execute(new TransactionCallback<>() {
 
@@ -307,7 +307,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	transactionalOperator.execute(object : TransactionCallback() {
 
@@ -346,7 +346,7 @@ following example shows customization of the transactional settings for a specif
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleService implements Service {
 
@@ -367,7 +367,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
 
@@ -402,7 +402,7 @@ following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -421,7 +421,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val def = DefaultTransactionDefinition()
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -455,7 +455,7 @@ following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -475,7 +475,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val def = DefaultTransactionDefinition()
 	// explicitly setting the transaction name is something that can be done only programmatically

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for {@link ParameterContentTypeResolver}.
+ * Tests for {@link ParameterContentTypeResolver}.
+ *
  * @author Rossen Stoyanchev
  */
-public class ParameterContentTypeResolverTests {
+class ParameterContentTypeResolverTests {
 
 	@Test
-	public void noKey() {
+	void noKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
@@ -47,14 +48,14 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	@Test
-	public void noMatchForKey() {
+	void noMatchForKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
 				resolver.resolveMediaTypes(createExchange("blah")));
 	}
 
 	@Test
-	public void resolveKeyFromRegistrations() {
+	void resolveKeyFromRegistrations() {
 		ServerWebExchange exchange = createExchange("html");
 
 		Map<String, MediaType> mapping = Collections.emptyMap();
@@ -69,7 +70,7 @@ public class ParameterContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveKeyThroughMediaTypeFactory() {
+	void resolveKeyThroughMediaTypeFactory() {
 		ServerWebExchange exchange = createExchange("xls");
 		RequestedContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);

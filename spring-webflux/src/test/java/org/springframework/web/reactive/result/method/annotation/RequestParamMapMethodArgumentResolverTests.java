@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
 
 /**
- * Unit tests for {@link RequestParamMapMethodArgumentResolver}.
+ * Tests for {@link RequestParamMapMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  */
-public class RequestParamMapMethodArgumentResolverTests {
+class RequestParamMapMethodArgumentResolverTests {
 
 	private final RequestParamMapMethodArgumentResolver resolver =
 			new RequestParamMapMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -51,7 +51,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
@@ -70,7 +70,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMapArgumentWithQueryString() {
+	void resolveMapArgumentWithQueryString() {
 		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		Object result= resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/path?foo=bar")));
 		boolean condition = result instanceof Map;
@@ -79,7 +79,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMultiValueMapArgument() {
+	void resolveMultiValueMapArgument() {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?foo=bar&foo=baz"));
 		Object result= resolve(param, exchange);

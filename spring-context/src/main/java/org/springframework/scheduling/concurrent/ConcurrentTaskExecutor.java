@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see DefaultManagedTaskExecutor
  * @see ThreadPoolTaskExecutor
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "removal"})
 public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
 	private static final Executor STUB_EXECUTOR = (task -> {
@@ -143,11 +143,6 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	 * execution callback (which may be a wrapper around the user-supplied task).
 	 * <p>The primary use case is to set some execution context around the task's
 	 * invocation, or to provide some monitoring/statistics for task execution.
-	 * <p><b>NOTE:</b> Exception handling in {@code TaskDecorator} implementations
-	 * is limited to plain {@code Runnable} execution via {@code execute} calls.
-	 * In case of {@code #submit} calls, the exposed {@code Runnable} will be a
-	 * {@code FutureTask} which does not propagate any exceptions; you might
-	 * have to cast it and call {@code Future#get} to evaluate exceptions.
 	 * @since 4.3
 	 */
 	public final void setTaskDecorator(TaskDecorator taskDecorator) {
@@ -188,15 +183,18 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	}
 
 
-	private TaskExecutorAdapter getAdaptedExecutor(Executor concurrentExecutor) {
-		if (managedExecutorServiceClass != null && managedExecutorServiceClass.isInstance(concurrentExecutor)) {
-			return new ManagedTaskExecutorAdapter(concurrentExecutor);
-		}
-		TaskExecutorAdapter adapter = new TaskExecutorAdapter(concurrentExecutor);
+	private TaskExecutorAdapter getAdaptedExecutor(Executor originalExecutor) {
+		TaskExecutorAdapter adapter =
+				(managedExecutorServiceClass != null && managedExecutorServiceClass.isInstance(originalExecutor) ?
+						new ManagedTaskExecutorAdapter(originalExecutor) : new TaskExecutorAdapter(originalExecutor));
 		if (this.taskDecorator != null) {
 			adapter.setTaskDecorator(this.taskDecorator);
 		}
 		return adapter;
+	}
+
+	Runnable decorateTaskIfNecessary(Runnable task) {
+		return (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
 	}
 
 

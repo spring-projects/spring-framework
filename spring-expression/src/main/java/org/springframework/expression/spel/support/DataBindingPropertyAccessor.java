@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 
 /**
- * A {@link org.springframework.expression.PropertyAccessor} variant for data binding
+ * An {@link org.springframework.expression.PropertyAccessor} variant for data binding
  * purposes, using reflection to access properties for reading and possibly writing.
  *
  * <p>A property can be referenced through a public getter method (when being read)

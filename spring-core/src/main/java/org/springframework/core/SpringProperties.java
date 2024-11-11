@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>This is an alternative way to set Spring-related system properties such as
  * "spring.getenv.ignore" and "spring.beaninfo.ignore", in particular for scenarios
- * where JVM system properties are locked on the target platform (e.g. WebSphere).
+ * where JVM system properties are locked on the target platform (for example, WebSphere).
  * See {@link #setFlag} for a convenient way to locally set such flags to "true".
  *
  * @author Juergen Hoeller

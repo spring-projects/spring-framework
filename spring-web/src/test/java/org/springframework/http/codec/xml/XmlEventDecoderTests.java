@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
+class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 
 	private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +
@@ -43,11 +43,11 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 			"<bar>barbar</bar>" +
 			"</pojo>";
 
-	private XmlEventDecoder decoder = new XmlEventDecoder();
+	private final XmlEventDecoder decoder = new XmlEventDecoder();
 
 
 	@Test
-	public void toXMLEventsAalto() {
+	void toXMLEventsAalto() {
 
 		Flux<XMLEvent> events =
 				this.decoder.decode(stringBufferMono(XML), null, null, Collections.emptyMap());
@@ -67,7 +67,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void toXMLEventsNonAalto() {
+	void toXMLEventsNonAalto() {
 		decoder.useAalto = false;
 
 		Flux<XMLEvent> events =
@@ -89,7 +89,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void toXMLEventsWithLimit() {
+	void toXMLEventsWithLimit() {
 
 		this.decoder.setMaxInMemorySize(6);
 
@@ -111,7 +111,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void decodeErrorAalto() {
+	void decodeErrorAalto() {
 		Flux<DataBuffer> source = Flux.concat(
 				stringBufferMono("<pojo>"),
 				Flux.error(new RuntimeException()));
@@ -127,7 +127,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void decodeErrorNonAalto() {
+	void decodeErrorNonAalto() {
 		decoder.useAalto = false;
 
 		Flux<DataBuffer> source = Flux.concat(

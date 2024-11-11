@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,18 @@ import org.springframework.web.reactive.result.view.script.ScriptTemplateViewRes
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link ViewResolverRegistry}.
+ * Tests for {@link ViewResolverRegistry}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class ViewResolverRegistryTests {
+class ViewResolverRegistryTests {
 
 	private ViewResolverRegistry registry;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
 		context.registerSingleton("scriptTemplateConfigurer", ScriptTemplateConfigurer.class);
@@ -56,12 +56,12 @@ public class ViewResolverRegistryTests {
 
 
 	@Test
-	public void order() {
+	void order() {
 		assertThat(this.registry.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
-	public void hasRegistrations() {
+	void hasRegistrations() {
 		assertThat(this.registry.hasRegistrations()).isFalse();
 
 		this.registry.freeMarker();
@@ -69,28 +69,26 @@ public class ViewResolverRegistryTests {
 	}
 
 	@Test
-	public void noResolvers() {
+	void noResolvers() {
 		assertThat(this.registry.getViewResolvers()).isNotNull();
 		assertThat(this.registry.getViewResolvers()).isEmpty();
 		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 
 	@Test
-	public void customViewResolver() {
+	void customViewResolver() {
 		UrlBasedViewResolver viewResolver = new UrlBasedViewResolver();
 		this.registry.viewResolver(viewResolver);
 
-		assertThat(this.registry.getViewResolvers().get(0)).isSameAs(viewResolver);
-		assertThat(this.registry.getViewResolvers()).hasSize(1);
+		assertThat(this.registry.getViewResolvers()).containsExactly(viewResolver);
 	}
 
 	@Test
-	public void defaultViews() throws Exception {
+	void defaultViews() {
 		View view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 		this.registry.defaultViews(view);
 
-		assertThat(this.registry.getDefaultViews()).hasSize(1);
-		assertThat(this.registry.getDefaultViews().get(0)).isSameAs(view);
+		assertThat(this.registry.getDefaultViews()).containsExactly(view);
 	}
 
 	@Test  // SPR-16431

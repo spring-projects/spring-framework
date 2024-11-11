@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,9 @@ class R2dbcBeanPropertyRowMapperTests {
 
 	@Test
 	void mappingRowSimpleObject() {
-		MockRow mockRow = SIMPLE_PERSON_ROW;
 		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 
-		Person result = mapper.apply(mockRow);
+		Person result = mapper.apply(SIMPLE_PERSON_ROW);
 
 		assertThat(result.firstName).as("firstName").isEqualTo("John");
 		assertThat(result.lastName).as("lastName").isEqualTo("Doe");
@@ -69,10 +68,9 @@ class R2dbcBeanPropertyRowMapperTests {
 
 	@Test
 	void mappingRowMissingAttributeAccepted() {
-		MockRow mockRow = SIMPLE_PERSON_ROW;
 		BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class);
 
-		ExtendedPerson result = mapper.apply(mockRow);
+		ExtendedPerson result = mapper.apply(SIMPLE_PERSON_ROW);
 
 		assertThat(result.firstName).as("firstName").isEqualTo("John");
 		assertThat(result.lastName).as("lastName").isEqualTo("Doe");
@@ -82,10 +80,9 @@ class R2dbcBeanPropertyRowMapperTests {
 
 	@Test
 	void mappingRowWithDifferentName() {
-		MockRow mockRow = EMAIL_PERSON_ROW;
 		BeanPropertyRowMapper<EmailPerson> mapper = new BeanPropertyRowMapper<>(EmailPerson.class);
 
-		EmailPerson result = mapper.apply(mockRow);
+		EmailPerson result = mapper.apply(EMAIL_PERSON_ROW);
 
 		assertThat(result.firstName).as("firstName").isEqualTo("John");
 		assertThat(result.lastName).as("lastName").isEqualTo("Doe");
@@ -95,11 +92,10 @@ class R2dbcBeanPropertyRowMapperTests {
 
 	@Test
 	void rowTypeAndMappingTypeMisaligned() {
-		MockRow mockRow = EXTENDED_PERSON_ROW;
 		BeanPropertyRowMapper<TypeMismatchExtendedPerson> mapper = new BeanPropertyRowMapper<>(TypeMismatchExtendedPerson.class);
 
 		assertThatExceptionOfType(TypeMismatchException.class)
-				.isThrownBy(() -> mapper.apply(mockRow))
+				.isThrownBy(() -> mapper.apply(EXTENDED_PERSON_ROW))
 				.withMessage("Failed to convert property value of type 'java.lang.String' to required type "
 						+ "'java.lang.String' for property 'address'; simulating type mismatch for address");
 	}

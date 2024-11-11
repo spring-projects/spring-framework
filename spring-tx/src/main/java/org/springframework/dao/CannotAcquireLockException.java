@@ -16,6 +16,8 @@
 
 package org.springframework.dao;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown on failure to acquire a lock during an update,
  * for example during a "select for update" statement.
@@ -32,7 +34,7 @@ public class CannotAcquireLockException extends PessimisticLockingFailureExcepti
 	 * Constructor for CannotAcquireLockException.
 	 * @param msg the detail message
 	 */
-	public CannotAcquireLockException(String msg) {
+	public CannotAcquireLockException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -41,7 +43,7 @@ public class CannotAcquireLockException extends PessimisticLockingFailureExcepti
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public CannotAcquireLockException(String msg, Throwable cause) {
+	public CannotAcquireLockException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

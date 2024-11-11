@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.web.util.UriComponents;
  * in which case it removes but does not use the headers.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.1
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  * @see <a href="https://docs.spring.io/spring-framework/reference/web/webflux/reactive-spring.html#webflux-forwarded-headers">Forwarded Headers</a>
@@ -60,7 +61,7 @@ import org.springframework.web.util.UriComponents;
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
 	static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ROOT));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -165,7 +166,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
 		for (String rawPrefix : rawPrefixes) {
 			int endIndex = rawPrefix.length();
-			while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
+			while (endIndex > 0 && rawPrefix.charAt(endIndex - 1) == '/') {
 				endIndex--;
 			}
 			prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));

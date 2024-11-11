@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ public final class ResponseCookie extends HttpCookie {
 
 	private final boolean httpOnly;
 
+	private final boolean partitioned;
+
 	@Nullable
 	private final String sameSite;
 
@@ -55,7 +57,7 @@ public final class ResponseCookie extends HttpCookie {
 	 * Private constructor. See {@link #from(String, String)}.
 	 */
 	private ResponseCookie(String name, @Nullable String value, Duration maxAge, @Nullable String domain,
-			@Nullable String path, boolean secure, boolean httpOnly, @Nullable String sameSite) {
+			@Nullable String path, boolean secure, boolean httpOnly, boolean partitioned, @Nullable String sameSite) {
 
 		super(name, value);
 		Assert.notNull(maxAge, "Max age must not be null");
@@ -65,6 +67,7 @@ public final class ResponseCookie extends HttpCookie {
 		this.path = path;
 		this.secure = secure;
 		this.httpOnly = httpOnly;
+		this.partitioned = partitioned;
 		this.sameSite = sameSite;
 
 		Rfc6265Utils.validateCookieName(name);
@@ -110,10 +113,19 @@ public final class ResponseCookie extends HttpCookie {
 
 	/**
 	 * Return {@code true} if the cookie has the "HttpOnly" attribute.
-	 * @see <a href="https://www.owasp.org/index.php/HTTPOnly">https://www.owasp.org/index.php/HTTPOnly</a>
+	 * @see <a href="https://owasp.org/www-community/HttpOnly">https://owasp.org/www-community/HttpOnly</a>
 	 */
 	public boolean isHttpOnly() {
 		return this.httpOnly;
+	}
+
+	/**
+	 * Return {@code true} if the cookie has the "Partitioned" attribute.
+	 * @since 6.2
+	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
+	 */
+	public boolean isPartitioned() {
+		return this.partitioned;
 	}
 
 	/**
@@ -139,6 +151,7 @@ public final class ResponseCookie extends HttpCookie {
 				.path(this.path)
 				.secure(this.secure)
 				.httpOnly(this.httpOnly)
+				.partitioned(this.partitioned)
 				.sameSite(this.sameSite);
 	}
 
@@ -171,7 +184,7 @@ public final class ResponseCookie extends HttpCookie {
 		if (!this.maxAge.isNegative()) {
 			sb.append("; Max-Age=").append(this.maxAge.getSeconds());
 			sb.append("; Expires=");
-			long millis = this.maxAge.getSeconds() > 0 ? System.currentTimeMillis() + this.maxAge.toMillis() : 0;
+			long millis = (this.maxAge.getSeconds() > 0 ? System.currentTimeMillis() + this.maxAge.toMillis() : 0);
 			sb.append(HttpHeaders.formatDate(millis));
 		}
 		if (this.secure) {
@@ -179,6 +192,9 @@ public final class ResponseCookie extends HttpCookie {
 		}
 		if (this.httpOnly) {
 			sb.append("; HttpOnly");
+		}
+		if (this.partitioned) {
+			sb.append("; Partitioned");
 		}
 		if (StringUtils.hasText(this.sameSite)) {
 			sb.append("; SameSite=").append(this.sameSite);
@@ -213,7 +229,7 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Factory method to obtain a builder for a server-defined cookie. Unlike
 	 * {@link #from(String, String)} this option assumes input from a remote
-	 * server, which can be handled more leniently, e.g. ignoring an empty domain
+	 * server, which can be handled more leniently, for example, ignoring an empty domain
 	 * name with double quotes.
 	 * @param name the cookie name
 	 * @param value the cookie value
@@ -268,9 +284,16 @@ public final class ResponseCookie extends HttpCookie {
 
 		/**
 		 * Add the "HttpOnly" attribute to the cookie.
-		 * @see <a href="https://www.owasp.org/index.php/HTTPOnly">https://www.owasp.org/index.php/HTTPOnly</a>
+		 * @see <a href="https://owasp.org/www-community/HttpOnly">https://owasp.org/www-community/HttpOnly</a>
 		 */
 		ResponseCookieBuilder httpOnly(boolean httpOnly);
+
+		/**
+		 * Add the "Partitioned" attribute to the cookie.
+		 * @since 6.2
+		 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
+		 */
+		ResponseCookieBuilder partitioned(boolean partitioned);
 
 		/**
 		 * Add the "SameSite" attribute to the cookie.
@@ -397,6 +420,8 @@ public final class ResponseCookie extends HttpCookie {
 
 		private boolean httpOnly;
 
+		private boolean partitioned;
+
 		@Nullable
 		private String sameSite;
 
@@ -462,6 +487,12 @@ public final class ResponseCookie extends HttpCookie {
 		}
 
 		@Override
+		public ResponseCookieBuilder partitioned(boolean partitioned) {
+			this.partitioned = partitioned;
+			return this;
+		}
+
+		@Override
 		public ResponseCookieBuilder sameSite(@Nullable String sameSite) {
 			this.sameSite = sameSite;
 			return this;
@@ -470,7 +501,7 @@ public final class ResponseCookie extends HttpCookie {
 		@Override
 		public ResponseCookie build() {
 			return new ResponseCookie(this.name, this.value, this.maxAge,
-					this.domain, this.path, this.secure, this.httpOnly, this.sameSite);
+					this.domain, this.path, this.secure, this.httpOnly, this.partitioned, this.sameSite);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class HotSwappableTargetSourceTests {
+class HotSwappableTargetSourceTests {
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
@@ -68,7 +68,7 @@ public class HotSwappableTargetSourceTests {
 	 * Check it works like a normal invoker
 	 */
 	@Test
-	public void testBasicFunctionality() {
+	void testBasicFunctionality() {
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
 		assertThat(proxied.getCount()).isEqualTo(INITIAL_COUNT);
 		proxied.doWork();
@@ -80,7 +80,7 @@ public class HotSwappableTargetSourceTests {
 	}
 
 	@Test
-	public void testValidSwaps() {
+	void testValidSwaps() {
 		SideEffectBean target1 = (SideEffectBean) beanFactory.getBean("target1");
 		SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 
@@ -107,7 +107,7 @@ public class HotSwappableTargetSourceTests {
 	}
 
 	@Test
-	public void testRejectsSwapToNull() {
+	void testRejectsSwapToNull() {
 		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		assertThatIllegalArgumentException().as("Shouldn't be able to swap to invalid value").isThrownBy(() ->
 				swapper.swap(null))
@@ -117,7 +117,7 @@ public class HotSwappableTargetSourceTests {
 	}
 
 	@Test
-	public void testSerialization() throws Exception {
+	void testSerialization() throws Exception {
 		SerializablePerson sp1 = new SerializablePerson();
 		sp1.setName("Tony");
 		SerializablePerson sp2 = new SerializablePerson();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.http.MediaType.APPLICATION_ATOM_XML
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_XML
 import org.springframework.http.MediaType.TEXT_PLAIN
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -64,7 +65,7 @@ class MockMvcExtensionsTests {
 			status { isOk() }
 			content { contentType(APPLICATION_JSON) }
 			jsonPath("$.name") { value("Lee") }
-			content { json("""{"someBoolean": false}""", false) }
+			content { json("""{"someBoolean": false}""", JsonCompareMode.LENIENT) }
 		}.andDo {
 			print()
 		}
@@ -130,7 +131,7 @@ class MockMvcExtensionsTests {
 			status { isOk() }
 			content { contentType(APPLICATION_JSON) }
 			jsonPath("$.name") { value("Lee") }
-			content { json("""{"someBoolean": false}""", false) }
+			content { json("""{"someBoolean": false}""", JsonCompareMode.LENIENT) }
 		}.andDo {
 			print()
 		}
@@ -217,6 +218,16 @@ class MockMvcExtensionsTests {
 				.hasMessage("Multiple Exceptions (2):\n" +
 						"Range for response status value 200 expected:<CLIENT_ERROR> but was:<SUCCESSFUL>\n" +
 						"Content type expected:<text/plain> but was:<application/json>")
+	}
+
+	@Test
+	fun queryParameter() {
+		val result = mockMvc.get("/") {
+			queryParam("foo", "bar")
+			queryParam("foo", "baz")
+		}.andReturn()
+		assertThat(result.request.parameterMap["foo"]).containsExactly("bar", "baz")
+		assertThat(result.request.queryString).isEqualTo("foo=bar&foo=baz")
 	}
 
 

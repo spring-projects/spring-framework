@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,12 +41,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 6.1
  */
-public class CaffeineReactiveCachingTests {
+class CaffeineReactiveCachingTests {
 
 	@ParameterizedTest
 	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
 	void cacheHitDetermination(Class<?> configClass) {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
 		Object key = new Object();
@@ -103,6 +102,30 @@ public class CaffeineReactiveCachingTests {
 
 		assertThat(r1).isNotNull();
 		assertThat(r1).isSameAs(r2).isSameAs(r3);
+
+		ctx.close();
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
+	void fluxCacheDoesntDependOnFirstRequest(Class<?> configClass) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
+
+		Object key = new Object();
+
+		List<Long> l1 = service.cacheFlux(key).take(1L, true).collectList().block();
+		List<Long> l2 = service.cacheFlux(key).take(3L, true).collectList().block();
+		List<Long> l3 = service.cacheFlux(key).collectList().block();
+
+		Long first = l1.get(0);
+
+		assertThat(l1).as("l1").containsExactly(first);
+		assertThat(l2).as("l2").containsExactly(first, 0L, -1L);
+		assertThat(l3).as("l3").containsExactly(first, 0L, -1L, -2L, -3L);
+
+		ctx.close();
 	}
 
 
@@ -118,12 +141,16 @@ public class CaffeineReactiveCachingTests {
 
 		@Cacheable
 		Mono<Long> cacheMono(Object arg) {
-			return Mono.just(this.counter.getAndIncrement());
+			// here counter not only reflects invocations of cacheMono but subscriptions to
+			// the returned Mono as well. See https://github.com/spring-projects/spring-framework/issues/32370
+			return Mono.defer(() -> Mono.just(this.counter.getAndIncrement()));
 		}
 
 		@Cacheable
 		Flux<Long> cacheFlux(Object arg) {
-			return Flux.just(this.counter.getAndIncrement(), 0L);
+			// here counter not only reflects invocations of cacheFlux but subscriptions to
+			// the returned Flux as well. See https://github.com/spring-projects/spring-framework/issues/32370
+			return Flux.defer(() -> Flux.just(this.counter.getAndIncrement(), 0L, -1L, -2L, -3L));
 		}
 	}
 

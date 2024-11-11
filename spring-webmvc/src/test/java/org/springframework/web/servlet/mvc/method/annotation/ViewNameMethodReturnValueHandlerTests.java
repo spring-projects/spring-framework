@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ViewNameMethodReturnValueHandlerTests {
+class ViewNameMethodReturnValueHandlerTests {
 
 	private ViewNameMethodReturnValueHandler handler;
 
@@ -45,7 +45,7 @@ public class ViewNameMethodReturnValueHandlerTests {
 
 
 	@BeforeEach
-	public void setup() throws NoSuchMethodException {
+	void setup() throws NoSuchMethodException {
 		this.handler = new ViewNameMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
@@ -55,18 +55,18 @@ public class ViewNameMethodReturnValueHandlerTests {
 
 
 	@Test
-	public void supportsReturnType() throws Exception {
+	void supportsReturnType() throws Exception {
 		assertThat(this.handler.supportsReturnType(this.param)).isTrue();
 	}
 
 	@Test
-	public void returnViewName() throws Exception {
+	void returnViewName() throws Exception {
 		this.handler.handleReturnValue("testView", this.param, this.mavContainer, this.webRequest);
 		assertThat(this.mavContainer.getViewName()).isEqualTo("testView");
 	}
 
 	@Test
-	public void returnViewNameRedirect() throws Exception {
+	void returnViewNameRedirect() throws Exception {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);
 		this.handler.handleReturnValue("redirect:testView", this.param, this.mavContainer, this.webRequest);
@@ -75,7 +75,7 @@ public class ViewNameMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void returnViewCustomRedirect() throws Exception {
+	void returnViewCustomRedirect() throws Exception {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);
 		this.handler.setRedirectPatterns("myRedirect:*");
@@ -85,7 +85,7 @@ public class ViewNameMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void returnViewRedirectWithCustomRedirectPattern() throws Exception {
+	void returnViewRedirectWithCustomRedirectPattern() throws Exception {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);
 		this.handler.setRedirectPatterns("myRedirect:*");

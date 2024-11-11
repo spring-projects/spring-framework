@@ -44,11 +44,11 @@ public class Attribute {
   public final String type;
 
   /**
-   * The raw content of this attribute, only used for unknown attributes (see {@link #isUnknown()}).
-   * The 6 header bytes of the attribute (attribute_name_index and attribute_length) are <i>not</i>
-   * included.
+   * The raw content of this attribute, as returned by {@link
+   * #write(ClassWriter,byte[],int,int,int)}. The 6 header bytes of the attribute
+   * (attribute_name_index and attribute_length) are <i>not</i> included.
    */
-  private byte[] content;
+  private ByteVector cachedContent;
 
   /**
    * The next attribute in this attribute list (Attribute instances can be linked via this field to
@@ -93,7 +93,9 @@ public class Attribute {
    *
    * @return the labels corresponding to this attribute, or {@literal null} if this attribute is not
    *     a Code attribute that contains labels.
+   * @deprecated no longer used by ASM.
    */
+  @Deprecated
   protected Label[] getLabels() {
     return new Label[0];
   }
@@ -115,7 +117,9 @@ public class Attribute {
    *     attribute header bytes (attribute_name_index and attribute_length) are not taken into
    *     account here.
    * @param labels the labels of the method's code, or {@literal null} if the attribute to be read
-   *     is not a Code attribute.
+   *     is not a Code attribute. Labels defined in the attribute must be created and added to this
+   *     array, if not already present, by calling the {@link #readLabel} method (do not create
+   *     {@link Label} instances directly).
    * @return a <i>new</i> {@link Attribute} object corresponding to the specified bytes.
    */
   protected Attribute read(
@@ -126,15 +130,98 @@ public class Attribute {
       final int codeAttributeOffset,
       final Label[] labels) {
     Attribute attribute = new Attribute(type);
-    attribute.content = new byte[length];
-    System.arraycopy(classReader.classFileBuffer, offset, attribute.content, 0, length);
+    attribute.cachedContent = new ByteVector(classReader.readBytes(offset, length));
     return attribute;
+  }
+
+  /**
+   * Reads an attribute with the same {@link #type} as the given attribute. This method returns a
+   * new {@link Attribute} object, corresponding to the 'length' bytes starting at 'offset', in the
+   * given ClassReader.
+   *
+   * @param attribute The attribute prototype that is used for reading.
+   * @param classReader the class that contains the attribute to be read.
+   * @param offset index of the first byte of the attribute's content in {@link ClassReader}. The 6
+   *     attribute header bytes (attribute_name_index and attribute_length) are not taken into
+   *     account here.
+   * @param length the length of the attribute's content (excluding the 6 attribute header bytes).
+   * @param charBuffer the buffer to be used to call the ClassReader methods requiring a
+   *     'charBuffer' parameter.
+   * @param codeAttributeOffset index of the first byte of content of the enclosing Code attribute
+   *     in {@link ClassReader}, or -1 if the attribute to be read is not a Code attribute. The 6
+   *     attribute header bytes (attribute_name_index and attribute_length) are not taken into
+   *     account here.
+   * @param labels the labels of the method's code, or {@literal null} if the attribute to be read
+   *     is not a Code attribute. Labels defined in the attribute are added to this array, if not
+   *     already present.
+   * @return a new {@link Attribute} object corresponding to the specified bytes.
+   */
+  public static Attribute read(
+      final Attribute attribute,
+      final ClassReader classReader,
+      final int offset,
+      final int length,
+      final char[] charBuffer,
+      final int codeAttributeOffset,
+      final Label[] labels) {
+    return attribute.read(classReader, offset, length, charBuffer, codeAttributeOffset, labels);
+  }
+
+  /**
+   * Returns the label corresponding to the given bytecode offset by calling {@link
+   * ClassReader#readLabel}. This creates and adds the label to the given array if it is not already
+   * present. Note that this created label may be a {@link Label} subclass instance, if the given
+   * ClassReader overrides {@link ClassReader#readLabel}. Hence {@link #read(ClassReader, int, int,
+   * char[], int, Label[])} must not manually create {@link Label} instances.
+   *
+   * @param bytecodeOffset a bytecode offset in a method.
+   * @param labels the already created labels, indexed by their offset. If a label already exists
+   *     for bytecodeOffset this method does not create a new one. Otherwise it stores the new label
+   *     in this array.
+   * @return a label for the given bytecode offset.
+   */
+  public static Label readLabel(
+      final ClassReader classReader, final int bytecodeOffset, final Label[] labels) {
+    return classReader.readLabel(bytecodeOffset, labels);
+  }
+
+  /**
+   * Calls {@link #write(ClassWriter,byte[],int,int,int)} if it has not already been called and
+   * returns its result or its (cached) previous result.
+   *
+   * @param classWriter the class to which this attribute must be added. This parameter can be used
+   *     to add the items that corresponds to this attribute to the constant pool of this class.
+   * @param code the bytecode of the method corresponding to this Code attribute, or {@literal null}
+   *     if this attribute is not a Code attribute. Corresponds to the 'code' field of the Code
+   *     attribute.
+   * @param codeLength the length of the bytecode of the method corresponding to this code
+   *     attribute, or 0 if this attribute is not a Code attribute. Corresponds to the 'code_length'
+   *     field of the Code attribute.
+   * @param maxStack the maximum stack size of the method corresponding to this Code attribute, or
+   *     -1 if this attribute is not a Code attribute.
+   * @param maxLocals the maximum number of local variables of the method corresponding to this code
+   *     attribute, or -1 if this attribute is not a Code attribute.
+   * @return the byte array form of this attribute.
+   */
+  private ByteVector maybeWrite(
+      final ClassWriter classWriter,
+      final byte[] code,
+      final int codeLength,
+      final int maxStack,
+      final int maxLocals) {
+    if (cachedContent == null) {
+      cachedContent = write(classWriter, code, codeLength, maxStack, maxLocals);
+    }
+    return cachedContent;
   }
 
   /**
    * Returns the byte array form of the content of this attribute. The 6 header bytes
    * (attribute_name_index and attribute_length) must <i>not</i> be added in the returned
    * ByteVector.
+   *
+   * <p>This method is only invoked once to compute the binary form of this attribute. Subsequent
+   * changes to the attribute after it was written for the first time will not be considered.
    *
    * @param classWriter the class to which this attribute must be added. This parameter can be used
    *     to add the items that corresponds to this attribute to the constant pool of this class.
@@ -156,7 +243,39 @@ public class Attribute {
       final int codeLength,
       final int maxStack,
       final int maxLocals) {
-    return new ByteVector(content);
+    return cachedContent;
+  }
+
+  /**
+   * Returns the byte array form of the content of the given attribute. The 6 header bytes
+   * (attribute_name_index and attribute_length) are <i>not</i> added in the returned byte array.
+   *
+   * @param attribute The attribute that should be written.
+   * @param classWriter the class to which this attribute must be added. This parameter can be used
+   *     to add the items that corresponds to this attribute to the constant pool of this class.
+   * @param code the bytecode of the method corresponding to this Code attribute, or {@literal null}
+   *     if this attribute is not a Code attribute. Corresponds to the 'code' field of the Code
+   *     attribute.
+   * @param codeLength the length of the bytecode of the method corresponding to this code
+   *     attribute, or 0 if this attribute is not a Code attribute. Corresponds to the 'code_length'
+   *     field of the Code attribute.
+   * @param maxStack the maximum stack size of the method corresponding to this Code attribute, or
+   *     -1 if this attribute is not a Code attribute.
+   * @param maxLocals the maximum number of local variables of the method corresponding to this code
+   *     attribute, or -1 if this attribute is not a Code attribute.
+   * @return the byte array form of this attribute.
+   */
+  public static byte[] write(
+      final Attribute attribute,
+      final ClassWriter classWriter,
+      final byte[] code,
+      final int codeLength,
+      final int maxStack,
+      final int maxLocals) {
+    ByteVector content = attribute.maybeWrite(classWriter, code, codeLength, maxStack, maxLocals);
+    byte[] result = new byte[content.length];
+    System.arraycopy(content.data, 0, result, 0, content.length);
+    return result;
   }
 
   /**
@@ -221,7 +340,7 @@ public class Attribute {
     Attribute attribute = this;
     while (attribute != null) {
       symbolTable.addConstantUtf8(attribute.type);
-      size += 6 + attribute.write(classWriter, code, codeLength, maxStack, maxLocals).length;
+      size += 6 + attribute.maybeWrite(classWriter, code, codeLength, maxStack, maxLocals).length;
       attribute = attribute.nextAttribute;
     }
     return size;
@@ -308,7 +427,7 @@ public class Attribute {
     Attribute attribute = this;
     while (attribute != null) {
       ByteVector attributeContent =
-          attribute.write(classWriter, code, codeLength, maxStack, maxLocals);
+          attribute.maybeWrite(classWriter, code, codeLength, maxStack, maxLocals);
       // Put attribute_name_index and attribute_length.
       output.putShort(symbolTable.addConstantUtf8(attribute.type)).putInt(attributeContent.length);
       output.putByteArray(attributeContent.data, 0, attributeContent.length);

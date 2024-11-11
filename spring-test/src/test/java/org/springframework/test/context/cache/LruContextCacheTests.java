@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for the LRU eviction policy in {@link DefaultContextCache}.
+ * Tests for the LRU eviction policy in {@link DefaultContextCache}.
  *
  * @author Sam Brannen
  * @since 4.3
@@ -155,7 +155,6 @@ class LruContextCacheTests {
 		return new MergedContextConfiguration(null, null, new Class<?>[] { clazz }, null, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
 		assertThat(cache).extracting("contextMap", as(map(MergedContextConfiguration.class, ApplicationContext.class)))
 				.satisfies(contextMap -> {

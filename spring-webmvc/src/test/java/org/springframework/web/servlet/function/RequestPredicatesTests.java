@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -31,10 +32,10 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 class RequestPredicatesTests {
 
@@ -149,7 +150,7 @@ class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathWithContext() {
+	void pathWithContext() {
 		RequestPredicate predicate = RequestPredicates.path("/p*");
 		ServerRequest request = initRequest("GET", "/context/path",
 				servletRequest -> servletRequest.setContextPath("/context"));
@@ -179,22 +180,46 @@ class RequestPredicatesTests {
 	}
 
 	@Test
-	void contentType() {
-		MediaType json = MediaType.APPLICATION_JSON;
-		RequestPredicate predicate = RequestPredicates.contentType(json);
-		ServerRequest request = initRequest("GET", "/path", req -> req.setContentType(json.toString()));
+	void singleContentType() {
+		RequestPredicate predicate = RequestPredicates.contentType(MediaType.APPLICATION_JSON);
+		ServerRequest request = initRequest("GET", "/path", r -> r.setContentType(MediaType.APPLICATION_JSON_VALUE));
 		assertThat(predicate.test(request)).isTrue();
-		assertThat(predicate.test(initRequest("GET", ""))).isFalse();
+
+		assertThat(predicate.test(initRequest("GET", "", r -> r.setContentType(MediaType.TEXT_XML_VALUE)))).isFalse();
 	}
 
 	@Test
-	void accept() {
-		MediaType json = MediaType.APPLICATION_JSON;
-		RequestPredicate predicate = RequestPredicates.accept(json);
-		ServerRequest request = initRequest("GET", "/path", req -> req.addHeader("Accept", json.toString()));
+	void multipleContentTypes() {
+		RequestPredicate predicate = RequestPredicates.contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
+		ServerRequest request = initRequest("GET", "/path", r -> r.setContentType(MediaType.APPLICATION_JSON_VALUE));
 		assertThat(predicate.test(request)).isTrue();
 
-		request = initRequest("GET", "", req -> req.addHeader("Accept", TEXT_XML_VALUE));
+		request = initRequest("GET", "/path", r -> r.setContentType(MediaType.TEXT_PLAIN_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		assertThat(predicate.test(initRequest("GET", "", r -> r.setContentType(MediaType.TEXT_XML_VALUE)))).isFalse();
+	}
+
+	@Test
+	void singleAccept() {
+		RequestPredicate predicate = RequestPredicates.accept(MediaType.APPLICATION_JSON);
+		ServerRequest request = initRequest("GET", "/path", r -> r.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		request = initRequest("GET", "", req -> req.addHeader("Accept", MediaType.TEXT_XML_VALUE));
+		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	void multipleAccepts() {
+		RequestPredicate predicate = RequestPredicates.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
+		ServerRequest request = initRequest("GET", "/path", r -> r.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		request = initRequest("GET", "/path", r -> r.addHeader("Accept", MediaType.TEXT_PLAIN_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		request = initRequest("GET", "", req -> req.addHeader("Accept", MediaType.TEXT_XML_VALUE));
 		assertThat(predicate.test(request)).isFalse();
 	}
 
@@ -209,6 +234,18 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(initRequest("GET", "/FILE.TXT"))).isFalse();
 
 		assertThat(predicate.test(initRequest("GET", "/file.foo"))).isFalse();
+		assertThat(predicate.test(initRequest("GET", "/file"))).isFalse();
+	}
+
+	@Test
+	void pathExtensionPredicate() {
+		List<String> extensions = List.of("foo", "bar");
+		RequestPredicate predicate = RequestPredicates.pathExtension(extensions::contains);
+
+		assertThat(predicate.test(initRequest("GET", "/file.foo"))).isTrue();
+		assertThat(predicate.test(initRequest("GET", "/file.bar"))).isTrue();
+		assertThat(predicate.test(initRequest("GET", "/file"))).isFalse();
+		assertThat(predicate.test(initRequest("GET", "/file.baz"))).isFalse();
 	}
 
 	@Test

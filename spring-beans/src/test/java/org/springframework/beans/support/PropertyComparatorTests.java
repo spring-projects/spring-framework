@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PropertyComparator}.
+ * Tests for {@link PropertyComparator}.
  *
  * @author Keith Donald
  * @author Chris Beams
  */
-public class PropertyComparatorTests {
+class PropertyComparatorTests {
 
 	@Test
-	public void testPropertyComparator() {
+	void testPropertyComparator() {
 		Dog dog = new Dog();
 		dog.setNickName("mace");
 
@@ -45,7 +45,7 @@ public class PropertyComparatorTests {
 	}
 
 	@Test
-	public void testPropertyComparatorNulls() {
+	void testPropertyComparatorNulls() {
 		Dog dog = new Dog();
 		Dog dog2 = new Dog();
 		PropertyComparator<Dog> c = new PropertyComparator<>("nickName", false, true);
@@ -53,7 +53,7 @@ public class PropertyComparatorTests {
 	}
 
 	@Test
-	public void testChainedComparators() {
+	void testChainedComparators() {
 		Comparator<Dog> c = new PropertyComparator<>("lastName", false, true);
 
 		Dog dog1 = new Dog();
@@ -74,7 +74,7 @@ public class PropertyComparatorTests {
 	}
 
 	@Test
-	public void testChainedComparatorsReversed() {
+	void testChainedComparatorsReversed() {
 		Comparator<Dog> c = (new PropertyComparator<Dog>("lastName", false, true)).
 				thenComparing(new PropertyComparator<>("firstName", false, true));
 

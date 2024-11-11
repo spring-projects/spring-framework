@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,32 @@ public abstract class BodyInserters {
 				"'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body), null);
+	}
+
+	/**
+	 * Inserter to write the given value.
+	 * <p>Alternatively, consider using the {@code bodyValue(Object, ParameterizedTypeReference)} shortcuts on
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
+	 * @param body the value to write
+	 * @param bodyType the type of the body, used to capture the generic type
+	 * @param <T> the type of the body
+	 * @return the inserter to write a single value
+	 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
+	 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
+	 * for which {@link #fromPublisher(Publisher, ParameterizedTypeReference)} or
+	 * {@link #fromProducer(Object, ParameterizedTypeReference)} should be used.
+	 * @since 6.2
+	 * @see #fromPublisher(Publisher, ParameterizedTypeReference)
+	 * @see #fromProducer(Object, ParameterizedTypeReference)
+	 */
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromValue(T body, ParameterizedTypeReference<T> bodyType) {
+		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(bodyType, "'bodyType' must not be null");
+		Assert.isNull(registry.getAdapter(body.getClass()),
+				"'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
+		return (message, context) ->
+				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forType(bodyType), null);
 	}
 
 	/**

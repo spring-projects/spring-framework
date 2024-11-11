@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 
@@ -30,53 +31,54 @@ import org.springframework.validation.annotation.Validated;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link HandlerMethod}.
+ * Tests for {@link HandlerMethod}.
+ *
  * @author Rossen Stoyanchev
  */
-public class HandlerMethodTests {
+class HandlerMethodTests {
 
 	@Test
 	void shouldValidateArgsWithConstraintsDirectlyOnClass() {
 		Object target = new MyClass();
-		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
-		testShouldValidateArguments(target, List.of("addPerson", "getPerson", "getIntValue", "addPersonNotValidated"), false);
+		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addPeople", "addNames"), true);
+		testValidateArgs(target, List.of("addPerson", "getPerson", "getIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void shouldValidateArgsWithConstraintsOnInterface() {
 		Object target = new MyInterfaceImpl();
-		testShouldValidateArguments(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
-		testShouldValidateArguments(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
+		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addPeople"), true);
+		testValidateArgs(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
 	}
 
 	@Test
 	void shouldValidateReturnValueWithConstraintsDirectlyOnClass() {
 		Object target = new MyClass();
-		testShouldValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
-		testShouldValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
+		testValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
+		testValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void shouldValidateReturnValueWithConstraintsOnInterface() {
 		Object target = new MyInterfaceImpl();
-		testShouldValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
-		testShouldValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
+		testValidateReturnValue(target, List.of("getPerson", "getIntValue"), true);
+		testValidateReturnValue(target, List.of("addPerson", "addIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void classLevelValidatedAnnotation() {
 		Object target = new MyValidatedClass();
-		testShouldValidateArguments(target, List.of("addPerson"), false);
-		testShouldValidateReturnValue(target, List.of("getPerson"), false);
+		testValidateArgs(target, List.of("addPerson"), false);
+		testValidateReturnValue(target, List.of("getPerson"), false);
 	}
 
-	private static void testShouldValidateArguments(Object target, List<String> methodNames, boolean expected) {
+	private static void testValidateArgs(Object target, List<String> methodNames, boolean expected) {
 		for (String methodName : methodNames) {
 			assertThat(getHandlerMethod(target, methodName).shouldValidateArguments()).isEqualTo(expected);
 		}
 	}
 
-	private static void testShouldValidateReturnValue(Object target, List<String> methodNames, boolean expected) {
+	private static void testValidateReturnValue(Object target, List<String> methodNames, boolean expected) {
 		for (String methodName : methodNames) {
 			assertThat(getHandlerMethod(target, methodName).shouldValidateReturnValue()).isEqualTo(expected);
 		}
@@ -84,7 +86,7 @@ public class HandlerMethodTests {
 
 	private static HandlerMethod getHandlerMethod(Object target, String methodName) {
 		Method method = ClassUtils.getMethod(target.getClass(), methodName, (Class<?>[]) null);
-		return new HandlerMethod(target, method);
+		return new HandlerMethod(target, method).createWithValidateFlags();
 	}
 
 
@@ -113,6 +115,12 @@ public class HandlerMethodTests {
 		public void addPersons(@Valid List<Person> persons) {
 		}
 
+		public void addPeople(List<@Valid Person> persons) {
+		}
+
+		public void addNames(List<@NotEmpty String> names) {
+		}
+
 		public void addPersonNotValidated(Person person) {
 		}
 
@@ -138,6 +146,8 @@ public class HandlerMethodTests {
 		void addPersonAndIntValue(@Valid Person person, @Max(10) int value);
 
 		void addPersons(@Valid List<Person> persons);
+
+		void addPeople(List<@Valid Person> persons);
 
 		void addPersonNotValidated(Person person);
 
@@ -166,6 +176,10 @@ public class HandlerMethodTests {
 
 		@Override
 		public void addPersons(List<Person> persons) {
+		}
+
+		@Override
+		public void addPeople(List<@Valid Person> persons) {
 		}
 
 		@Override

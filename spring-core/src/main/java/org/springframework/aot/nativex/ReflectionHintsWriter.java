@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.aot.nativex;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,9 @@ class ReflectionHintsWriter {
 	public static final ReflectionHintsWriter INSTANCE = new ReflectionHintsWriter();
 
 	public void write(BasicJsonWriter writer, ReflectionHints hints) {
-		writer.writeArray(hints.typeHints().map(this::toAttributes).toList());
+		writer.writeArray(hints.typeHints()
+				.sorted(Comparator.comparing(TypeHint::getType))
+				.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(TypeHint hint) {
@@ -58,7 +61,8 @@ class ReflectionHintsWriter {
 		handleCondition(attributes, hint);
 		handleCategories(attributes, hint.getMemberCategories());
 		handleFields(attributes, hint.fields());
-		handleExecutables(attributes, Stream.concat(hint.constructors(), hint.methods()).toList());
+		handleExecutables(attributes, Stream.concat(
+				hint.constructors(), hint.methods()).sorted().toList());
 		return attributes;
 	}
 
@@ -71,7 +75,9 @@ class ReflectionHintsWriter {
 	}
 
 	private void handleFields(Map<String, Object> attributes, Stream<FieldHint> fields) {
-		addIfNotEmpty(attributes, "fields", fields.map(this::toAttributes).toList());
+		addIfNotEmpty(attributes, "fields", fields
+				.sorted(Comparator.comparing(FieldHint::getName, String::compareToIgnoreCase))
+				.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(FieldHint hint) {
@@ -97,7 +103,7 @@ class ReflectionHintsWriter {
 	}
 
 	private void handleCategories(Map<String, Object> attributes, Set<MemberCategory> categories) {
-		categories.forEach(category -> {
+		categories.stream().sorted().forEach(category -> {
 					switch (category) {
 						case PUBLIC_FIELDS -> attributes.put("allPublicFields", true);
 						case DECLARED_FIELDS -> attributes.put("allDeclaredFields", true);

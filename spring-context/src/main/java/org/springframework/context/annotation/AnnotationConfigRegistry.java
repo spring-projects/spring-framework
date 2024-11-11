@@ -30,7 +30,7 @@ public interface AnnotationConfigRegistry {
 	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * component class more than once has no additional effect.
 	 * @param componentClasses one or more component classes,
-	 * e.g. {@link Configuration @Configuration} classes
+	 * for example, {@link Configuration @Configuration} classes
 	 */
 	void register(Class<?>... componentClasses);
 

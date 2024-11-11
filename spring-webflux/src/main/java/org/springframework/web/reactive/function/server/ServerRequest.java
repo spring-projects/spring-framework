@@ -214,7 +214,7 @@ public interface ServerRequest {
 	/**
 	 * Bind to this request and return an instance of the given type.
 	 * @param bindType the type of class to bind this request to
-	 * @param dataBinderCustomizer used to customize the data binder, e.g. set
+	 * @param dataBinderCustomizer used to customize the data binder, for example, set
 	 * (dis)allowed fields
 	 * @param <T> the type to bind to
 	 * @return a mono containing either a constructed and bound instance of
@@ -272,7 +272,7 @@ public interface ServerRequest {
 	default String pathVariable(String name) {
 		Map<String, String> pathVariables = pathVariables();
 		if (pathVariables.containsKey(name)) {
-			return pathVariables().get(name);
+			return pathVariables.get(name);
 		}
 		else {
 			throw new IllegalArgumentException("No path variable with name \"" + name + "\" available");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,15 +146,10 @@ public class RequestHandledEvent extends ApplicationEvent {
 		StringBuilder sb = new StringBuilder();
 		sb.append("session=[").append(this.sessionId).append("]; ");
 		sb.append("user=[").append(this.userName).append("]; ");
-		sb.append("time=[").append(this.processingTimeMillis).append("ms]; ");
-		sb.append("status=[");
-		if (!wasFailure()) {
-			sb.append("OK");
+		sb.append("time=[").append(this.processingTimeMillis).append("ms]");
+		if (wasFailure()) {
+			sb.append("; failure=[").append(this.failureCause).append("]");
 		}
-		else {
-			sb.append("failed: ").append(this.failureCause);
-		}
-		sb.append(']');
 		return sb.toString();
 	}
 

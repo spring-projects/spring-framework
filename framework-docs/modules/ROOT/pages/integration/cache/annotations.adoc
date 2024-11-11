@@ -332,7 +332,7 @@ metadata, such as the argument names. The following table describes the items ma
 available to the context so that you can use them for key and conditional computations:
 
 [[cache-spel-context-tbl]]
-.Cache SpEL available metadata
+.Cache metadata available in SpEL expressions
 |===
 | Name| Location| Description| Example
 
@@ -358,7 +358,7 @@ available to the context so that you can use them for key and conditional comput
 
 | `args`
 | Root object
-| The arguments (as array) used for invoking the target
+| The arguments (as an object array) used for invoking the target
 | `#root.args[0]`
 
 | `caches`
@@ -368,9 +368,10 @@ available to the context so that you can use them for key and conditional comput
 
 | Argument name
 | Evaluation context
-| Name of any of the method arguments. If the names are not available
-  (perhaps due to having no debug information), the argument names are also available under the `#a<#arg>`
-  where `#arg` stands for the argument index (starting from `0`).
+| The name of a particular method argument. If the names are not available
+  (for example, because the code was compiled without the `-parameters` flag), individual
+  arguments are also available using the `#a<#arg>` syntax where `<#arg>` stands for the
+  argument index (starting from 0).
 | `#iban` or `#a0` (you can also use `#p0` or `#p<#arg>` notation as an alias).
 
 | `result`
@@ -500,12 +501,12 @@ Placing this annotation on the class does not turn on any caching operation.
 An operation-level customization always overrides a customization set on `@CacheConfig`.
 Therefore, this gives three levels of customizations for each cache operation:
 
-* Globally configured, e.g. through `CachingConfigurer`: see next section.
+* Globally configured, for example, through `CachingConfigurer`: see next section.
 * At the class level, using `@CacheConfig`.
 * At the operation level.
 
 NOTE: Provider-specific settings are typically available on the `CacheManager` bean,
-e.g. on `CaffeineCacheManager`. These are effectively also global.
+for example, on `CaffeineCacheManager`. These are effectively also global.
 
 
 [[cache-annotation-enable]]
@@ -518,41 +519,9 @@ disable it by removing only one configuration line rather than all the annotatio
 your code).
 
 To enable caching annotations add the annotation `@EnableCaching` to one of your
-`@Configuration` classes:
+`@Configuration` classes or use the `cache:annotation-driven` element with XML:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableCaching
-	public class AppConfig {
-
-		@Bean
-		CacheManager cacheManager() {
-			CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-			cacheManager.setCacheSpecification(...);
-			return cacheManager;
-		}
-	}
-----
-
-Alternatively, for XML configuration you can use the `cache:annotation-driven` element:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:cache="http://www.springframework.org/schema/cache"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
-
-		<cache:annotation-driven/>
-
-		<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
-			<property name="cacheSpecification" value="..."/>
-		</bean>
-	</beans>
-----
+include-code::./CacheConfiguration[tag=snippet,indent=0]
 
 Both the `cache:annotation-driven` element and the `@EnableCaching` annotation let you
 specify various options that influence the way the caching behavior is added to the

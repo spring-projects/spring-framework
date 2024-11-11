@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.function.Predicate;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -56,7 +57,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 
 	private final MethodValidationResult validationResult;
 
-	private final Predicate<MethodParameter> modelAttribitePredicate;
+	private final Predicate<MethodParameter> modelAttributePredicate;
 
 	private final Predicate<MethodParameter> requestParamPredicate;
 
@@ -68,16 +69,16 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 	}
 
 	public HandlerMethodValidationException(MethodValidationResult validationResult,
-			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		super(initHttpStatus(validationResult), "Validation failure", null, null, null);
 		this.validationResult = validationResult;
-		this.modelAttribitePredicate = modelAttribitePredicate;
+		this.modelAttributePredicate = modelAttributePredicate;
 		this.requestParamPredicate = requestParamPredicate;
 	}
 
 	private static HttpStatus initHttpStatus(MethodValidationResult validationResult) {
-		return (!validationResult.isForReturnValue() ? HttpStatus.BAD_REQUEST : HttpStatus.INTERNAL_SERVER_ERROR);
+		return (validationResult.isForReturnValue() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.BAD_REQUEST);
 	}
 
 
@@ -107,8 +108,13 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 	}
 
 	@Override
-	public List<ParameterValidationResult> getAllValidationResults() {
-		return this.validationResult.getAllValidationResults();
+	public List<ParameterValidationResult> getParameterValidationResults() {
+		return this.validationResult.getParameterValidationResults();
+	}
+
+	@Override
+	public List<MessageSourceResolvable> getCrossParameterValidationResults() {
+		return this.validationResult.getCrossParameterValidationResults();
 	}
 
 	/**
@@ -116,7 +122,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 	 * through callback methods organized by controller method parameter type.
 	 */
 	public void visitResults(Visitor visitor) {
-		for (ParameterValidationResult result : getAllValidationResults()) {
+		for (ParameterValidationResult result : getParameterValidationResults()) {
 			MethodParameter param = result.getMethodParameter();
 			CookieValue cookieValue = param.getParameterAnnotation(CookieValue.class);
 			if (cookieValue != null) {
@@ -128,7 +134,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 				visitor.matrixVariable(matrixVariable, result);
 				continue;
 			}
-			if (this.modelAttribitePredicate.test(param)) {
+			if (this.modelAttributePredicate.test(param)) {
 				ModelAttribute modelAttribute = param.getParameterAnnotation(ModelAttribute.class);
 				visitor.modelAttribute(modelAttribute, asErrors(result));
 				continue;

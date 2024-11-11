@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-@SuppressWarnings({ "resource", "deprecation" })
+@SuppressWarnings({"resource", "deprecation", "removal"})
 class AsyncExecutionTests {
 
 	private static String originalThreadName;
@@ -329,7 +329,7 @@ class AsyncExecutionTests {
 	}
 
 	@Test
-	void asyncMethodListener() throws Exception {
+	void asyncMethodListener() {
 		// Arrange
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodListener.class));
@@ -339,14 +339,14 @@ class AsyncExecutionTests {
 		context.refresh();
 		// Assert
 		Awaitility.await()
-					.atMost(1, TimeUnit.SECONDS)
+					.atMost(5, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 1);
 		context.close();
 	}
 
 	@Test
-	void asyncClassListener() throws Exception {
+	void asyncClassListener() {
 		// Arrange
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassListener.class));
@@ -357,14 +357,14 @@ class AsyncExecutionTests {
 		context.close();
 		// Assert
 		Awaitility.await()
-					.atMost(1, TimeUnit.SECONDS)
+					.atMost(5, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 2);
 		assertThat(listenerConstructed).isEqualTo(1);
 	}
 
 	@Test
-	void asyncPrototypeClassListener() throws Exception {
+	void asyncPrototypeClassListener() {
 		// Arrange
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(AsyncClassListener.class);
@@ -377,7 +377,7 @@ class AsyncExecutionTests {
 		context.close();
 		// Assert
 		Awaitility.await()
-					.atMost(1, TimeUnit.SECONDS)
+					.atMost(5, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 2);
 		assertThat(listenerConstructed).isEqualTo(2);

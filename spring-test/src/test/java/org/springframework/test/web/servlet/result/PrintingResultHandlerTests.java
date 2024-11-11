@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link PrintingResultHandler}.
+ * Tests for {@link PrintingResultHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -145,7 +145,6 @@ class PrintingResultHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
 	void printResponse() throws Exception {
 		Cookie enigmaCookie = new Cookie("enigma", "42");
 		enigmaCookie.setHttpOnly(true);
@@ -167,10 +166,9 @@ class PrintingResultHandlerTests {
 
 		// Manually validate cookie values since maxAge changes...
 		List<String> cookieValues = this.response.getHeaders("Set-Cookie");
-		assertThat(cookieValues).hasSize(2);
-		assertThat(cookieValues.get(0)).isEqualTo("cookie=cookieValue");
-		assertThat(cookieValues.get(1)).as("Actual: " + cookieValues.get(1))
-				.startsWith("enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires=");
+		assertThat(cookieValues).satisfiesExactly(
+				zero -> assertThat(zero).isEqualTo("cookie=cookieValue"),
+				one -> assertThat(one).startsWith("enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires="));
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");

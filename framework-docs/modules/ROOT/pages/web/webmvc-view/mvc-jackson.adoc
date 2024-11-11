@@ -36,7 +36,7 @@ to render the response content as XML. If the model contains multiple entries, y
 explicitly set the object to be serialized by using the `modelKey` bean property. If the
 model contains a single entry, it is serialized automatically.
 
-You can customized XML mapping as needed by using JAXB or Jackson's provided
+You can customize XML mapping as needed by using JAXB or Jackson's provided
 annotations. When you need further control, you can inject a custom `XmlMapper`
 through the `ObjectMapper` property, for cases where custom XML
 you need to provide serializers and deserializers for specific types.

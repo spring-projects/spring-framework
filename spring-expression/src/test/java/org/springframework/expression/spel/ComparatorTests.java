@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import org.springframework.lang.Nullable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for type comparison
+ * Tests for type comparison
  *
  * @author Andy Clement
  * @author Giovanni Dall'Oglio Risso
  */
-public class ComparatorTests {
+class ComparatorTests {
 
 	@Test
 	void testPrimitives() throws EvaluationException {
@@ -126,7 +126,7 @@ public class ComparatorTests {
 	}
 
 	@Test
-	public void customComparatorWorksWithEquality() {
+	void customComparatorWorksWithEquality() {
 		final StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setTypeComparator(customComparator);
 

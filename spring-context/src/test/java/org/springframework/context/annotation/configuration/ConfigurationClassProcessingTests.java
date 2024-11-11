@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
@@ -143,6 +144,11 @@ class ConfigurationClassProcessingTests {
 				initBeanFactory(ConfigWithFinalBean.class));
 	}
 
+	@Test
+	void finalBeanMethodWithoutProxy() {
+		initBeanFactory(ConfigWithFinalBeanWithoutProxy.class);
+	}
+
 	@Test  // gh-31007
 	void voidBeanMethod() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
@@ -210,8 +216,14 @@ class ConfigurationClassProcessingTests {
 		BeanFactory factory = initBeanFactory(ConfigWithNullReference.class);
 
 		TestBean foo = factory.getBean("foo", TestBean.class);
-		assertThat(factory.getBean("bar").equals(null)).isTrue();
+		assertThat(factory.getBean("bar")).isEqualTo(null);
 		assertThat(foo.getSpouse()).isNull();
+	}
+
+	@Test  // gh-33330
+	void configurationWithMethodNameMismatch() {
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class)
+				.isThrownBy(() -> initBeanFactory(ConfigWithMethodNameMismatch.class));
 	}
 
 	@Test
@@ -347,6 +359,7 @@ class ConfigurationClassProcessingTests {
 			String configBeanName = configClass.getName();
 			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
 		}
+		factory.setAllowBeanDefinitionOverriding(false);
 		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
 		ccpp.postProcessBeanDefinitionRegistry(factory);
 		ccpp.postProcessBeanFactory(factory);
@@ -438,6 +451,15 @@ class ConfigurationClassProcessingTests {
 	}
 
 
+	@Configuration(proxyBeanMethods = false)
+	static class ConfigWithFinalBeanWithoutProxy {
+
+		@Bean public final TestBean testBean() {
+			return new TestBean();
+		}
+	}
+
+
 	@Configuration
 	static class ConfigWithVoidBean {
 
@@ -508,6 +530,19 @@ class ConfigurationClassProcessingTests {
 		@Override
 		public TestBean bar() {
 			return null;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithMethodNameMismatch {
+
+		@Bean(name = "foo") public TestBean foo() {
+			return new SpousyTestBean("foo");
+		}
+
+		@Bean(name = "foo") public TestBean fooX() {
+			return new SpousyTestBean("fooX");
 		}
 	}
 
@@ -619,15 +654,15 @@ class ConfigurationClassProcessingTests {
 		void register(GenericApplicationContext ctx) {
 			ctx.registerBean("spouse", TestBean.class,
 					() -> new TestBean("functional"));
-			Supplier<TestBean> testBeanSupplier = () -> new TestBean(ctx.getBean("spouse", TestBean.class));
-			ctx.registerBean(TestBean.class,
-					testBeanSupplier,
+			Supplier<TestBean> testBeanSupplier =
+					() -> new TestBean(ctx.getBean("spouse", TestBean.class));
+			ctx.registerBean(TestBean.class, testBeanSupplier,
 					bd -> bd.setPrimary(true));
 		}
 
 		@Bean
-		public NestedTestBean nestedTestBean(TestBean testBean) {
-			return new NestedTestBean(testBean.getSpouse().getName());
+		public NestedTestBean nestedTestBean(TestBean spouse) {
+			return new NestedTestBean(spouse.getSpouse().getName());
 		}
 	}
 

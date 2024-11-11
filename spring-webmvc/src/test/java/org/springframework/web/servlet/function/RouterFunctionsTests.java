@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,14 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-public class RouterFunctionsTests {
+class RouterFunctionsTests {
 
 	private final ServerRequest request = new DefaultServerRequest(
 			PathPatternsTestUtils.initRequest("GET", "", true), Collections.emptyList());
 
 
 	@Test
-	public void routeMatch() {
+	void routeMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
 		RequestPredicate requestPredicate = mock();
@@ -54,7 +54,7 @@ public class RouterFunctionsTests {
 	}
 
 	@Test
-	public void routeNoMatch() {
+	void routeNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
 		RequestPredicate requestPredicate = mock();
@@ -68,7 +68,7 @@ public class RouterFunctionsTests {
 	}
 
 	@Test
-	public void nestMatch() {
+	void nestMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
@@ -84,7 +84,7 @@ public class RouterFunctionsTests {
 	}
 
 	@Test
-	public void nestNoMatch() {
+	void nestNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
@@ -99,7 +99,7 @@ public class RouterFunctionsTests {
 	}
 
 	@Test
-	public void nestPathVariable() {
+	void nestPathVariable() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RequestPredicate requestPredicate = request -> request.pathVariable("foo").equals("bar");
 		RouterFunction<ServerResponse> nestedFunction = RouterFunctions.route(requestPredicate, handlerFunction);
@@ -110,6 +110,20 @@ public class RouterFunctionsTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/bar");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
+	}
+
+	@Test
+	void composedPathVariable() {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RequestPredicate requestPredicate = RequestPredicates.path("/{foo}").and(
+				request -> request.pathVariable("foo").equals("bar"));
+		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route(requestPredicate, handlerFunction);
+
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/bar");
+		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
+		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = routerFunction.route(request);
 		assertThat(resultHandlerFunction).isPresent();
 		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}

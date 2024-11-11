@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import org.springframework.messaging.support.GenericMessage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link PrincipalMethodArgumentResolver}.
+ * Tests for {@link PrincipalMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Johnny Lim
  */
-public class PrincipalMethodArgumentResolverTests {
+class PrincipalMethodArgumentResolverTests {
 
 	private final PrincipalMethodArgumentResolver resolver = new PrincipalMethodArgumentResolver();
 
@@ -44,14 +44,14 @@ public class PrincipalMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Principal.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Optional.class, Principal.class))).isTrue();
 	}
 
 
 	@Test
-	public void resolverArgument() {
+	void resolverArgument() {
 		Principal user = () -> "Joe";
 		Message<String> message = new GenericMessage<>("Hello, world!",
 				Collections.singletonMap(SimpMessageHeaderAccessor.USER_HEADER, user));

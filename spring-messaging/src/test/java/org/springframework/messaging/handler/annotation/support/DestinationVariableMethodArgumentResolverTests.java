@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.springframework.messaging.handler.annotation.MessagingPredicat
  *
  * @author Brian Clozel
  */
-public class DestinationVariableMethodArgumentResolverTests {
+class DestinationVariableMethodArgumentResolverTests {
 
 	private final DestinationVariableMethodArgumentResolver resolver =
 			new DestinationVariableMethodArgumentResolver(new DefaultConversionService());
@@ -48,13 +48,13 @@ public class DestinationVariableMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(resolver.supportsParameter(this.resolvable.annot(destinationVar().noValue()).arg())).isTrue();
 		assertThat(resolver.supportsParameter(this.resolvable.annotNotPresent(DestinationVariable.class).arg())).isFalse();
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 
 		Map<String, Object> vars = new HashMap<>();
 		vars.put("foo", "bar");
@@ -73,7 +73,7 @@ public class DestinationVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNotFound() throws Exception {
+	void resolveArgumentNotFound() {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
 		assertThatExceptionOfType(MessageHandlingException.class).isThrownBy(() ->
 				this.resolver.resolveArgument(this.resolvable.annot(destinationVar().noValue()).arg(), message));

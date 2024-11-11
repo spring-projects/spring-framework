@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.beans.PropertyEditor;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link ResourceEditor} class.
+ * Tests for {@link ResourceEditor}.
  *
  * @author Rick Evans
  * @author Arjen Poutsma
@@ -73,7 +75,7 @@ class ResourceEditorTests {
 			assertThat(resolved.getFilename()).isEqualTo("foo");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -87,7 +89,7 @@ class ResourceEditorTests {
 			assertThat(resolved.getFilename()).isEqualTo("foo-${bar}");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
@@ -96,13 +98,13 @@ class ResourceEditorTests {
 		PropertyEditor editor = new ResourceEditor(new DefaultResourceLoader(), new StandardEnvironment(), false);
 		System.setProperty("test.prop", "foo");
 		try {
-			assertThatIllegalArgumentException().isThrownBy(() -> {
+			assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() -> {
 					editor.setAsText("${test.prop}-${bar}");
 					editor.getValue();
 			});
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 

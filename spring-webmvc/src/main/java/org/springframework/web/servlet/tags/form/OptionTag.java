@@ -364,6 +364,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	@Override
+	@Nullable
 	protected String autogenerateId() throws JspException {
 		return null;
 	}

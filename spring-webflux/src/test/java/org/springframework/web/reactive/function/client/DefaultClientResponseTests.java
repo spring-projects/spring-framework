@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
@@ -34,7 +36,9 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -43,6 +47,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -67,13 +72,16 @@ class DefaultClientResponseTests {
 
 	private final ExchangeStrategies mockExchangeStrategies = mock();
 
+	@Nullable
+	private HttpRequest httpRequest = null;
+
 	private DefaultClientResponse defaultClientResponse;
 
 
 	@BeforeEach
 	void configureMocks() {
 		given(mockResponse.getHeaders()).willReturn(this.httpHeaders);
-		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "", () -> null);
+		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "", () -> httpRequest);
 	}
 
 
@@ -302,13 +310,35 @@ class DefaultClientResponseTests {
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		given(mockResponse.getBody()).willReturn(Flux.just(dataBuffer));
 
+		httpRequest = new HttpRequest() {
+			@Override
+			public HttpMethod getMethod() {
+				return HttpMethod.valueOf("UNKNOWN");
+			}
+
+			@Override
+			public URI getURI() {
+				return URI.create("https://user:pass@example.org:9999/app/path?token=secret#fragment");
+			}
+
+			@Override
+			public HttpHeaders getHeaders() {
+				return HttpHeaders.EMPTY;
+			}
+
+			@Override
+			public Map<String, Object> getAttributes() {
+				return Collections.emptyMap();
+			}
+		};
+
 		given(mockExchangeStrategies.messageReaders()).willReturn(
 				List.of(new DecoderHttpMessageReader<>(new ByteArrayDecoder())));
 
 		Mono<WebClientResponseException> resultMono = defaultClientResponse.createException();
 		WebClientResponseException exception = resultMono.block();
 		assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-		assertThat(exception.getMessage()).isEqualTo("404 Not Found");
+		assertThat(exception.getMessage()).isEqualTo("404 Not Found from UNKNOWN https://example.org:9999/app/path");
 		assertThat(exception.getHeaders()).containsExactly(entry("Content-Type", List.of("text/plain")));
 		assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
 	}

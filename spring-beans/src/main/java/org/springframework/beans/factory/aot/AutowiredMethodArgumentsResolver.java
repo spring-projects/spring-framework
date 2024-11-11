@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +33,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.function.ThrowingConsumer;
 
@@ -63,17 +63,17 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	private final boolean required;
 
 	@Nullable
-	private final String[] shortcuts;
+	private final String[] shortcutBeanNames;
 
 
 	private AutowiredMethodArgumentsResolver(String methodName, Class<?>[] parameterTypes,
-			boolean required, @Nullable String[] shortcuts) {
+			boolean required, @Nullable String[] shortcutBeanNames) {
 
 		Assert.hasText(methodName, "'methodName' must not be empty");
 		this.methodName = methodName;
 		this.parameterTypes = parameterTypes;
 		this.required = required;
-		this.shortcuts = shortcuts;
+		this.shortcutBeanNames = shortcutBeanNames;
 	}
 
 
@@ -105,7 +105,7 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	 * @param beanNames the bean names to use as shortcuts (aligned with the
 	 * method parameters)
 	 * @return a new {@link AutowiredMethodArgumentsResolver} instance that uses
-	 * the shortcuts
+	 * the given shortcut bean names
 	 */
 	public AutowiredMethodArgumentsResolver withShortcut(String... beanNames) {
 		return new AutowiredMethodArgumentsResolver(this.methodName, this.parameterTypes, this.required, beanNames);
@@ -165,13 +165,13 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 		AutowireCapableBeanFactory autowireCapableBeanFactory = (AutowireCapableBeanFactory) beanFactory;
 		int argumentCount = method.getParameterCount();
 		Object[] arguments = new Object[argumentCount];
-		Set<String> autowiredBeanNames = new LinkedHashSet<>(argumentCount);
+		Set<String> autowiredBeanNames = CollectionUtils.newLinkedHashSet(argumentCount);
 		TypeConverter typeConverter = beanFactory.getTypeConverter();
 		for (int i = 0; i < argumentCount; i++) {
 			MethodParameter parameter = new MethodParameter(method, i);
 			DependencyDescriptor descriptor = new DependencyDescriptor(parameter, this.required);
 			descriptor.setContainingClass(beanClass);
-			String shortcut = (this.shortcuts != null ? this.shortcuts[i] : null);
+			String shortcut = (this.shortcutBeanNames != null ? this.shortcutBeanNames[i] : null);
 			if (shortcut != null) {
 				descriptor = new ShortcutDependencyDescriptor(descriptor, shortcut);
 			}

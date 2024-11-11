@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,12 @@ public class JmsListenerContainerTestFactory implements JmsListenerContainerFact
 
 	private boolean autoStartup = true;
 
-	private final Map<String, MessageListenerTestContainer> listenerContainers =
-			new LinkedHashMap<>();
+	private final Map<String, MessageListenerTestContainer> listenerContainers = new LinkedHashMap<>();
 
 
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
 	}
-
 
 	public List<MessageListenerTestContainer> getListenerContainers() {
 		return new ArrayList<>(this.listenerContainers.values());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <p>If no MultipartResolver bean is found, this filter falls back to a default
  * MultipartResolver: {@link StandardServletMultipartResolver} for Servlet
- * oontainers, based on a multipart-config section in {@code web.xml}.
+ * containers, based on a multipart-config section in {@code web.xml}.
  * Note however that at present the Servlet specification only defines how to
  * enable multipart configuration on a Servlet and as a result multipart request
  * processing is likely not possible in a Filter unless the Servlet container
@@ -54,7 +54,7 @@ import org.springframework.web.multipart.MultipartResolver;
  * <p>Note: This filter is an <b>alternative</b> to using DispatcherServlet's
  * MultipartResolver support, for example for web applications with custom web views
  * which do not use Spring's web MVC, or for custom filters applied before a Spring MVC
- * DispatcherServlet (e.g. {@link org.springframework.web.filter.HiddenHttpMethodFilter}).
+ * DispatcherServlet (for example, {@link org.springframework.web.filter.HiddenHttpMethodFilter}).
  * In any case, this filter should not be combined with servlet-specific multipart resolution.
  *
  * @author Juergen Hoeller

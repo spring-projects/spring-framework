@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,10 @@ import static org.mockito.Mockito.mock;
  *
  * @author Arjen Poutsma
  */
-public class MarshallingHttpMessageConverterTests {
+class MarshallingHttpMessageConverterTests {
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		Unmarshaller unmarshaller = mock();
 
 		given(unmarshaller.supports(Integer.class)).willReturn(false);
@@ -66,7 +66,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		Marshaller marshaller = mock();
 
 		given(marshaller.supports(Integer.class)).willReturn(false);
@@ -81,7 +81,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void read() throws Exception {
+	void read() throws Exception {
 		String body = "<root>Hello World</root>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 
@@ -96,7 +96,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readWithTypeMismatchException() throws Exception {
+	void readWithTypeMismatchException() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
 
 		Marshaller marshaller = mock();
@@ -110,7 +110,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readWithMarshallingFailureException() throws Exception {
+	void readWithMarshallingFailureException() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
 		UnmarshallingFailureException ex = new UnmarshallingFailureException("forced");
 
@@ -125,7 +125,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws Exception {
+	void write() throws Exception {
 		String body = "<root>Hello World</root>";
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 
@@ -140,7 +140,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void writeWithMarshallingFailureException() throws Exception {
+	void writeWithMarshallingFailureException() throws Exception {
 		String body = "<root>Hello World</root>";
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MarshallingFailureException ex = new MarshallingFailureException("forced");
@@ -154,7 +154,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void supports() {
+	void supports() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				new MarshallingHttpMessageConverter().supports(Object.class));
 	}

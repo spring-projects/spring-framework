@@ -137,8 +137,8 @@
 <!ATTLIST bean name CDATA #IMPLIED>
 
 <!--
-	Each bean definition must specify the fully qualified name of the class,
-	except if it serves only as a parent definition for child bean definitions.
+	Each bean definition must specify the fully-qualified name of the class,
+	unless it serves only as a parent definition for child bean definitions.
 -->
 <!ATTLIST bean class CDATA #IMPLIED>
 
@@ -343,14 +343,14 @@
 <!--
 	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
-	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
+	to avoid ambiguities, for example, in case of 2 arguments of the same type.
 -->
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
 
 <!--
 	The constructor-arg tag can have an optional type attribute,
 	to specify the exact type of the constructor argument. Only needed
-	to avoid ambiguities, e.g. in case of 2 single argument constructors
+	to avoid ambiguities, for example, in case of 2 single argument constructors
 	that can both be converted from a String.
 -->
 <!ATTLIST constructor-arg type CDATA #IMPLIED>
@@ -451,8 +451,8 @@
 
 <!--
 	Specification of the type of an overloaded method argument as a String.
-	For convenience, this may be a substring of the FQN. E.g. all the
-	following would match "java.lang.String":
+	For convenience, this may be a substring of the fully-qualified class name.
+	For example, all the following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str

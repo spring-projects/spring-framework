@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,36 +24,36 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for the {@link DefaultScopedObject} class.
+ * Tests for {@link DefaultScopedObject}.
  *
  * @author Rick Evans
  * @author Chris Beams
  */
-public class DefaultScopedObjectTests {
+class DefaultScopedObjectTests {
 
 	private static final String GOOD_BEAN_NAME = "foo";
 
 
 	@Test
-	public void testCtorWithNullBeanFactory() throws Exception {
+	void testCtorWithNullBeanFactory() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 			new DefaultScopedObject(null, GOOD_BEAN_NAME));
 	}
 
 	@Test
-	public void testCtorWithNullTargetBeanName() throws Exception {
+	void testCtorWithNullTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName(null));
 	}
 
 	@Test
-	public void testCtorWithEmptyTargetBeanName() throws Exception {
+	void testCtorWithEmptyTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName(""));
 	}
 
 	@Test
-	public void testCtorWithJustWhitespacedTargetBeanName() throws Exception {
+	void testCtorWithJustWhitespacedTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName("   "));
 	}

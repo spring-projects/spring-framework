@@ -75,6 +75,36 @@ lead to concurrent access exceptions, inconsistent state in the bean container, 
 
 
 
+[[beans-definition-overriding]]
+== Overriding Beans
+
+Bean overriding occurs when a bean is registered using an identifier that is already
+allocated. While bean overriding is possible, it makes the configuration harder to read.
+
+WARNING: Bean overriding will be deprecated in a future release.
+
+To disable bean overriding altogether, you can set the `allowBeanDefinitionOverriding`
+flag to `false` on the `ApplicationContext` before it is refreshed. In such a setup, an
+exception is thrown if bean overriding is used.
+
+By default, the container logs every attempt to override a bean at `INFO` level so that
+you can adapt your configuration accordingly. While not recommended, you can silence
+those logs by setting the `allowBeanDefinitionOverriding` flag to `true`.
+
+.Java Configuration
+****
+If you use Java Configuration, a corresponding `@Bean` method always silently overrides
+a scanned bean class with the same component name as long as the return type of the
+`@Bean` method matches that bean class. This simply means that the container will call
+the `@Bean` factory method in favor of any pre-declared constructor on the bean class.
+****
+
+NOTE: We acknowledge that overriding beans in test scenarios is convenient, and there is
+explicit support for this as of Spring Framework 6.2. Please refer to
+xref:testing/testcontext-framework/bean-overriding.adoc[this section] for more details.
+
+
+
 [[beans-beanname]]
 == Naming Beans
 
@@ -234,6 +264,10 @@ For details about the mechanism for supplying arguments to the constructor (if r
 and setting object instance properties after the object is constructed, see
 xref:core/beans/dependencies/factory-collaborators.adoc[Injecting Dependencies].
 
+NOTE: In the case of constructor arguments, the container can select a corresponding
+constructor among several overloaded constructors. That said, to avoid ambiguities,
+it is recommended to keep your constructor signatures as straightforward as possible.
+
 
 [[beans-factory-class-static-factory-method]]
 === Instantiation with a Static Factory Method
@@ -264,7 +298,7 @@ The following example shows a class that would work with the preceding bean defi
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ClientService {
 		private static ClientService clientService = new ClientService();
@@ -278,7 +312,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ClientService private constructor() {
 		companion object {
@@ -293,6 +327,24 @@ Kotlin::
 For details about the mechanism for supplying (optional) arguments to the factory method
 and setting object instance properties after the object is returned from the factory,
 see xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail].
+
+NOTE: In the case of factory method arguments, the container can select a corresponding
+method among several overloaded methods of the same name. That said, to avoid ambiguities,
+it is recommended to keep your factory method signatures as straightforward as possible.
+
+[TIP]
+====
+A typical problematic case with factory method overloading is Mockito with its many
+overloads of the `mock` method. Choose the most specific variant of `mock` possible:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="clientService" class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg type="java.lang.Class" value="examples.ClientService"/>
+		<constructor-arg type="java.lang.String" value="clientService"/>
+	</bean>
+----
+====
 
 
 [[beans-factory-class-instance-factory-method]]
@@ -326,7 +378,7 @@ The following example shows the corresponding class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultServiceLocator {
 
@@ -340,7 +392,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DefaultServiceLocator {
 		companion object {
@@ -376,7 +428,7 @@ The following example shows the corresponding class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultServiceLocator {
 
@@ -396,7 +448,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DefaultServiceLocator {
 		companion object {
@@ -416,8 +468,8 @@ Kotlin::
 ======
 
 This approach shows that the factory bean itself can be managed and configured through
-dependency injection (DI). See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail]
-.
+dependency injection (DI).
+See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail].
 
 NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
 Spring container and that creates objects through an
@@ -442,7 +494,5 @@ The recommended way to find out about the actual runtime type of a particular be
 a `BeanFactory.getType` call for the specified bean name. This takes all of the above
 cases into account and returns the type of object that a `BeanFactory.getBean` call is
 going to return for the same bean name.
-
-
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class FlashAttributeAssertionTests {
 
 
 	@Test
-	void attributeCountWithWrongCount() throws Exception {
+	void attributeCountWithWrongCount() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> this.mockMvc.perform(post("/persons")).andExpect(flash().attributeCount(1)))
 			.withMessage("FlashMap size expected:<1> but was:<3>");

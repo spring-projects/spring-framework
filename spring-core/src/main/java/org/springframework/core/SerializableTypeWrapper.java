@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,12 +105,12 @@ final class SerializableTypeWrapper {
 	static Type forTypeProvider(TypeProvider provider) {
 		Type providedType = provider.getType();
 		if (providedType == null || providedType instanceof Serializable) {
-			// No serializable type wrapping necessary (e.g. for java.lang.Class)
+			// No serializable type wrapping necessary (for example, for java.lang.Class)
 			return providedType;
 		}
 		if (NativeDetector.inNativeImage() || !Serializable.class.isAssignableFrom(Class.class)) {
 			// Let's skip any wrapping attempts if types are generally not serializable in
-			// the current runtime environment (even java.lang.Class itself, e.g. on GraalVM native images)
+			// the current runtime environment (even java.lang.Class itself, for example, on GraalVM native images)
 			return providedType;
 		}
 
@@ -159,7 +159,7 @@ final class SerializableTypeWrapper {
 
 		/**
 		 * Return the source of the type, or {@code null} if not known.
-		 * <p>The default implementations returns {@code null}.
+		 * <p>The default implementation returns {@code null}.
 		 */
 		@Nullable
 		default Object getSource() {
@@ -186,17 +186,20 @@ final class SerializableTypeWrapper {
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					Object other = args[0];
 					// Unwrap proxies for speed
 					if (other instanceof Type otherType) {
 						other = unwrap(otherType);
 					}
 					return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					return ObjectUtils.nullSafeHashCode(this.provider.getType());
-				case "getTypeProvider":
+				}
+				case "getTypeProvider" -> {
 					return this.provider;
+				}
 			}
 
 			if (Type.class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
@@ -214,7 +217,12 @@ final class SerializableTypeWrapper {
 				return result;
 			}
 
-			return ReflectionUtils.invokeMethod(method, this.provider.getType(), args);
+			Type type = this.provider.getType();
+			if (type instanceof TypeVariable<?> tv && method.getName().equals("getName")) {
+				// Avoid reflection for common comparison of type variables
+				return tv.getName();
+			}
+			return ReflectionUtils.invokeMethod(method, type, args);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -65,7 +65,23 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
- * <p>Note that {@code HttpHeaders} generally treats header names in a case-insensitive manner.
+ * <p>Note that {@code HttpHeaders} instances created by the default constructor
+ * treat header names in a case-insensitive manner. Instances created with the
+ * {@link #HttpHeaders(MultiValueMap)} constructor like those instantiated
+ * internally by the framework to adapt to existing HTTP headers data structures
+ * do guarantee per-header get/set/add operations to be case-insensitive as
+ * mandated by the HTTP specification. However, it is not necessarily the case
+ * for operations that deal with the collection as a whole (like {@code size()},
+ * {@code values()}, {@code keySet()} and {@code entrySet()}). Prefer using
+ * {@link #headerSet()} for these cases.
+ *
+ * <p>Some backing implementations can store header names in a case-sensitive
+ * manner, which will lead to duplicates during the entrySet() iteration where
+ * multiple occurrences of a header name can surface depending on letter casing
+ * but each such entry has the full {@code List} of values. &mdash; This can be
+ * problematic for example when copying headers into a new instance by iterating
+ * over the old instance's {@code entrySet()} and using
+ * {@link #addAll(String, List)} rather than {@link #put(String, List)}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -73,6 +89,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Josh Long
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -394,13 +411,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new LinkedMultiValueMap<>());
 
-	/**
-	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
-	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
-	 */
-	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
-
-	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
+	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ROOT);
 
 	private static final ZoneId GMT = ZoneId.of("GMT");
 
@@ -426,11 +437,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Construct a new, empty instance of the {@code HttpHeaders} object.
-	 * <p>This is the common constructor, using a case-insensitive map structure.
+	 * Construct a new, empty instance of the {@code HttpHeaders} object
+	 * using an underlying case-insensitive map.
 	 */
 	public HttpHeaders() {
-		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)));
+		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT)));
 	}
 
 	/**
@@ -442,7 +453,18 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
 		Assert.notNull(headers, "MultiValueMap must not be null");
-		this.headers = headers;
+		if (headers == EMPTY) {
+			this.headers = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		}
+		else if (headers instanceof HttpHeaders httpHeaders) {
+			while (httpHeaders.headers instanceof HttpHeaders wrapped) {
+				httpHeaders = wrapped;
+			}
+			this.headers = httpHeaders.headers;
+		}
+		else {
+			this.headers = headers;
+		}
 	}
 
 
@@ -502,7 +524,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {
 		String value = getFirst(ACCEPT_LANGUAGE);
-		return (StringUtils.hasText(value) ? Locale.LanguageRange.parse(value) : Collections.emptyList());
+		if (StringUtils.hasText(value)) {
+			try {
+				return Locale.LanguageRange.parse(value);
+			}
+			catch (IllegalArgumentException ignored) {
+				String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+				for (int i = 0; i < tokens.length; i++) {
+					tokens[i] = StringUtils.trimTrailingCharacter(tokens[i], ';');
+				}
+				value = StringUtils.arrayToCommaDelimitedString(tokens);
+				return Locale.LanguageRange.parse(value);
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	/**
@@ -527,10 +562,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (ranges.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return ranges.stream()
-				.map(range -> Locale.forLanguageTag(range.getRange()))
-				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
-				.toList();
+
+		List<Locale> locales = new ArrayList<>(ranges.size());
+		for (Locale.LanguageRange range : ranges) {
+			if (!range.getRange().startsWith("*")) {
+				locales.add(Locale.forLanguageTag(range.getRange()));
+			}
+		}
+		return locales;
 	}
 
 	/**
@@ -701,7 +740,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void setAcceptCharset(List<Charset> acceptableCharsets) {
 		StringJoiner joiner = new StringJoiner(", ");
 		for (Charset charset : acceptableCharsets) {
-			joiner.add(charset.name().toLowerCase(Locale.ENGLISH));
+			joiner.add(charset.name().toLowerCase(Locale.ROOT));
 		}
 		set(ACCEPT_CHARSET, joiner.toString());
 	}
@@ -752,7 +791,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ALLOW);
 		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			Set<HttpMethod> result = new LinkedHashSet<>(tokens.length);
+			Set<HttpMethod> result = CollectionUtils.newLinkedHashSet(tokens.length);
 			for (String token : tokens) {
 				HttpMethod method = HttpMethod.valueOf(token);
 				result.add(method);
@@ -958,8 +997,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the length of the body in bytes, as specified by the
 	 * {@code Content-Length} header.
+	 * @param contentLength content length (greater than or equal to zero)
+	 * @throws IllegalArgumentException if the content length is negative
 	 */
 	public void setContentLength(long contentLength) {
+		if (contentLength < 0) {
+			throw new IllegalArgumentException("Content-Length must be a non-negative number");
+		}
 		set(CONTENT_LENGTH, Long.toString(contentLength));
 	}
 
@@ -1042,12 +1086,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) entity tag of the body, as specified by the {@code ETag} header.
 	 */
-	public void setETag(@Nullable String etag) {
-		if (etag != null) {
-			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
-					"Invalid ETag: does not start with W/ or \"");
-			Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
-			set(ETAG, etag);
+	public void setETag(@Nullable String tag) {
+		if (tag != null) {
+			set(ETAG, ETag.quoteETagIfNecessary(tag));
 		}
 		else {
 			remove(ETAG);
@@ -1118,7 +1159,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			set(HOST, value);
 		}
 		else {
-			remove(HOST, null);
+			remove(HOST);
 		}
 	}
 
@@ -1400,7 +1441,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the request header names (e.g. "Accept-Language") for which the
+	 * Set the request header names (for example, "Accept-Language") for which the
 	 * response is subject to content negotiation and variances based on the
 	 * value of those request headers.
 	 * @param requestHeaders the request header names
@@ -1626,35 +1667,27 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Retrieve a combined result from the field values of the ETag header.
-	 * @param headerName the header name
+	 * @param name the header name
 	 * @return the combined result
 	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
-	protected List<String> getETagValuesAsList(String headerName) {
-		List<String> values = get(headerName);
-		if (values != null) {
-			List<String> result = new ArrayList<>();
-			for (String value : values) {
-				if (value != null) {
-					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
-					while (matcher.find()) {
-						if ("*".equals(matcher.group())) {
-							result.add(matcher.group());
-						}
-						else {
-							result.add(matcher.group(1));
-						}
-					}
-					if (result.isEmpty()) {
-						throw new IllegalArgumentException(
-								"Could not parse header '" + headerName + "' with value '" + value + "'");
-					}
+	protected List<String> getETagValuesAsList(String name) {
+		List<String> values = get(name);
+		if (values == null) {
+			return Collections.emptyList();
+		}
+		List<String> result = new ArrayList<>();
+		for (String value : values) {
+			if (value != null) {
+				List<ETag> tags = ETag.parse(value);
+				Assert.notEmpty(tags, "Could not parse header '" + name + "' with value '" + value + "'");
+				for (ETag tag : tags) {
+					result.add(tag.formattedTag());
 				}
 			}
-			return result;
 		}
-		return Collections.emptyList();
+		return result;
 	}
 
 	/**
@@ -1758,13 +1791,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return this.headers.toSingleValueMap();
 	}
 
+	@Override
+	public Map<String, String> asSingleValueMap() {
+		return this.headers.asSingleValueMap();
+	}
 
 	// Map implementation
-
-	@Override
-	public int size() {
-		return this.headers.size();
-	}
 
 	@Override
 	public boolean isEmpty() {
@@ -1808,28 +1840,80 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	@Override
+	public List<String> putIfAbsent(String key, List<String> value) {
+		return this.headers.putIfAbsent(key, value);
+	}
+
+	// Map/MultiValueMap methods that can have duplicate header names: size/keySet/values/entrySet/forEach
+
+	/**
+	 * Return the number of headers in the collection. This can be inflated,
+	 * see {@link HttpHeaders class level javadoc}.
+	 */
+	@Override
+	public int size() {
+		return this.headers.size();
+	}
+
+	/**
+	 * Return a {@link Set} view of header names. This can include multiple
+	 * casing variants of a given header name, see
+	 * {@link HttpHeaders class level javadoc}.
+	 */
+	@Override
 	public Set<String> keySet() {
 		return this.headers.keySet();
 	}
 
+	/**
+	 * Return a {@link Collection} view of all the header values, reconstructed
+	 * from iterating over the {@link #keySet()}. This can include duplicates if
+	 * multiple casing variants of a given header name are tracked, see
+	 * {@link HttpHeaders class level javadoc}.
+	 */
 	@Override
 	public Collection<List<String>> values() {
 		return this.headers.values();
 	}
 
+	/**
+	 * Return a {@link Set} views of header entries, reconstructed from
+	 * iterating over the {@link #keySet()}. This can include duplicate entries
+	 * if multiple casing variants of a given header name are tracked, see
+	 * {@link HttpHeaders class level javadoc}.
+	 * @see #headerSet()
+	 */
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
 		return this.headers.entrySet();
 	}
 
+	/**
+	 * Perform an action over each header, as when iterated via
+	 * {@link #entrySet()}. This can include duplicate entries
+	 * if multiple casing variants of a given header name are tracked, see
+	 * {@link HttpHeaders class level javadoc}.
+	 * @param action the action to be performed for each entry
+	 */
 	@Override
 	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
 		this.headers.forEach(action);
 	}
 
-	@Override
-	public List<String> putIfAbsent(String key, List<String> value) {
-		return this.headers.putIfAbsent(key, value);
+	/**
+	 * Return a view of the headers as an entry {@code Set} of key-list pairs.
+	 * Both {@link Iterator#remove()} and {@link java.util.Map.Entry#setValue}
+	 * are supported and mutate the headers.
+	 * <p>This collection is guaranteed to contain one entry per header name
+	 * even if the backing structure stores multiple casing variants of names,
+	 * at the cost of first copying the names into a case-insensitive set for
+	 * filtering the iteration.
+	 * @return a {@code Set} view that iterates over all headers in a
+	 * case-insensitive manner
+	 * @since 6.1.15
+	 */
+	public Set<Entry<String, List<String>>> headerSet() {
+		return new CaseInsensitiveEntrySet(this.headers);
 	}
 
 
@@ -1866,7 +1950,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
 	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
 	 * @param headers the headers to expose
-	 * @return a read-only variant of the headers, or the original headers as-is
+	 * @return a read-only variant of the headers, or the original headers as-is if already read-only
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
@@ -1876,35 +1960,46 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Remove any read-only wrapper that may have been previously applied around
 	 * the given headers via {@link #readOnlyHttpHeaders(HttpHeaders)}.
+	 * <p>Once the writable instance is mutated, the read-only instance is likely
+	 * to be out of sync and should be discarded.
 	 * @param headers the headers to expose
 	 * @return a writable variant of the headers, or the original headers as-is
 	 * @since 5.1.1
+	 * @deprecated as of 6.2 in favor of {@link #HttpHeaders(MultiValueMap)}.
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
-		Assert.notNull(headers, "HttpHeaders must not be null");
-		if (headers == EMPTY) {
-			return new HttpHeaders();
-		}
-		return (headers instanceof ReadOnlyHttpHeaders ? new HttpHeaders(headers.headers) : headers);
+		return new HttpHeaders(headers);
 	}
 
 	/**
 	 * Helps to format HTTP header values, as HTTP header values themselves can
 	 * contain comma-separated values, can become confusing with regular
 	 * {@link Map} formatting that also uses commas between entries.
+	 * <p>Additionally, this method displays the native list of header names
+	 * with the mention {@code with native header names} if the underlying
+	 * implementation stores multiple casing variants of header names (see
+	 * {@link HttpHeaders class level javadoc}).
 	 * @param headers the headers to format
 	 * @return the headers to a String
 	 * @since 5.1.4
 	 */
 	public static String formatHeaders(MultiValueMap<String, String> headers) {
-		return headers.entrySet().stream()
-				.map(entry -> {
-					List<String> values = entry.getValue();
-					return entry.getKey() + ":" + (values.size() == 1 ?
+		Set<String> headerNames = toCaseInsensitiveSet(headers.keySet());
+		String suffix = "]";
+		if (headerNames.size() != headers.size()) {
+			suffix = "] with native header names " + headers.keySet();
+		}
+
+		return headerNames.stream()
+				.map(headerName -> {
+					List<String> values = headers.get(headerName);
+					Assert.notNull(values, "Expected at least one value for header " + headerName);
+					return headerName + ":" + (values.size() == 1 ?
 							"\"" + values.get(0) + "\"" :
 							values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
 				})
-				.collect(Collectors.joining(", ", "[", "]"));
+				.collect(Collectors.joining(", ", "[", suffix));
 	}
 
 	/**
@@ -1955,6 +2050,105 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		Instant instant = Instant.ofEpochMilli(date);
 		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
 		return DATE_FORMATTER.format(time);
+	}
+
+
+	private static Set<String> toCaseInsensitiveSet(Set<String> originalSet) {
+		final Set<String> deduplicatedSet = Collections.newSetFromMap(
+				new LinkedCaseInsensitiveMap<>(originalSet.size(), Locale.ROOT));
+		// add/addAll (put/putAll in LinkedCaseInsensitiveMap) retain the casing of the last occurrence.
+		// Here we prefer the first.
+		for (String header : originalSet) {
+			//noinspection RedundantCollectionOperation
+			if (!deduplicatedSet.contains(header)) {
+				deduplicatedSet.add(header);
+			}
+		}
+		return deduplicatedSet;
+	}
+
+
+	private static final class CaseInsensitiveEntrySet extends AbstractSet<Entry<String, List<String>>> {
+
+		private final MultiValueMap<String, String> headers;
+		private final Set<String> deduplicatedNames;
+
+		public CaseInsensitiveEntrySet(MultiValueMap<String, String> headers) {
+			this.headers = headers;
+			this.deduplicatedNames = toCaseInsensitiveSet(headers.keySet());
+		}
+
+		@Override
+		public Iterator<Map.Entry<String, List<String>>> iterator() {
+			return new CaseInsensitiveIterator(this.deduplicatedNames.iterator());
+		}
+
+		@Override
+		public int size() {
+			return this.deduplicatedNames.size();
+		}
+
+		private final class CaseInsensitiveIterator implements Iterator<Map.Entry<String, List<String>>> {
+
+			private final Iterator<String> namesIterator;
+
+			@Nullable
+			private String currentName;
+
+			private CaseInsensitiveIterator(Iterator<String> namesIterator) {
+				this.namesIterator = namesIterator;
+				this.currentName = null;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return this.namesIterator.hasNext();
+			}
+
+			@Override
+			public Map.Entry<String, List<String>> next() {
+				this.currentName = this.namesIterator.next();
+				return new CaseInsensitiveEntry(this.currentName);
+			}
+
+			@Override
+			public void remove() {
+				if (this.currentName == null) {
+					throw new IllegalStateException("No current Header in iterator");
+				}
+				if (!CaseInsensitiveEntrySet.this.headers.containsKey(this.currentName)) {
+					throw new IllegalStateException("Header not present: " + this.currentName);
+				}
+				CaseInsensitiveEntrySet.this.headers.remove(this.currentName);
+			}
+		}
+
+		private final class CaseInsensitiveEntry implements Map.Entry<String, List<String>> {
+
+			private final String key;
+
+			CaseInsensitiveEntry(String key) {
+				this.key = key;
+			}
+
+			@Override
+			public String getKey() {
+				return this.key;
+			}
+
+			@Override
+			public List<String> getValue() {
+				return Objects.requireNonNull(CaseInsensitiveEntrySet.this.headers.get(this.key));
+			}
+
+			@Override
+			public List<String> setValue(List<String> value) {
+				List<String> previousValues = Objects.requireNonNull(
+						CaseInsensitiveEntrySet.this.headers.get(this.key));
+				CaseInsensitiveEntrySet.this.headers.put(this.key, value);
+				return previousValues;
+			}
+		}
 	}
 
 }

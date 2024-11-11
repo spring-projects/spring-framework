@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ class NestedConfigurationClassTests {
 	@Test
 	void oneLevelDeep() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(L0Config.L1Config.class);
 		ctx.refresh();
 
@@ -55,6 +56,7 @@ class NestedConfigurationClassTests {
 	@Test
 	void twoLevelsDeep() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(L0Config.class);
 		ctx.refresh();
 
@@ -78,6 +80,7 @@ class NestedConfigurationClassTests {
 	@Test
 	void twoLevelsInLiteMode() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(L0ConfigLight.class);
 		ctx.refresh();
 
@@ -101,6 +104,7 @@ class NestedConfigurationClassTests {
 	@Test
 	void twoLevelsDeepWithInheritance() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(S1Config.class);
 		ctx.refresh();
 
@@ -123,13 +127,14 @@ class NestedConfigurationClassTests {
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
 		TestBean pb2 = ctx.getBean("prototypeBean", TestBean.class);
 		assertThat(pb1).isNotSameAs(pb2);
-		assertThat(pb1.getFriends().iterator().next()).isNotSameAs(pb2.getFriends().iterator().next());
+		assertThat(pb1.getFriends()).element(0).isNotSameAs(pb2.getFriends());
 		ctx.close();
 	}
 
 	@Test
 	void twoLevelsDeepWithInheritanceThroughImport() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(S1Importer.class);
 		ctx.refresh();
 
@@ -152,13 +157,14 @@ class NestedConfigurationClassTests {
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
 		TestBean pb2 = ctx.getBean("prototypeBean", TestBean.class);
 		assertThat(pb1).isNotSameAs(pb2);
-		assertThat(pb1.getFriends().iterator().next()).isNotSameAs(pb2.getFriends().iterator().next());
+		assertThat(pb1.getFriends()).element(0).isNotSameAs(pb2.getFriends());
 		ctx.close();
 	}
 
 	@Test
 	void twoLevelsDeepWithInheritanceAndScopedProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(S1ImporterWithProxy.class);
 		ctx.refresh();
 
@@ -181,7 +187,7 @@ class NestedConfigurationClassTests {
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
 		TestBean pb2 = ctx.getBean("prototypeBean", TestBean.class);
 		assertThat(pb1).isNotSameAs(pb2);
-		assertThat(pb1.getFriends().iterator().next()).isNotSameAs(pb2.getFriends().iterator().next());
+		assertThat(pb1.getFriends()).element(0).isNotSameAs(pb2.getFriends());
 		ctx.close();
 	}
 

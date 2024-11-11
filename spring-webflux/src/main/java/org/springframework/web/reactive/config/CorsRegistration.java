@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"}, etc.
+	 * Set the HTTP methods to allow, for example, {@code "GET"}, {@code "POST"}, etc.
 	 * The special value {@code "*"} allows all methods. By default,
 	 * "simple" methods {@code GET}, {@code HEAD}, and {@code POST}
 	 * are allowed.
@@ -128,6 +128,17 @@ public class CorsRegistration {
 	 */
 	public CorsRegistration allowCredentials(boolean allowCredentials) {
 		this.config.setAllowCredentials(allowCredentials);
+		return this;
+	}
+
+	/**
+	 * Whether private network access is supported.
+	 * <p>Please, see {@link CorsConfiguration#setAllowPrivateNetwork(Boolean)} for details.
+	 * <p>By default this is not set (i.e. private network access is not supported).
+	 * @since 5.3.32
+	 */
+	public CorsRegistration allowPrivateNetwork(boolean allowPrivateNetwork) {
+		this.config.setAllowPrivateNetwork(allowPrivateNetwork);
 		return this;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import freemarker.template.TemplateException;
 
 /**
  * Utility class for working with FreeMarker.
- * Provides convenience methods to process a FreeMarker template with a model.
+ *
+ * <p>Provides convenience methods to process a FreeMarker template with a model.
  *
  * @author Juergen Hoeller
  * @since 14.03.2004
@@ -33,12 +34,12 @@ public abstract class FreeMarkerTemplateUtils {
 
 	/**
 	 * Process the specified FreeMarker template with the given model and write
-	 * the result to the given Writer.
-	 * <p>When using this method to prepare a text for a mail to be sent with Spring's
+	 * the result to a String.
+	 * <p>When using this method to prepare text for a mail to be sent with Spring's
 	 * mail support, consider wrapping IO/TemplateException in MailPreparationException.
 	 * @param model the model object, typically a Map that contains model names
 	 * as keys and model objects as values
-	 * @return the result as String
+	 * @return the result as a String
 	 * @throws IOException if the template wasn't found or couldn't be read
 	 * @throws freemarker.template.TemplateException if rendering failed
 	 * @see org.springframework.mail.MailPreparationException

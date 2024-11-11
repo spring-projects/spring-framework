@@ -30,7 +30,7 @@ package org.springframework.asm;
 
 /**
  * A reference to a type appearing in a class, field or method declaration, or on an instruction.
- * Such a reference designates the part of the class where the referenced type is appearing (e.g. an
+ * Such a reference designates the part of the class where the referenced type is appearing (for example, an
  * 'extends', 'implements' or 'throws' clause, a 'new' instruction, a 'catch' clause, a type cast, a
  * local variable declaration, etc).
  *

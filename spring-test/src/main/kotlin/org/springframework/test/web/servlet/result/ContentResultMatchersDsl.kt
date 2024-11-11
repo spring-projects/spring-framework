@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.result
 
 import org.hamcrest.Matcher
 import org.springframework.http.MediaType
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.servlet.ResultActions
 import org.w3c.dom.Node
 import javax.xml.transform.Source
@@ -112,7 +113,16 @@ class ContentResultMatchersDsl internal constructor (private val actions: Result
 	/**
 	 * @see ContentResultMatchers.json
 	 */
-	fun json(jsonContent: String, strict: Boolean = false) {
-		actions.andExpect(matchers.json(jsonContent, strict))
+	@Deprecated(message = "Use JsonCompare mode instead")
+	fun json(jsonContent: String, strict: Boolean) {
+		val compareMode = (if (strict) JsonCompareMode.STRICT else JsonCompareMode.LENIENT)
+		actions.andExpect(matchers.json(jsonContent, compareMode))
+	}
+
+	/**
+	 * @see ContentResultMatchers.json
+	 */
+	fun json(jsonContent: String, compareMode: JsonCompareMode = JsonCompareMode.LENIENT) {
+		actions.andExpect(matchers.json(jsonContent, compareMode))
 	}
 }

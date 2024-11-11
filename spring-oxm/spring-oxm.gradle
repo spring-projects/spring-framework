@@ -1,17 +1,12 @@
 plugins {
-	id "org.unbroken-dome.xjc"
+	id "com.github.bjornvester.xjc"
 }
 
 description = "Spring Object/XML Marshalling"
 
 xjc {
-	xjcVersion = '3.0'
-}
-
-sourceSets {
-	test {
-		xjcTargetPackage = 'org.springframework.oxm.jaxb.test'
-	}
+	xsdDir.set(layout.projectDirectory.dir("src/test/schema"))
+	defaultPackage.set('org.springframework.oxm.jaxb.test')
 }
 
 dependencies {
@@ -25,9 +20,20 @@ dependencies {
 	testImplementation("org.codehaus.jettison:jettison") {
 		exclude group: "stax", module: "stax-api"
 	}
-	//testImplementation(files(genJaxb.classesDir).builtBy(genJaxb))
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+}
+
+tasks.named("xjc").configure { xjc ->
+	// XJC plugin only works against main sources, so we have to "move" them to test sources.
+	sourceSets.main.java.exclude {
+		it.file.absolutePath.startsWith(outputJavaDir.get().asFile.absolutePath)
+	}
+	sourceSets.main.resources.exclude {
+		it.file.absolutePath.startsWith(outputResourcesDir.get().asFile.absolutePath)
+	}
+	sourceSets.test.java.srcDir(xjc.outputJavaDir)
+	sourceSets.test.resources.srcDir(xjc.outputResourcesDir)
 }

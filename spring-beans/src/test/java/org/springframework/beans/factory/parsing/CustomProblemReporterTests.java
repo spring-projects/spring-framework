@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Chris Beams
  * @since 2.0
  */
-public class CustomProblemReporterTests {
+class CustomProblemReporterTests {
 
 	private CollatingProblemReporter problemReporter;
 
@@ -44,7 +44,7 @@ public class CustomProblemReporterTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.problemReporter = new CollatingProblemReporter();
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
@@ -53,7 +53,7 @@ public class CustomProblemReporterTests {
 
 
 	@Test
-	public void testErrorsAreCollated() {
+	void testErrorsAreCollated() {
 		this.reader.loadBeanDefinitions(qualifiedResource(CustomProblemReporterTests.class, "context.xml"));
 		assertThat(this.problemReporter.getErrors()).as("Incorrect number of errors collated").hasSize(4);
 

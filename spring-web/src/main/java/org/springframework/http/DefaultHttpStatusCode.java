@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http;
 
 import java.io.Serializable;
 
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
@@ -80,8 +79,8 @@ final class DefaultHttpStatusCode implements HttpStatusCode, Comparable<HttpStat
 
 
 	@Override
-	public int compareTo(@NonNull HttpStatusCode o) {
-		return Integer.compare(this.value, o.value());
+	public int compareTo(HttpStatusCode other) {
+		return Integer.compare(this.value, other.value());
 	}
 
 	@Override

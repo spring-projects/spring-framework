@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class DataBufferDecoderTests extends AbstractDecoderTests<DataBufferDecoder> {
 
 	@Override
 	@Test
-	public void canDecode() {
+	protected void canDecode() {
 		assertThat(this.decoder.canDecode(ResolvableType.forClass(DataBuffer.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
@@ -57,7 +57,7 @@ class DataBufferDecoderTests extends AbstractDecoderTests<DataBufferDecoder> {
 
 	@Override
 	@Test
-	public void decode() {
+	protected void decode() {
 		Flux<DataBuffer> input = Flux.just(
 				this.bufferFactory.wrap(this.fooBytes),
 				this.bufferFactory.wrap(this.barBytes));
@@ -70,7 +70,7 @@ class DataBufferDecoderTests extends AbstractDecoderTests<DataBufferDecoder> {
 
 	@Override
 	@Test
-	public void decodeToMono() throws Exception {
+	protected void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
 				dataBuffer(this.barBytes));

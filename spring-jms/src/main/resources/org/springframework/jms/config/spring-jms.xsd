@@ -296,7 +296,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	A reference to an external PlatformTransactionManager (typically an
-	XA-based transaction coordinator, e.g. Spring's JtaTransactionManager).
+	XA-based transaction coordinator, for example, Spring's JtaTransactionManager).
 	If not specified, native acknowledging will be used (see "acknowledge" attribute).
 					]]></xsd:documentation>
 					<xsd:appinfo>
@@ -310,8 +310,8 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The number of concurrent sessions/consumers to start for each listener.
-	Can either be a simple number indicating the maximum number (e.g. "5")
-	or a range indicating the lower as well as the upper limit (e.g. "3-5").
+	Can either be a simple number indicating the maximum number (for example, "5")
+	or a range indicating the lower as well as the upper limit (for example, "3-5").
 	Note that a specified minimum is just a hint and might be ignored at runtime.
 	Default is 1; keep concurrency limited to 1 in case of a topic listener
 	or if message ordering is important; consider raising it for general queues.
@@ -379,7 +379,7 @@
 	Each listener child element will be hosted by a container whose configuration is
 	determined by this parent element. This variant builds standard JCA-based listener
 	containers, operating against a specified JCA ResourceAdapter (which needs to be
-	provided by the JMS message broker, e.g. ActiveMQ). When a factory-id attribute is
+	provided by the JMS message broker, for example, ActiveMQ). When a factory-id attribute is
 	present, the configuration defined by this element is exposed as a bean of type
 	org.springframework.jms.config.JmsListenerContainerFactory. It is therefore possible
 	to only define this element without any child to just expose a container factory.
@@ -529,8 +529,8 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The number of concurrent sessions/consumers to start for each listener.
-	Can either be a simple number indicating the maximum number (e.g. "5")
-	or a range indicating the lower as well as the upper limit (e.g. "3-5").
+	Can either be a simple number indicating the maximum number (for example, "5")
+	or a range indicating the lower as well as the upper limit (for example, "3-5").
 	Note that a specified minimum is just a hint and will typically be ignored
 	at runtime when using a JCA listener container. Default is 1.
 					]]></xsd:documentation>
@@ -624,8 +624,8 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The number of concurrent sessions/consumers to start for this listener.
-	Can either be a simple number indicating the maximum number (e.g. "5")
-	or a range indicating the lower as well as the upper limit (e.g. "3-5").
+	Can either be a simple number indicating the maximum number (for example, "5")
+	or a range indicating the lower as well as the upper limit (for example, "3-5").
 	Note that a specified minimum is just a hint and might be ignored at runtime.
 	Default is the value provided by the container.
 					]]></xsd:documentation>

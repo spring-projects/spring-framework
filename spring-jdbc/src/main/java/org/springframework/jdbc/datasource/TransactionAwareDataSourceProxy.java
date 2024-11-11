@@ -76,6 +76,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
+	private boolean lazyTransactionalConnections = true;
+
 	private boolean reobtainTransactionalConnections = false;
 
 
@@ -92,6 +94,18 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	public TransactionAwareDataSourceProxy(DataSource targetDataSource) {
 		super(targetDataSource);
+	}
+
+
+	/**
+	 * Specify whether to obtain the transactional target Connection lazily on
+	 * actual data access.
+	 * <p>The default is "true". Specify "false" to immediately obtain a target
+	 * Connection when a transaction-aware Connection handle is retrieved.
+	 * @since 6.1.2
+	 */
+	public void setLazyTransactionalConnections(boolean lazyTransactionalConnections) {
+		this.lazyTransactionalConnections = lazyTransactionalConnections;
 	}
 
 	/**
@@ -119,7 +133,12 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return getTransactionAwareConnectionProxy(obtainTargetDataSource());
+		DataSource ds = obtainTargetDataSource();
+		Connection con = getTransactionAwareConnectionProxy(ds);
+		if (!this.lazyTransactionalConnections && shouldObtainFixedConnection(ds)) {
+			((ConnectionProxy) con).getTargetConnection();
+		}
+		return con;
 	}
 
 	/**
@@ -176,13 +195,15 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 			// Invocation on ConnectionProxy interface coming in...
 
 			switch (method.getName()) {
-				case "equals":
+				case "equals" -> {
 					// Only considered as equal when proxies are identical.
 					return (proxy == args[0]);
-				case "hashCode":
+				}
+				case "hashCode" -> {
 					// Use hashCode of Connection proxy.
 					return System.identityHashCode(proxy);
-				case "toString":
+				}
+				case "toString" -> {
 					// Allow for differentiating between the proxy and the raw Connection.
 					StringBuilder sb = new StringBuilder("Transaction-aware proxy for target Connection ");
 					if (this.target != null) {
@@ -192,28 +213,31 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 						sb.append(" from DataSource [").append(this.targetDataSource).append(']');
 					}
 					return sb.toString();
-				case "close":
+				}
+				case "close" -> {
 					// Handle close method: only close if not within a transaction.
 					DataSourceUtils.doReleaseConnection(this.target, this.targetDataSource);
 					this.closed = true;
 					return null;
-				case "isClosed":
+				}
+				case "isClosed" -> {
 					return this.closed;
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					if (((Class<?>) args[0]).isInstance(proxy)) {
 						return proxy;
 					}
-					break;
-				case "isWrapperFor":
+				}
+				case "isWrapperFor" -> {
 					if (((Class<?>) args[0]).isInstance(proxy)) {
 						return true;
 					}
-					break;
+				}
 			}
 
 			if (this.target == null) {
 				if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
-					// Avoid creation of target Connection on pre-close cleanup (e.g. Hibernate Session)
+					// Avoid creation of target Connection on pre-close cleanup (for example, Hibernate Session)
 					return null;
 				}
 				if (this.closed) {

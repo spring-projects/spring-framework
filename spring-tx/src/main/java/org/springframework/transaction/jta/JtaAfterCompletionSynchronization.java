@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class JtaAfterCompletionSynchronization implements Synchronization {
 	@Override
 	public void afterCompletion(int status) {
 		switch (status) {
-			case Status.STATUS_COMMITTED:
+			case Status.STATUS_COMMITTED -> {
 				try {
 					TransactionSynchronizationUtils.invokeAfterCommit(this.synchronizations);
 				}
@@ -65,14 +65,15 @@ public class JtaAfterCompletionSynchronization implements Synchronization {
 					TransactionSynchronizationUtils.invokeAfterCompletion(
 							this.synchronizations, TransactionSynchronization.STATUS_COMMITTED);
 				}
-				break;
-			case Status.STATUS_ROLLEDBACK:
+			}
+			case Status.STATUS_ROLLEDBACK -> {
 				TransactionSynchronizationUtils.invokeAfterCompletion(
 						this.synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
-				break;
-			default:
+			}
+			default -> {
 				TransactionSynchronizationUtils.invokeAfterCompletion(
 						this.synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
+			}
 		}
 	}
 }

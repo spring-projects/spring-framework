@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -40,6 +41,9 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 
 	private boolean webSocketUpgradeMatch;
 
+	@Nullable
+	private Integer phase;
+
 	private volatile boolean running;
 
 
@@ -55,6 +59,21 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 	 */
 	public void setWebSocketUpgradeMatch(boolean match) {
 		this.webSocketUpgradeMatch = match;
+	}
+
+	/**
+	 * Set the phase that this handler should run in.
+	 * <p>By default, this is {@link SmartLifecycle#DEFAULT_PHASE}, but with
+	 * {@code @EnableWebSocketMessageBroker} configuration it is set to 0.
+	 * @since 6.1.4
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	@Override
+	public int getPhase() {
+		return (this.phase != null ? this.phase : SmartLifecycle.super.getPhase());
 	}
 
 
@@ -109,7 +128,7 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 		handler = (handler instanceof HandlerExecutionChain chain ? chain.getHandler() : handler);
 		if (this.webSocketUpgradeMatch && handler instanceof WebSocketHttpRequestHandler) {
 			String header = request.getHeader(HttpHeaders.UPGRADE);
-			return (request.getMethod().equals("GET") &&
+			return (HttpMethod.GET.matches(request.getMethod()) &&
 					header != null && header.equalsIgnoreCase("websocket"));
 		}
 		return true;

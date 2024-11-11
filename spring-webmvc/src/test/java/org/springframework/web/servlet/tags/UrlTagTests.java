@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Scott Andrews
  */
-public class UrlTagTests extends AbstractTagTests {
+class UrlTagTests extends AbstractTagTests {
 
 	private UrlTag tag;
 
@@ -43,7 +43,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		context = createPageContext();
 		tag = new UrlTag();
 		tag.setPageContext(context);
@@ -51,19 +51,19 @@ public class UrlTagTests extends AbstractTagTests {
 
 
 	@Test
-	public void paramSupport() {
+	void paramSupport() {
 		assertThat(tag).isInstanceOf(ParamAware.class);
 	}
 
 	@Test
-	public void doStartTag() throws JspException {
+	void doStartTag() throws JspException {
 		int action = tag.doStartTag();
 
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
 	}
 
 	@Test
-	public void doEndTag() throws JspException {
+	void doEndTag() throws JspException {
 		tag.setValue("url/path");
 		tag.doStartTag();
 		int action = tag.doEndTag();
@@ -72,7 +72,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void varDefaultScope() throws JspException {
+	void varDefaultScope() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.doStartTag();
@@ -82,7 +82,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void varExplicitScope() throws JspException {
+	void varExplicitScope() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setScope("request");
@@ -93,7 +93,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void setHtmlEscapeDefault() throws JspException {
+	void setHtmlEscapeDefault() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.doStartTag();
@@ -113,7 +113,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void setHtmlEscapeFalse() throws JspException {
+	void setHtmlEscapeFalse() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setHtmlEscape(false);
@@ -135,7 +135,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void setHtmlEscapeTrue() throws JspException {
+	void setHtmlEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setHtmlEscape(true);
@@ -156,7 +156,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void setJavaScriptEscapeTrue() throws JspException {
+	void setJavaScriptEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setJavaScriptEscape(true);
@@ -177,7 +177,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void setHtmlAndJavaScriptEscapeTrue() throws JspException {
+	void setHtmlAndJavaScriptEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
 		tag.setHtmlEscape(true);
@@ -199,7 +199,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringNoParams() throws JspException {
+	void createQueryStringNoParams() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -208,7 +208,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringOneParam() throws JspException {
+	void createQueryStringOneParam() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -222,7 +222,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringOneParamForExistingQueryString() throws JspException {
+	void createQueryStringOneParamForExistingQueryString() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -236,7 +236,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringOneParamEmptyValue() throws JspException {
+	void createQueryStringOneParamEmptyValue() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -250,7 +250,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringOneParamNullValue() throws JspException {
+	void createQueryStringOneParamNullValue() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -264,7 +264,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringOneParamAlreadyUsed() throws JspException {
+	void createQueryStringOneParamAlreadyUsed() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -279,7 +279,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringTwoParams() throws JspException {
+	void createQueryStringTwoParams() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -298,7 +298,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringUrlEncoding() throws JspException {
+	void createQueryStringUrlEncoding() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -317,7 +317,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringParamNullName() throws JspException {
+	void createQueryStringParamNullName() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -331,7 +331,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringParamEmptyName() throws JspException {
+	void createQueryStringParamEmptyName() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -345,7 +345,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void replaceUriTemplateParamsNoParams() throws JspException {
+	void replaceUriTemplateParamsNoParams() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -355,7 +355,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithoutParamMatch() throws JspException {
+	void replaceUriTemplateParamsTemplateWithoutParamMatch() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -365,7 +365,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithParamMatch() throws JspException {
+	void replaceUriTemplateParamsTemplateWithParamMatch() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -377,11 +377,11 @@ public class UrlTagTests extends AbstractTagTests {
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
 		assertThat(uri).isEqualTo("url/value");
 		assertThat(usedParams).hasSize(1);
-		assertThat(usedParams.contains("name")).isTrue();
+		assertThat(usedParams).contains("name");
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithParamMatchNamePreEncoding() throws JspException {
+	void replaceUriTemplateParamsTemplateWithParamMatchNamePreEncoding() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -393,11 +393,11 @@ public class UrlTagTests extends AbstractTagTests {
 		String uri = tag.replaceUriTemplateParams("url/{n me}", params, usedParams);
 		assertThat(uri).isEqualTo("url/value");
 		assertThat(usedParams).hasSize(1);
-		assertThat(usedParams.contains("n me")).isTrue();
+		assertThat(usedParams).contains("n me");
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithParamMatchValueEncoded() throws JspException {
+	void replaceUriTemplateParamsTemplateWithParamMatchValueEncoded() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -411,7 +411,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		assertThat(uri).isEqualTo("url/v%20lue");
 		assertThat(usedParams).hasSize(1);
-		assertThat(usedParams.contains("name")).isTrue();
+		assertThat(usedParams).contains("name");
 	}
 
 	@Test  // SPR-11401
@@ -428,11 +428,11 @@ public class UrlTagTests extends AbstractTagTests {
 
 		assertThat(uri).isEqualTo("url/my%2FId");
 		assertThat(usedParams).hasSize(1);
-		assertThat(usedParams.contains("name")).isTrue();
+		assertThat(usedParams).contains("name");
 	}
 
 	@Test
-	public void replaceUriTemplateParamsTemplateWithPath() throws JspException {
+	void replaceUriTemplateParamsTemplateWithPath() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 
@@ -444,11 +444,11 @@ public class UrlTagTests extends AbstractTagTests {
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
 		assertThat(uri).isEqualTo("url/my/Id");
 		assertThat(usedParams).hasSize(1);
-		assertThat(usedParams.contains("name")).isTrue();
+		assertThat(usedParams).contains("name");
 	}
 
 	@Test
-	public void createUrlRemoteServer() throws JspException {
+	void createUrlRemoteServer() throws JspException {
 		tag.setValue("https://www.springframework.org/");
 		tag.doStartTag();
 
@@ -457,7 +457,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlRelative() throws JspException {
+	void createUrlRelative() throws JspException {
 		tag.setValue("url/path");
 		tag.doStartTag();
 
@@ -466,7 +466,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlLocalContext() throws JspException {
+	void createUrlLocalContext() throws JspException {
 		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
@@ -477,7 +477,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlRemoteContext() throws JspException {
+	void createUrlRemoteContext() throws JspException {
 		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
@@ -489,7 +489,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlRemoteContextWithSlash() throws JspException {
+	void createUrlRemoteContextWithSlash() throws JspException {
 		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
@@ -501,7 +501,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlRemoteContextSingleSlash() throws JspException {
+	void createUrlRemoteContextSingleSlash() throws JspException {
 		((MockHttpServletRequest) context.getRequest()).setContextPath("/app-context");
 
 		tag.setValue("/url/path");
@@ -513,7 +513,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlWithParams() throws JspException {
+	void createUrlWithParams() throws JspException {
 		tag.setValue("url/path");
 		tag.doStartTag();
 
@@ -532,7 +532,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlWithTemplateParams() throws JspException {
+	void createUrlWithTemplateParams() throws JspException {
 		tag.setValue("url/{name}");
 		tag.doStartTag();
 
@@ -551,7 +551,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createUrlWithParamAndExistingQueryString() throws JspException {
+	void createUrlWithParamAndExistingQueryString() throws JspException {
 		tag.setValue("url/path?foo=bar");
 		tag.doStartTag();
 

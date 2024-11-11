@@ -8,9 +8,9 @@
 
 Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
-* WebMvc.fn DSL with {spring-framework-api-kdoc}/spring-webmvc/org.springframework.web.servlet.function/router.html[router { }]
-* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/router.html[router { }]
-* WebFlux.fn <<Coroutines>> DSL with {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
+* xref:web/webmvc-functional.adoc[WebMvc.fn DSL] with {spring-framework-api-kdoc}/spring-webmvc/org.springframework.web.servlet.function/router.html[router { }]
+* xref:web/webflux-functional.adoc[WebFlux.fn Reactive DSL] with {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/router.html[router { }]
+* xref:languages/kotlin/coroutines.adoc[WebFlux.fn Coroutines DSL] with {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
 These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
@@ -126,7 +126,7 @@ project for more details.
 [[kotlin-multiplatform-serialization]]
 == Kotlin multiplatform serialization
 
-As of Spring Framework 5.3, {kotlin-github-org}/kotlinx.serialization[Kotlin multiplatform serialization] is
+{kotlin-github-org}/kotlinx.serialization[Kotlin multiplatform serialization] is
 supported in Spring MVC, Spring WebFlux and Spring Messaging (RSocket). The builtin support currently targets CBOR, JSON, and ProtoBuf formats.
 
 To enable it, follow {kotlin-github-org}/kotlinx.serialization#setup[those instructions] to add the related dependency and plugin.

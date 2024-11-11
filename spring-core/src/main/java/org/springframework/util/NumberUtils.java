@@ -238,6 +238,7 @@ public abstract class NumberUtils {
 	 * @see #convertNumberToTargetClass
 	 * @see #parseNumber(String, Class)
 	 */
+	@SuppressWarnings("NullAway")
 	public static <T extends Number> T parseNumber(
 			String text, Class<T> targetClass, @Nullable NumberFormat numberFormat) {
 

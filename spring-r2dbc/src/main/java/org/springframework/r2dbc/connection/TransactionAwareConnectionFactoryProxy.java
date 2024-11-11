@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,33 +143,31 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 				}
 			}
 
-			switch (method.getName()) {
-				case "unwrap":
-					return this.connection;
-				case "close":
-					// Handle close method: only close if not within a transaction.
-					return ConnectionFactoryUtils.doReleaseConnection(this.connection, this.targetConnectionFactory)
+			return switch (method.getName()) {
+				case "unwrap" -> this.connection;
+				// Handle close method: only close if not within a transaction.
+				case "close" -> ConnectionFactoryUtils.doReleaseConnection(this.connection, this.targetConnectionFactory)
 							.doOnSubscribe(n -> this.closed = true);
-				case "isClosed":
-					return this.closed;
-			}
+				case "isClosed" -> this.closed;
+				default -> {
+					if (this.closed) {
+						throw new IllegalStateException("Connection handle already closed");
+					}
 
-			if (this.closed) {
-				throw new IllegalStateException("Connection handle already closed");
-			}
-
-			// Invoke method on target Connection.
-			try {
-				return method.invoke(this.connection, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+					try {
+						// Invoke method on target Connection.
+						yield method.invoke(this.connection, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 
 		private String proxyToString(@Nullable Object proxy) {
 			// Allow for differentiating between the proxy and the raw Connection.
-			return "Transaction-aware proxy for target Connection [" + this.connection.toString() + "]";
+			return "Transaction-aware proxy for target Connection [" + this.connection + "]";
 		}
 
 	}

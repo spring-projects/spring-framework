@@ -128,7 +128,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Property suffix for references to other beans in the current
-	 * BeanFactory: e.g. {@code owner.dog(ref)=fido}.
+	 * BeanFactory: for example, {@code owner.dog(ref)=fido}.
 	 * Whether this is a reference to a singleton or a prototype
 	 * will depend on the definition of the target bean.
 	 */
@@ -165,7 +165,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Set the default parent bean for this bean factory.
 	 * If a child bean definition handled by this factory provides neither
 	 * a parent nor a class attribute, this default value gets used.
-	 * <p>Can be used e.g. for view definition files, to define a parent
+	 * <p>Can be used, for example, for view definition files, to define a parent
 	 * with a default view class and common attributes for all views.
 	 * View definitions that define their own parent or carry their own
 	 * class can still override this.
@@ -219,7 +219,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Load bean definitions from the specified properties file.
 	 * @param resource the resource descriptor for the properties file
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
+	 * @param prefix a filter within the keys in the map: for example, 'beans.'
 	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -243,7 +243,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Load bean definitions from the specified properties file.
 	 * @param encodedResource the resource descriptor for the properties file,
 	 * allowing to specify an encoding to use for parsing the file
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
+	 * @param prefix a filter within the keys in the map: for example, 'beans.'
 	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -294,7 +294,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * <p>Similar syntax as for a Map. This method is useful to enable
 	 * standard Java internationalization support.
 	 * @param rb the ResourceBundle to load from
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
+	 * @param prefix a filter within the keys in the map: for example, 'beans.'
 	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -331,7 +331,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @param map a map of {@code name} to {@code property} (String or Object). Property
 	 * values will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
+	 * @param prefix a filter within the keys in the map: for example, 'beans.'
 	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
@@ -346,7 +346,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @param map a map of {@code name} to {@code property} (String or Object). Property
 	 * values will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
+	 * @param prefix a filter within the keys in the map: for example, 'beans.'
 	 * (can be empty or {@code null})
 	 * @param resourceDescription description of the resource that the
 	 * Map came from (for logging purposes)

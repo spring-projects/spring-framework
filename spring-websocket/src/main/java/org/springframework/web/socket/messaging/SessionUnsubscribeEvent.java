@@ -23,7 +23,7 @@ import org.springframework.messaging.Message;
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol
- * (e.g. STOMP) sends a request to remove a subscription.
+ * (for example, STOMP) sends a request to remove a subscription.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3

@@ -45,7 +45,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.AbstractWebSocketSession;
 
 /**
- * A {@link WebSocketSession} for use with the Jetty 9.4 WebSocket API.
+ * A {@link WebSocketSession} for use with the Jetty WebSocket API.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
@@ -114,6 +114,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
+	@Nullable
 	public String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
 		return this.acceptedProtocol;
@@ -126,6 +127,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
+	@Nullable
 	public Principal getPrincipal() {
 		return this.user;
 	}
@@ -142,11 +144,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return (InetSocketAddress) getNativeSession().getRemoteSocketAddress();
 	}
 
-	/**
-	 * This method is a no-op for Jetty.
-	 */
 	@Override
 	public void setTextMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().setMaxTextMessageSize(messageSizeLimit);
 	}
 
 	@Override
@@ -155,11 +156,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return (int) getNativeSession().getMaxTextMessageSize();
 	}
 
-	/**
-	 * This method is a no-op for Jetty.
-	 */
 	@Override
 	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		checkNativeSessionInitialized();
+		getNativeSession().setMaxBinaryMessageSize(messageSizeLimit);
 	}
 
 	@Override

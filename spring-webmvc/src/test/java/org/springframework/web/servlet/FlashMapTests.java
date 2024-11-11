@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class FlashMapTests {
+class FlashMapTests {
 
 	@Test
-	public void isExpired() throws InterruptedException {
+	void isExpired() throws InterruptedException {
 		assertThat(new FlashMap().isExpired()).isFalse();
 
 		FlashMap flashMap = new FlashMap();
@@ -42,7 +42,7 @@ public class FlashMapTests {
 	}
 
 	@Test
-	public void notExpired() throws InterruptedException {
+	void notExpired() throws InterruptedException {
 		FlashMap flashMap = new FlashMap();
 		flashMap.startExpirationPeriod(10);
 		Thread.sleep(100);
@@ -51,7 +51,7 @@ public class FlashMapTests {
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		FlashMap flashMap1 = new FlashMap();
 		FlashMap flashMap2 = new FlashMap();
 		assertThat(flashMap1.compareTo(flashMap2)).isEqualTo(0);
@@ -72,7 +72,7 @@ public class FlashMapTests {
 	}
 
 	@Test
-	public void addTargetRequestParamNullValue() {
+	void addTargetRequestParamNullValue() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParam("text", "abc");
 		flashMap.addTargetRequestParam("empty", " ");
@@ -83,7 +83,7 @@ public class FlashMapTests {
 	}
 
 	@Test
-	public void addTargetRequestParamsNullValue() {
+	void addTargetRequestParamsNullValue() {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("key", "abc");
 		params.add("key", " ");
@@ -98,16 +98,16 @@ public class FlashMapTests {
 	}
 
 	@Test
-	public void addTargetRequestParamNullKey() {
+	void addTargetRequestParamNullKey() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParam(" ", "abc");
 		flashMap.addTargetRequestParam(null, "abc");
 
-		assertThat(flashMap.getTargetRequestParams().isEmpty()).isTrue();
+		assertThat(flashMap.getTargetRequestParams()).isEmpty();
 	}
 
 	@Test
-	public void addTargetRequestParamsNullKey() {
+	void addTargetRequestParamsNullKey() {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add(" ", "abc");
 		params.add(null, " ");
@@ -115,7 +115,7 @@ public class FlashMapTests {
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParams(params);
 
-		assertThat(flashMap.getTargetRequestParams().isEmpty()).isTrue();
+		assertThat(flashMap.getTargetRequestParams()).isEmpty();
 	}
 
 }

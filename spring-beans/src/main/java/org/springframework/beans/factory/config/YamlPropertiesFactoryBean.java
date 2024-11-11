@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  * has a lot of similar features.
  *
  * <p><b>Note: All exposed values are of type {@code String}</b> for access through
- * the common {@link Properties#getProperty} method (e.g. in configuration property
+ * the common {@link Properties#getProperty} method (for example, in configuration property
  * resolution through {@link PropertyResourceConfigurer#setProperties(Properties)}).
  * If this is not desirable, use {@link YamlMapFactoryBean} instead.
  *

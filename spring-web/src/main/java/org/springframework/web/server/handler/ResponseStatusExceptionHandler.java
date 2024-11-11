@@ -132,9 +132,9 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	 * @param ex the exception to check
 	 * @return the associated HTTP status code, or -1 if it can't be derived.
 	 * @since 5.3
-	 * @deprecated as of 6.0, in favor of {@link #determineStatus(Throwable)}
+	 * @deprecated in favor of {@link #determineStatus(Throwable)}, for removal in 7.0
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	protected int determineRawStatusCode(Throwable ex) {
 		if (ex instanceof ResponseStatusException responseStatusException) {
 			return responseStatusException.getStatusCode().value();

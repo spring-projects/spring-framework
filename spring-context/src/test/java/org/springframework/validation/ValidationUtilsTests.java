@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link ValidationUtils}.
+ * Tests for {@link ValidationUtils}.
  *
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Arjen Poutsma
  * @since 08.10.2004
  */
-public class ValidationUtilsTests {
+class ValidationUtilsTests {
 
 	private final Validator emptyValidator = Validator.forInstanceOf(TestBean.class, (testBean, errors) ->
 			ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!"));
@@ -43,7 +43,7 @@ public class ValidationUtilsTests {
 
 
 	@Test
-	public void testInvokeValidatorWithNullValidator() {
+	void testInvokeValidatorWithNullValidator() {
 		TestBean tb = new TestBean();
 		Errors errors = new SimpleErrors(tb);
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -51,14 +51,14 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testInvokeValidatorWithNullErrors() {
+	void testInvokeValidatorWithNullErrors() {
 		TestBean tb = new TestBean();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ValidationUtils.invokeValidator(emptyValidator, tb, null));
 	}
 
 	@Test
-	public void testInvokeValidatorSunnyDay() {
+	void testInvokeValidatorSunnyDay() {
 		TestBean tb = new TestBean();
 		Errors errors = new SimpleErrors(tb);
 		ValidationUtils.invokeValidator(emptyValidator, tb, errors);
@@ -67,7 +67,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsSunnyDay() {
+	void testValidationUtilsSunnyDay() {
 		TestBean tb = new TestBean("");
 
 		tb.setName(" ");
@@ -83,7 +83,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsNull() {
+	void testValidationUtilsNull() {
 		TestBean tb = new TestBean();
 		Errors errors = emptyValidator.validateObject(tb);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
@@ -95,7 +95,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsEmpty() {
+	void testValidationUtilsEmpty() {
 		TestBean tb = new TestBean("");
 		Errors errors = emptyValidator.validateObject(tb);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
@@ -107,7 +107,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsEmptyVariants() {
+	void testValidationUtilsEmptyVariants() {
 		TestBean tb = new TestBean();
 
 		Errors errors = new SimpleErrors(tb);
@@ -125,7 +125,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsEmptyOrWhitespace() {
+	void testValidationUtilsEmptyOrWhitespace() {
 		TestBean tb = new TestBean();
 
 		// Test null
@@ -152,7 +152,7 @@ public class ValidationUtilsTests {
 	}
 
 	@Test
-	public void testValidationUtilsEmptyOrWhitespaceVariants() {
+	void testValidationUtilsEmptyOrWhitespaceVariants() {
 		TestBean tb = new TestBean();
 		tb.setName(" ");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class ImportResourceTests {
+class ImportResourceTests {
 
 	@Test
-	public void importXml() {
+	void importXml() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlConfig.class);
 		assertThat(ctx.containsBean("javaDeclaredBean")).as("did not contain java-declared bean").isTrue();
 		assertThat(ctx.containsBean("xmlDeclaredBean")).as("did not contain xml-declared bean").isTrue();
@@ -55,14 +55,14 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importXmlIsInheritedFromSuperclassDeclarations() {
+	void importXmlIsInheritedFromSuperclassDeclarations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FirstLevelSubConfig.class);
 		assertThat(ctx.containsBean("xmlDeclaredBean")).isTrue();
 		ctx.close();
 	}
 
 	@Test
-	public void importXmlIsMergedFromSuperclassDeclarations() {
+	void importXmlIsMergedFromSuperclassDeclarations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SecondLevelSubConfig.class);
 		assertThat(ctx.containsBean("secondLevelXmlDeclaredBean")).as("failed to pick up second-level-declared XML bean").isTrue();
 		assertThat(ctx.containsBean("xmlDeclaredBean")).as("failed to pick up parent-declared XML bean").isTrue();
@@ -70,7 +70,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importXmlWithNamespaceConfig() {
+	void importXmlWithNamespaceConfig() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithAopNamespaceConfig.class);
 		Object bean = ctx.getBean("proxiedXmlBean");
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
@@ -78,7 +78,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importXmlWithOtherConfigurationClass() {
+	void importXmlWithOtherConfigurationClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithConfigurationClass.class);
 		assertThat(ctx.containsBean("javaDeclaredBean")).as("did not contain java-declared bean").isTrue();
 		assertThat(ctx.containsBean("xmlDeclaredBean")).as("did not contain xml-declared bean").isTrue();
@@ -88,7 +88,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importWithPlaceholder() throws Exception {
+	void importWithPlaceholder() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		PropertySource<?> propertySource = new MapPropertySource("test",
 				Collections.<String, Object> singletonMap("test", "springframework"));
@@ -100,7 +100,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importXmlWithAutowiredConfig() {
+	void importXmlWithAutowiredConfig() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlAutowiredConfig.class);
 		String name = ctx.getBean("xmlBeanName", String.class);
 		assertThat(name).isEqualTo("xml.declared");
@@ -108,7 +108,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void importNonXmlResource() {
+	void importNonXmlResource() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportNonXmlResourceConfig.class);
 		assertThat(ctx.containsBean("propertiesDeclaredBean")).isTrue();
 		ctx.close();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -133,7 +132,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private boolean useSuffixPatternMatch = false;
 
-	private boolean useTrailingSlashPatternMatch = true;
+	private boolean useTrailingSlashPatternMatch = false;
 
 	@Nullable
 	private Boolean removeSemicolonContent;
@@ -286,7 +285,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Sets up a single {@link ViewResolver} that always returns the provided
 	 * view instance. This is a convenient shortcut if you need to use one
-	 * View instance only -- e.g. rendering generated content (JSON, XML, Atom).
+	 * View instance only -- for example, rendering generated content (JSON, XML, Atom).
 	 */
 	public StandaloneMockMvcBuilder setSingleView(View view) {
 		this.viewResolvers = Collections.<ViewResolver>singletonList(new StaticViewResolver(view));
@@ -586,32 +585,13 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		private final PlaceholderResolver resolver;
 
 		public StaticStringValueResolver(Map<String, String> values) {
-			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
+			this.helper = new PropertyPlaceholderHelper("${", "}", ":", null, false);
 			this.resolver = values::get;
 		}
 
 		@Override
 		public String resolveStringValue(String strVal) throws BeansException {
 			return this.helper.replacePlaceholders(strVal, this.resolver);
-		}
-	}
-
-
-	/**
-	 * A {@link ViewResolver} that always returns same View.
-	 */
-	private static class StaticViewResolver implements ViewResolver {
-
-		private final View view;
-
-		public StaticViewResolver(View view) {
-			this.view = view;
-		}
-
-		@Override
-		@Nullable
-		public View resolveViewName(String viewName, Locale locale) {
-			return this.view;
 		}
 	}
 

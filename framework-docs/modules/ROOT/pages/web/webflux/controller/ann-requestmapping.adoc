@@ -28,13 +28,19 @@ because, arguably, most controller methods should be mapped to a specific HTTP m
 using `@RequestMapping`, which, by default, matches to all HTTP methods. At the same time, a
 `@RequestMapping` is still needed at the class level to express shared mappings.
 
+NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
+annotations that are declared on the same element (class, interface, or method). If
+multiple `@RequestMapping` annotations are detected on the same element, a warning will
+be logged, and only the first mapping will be used. This also applies to composed
+`@RequestMapping` annotations such as `@GetMapping`, `@PostMapping`, etc.
+
 The following example uses type and method level mappings:
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -55,7 +61,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -123,7 +129,7 @@ Captured URI variables can be accessed with `@PathVariable`, as the following ex
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
@@ -133,7 +139,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
@@ -150,7 +156,7 @@ You can declare URI variables at the class and method levels, as the following e
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	@RequestMapping("/owners/{ownerId}") // <1>
@@ -167,7 +173,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	@RequestMapping("/owners/{ownerId}") // <1>
@@ -207,7 +213,7 @@ extracts the name, version, and file extension:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	public void handle(@PathVariable String version, @PathVariable String ext) {
@@ -217,7 +223,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	fun handle(@PathVariable version: String, @PathVariable ext: String) {
@@ -268,7 +274,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping(path = "/pets", consumes = "application/json")
 	public void addPet(@RequestBody Pet pet) {
@@ -278,7 +284,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/pets", consumes = ["application/json"])
 	fun addPet(@RequestBody pet: Pet) {
@@ -309,7 +315,7 @@ content types that a controller method produces, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path = "/pets/{petId}", produces = "application/json")
 	@ResponseBody
@@ -320,7 +326,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/pets/{petId}", produces = ["application/json"])
 	@ResponseBody
@@ -337,7 +343,7 @@ You can declare a shared `produces` attribute at the class level. Unlike most ot
 mapping attributes, however, when used at the class level, a method-level `produces` attribute
 overrides rather than extend the class level declaration.
 
-TIP: `MediaType` provides constants for commonly used media types -- e.g.
+TIP: `MediaType` provides constants for commonly used media types -- for example,
 `APPLICATION_JSON_VALUE`, `APPLICATION_XML_VALUE`.
 
 
@@ -353,7 +359,7 @@ specific value (`myParam=myValue`). The following examples tests for a parameter
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path = "/pets/{petId}", params = "myParam=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
@@ -364,7 +370,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/pets/{petId}", params = ["myParam=myValue"]) // <1>
 	fun findPet(@PathVariable petId: String) {
@@ -380,7 +386,7 @@ You can also use the same with request header conditions, as the following examp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path = "/pets/{petId}", headers = "myHeader=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
@@ -391,7 +397,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/pets/{petId}", headers = ["myHeader=myValue"]) // <1>
 	fun findPet(@PathVariable petId: String) {
@@ -436,8 +442,14 @@ attributes with a narrower, more specific purpose.
 `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping` are
 examples of composed annotations. They are provided, because, arguably, most
 controller methods should be mapped to a specific HTTP method versus using `@RequestMapping`,
-which, by default, matches to all HTTP methods. If you need an example of composed
-annotations, look at how those are declared.
+which, by default, matches to all HTTP methods. If you need an example of how to implement
+a composed annotation, look at how those are declared.
+
+NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
+annotations that are declared on the same element (class, interface, or method). If
+multiple `@RequestMapping` annotations are detected on the same element, a warning will
+be logged, and only the first mapping will be used. This also applies to composed
+`@RequestMapping` annotations such as `@GetMapping`, `@PostMapping`, etc.
 
 Spring WebFlux also supports custom request mapping attributes with custom request matching
 logic. This is a more advanced option that requires sub-classing
@@ -457,7 +469,7 @@ under different URLs. The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	public class MyConfig {
@@ -483,7 +495,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	class MyConfig {
@@ -509,12 +521,19 @@ Kotlin::
 
 [[webflux-ann-httpexchange-annotation]]
 == `@HttpExchange`
-[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Servlet stack]#
 
-As an alternative to  `@RequestMapping`, you can also handle requests with `@HttpExchange`
-methods. Such methods are declared on an
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] and can be used as
-a client via `HttpServiceProxyFactory` or implemented by a server `@Controller`.
+While the main purpose of `@HttpExchange` is to abstract HTTP client code with a
+generated proxy, the
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] on which
+such annotations are placed is a contract neutral to client vs server use.
+In addition to simplifying client code, there are also cases where an HTTP Interface
+may be a convenient way for servers to expose their API for client access. This leads
+to increased coupling between client and server and is often not a good choice,
+especially for public API's, but may be exactly the goal for an internal API.
+It is an approach commonly used in Spring Cloud, and it is why `@HttpExchange` is
+supported as an alternative to `@RequestMapping` for server side handling in
+controller classes.
 
 For example:
 
@@ -522,18 +541,25 @@ For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@RestController
 	@HttpExchange("/persons")
-	class PersonController {
+	interface PersonService {
 
 		@GetExchange("/{id}")
+		Person getPerson(@PathVariable Long id);
+
+		@PostExchange
+		void add(@RequestBody Person person);
+	}
+
+	@RestController
+	class PersonController implements PersonService {
+
 		public Person getPerson(@PathVariable Long id) {
 			// ...
 		}
 
-		@PostExchange
 		@ResponseStatus(HttpStatus.CREATED)
 		public void add(@RequestBody Person person) {
 			// ...
@@ -543,32 +569,45 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	@RestController
 	@HttpExchange("/persons")
-	class PersonController {
+	interface PersonService {
 
 		@GetExchange("/{id}")
-		fun getPerson(@PathVariable id: Long): Person {
+		fun getPerson(@PathVariable id: Long): Person
+
+		@PostExchange
+		fun add(@RequestBody person: Person)
+	}
+
+	@RestController
+	class PersonController : PersonService {
+
+		override fun getPerson(@PathVariable id: Long): Person {
 			// ...
 		}
 
-		@PostExchange
 		@ResponseStatus(HttpStatus.CREATED)
-		fun add(@RequestBody person: Person) {
+		override fun add(@RequestBody person: Person) {
 			// ...
 		}
 	}
 ----
 ======
 
-There some differences between `@HttpExchange` and `@RequestMapping` since the
-former needs to remain suitable for client and server use. For example, while
-`@RequestMapping` can be declared to handle any number of paths and each path can
-be a pattern, `@HttpExchange` must be declared with a single, concrete path. There are
-also differences in the supported method parameters. Generally, `@HttpExchange` supports
-a subset of method parameters that `@RequestMapping` does, excluding any parameters that
-are server side only. For details see the list of supported method parameters for
-xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[HTTP interface] and for
+`@HttpExchange` and `@RequestMapping` have differences.
+`@RequestMapping` can map to any number of requests by path patterns, HTTP methods,
+and more, while `@HttpExchange` declares a single endpoint with a concrete HTTP method,
+path, and content types.
+
+For method parameters and returns values, generally, `@HttpExchange` supports a
+subset of the method parameters that `@RequestMapping` does. Notably, it excludes any
+server-side specific parameter types. For details, see the list for
+xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
 xref:web/webflux/controller/ann-methods/arguments.adoc[@RequestMapping].
+
+`@HttpExchange` also supports a `headers()` parameter which accepts `"name=value"`-like
+pairs like in `@RequestMapping(headers={})` on the client side. On the server side,
+this extends to the full syntax that
+xref:#webflux-ann-requestmapping-params-and-headers[`@RequestMapping`] supports.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,30 +28,30 @@ import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** @author Arjen Poutsma */
-public class ByteArrayHttpMessageConverterTests {
+class ByteArrayHttpMessageConverterTests {
 
 	private ByteArrayHttpMessageConverter converter;
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		converter = new ByteArrayHttpMessageConverter();
 	}
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(converter.canRead(byte[].class, new MediaType("application", "octet-stream"))).isTrue();
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(converter.canWrite(byte[].class, new MediaType("application", "octet-stream"))).isTrue();
 		assertThat(converter.canWrite(byte[].class, MediaType.ALL)).isTrue();
 	}
 
 	@Test
-	public void read() throws IOException {
+	void read() throws IOException {
 		byte[] body = new byte[]{0x1, 0x2};
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "octet-stream"));
@@ -60,7 +60,7 @@ public class ByteArrayHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readWithContentLengthHeaderSet() throws IOException {
+	void readWithContentLengthHeaderSet() throws IOException {
 		byte[] body = new byte[]{0x1, 0x2, 0x3, 0x4, 0x5};
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "octet-stream"));
@@ -70,7 +70,7 @@ public class ByteArrayHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
+	void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		byte[] body = new byte[]{0x1, 0x2};
 		converter.write(body, null, outputMessage);
@@ -80,7 +80,7 @@ public class ByteArrayHttpMessageConverterTests {
 	}
 
 	@Test
-	public void repeatableWrites() throws IOException {
+	void repeatableWrites() throws IOException {
 		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
 		byte[] body = new byte[]{0x1, 0x2};
 		assertThat(converter.supportsRepeatableWrites(body)).isTrue();

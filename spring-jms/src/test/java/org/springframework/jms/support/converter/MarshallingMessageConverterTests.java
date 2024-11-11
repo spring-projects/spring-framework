@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Arjen Poutsma
  */
-public class MarshallingMessageConverterTests {
+class MarshallingMessageConverterTests {
 
 	private Marshaller marshallerMock = mock();
 
@@ -49,7 +49,7 @@ public class MarshallingMessageConverterTests {
 
 
 	@Test
-	public void toBytesMessage() throws Exception {
+	void toBytesMessage() throws Exception {
 		BytesMessage bytesMessageMock = mock();
 		Object toBeMarshalled = new Object();
 		given(sessionMock.createBytesMessage()).willReturn(bytesMessageMock);
@@ -61,7 +61,7 @@ public class MarshallingMessageConverterTests {
 	}
 
 	@Test
-	public void fromBytesMessage() throws Exception {
+	void fromBytesMessage() throws Exception {
 		BytesMessage bytesMessageMock = mock();
 		Object unmarshalled = new Object();
 
@@ -74,7 +74,7 @@ public class MarshallingMessageConverterTests {
 	}
 
 	@Test
-	public void toTextMessage() throws Exception {
+	void toTextMessage() throws Exception {
 		converter.setTargetType(MessageType.TEXT);
 		TextMessage textMessageMock = mock();
 		Object toBeMarshalled = new Object();
@@ -87,7 +87,7 @@ public class MarshallingMessageConverterTests {
 	}
 
 	@Test
-	public void fromTextMessage() throws Exception {
+	void fromTextMessage() throws Exception {
 		TextMessage textMessageMock = mock();
 		Object unmarshalled = new Object();
 

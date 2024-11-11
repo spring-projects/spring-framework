@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,12 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,10 +33,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Integration tests related to the use of context paths.
@@ -40,22 +50,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ContextPathIntegrationTests {
 
-	@Test
-	void multipleWebFluxApps() throws Exception {
+	static Stream<Arguments> httpServers() {
+		return Stream.of(
+				argumentSet("Jetty", new JettyHttpServer()),
+				argumentSet("Jetty Core", new JettyCoreHttpServer()),
+				argumentSet("Reactor Netty", new ReactorHttpServer()),
+				argumentSet("Tomcat", new TomcatHttpServer()),
+				argumentSet("Undertow", new UndertowHttpServer())
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("httpServers")
+	void multipleWebFluxApps(AbstractHttpServer server) throws Exception {
 		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext(WebAppConfig.class);
 		AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(WebAppConfig.class);
 
 		HttpHandler webApp1Handler = WebHttpHandlerBuilder.applicationContext(context1).build();
 		HttpHandler webApp2Handler = WebHttpHandlerBuilder.applicationContext(context2).build();
 
-		ReactorHttpServer server = new ReactorHttpServer();
 		server.registerHttpHandler("/webApp1", webApp1Handler);
 		server.registerHttpHandler("/webApp2", webApp2Handler);
 		server.afterPropertiesSet();
 		server.start();
 
 		try {
-			@SuppressWarnings("resource")
 			RestTemplate restTemplate = new RestTemplate();
 			String actual;
 
@@ -88,7 +107,6 @@ class ContextPathIntegrationTests {
 
 		try {
 			String url = "http://localhost:" + server.getPort() + "/app/api/test";
-			@SuppressWarnings("resource")
 			String actual = new RestTemplate().getForObject(url, String.class);
 			assertThat(actual).isEqualTo("Tested in /app/api");
 		}

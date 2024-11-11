@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	@Nullable
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
+	@Nullable
+	private Character escapeCharacter = SystemPropertyUtils.ESCAPE_CHARACTER;
+
 	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
 
@@ -119,6 +122,19 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	@Override
 	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.valueSeparator = valueSeparator;
+	}
+
+	/**
+	 * Specify the escape character to use to ignore placeholder prefix
+	 * or value separator, or {@code null} if no escaping should take
+	 * place.
+	 * <p>The default is "\".
+	 * @since 6.2
+	 * @see org.springframework.util.SystemPropertyUtils#ESCAPE_CHARACTER
+	 */
+	@Override
+	public void setEscapeCharacter(@Nullable Character escapeCharacter) {
+		this.escapeCharacter = escapeCharacter;
 	}
 
 	/**
@@ -232,7 +248,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private PropertyPlaceholderHelper createPlaceholderHelper(boolean ignoreUnresolvablePlaceholders) {
 		return new PropertyPlaceholderHelper(this.placeholderPrefix, this.placeholderSuffix,
-				this.valueSeparator, ignoreUnresolvablePlaceholders);
+				this.valueSeparator, this.escapeCharacter, ignoreUnresolvablePlaceholders);
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {

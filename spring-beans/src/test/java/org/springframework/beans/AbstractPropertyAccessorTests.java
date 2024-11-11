@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,7 +294,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setNestedPropertyPolymorphic() throws Exception {
+	void setNestedPropertyPolymorphic() {
 		ITestBean target = new TestBean("rod", 31);
 		ITestBean kerry = new Employee();
 
@@ -316,7 +316,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setAnotherNestedProperty() throws Exception {
+	void setAnotherNestedProperty() {
 		ITestBean target = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 0);
 
@@ -386,7 +386,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setAnotherPropertyIntermediatePropertyIsNull() throws Exception {
+	void setAnotherPropertyIntermediatePropertyIsNull() {
 		ITestBean target = new TestBean("rod", 31);
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
@@ -406,6 +406,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void setPropertyIntermediateListIsNullWithAutoGrow() {
 		Foo target = new Foo();
 		AbstractPropertyAccessor accessor = createAccessor(target);
@@ -414,7 +415,7 @@ abstract class AbstractPropertyAccessorTests {
 		Map<String, String> map = new HashMap<>();
 		map.put("favoriteNumber", "9");
 		accessor.setPropertyValue("list[0]", map);
-		assertThat(target.list.get(0)).isEqualTo(map);
+		assertThat(target.list).element(0).isEqualTo(map);
 	}
 
 	@Test
@@ -552,7 +553,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setStringPropertyWithCustomEditor() throws Exception {
+	void setStringPropertyWithCustomEditor() {
 		TestBean target = new TestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
@@ -723,7 +724,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setPropertiesProperty() throws Exception {
+	void setPropertiesProperty() {
 		PropsTester target = new PropsTester();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setPropertyValue("name", "ptest");
@@ -741,7 +742,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setStringArrayProperty() throws Exception {
+	void setStringArrayProperty() {
 		PropsTester target = new PropsTester();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 
@@ -766,7 +767,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setStringArrayPropertyWithCustomStringEditor() throws Exception {
+	void setStringArrayPropertyWithCustomStringEditor() {
 		PropsTester target = new PropsTester();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
@@ -795,7 +796,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setStringArrayPropertyWithStringSplitting() throws Exception {
+	void setStringArrayPropertyWithStringSplitting() {
 		PropsTester target = new PropsTester();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.useConfigValueEditors();
@@ -804,7 +805,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setStringArrayPropertyWithCustomStringDelimiter() throws Exception {
+	void setStringArrayPropertyWithCustomStringDelimiter() {
 		PropsTester target = new PropsTester();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.registerCustomEditor(String[].class, "stringArray", new StringArrayPropertyEditor("-"));
@@ -813,7 +814,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setStringArrayWithAutoGrow() throws Exception {
+	void setStringArrayWithAutoGrow() {
 		StringArrayBean target = new StringArrayBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setAutoGrowNestedPaths(true);
@@ -887,7 +888,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setIntArrayPropertyWithStringSplitting() throws Exception {
+	void setIntArrayPropertyWithStringSplitting() {
 		PropsTester target = new PropsTester();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.useConfigValueEditors();
@@ -942,7 +943,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void setPrimitiveArrayPropertyWithAutoGrow() throws Exception {
+	void setPrimitiveArrayPropertyWithAutoGrow() {
 		PrimitiveArrayBean target = new PrimitiveArrayBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setAutoGrowNestedPaths(true);
@@ -1143,12 +1144,12 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(target.getSet()).hasSize(1);
 		assertThat(target.getSet().contains("set1")).isTrue();
 		assertThat(target.getSortedSet()).hasSize(1);
-		assertThat(target.getSortedSet().contains("sortedSet1")).isTrue();
+		assertThat(target.getSortedSet()).contains("sortedSet1");
 		assertThat(target.getList()).hasSize(1);
-		assertThat(target.getList().contains("list1")).isTrue();
+		assertThat(target.getList()).contains("list1");
 
 		accessor.setPropertyValue("list", Collections.singletonList("list1 "));
-		assertThat(target.getList().contains("list1")).isTrue();
+		assertThat(target.getList()).contains("list1");
 	}
 
 	@Test

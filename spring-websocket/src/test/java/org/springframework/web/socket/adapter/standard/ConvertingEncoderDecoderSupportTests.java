@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Phillip Webb
  */
-public class ConvertingEncoderDecoderSupportTests {
+class ConvertingEncoderDecoderSupportTests {
 
 	private static final String CONVERTED_TEXT = "_test";
 
@@ -64,12 +64,12 @@ public class ConvertingEncoderDecoderSupportTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		setup(Config.class);
 	}
 
 	@AfterEach
-	public void teardown() {
+	void teardown() {
 		ContextLoaderTestUtils.setCurrentWebApplicationContext(null);
 	}
 
@@ -82,12 +82,12 @@ public class ConvertingEncoderDecoderSupportTests {
 	}
 
 	@Test
-	public void encodeToText() throws Exception {
+	void encodeToText() throws Exception {
 		assertThat(new MyTextEncoder().encode(myType)).isEqualTo(CONVERTED_TEXT);
 	}
 
 	@Test
-	public void encodeToTextCannotConvert() throws Exception {
+	void encodeToTextCannotConvert() {
 		setup(NoConvertersConfig.class);
 		assertThatExceptionOfType(EncodeException.class).isThrownBy(() ->
 				new MyTextEncoder().encode(myType))
@@ -95,13 +95,13 @@ public class ConvertingEncoderDecoderSupportTests {
 	}
 
 	@Test
-	public void encodeToBinary() throws Exception {
+	void encodeToBinary() throws Exception {
 		assertThat(new MyBinaryEncoder().encode(myType).array())
 				.isEqualTo(CONVERTED_BYTES.array());
 	}
 
 	@Test
-	public void encodeToBinaryCannotConvert() throws Exception {
+	void encodeToBinaryCannotConvert() {
 		setup(NoConvertersConfig.class);
 		assertThatExceptionOfType(EncodeException.class).isThrownBy(() ->
 				new MyBinaryEncoder().encode(myType))
@@ -109,14 +109,14 @@ public class ConvertingEncoderDecoderSupportTests {
 	}
 
 	@Test
-	public void decodeFromText() throws Exception {
+	void decodeFromText() throws Exception {
 		Decoder.Text<MyType> decoder = new MyTextDecoder();
 		assertThat(decoder.willDecode(CONVERTED_TEXT)).isTrue();
 		assertThat(decoder.decode(CONVERTED_TEXT)).isEqualTo(myType);
 	}
 
 	@Test
-	public void decodeFromTextCannotConvert() throws Exception {
+	void decodeFromTextCannotConvert() {
 		setup(NoConvertersConfig.class);
 		Decoder.Text<MyType> decoder = new MyTextDecoder();
 		assertThat(decoder.willDecode(CONVERTED_TEXT)).isFalse();
@@ -126,14 +126,14 @@ public class ConvertingEncoderDecoderSupportTests {
 	}
 
 	@Test
-	public void decodeFromBinary() throws Exception {
+	void decodeFromBinary() throws Exception {
 		Decoder.Binary<MyType> decoder = new MyBinaryDecoder();
 		assertThat(decoder.willDecode(CONVERTED_BYTES)).isTrue();
 		assertThat(decoder.decode(CONVERTED_BYTES)).isEqualTo(myType);
 	}
 
 	@Test
-	public void decodeFromBinaryCannotConvert() throws Exception {
+	void decodeFromBinaryCannotConvert() {
 		setup(NoConvertersConfig.class);
 		Decoder.Binary<MyType> decoder = new MyBinaryDecoder();
 		assertThat(decoder.willDecode(CONVERTED_BYTES)).isFalse();
@@ -143,28 +143,28 @@ public class ConvertingEncoderDecoderSupportTests {
 	}
 
 	@Test
-	public void encodeAndDecodeText() throws Exception {
+	void encodeAndDecodeText() throws Exception {
 		MyTextEncoderDecoder encoderDecoder = new MyTextEncoderDecoder();
 		String encoded = encoderDecoder.encode(myType);
 		assertThat(encoderDecoder.decode(encoded)).isEqualTo(myType);
 	}
 
 	@Test
-	public void encodeAndDecodeBytes() throws Exception {
+	void encodeAndDecodeBytes() throws Exception {
 		MyBinaryEncoderDecoder encoderDecoder = new MyBinaryEncoderDecoder();
 		ByteBuffer encoded = encoderDecoder.encode(myType);
 		assertThat(encoderDecoder.decode(encoded)).isEqualTo(myType);
 	}
 
 	@Test
-	public void autowiresIntoEncoder() throws Exception {
+	void autowiresIntoEncoder() {
 		WithAutowire withAutowire = new WithAutowire();
 		withAutowire.init(null);
 		assertThat(withAutowire.config).isEqualTo(applicationContext.getBean(Config.class));
 	}
 
 	@Test
-	public void cannotFindApplicationContext() throws Exception {
+	void cannotFindApplicationContext() {
 		ContextLoaderTestUtils.setCurrentWebApplicationContext(null);
 		WithAutowire encoder = new WithAutowire();
 		encoder.init(null);
@@ -174,7 +174,7 @@ public class ConvertingEncoderDecoderSupportTests {
 	}
 
 	@Test
-	public void cannotFindConversionService() throws Exception {
+	void cannotFindConversionService() {
 		setup(NoConfig.class);
 		MyBinaryEncoder encoder = new MyBinaryEncoder();
 		encoder.init(null);

@@ -31,5 +31,5 @@ provide convenience methods that delegate to the aforementioned methods in
 The `spring-jdbc` module provides support for configuring and launching an embedded
 database, which you can use in integration tests that interact with a database.
 For details, see xref:data-access/jdbc/embedded-database-support.adoc[Embedded Database Support]
- and <<data-access.adoc#jdbc-embedded-database-dao-testing, Testing Data Access
-Logic with an Embedded Database>>.
+ and xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-dao-testing[Testing Data Access
+Logic with an Embedded Database].

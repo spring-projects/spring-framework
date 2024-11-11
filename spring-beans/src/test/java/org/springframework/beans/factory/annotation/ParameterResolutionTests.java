@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,35 +35,35 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link ParameterResolutionDelegate}.
+ * Tests for {@link ParameterResolutionDelegate}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @author Loïc Ledoyen
  */
-public class ParameterResolutionTests {
+class ParameterResolutionTests {
 
 	@Test
-	public void isAutowirablePreconditions() {
+	void isAutowirablePreconditions() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ParameterResolutionDelegate.isAutowirable(null, 0))
 			.withMessageContaining("Parameter must not be null");
 	}
 
 	@Test
-	public void annotatedParametersInMethodAreCandidatesForAutowiring() throws Exception {
+	void annotatedParametersInMethodAreCandidatesForAutowiring() throws Exception {
 		Method method = getClass().getDeclaredMethod("autowirableMethod", String.class, String.class, String.class, String.class);
 		assertAutowirableParameters(method);
 	}
 
 	@Test
-	public void annotatedParametersInTopLevelClassConstructorAreCandidatesForAutowiring() throws Exception {
+	void annotatedParametersInTopLevelClassConstructorAreCandidatesForAutowiring() throws Exception {
 		Constructor<?> constructor = AutowirableClass.class.getConstructor(String.class, String.class, String.class, String.class);
 		assertAutowirableParameters(constructor);
 	}
 
 	@Test
-	public void annotatedParametersInInnerClassConstructorAreCandidatesForAutowiring() throws Exception {
+	void annotatedParametersInInnerClassConstructorAreCandidatesForAutowiring() throws Exception {
 		Class<?> innerClass = AutowirableClass.InnerAutowirableClass.class;
 		assertThat(ClassUtils.isInnerClass(innerClass)).isTrue();
 		Constructor<?> constructor = innerClass.getConstructor(AutowirableClass.class, String.class, String.class);
@@ -81,7 +81,7 @@ public class ParameterResolutionTests {
 	}
 
 	@Test
-	public void nonAnnotatedParametersInTopLevelClassConstructorAreNotCandidatesForAutowiring() throws Exception {
+	void nonAnnotatedParametersInTopLevelClassConstructorAreNotCandidatesForAutowiring() throws Exception {
 		Constructor<?> notAutowirableConstructor = AutowirableClass.class.getConstructor(String.class);
 
 		Parameter[] parameters = notAutowirableConstructor.getParameters();
@@ -92,21 +92,21 @@ public class ParameterResolutionTests {
 	}
 
 	@Test
-	public void resolveDependencyPreconditionsForParameter() {
+	void resolveDependencyPreconditionsForParameter() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> ParameterResolutionDelegate.resolveDependency(null, 0, null, mock()))
 			.withMessageContaining("Parameter must not be null");
 	}
 
 	@Test
-	public void resolveDependencyPreconditionsForContainingClass() throws Exception {
+	void resolveDependencyPreconditionsForContainingClass() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ParameterResolutionDelegate.resolveDependency(getParameter(), 0, null, null))
 			.withMessageContaining("Containing class must not be null");
 	}
 
 	@Test
-	public void resolveDependencyPreconditionsForBeanFactory() throws Exception {
+	void resolveDependencyPreconditionsForBeanFactory() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ParameterResolutionDelegate.resolveDependency(getParameter(), 0, getClass(), null))
 			.withMessageContaining("AutowireCapableBeanFactory must not be null");
@@ -118,7 +118,7 @@ public class ParameterResolutionTests {
 	}
 
 	@Test
-	public void resolveDependencyForAnnotatedParametersInTopLevelClassConstructor() throws Exception {
+	void resolveDependencyForAnnotatedParametersInTopLevelClassConstructor() throws Exception {
 		Constructor<?> constructor = AutowirableClass.class.getConstructor(String.class, String.class, String.class, String.class);
 
 		AutowireCapableBeanFactory beanFactory = mock();

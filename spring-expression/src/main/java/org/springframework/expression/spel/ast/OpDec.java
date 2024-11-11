@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,13 @@ import org.springframework.util.Assert;
  */
 public class OpDec extends Operator {
 
+	private static final String DEC = "--";
+
 	private final boolean postfix;  // false means prefix
 
 
 	public OpDec(int startPos, int endPos, boolean postfix, SpelNodeImpl... operands) {
-		super("--", startPos, endPos, operands);
+		super(DEC, startPos, endPos, operands);
 		this.postfix = postfix;
 		Assert.notEmpty(operands, "Operands must not be empty");
 	}
@@ -51,6 +53,10 @@ public class OpDec extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		if (!state.getEvaluationContext().isAssignmentEnabled()) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.OPERAND_NOT_DECREMENTABLE, toStringAST());
+		}
+
 		SpelNodeImpl operand = getLeftOperand();
 
 		// The operand is going to be read and then assigned to, we don't want to evaluate it twice.
@@ -113,7 +119,7 @@ public class OpDec extends Operator {
 			lvalue.setValue(newValue.getValue());
 		}
 		catch (SpelEvaluationException see) {
-			// if unable to set the value the operand is not writable (e.g. 1-- )
+			// if unable to set the value the operand is not writable (for example, 1-- )
 			if (see.getMessageCode() == SpelMessage.SETVALUE_NOT_SUPPORTED) {
 				throw new SpelEvaluationException(operand.getStartPosition(),
 						SpelMessage.OPERAND_NOT_DECREMENTABLE);
@@ -133,7 +139,8 @@ public class OpDec extends Operator {
 
 	@Override
 	public String toStringAST() {
-		return getLeftOperand().toStringAST() + "--";
+		String ast = getLeftOperand().toStringAST();
+		return (this.postfix ? ast + DEC : DEC + ast);
 	}
 
 	@Override

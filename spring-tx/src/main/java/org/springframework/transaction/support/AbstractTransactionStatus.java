@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,14 +138,19 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Create a savepoint and hold it for the transaction.
 	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
 	 * if the underlying transaction does not support savepoints
+	 * @see SavepointManager#createSavepoint
 	 */
 	public void createAndHoldSavepoint() throws TransactionException {
-		setSavepoint(getSavepointManager().createSavepoint());
+		Object savepoint = getSavepointManager().createSavepoint();
+		TransactionSynchronizationUtils.triggerSavepoint(savepoint);
+		setSavepoint(savepoint);
 	}
 
 	/**
 	 * Roll back to the savepoint that is held for the transaction
 	 * and release the savepoint right afterwards.
+	 * @see SavepointManager#rollbackToSavepoint
+	 * @see SavepointManager#releaseSavepoint
 	 */
 	public void rollbackToHeldSavepoint() throws TransactionException {
 		Object savepoint = getSavepoint();
@@ -153,6 +158,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 			throw new TransactionUsageException(
 					"Cannot roll back to savepoint - no savepoint associated with current transaction");
 		}
+		TransactionSynchronizationUtils.triggerSavepointRollback(savepoint);
 		getSavepointManager().rollbackToSavepoint(savepoint);
 		getSavepointManager().releaseSavepoint(savepoint);
 		setSavepoint(null);
@@ -160,6 +166,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	/**
 	 * Release the savepoint that is held for the transaction.
+	 * @see SavepointManager#releaseSavepoint
 	 */
 	public void releaseHeldSavepoint() throws TransactionException {
 		Object savepoint = getSavepoint();
@@ -184,7 +191,9 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 */
 	@Override
 	public Object createSavepoint() throws TransactionException {
-		return getSavepointManager().createSavepoint();
+		Object savepoint = getSavepointManager().createSavepoint();
+		TransactionSynchronizationUtils.triggerSavepoint(savepoint);
+		return savepoint;
 	}
 
 	/**
@@ -195,6 +204,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 */
 	@Override
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
+		TransactionSynchronizationUtils.triggerSavepointRollback(savepoint);
 		getSavepointManager().rollbackToSavepoint(savepoint);
 	}
 

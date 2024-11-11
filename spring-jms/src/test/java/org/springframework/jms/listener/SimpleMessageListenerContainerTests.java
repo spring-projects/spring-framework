@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Mark Fisher
  */
-public class SimpleMessageListenerContainerTests {
+class SimpleMessageListenerContainerTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
@@ -59,25 +59,25 @@ public class SimpleMessageListenerContainerTests {
 
 
 	@Test
-	public void testSettingMessageListenerToANullType() {
+	void testSettingMessageListenerToANullType() {
 		this.container.setMessageListener(null);
 		assertThat(this.container.getMessageListener()).isNull();
 	}
 
 	@Test
-	public void testSettingMessageListenerToAnUnsupportedType() {
+	void testSettingMessageListenerToAnUnsupportedType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.container.setMessageListener("Bingo"));
 	}
 
 	@Test
-	public void testSessionTransactedModeReallyDoesDefaultToFalse() {
+	void testSessionTransactedModeReallyDoesDefaultToFalse() {
 		assertThat(this.container.isPubSubNoLocal()).as("The [pubSubLocal] property of SimpleMessageListenerContainer " +
 				"must default to false. Change this test (and the attendant javadoc) if you have changed the default.").isFalse();
 	}
 
 	@Test
-	public void testSettingConcurrentConsumersToZeroIsNotAllowed() {
+	void testSettingConcurrentConsumersToZeroIsNotAllowed() {
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 				this.container.setConcurrentConsumers(0);
 				this.container.afterPropertiesSet();
@@ -85,7 +85,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() {
+	void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() {
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 				this.container.setConcurrentConsumers(-198);
 				this.container.afterPropertiesSet();
@@ -93,7 +93,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testContextRefreshedEventDoesNotStartTheConnectionIfAutoStartIsSetToFalse() throws Exception {
+	void testContextRefreshedEventDoesNotStartTheConnectionIfAutoStartIsSetToFalse() throws Exception {
 		MessageConsumer messageConsumer = mock();
 		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
@@ -124,7 +124,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testContextRefreshedEventStartsTheConnectionByDefault() throws Exception {
+	void testContextRefreshedEventStartsTheConnectionByDefault() throws Exception {
 		MessageConsumer messageConsumer = mock();
 		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
@@ -156,7 +156,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testCorrectSessionExposedForSessionAwareMessageListenerInvocation() throws Exception {
+	void testCorrectSessionExposedForSessionAwareMessageListenerInvocation() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
 		final Session session = mock();
@@ -206,7 +206,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testTaskExecutorCorrectlyInvokedWhenSpecified() throws Exception {
+	void testTaskExecutorCorrectlyInvokedWhenSpecified() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
 		final Session session = mock();
@@ -247,7 +247,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testRegisteredExceptionListenerIsInvokedOnException() throws Exception {
+	void testRegisteredExceptionListenerIsInvokedOnException() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
 		Session session = mock();
@@ -294,7 +294,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testRegisteredErrorHandlerIsInvokedOnException() throws Exception {
+	void testRegisteredErrorHandlerIsInvokedOnException() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
 		Session session = mock();
@@ -339,7 +339,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testNoRollbackOccursIfSessionIsNotTransactedAndThatExceptionsDo_NOT_Propagate() throws Exception {
+	void testNoRollbackOccursIfSessionIsNotTransactedAndThatExceptionsDo_NOT_Propagate() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
 		Session session = mock();
@@ -378,7 +378,7 @@ public class SimpleMessageListenerContainerTests {
 	}
 
 	@Test
-	public void testTransactedSessionsGetRollbackLogicAppliedAndThatExceptionsStillDo_NOT_Propagate() throws Exception {
+	void testTransactedSessionsGetRollbackLogicAppliedAndThatExceptionsStillDo_NOT_Propagate() throws Exception {
 		this.container.setSessionTransacted(true);
 
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
@@ -414,14 +414,14 @@ public class SimpleMessageListenerContainerTests {
 		// a Throwable from a MessageListener MUST simply be swallowed...
 		messageConsumer.sendMessage(message);
 
-		// Session is rolled back 'cos it is transacted...
+		// Session is rolled back because it is transacted...
 		verify(session).rollback();
 		verify(connection).setExceptionListener(this.container);
 		verify(connection).start();
 	}
 
 	@Test
-	public void testDestroyClosesConsumersSessionsAndConnectionInThatOrder() throws Exception {
+	void testDestroyClosesConsumersSessionsAndConnectionInThatOrder() throws Exception {
 		MessageConsumer messageConsumer = mock();
 		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...

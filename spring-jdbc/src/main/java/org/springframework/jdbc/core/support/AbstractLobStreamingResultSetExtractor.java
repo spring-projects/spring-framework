@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,20 +41,23 @@ import org.springframework.lang.Nullable;
  * final LobHandler lobHandler = new DefaultLobHandler();  // reusable object
  *
  * jdbcTemplate.query(
- *		 "SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
- *		 new AbstractLobStreamingResultSetExtractor() {
- *			 public void streamData(ResultSet rs) throws SQLException, IOException {
- *				 FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), contentStream);
- *             }
- *         }
- * );</pre>
+ *	   "SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
+ *	   new AbstractLobStreamingResultSetExtractor() {
+ *	     public void streamData(ResultSet rs) throws SQLException, IOException {
+ *         FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), contentStream);
+ *       }
+ *     });
+ * </pre>
  *
  * @author Juergen Hoeller
  * @since 1.0.2
  * @param <T> the result type
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.LobRetrievalFailureException
+ * @deprecated as of 6.2 along with {@link org.springframework.jdbc.support.lob.LobHandler},
+ * in favor of {@link ResultSet#getBinaryStream}/{@link ResultSet#getCharacterStream} usage
  */
+@Deprecated(since = "6.2")
 public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<T> {
 
 	/**

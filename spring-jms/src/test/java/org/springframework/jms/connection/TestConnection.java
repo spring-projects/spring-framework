@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,36 +39,36 @@ public class TestConnection implements Connection {
 
 
 	@Override
-	public Session createSession(boolean b, int i) throws JMSException {
+	public Session createSession(boolean b, int i) {
 		return null;
 	}
 
 	@Override
-	public Session createSession(int sessionMode) throws JMSException {
+	public Session createSession(int sessionMode) {
 		return null;
 	}
 
 	@Override
-	public Session createSession() throws JMSException {
+	public Session createSession() {
 		return null;
 	}
 
 	@Override
-	public String getClientID() throws JMSException {
+	public String getClientID() {
 		return null;
 	}
 
 	@Override
-	public void setClientID(String paramName) throws JMSException {
+	public void setClientID(String paramName) {
 	}
 
 	@Override
-	public ConnectionMetaData getMetaData() throws JMSException {
+	public ConnectionMetaData getMetaData() {
 		return null;
 	}
 
 	@Override
-	public ExceptionListener getExceptionListener() throws JMSException {
+	public ExceptionListener getExceptionListener() {
 		return exceptionListener;
 	}
 
@@ -78,36 +78,36 @@ public class TestConnection implements Connection {
 	}
 
 	@Override
-	public void start() throws JMSException {
+	public void start() {
 		this.startCount++;
 	}
 
 	@Override
-	public void stop() throws JMSException {
+	public void stop() {
 	}
 
 	@Override
-	public void close() throws JMSException {
+	public void close() {
 		this.closeCount++;
 	}
 
 	@Override
-	public ConnectionConsumer createConnectionConsumer(Destination destination, String paramName, ServerSessionPool serverSessionPool, int i) throws JMSException {
+	public ConnectionConsumer createConnectionConsumer(Destination destination, String paramName, ServerSessionPool serverSessionPool, int i) {
 		return null;
 	}
 
 	@Override
-	public ConnectionConsumer createDurableConnectionConsumer(Topic topic, String paramName, String paramName1, ServerSessionPool serverSessionPool, int i) throws JMSException {
+	public ConnectionConsumer createDurableConnectionConsumer(Topic topic, String paramName, String paramName1, ServerSessionPool serverSessionPool, int i) {
 		return null;
 	}
 
 	@Override
-	public ConnectionConsumer createSharedConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+	public ConnectionConsumer createSharedConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) {
 		return null;
 	}
 
 	@Override
-	public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+	public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) {
 		return null;
 	}
 

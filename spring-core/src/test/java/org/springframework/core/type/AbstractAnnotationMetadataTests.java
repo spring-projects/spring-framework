@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,30 +38,30 @@ import static org.assertj.core.api.Assertions.entry;
 public abstract class AbstractAnnotationMetadataTests {
 
 	@Test
-	public void verifyEquals() throws Exception {
+	void verifyEquals() {
 		AnnotationMetadata testClass1 = get(TestClass.class);
 		AnnotationMetadata testClass2 = get(TestClass.class);
 		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
 		AnnotationMetadata testMemberClass2 = get(TestMemberClass.class);
 
-		assertThat(testClass1.equals(null)).isFalse();
+		assertThat(testClass1).isNotEqualTo(null);
 
-		assertThat(testClass1.equals(testClass1)).isTrue();
-		assertThat(testClass2.equals(testClass2)).isTrue();
-		assertThat(testClass1.equals(testClass2)).isTrue();
-		assertThat(testClass2.equals(testClass1)).isTrue();
+		assertThat(testClass1).isEqualTo(testClass1);
+		assertThat(testClass2).isEqualTo(testClass2);
+		assertThat(testClass1).isEqualTo(testClass2);
+		assertThat(testClass2).isEqualTo(testClass1);
 
-		assertThat(testMemberClass1.equals(testMemberClass1)).isTrue();
-		assertThat(testMemberClass2.equals(testMemberClass2)).isTrue();
-		assertThat(testMemberClass1.equals(testMemberClass2)).isTrue();
-		assertThat(testMemberClass2.equals(testMemberClass1)).isTrue();
+		assertThat(testMemberClass1).isEqualTo(testMemberClass1);
+		assertThat(testMemberClass2).isEqualTo(testMemberClass2);
+		assertThat(testMemberClass1).isEqualTo(testMemberClass2);
+		assertThat(testMemberClass2).isEqualTo(testMemberClass1);
 
-		assertThat(testClass1.equals(testMemberClass1)).isFalse();
-		assertThat(testMemberClass1.equals(testClass1)).isFalse();
+		assertThat(testClass1).isNotEqualTo(testMemberClass1);
+		assertThat(testMemberClass1).isNotEqualTo(testClass1);
 	}
 
 	@Test
-	public void verifyHashCode() throws Exception {
+	void verifyHashCode() {
 		AnnotationMetadata testClass1 = get(TestClass.class);
 		AnnotationMetadata testClass2 = get(TestClass.class);
 		AnnotationMetadata testMemberClass1 = get(TestMemberClass.class);
@@ -74,106 +74,106 @@ public abstract class AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	public void verifyToString() throws Exception {
+	void verifyToString() {
 		assertThat(get(TestClass.class).toString()).isEqualTo(TestClass.class.getName());
 	}
 
 	@Test
-	public void getClassNameReturnsClassName() {
+	void getClassNameReturnsClassName() {
 		assertThat(get(TestClass.class).getClassName()).isEqualTo(TestClass.class.getName());
 	}
 
 	@Test
-	public void isInterfaceWhenInterfaceReturnsTrue() {
+	void isInterfaceWhenInterfaceReturnsTrue() {
 		assertThat(get(TestInterface.class).isInterface()).isTrue();
 		assertThat(get(TestAnnotation.class).isInterface()).isTrue();
 	}
 
 	@Test
-	public void isInterfaceWhenNotInterfaceReturnsFalse() {
+	void isInterfaceWhenNotInterfaceReturnsFalse() {
 		assertThat(get(TestClass.class).isInterface()).isFalse();
 	}
 
 	@Test
-	public void isAnnotationWhenAnnotationReturnsTrue() {
+	void isAnnotationWhenAnnotationReturnsTrue() {
 		assertThat(get(TestAnnotation.class).isAnnotation()).isTrue();
 	}
 
 	@Test
-	public void isAnnotationWhenNotAnnotationReturnsFalse() {
+	void isAnnotationWhenNotAnnotationReturnsFalse() {
 		assertThat(get(TestClass.class).isAnnotation()).isFalse();
 		assertThat(get(TestInterface.class).isAnnotation()).isFalse();
 	}
 
 	@Test
-	public void isFinalWhenFinalReturnsTrue() {
+	void isFinalWhenFinalReturnsTrue() {
 		assertThat(get(TestFinalClass.class).isFinal()).isTrue();
 	}
 
 	@Test
-	public void isFinalWhenNonFinalReturnsFalse() {
+	void isFinalWhenNonFinalReturnsFalse() {
 		assertThat(get(TestClass.class).isFinal()).isFalse();
 	}
 
 	@Test
-	public void isIndependentWhenIndependentReturnsTrue() {
+	void isIndependentWhenIndependentReturnsTrue() {
 		assertThat(get(AbstractAnnotationMetadataTests.class).isIndependent()).isTrue();
 		assertThat(get(TestClass.class).isIndependent()).isTrue();
 	}
 
 	@Test
-	public void isIndependentWhenNotIndependentReturnsFalse() {
+	void isIndependentWhenNotIndependentReturnsFalse() {
 		assertThat(get(TestNonStaticInnerClass.class).isIndependent()).isFalse();
 	}
 
 	@Test
-	public void getEnclosingClassNameWhenHasEnclosingClassReturnsEnclosingClass() {
+	void getEnclosingClassNameWhenHasEnclosingClassReturnsEnclosingClass() {
 		assertThat(get(TestClass.class).getEnclosingClassName()).isEqualTo(
 				AbstractAnnotationMetadataTests.class.getName());
 	}
 
 	@Test
-	public void getEnclosingClassNameWhenHasNoEnclosingClassReturnsNull() {
+	void getEnclosingClassNameWhenHasNoEnclosingClassReturnsNull() {
 		assertThat(get(AbstractAnnotationMetadataTests.class).getEnclosingClassName()).isNull();
 	}
 
 	@Test
-	public void getSuperClassNameWhenHasSuperClassReturnsName() {
+	void getSuperClassNameWhenHasSuperClassReturnsName() {
 		assertThat(get(TestSubclass.class).getSuperClassName()).isEqualTo(TestClass.class.getName());
 		assertThat(get(TestClass.class).getSuperClassName()).isEqualTo(Object.class.getName());
 	}
 
 	@Test
-	public void getSuperClassNameWhenHasNoSuperClassReturnsNull() {
+	void getSuperClassNameWhenHasNoSuperClassReturnsNull() {
 		assertThat(get(Object.class).getSuperClassName()).isNull();
 		assertThat(get(TestInterface.class).getSuperClassName()).isNull();
 		assertThat(get(TestSubInterface.class).getSuperClassName()).isNull();
 	}
 
 	@Test
-	public void getInterfaceNamesWhenHasInterfacesReturnsNames() {
+	void getInterfaceNamesWhenHasInterfacesReturnsNames() {
 		assertThat(get(TestSubclass.class).getInterfaceNames()).containsExactlyInAnyOrder(TestInterface.class.getName());
 		assertThat(get(TestSubInterface.class).getInterfaceNames()).containsExactlyInAnyOrder(TestInterface.class.getName());
 	}
 
 	@Test
-	public void getInterfaceNamesWhenHasNoInterfacesReturnsEmptyArray() {
+	void getInterfaceNamesWhenHasNoInterfacesReturnsEmptyArray() {
 		assertThat(get(TestClass.class).getInterfaceNames()).isEmpty();
 	}
 
 	@Test
-	public void getMemberClassNamesWhenHasMemberClassesReturnsNames() {
+	void getMemberClassNamesWhenHasMemberClassesReturnsNames() {
 		assertThat(get(TestMemberClass.class).getMemberClassNames()).containsExactlyInAnyOrder(
 			TestMemberClassInnerClass.class.getName(), TestMemberClassInnerInterface.class.getName());
 	}
 
 	@Test
-	public void getMemberClassNamesWhenHasNoMemberClassesReturnsEmptyArray() {
+	void getMemberClassNamesWhenHasNoMemberClassesReturnsEmptyArray() {
 		assertThat(get(TestClass.class).getMemberClassNames()).isEmpty();
 	}
 
 	@Test
-	public void getAnnotationsReturnsDirectAnnotations() {
+	void getAnnotationsReturnsDirectAnnotations() {
 		assertThat(get(WithDirectAnnotations.class).getAnnotations().stream())
 			.filteredOn(MergedAnnotation::isDirectlyPresent)
 			.extracting(a -> a.getType().getName())
@@ -181,28 +181,28 @@ public abstract class AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	public void isAnnotatedWhenMatchesDirectAnnotationReturnsTrue() {
+	void isAnnotatedWhenMatchesDirectAnnotationReturnsTrue() {
 		assertThat(get(WithDirectAnnotations.class).isAnnotated(DirectAnnotation1.class.getName())).isTrue();
 	}
 
 	@Test
-	public void isAnnotatedWhenMatchesMetaAnnotationReturnsTrue() {
+	void isAnnotatedWhenMatchesMetaAnnotationReturnsTrue() {
 		assertThat(get(WithMetaAnnotations.class).isAnnotated(MetaAnnotation2.class.getName())).isTrue();
 	}
 
 	@Test
-	public void isAnnotatedWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
+	void isAnnotatedWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
 		assertThat(get(TestClass.class).isAnnotated(DirectAnnotation1.class.getName())).isFalse();
 	}
 
 	@Test
-	public void getAnnotationAttributesReturnsAttributes() {
+	void getAnnotationAttributesReturnsAttributes() {
 		assertThat(get(WithAnnotationAttributes.class).getAnnotationAttributes(AnnotationAttributes.class.getName()))
 			.containsOnly(entry("name", "test"), entry("size", 1));
 	}
 
 	@Test
-	public void getAllAnnotationAttributesReturnsAllAttributes() {
+	void getAllAnnotationAttributesReturnsAllAttributes() {
 		MultiValueMap<String, Object> attributes =
 				get(WithMetaAnnotationAttributes.class).getAllAnnotationAttributes(AnnotationAttributes.class.getName());
 		assertThat(attributes).containsOnlyKeys("name", "size");
@@ -211,69 +211,69 @@ public abstract class AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	public void getAnnotationTypesReturnsDirectAnnotations() {
+	void getAnnotationTypesReturnsDirectAnnotations() {
 		AnnotationMetadata metadata = get(WithDirectAnnotations.class);
 		assertThat(metadata.getAnnotationTypes()).containsExactlyInAnyOrder(
 				DirectAnnotation1.class.getName(), DirectAnnotation2.class.getName());
 	}
 
 	@Test
-	public void getMetaAnnotationTypesReturnsMetaAnnotations() {
+	void getMetaAnnotationTypesReturnsMetaAnnotations() {
 		AnnotationMetadata metadata = get(WithMetaAnnotations.class);
 		assertThat(metadata.getMetaAnnotationTypes(MetaAnnotationRoot.class.getName()))
 			.containsExactlyInAnyOrder(MetaAnnotation1.class.getName(), MetaAnnotation2.class.getName());
 	}
 
 	@Test
-	public void hasAnnotationWhenMatchesDirectAnnotationReturnsTrue() {
+	void hasAnnotationWhenMatchesDirectAnnotationReturnsTrue() {
 		assertThat(get(WithDirectAnnotations.class).hasAnnotation(DirectAnnotation1.class.getName())).isTrue();
 	}
 
 	@Test
-	public void hasAnnotationWhenMatchesMetaAnnotationReturnsFalse() {
+	void hasAnnotationWhenMatchesMetaAnnotationReturnsFalse() {
 		assertThat(get(WithMetaAnnotations.class).hasAnnotation(MetaAnnotation1.class.getName())).isFalse();
 		assertThat(get(WithMetaAnnotations.class).hasAnnotation(MetaAnnotation2.class.getName())).isFalse();
 	}
 
 	@Test
-	public void hasAnnotationWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
+	void hasAnnotationWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
 		assertThat(get(TestClass.class).hasAnnotation(DirectAnnotation1.class.getName())).isFalse();
 	}
 
 	@Test
-	public void hasMetaAnnotationWhenMatchesDirectReturnsFalse() {
+	void hasMetaAnnotationWhenMatchesDirectReturnsFalse() {
 		assertThat(get(WithDirectAnnotations.class).hasMetaAnnotation(DirectAnnotation1.class.getName())).isFalse();
 	}
 
 	@Test
-	public void hasMetaAnnotationWhenMatchesMetaAnnotationReturnsTrue() {
+	void hasMetaAnnotationWhenMatchesMetaAnnotationReturnsTrue() {
 		assertThat(get(WithMetaAnnotations.class).hasMetaAnnotation(MetaAnnotation1.class.getName())).isTrue();
 		assertThat(get(WithMetaAnnotations.class).hasMetaAnnotation(MetaAnnotation2.class.getName())).isTrue();
 	}
 
 	@Test
-	public void hasMetaAnnotationWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
+	void hasMetaAnnotationWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
 		assertThat(get(TestClass.class).hasMetaAnnotation(MetaAnnotation1.class.getName())).isFalse();
 	}
 
 	@Test
-	public void hasAnnotatedMethodsWhenMatchesDirectAnnotationReturnsTrue() {
+	void hasAnnotatedMethodsWhenMatchesDirectAnnotationReturnsTrue() {
 		assertThat(get(WithAnnotatedMethod.class).hasAnnotatedMethods(DirectAnnotation1.class.getName())).isTrue();
 	}
 
 	@Test
-	public void hasAnnotatedMethodsWhenMatchesMetaAnnotationReturnsTrue() {
+	void hasAnnotatedMethodsWhenMatchesMetaAnnotationReturnsTrue() {
 		assertThat(get(WithMetaAnnotatedMethod.class).hasAnnotatedMethods(MetaAnnotation2.class.getName())).isTrue();
 	}
 
 	@Test
-	public void hasAnnotatedMethodsWhenDoesNotMatchAnyAnnotationReturnsFalse() {
+	void hasAnnotatedMethodsWhenDoesNotMatchAnyAnnotationReturnsFalse() {
 		assertThat(get(WithAnnotatedMethod.class).hasAnnotatedMethods(MetaAnnotation2.class.getName())).isFalse();
 		assertThat(get(WithNonAnnotatedMethod.class).hasAnnotatedMethods(DirectAnnotation1.class.getName())).isFalse();
 	}
 
 	@Test
-	public void getAnnotatedMethodsReturnsMatchingAnnotatedAndMetaAnnotatedMethods() {
+	void getAnnotatedMethodsReturnsMatchingAnnotatedAndMetaAnnotatedMethods() {
 		assertThat(get(WithDirectAndMetaAnnotatedMethods.class).getAnnotatedMethods(MetaAnnotation2.class.getName()))
 			.extracting(MethodMetadata::getMethodName)
 			.containsExactlyInAnyOrder("direct", "meta");

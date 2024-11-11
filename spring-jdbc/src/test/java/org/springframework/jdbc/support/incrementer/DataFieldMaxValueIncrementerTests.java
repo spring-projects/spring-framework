@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link DataFieldMaxValueIncrementer} implementations.
+ * Tests for {@link DataFieldMaxValueIncrementer} implementations.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -129,6 +129,33 @@ class DataFieldMaxValueIncrementerTests {
 		verify(statement).executeUpdate("delete from myseq where seq in (-1, 0, 1)");
 		verify(statement).executeUpdate("delete from myseq where seq in (2, 3, 4)");
 		verify(resultSet, times(6)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void mySQLIdentityColumnMaxValueIncrementer() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L, 2L, 3L, 4L);
+
+		MySQLIdentityColumnMaxValueIncrementer incrementer = new MySQLIdentityColumnMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.setPaddingLength(1);
+		incrementer.afterPropertiesSet();
+
+		assertThat(incrementer.nextIntValue()).isEqualTo(1);
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+		assertThat(incrementer.nextStringValue()).isEqualTo("3");
+		assertThat(incrementer.nextLongValue()).isEqualTo(4);
+
+		verify(statement, times(4)).executeUpdate("insert into myseq () values ()");
+		verify(resultSet, times(4)).close();
 		verify(statement, times(2)).close();
 		verify(connection, times(2)).close();
 	}

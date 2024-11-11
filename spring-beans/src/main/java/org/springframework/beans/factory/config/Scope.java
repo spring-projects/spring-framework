@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
  * <p>{@link org.springframework.context.ApplicationContext} implementations
  * such as a {@link org.springframework.web.context.WebApplicationContext}
  * may register additional standard scopes specific to their environment,
- * e.g. {@link org.springframework.web.context.WebApplicationContext#SCOPE_REQUEST "request"}
+ * for example, {@link org.springframework.web.context.WebApplicationContext#SCOPE_REQUEST "request"}
  * and {@link org.springframework.web.context.WebApplicationContext#SCOPE_SESSION "session"},
  * based on this Scope SPI.
  *
@@ -125,7 +125,7 @@ public interface Scope {
 
 	/**
 	 * Resolve the contextual object for the given key, if any.
-	 * E.g. the HttpServletRequest object for key "request".
+	 * For example, the HttpServletRequest object for key "request".
 	 * @param key the contextual key
 	 * @return the corresponding object, or {@code null} if none found
 	 * @throws IllegalStateException if the underlying scope is not currently active

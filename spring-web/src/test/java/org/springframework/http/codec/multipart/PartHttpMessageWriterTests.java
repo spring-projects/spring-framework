@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.http.codec.multipart.MultipartHttpMessageWriterTests.parse;
 
 /**
- * Unit tests for {@link PartHttpMessageWriter}.
+ * Tests for {@link PartHttpMessageWriter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
  */
-public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
+class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final PartHttpMessageWriter writer = new PartHttpMessageWriter();
 
@@ -51,7 +51,7 @@ public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_MIXED)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_RELATED)).isTrue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,11 +328,11 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		String url = getUrl();
 		Assert.state(url != null, "'url' not set");
 
-		if (this.contextRelative && getUrl().startsWith("/")) {
+		if (this.contextRelative && url.startsWith("/")) {
 			// Do not apply context path to relative URLs.
 			targetUrl.append(getContextPath(request));
 		}
-		targetUrl.append(getUrl());
+		targetUrl.append(url);
 
 		String enc = this.encodingScheme;
 		if (enc == null) {
@@ -554,7 +554,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Determine whether the given model element value is eligible for exposure.
 	 * <p>The default implementation considers primitives, strings, numbers, dates,
-	 * URIs, URLs etc as eligible, according to {@link BeanUtils#isSimpleValueType}.
+	 * URIs, URLs etc. as eligible, according to {@link BeanUtils#isSimpleValueType}.
 	 * This can be overridden in subclasses.
 	 * @param value the model element value
 	 * @return whether the element value is eligible

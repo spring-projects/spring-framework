@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,236 +17,302 @@
 package org.springframework.expression.spel;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
+import org.assertj.core.api.ThrowableTypeAssert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.expression.spel.SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS;
+import static org.springframework.expression.spel.SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS;
+import static org.springframework.expression.spel.SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE;
+import static org.springframework.expression.spel.SpelMessage.SETVALUE_NOT_SUPPORTED;
+import static org.springframework.expression.spel.SpelMessage.TYPE_CONVERSION_ERROR;
 
 /**
- * Tests set value expressions.
+ * Tests for assignment, setValue(), and isWritable() expressions.
  *
  * @author Keith Donald
  * @author Andy Clement
+ * @author Sam Brannen
  */
-public class SetValueTests extends AbstractExpressionTests {
+class SetValueTests extends AbstractExpressionTests {
 
 	private static final boolean DEBUG = false;
 
 
 	@Test
-	public void testSetProperty() {
+	void assignmentOperator() {
+		Expression e = parse("publicName='Andy'");
+		assertThat(e.isWritable(context)).isFalse();
+		assertThat(e.getValue(context)).isEqualTo("Andy");
+	}
+
+	@Test
+	void setValueFailsWhenLeftOperandIsNotAssignable() {
+		setValueAndExpectError("3=4", "enigma", SETVALUE_NOT_SUPPORTED, 1, Assign.class.getName());
+	}
+
+	@Test
+	void setValueFailsWhenLeftOperandCannotBeIndexed() {
+		setValueAndExpectError("'hello'[3]", 'p', INDEXING_NOT_SUPPORTED_FOR_TYPE, 7, String.class.getName());
+	}
+
+	@Test
+	void setArrayElementFailsWhenIndexIsOutOfBounds() {
+		setValueAndExpectError("placesLived[23]", "Wien", ARRAY_INDEX_OUT_OF_BOUNDS, 11, 1, 23);
+	}
+
+	@Test
+	void setListElementFailsWhenIndexIsOutOfBounds() {
+		setValueAndExpectError("placesLivedList[23]", "Wien", COLLECTION_INDEX_OUT_OF_BOUNDS, 15, 1, 23);
+	}
+
+	@Test
+	void setProperty() {
 		setValue("wonNobelPrize", true);
 	}
 
 	@Test
-	public void testSetNestedProperty() {
+	void setPropertyWithTypeConversion() {
+		// Relies on StringToBooleanConverter to convert "yes" to true.
+		setValue("publicBoolean", "yes", true);
+	}
+
+	@Test
+	void setPropertyWithTypeConversionViaSetterMethod() {
+		setValue("SomeProperty", "true", true);
+	}
+
+	@Test
+	void setNestedProperty() {
 		setValue("placeOfBirth.city", "Wien");
 	}
 
 	@Test
-	public void testSetArrayElementValue() {
+	void setArrayElement() {
 		setValue("inventions[0]", "Just the telephone");
 	}
 
 	@Test
-	public void testErrorCase() {
-		setValueExpectError("3=4", null);
-	}
-
-	@Test
-	public void testSetElementOfNull() {
-		setValueExpectError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",
-				SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
-	}
-
-	@Test
-	public void testSetArrayElementValueAllPrimitiveTypes() {
-		setValue("arrayContainer.ints[1]", 3);
-		setValue("arrayContainer.floats[1]", 3.0f);
-		setValue("arrayContainer.booleans[1]", false);
-		setValue("arrayContainer.doubles[1]", 3.4d);
-		setValue("arrayContainer.shorts[1]", (short)3);
-		setValue("arrayContainer.longs[1]", 3L);
-		setValue("arrayContainer.bytes[1]", (byte) 3);
-		setValue("arrayContainer.chars[1]", (char) 3);
-	}
-
-	@Test
-	public void testIsWritableForInvalidExpressions_SPR10610() {
-		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-
-		// PROPERTYORFIELDREFERENCE
-		// Non-existent field (or property):
-		Expression e1 = parser.parseExpression("arrayContainer.wibble");
-		assertThat(e1.isWritable(lContext)).as("Should not be writable!").isFalse();
-
-		Expression e2 = parser.parseExpression("arrayContainer.wibble.foo");
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				e2.isWritable(lContext));
-//			org.springframework.expression.spel.SpelEvaluationException: EL1008E:(pos 15): Property or field 'wibble' cannot be found on object of type 'org.springframework.expression.spel.testresources.ArrayContainer' - maybe not public?
-//					at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:225)
-
-		// VARIABLE
-		// the variable does not exist (but that is OK, we should be writable)
-		Expression e3 = parser.parseExpression("#madeup1");
-		assertThat(e3.isWritable(lContext)).as("Should be writable!").isTrue();
-
-		Expression e4 = parser.parseExpression("#madeup2.bar"); // compound expression
-		assertThat(e4.isWritable(lContext)).as("Should not be writable!").isFalse();
-
-		// INDEXER
-		// non-existent indexer (wibble made up)
-		Expression e5 = parser.parseExpression("arrayContainer.wibble[99]");
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				e5.isWritable(lContext));
-
-		// non-existent indexer (index via a string)
-		Expression e6 = parser.parseExpression("arrayContainer.ints['abc']");
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				e6.isWritable(lContext));
-	}
-
-	@Test
-	public void testSetArrayElementValueAllPrimitiveTypesErrors() {
-		// none of these sets are possible due to (expected) conversion problems
-		setValueExpectError("arrayContainer.ints[1]", "wibble");
-		setValueExpectError("arrayContainer.floats[1]", "dribble");
-		setValueExpectError("arrayContainer.booleans[1]", "nein");
-		// TODO -- this fails with NPE due to ArrayToObject converter - discuss with Andy
-		//setValueExpectError("arrayContainer.doubles[1]", new ArrayList<String>());
-		//setValueExpectError("arrayContainer.shorts[1]", new ArrayList<String>());
-		//setValueExpectError("arrayContainer.longs[1]", new ArrayList<String>());
-		setValueExpectError("arrayContainer.bytes[1]", "NaB");
-		setValueExpectError("arrayContainer.chars[1]", "NaC");
-	}
-
-	@Test
-	public void testSetArrayElementNestedValue() {
+	void setNestedPropertyInArrayElement() {
 		setValue("placesLived[0].city", "Wien");
 	}
 
 	@Test
-	public void testSetListElementValue() {
+	void setArrayElementToPrimitiveFromWrapper() {
+		// All primitive values below are auto-boxed into their wrapper types.
+		setValue("arrayContainer.booleans[1]", false);
+		setValue("arrayContainer.chars[1]", (char) 3);
+		setValue("arrayContainer.shorts[1]", (short) 3);
+		setValue("arrayContainer.bytes[1]", (byte) 3);
+		setValue("arrayContainer.ints[1]", 3);
+		setValue("arrayContainer.longs[1]", 3L);
+		setValue("arrayContainer.floats[1]", 3.0f);
+		setValue("arrayContainer.doubles[1]", 3.4d);
+	}
+
+	@Test
+	void setArrayElementToPrimitiveFromSingleElementPrimitiveArray() {
+		setValue("arrayContainer.booleans[1]", new boolean[] { false }, false);
+		setValue("arrayContainer.chars[1]", new char[] { 'a' }, 'a');
+		setValue("arrayContainer.shorts[1]", new short[] { (short) 3 }, (short) 3);
+		setValue("arrayContainer.bytes[1]", new byte[] { (byte) 3 }, (byte) 3);
+		setValue("arrayContainer.ints[1]", new int[] { 42 }, 42);
+		setValue("arrayContainer.longs[1]", new long[] { 42L }, 42L);
+		setValue("arrayContainer.floats[1]", new float[] { 42F }, 42F);
+		setValue("arrayContainer.doubles[1]", new double[] { 42D }, 42D);
+	}
+
+	@Test
+	void setArrayElementToPrimitiveFromSingleElementWrapperArray() {
+		setValue("arrayContainer.booleans[1]", new Boolean[] { false }, false);
+		setValue("arrayContainer.chars[1]", new Character[] { 'a' }, 'a');
+		setValue("arrayContainer.shorts[1]", new Short[] { (short) 3 }, (short) 3);
+		setValue("arrayContainer.bytes[1]", new Byte[] { (byte) 3 }, (byte) 3);
+		setValue("arrayContainer.ints[1]", new Integer[] { 42 }, 42);
+		setValue("arrayContainer.longs[1]", new Long[] { 42L }, 42L);
+		setValue("arrayContainer.floats[1]", new Float[] { 42F }, 42F);
+		setValue("arrayContainer.doubles[1]", new Double[] { 42D }, 42D);
+	}
+
+	@Test
+	void setArrayElementToPrimitiveFromSingleElementWrapperList() {
+		setValue("arrayContainer.booleans[1]", List.of(false), false);
+		setValue("arrayContainer.chars[1]", List.of('a'), 'a');
+		setValue("arrayContainer.shorts[1]", List.of((short) 3), (short) 3);
+		setValue("arrayContainer.bytes[1]", List.of((byte) 3), (byte) 3);
+		setValue("arrayContainer.ints[1]", List.of(42), 42);
+		setValue("arrayContainer.longs[1]", List.of(42L), 42L);
+		setValue("arrayContainer.floats[1]", List.of(42F), 42F);
+		setValue("arrayContainer.doubles[1]", List.of(42D), 42D);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"arrayContainer.booleans[1]",
+		"arrayContainer.chars[1]",
+		"arrayContainer.shorts[1]",
+		"arrayContainer.bytes[1]",
+		"arrayContainer.ints[1]",
+		"arrayContainer.longs[1]",
+		"arrayContainer.floats[1]",
+		"arrayContainer.doubles[1]"
+	})
+	void setArrayElementToPrimitiveFromStringFailsWithTypeConversionError(String expression) {
+		setValueAndExpectError(expression, "enigma", TYPE_CONVERSION_ERROR);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"arrayContainer.booleans[1]",
+		"arrayContainer.chars[1]",
+		"arrayContainer.shorts[1]",
+		"arrayContainer.bytes[1]",
+		"arrayContainer.ints[1]",
+		"arrayContainer.longs[1]",
+		"arrayContainer.floats[1]",
+		"arrayContainer.doubles[1]"
+	})
+	void setArrayElementToPrimitiveFromEmptyCollectionFailsWithTypeConversionError(String expression) {
+		setValueAndExpectError(expression, List.of(), TYPE_CONVERSION_ERROR);
+	}
+
+	@Test
+	void setListElement() {
 		setValue("placesLivedList[0]", new PlaceOfBirth("Wien"));
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoercion() {
-		// TODO currently failing since setValue does a getValue and "Wien" string != PlaceOfBirth - check with andy
+	void setGenericListElementWithTypeConversion() {
+		// Relies on StringToBooleanConverter to convert "yes" to true.
+		setValue("booleanList[0]", "yes", true);
+		// Relies on ObjectToObjectConverter to convert a String to a PlaceOfBirth.
 		setValue("placesLivedList[0]", "Wien");
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoercionOK() {
-		setValue("booleanList[0]", "true", Boolean.TRUE);
+	void setNestedPropertyInListElement() {
+		setValue("placesLivedList[0].city", "Wien");
 	}
 
 	@Test
-	public void testSetListElementNestedValue() {
-		setValue("placesLived[0].city", "Wien");
+	void setMapElement() {
+		setValue("testMap['montag']", "lundi");
 	}
 
-	@Test
-	public void testSetArrayElementInvalidIndex() {
-		setValueExpectError("placesLived[23]", "Wien");
-		setValueExpectError("placesLivedList[23]", "Wien");
-	}
-
-	@Test
-	public void testSetMapElements() {
-		setValue("testMap['montag']","lundi");
-	}
-
-	@Test
-	public void testIndexingIntoUnsupportedType() {
-		setValueExpectError("'hello'[3]", 'p');
-	}
-
-	@Test
-	public void testSetPropertyTypeCoercion() {
-		setValue("publicBoolean", "true", Boolean.TRUE);
-	}
-
-	@Test
-	public void testSetPropertyTypeCoercionThroughSetter() {
-		setValue("SomeProperty", "true", Boolean.TRUE);
-	}
-
-	@Test
-	public void testAssign() throws Exception {
-		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
-		Expression e = parse("publicName='Andy'");
-		assertThat(e.isWritable(eContext)).isFalse();
-		assertThat(e.getValue(eContext)).isEqualTo("Andy");
-	}
-
-	/*
-	 * Testing the coercion of both the keys and the values to the correct type
+	/**
+	 * Tests the conversion of both the keys and the values to the correct types.
 	 */
 	@Test
-	public void testSetGenericMapElementRequiresCoercion() throws Exception {
-		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+	void setGenericMapElementWithTypeConversion() {
+		// Key should be converted to string representation of 42
 		Expression e = parse("mapOfStringToBoolean[42]");
-		assertThat(e.getValue(eContext)).isNull();
+		assertThat(e.getValue(context)).isNull();
 
-		// Key should be coerced to string representation of 42
-		e.setValue(eContext, "true");
+		e.setValue(context, "true"); // 42 -> true
 
 		// All keys should be strings
-		Set<?> ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext, Set.class);
-		for (Object o: ks) {
-			assertThat(o.getClass()).isEqualTo(String.class);
-		}
+		Set<?> keys = parse("mapOfStringToBoolean.keySet()").getValue(context, Set.class);
+		assertThat(keys).allSatisfy(key -> assertThat(key).isExactlyInstanceOf(String.class));
 
 		// All values should be booleans
-		Collection<?> vs = parse("mapOfStringToBoolean.values()").getValue(eContext, Collection.class);
-		for (Object o: vs) {
-			assertThat(o.getClass()).isEqualTo(Boolean.class);
-		}
+		Collection<?> values = parse("mapOfStringToBoolean.values()").getValue(context, Collection.class);
+		assertThat(values).allSatisfy(key -> assertThat(key).isExactlyInstanceOf(Boolean.class));
 
-		// One final test check coercion on the key for a map lookup
-		Object o = e.getValue(eContext);
-		assertThat(o).isEqualTo(Boolean.TRUE);
+		// One final test to check conversion on the key for a map lookup
+		assertThat(e.getValue(context, boolean.class)).isTrue();
+	}
+
+	@Test  // gh-15239
+	void isWritableForInvalidExpressions() {
+		// PROPERTYORFIELDREFERENCE
+		// Non-existent field (or property):
+		Expression e1 = parser.parseExpression("arrayContainer.wibble");
+		assertThat(e1.isWritable(context)).as("Should not be writable!").isFalse();
+
+		Expression e2 = parser.parseExpression("arrayContainer.wibble.foo");
+		assertThatSpelEvaluationException().isThrownBy(() -> e2.isWritable(context));
+
+		// VARIABLE
+		// the variable does not exist (but that is OK, we should be writable)
+		Expression e3 = parser.parseExpression("#madeup1");
+		assertThat(e3.isWritable(context)).as("Should be writable!").isTrue();
+
+		Expression e4 = parser.parseExpression("#madeup2.bar"); // compound expression
+		assertThat(e4.isWritable(context)).as("Should not be writable!").isFalse();
+
+		// INDEXER
+		// non-existent indexer (wibble made up)
+		Expression e5 = parser.parseExpression("arrayContainer.wibble[99]");
+		assertThatSpelEvaluationException().isThrownBy(() -> e5.isWritable(context));
+
+		// non-existent indexer (index via a string)
+		Expression e6 = parser.parseExpression("arrayContainer.ints['abc']");
+		assertThatSpelEvaluationException().isThrownBy(() -> e6.isWritable(context));
 	}
 
 
-	private Expression parse(String expressionString) throws Exception {
+	private Expression parse(String expressionString) {
 		return parser.parseExpression(expressionString);
 	}
 
 	/**
 	 * Call setValue() but expect it to fail.
+	 * @see #evaluateAndCheckError(org.springframework.expression.ExpressionParser, String, Class, SpelMessage, Object...)
 	 */
-	protected void setValueExpectError(String expression, Object value) {
-		Expression e = parser.parseExpression(expression);
-		assertThat(e).isNotNull();
+	private void setValueAndExpectError(String expression, Object value, SpelMessage expectedMessage,
+			Object... otherProperties) {
+
+		Expression expr = parser.parseExpression(expression);
+		assertThat(expr).as("expression").isNotNull();
+
 		if (DEBUG) {
-			SpelUtilities.printAbstractSyntaxTree(System.out, e);
+			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
-		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
-				e.setValue(lContext, value));
+
+		assertThatSpelEvaluationException()
+			.isThrownBy(() -> expr.setValue(context, value))
+			.satisfies(ex -> {
+				assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
+				if (!ObjectUtils.isEmpty(otherProperties)) {
+					// first one is expected position of the error within the string
+					int pos = (Integer) otherProperties[0];
+					assertThat(ex.getPosition()).as("position").isEqualTo(pos);
+					if (otherProperties.length > 1) {
+						// Check inserts match
+						Object[] inserts = ex.getInserts();
+						assertThat(inserts).as("inserts").hasSizeGreaterThanOrEqualTo(otherProperties.length - 1);
+						Object[] expectedInserts = new Object[inserts.length];
+						System.arraycopy(otherProperties, 1, expectedInserts, 0, expectedInserts.length);
+						assertThat(inserts).as("inserts").containsExactly(expectedInserts);
+					}
+				}
+			});
 	}
 
-	protected void setValue(String expression, Object value) {
+	private void setValue(String expression, Object value) {
+		Class<?> expectedType = value.getClass();
 		try {
 			Expression e = parser.parseExpression(expression);
 			assertThat(e).isNotNull();
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			assertThat(e.isWritable(lContext)).as("Expression is not writeable but should be").isTrue();
-			e.setValue(lContext, value);
-			assertThat(e.getValue(lContext,value.getClass())).as("Retrieved value was not equal to set value").isEqualTo(value);
+			assertThat(e.isWritable(context)).as("Expression is not writeable but should be").isTrue();
+			e.setValue(context, value);
+			assertThat(e.getValue(context, expectedType)).as("Retrieved value was not equal to set value").isEqualTo(value);
 		}
 		catch (EvaluationException | ParseException ex) {
 			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
@@ -254,26 +320,27 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	/**
-	 * For use when coercion is happening during a setValue().  The expectedValue should be
-	 * the coerced form of the value.
+	 * For use when conversion is happening during setValue(). The expectedValue should be
+	 * the converted form of the value.
 	 */
-	protected void setValue(String expression, Object value, Object expectedValue) {
+	private void setValue(String expression, Object value, Object expectedValue) {
 		try {
 			Expression e = parser.parseExpression(expression);
 			assertThat(e).isNotNull();
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			assertThat(e.isWritable(lContext)).as("Expression is not writeable but should be").isTrue();
-			e.setValue(lContext, value);
-			Object a = expectedValue;
-			Object b = e.getValue(lContext);
-			assertThat(a).isEqualTo(b);
+			assertThat(e.isWritable(context)).as("Expression is not writeable but should be").isTrue();
+			e.setValue(context, value);
+			assertThat(expectedValue).isEqualTo(e.getValue(context));
 		}
 		catch (EvaluationException | ParseException ex) {
 			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
 		}
+	}
+
+	private static ThrowableTypeAssert<SpelEvaluationException> assertThatSpelEvaluationException() {
+		return assertThatExceptionOfType(SpelEvaluationException.class);
 	}
 
 }

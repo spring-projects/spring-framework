@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class JndiDestinationResolverTests {
+class JndiDestinationResolverTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
@@ -41,7 +41,7 @@ public class JndiDestinationResolverTests {
 
 
 	@Test
-	public void testHitsCacheSecondTimeThrough() throws Exception {
+	void testHitsCacheSecondTimeThrough() throws Exception {
 
 		Session session = mock();
 
@@ -52,7 +52,7 @@ public class JndiDestinationResolverTests {
 	}
 
 	@Test
-	public void testDoesNotUseCacheIfCachingIsTurnedOff() throws Exception {
+	void testDoesNotUseCacheIfCachingIsTurnedOff() throws Exception {
 
 		Session session = mock();
 
@@ -71,7 +71,7 @@ public class JndiDestinationResolverTests {
 	}
 
 	@Test
-	public void testDelegatesToFallbackIfNotResolvedInJndi() throws Exception {
+	void testDelegatesToFallbackIfNotResolvedInJndi() throws Exception {
 		Session session = mock();
 
 		DestinationResolver dynamicResolver = mock();
@@ -93,7 +93,7 @@ public class JndiDestinationResolverTests {
 	}
 
 	@Test
-	public void testDoesNotDelegateToFallbackIfNotResolvedInJndi() throws Exception {
+	void testDoesNotDelegateToFallbackIfNotResolvedInJndi() {
 		final Session session = mock();
 		DestinationResolver dynamicResolver = mock();
 
@@ -115,7 +115,7 @@ public class JndiDestinationResolverTests {
 		private boolean called;
 
 		@Override
-		protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+		protected <T> T lookup(String jndiName, Class<T> requiredType) {
 			assertThat(called).as("delegating to lookup(..) not cache").isFalse();
 			assertThat(jndiName).isEqualTo(DESTINATION_NAME);
 			called = true;
@@ -132,7 +132,7 @@ public class JndiDestinationResolverTests {
 		}
 
 		@Override
-		protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+		protected <T> T lookup(String jndiName, Class<T> requiredType) {
 			++this.callCount;
 			return requiredType.cast(DESTINATION);
 		}

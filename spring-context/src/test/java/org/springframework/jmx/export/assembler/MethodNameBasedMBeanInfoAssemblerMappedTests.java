@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTests {
+class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTests {
 
 	protected static final String OBJECT_NAME = "bean:name=testBean4";
 
 
 	@Test
-	public void testGetAgeIsReadOnly() throws Exception {
+	void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
@@ -45,7 +45,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	}
 
 	@Test
-	public void testWithFallThrough() throws Exception {
+	void testWithFallThrough() throws Exception {
 		MethodNameBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "add,myOperation,getName,setName,getAge");
 		assembler.setManagedMethods("getNickName", "setNickName");
@@ -57,7 +57,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	}
 
 	@Test
-	public void testNickNameIsExposed() throws Exception {
+	void testNickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 
@@ -80,7 +80,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	}
 
 	@Override
-	protected MBeanInfoAssembler getAssembler() throws Exception {
+	protected MBeanInfoAssembler getAssembler() {
 		return getWithMapping("getNickName,setNickName,add,myOperation,getName,setName,getAge");
 	}
 

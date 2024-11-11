@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.sql.Savepoint;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,10 +35,15 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,7 +78,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.relativeTo;
 
 /**
- * Unit tests for {@link MvcUriComponentsBuilder}.
+ * Tests for {@link MvcUriComponentsBuilder}.
  *
  * @author Oliver Gierke
  * @author Dietrich Schulten
@@ -86,49 +92,49 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
 	@AfterEach
-	public void reset() {
+	void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
 
 	@Test
-	public void fromControllerPlain() {
+	void fromControllerPlain() {
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 		assertThat(uriComponents.toUriString()).endsWith("/people");
 	}
 
 	@Test
-	public void fromControllerUriTemplate() {
+	void fromControllerUriTemplate() {
 		UriComponents uriComponents = fromController(PersonsAddressesController.class).buildAndExpand(15);
 		assertThat(uriComponents.toUriString()).endsWith("/people/15/addresses");
 	}
 
 	@Test
-	public void fromControllerSubResource() {
+	void fromControllerSubResource() {
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).pathSegment("something").build();
 
 		assertThat(uriComponents.toUriString()).endsWith("/people/something");
 	}
 
 	@Test
-	public void fromControllerTwoTypeLevelMappings() {
+	void fromControllerTwoTypeLevelMappings() {
 		UriComponents uriComponents = fromController(InvalidController.class).build();
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/persons");
 	}
 
 	@Test
-	public void fromControllerNotMapped() {
+	void fromControllerNotMapped() {
 		UriComponents uriComponents = fromController(UnmappedController.class).build();
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/");
 	}
 
 	@Test
-	public void fromControllerWithCustomBaseUrlViaStaticCall() {
+	void fromControllerWithCustomBaseUrlViaStaticCall() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		UriComponents uriComponents = fromController(builder, PersonControllerImpl.class).build();
 
@@ -137,7 +143,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromControllerWithCustomBaseUrlViaInstance() {
+	void fromControllerWithCustomBaseUrlViaInstance() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(builder);
 		UriComponents uriComponents = mvcBuilder.withController(PersonControllerImpl.class).build();
@@ -147,7 +153,32 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void usesForwardedHostAsHostIfHeaderIsSet() throws Exception {
+	void fromControllerWithPlaceholder() {
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addFirst(new MapPropertySource("test",
+				Map.of("context.test.mapping", "people")));
+		initWebApplicationContext(WebConfig.class, environment);
+		UriComponents uriComponents = fromController(ConfigurablePersonController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/people");
+	}
+
+	@Test
+	void fromControllerWithPlaceholderAndMissingValue() {
+		StandardEnvironment environment = new StandardEnvironment();
+		assertThat(environment.containsProperty("context.test.mapping")).isFalse();
+		initWebApplicationContext(WebConfig.class, environment);
+		UriComponents uriComponents = fromController(ConfigurablePersonController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/${context.test.mapping}");
+	}
+
+	@Test
+	void fromControllerWithPlaceholderAndNoValueResolver() {
+		UriComponents uriComponents = fromController(ConfigurablePersonController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/${context.test.mapping}");
+	}
+
+	@Test
+	void usesForwardedHostAsHostIfHeaderIsSet() throws Exception {
 		this.request.setScheme("https");
 		this.request.addHeader("X-Forwarded-Host", "somethingDifferent");
 		adaptRequestFromForwardedHeaders();
@@ -157,7 +188,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void usesForwardedHostAndPortFromHeader() throws Exception {
+	void usesForwardedHostAndPortFromHeader() throws Exception {
 		this.request.setScheme("https");
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
 		adaptRequestFromForwardedHeaders();
@@ -167,7 +198,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void usesFirstHostOfXForwardedHost() throws Exception {
+	void usesFirstHostOfXForwardedHost() throws Exception {
 		this.request.setScheme("https");
 		this.request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
 		adaptRequestFromForwardedHeaders();
@@ -185,7 +216,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNamePathVariable() {
+	void fromMethodNamePathVariable() {
 		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
 				"methodWithPathVariable", "1").build();
 
@@ -193,7 +224,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameTypeLevelPathVariable() {
+	void fromMethodNameTypeLevelPathVariable() {
 		this.request.setContextPath("/myapp");
 		UriComponents uriComponents = fromMethodName(
 				PersonsAddressesController.class, "getAddressesForCountry", "DE").buildAndExpand("1");
@@ -202,7 +233,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameTwoPathVariables() {
+	void fromMethodNameTwoPathVariables() {
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodWithTwoPathVariables", 1, "2009-10-31").build();
 
@@ -210,7 +241,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameWithPathVarAndRequestParam() {
+	void fromMethodNameWithPathVarAndRequestParam() {
 		UriComponents uriComponents = fromMethodName(
 				ControllerWithMethods.class, "methodForNextPage", "1", 10, 5).build();
 
@@ -235,7 +266,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameInUnmappedController() {
+	void fromMethodNameInUnmappedController() {
 		UriComponents uriComponents = fromMethodName(UnmappedController.class, "requestMappingMethod").build();
 
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/");
@@ -249,7 +280,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameWithCustomBaseUrlViaStaticCall() {
+	void fromMethodNameWithCustomBaseUrlViaStaticCall() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		UriComponents uriComponents = fromMethodName(builder, ControllerWithMethods.class,
 				"methodWithPathVariable", "1").build();
@@ -259,7 +290,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameWithCustomBaseUrlViaInstance() {
+	void fromMethodNameWithCustomBaseUrlViaInstance() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(builder);
 		UriComponents uriComponents = mvcBuilder.withMethodName(ControllerWithMethods.class,
@@ -287,14 +318,33 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameWithMetaAnnotation() {
+	void fromMethodNameWithMetaAnnotation() {
 		UriComponents uriComponents = fromMethodName(MetaAnnotationController.class, "handleInput").build();
 
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/input");
 	}
 
 	@Test
-	public void fromMethodCallOnSubclass() {
+	void fromMethodNameConfigurablePath() {
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addFirst(new MapPropertySource("test",
+				Map.of("method.test.mapping", "custom")));
+		initWebApplicationContext(WebConfig.class, environment);
+		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
+				"methodWithConfigurableMapping", "1").build();
+		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
+	}
+
+	@Test
+	void fromMethodNameWithAnnotationsOnInterface() {
+		initWebApplicationContext(WebConfig.class);
+		UriComponents uriComponents = fromMethodName(HelloController.class, "get", "test").build();
+
+		assertThat(uriComponents.toString()).isEqualTo("http://localhost/hello/test");
+	}
+
+	@Test
+	void fromMethodCallOnSubclass() {
 		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
 
 		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
@@ -302,7 +352,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallPlain() {
+	void fromMethodCallPlain() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
 
 		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
@@ -310,7 +360,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallPlainWithNoArguments() {
+	void fromMethodCallPlainWithNoArguments() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod()).build();
 
 		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
@@ -318,7 +368,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallPlainOnInterface() {
+	void fromMethodCallPlainOnInterface() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerInterface.class).myMethod(null)).build();
 
 		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
@@ -326,7 +376,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallPlainWithNoArgumentsOnInterface() {
+	void fromMethodCallPlainWithNoArgumentsOnInterface() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerInterface.class).myMethod()).build();
 
 		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
@@ -334,7 +384,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallWithTypeLevelUriVars() {
+	void fromMethodCallWithTypeLevelUriVars() {
 		UriComponents uriComponents = fromMethodCall(
 				on(PersonsAddressesController.class).getAddressesForCountry("DE")).buildAndExpand(15);
 
@@ -342,7 +392,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallWithPathVariable() {
+	void fromMethodCallWithPathVariable() {
 		UriComponents uriComponents = fromMethodCall(
 				on(ControllerWithMethods.class).methodWithPathVariable("1")).build();
 
@@ -351,7 +401,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallWithPathVariableAndRequestParams() {
+	void fromMethodCallWithPathVariableAndRequestParams() {
 		UriComponents uriComponents = fromMethodCall(
 				on(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).build();
 
@@ -363,7 +413,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallWithPathVariableAndMultiValueRequestParams() {
+	void fromMethodCallWithPathVariableAndMultiValueRequestParams() {
 		UriComponents uriComponents = fromMethodCall(
 				on(ControllerWithMethods.class).methodWithMultiValueRequestParams("1", Arrays.asList(3, 7), 5)).build();
 
@@ -375,7 +425,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallWithCustomBaseUrlViaStaticCall() {
+	void fromMethodCallWithCustomBaseUrlViaStaticCall() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		UriComponents uriComponents = fromMethodCall(builder, on(ControllerWithMethods.class).myMethod(null)).build();
 
@@ -384,7 +434,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallWithCustomBaseUrlViaInstance() {
+	void fromMethodCallWithCustomBaseUrlViaInstance() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(builder);
 		UriComponents result = mvcBuilder.withMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
@@ -443,7 +493,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMappingNamePlain() {
+	void fromMappingNamePlain() {
 		initWebApplicationContext(WebConfig.class);
 
 		this.request.setServerName("example.org");
@@ -456,7 +506,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMappingNameWithCustomBaseUrl() {
+	void fromMappingNameWithCustomBaseUrl() {
 		initWebApplicationContext(WebConfig.class);
 
 		UriComponentsBuilder baseUrl = UriComponentsBuilder.fromUriString("https://example.org:9999/base");
@@ -479,7 +529,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMappingNameWithPathWithoutLeadingSlash() {
+	void fromMappingNameWithPathWithoutLeadingSlash() {
 		initWebApplicationContext(PathWithoutLeadingSlashConfig.class);
 
 		this.request.setServerName("example.org");
@@ -492,7 +542,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromControllerWithPrefix() {
+	void fromControllerWithPrefix() {
 		initWebApplicationContext(PathPrefixWebConfig.class);
 
 		this.request.setScheme("https");
@@ -505,7 +555,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodWithPrefix() {
+	void fromMethodWithPrefix() {
 		initWebApplicationContext(PathPrefixWebConfig.class);
 
 		this.request.setScheme("https");
@@ -522,7 +572,14 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	private void initWebApplicationContext(Class<?> configClass) {
+		initWebApplicationContext(configClass, null);
+	}
+
+	private void initWebApplicationContext(Class<?> configClass, @Nullable ConfigurableEnvironment environment) {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		if (environment != null) {
+			context.setEnvironment(environment);
+		}
 		context.setServletContext(new MockServletContext());
 		context.register(configClass);
 		context.refresh();
@@ -570,11 +627,16 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@RequestMapping({"/persons", "/people"})
-	private class InvalidController {
+	private static class InvalidController {
 	}
 
 
-	private class UnmappedController {
+	@RequestMapping("/${context.test.mapping}")
+	interface ConfigurablePersonController {
+	}
+
+
+	private static class UnmappedController {
 
 		@RequestMapping
 		public void requestMappingMethod() {
@@ -583,7 +645,7 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@RequestMapping("/path")
-	private class UnmappedControllerMethod {
+	private static class UnmappedControllerMethod {
 
 		@GetMapping
 		public void getMethod() {
@@ -634,6 +696,11 @@ public class MvcUriComponentsBuilderTests {
 
 		@GetMapping("/optional-param-with-name")
 		HttpEntity<Void> methodWithOptionalNamedParam(@RequestParam("search") Optional<String> q) {
+			return null;
+		}
+
+		@RequestMapping("/${method.test.mapping}/{id}/foo")
+		HttpEntity<Void> methodWithConfigurableMapping(@PathVariable String id) {
 			return null;
 		}
 	}
@@ -794,6 +861,23 @@ public class MvcUriComponentsBuilderTests {
 		@GetMapping("/bookings/{booking}")
 		public Savepoint getBooking(@PathVariable Long booking) {
 			return null;
+		}
+	}
+
+
+	interface HelloInterface {
+
+		@GetMapping("/hello/{name}")
+		ResponseEntity<String> get(@PathVariable String name);
+	}
+
+
+	@Controller
+	static class HelloController implements HelloInterface {
+
+		@Override
+		public ResponseEntity<String> get(String name) {
+			return ResponseEntity.ok("Hello " + name);
 		}
 	}
 

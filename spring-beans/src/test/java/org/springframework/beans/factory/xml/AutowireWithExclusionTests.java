@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AutowireWithExclusionTests {
+class AutowireWithExclusionTests {
 
 	@Test
-	public void byTypeAutowireWithAutoSelfExclusion() throws Exception {
+	void byTypeAutowireWithAutoSelfExclusion() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -45,7 +45,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithExclusion() throws Exception {
+	void byTypeAutowireWithExclusion() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -55,7 +55,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithExclusionInParentFactory() throws Exception {
+	void byTypeAutowireWithExclusionInParentFactory() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.preInstantiateSingletons();
@@ -70,7 +70,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithPrimaryInParentFactory() throws Exception {
+	void byTypeAutowireWithPrimaryInParentFactory() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.getBeanDefinition("props1").setPrimary(true);
@@ -89,7 +89,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithPrimaryOverridingParentFactory() throws Exception {
+	void byTypeAutowireWithPrimaryOverridingParentFactory() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.preInstantiateSingletons();
@@ -108,7 +108,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithPrimaryInParentAndChild() throws Exception {
+	void byTypeAutowireWithPrimaryInParentAndChild() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory parent = getBeanFactory("autowire-with-exclusion.xml");
 		parent.getBeanDefinition("props1").setPrimary(true);
@@ -128,7 +128,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithInclusion() throws Exception {
+	void byTypeAutowireWithInclusion() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-inclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -138,7 +138,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void byTypeAutowireWithSelectiveInclusion() throws Exception {
+	void byTypeAutowireWithSelectiveInclusion() {
 		CountingFactory.reset();
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-with-selective-inclusion.xml");
 		beanFactory.preInstantiateSingletons();
@@ -148,7 +148,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void constructorAutowireWithAutoSelfExclusion() throws Exception {
+	void constructorAutowireWithAutoSelfExclusion() {
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-constructor-with-exclusion.xml");
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		TestBean sally = (TestBean) beanFactory.getBean("sally");
@@ -161,7 +161,7 @@ public class AutowireWithExclusionTests {
 	}
 
 	@Test
-	public void constructorAutowireWithExclusion() throws Exception {
+	void constructorAutowireWithExclusion() {
 		DefaultListableBeanFactory beanFactory = getBeanFactory("autowire-constructor-with-exclusion.xml");
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertThat(rob.getSomeProperties().getProperty("name")).isEqualTo("props1");

@@ -29,6 +29,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.condition.JRE.JAVA_18;
 
@@ -66,7 +67,7 @@ class SpringCoreBlockHoundIntegrationTests {
 	}
 
 	@Test
-	void concurrentReferenceHashMap() {
+	void concurrentReferenceHashMapSegmentDoTask() {
 		int size = 10000;
 		Map<String, String> map = new ConcurrentReferenceHashMap<>(size);
 
@@ -86,6 +87,30 @@ class SpringCoreBlockHoundIntegrationTests {
 
 		CompletableFuture.allOf(future1, future2).join();
 		assertThat(map).hasSize(size);
+	}
+
+	@Test
+	void concurrentReferenceHashMapSegmentClear() {
+		int size = 10000;
+		Map<String, String> map = new ConcurrentReferenceHashMap<>(size);
+
+		CompletableFuture<Object> future1 = new CompletableFuture<>();
+		testNonBlockingTask(() -> {
+			for (int i = 0; i < size / 2; i++) {
+				map.put("a" + i, "bar");
+			}
+		}, future1);
+
+		CompletableFuture<Object> future2 = new CompletableFuture<>();
+		testNonBlockingTask(() -> {
+			for (int i = 0; i < size; i++) {
+				map.clear();
+			}
+		}, future2);
+
+		//ensure blockhound doesn't trigger
+		final CompletableFuture<Void> allOf = CompletableFuture.allOf(future1, future2);
+		assertThatNoException().isThrownBy(allOf::join);
 	}
 
 	private void testNonBlockingTask(NonBlockingTask task) {

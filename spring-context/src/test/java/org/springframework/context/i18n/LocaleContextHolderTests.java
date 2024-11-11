@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class LocaleContextHolderTests {
+class LocaleContextHolderTests {
 
 	@Test
-	public void testSetLocaleContext() {
+	void testSetLocaleContext() {
 		LocaleContext lc = new SimpleLocaleContext(Locale.GERMAN);
 		LocaleContextHolder.setLocaleContext(lc);
 		assertThat(LocaleContextHolder.getLocaleContext()).isSameAs(lc);
@@ -49,7 +49,7 @@ public class LocaleContextHolderTests {
 	}
 
 	@Test
-	public void testSetTimeZoneAwareLocaleContext() {
+	void testSetTimeZoneAwareLocaleContext() {
 		LocaleContext lc = new SimpleTimeZoneAwareLocaleContext(Locale.GERMANY, TimeZone.getTimeZone("GMT+1"));
 		LocaleContextHolder.setLocaleContext(lc);
 		assertThat(LocaleContextHolder.getLocaleContext()).isSameAs(lc);
@@ -63,7 +63,7 @@ public class LocaleContextHolderTests {
 	}
 
 	@Test
-	public void testSetLocale() {
+	void testSetLocale() {
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		assertThat(LocaleContextHolder.getLocale()).isEqualTo(Locale.GERMAN);
 		assertThat(LocaleContextHolder.getTimeZone()).isEqualTo(TimeZone.getDefault());
@@ -90,7 +90,7 @@ public class LocaleContextHolderTests {
 	}
 
 	@Test
-	public void testSetTimeZone() {
+	void testSetTimeZone() {
 		LocaleContextHolder.setTimeZone(TimeZone.getTimeZone("GMT+1"));
 		assertThat(LocaleContextHolder.getLocale()).isEqualTo(Locale.getDefault());
 		assertThat(LocaleContextHolder.getTimeZone()).isEqualTo(TimeZone.getTimeZone("GMT+1"));
@@ -119,7 +119,7 @@ public class LocaleContextHolderTests {
 	}
 
 	@Test
-	public void testSetLocaleAndSetTimeZoneMixed() {
+	void testSetLocaleAndSetTimeZoneMixed() {
 		LocaleContextHolder.setLocale(Locale.GERMANY);
 		assertThat(LocaleContextHolder.getLocale()).isEqualTo(Locale.GERMANY);
 		assertThat(LocaleContextHolder.getTimeZone()).isEqualTo(TimeZone.getDefault());

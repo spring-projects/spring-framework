@@ -140,7 +140,7 @@ public final class MockRestServiceServer {
 
 	/**
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
-	 * to reply to the given {@code RestTemplate}.
+	 * to reply to the {@code RestClient} for the given {@code RestClient.Builder}.
 	 * @since 6.1
 	 */
 	public static MockRestServiceServerBuilder bindTo(RestClient.Builder restClientBuilder) {
@@ -158,7 +158,7 @@ public final class MockRestServiceServer {
 
 	/**
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
-	 * to reply to the given {@code RestGatewaySupport}.
+	 * to reply to the {@code RestTemplate} for the given {@code RestGatewaySupport}.
 	 * @since 4.3
 	 */
 	public static MockRestServiceServerBuilder bindTo(RestGatewaySupport restGatewaySupport) {
@@ -179,7 +179,7 @@ public final class MockRestServiceServer {
 	/**
 	 * A shortcut for {@code bindTo(restGateway).build()}.
 	 * @param restGateway the REST gateway to set up for mock testing
-	 * @return the created mock server
+	 * @return the mock server
 	 */
 	public static MockRestServiceServer createServer(RestGatewaySupport restGateway) {
 		return bindTo(restGateway).build();

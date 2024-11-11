@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for the {@link SimpleTraceInterceptor} class.
+ * Tests for {@link SimpleTraceInterceptor}.
  *
  * @author Rick Evans
  * @author Chris Beams
  */
-public class SimpleTraceInterceptorTests {
+class SimpleTraceInterceptorTests {
 
 	@Test
-	public void testSunnyDayPathLogsCorrectly() throws Throwable {
+	void testSunnyDayPathLogsCorrectly() throws Throwable {
 		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.getThis()).willReturn(this);
@@ -51,7 +51,7 @@ public class SimpleTraceInterceptorTests {
 	}
 
 	@Test
-	public void testExceptionPathStillLogsCorrectly() throws Throwable {
+	void testExceptionPathStillLogsCorrectly() throws Throwable {
 		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.getThis()).willReturn(this);

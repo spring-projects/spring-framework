@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.mock;
 
 /**
- * Unit tests for {@link ResponseEntityExceptionHandler}.
+ * Tests for {@link ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class ResponseEntityExceptionHandlerTests {
+class ResponseEntityExceptionHandlerTests {
 
 	private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
@@ -110,12 +110,12 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void handlerMethodValidationException() {
+	void handlerMethodValidationException() {
 		testException(new HandlerMethodValidationException(mock(MethodValidationResult.class)));
 	}
 
 	@Test
-	public void methodValidationException() {
+	void methodValidationException() {
 		MethodValidationException ex = new MethodValidationException(mock(MethodValidationResult.class));
 		ResponseEntity<?> entity = this.exceptionHandler.handleException(ex, this.exchange).block();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
+import org.springframework.messaging.simp.stomp.SplittingStompEncoder;
 import org.springframework.messaging.simp.stomp.StompClientSupport;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
@@ -68,15 +69,20 @@ import org.springframework.web.util.UriComponentsBuilder;
  * SockJsClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Injae Kim
  * @since 4.2
  */
 public class WebSocketStompClient extends StompClientSupport implements SmartLifecycle {
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
+
 	private final WebSocketClient webSocketClient;
 
 	private int inboundMessageSizeLimit = 64 * 1024;
+
+	@Nullable
+	private Integer outboundMessageSizeLimit;
 
 	private boolean autoStartup = true;
 
@@ -134,6 +140,26 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 */
 	public int getInboundMessageSizeLimit() {
 		return this.inboundMessageSizeLimit;
+	}
+
+	/**
+	 * Configure the maximum size allowed for outbound STOMP message.
+	 * If STOMP message's size exceeds {@link WebSocketStompClient#outboundMessageSizeLimit},
+	 * STOMP message is split into multiple frames.
+	 * <p>By default this is not set in which case each STOMP message are not split.
+	 * @since 6.2
+	 */
+	public void setOutboundMessageSizeLimit(Integer outboundMessageSizeLimit) {
+		this.outboundMessageSizeLimit = outboundMessageSizeLimit;
+	}
+
+	/**
+	 * Get the configured outbound message buffer size in bytes.
+	 * @since 6.2
+	 */
+	@Nullable
+	public Integer getOutboundMessageSizeLimit() {
+		return this.outboundMessageSizeLimit;
 	}
 
 	/**
@@ -211,7 +237,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, StompSessionHandler, Object...)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			String url, StompSessionHandler handler, Object... uriVars) {
 
@@ -244,7 +271,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			StompSessionHandler handler, Object... uriVariables) {
@@ -283,7 +311,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, WebSocketHttpHeaders, StompHeaders, StompSessionHandler, Object...)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
@@ -324,7 +353,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(URI, WebSocketHttpHeaders, StompHeaders, StompSessionHandler)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			URI url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
@@ -372,9 +402,10 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	private class WebSocketTcpConnectionHandlerAdapter implements BiConsumer<WebSocketSession, Throwable>,
 			WebSocketHandler, TcpConnection<byte[]> {
 
-		private final TcpConnectionHandler<byte[]> connectionHandler;
+		private final TcpConnectionHandler<byte[]> stompSession;
 
-		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
+		private final StompWebSocketMessageCodec codec =
+				new StompWebSocketMessageCodec(getInboundMessageSizeLimit(),getOutboundMessageSizeLimit());
 
 		@Nullable
 		private volatile WebSocketSession session;
@@ -383,11 +414,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private volatile long lastWriteTime = -1;
 
-		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<>(2);
+		@Nullable
+		private ScheduledFuture<?> readInactivityFuture;
 
-		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> connectionHandler) {
-			Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
-			this.connectionHandler = connectionHandler;
+		@Nullable
+		private ScheduledFuture<?> writeInactivityFuture;
+
+		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> stompSession) {
+			Assert.notNull(stompSession, "TcpConnectionHandler must not be null");
+			this.stompSession = stompSession;
 		}
 
 		// CompletableFuture callback implementation: handshake outcome
@@ -395,7 +430,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public void accept(@Nullable WebSocketSession webSocketSession, @Nullable Throwable throwable) {
 			if (throwable != null) {
-				this.connectionHandler.afterConnectFailure(throwable);
+				this.stompSession.afterConnectFailure(throwable);
 			}
 		}
 
@@ -404,7 +439,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) {
 			this.session = session;
-			this.connectionHandler.afterConnected(this);
+			this.stompSession.afterConnected(this);
 		}
 
 		@Override
@@ -415,37 +450,22 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				messages = this.codec.decode(webSocketMessage);
 			}
 			catch (Throwable ex) {
-				this.connectionHandler.handleFailure(ex);
+				this.stompSession.handleFailure(ex);
 				return;
 			}
 			for (Message<byte[]> message : messages) {
-				this.connectionHandler.handleMessage(message);
+				this.stompSession.handleMessage(message);
 			}
 		}
 
 		@Override
-		public void handleTransportError(WebSocketSession session, Throwable ex) throws Exception {
-			this.connectionHandler.handleFailure(ex);
+		public void handleTransportError(WebSocketSession session, Throwable ex) {
+			this.stompSession.handleFailure(ex);
 		}
 
 		@Override
-		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-			cancelInactivityTasks();
-			this.connectionHandler.afterConnectionClosed();
-		}
-
-		private void cancelInactivityTasks() {
-			for (ScheduledFuture<?> task : this.inactivityTasks) {
-				try {
-					task.cancel(true);
-				}
-				catch (Throwable ex) {
-					// Ignore
-				}
-			}
-			this.lastReadTime = -1;
-			this.lastWriteTime = -1;
-			this.inactivityTasks.clear();
+		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
+			this.stompSession.afterConnectionClosed();
 		}
 
 		@Override
@@ -462,7 +482,14 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			try {
 				WebSocketSession session = this.session;
 				Assert.state(session != null, "No WebSocketSession available");
-				session.sendMessage(this.codec.encode(message, session.getClass()));
+				if (this.codec.hasSplittingEncoder()) {
+					for (WebSocketMessage<?> outMessage : this.codec.encodeAndSplit(message, session.getClass())) {
+						session.sendMessage(outMessage);
+					}
+				}
+				else {
+					session.sendMessage(this.codec.encode(message, session.getClass()));
+				}
 				future.complete(null);
 			}
 			catch (Throwable ex) {
@@ -486,7 +513,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
 			Duration delay = Duration.ofMillis(duration / 2);
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+			this.readInactivityFuture = getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastReadTime > duration) {
 					try {
 						runnable.run();
@@ -497,7 +524,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, delay));
+			}, delay);
 		}
 
 		@Override
@@ -505,7 +532,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
 			Duration delay = Duration.ofMillis(duration / 2);
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+			this.writeInactivityFuture = getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
 					try {
 						runnable.run();
@@ -516,11 +543,12 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, delay));
+			}, delay);
 		}
 
 		@Override
 		public void close() {
+			cancelInactivityTasks();
 			WebSocketSession session = this.session;
 			if (session != null) {
 				try {
@@ -533,6 +561,31 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				}
 			}
 		}
+
+		private void cancelInactivityTasks() {
+			ScheduledFuture<?> readFuture = this.readInactivityFuture;
+			this.readInactivityFuture = null;
+			cancelFuture(readFuture);
+
+			ScheduledFuture<?> writeFuture = this.writeInactivityFuture;
+			this.writeInactivityFuture = null;
+			cancelFuture(writeFuture);
+
+			this.lastReadTime = -1;
+			this.lastWriteTime = -1;
+		}
+
+		private static void cancelFuture(@Nullable ScheduledFuture<?> future) {
+			if (future != null) {
+				try {
+					future.cancel(true);
+				}
+				catch (Throwable ex) {
+					// Ignore
+				}
+			}
+		}
+
 	}
 
 
@@ -547,8 +600,13 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final BufferingStompDecoder bufferingDecoder;
 
-		public StompWebSocketMessageCodec(int messageSizeLimit) {
-			this.bufferingDecoder = new BufferingStompDecoder(DECODER, messageSizeLimit);
+		@Nullable
+		private final SplittingStompEncoder splittingEncoder;
+
+		public StompWebSocketMessageCodec(int inboundMessageSizeLimit, @Nullable Integer outboundMessageSizeLimit) {
+			this.bufferingDecoder = new BufferingStompDecoder(DECODER, inboundMessageSizeLimit);
+			this.splittingEncoder = (outboundMessageSizeLimit != null ?
+					new SplittingStompEncoder(ENCODER, outboundMessageSizeLimit) : null);
 		}
 
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
@@ -574,17 +632,41 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			return result;
 		}
 
+		public boolean hasSplittingEncoder() {
+			return (this.splittingEncoder != null);
+		}
+
 		public WebSocketMessage<?> encode(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
+			StompHeaderAccessor accessor = getStompHeaderAccessor(message);
+			byte[] payload = message.getPayload();
+			byte[] frame = ENCODER.encode(accessor.getMessageHeaders(), payload);
+			return (useBinary(accessor, payload, sessionType) ? new BinaryMessage(frame) : new TextMessage(frame));
+		}
+
+		public List<WebSocketMessage<?>> encodeAndSplit(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
+			Assert.state(this.splittingEncoder != null, "No SplittingEncoder");
+			StompHeaderAccessor accessor = getStompHeaderAccessor(message);
+			byte[] payload = message.getPayload();
+			List<byte[]> frames = this.splittingEncoder.encode(accessor.getMessageHeaders(), payload);
+			boolean useBinary = useBinary(accessor, payload, sessionType);
+
+			List<WebSocketMessage<?>> messages = new ArrayList<>(frames.size());
+			frames.forEach(frame -> messages.add(useBinary ? new BinaryMessage(frame) : new TextMessage(frame)));
+			return messages;
+		}
+
+		private static StompHeaderAccessor getStompHeaderAccessor(Message<byte[]> message) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			Assert.notNull(accessor, "No StompHeaderAccessor available");
-			byte[] payload = message.getPayload();
-			byte[] bytes = ENCODER.encode(accessor.getMessageHeaders(), payload);
+			return accessor;
+		}
 
-			boolean useBinary = (payload.length > 0 &&
+		private static boolean useBinary(
+				StompHeaderAccessor accessor, byte[] payload, Class<? extends WebSocketSession> sessionType) {
+
+			return (payload.length > 0 &&
 					!(SockJsSession.class.isAssignableFrom(sessionType)) &&
 					MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(accessor.getContentType()));
-
-			return (useBinary ? new BinaryMessage(bytes) : new TextMessage(bytes));
 		}
 	}
 

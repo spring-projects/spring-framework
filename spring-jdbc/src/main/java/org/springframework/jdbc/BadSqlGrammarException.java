@@ -19,6 +19,7 @@ package org.springframework.jdbc;
 import java.sql.SQLException;
 
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when SQL specified is invalid. Such exceptions always have
@@ -52,6 +53,7 @@ public class BadSqlGrammarException extends InvalidDataAccessResourceUsageExcept
 	/**
 	 * Return the wrapped SQLException.
 	 */
+	@Nullable
 	public SQLException getSQLException() {
 		return (SQLException) getCause();
 	}

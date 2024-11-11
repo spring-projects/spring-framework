@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for {@link JsonPathResultMatchers}.
+ * Tests for {@link JsonPathResultMatchers}.
  *
  * @author Rossen Stoyanchev
  * @author Craig Andrews
@@ -66,14 +66,14 @@ class JsonPathResultMatchersTests {
 
 
 	@Test
-	void valueWithValueMismatch() throws Exception {
+	void valueWithValueMismatch() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> new JsonPathResultMatchers("$.str").value("bogus").match(stubMvcResult))
 			.withMessage("JSON path \"$.str\" expected:<bogus> but was:<foo>");
 	}
 
 	@Test
-	void valueWithTypeMismatch() throws Exception {
+	void valueWithTypeMismatch() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> new JsonPathResultMatchers("$.str").value("bogus".getBytes()).match(stubMvcResult))
 			.withMessage("At JSON path \"$.str\", value <foo> of type <java.lang.String> cannot be converted to type <byte[]>");
@@ -105,7 +105,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void valueWithMatcherAndMismatch() throws Exception {
+	void valueWithMatcherAndMismatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").value(Matchers.equalTo("bogus")).match(stubMvcResult));
 	}
@@ -126,7 +126,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void existsNoMatch() throws Exception {
+	void existsNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.bogus").exists().match(stubMvcResult));
 	}
@@ -137,19 +137,19 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void doesNotExistNoMatch() throws Exception {
+	void doesNotExistNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").doesNotExist().match(stubMvcResult));
 	}
 
 	@Test
-	void doesNotExistForAnEmptyArray() throws Exception {
+	void doesNotExistForAnEmptyArray() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.emptyArray").doesNotExist().match(stubMvcResult));
 	}
 
 	@Test
-	void doesNotExistForAnEmptyMap() throws Exception {
+	void doesNotExistForAnEmptyMap() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.emptyMap").doesNotExist().match(stubMvcResult));
 	}
@@ -195,19 +195,19 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void isNotEmptyForAnEmptyString() throws Exception {
+	void isNotEmptyForAnEmptyString() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.emptyString").isNotEmpty().match(stubMvcResult));
 	}
 
 	@Test
-	void isNotEmptyForAnEmptyArray() throws Exception {
+	void isNotEmptyForAnEmptyArray() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.emptyArray").isNotEmpty().match(stubMvcResult));
 	}
 
 	@Test
-	void isNotEmptyForAnEmptyMap() throws Exception {
+	void isNotEmptyForAnEmptyMap() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.emptyMap").isNotEmpty().match(stubMvcResult));
 	}
@@ -223,7 +223,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void isArrayNoMatch() throws Exception {
+	void isArrayNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.bar").isArray().match(stubMvcResult));
 	}
@@ -239,7 +239,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void isMapNoMatch() throws Exception {
+	void isMapNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").isMap().match(stubMvcResult));
 	}
@@ -250,7 +250,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void isBooleanNoMatch() throws Exception {
+	void isBooleanNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").isBoolean().match(stubMvcResult));
 	}
@@ -261,7 +261,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void isNumberNoMatch() throws Exception {
+	void isNumberNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.str").isNumber().match(stubMvcResult));
 	}
@@ -272,7 +272,7 @@ class JsonPathResultMatchersTests {
 	}
 
 	@Test
-	void isStringNoMatch() throws Exception {
+	void isStringNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new JsonPathResultMatchers("$.arr").isString().match(stubMvcResult));
 	}

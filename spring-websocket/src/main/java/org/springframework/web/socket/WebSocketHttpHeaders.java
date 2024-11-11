@@ -257,6 +257,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
+	@Nullable
 	public List<String> get(Object key) {
 		return this.headers.get(key);
 	}

@@ -11,7 +11,7 @@ annotation. The following example shows how to declare an SQL group:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Test
 	@SqlGroup({ // <1>
@@ -26,7 +26,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Test
 	@SqlGroup( // <1>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,14 +88,14 @@ class InlineCollectionTests {
 		@Test
 		void listCanBeCompiled() {
 			SpelExpression listExpression = parseExpression("{1, -2, 3, 4}");
-			assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isTrue();
+			assertThat(listExpression.getAST().isCompilable()).isTrue();
 			assertThat(SpelCompiler.compile(listExpression)).isTrue();
 		}
 
 		@Test
 		void dynamicListCannotBeCompiled() {
 			SpelExpression listExpression = parseExpression("{1, (5 - 3), 3, 4}");
-			assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isFalse();
+			assertThat(listExpression.getAST().isCompilable()).isFalse();
 			assertThat(SpelCompiler.compile(listExpression)).isFalse();
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.testfixture.codec.AbstractDecoderTests
 import org.springframework.http.MediaType
 import org.springframework.http.customJson
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.math.BigDecimal
@@ -45,12 +46,16 @@ class CustomKotlinSerializationJsonDecoderTests :
 
 	@Test
 	override fun decode() {
-		val output = decoder.decode(Mono.empty(),
-				ResolvableType.forClass(KotlinSerializationJsonDecoderTests.Pojo::class.java), null, emptyMap())
+		val input = Flux.concat(
+			stringBuffer("1.0\n"),
+			stringBuffer("2.0\n")
+		)
+		val output = decoder.decode(input, ResolvableType.forClass(BigDecimal::class.java), null, emptyMap())
 		StepVerifier
 				.create(output)
-				.expectError(UnsupportedOperationException::class.java)
-				.verify()
+				.expectNext(BigDecimal.valueOf(1.0))
+				.expectNext(BigDecimal.valueOf(2.0))
+				.verifyComplete()
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,23 +37,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AnnotationDrivenTests {
+class AnnotationDrivenTests {
 
 	@Test
-	public void withProxyTargetClass() throws Exception {
+	void withProxyTargetClass() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		doTestWithMultipleTransactionManagers(context);
 	}
 
 	@Test
-	public void withConfigurationClass() throws Exception {
+	void withConfigurationClass() {
 		ApplicationContext parent = new AnnotationConfigApplicationContext(TransactionManagerConfiguration.class);
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"annotationDrivenConfigurationClassTests.xml"}, getClass(), parent);
 		doTestWithMultipleTransactionManagers(context);
 	}
 
 	@Test
-	public void withAnnotatedTransactionManagers() throws Exception {
+	void withAnnotatedTransactionManagers() {
 		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
 		parent.registerBeanDefinition("transactionManager1", new RootBeanDefinition(SynchTransactionManager.class));
 		parent.registerBeanDefinition("transactionManager2", new RootBeanDefinition(NoSynchTransactionManager.class));
@@ -82,8 +82,7 @@ public class AnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void serializableWithPreviousUsage() throws Exception {
+	void serializableWithPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service.setSomething("someName");
@@ -92,8 +91,7 @@ public class AnnotationDrivenTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void serializableWithoutPreviousUsage() throws Exception {
+	void serializableWithoutPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service = SerializationTestUtils.serializeAndDeserialize(service);

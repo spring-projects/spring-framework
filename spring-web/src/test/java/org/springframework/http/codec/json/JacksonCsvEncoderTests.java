@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier.LastStep;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.testfixture.codec.AbstractEncoderTests;
@@ -70,7 +71,7 @@ class JacksonCsvEncoderTests extends AbstractEncoderTests<org.springframework.ht
 	// this test did not fail directly but logged a NullPointerException dropped by the reactive pipeline
 	void encodeEmptyFlux() {
 		Flux<Object> input = Flux.empty();
-		testEncode(input, Pojo.class, step -> step.verifyComplete());
+		testEncode(input, Pojo.class, LastStep::verifyComplete);
 	}
 
 	static class JacksonCsvEncoder extends AbstractJackson2Encoder {

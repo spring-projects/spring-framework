@@ -10,7 +10,7 @@ Spring requires Java 17+.
 
 Spring supports a wide range of application scenarios. In a large enterprise, applications
 often exist for a long time and have to run on a JDK and application server whose upgrade
-cycle is beyond developer control. Others may run as a single jar with the server embedded,
+cycle is beyond the developer's control. Others may run as a single jar with the server embedded,
 possibly in a cloud environment. Yet others may be standalone applications (such as batch
 or integration workloads) that do not need a server.
 
@@ -37,12 +37,12 @@ support for different application architectures, including messaging, transactio
 persistence, and web. It also includes the Servlet-based Spring MVC web framework and, in
 parallel, the Spring WebFlux reactive web framework.
 
-A note about modules: Spring's framework jars allow for deployment to JDK 9's module path
-("Jigsaw"). For use in Jigsaw-enabled applications, the Spring Framework 5 jars come with
-"Automatic-Module-Name" manifest entries which define stable language-level module names
-("spring.core", "spring.context", etc.) independent from jar artifact names (the jars follow
-the same naming pattern with "-" instead of ".", e.g. "spring-core" and "spring-context").
-Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9+.
+A note about modules: Spring Framework's jars allow for deployment to the module path (Java
+Module System). For use in module-enabled applications, the Spring Framework jars come with
+`Automatic-Module-Name` manifest entries which define stable language-level module names
+(`spring.core`, `spring.context`, etc.) independent from jar artifact names. The jars follow
+the same naming pattern with `-` instead of `.` – for example, `spring-core` and `spring-context`.
+Of course, Spring Framework's jars also work fine on the classpath.
 
 
 
@@ -73,7 +73,7 @@ developers may choose to use instead of the Spring-specific mechanisms provided
 by the Spring Framework. Originally, those were based on common `javax` packages.
 
 As of Spring Framework 6.0, Spring has been upgraded to the Jakarta EE 9 level
-(e.g. Servlet 5.0+, JPA 3.0+), based on the `jakarta` namespace instead of the
+(for example, Servlet 5.0+, JPA 3.0+), based on the `jakarta` namespace instead of the
 traditional `javax` packages. With EE 9 as the minimum and EE 10 supported already,
 Spring is prepared to provide out-of-the-box support for the further evolution of
 the Jakarta EE APIs. Spring Framework 6.0 is fully compatible with Tomcat 10.1,

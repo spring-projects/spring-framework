@@ -70,7 +70,12 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		Assert.notNull(original, "ServerHttpRequest is required");
 
 		this.uri = original.getURI();
-		this.headers = HttpHeaders.writableHttpHeaders(original.getHeaders());
+		// Some containers (including Jetty and Netty4) can have an immutable
+		// representation of headers. Since mutability is always desirable here,
+		// we always create a mutable case-insensitive copy of the original
+		// headers by using the basic constructor and addAll.
+		this.headers = new HttpHeaders();
+		this.headers.addAll(original.getHeaders());
 		this.httpMethod = original.getMethod();
 		this.contextPath = original.getPath().contextPath().value();
 		this.remoteAddress = original.getRemoteAddress();
@@ -187,7 +192,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final ServerHttpRequest originalRequest;
 
-
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
 				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
 				HttpHeaders headers, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
@@ -227,7 +231,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return this.body;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T getNativeRequest() {
 			return ServerHttpRequestDecorator.getNativeRequest(this.originalRequest);

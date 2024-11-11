@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 
 
 	@Test
-	public void executeInsertInTransaction() {
+	void executeInsertInTransaction() {
 		Flux<Long> longFlux = databaseClient
 				.sql(getInsertIntoLegosetStatement())
 				.bind(0, 42055)
@@ -133,7 +133,7 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldRollbackTransaction() {
+	void shouldRollbackTransaction() {
 		Mono<Object> integerFlux = databaseClient.sql(getInsertIntoLegosetStatement())
 				.bind(0, 42055)
 				.bind(1, "SCHAUFELRADBAGGER")
@@ -155,7 +155,7 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldRollbackTransactionUsingTransactionalOperator() {
+	void shouldRollbackTransactionUsingTransactionalOperator() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		TransactionalOperator transactionalOperator = TransactionalOperator

@@ -35,9 +35,7 @@ import org.springframework.util.ClassUtils;
  * @since 5.2
  */
 @DisplayName("Explicit properties file in @TestPropertySource")
-// Since Spring test's AOT processing support does not invoke test lifecycle methods such
-// as @BeforeAll/@AfterAll, this test class simply is not supported for AOT processing.
-@DisabledInAotMode
+@DisabledInAotMode("Spring test's AOT processing support does not invoke lifecycle methods such as @BeforeAll/@AfterAll")
 class ExplicitPropertiesFileTestPropertySourceTests {
 
 	static final String CURRENT_TEST_PACKAGE = "current.test.package";

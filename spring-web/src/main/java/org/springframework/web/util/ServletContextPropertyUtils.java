@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.SystemPropertyUtils;
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
  * <p>A text may contain {@code ${...}} placeholders, to be resolved as servlet context
- * init parameters or system properties: e.g. {@code ${user.dir}}. Default values can
+ * init parameters or system properties: for example, {@code ${user.dir}}. Default values can
  * be supplied using the ":" separator between key and value.
  *
  * @author Juergen Hoeller
@@ -39,11 +39,13 @@ public abstract class ServletContextPropertyUtils {
 
 	private static final PropertyPlaceholderHelper strictHelper =
 			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
-					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR, false);
+					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR,
+					SystemPropertyUtils.ESCAPE_CHARACTER, false);
 
 	private static final PropertyPlaceholderHelper nonStrictHelper =
 			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
-					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR, true);
+					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR,
+					SystemPropertyUtils.ESCAPE_CHARACTER, true);
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jndi;
 
 import javax.naming.Context;
-import javax.naming.NamingException;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,28 +25,28 @@ import org.springframework.context.testfixture.jndi.SimpleNamingContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link JndiPropertySource}.
+ * Tests for {@link JndiPropertySource}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class JndiPropertySourceTests {
+class JndiPropertySourceTests {
 
 	@Test
-	public void nonExistentProperty() {
+	void nonExistentProperty() {
 		JndiPropertySource ps = new JndiPropertySource("jndiProperties");
 		assertThat(ps.getProperty("bogus")).isNull();
 	}
 
 	@Test
-	public void nameBoundWithoutPrefix() {
+	void nameBoundWithoutPrefix() {
 		final SimpleNamingContext context = new SimpleNamingContext();
 		context.bind("p1", "v1");
 
 		JndiTemplate jndiTemplate = new JndiTemplate() {
 			@Override
-			protected Context createInitialContext() throws NamingException {
+			protected Context createInitialContext() {
 				return context;
 			}
 		};
@@ -60,13 +59,13 @@ public class JndiPropertySourceTests {
 	}
 
 	@Test
-	public void nameBoundWithPrefix() {
+	void nameBoundWithPrefix() {
 		final SimpleNamingContext context = new SimpleNamingContext();
 		context.bind("java:comp/env/p1", "v1");
 
 		JndiTemplate jndiTemplate = new JndiTemplate() {
 			@Override
-			protected Context createInitialContext() throws NamingException {
+			protected Context createInitialContext() {
 				return context;
 			}
 		};
@@ -79,10 +78,10 @@ public class JndiPropertySourceTests {
 	}
 
 	@Test
-	public void propertyWithDefaultClauseInResourceRefMode() {
+	void propertyWithDefaultClauseInResourceRefMode() {
 		JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate() {
 			@Override
-			public Object lookup(String jndiName) throws NamingException {
+			public Object lookup(String jndiName) {
 				throw new IllegalStateException("Should not get called");
 			}
 		};
@@ -93,10 +92,10 @@ public class JndiPropertySourceTests {
 	}
 
 	@Test
-	public void propertyWithColonInNonResourceRefMode() {
+	void propertyWithColonInNonResourceRefMode() {
 		JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate() {
 			@Override
-			public Object lookup(String jndiName) throws NamingException {
+			public Object lookup(String jndiName) {
 				assertThat(jndiName).isEqualTo("my:key");
 				return "my:value";
 			}

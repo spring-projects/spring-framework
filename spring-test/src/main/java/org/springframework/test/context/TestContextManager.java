@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -89,6 +91,17 @@ import org.springframework.util.ReflectionUtils;
 public class TestContextManager {
 
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
+
+	private static final Set<Class<? extends Throwable>> skippedExceptionTypes = CollectionUtils.newLinkedHashSet(3);
+
+	static {
+		// JUnit Jupiter
+		registerSkippedExceptionType("org.opentest4j.TestAbortedException");
+		// JUnit 4
+		registerSkippedExceptionType("org.junit.AssumptionViolatedException");
+		// TestNG
+		registerSkippedExceptionType("org.testng.SkipException");
+	}
 
 	private final TestContext testContext;
 
@@ -163,7 +176,7 @@ public class TestContextManager {
 	/**
 	 * Get the current {@link TestExecutionListener TestExecutionListeners}
 	 * registered for this {@code TestContextManager}.
-	 * <p>Allows for modifications, e.g. adding a listener to the beginning of the list.
+	 * <p>Allows for modifications, for example, adding a listener to the beginning of the list.
 	 * However, make sure to keep the list stable while actually executing tests.
 	 */
 	public final List<TestExecutionListener> getTestExecutionListeners() {
@@ -247,11 +260,19 @@ public class TestContextManager {
 					testExecutionListener.prepareTestInstance(getTestContext());
 				}
 				catch (Throwable ex) {
-					if (logger.isErrorEnabled()) {
-						logger.error("""
+					if (isSkippedException(ex)) {
+						if (logger.isInfoEnabled()) {
+							logger.info("""
+									Caught exception while allowing TestExecutionListener [%s] to \
+									prepare test instance [%s]"""
+										.formatted(typeName(testExecutionListener), testInstance), ex);
+						}
+					}
+					else if (logger.isWarnEnabled()) {
+						logger.warn("""
 							Caught exception while allowing TestExecutionListener [%s] to \
 							prepare test instance [%s]"""
-							.formatted(typeName(testExecutionListener), testInstance), ex);
+								.formatted(typeName(testExecutionListener), testInstance), ex);
 					}
 					ReflectionUtils.rethrowException(ex);
 				}
@@ -570,7 +591,15 @@ public class TestContextManager {
 	private void logException(
 			Throwable ex, String callbackName, TestExecutionListener testExecutionListener, Class<?> testClass) {
 
-		if (logger.isWarnEnabled()) {
+		if (isSkippedException(ex)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("""
+						Caught exception while invoking '%s' callback on TestExecutionListener [%s] \
+						for test class [%s]"""
+							.formatted(callbackName, typeName(testExecutionListener), typeName(testClass)), ex);
+			}
+		}
+		else if (logger.isWarnEnabled()) {
 			logger.warn("""
 					Caught exception while invoking '%s' callback on TestExecutionListener [%s] \
 					for test class [%s]"""
@@ -581,7 +610,15 @@ public class TestContextManager {
 	private void logException(Throwable ex, String callbackName, TestExecutionListener testExecutionListener,
 			Object testInstance, Method testMethod) {
 
-		if (logger.isWarnEnabled()) {
+		if (isSkippedException(ex)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("""
+						Caught exception while invoking '%s' callback on TestExecutionListener [%s] for \
+						test method [%s] and test instance [%s]"""
+							.formatted(callbackName, typeName(testExecutionListener), testMethod, testInstance), ex);
+			}
+		}
+		else if (logger.isWarnEnabled()) {
 			logger.warn("""
 					Caught exception while invoking '%s' callback on TestExecutionListener [%s] for \
 					test method [%s] and test instance [%s]"""
@@ -624,6 +661,27 @@ public class TestContextManager {
 			return type.getName();
 		}
 		return obj.getClass().getName();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void registerSkippedExceptionType(String name) {
+		try {
+			Class<? extends Throwable> exceptionType = (Class<? extends Throwable>)
+					ClassUtils.forName(name, TestContextManager.class.getClassLoader());
+			skippedExceptionTypes.add(exceptionType);
+		}
+		catch (ClassNotFoundException | LinkageError ex) {
+			// ignore
+		}
+	}
+
+	private static boolean isSkippedException(Throwable ex) {
+		for (Class<? extends Throwable> skippedExceptionType : skippedExceptionTypes) {
+			if (skippedExceptionType.isInstance(ex)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,18 @@ package org.springframework.http.codec.json
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
-import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.testfixture.codec.AbstractEncoderTests
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier.FirstStep
+import reactor.test.StepVerifier
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Tests for the JSON encoding using kotlinx.serialization.
@@ -58,33 +58,81 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(encoder.canEncode(pojoType, MediaType.APPLICATION_NDJSON)).isTrue()
 	}
 
 	@Test
 	override fun encode() {
 		val input = Flux.just(
-				Pojo("foo", "bar"),
-				Pojo("foofoo", "barbar"),
-				Pojo("foofoofoo", "barbarbar")
+			Pojo("foo", "bar"),
+			Pojo("foofoo", "barbar"),
+			Pojo("foofoofoo", "barbarbar")
 		)
-		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
-			.consumeNextWith(expectString("[" +
-					"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
-					"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
-					"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
-				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
-			.verifyComplete()
-		})
+		testEncode(input, Pojo::class.java) {
+			it.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
+				.consumeNextWith(expectString("]"))
+				.verifyComplete()
+		}
+	}
+
+	@Test
+	fun encodeEmpty() {
+		testEncode(Flux.empty(), Pojo::class.java) {
+			it
+				.consumeNextWith(expectString("["))
+				.consumeNextWith(expectString("]"))
+				.verifyComplete()
+		}
+	}
+
+	@Test
+	fun encodeWithErrorAsFirstSignal() {
+		val message = "I'm a teapot"
+		val input = Flux.error<Any>(IllegalStateException(message))
+		val output = encoder.encode(input, this.bufferFactory, ResolvableType.forClass(Pojo::class.java), null, null)
+		StepVerifier.create(output).expectErrorMessage(message).verify()
+	}
+
+	@Test
+	fun encodeStream() {
+		val input = Flux.just(
+			Pojo("foo", "bar"),
+			Pojo("foofoo", "barbar"),
+			Pojo("foofoofoo", "barbarbar")
+		)
+		testEncodeAll(
+			input,
+			ResolvableType.forClass(Pojo::class.java),
+			MediaType.APPLICATION_NDJSON,
+			null
+		) {
+			it.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
+				.verifyComplete()
+		}
 	}
 
 	@Test
 	fun encodeMono() {
 		val input = Mono.just(Pojo("foo", "bar"))
-		testEncode(input, Pojo::class.java, { step: FirstStep<DataBuffer?> -> step
-			.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}")
-				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
-			.verifyComplete()
-		})
+		testEncode(input, Pojo::class.java) {
+			it.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.verifyComplete()
+		}
+	}
+
+	@Test
+	fun encodeMonoWithNullableWithNull() {
+		val input = Mono.just(mapOf("value" to null))
+		val methodParameter = MethodParameter.forExecutable(::handleMapWithNullable::javaMethod.get()!!, -1)
+		testEncode(input, ResolvableType.forMethodParameter(methodParameter), null, null) {
+			it.consumeNextWith(expectString("{\"value\":null}"))
+				.verifyComplete()
+		}
 	}
 
 	@Test
@@ -100,5 +148,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 
 	@Serializable
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
+
+	fun handleMapWithNullable(map: Map<String, String?>) = map
 
 }

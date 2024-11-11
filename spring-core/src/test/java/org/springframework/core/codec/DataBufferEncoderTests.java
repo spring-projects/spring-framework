@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class DataBufferEncoderTests extends AbstractEncoderTests<DataBufferEncoder> {
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
@@ -59,7 +59,7 @@ class DataBufferEncoderTests extends AbstractEncoderTests<DataBufferEncoder> {
 
 	@Override
 	@Test
-	public void encode() throws Exception {
+	protected void encode() {
 		Flux<DataBuffer> input = Flux.just(this.fooBytes, this.barBytes)
 				.flatMap(bytes -> Mono.defer(() -> {
 					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(bytes.length);

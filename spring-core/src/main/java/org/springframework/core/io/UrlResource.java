@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.StringUtils;
 public class UrlResource extends AbstractFileResolvingResource {
 
 	private static final String AUTHORIZATION = "Authorization";
+
 
 	/**
 	 * Original URI, if available; used for URI and File access.
@@ -122,9 +123,9 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Create a new {@code UrlResource} based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
-	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * @param protocol the URL protocol to use (for example, "jar" or "file" - without colon);
 	 * also known as "scheme"
-	 * @param location the location (e.g. the file path within that protocol);
+	 * @param location the location (for example, the file path within that protocol);
 	 * also known as "scheme-specific part"
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
@@ -136,11 +137,11 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Create a new {@code UrlResource} based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
-	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * @param protocol the URL protocol to use (for example, "jar" or "file" - without colon);
 	 * also known as "scheme"
-	 * @param location the location (e.g. the file path within that protocol);
+	 * @param location the location (for example, the file path within that protocol);
 	 * also known as "scheme-specific part"
-	 * @param fragment the fragment within that location (e.g. anchor on an HTML page,
+	 * @param fragment the fragment within that location (for example, anchor on an HTML page,
 	 * as following after a "#" separator)
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
@@ -310,7 +311,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * This delegate creates a {@code java.net.URL}, applying the given path
 	 * relative to the path of the underlying URL of this resource descriptor.
-	 * A leading slash will get dropped; a "#" symbol will get encoded.
+	 * <p>A leading slash will get dropped; a "#" symbol will get encoded.
+	 * Note that this method effectively cleans the combined path as of 6.1.
 	 * @since 5.2
 	 * @see #createRelative(String)
 	 * @see ResourceUtils#toRelativeURL(URL, String)
@@ -332,13 +334,15 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Nullable
 	public String getFilename() {
 		if (this.uri != null) {
-			// URI path is decoded and has standard separators
-			return StringUtils.getFilename(this.uri.getPath());
+			String path = this.uri.getPath();
+			if (path != null) {
+				// Prefer URI path: decoded and has standard separators
+				return StringUtils.getFilename(this.uri.getPath());
+			}
 		}
-		else {
-			String filename = StringUtils.getFilename(StringUtils.cleanPath(this.url.getPath()));
-			return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
-		}
+		// Otherwise, process URL path
+		String filename = StringUtils.getFilename(StringUtils.cleanPath(this.url.getPath()));
+		return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
 	}
 
 	/**

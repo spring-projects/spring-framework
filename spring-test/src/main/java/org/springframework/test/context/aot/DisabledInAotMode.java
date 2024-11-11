@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.condition.DisabledIf;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * {@code @DisabledInAotMode} signals that an annotated test class is <em>disabled</em>
+ * {@code @DisabledInAotMode} signals that the annotated test class is <em>disabled</em>
  * in Spring AOT (ahead-of-time) mode, which means that the {@code ApplicationContext}
  * for the test class will not be processed for AOT optimizations at build time.
  *
@@ -48,6 +48,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
  * annotation.
  *
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 6.1
  * @see org.springframework.aot.AotDetector#useGeneratedArtifacts() AotDetector.useGeneratedArtifacts()
  * @see org.junit.jupiter.api.condition.EnabledInNativeImage @EnabledInNativeImage
@@ -56,7 +57,21 @@ import org.junit.jupiter.api.condition.DisabledIf;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@DisabledIf(value = "org.springframework.aot.AotDetector#useGeneratedArtifacts",
-		disabledReason = "Disabled in Spring AOT mode")
+@ExtendWith(DisabledInAotModeCondition.class)
 public @interface DisabledInAotMode {
+
+	/**
+	 * Custom reason to document why the test class or test method is disabled in
+	 * AOT mode.
+	 * <p>If a custom reason is not supplied, the default reason will be used:
+	 * {@code "Disabled in Spring AOT mode"}.
+	 * <p>If a custom reason is supplied, it will be combined with the default
+	 * reason. For example,
+	 * {@code @DisabledInAotMode("@ContextHierarchy is not supported")} will result
+	 * in a combined reason like the following:
+	 * {@code "Disabled in Spring AOT mode ==> @ContextHierarchy is not supported"}.
+	 * @since 6.2
+	 */
+	String value() default "";
+
 }

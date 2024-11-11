@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
 /**
@@ -44,7 +45,6 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  *     public MyService myService() {
  *         return new MyService();
  *     }
- *
  * }</pre>
  *
  * <p>If the configuration class above is processed, {@code MyHints} will be
@@ -62,9 +62,8 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  * @author Brian Clozel
  * @author Stephane Nicoll
  * @since 6.0
- * @see org.springframework.aot.hint.RuntimeHints
- * @see org.springframework.aot.hint.annotation.Reflective
- * @see org.springframework.aot.hint.annotation.RegisterReflectionForBinding
+ * @see RuntimeHints
+ * @see ReflectiveScan @ReflectiveScan
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

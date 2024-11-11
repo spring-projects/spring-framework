@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Sungbin Yang
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -135,9 +136,25 @@ public abstract class ClassUtils {
 	private static final Set<Class<?>> javaLanguageInterfaces;
 
 	/**
-	 * Cache for equivalent methods on an interface implemented by the declaring class.
+	 * Cache for equivalent methods on a interface implemented by the declaring class.
+	 * <p>A {@code null} value signals that no interface method was found for the key.
 	 */
 	private static final Map<Method, Method> interfaceMethodCache = new ConcurrentReferenceHashMap<>(256);
+
+	/**
+	 * Cache for equivalent methods on a public interface implemented by the declaring class.
+	 * <p>A {@code null} value signals that no public interface method was found for the key.
+	 * @since 6.2
+	 */
+	private static final Map<Method, Method> publicInterfaceMethodCache = new ConcurrentReferenceHashMap<>(256);
+
+	/**
+	 * Cache for equivalent public methods in a public declaring type within the type hierarchy
+	 * of the method's declaring class.
+	 * <p>A {@code null} value signals that no publicly accessible method was found for the key.
+	 * @since 6.2
+	 */
+	private static final Map<Method, Method> publiclyAccessibleMethodCache = new ConcurrentReferenceHashMap<>(256);
 
 
 	static {
@@ -251,12 +268,12 @@ public abstract class ClassUtils {
 
 	/**
 	 * Replacement for {@code Class.forName()} that also returns Class instances
-	 * for primitives (e.g. "int") and array class names (e.g. "String[]").
+	 * for primitives (for example, "int") and array class names (for example, "String[]").
 	 * Furthermore, it is also capable of resolving nested class names in Java source
-	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 * style (for example, "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
-	 * (may be {@code null}, which indicates the default class loader)
+	 * (can be {@code null}, which indicates the default class loader)
 	 * @return a class instance for the supplied name
 	 * @throws ClassNotFoundException if the class was not found
 	 * @throws LinkageError if the class file could not be loaded
@@ -305,7 +322,7 @@ public abstract class ClassUtils {
 		}
 		catch (ClassNotFoundException ex) {
 			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
-			int previousDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex -1);
+			int previousDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex - 1);
 			if (lastDotIndex != -1 && previousDotIndex != -1 && Character.isUpperCase(name.charAt(previousDotIndex + 1))) {
 				String nestedClassName =
 						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
@@ -328,14 +345,14 @@ public abstract class ClassUtils {
 	 * the exceptions thrown in case of class loading failure.
 	 * @param className the name of the Class
 	 * @param classLoader the class loader to use
-	 * (may be {@code null}, which indicates the default class loader)
+	 * (can be {@code null}, which indicates the default class loader)
 	 * @return a class instance for the supplied name
 	 * @throws IllegalArgumentException if the class name was not resolvable
 	 * (that is, the class could not be found or the class file could not be loaded)
-	 * @throws IllegalStateException if the corresponding class is resolvable but
-	 * there was a readability mismatch in the inheritance hierarchy of the class
-	 * (typically a missing dependency declaration in a Jigsaw module definition
-	 * for a superclass or interface implemented by the class to be loaded here)
+	 * @throws IllegalStateException if the corresponding class is resolvable but there
+	 * was a readability mismatch in the inheritance hierarchy of the class (typically a
+	 * missing dependency declaration in a Java Module System module definition for a
+	 * superclass or interface implemented by the class to be loaded here)
 	 * @see #forName(String, ClassLoader)
 	 */
 	public static Class<?> resolveClassName(String className, @Nullable ClassLoader classLoader)
@@ -362,13 +379,13 @@ public abstract class ClassUtils {
 	 * one of its dependencies is not present or cannot be loaded.
 	 * @param className the name of the class to check
 	 * @param classLoader the class loader to use
-	 * (may be {@code null} which indicates the default class loader)
+	 * (can be {@code null} which indicates the default class loader)
 	 * @return whether the specified class is present (including all of its
 	 * superclasses and interfaces)
-	 * @throws IllegalStateException if the corresponding class is resolvable but
-	 * there was a readability mismatch in the inheritance hierarchy of the class
-	 * (typically a missing dependency declaration in a Jigsaw module definition
-	 * for a superclass or interface implemented by the class to be checked here)
+	 * @throws IllegalStateException if the corresponding class is resolvable but there
+	 * was a readability mismatch in the inheritance hierarchy of the class (typically a
+	 * missing dependency declaration in a Java Module System module definition for a
+	 * superclass or interface implemented by the class to be checked here)
 	 */
 	public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
 		try {
@@ -389,7 +406,7 @@ public abstract class ClassUtils {
 	 * Check whether the given class is visible in the given ClassLoader.
 	 * @param clazz the class to check (typically an interface)
 	 * @param classLoader the ClassLoader to check against
-	 * (may be {@code null} in which case this method will always return {@code true})
+	 * (can be {@code null} in which case this method will always return {@code true})
 	 */
 	public static boolean isVisible(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		if (classLoader == null) {
@@ -413,7 +430,7 @@ public abstract class ClassUtils {
 	 * i.e. whether it is loaded by the given ClassLoader or a parent of it.
 	 * @param clazz the class to analyze
 	 * @param classLoader the ClassLoader to potentially cache metadata in
-	 * (may be {@code null} which indicates the system class loader)
+	 * (can be {@code null} which indicates the system class loader)
 	 */
 	public static boolean isCacheSafe(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -544,9 +561,22 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return the original class, or a primitive wrapper for the original primitive type
 	 */
+	@SuppressWarnings("NullAway")
 	public static Class<?> resolvePrimitiveIfNecessary(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isPrimitive() && clazz != void.class ? primitiveTypeToWrapperMap.get(clazz) : clazz);
+	}
+
+	/**
+	 * Determine if the given type represents either {@code Void} or {@code void}.
+	 * @param type the type to check
+	 * @return {@code true} if the type represents {@code Void} or {@code void}
+	 * @since 6.1.4
+	 * @see Void
+	 * @see Void#TYPE
+	 */
+	public static boolean isVoidType(@Nullable Class<?> type) {
+		return (type == void.class || type == Void.class);
 	}
 
 	/**
@@ -565,7 +595,7 @@ public abstract class ClassUtils {
 	 * @since 6.1
 	 */
 	public static boolean isSimpleValueType(Class<?> type) {
-		return (Void.class != type && void.class != type &&
+		return (!isVoidType(type) &&
 				(isPrimitiveOrWrapper(type) ||
 				Enum.class.isAssignableFrom(type) ||
 				CharSequence.class.isAssignableFrom(type) ||
@@ -665,7 +695,7 @@ public abstract class ClassUtils {
 	public static String addResourcePathToPackagePath(Class<?> clazz, String resourceName) {
 		Assert.notNull(resourceName, "Resource name must not be null");
 		if (!resourceName.startsWith("/")) {
-			return classPackageAsResourcePath(clazz) + '/' + resourceName;
+			return classPackageAsResourcePath(clazz) + PATH_SEPARATOR + resourceName;
 		}
 		return classPackageAsResourcePath(clazz) + resourceName;
 	}
@@ -715,7 +745,7 @@ public abstract class ClassUtils {
 	 * in the given collection.
 	 * <p>Basically like {@code AbstractCollection.toString()}, but stripping
 	 * the "class "/"interface " prefix before every class name.
-	 * @param classes a Collection of Class objects (may be {@code null})
+	 * @param classes a Collection of Class objects (can be {@code null})
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
@@ -770,7 +800,7 @@ public abstract class ClassUtils {
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
-	 * (may be {@code null} when accepting all declared interfaces)
+	 * (can be {@code null} when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, @Nullable ClassLoader classLoader) {
@@ -805,7 +835,7 @@ public abstract class ClassUtils {
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
-	 * (may be {@code null} when accepting all declared interfaces)
+	 * (can be {@code null} when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as a Set
 	 */
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, @Nullable ClassLoader classLoader) {
@@ -1007,10 +1037,10 @@ public abstract class ClassUtils {
 		}
 		Class<?> clazz = value.getClass();
 		if (Proxy.isProxyClass(clazz)) {
-			String prefix = clazz.getName() + " implementing ";
+			String prefix = clazz.getTypeName() + " implementing ";
 			StringJoiner result = new StringJoiner(",", prefix, "");
 			for (Class<?> ifc : clazz.getInterfaces()) {
-				result.add(ifc.getName());
+				result.add(ifc.getTypeName());
 			}
 			return result.toString();
 		}
@@ -1072,7 +1102,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the name of the class file, relative to the containing
-	 * package: e.g. "String.class"
+	 * package: for example, "String.class".
 	 * @param clazz the class
 	 * @return the file name of the ".class" file
 	 */
@@ -1085,7 +1115,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the name of the package of the given class,
-	 * e.g. "java.lang" for the {@code java.lang.String} class.
+	 * for example, "java.lang" for the {@code java.lang.String} class.
 	 * @param clazz the class
 	 * @return the package name, or the empty String if the class
 	 * is defined in the default package
@@ -1097,7 +1127,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the name of the package of the given fully-qualified class name,
-	 * e.g. "java.lang" for the {@code java.lang.String} class name.
+	 * for example, "java.lang" for the {@code java.lang.String} class name.
 	 * @param fqClassName the fully-qualified class name
 	 * @return the package name, or the empty String if the class
 	 * is defined in the default package
@@ -1134,7 +1164,7 @@ public abstract class ClassUtils {
 	 * fully qualified interface/class name + "." + method name.
 	 * @param method the method
 	 * @param clazz the clazz that the method is being invoked on
-	 * (may be {@code null} to indicate the method's declaring class)
+	 * (can be {@code null} to indicate the method's declaring class)
 	 * @return the qualified name of the method
 	 * @since 4.3.4
 	 */
@@ -1215,7 +1245,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be {@code null} to indicate any signature)
+	 * (can be {@code null} to indicate any signature)
 	 * @return the method (never {@code null})
 	 * @throws IllegalStateException if the method has not been found
 	 * @see Class#getMethod
@@ -1254,7 +1284,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be {@code null} to indicate any signature)
+	 * (can be {@code null} to indicate any signature)
 	 * @return the method, or {@code null} if not found
 	 * @see Class#getMethod
 	 */
@@ -1343,13 +1373,14 @@ public abstract class ClassUtils {
 	 * implementation will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation
-	 * (may be {@code null} or may not even implement the method)
+	 * (can be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} does not implement it
 	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
-		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
+		if (targetClass != null && targetClass != method.getDeclaringClass() &&
+				(isOverridable(method, targetClass) || !method.getDeclaringClass().isAssignableFrom(targetClass))) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {
@@ -1374,11 +1405,13 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine a corresponding interface method for the given method handle, if possible.
-	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
-	 * which can be reflectively invoked without an illegal access warning.
+	 * <p>This is particularly useful for arriving at a public exported type on the Java
+	 * Module System which allows the method to be invoked via reflection without an illegal
+	 * access warning.
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.1
+	 * @see #getPubliclyAccessibleMethodIfPossible(Method, Class)
 	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
 	 */
 	@Deprecated
@@ -1388,37 +1421,56 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine a corresponding interface method for the given method handle, if possible.
-	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
-	 * which can be reflectively invoked without an illegal access warning.
+	 * <p>This is particularly useful for arriving at a public exported type on the Java
+	 * Module System which allows the method to be invoked via reflection without an illegal
+	 * access warning.
 	 * @param method the method to be invoked, potentially from an implementation class
-	 * @param targetClass the target class to check for declared interfaces
+	 * @param targetClass the target class to invoke the method on, or {@code null} if unknown
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.3.16
+	 * @see #getPubliclyAccessibleMethodIfPossible(Method, Class)
 	 * @see #getMostSpecificMethod
 	 */
 	public static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
-		if (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
-			return method;
-		}
-		// Try cached version of method in its declaring class
-		Method result = interfaceMethodCache.computeIfAbsent(method,
-				key -> findInterfaceMethodIfPossible(key, key.getDeclaringClass(), Object.class));
-		if (result == method && targetClass != null) {
-			// No interface method found yet -> try given target class (possibly a subclass of the
-			// declaring class, late-binding a base class method to a subclass-declared interface:
-			// see e.g. HashMap.HashIterator.hasNext)
-			result = findInterfaceMethodIfPossible(method, targetClass, method.getDeclaringClass());
-		}
-		return result;
+		return getInterfaceMethodIfPossible(method, targetClass, false);
 	}
 
-	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
+	private static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass,
+			boolean requirePublicInterface) {
+
+		Class<?> declaringClass = method.getDeclaringClass();
+		if (!Modifier.isPublic(method.getModifiers()) || (declaringClass.isInterface() &&
+				(!requirePublicInterface || Modifier.isPublic(declaringClass.getModifiers())))) {
+			return method;
+		}
+		String methodName = method.getName();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+
+		Map<Method, Method> methodCache = (requirePublicInterface ? publicInterfaceMethodCache : interfaceMethodCache);
+		// Try cached version of method in its declaring class
+		Method result = methodCache.computeIfAbsent(method, key -> findInterfaceMethodIfPossible(
+				methodName, parameterTypes, declaringClass, Object.class, requirePublicInterface));
+		if (result == null && targetClass != null) {
+			// No interface method found yet -> try given target class (possibly a subclass of the
+			// declaring class, late-binding a base class method to a subclass-declared interface:
+			// see, for example, HashMap.HashIterator.hasNext)
+			result = findInterfaceMethodIfPossible(
+					methodName, parameterTypes, targetClass, declaringClass, requirePublicInterface);
+		}
+		return (result != null ? result : method);
+	}
+
+	@Nullable
+	private static Method findInterfaceMethodIfPossible(String methodName, Class<?>[] parameterTypes,
+			Class<?> startClass, Class<?> endClass, boolean requirePublicInterface) {
+
 		Class<?> current = startClass;
 		while (current != null && current != endClass) {
-			Class<?>[] ifcs = current.getInterfaces();
-			for (Class<?> ifc : ifcs) {
+			for (Class<?> ifc : current.getInterfaces()) {
 				try {
-					return ifc.getMethod(method.getName(), method.getParameterTypes());
+					if (!requirePublicInterface || Modifier.isPublic(ifc.getModifiers())) {
+						return ifc.getMethod(methodName, parameterTypes);
+					}
 				}
 				catch (NoSuchMethodException ex) {
 					// ignore
@@ -1426,7 +1478,72 @@ public abstract class ClassUtils {
 			}
 			current = current.getSuperclass();
 		}
-		return method;
+		return null;
+	}
+
+	/**
+	 * Get the first publicly accessible method in the supplied method's type hierarchy that
+	 * has a method signature equivalent to the supplied method, if possible.
+	 * <p>If the supplied method is {@code public} and declared in a {@code public} type,
+	 * the supplied method will be returned.
+	 * <p>Otherwise, this method recursively searches the class hierarchy and implemented
+	 * interfaces for an equivalent method that is {@code public} and declared in a
+	 * {@code public} type.
+	 * <p>If a publicly accessible equivalent method cannot be found, the supplied method
+	 * will be returned, indicating that no such equivalent method exists. Consequently,
+	 * callers of this method must manually validate the accessibility of the returned method
+	 * if public access is a requirement.
+	 * <p>This is particularly useful for arriving at a public exported type on the Java
+	 * Module System which allows the method to be invoked via reflection without an illegal
+	 * access warning. This is also useful for invoking methods via a public API in bytecode
+	 * &mdash; for example, for use with the Spring Expression Language (SpEL) compiler.
+	 * For example, if a non-public class overrides {@code toString()}, this method will
+	 * traverse up the type hierarchy to find the first public type that declares the method
+	 * (if there is one). For {@code toString()}, it may traverse as far as {@link Object}.
+	 * @param method the method to be invoked, potentially from an implementation class
+	 * @param targetClass the target class to invoke the method on, or {@code null} if unknown
+	 * @return the corresponding publicly accessible method, or the original method if none
+	 * found
+	 * @since 6.2
+	 * @see #getInterfaceMethodIfPossible(Method, Class)
+	 * @see #getMostSpecificMethod(Method, Class)
+	 */
+	public static Method getPubliclyAccessibleMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
+		Class<?> declaringClass = method.getDeclaringClass();
+		// If the method is not public, we can abort the search immediately; or if the method's
+		// declaring class is public, the method is already publicly accessible.
+		if (!Modifier.isPublic(method.getModifiers()) || Modifier.isPublic(declaringClass.getModifiers())) {
+			return method;
+		}
+
+		Method interfaceMethod = getInterfaceMethodIfPossible(method, targetClass, true);
+		// If we found a method in a public interface, return the interface method.
+		if (!interfaceMethod.equals(method)) {
+			return interfaceMethod;
+		}
+
+		Method result = publiclyAccessibleMethodCache.computeIfAbsent(method,
+				key -> findPubliclyAccessibleMethodIfPossible(key.getName(), key.getParameterTypes(), declaringClass));
+		return (result != null ? result : method);
+	}
+
+	@Nullable
+	private static Method findPubliclyAccessibleMethodIfPossible(
+			String methodName, Class<?>[] parameterTypes, Class<?> declaringClass) {
+
+		Class<?> current = declaringClass.getSuperclass();
+		while (current != null) {
+			if (Modifier.isPublic(current.getModifiers())) {
+				try {
+					return current.getDeclaredMethod(methodName, parameterTypes);
+				}
+				catch (NoSuchMethodException ex) {
+					// ignore
+				}
+			}
+			current = current.getSuperclass();
+		}
+		return null;
 	}
 
 	/**

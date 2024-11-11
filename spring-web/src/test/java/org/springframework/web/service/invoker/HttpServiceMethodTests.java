@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.web.service.invoker;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,10 +42,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
+import org.springframework.web.service.annotation.PutExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 /**
  * Tests for {@link HttpServiceMethod} with
@@ -52,6 +60,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
+ * @author Sam Brannen
  */
 class HttpServiceMethodTests {
 
@@ -91,7 +100,7 @@ class HttpServiceMethodTests {
 		assertThat(voidEntity.getBody()).isNull();
 
 		List<String> list = service.getList();
-		assertThat(list.get(0)).isEqualTo("exchangeForBody");
+		assertThat(list).containsOnly("exchangeForBody");
 	}
 
 	@Test
@@ -144,7 +153,7 @@ class HttpServiceMethodTests {
 		assertThat(bodySingle.blockingGet()).isEqualTo("exchangeForBodyMono");
 
 		Flowable<String> bodyFlow = service.getFlowableBody();
-		assertThat(bodyFlow.toList().blockingGet()).asList().containsExactly("exchange", "For", "Body", "Flux");
+		assertThat(bodyFlow.toList().blockingGet()).containsExactly("exchange", "For", "Body", "Flux");
 
 		Single<ResponseEntity<Void>> voidEntity = service.getVoidEntity();
 		assertThat(voidEntity.blockingGet().getBody()).isNull();
@@ -175,7 +184,16 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
+
+		service.performGetWithHeaders();
+
+		requestValues = this.client.getRequestValues();
+		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
+		assertThat(requestValues.getUriTemplate()).isEmpty();
+		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).isEmpty();
+		assertThat(requestValues.getHeaders().get("CustomHeader")).containsExactly("a", "b", "c");
 	}
 
 	@Test
@@ -193,7 +211,7 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/base");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_CBOR);
-		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_CBOR);
+		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_CBOR);
 
 		service.performPost();
 
@@ -201,7 +219,34 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/base/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(requestValues.getHeaders().getAccept()).containsExactly(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
+	}
+
+	@Test  // gh-32049
+	void multipleAnnotationsAtClassLevel() {
+		Class<?> serviceInterface = MultipleClassLevelAnnotationsService.class;
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.proxyFactory.createClient(serviceInterface))
+				.withMessageContainingAll(
+					"Multiple @HttpExchange annotations found on " + serviceInterface,
+					HttpExchange.class.getSimpleName(),
+					ExtraHttpExchange.class.getSimpleName()
+				);
+	}
+
+	@Test  // gh-32049
+	void multipleAnnotationsAtMethodLevel() throws NoSuchMethodException {
+		Class<?> serviceInterface = MultipleMethodLevelAnnotationsService.class;
+		Method method = serviceInterface.getMethod("post");
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.proxyFactory.createClient(serviceInterface))
+				.withMessageContainingAll(
+					"Multiple @HttpExchange annotations found on method " + method,
+					PostExchange.class.getSimpleName(),
+					PutExchange.class.getSimpleName()
+				);
 	}
 
 	protected void verifyReactorClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
@@ -303,11 +348,40 @@ class HttpServiceMethodTests {
 		@PostExchange(url = "/url", contentType = APPLICATION_JSON_VALUE, accept = APPLICATION_JSON_VALUE)
 		void performPost();
 
+		@HttpExchange(contentType = APPLICATION_JSON_VALUE, headers = {"CustomHeader=a,b, c",
+				"Content-Type=" + APPLICATION_NDJSON_VALUE}, method = "GET")
+		void performGetWithHeaders();
+
 	}
+
 
 	@SuppressWarnings("unused")
 	@HttpExchange(url = "${baseUrl}", contentType = APPLICATION_CBOR_VALUE, accept = APPLICATION_CBOR_VALUE)
 	private interface TypeAndMethodLevelAnnotatedService extends MethodLevelAnnotatedService {
+	}
+
+
+	@HttpExchange("/exchange")
+	@ExtraHttpExchange
+	private interface MultipleClassLevelAnnotationsService {
+
+		@PostExchange("/post")
+		void post();
+	}
+
+
+	private interface MultipleMethodLevelAnnotationsService {
+
+		@PostExchange("/post")
+		@PutExchange("/post")
+		void post();
+	}
+
+
+	@HttpExchange
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface ExtraHttpExchange {
 	}
 
 }

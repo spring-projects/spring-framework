@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
+import java.util.concurrent.Executor;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -147,6 +148,22 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
+	 * Set the {@link Executor} (possibly a {@link org.springframework.core.task.TaskExecutor})
+	 * for background bootstrapping.
+	 * @since 6.2
+	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setBackgroundInit
+	 */
+	void setBootstrapExecutor(@Nullable Executor executor);
+
+	/**
+	 * Return the {@link Executor} (possibly a {@link org.springframework.core.task.TaskExecutor})
+	 * for background bootstrapping, if any.
+	 * @since 6.2
+	 */
+	@Nullable
+	Executor getBootstrapExecutor();
+
+	/**
 	 * Specify a {@link ConversionService} to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 * @since 3.0
@@ -224,7 +241,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean hasEmbeddedValueResolver();
 
 	/**
-	 * Resolve the given embedded value, e.g. an annotation attribute.
+	 * Resolve the given embedded value, for example, an annotation attribute.
 	 * @param value the value to resolve
 	 * @return the resolved value (may be the original value as-is)
 	 * @since 3.0
@@ -238,7 +255,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>Note: Post-processors submitted here will be applied in the order of
 	 * registration; any ordering semantics expressed through implementing the
 	 * {@link org.springframework.core.Ordered} interface will be ignored. Note
-	 * that autodetected post-processors (e.g. as beans in an ApplicationContext)
+	 * that autodetected post-processors (for example, as beans in an ApplicationContext)
 	 * will always be applied after programmatically registered ones.
 	 * @param beanPostProcessor the post-processor to register
 	 */

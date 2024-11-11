@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,22 +34,26 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.netty.util.Attribute;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.eclipse.jetty.client.Request;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
@@ -79,7 +83,7 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Integration tests using an {@link ExchangeFunction} through {@link WebClient}.
@@ -95,17 +99,17 @@ class WebClientIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("arguments")
 	@interface ParameterizedWebClientTest {
 	}
 
-	static Stream<Named<ClientHttpConnector>> arguments() {
+	static Stream<Arguments> arguments() {
 		return Stream.of(
-				named("Reactor Netty", new ReactorClientHttpConnector()),
-				named("JDK", new JdkClientHttpConnector()),
-				named("Jetty", new JettyClientHttpConnector()),
-				named("HttpComponents", new HttpComponentsClientHttpConnector())
+				argumentSet("Reactor Netty", new ReactorClientHttpConnector()),
+				argumentSet("JDK", new JdkClientHttpConnector()),
+				argumentSet("Jetty", new JettyClientHttpConnector()),
+				argumentSet("HttpComponents", new HttpComponentsClientHttpConnector())
 		);
 	}
 
@@ -187,6 +191,41 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	void applyAttributesToNativeRequest(ClientHttpConnector connector) {
+		startServer(connector);
+		prepareResponse(response -> {});
+
+		final AtomicReference<Object> nativeRequest = new AtomicReference<>();
+		Mono<Void> result = this.webClient.get()
+				.uri("/pojo")
+				.attribute("foo","bar")
+				.httpRequest(clientHttpRequest -> nativeRequest.set(clientHttpRequest.getNativeRequest()))
+				.retrieve()
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectComplete().verify();
+
+		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
+			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY);
+			assertThat(attributes.get()).isNotNull();
+			assertThat(attributes.get()).containsEntry("foo", "bar");
+		}
+		else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
+			io.netty5.util.Attribute<Map<String, Object>> attributes =
+					nativeReq.channel().attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY);
+			assertThat(attributes.get()).isNotNull();
+			assertThat(attributes.get()).containsEntry("foo", "bar");
+		}
+		else if (nativeRequest.get() instanceof Request nativeReq) {
+			assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
+		}
+		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest) {
+			// Attributes are not in the request, but in separate HttpClientContext
+		}
+	}
+
+
+	@ParameterizedWebClientTest
 	void retrieveJsonWithParameterizedTypeReference(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -197,7 +236,7 @@ class WebClientIntegrationTests {
 		Mono<ValueContainer<Pojo>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<ValueContainer<Pojo>>() {});
+				.bodyToMono(new ParameterizedTypeReference<>() {});
 
 		StepVerifier.create(result)
 				.assertNext(c -> assertThat(c.getContainerValue()).isEqualTo(new Pojo("foofoo", "barbar")))
@@ -481,7 +520,7 @@ class WebClientIntegrationTests {
 				.retrieve()
 				.bodyToMono(Map.class);
 
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest  // SPR-15946
@@ -737,7 +776,7 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest  // SPR-16246
-	void postLargeTextFile(ClientHttpConnector connector) throws Exception {
+	void postLargeTextFile(ClientHttpConnector connector) {
 		startServer(connector);
 
 		prepareResponse(response -> {});
@@ -804,7 +843,7 @@ class WebClientIntegrationTests {
 				.uri("/greeting")
 				.retrieve()
 				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
-				.bodyToMono(new ParameterizedTypeReference<String>() {});
+				.bodyToMono(new ParameterizedTypeReference<>() {});
 
 		StepVerifier.create(result)
 				.expectError(MyException.class)
@@ -842,7 +881,7 @@ class WebClientIntegrationTests {
 					MyException error = (MyException) throwable;
 					assertThat(error.getMessage()).isEqualTo("foofoo");
 				})
-				.verify();
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
@@ -884,7 +923,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Internal Server error")
-				.verifyComplete();
+				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {
@@ -914,7 +953,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Internal Server error")
-				.verifyComplete();
+				.expectComplete().verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {
@@ -1072,7 +1111,7 @@ class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.assertNext(r -> assertThat(r.getStatusCode().is2xxSuccessful()).isTrue())
-				.verifyComplete();
+				.expectComplete().verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
@@ -1241,7 +1280,7 @@ class WebClientIntegrationTests {
 					WebClientException ex = (WebClientException) throwable;
 					assertThat(ex.getCause()).isInstanceOf(IOException.class);
 				})
-				.verify();
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
@@ -1253,7 +1292,7 @@ class WebClientIntegrationTests {
 					WebClientException ex = (WebClientException) throwable;
 					assertThat(ex.getCause()).isInstanceOf(IOException.class);
 				})
-				.verify();
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,20 @@
 package org.springframework.context.aot;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
-import org.springframework.aot.hint.annotation.ReflectiveRuntimeHintsRegistrar;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
-import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.context.annotation.ReflectiveScan;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * AOT {@code BeanFactoryInitializationAotProcessor} that detects the presence
@@ -39,30 +42,38 @@ import org.springframework.beans.factory.support.RegisteredBean;
  */
 class ReflectiveProcessorBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-	private static final ReflectiveRuntimeHintsRegistrar REGISTRAR = new ReflectiveRuntimeHintsRegistrar();
-
 	@Override
+	@Nullable
 	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
-		Class<?>[] beanTypes = Arrays.stream(beanFactory.getBeanDefinitionNames())
+		Class<?>[] beanClasses = Arrays.stream(beanFactory.getBeanDefinitionNames())
 				.map(beanName -> RegisteredBean.of(beanFactory, beanName).getBeanClass())
 				.toArray(Class<?>[]::new);
-		return new ReflectiveProcessorBeanFactoryInitializationAotContribution(beanTypes);
+		String[] packagesToScan = findBasePackagesToScan(beanClasses);
+		return new ReflectiveProcessorAotContributionBuilder().withClasses(beanClasses)
+				.scan(beanFactory.getBeanClassLoader(), packagesToScan).build();
 	}
 
-	private static class ReflectiveProcessorBeanFactoryInitializationAotContribution implements BeanFactoryInitializationAotContribution {
-
-		private final Class<?>[] types;
-
-		public ReflectiveProcessorBeanFactoryInitializationAotContribution(Class<?>[] types) {
-			this.types = types;
+	protected String[] findBasePackagesToScan(Class<?>[] beanClasses) {
+		Set<String> basePackages = new LinkedHashSet<>();
+		for (Class<?> beanClass : beanClasses) {
+			ReflectiveScan reflectiveScan = AnnotatedElementUtils.getMergedAnnotation(beanClass, ReflectiveScan.class);
+			if (reflectiveScan != null) {
+				basePackages.addAll(extractBasePackages(reflectiveScan, beanClass));
+			}
 		}
+		return basePackages.toArray(new String[0]);
+	}
 
-		@Override
-		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
-			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			REGISTRAR.registerRuntimeHints(runtimeHints, this.types);
+	private Set<String> extractBasePackages(ReflectiveScan annotation, Class<?> declaringClass) {
+		Set<String> basePackages = new LinkedHashSet<>();
+		Collections.addAll(basePackages, annotation.basePackages());
+		for (Class<?> clazz : annotation.basePackageClasses()) {
+			basePackages.add(ClassUtils.getPackageName(clazz));
 		}
-
+		if (basePackages.isEmpty()) {
+			basePackages.add(ClassUtils.getPackageName(declaringClass));
+		}
+		return basePackages;
 	}
 
 }

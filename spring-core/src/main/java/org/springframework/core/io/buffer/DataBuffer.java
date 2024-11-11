@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,29 +263,35 @@ public interface DataBuffer {
 	default DataBuffer write(CharSequence charSequence, Charset charset) {
 		Assert.notNull(charSequence, "CharSequence must not be null");
 		Assert.notNull(charset, "Charset must not be null");
-		if (charSequence.length() > 0) {
+		if (!charSequence.isEmpty()) {
 			CharsetEncoder encoder = charset.newEncoder()
 					.onMalformedInput(CodingErrorAction.REPLACE)
 					.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			CharBuffer src = CharBuffer.wrap(charSequence);
-			int cap = (int) (src.remaining() * encoder.averageBytesPerChar());
+			int averageSize = (int) Math.ceil(src.remaining() * encoder.averageBytesPerChar());
+			ensureWritable(averageSize);
 			while (true) {
-				ensureWritable(cap);
 				CoderResult cr;
-				try (ByteBufferIterator iterator = writableByteBuffers()) {
-					Assert.state(iterator.hasNext(), "No ByteBuffer available");
-					ByteBuffer dest = iterator.next();
-					cr = encoder.encode(src, dest, true);
-					if (cr.isUnderflow()) {
-						cr = encoder.flush(dest);
+				if (src.hasRemaining()) {
+					try (ByteBufferIterator iterator = writableByteBuffers()) {
+						Assert.state(iterator.hasNext(), "No ByteBuffer available");
+						ByteBuffer dest = iterator.next();
+						cr = encoder.encode(src, dest, true);
+						if (cr.isUnderflow()) {
+							cr = encoder.flush(dest);
+						}
+						writePosition(writePosition() + dest.position());
 					}
-					writePosition(dest.position());
+				}
+				else {
+					cr = CoderResult.UNDERFLOW;
 				}
 				if (cr.isUnderflow()) {
 					break;
 				}
-				if (cr.isOverflow()) {
-					cap = 2 * cap + 1;
+				else if (cr.isOverflow()) {
+					int maxSize = (int) Math.ceil(src.remaining() * encoder.maxBytesPerChar());
+					ensureWritable(maxSize);
 				}
 			}
 		}

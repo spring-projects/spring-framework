@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link org.springframework.web.socket.sockjs.frame.SockJsFrame}.
+ * Tests for {@link SockJsFrame}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class SockJsFrameTests {
+class SockJsFrameTests {
 
 
 	@Test
-	public void openFrame() {
+	void openFrame() {
 		SockJsFrame frame = SockJsFrame.openFrame();
 
 		assertThat(frame.getContent()).isEqualTo("o");
@@ -39,7 +39,7 @@ public class SockJsFrameTests {
 	}
 
 	@Test
-	public void heartbeatFrame() {
+	void heartbeatFrame() {
 		SockJsFrame frame = SockJsFrame.heartbeatFrame();
 
 		assertThat(frame.getContent()).isEqualTo("h");
@@ -48,7 +48,7 @@ public class SockJsFrameTests {
 	}
 
 	@Test
-	public void messageArrayFrame() {
+	void messageArrayFrame() {
 		SockJsFrame frame = SockJsFrame.messageFrame(new Jackson2SockJsMessageCodec(), "m1", "m2");
 
 		assertThat(frame.getContent()).isEqualTo("a[\"m1\",\"m2\"]");
@@ -57,7 +57,7 @@ public class SockJsFrameTests {
 	}
 
 	@Test
-	public void messageArrayFrameEmpty() {
+	void messageArrayFrameEmpty() {
 		SockJsFrame frame = new SockJsFrame("a");
 
 		assertThat(frame.getContent()).isEqualTo("a[]");
@@ -72,7 +72,7 @@ public class SockJsFrameTests {
 	}
 
 	@Test
-	public void closeFrame() {
+	void closeFrame() {
 		SockJsFrame frame = SockJsFrame.closeFrame(3000, "Go Away!");
 
 		assertThat(frame.getContent()).isEqualTo("c[3000,\"Go Away!\"]");
@@ -81,7 +81,7 @@ public class SockJsFrameTests {
 	}
 
 	@Test
-	public void closeFrameEmpty() {
+	void closeFrameEmpty() {
 		SockJsFrame frame = new SockJsFrame("c");
 
 		assertThat(frame.getContent()).isEqualTo("c[]");

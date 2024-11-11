@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,22 +34,22 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class CorsUtilsTests {
+class CorsUtilsTests {
 
 	@Test
-	public void isCorsRequest() {
+	void isCorsRequest() {
 		ServerHttpRequest request = get("http://domain.example/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
 		assertThat(CorsUtils.isCorsRequest(request)).isTrue();
 	}
 
 	@Test
-	public void isNotCorsRequest() {
+	void isNotCorsRequest() {
 		ServerHttpRequest request = get("/").build();
 		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
 	}
 
 	@Test
-	public void isPreFlightRequest() {
+	void isPreFlightRequest() {
 		ServerHttpRequest request = options("/")
 				.header(HttpHeaders.ORIGIN, "https://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
@@ -58,7 +58,7 @@ public class CorsUtilsTests {
 	}
 
 	@Test
-	public void isNotPreFlightRequest() {
+	void isNotPreFlightRequest() {
 		ServerHttpRequest request = get("/").build();
 		assertThat(CorsUtils.isPreFlightRequest(request)).isFalse();
 

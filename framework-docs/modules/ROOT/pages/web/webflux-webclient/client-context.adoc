@@ -3,8 +3,8 @@
 
 xref:web/webflux-webclient/client-attributes.adoc[Attributes] provide a convenient way to pass information to the filter
 chain but they only influence the current request. If you want to pass information that
-propagates to additional requests that are nested, e.g. via `flatMap`, or executed after,
-e.g. via `concatMap`, then you'll need to use the Reactor `Context`.
+propagates to additional requests that are nested, for example, via `flatMap`, or executed after,
+for example, via `concatMap`, then you'll need to use the Reactor `Context`.
 
 The Reactor `Context` needs to be populated at the end of a reactive chain in order to
 apply to all operations. For example:
@@ -13,7 +13,7 @@ apply to all operations. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient client = WebClient.builder()
 			.filter((request, next) ->

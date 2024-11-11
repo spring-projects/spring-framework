@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.server.PathContainer;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.resource.ResourceHandlerUtils;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -36,6 +35,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * Lookup function used by {@link RouterFunctions#resources(String, Resource)}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.2
  */
 class PathResourceLookupFunction implements Function<ServerRequest, Optional<Resource>> {
@@ -47,7 +47,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 
 	public PathResourceLookupFunction(String pattern, Resource location) {
 		Assert.hasLength(pattern, "'pattern' must not be empty");
-		Assert.notNull(location, "'location' must not be null");
+		ResourceHandlerUtils.assertResourceLocation(location);
 		this.pattern = PathPatternParser.defaultInstance.parse(pattern);
 		this.location = location;
 	}
@@ -61,17 +61,18 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		}
 
 		pathContainer = this.pattern.extractPathWithinPattern(pathContainer);
-		String path = processPath(pathContainer.value());
-		if (path.contains("%")) {
-			path = StringUtils.uriDecode(path, StandardCharsets.UTF_8);
-		}
-		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
+		String path = ResourceHandlerUtils.normalizeInputPath(pathContainer.value());
+		if (ResourceHandlerUtils.shouldIgnoreInputPath(path)) {
 			return Optional.empty();
+		}
+
+		if (!(this.location instanceof UrlResource)) {
+			path = UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 
 		try {
 			Resource resource = this.location.createRelative(path);
-			if (resource.isReadable() && isResourceUnderLocation(resource)) {
+			if (resource.isReadable() && ResourceHandlerUtils.isResourceUnderLocation(this.location, resource)) {
 				return Optional.of(resource);
 			}
 			else {
@@ -82,69 +83,6 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 			throw new UncheckedIOException(ex);
 		}
 	}
-
-	private String processPath(String path) {
-		boolean slash = false;
-		for (int i = 0; i < path.length(); i++) {
-			if (path.charAt(i) == '/') {
-				slash = true;
-			}
-			else if (path.charAt(i) > ' ' && path.charAt(i) != 127) {
-				if (i == 0 || (i == 1 && slash)) {
-					return path;
-				}
-				path = slash ? "/" + path.substring(i) : path.substring(i);
-				return path;
-			}
-		}
-		return (slash ? "/" : "");
-	}
-
-	private boolean isInvalidPath(String path) {
-		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			return true;
-		}
-		if (path.contains(":/")) {
-			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
-			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				return true;
-			}
-		}
-		return path.contains("..") && StringUtils.cleanPath(path).contains("../");
-	}
-
-	private boolean isResourceUnderLocation(Resource resource) throws IOException {
-		if (resource.getClass() != this.location.getClass()) {
-			return false;
-		}
-
-		String resourcePath;
-		String locationPath;
-
-		if (resource instanceof UrlResource) {
-			resourcePath = resource.getURL().toExternalForm();
-			locationPath = StringUtils.cleanPath(this.location.getURL().toString());
-		}
-		else if (resource instanceof ClassPathResource classPathResource) {
-			resourcePath = classPathResource.getPath();
-			locationPath = StringUtils.cleanPath(((ClassPathResource) this.location).getPath());
-		}
-		else {
-			resourcePath = resource.getURL().getPath();
-			locationPath = StringUtils.cleanPath(this.location.getURL().getPath());
-		}
-
-		if (locationPath.equals(resourcePath)) {
-			return true;
-		}
-		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
-		return !resourcePath.contains("%") ||
-				!StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../");
-	}
-
 
 	@Override
 	public String toString() {

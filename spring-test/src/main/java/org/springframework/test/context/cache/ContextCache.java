@@ -111,7 +111,7 @@ public interface ContextCache {
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#close() close}
 	 * it if it is an instance of {@code ConfigurableApplicationContext}.
 	 * <p>Generally speaking, this method should be called to properly evict
-	 * a context from the cache (e.g., due to a custom eviction policy) or if
+	 * a context from the cache (for example, due to a custom eviction policy) or if
 	 * the state of a singleton bean has been modified, potentially affecting
 	 * future interaction with the context.
 	 * <p>In addition, the semantics of the supplied {@code HierarchyMode} must

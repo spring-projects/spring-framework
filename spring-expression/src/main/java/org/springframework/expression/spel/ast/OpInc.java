@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,13 @@ import org.springframework.util.Assert;
  */
 public class OpInc extends Operator {
 
+	private static final String INC = "++";
+
 	private final boolean postfix;  // false means prefix
 
 
 	public OpInc(int startPos, int endPos, boolean postfix, SpelNodeImpl... operands) {
-		super("++", startPos, endPos, operands);
+		super(INC, startPos, endPos, operands);
 		this.postfix = postfix;
 		Assert.notEmpty(operands, "Operands must not be empty");
 	}
@@ -51,6 +53,10 @@ public class OpInc extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		if (!state.getEvaluationContext().isAssignmentEnabled()) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.OPERAND_NOT_INCREMENTABLE, toStringAST());
+		}
+
 		SpelNodeImpl operand = getLeftOperand();
 		ValueRef valueRef = operand.getValueRef(state);
 
@@ -104,12 +110,12 @@ public class OpInc extends Operator {
 			}
 		}
 
-		// set the name value
+		// set the new value
 		try {
 			valueRef.setValue(newValue.getValue());
 		}
 		catch (SpelEvaluationException see) {
-			// If unable to set the value the operand is not writable (e.g. 1++ )
+			// If unable to set the value the operand is not writable (for example, 1++ )
 			if (see.getMessageCode() == SpelMessage.SETVALUE_NOT_SUPPORTED) {
 				throw new SpelEvaluationException(operand.getStartPosition(), SpelMessage.OPERAND_NOT_INCREMENTABLE);
 			}
@@ -128,7 +134,8 @@ public class OpInc extends Operator {
 
 	@Override
 	public String toStringAST() {
-		return getLeftOperand().toStringAST() + "++";
+		String ast = getLeftOperand().toStringAST();
+		return (this.postfix ? ast + INC : INC + ast);
 	}
 
 	@Override

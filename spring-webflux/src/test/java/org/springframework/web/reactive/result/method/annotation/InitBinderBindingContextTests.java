@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link InitBinderBindingContext}.
+ * Tests for {@link InitBinderBindingContext}.
  *
  * @author Rossen Stoyanchev
  */
-public class InitBinderBindingContextTests {
+class InitBinderBindingContextTests {
 
 	private final ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 
@@ -53,7 +53,7 @@ public class InitBinderBindingContextTests {
 
 
 	@Test
-	public void createBinder() throws Exception {
+	void createBinder() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null);
@@ -63,7 +63,7 @@ public class InitBinderBindingContextTests {
 	}
 
 	@Test
-	public void createBinderWithGlobalInitialization() throws Exception {
+	void createBinderWithGlobalInitialization() throws Exception {
 		ConversionService conversionService = new DefaultFormattingConversionService();
 		bindingInitializer.setConversionService(conversionService);
 
@@ -75,7 +75,7 @@ public class InitBinderBindingContextTests {
 	}
 
 	@Test
-	public void createBinderWithAttrName() throws Exception {
+	void createBinderWithAttrName() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, "foo");
@@ -85,7 +85,7 @@ public class InitBinderBindingContextTests {
 	}
 
 	@Test
-	public void createBinderWithAttrNameNoMatch() throws Exception {
+	void createBinderWithAttrNameNoMatch() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, "invalidName");
@@ -94,7 +94,7 @@ public class InitBinderBindingContextTests {
 	}
 
 	@Test
-	public void createBinderNullAttrName() throws Exception {
+	void createBinderNullAttrName() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null);
@@ -103,14 +103,14 @@ public class InitBinderBindingContextTests {
 	}
 
 	@Test
-	public void returnValueNotExpected() throws Exception {
+	void returnValueNotExpected() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderReturnValue", WebDataBinder.class);
 		assertThatIllegalStateException().isThrownBy(() -> context.createDataBinder(exchange, "invalidName"));
 	}
 
 	@Test
-	public void createBinderTypeConversion() throws Exception {
+	void createBinderTypeConversion() throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?requestParam=22").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();

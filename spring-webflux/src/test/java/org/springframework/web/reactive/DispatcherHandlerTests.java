@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.withSettings;
 
 /**
- * Unit tests for {@link DispatcherHandler}.
+ * Tests for {@link DispatcherHandler}.
+ *
  * @author Rossen Stoyanchev
  */
-public class DispatcherHandlerTests {
+class DispatcherHandlerTests {
 
 	private static final MethodParameter RETURN_TYPE =
 			ResolvableMethod.on(DispatcherHandler.class).named("handle").resolveReturnType();

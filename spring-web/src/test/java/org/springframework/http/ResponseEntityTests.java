@@ -208,7 +208,7 @@ class ResponseEntityTests {
 		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_LENGTH)).isEqualTo(String.valueOf(contentLength));
 		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType.toString());
 
-		assertThat((Object) responseEntity.getBody()).isNull();
+		assertThat(responseEntity.getBody()).isNull();
 	}
 
 	@Test
@@ -250,7 +250,7 @@ class ResponseEntityTests {
 				ResponseEntity.ok().headers((HttpHeaders) null).build();
 
 		assertThat(responseEntityWithEmptyHeaders.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntityWithEmptyHeaders.getHeaders().isEmpty()).isTrue();
+		assertThat(responseEntityWithEmptyHeaders.getHeaders()).isEmpty();
 		assertThat(responseEntityWithNullHeaders.toString()).isEqualTo(responseEntityWithEmptyHeaders.toString());
 	}
 

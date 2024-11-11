@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,20 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.Payload;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link PayloadArgumentResolver}.
+ * Tests for {@link PayloadArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
-public class PayloadArgumentResolverTests extends RSocketServiceArgumentResolverTestSupport {
+@SuppressWarnings("DataFlowIssue")
+class PayloadArgumentResolverTests extends RSocketServiceArgumentResolverTestSupport {
 
 	@Override
 	protected RSocketServiceArgumentResolver initResolver() {
@@ -46,9 +50,7 @@ public class PayloadArgumentResolverTests extends RSocketServiceArgumentResolver
 		String payload = "payloadValue";
 		boolean resolved = execute(payload, initMethodParameter(Service.class, "execute", 0));
 
-		assertThat(resolved).isTrue();
-		assertThat(getRequestValues().getPayloadValue()).isEqualTo(payload);
-		assertThat(getRequestValues().getPayload()).isNull();
+		assertPayload(resolved, payload);
 	}
 
 	@Test
@@ -56,10 +58,7 @@ public class PayloadArgumentResolverTests extends RSocketServiceArgumentResolver
 		Mono<String> payloadMono = Mono.just("payloadValue");
 		boolean resolved = execute(payloadMono, initMethodParameter(Service.class, "executeMono", 0));
 
-		assertThat(resolved).isTrue();
-		assertThat(getRequestValues().getPayloadValue()).isNull();
-		assertThat(getRequestValues().getPayload()).isSameAs(payloadMono);
-		assertThat(getRequestValues().getPayloadElementType()).isEqualTo(new ParameterizedTypeReference<String>() {});
+		assertPayloadMono(resolved, payloadMono);
 	}
 
 	@Test
@@ -91,7 +90,7 @@ public class PayloadArgumentResolverTests extends RSocketServiceArgumentResolver
 	}
 
 	@Test
-	void notRequestBody() {
+	void notPayload() {
 		MethodParameter parameter = initMethodParameter(Service.class, "executeNotAnnotated", 0);
 		boolean resolved = execute("value", parameter);
 
@@ -99,22 +98,68 @@ public class PayloadArgumentResolverTests extends RSocketServiceArgumentResolver
 	}
 
 	@Test
-	void ignoreNull() {
-		boolean resolved = execute(null, initMethodParameter(Service.class, "execute", 0));
+	void nullPayload() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> execute(null, initMethodParameter(Service.class, "execute", 0)))
+				.withMessage("Missing payload");
 
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> execute(null, initMethodParameter(Service.class, "executeMono", 0)))
+				.withMessage("Missing payload");
+	}
+
+	@Test
+	void nullPayloadWithNullable() {
+		boolean resolved = execute(null, initMethodParameter(Service.class, "executeNullable", 0));
+		assertNullValues(resolved);
+
+		boolean resolvedMono = execute(null, initMethodParameter(Service.class, "executeNullableMono", 0));
+		assertNullValues(resolvedMono);
+	}
+
+	@Test
+	void nullPayloadWithNotRequired() {
+		boolean resolved = execute(null, initMethodParameter(Service.class, "executeNotRequired", 0));
+		assertNullValues(resolved);
+
+		boolean resolvedMono = execute(null, initMethodParameter(Service.class, "executeNotRequiredMono", 0));
+		assertNullValues(resolvedMono);
+	}
+
+	private void assertPayload(boolean resolved, String payload) {
+		assertThat(resolved).isTrue();
+		assertThat(getRequestValues().getPayloadValue()).isEqualTo(payload);
+		assertThat(getRequestValues().getPayload()).isNull();
+	}
+
+	private void assertPayloadMono(boolean resolved, Mono<String> payloadMono) {
+		assertThat(resolved).isTrue();
+		assertThat(getRequestValues().getPayloadValue()).isNull();
+		assertThat(getRequestValues().getPayload()).isSameAs(payloadMono);
+		assertThat(getRequestValues().getPayloadElementType()).isEqualTo(new ParameterizedTypeReference<String>() { });
+	}
+
+	private void assertNullValues(boolean resolved) {
 		assertThat(resolved).isTrue();
 		assertThat(getRequestValues().getPayloadValue()).isNull();
 		assertThat(getRequestValues().getPayload()).isNull();
 		assertThat(getRequestValues().getPayloadElementType()).isNull();
 	}
 
-
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused"})
 	private interface Service {
 
 		void execute(@Payload String body);
 
+		void executeNotRequired(@Payload(required = false) String body);
+
+		void executeNullable(@Nullable @Payload String body);
+
 		void executeMono(@Payload Mono<String> body);
+
+		void executeNullableMono(@Nullable @Payload Mono<String> body);
+
+		void executeNotRequiredMono(@Payload(required = false) Mono<String> body);
 
 		void executeSingle(@Payload Single<String> body);
 

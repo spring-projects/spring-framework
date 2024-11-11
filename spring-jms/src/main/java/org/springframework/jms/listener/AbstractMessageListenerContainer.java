@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import io.micrometer.jakarta9.instrument.jms.DefaultJmsProcessObservationConvention;
+import io.micrometer.jakarta9.instrument.jms.JmsInstrumentation;
 import io.micrometer.jakarta9.instrument.jms.JmsObservationDocumentation;
 import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext;
 import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationConvention;
@@ -204,7 +205,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * <p>Alternatively, specify a "destinationName", to be dynamically
 	 * resolved via the {@link org.springframework.jms.support.destination.DestinationResolver}.
 	 * <p>Note: The destination may be replaced at runtime, with the listener
-	 * container picking up the new destination immediately (works e.g. with
+	 * container picking up the new destination immediately (works, for example, with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @see #setDestinationName(String)
@@ -233,7 +234,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * {@link #setDestinationResolver destination resolver}.
 	 * <p>Alternatively, specify a JMS {@link Destination} object as "destination".
 	 * <p>Note: The destination may be replaced at runtime, with the listener
-	 * container picking up the new destination immediately (works e.g. with
+	 * container picking up the new destination immediately (works, for example, with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @see #setDestination(jakarta.jms.Destination)
@@ -267,7 +268,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Default is none.
 	 * <p>See the JMS specification for a detailed definition of selector expressions.
 	 * <p>Note: The message selector may be replaced at runtime, with the listener
-	 * container picking up the new selector value immediately (works e.g. with
+	 * container picking up the new selector value immediately (works, for example, with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 */
@@ -289,7 +290,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * This can be either a standard JMS {@link MessageListener} object
 	 * or a Spring {@link SessionAwareMessageListener} object.
 	 * <p>Note: The message listener may be replaced at runtime, with the listener
-	 * container picking up the new listener object immediately (works e.g. with
+	 * container picking up the new listener object immediately (works, for example, with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @throws IllegalArgumentException if the supplied listener is not a
@@ -675,16 +676,21 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #handleListenerException
 	 */
 	protected void executeListener(Session session, Message message) {
-		createObservation(message).observe(() -> {
-			try {
-				doExecuteListener(session, message);
-			}
-			catch (Throwable ex) {
-				handleListenerException(ex);
-			}
-		});
+		try {
+			doExecuteListener(session, message);
+		}
+		catch (Throwable ex) {
+			handleListenerException(ex);
+		}
 	}
 
+	/**
+	 * Create, but do not start an {@link Observation} for JMS message processing.
+	 * <p>This will return a "no-op" observation if Micrometer Jakarta instrumentation
+	 * is not available or if no Observation Registry has been configured.
+	 * @param message the message to be observed
+	 * @since 6.1
+	 */
 	protected Observation createObservation(Message message) {
 		if (micrometerJakartaPresent && this.observationRegistry != null) {
 			return ObservationFactory.create(this.observationRegistry, message);
@@ -769,16 +775,17 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 		Connection conToClose = null;
 		Session sessionToClose = null;
-		Observation observation = createObservation(message);
 		try {
 			Session sessionToUse = session;
+			if (micrometerJakartaPresent && this.observationRegistry != null) {
+				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
+			}
 			if (!isExposeListenerSession()) {
 				// We need to expose a separate Session.
 				conToClose = createConnection();
 				sessionToClose = createSession(conToClose);
 				sessionToUse = sessionToClose;
 			}
-			observation.start();
 			// Actually invoke the message listener...
 			listener.onMessage(message, sessionToUse);
 			// Clean up specially exposed Session, if any.
@@ -790,11 +797,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			}
 		}
 		catch (JMSException exc) {
-			observation.error(exc);
 			throw exc;
 		}
 		finally {
-			observation.stop();
 			JmsUtils.closeSession(sessionToClose);
 			JmsUtils.closeConnection(conToClose);
 		}
@@ -990,6 +995,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@SuppressWarnings("serial")
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
+	}
+
+	private abstract static class MicrometerInstrumentation {
+
+		static Session instrumentSession(Session session, ObservationRegistry registry) {
+			return JmsInstrumentation.instrumentSession(session, registry);
+		}
+
 	}
 
 	private abstract static class ObservationFactory {

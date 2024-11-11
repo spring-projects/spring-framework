@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,25 +38,25 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @since 05.08.2005
  */
-public class JndiJtaTransactionManagerTests {
+class JndiJtaTransactionManagerTests {
 
 	@Test
-	public void jtaTransactionManagerWithDefaultJndiLookups1() throws Exception {
+	void jtaTransactionManagerWithDefaultJndiLookups1() throws Exception {
 		doTestJtaTransactionManagerWithDefaultJndiLookups("java:comp/TransactionManager", true, true);
 	}
 
 	@Test
-	public void jtaTransactionManagerWithDefaultJndiLookups2() throws Exception {
+	void jtaTransactionManagerWithDefaultJndiLookups2() throws Exception {
 		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/TransactionManager", true, true);
 	}
 
 	@Test
-	public void jtaTransactionManagerWithDefaultJndiLookupsAndNoTmFound() throws Exception {
+	void jtaTransactionManagerWithDefaultJndiLookupsAndNoTmFound() throws Exception {
 		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/tm", false, true);
 	}
 
 	@Test
-	public void jtaTransactionManagerWithDefaultJndiLookupsAndNoUtFound() throws Exception {
+	void jtaTransactionManagerWithDefaultJndiLookupsAndNoUtFound() throws Exception {
 		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/TransactionManager", true, false);
 	}
 
@@ -127,7 +127,7 @@ public class JndiJtaTransactionManagerTests {
 	}
 
 	@Test
-	public void jtaTransactionManagerWithCustomJndiLookups() throws Exception {
+	void jtaTransactionManagerWithCustomJndiLookups() throws Exception {
 		UserTransaction ut = mock();
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
@@ -166,7 +166,7 @@ public class JndiJtaTransactionManagerTests {
 	}
 
 	@Test
-	public void jtaTransactionManagerWithNotCacheUserTransaction() throws Exception {
+	void jtaTransactionManagerWithNotCacheUserTransaction() throws Exception {
 		UserTransaction ut = mock();
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
@@ -218,8 +218,8 @@ public class JndiJtaTransactionManagerTests {
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
 	@AfterEach
-	public void tearDown() {
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+	void tearDown() {
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.getCurrentTransactionName()).isNull();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();

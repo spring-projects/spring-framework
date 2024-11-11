@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,14 +64,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for custom XML namespace handler implementations.
+ * Tests for custom XML namespace handler implementations.
  *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class CustomNamespaceHandlerTests {
+class CustomNamespaceHandlerTests {
 
 	private static final Class<?> CLASS = CustomNamespaceHandlerTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -85,7 +85,7 @@ public class CustomNamespaceHandlerTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() {
 		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(CLASS.getClassLoader(), NS_PROPS);
 		this.beanFactory = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
@@ -98,19 +98,19 @@ public class CustomNamespaceHandlerTests {
 
 
 	@Test
-	public void testSimpleParser() throws Exception {
+	void testSimpleParser() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertTestBean(bean);
 	}
 
 	@Test
-	public void testSimpleDecorator() throws Exception {
+	void testSimpleDecorator() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("customisedTestBean");
 		assertTestBean(bean);
 	}
 
 	@Test
-	public void testProxyingDecorator() throws Exception {
+	void testProxyingDecorator() {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("debuggingTestBean");
 		assertTestBean(bean);
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
@@ -120,9 +120,9 @@ public class CustomNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testProxyingDecoratorNoInstance() throws Exception {
+	void testProxyingDecoratorNoInstance() {
 		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
-		assertThat(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance")).isTrue();
+		assertThat(Arrays.asList(beanNames)).contains("debuggingTestBeanNoInstance");
 		assertThat(this.beanFactory.getType("debuggingTestBeanNoInstance")).isEqualTo(ApplicationListener.class);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				this.beanFactory.getBean("debuggingTestBeanNoInstance"))
@@ -131,7 +131,7 @@ public class CustomNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testChainedDecorators() throws Exception {
+	void testChainedDecorators() {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("chainedTestBean");
 		assertTestBean(bean);
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
@@ -142,27 +142,27 @@ public class CustomNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testDecorationViaAttribute() throws Exception {
+	void testDecorationViaAttribute() {
 		BeanDefinition beanDefinition = this.beanFactory.getBeanDefinition("decorateWithAttribute");
 		assertThat(beanDefinition.getAttribute("objectName")).isEqualTo("foo");
 	}
 
 	@Test  // SPR-2728
-	public void testCustomElementNestedWithinUtilList() throws Exception {
+	public void testCustomElementNestedWithinUtilList() {
 		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
 		assertThat(things).isNotNull();
 		assertThat(things).hasSize(2);
 	}
 
 	@Test  // SPR-2728
-	public void testCustomElementNestedWithinUtilSet() throws Exception {
+	public void testCustomElementNestedWithinUtilSet() {
 		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
 		assertThat(things).isNotNull();
 		assertThat(things).hasSize(2);
 	}
 
 	@Test  // SPR-2728
-	public void testCustomElementNestedWithinUtilMap() throws Exception {
+	public void testCustomElementNestedWithinUtilMap() {
 		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
 		assertThat(things).isNotNull();
 		assertThat(things).hasSize(2);

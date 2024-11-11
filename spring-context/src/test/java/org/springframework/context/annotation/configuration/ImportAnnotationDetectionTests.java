@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ImportAnnotationDetectionTests {
 
 	@Test
-	public void multipleMetaImportsAreProcessed() {
+	void multipleMetaImportsAreProcessed() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiMetaImportConfig.class);
 		ctx.refresh();
@@ -53,7 +53,7 @@ public class ImportAnnotationDetectionTests {
 	}
 
 	@Test
-	public void localAndMetaImportsAreProcessed() {
+	void localAndMetaImportsAreProcessed() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiMetaImportConfigWithLocalImport.class);
 		ctx.refresh();
@@ -63,8 +63,9 @@ public class ImportAnnotationDetectionTests {
 	}
 
 	@Test
-	public void localImportIsProcessedLast() {
+	void localImportIsProcessedLast() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(MultiMetaImportConfigWithLocalImportWithBeanOverride.class);
 		ctx.refresh();
 		assertThat(ctx.containsBean("testBean1")).isTrue();
@@ -73,7 +74,7 @@ public class ImportAnnotationDetectionTests {
 	}
 
 	@Test
-	public void importFromBean() throws Exception {
+	void importFromBean() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ImportFromBean.class);
 		ctx.refresh();

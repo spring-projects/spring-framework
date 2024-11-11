@@ -222,6 +222,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * for the given connection, or {@code null} if none.
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
 		Deque<Session> sessions =
 				(connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
@@ -250,7 +251,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 						while (ds != null) {
 							if (TransactionSynchronizationManager.hasResource(ds)) {
 								// IllegalStateException from sharing the underlying JDBC Connection
-								// which typically gets committed first, e.g. with Oracle AQ --> ignore
+								// which typically gets committed first, for example, with Oracle AQ --> ignore
 								return;
 							}
 							try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,10 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link ForwardedHeaderTransformer}.
+ * Tests for {@link ForwardedHeaderTransformer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 class ForwardedHeaderTransformerTests {
 
@@ -167,6 +168,17 @@ class ForwardedHeaderTransformerTests {
 
 		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/first/second/path"));
 		assertThat(request.getPath().value()).isEqualTo("/first/second/path");
+		assertForwardedHeadersRemoved(request);
+	}
+
+	@Test // gh-33465
+	void shouldRemoveSingleTrailingSlash() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-Prefix", "/prefix,/");
+		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
+
+		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/prefix/path"));
+		assertThat(request.getPath().value()).isEqualTo("/prefix/path");
 		assertForwardedHeadersRemoved(request);
 	}
 

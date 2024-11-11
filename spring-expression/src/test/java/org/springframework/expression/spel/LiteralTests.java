@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,83 +19,78 @@ package org.springframework.expression.spel;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date
+ * Tests the evaluation of basic literals: boolean, string, integer, long,
+ * hex integer, hex long, float, double, null.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
-public class LiteralTests extends AbstractExpressionTests {
+class LiteralTests extends AbstractExpressionTests {
 
 	@Test
-	public void testLiteralBoolean01() {
-		evaluate("false", "false", Boolean.class);
+	void booleans() {
+		evaluate("false", false, Boolean.class);
+		evaluate("true", true, Boolean.class);
 	}
 
 	@Test
-	public void testLiteralBoolean02() {
-		evaluate("true", "true", Boolean.class);
-	}
-
-	@Test
-	public void testLiteralInteger01() {
-		evaluate("1", "1", Integer.class);
-	}
-
-	@Test
-	public void testLiteralInteger02() {
-		evaluate("1415", "1415", Integer.class);
-	}
-
-	@Test
-	public void testLiteralString01() {
+	void strings() {
+		evaluate("'hello'", "hello", String.class);
+		evaluate("'joe bloggs'", "joe bloggs", String.class);
 		evaluate("'Hello World'", "Hello World", String.class);
 	}
 
 	@Test
-	public void testLiteralString02() {
-		evaluate("'joe bloggs'", "joe bloggs", String.class);
-	}
-
-	@Test
-	public void testLiteralString03() {
-		evaluate("'hello'", "hello", String.class);
-	}
-
-	@Test
-	public void testLiteralString04() {
+	void stringsContainingQuotes() {
 		evaluate("'Tony''s Pizza'", "Tony's Pizza", String.class);
 		evaluate("'Tony\\r''s Pizza'", "Tony\\r's Pizza", String.class);
-	}
-
-	@Test
-	public void testLiteralString05() {
 		evaluate("\"Hello World\"", "Hello World", String.class);
-	}
-
-	@Test
-	public void testLiteralString06() {
 		evaluate("\"Hello ' World\"", "Hello ' World", String.class);
 	}
 
 	@Test
-	public void testHexIntLiteral01() {
-		evaluate("0x7FFFF", "524287", Integer.class);
-		evaluate("0x7FFFFL", 524287L, Long.class);
-		evaluate("0X7FFFF", "524287", Integer.class);
-		evaluate("0X7FFFFl", 524287L, Long.class);
+	void integers() {
+		evaluate("1", 1, Integer.class);
+		evaluate("1415", 1415, Integer.class);
 	}
 
 	@Test
-	public void testLongIntLiteral01() {
+	void longs() {
+		evaluate("1L", 1L, Long.class);
+		evaluate("1415L", 1415L, Long.class);
+	}
+
+	@Test
+	void signedIntegers() {
+		evaluate("-1", -1, Integer.class);
+		evaluate("-0xa", -10, Integer.class);
+	}
+
+	@Test
+	void signedLongs() {
+		evaluate("-1L", -1L, Long.class);
+		evaluate("-0x20l", -32L, Long.class);
+	}
+
+	@Test
+	void hexIntegers() {
+		evaluate("0x7FFFF", 524287, Integer.class);
+		evaluate("0X7FFFF", 524287, Integer.class);
+	}
+
+	@Test
+	void hexLongs() {
+		evaluate("0X7FFFFl", 524287L, Long.class);
+		evaluate("0x7FFFFL", 524287L, Long.class);
 		evaluate("0xCAFEBABEL", 3405691582L, Long.class);
 	}
 
 	@Test
-	public void testLongIntInteractions01() {
+	void hexLongAndIntInteractions() {
 		evaluate("0x20 * 2L", 64L, Long.class);
 		// ask for the result to be made into an Integer
 		evaluateAndAskForReturnType("0x20 * 2L", 64, Integer.class);
@@ -104,29 +99,8 @@ public class LiteralTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSignedIntLiterals() {
-		evaluate("-1", -1, Integer.class);
-		evaluate("-0xa", -10, Integer.class);
-		evaluate("-1L", -1L, Long.class);
-		evaluate("-0x20l", -32L, Long.class);
-	}
-
-	@Test
-	public void testLiteralReal01_CreatingDoubles() {
-		evaluate("1.25", 1.25d, Double.class);
-		evaluate("2.99", 2.99d, Double.class);
-		evaluate("-3.141", -3.141d, Double.class);
-		evaluate("1.25d", 1.25d, Double.class);
-		evaluate("2.99d", 2.99d, Double.class);
-		evaluate("-3.141d", -3.141d, Double.class);
-		evaluate("1.25D", 1.25d, Double.class);
-		evaluate("2.99D", 2.99d, Double.class);
-		evaluate("-3.141D", -3.141d, Double.class);
-	}
-
-	@Test
-	public void testLiteralReal02_CreatingFloats() {
-		// For now, everything becomes a double...
+	void floats() {
+		// "f" or "F" must be explicitly specified.
 		evaluate("1.25f", 1.25f, Float.class);
 		evaluate("2.5f", 2.5f, Float.class);
 		evaluate("-3.5f", -3.5f, Float.class);
@@ -136,7 +110,23 @@ public class LiteralTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testLiteralReal03_UsingExponents() {
+	void doubles() {
+		// Real numbers are Doubles by default
+		evaluate("1.25", 1.25d, Double.class);
+		evaluate("2.99", 2.99d, Double.class);
+		evaluate("-3.141", -3.141d, Double.class);
+
+		// But "d" or "D" can also be explicitly specified.
+		evaluate("1.25d", 1.25d, Double.class);
+		evaluate("2.99d", 2.99d, Double.class);
+		evaluate("-3.141d", -3.141d, Double.class);
+		evaluate("1.25D", 1.25d, Double.class);
+		evaluate("2.99D", 2.99d, Double.class);
+		evaluate("-3.141D", -3.141d, Double.class);
+	}
+
+	@Test
+	void doublesUsingExponents() {
 		evaluate("6.0221415E+23", "6.0221415E23", Double.class);
 		evaluate("6.0221415e+23", "6.0221415E23", Double.class);
 		evaluate("6.0221415E+23d", "6.0221415E23", Double.class);
@@ -145,30 +135,33 @@ public class LiteralTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testLiteralReal04_BadExpressions() {
+	void doublesUsingExponentsWithInvalidInput() {
 		parseAndCheckError("6.1e23e22", SpelMessage.MORE_INPUT, 6, "e22");
 		parseAndCheckError("6.1f23e22", SpelMessage.MORE_INPUT, 4, "23e22");
 	}
 
 	@Test
-	public void testLiteralNull01() {
+	void nullLiteral() {
 		evaluate("null", null, null);
 	}
 
 	@Test
-	public void testConversions() {
+	void conversions() {
 		// getting the expression type to be what we want - either:
-		evaluate("new Integer(37).byteValue()", (byte) 37, Byte.class); // calling byteValue() on Integer.class
-		evaluateAndAskForReturnType("new Integer(37)", (byte) 37, Byte.class); // relying on registered type converters
+		evaluate("37.byteValue", (byte) 37, Byte.class); // calling byteValue() on Integer.class
+		evaluateAndAskForReturnType("37", (byte) 37, Byte.class); // relying on registered type converters
 	}
 
 	@Test
-	public void testNotWritable() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("37");
-		assertThat(expr.isWritable(new StandardEvaluationContext())).isFalse();
-		expr = (SpelExpression)parser.parseExpression("37L");
-		assertThat(expr.isWritable(new StandardEvaluationContext())).isFalse();
-		expr = (SpelExpression)parser.parseExpression("true");
-		assertThat(expr.isWritable(new StandardEvaluationContext())).isFalse();
+	void notWritable() {
+		SpelExpression expr = (SpelExpression) parser.parseExpression("37");
+		assertThat(expr.isWritable(context)).isFalse();
+
+		expr = (SpelExpression) parser.parseExpression("37L");
+		assertThat(expr.isWritable(context)).isFalse();
+
+		expr = (SpelExpression) parser.parseExpression("true");
+		assertThat(expr.isWritable(context)).isFalse();
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 
 	/**
 	 * Set the system property mode by the name of the corresponding constant,
-	 * e.g. "SYSTEM_PROPERTIES_MODE_OVERRIDE".
+	 * for example, "SYSTEM_PROPERTIES_MODE_OVERRIDE".
 	 * @param constantName name of the constant
 	 * @see #setSystemPropertiesMode
 	 */
@@ -234,7 +234,8 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 
 		public PlaceholderResolvingStringValueResolver(Properties props) {
 			this.helper = new PropertyPlaceholderHelper(
-					placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
+					placeholderPrefix, placeholderSuffix, valueSeparator,
+					escapeCharacter, ignoreUnresolvablePlaceholders);
 			this.resolver = new PropertyPlaceholderConfigurerResolver(props);
 		}
 

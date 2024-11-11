@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -562,7 +562,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		if (!usePathPatterns) {
 			// This depends on suffix pattern matching and has different outcomes otherwise,
-			// e.g. 404 vs another method matching, depending on the test case.
+			// for example, 404 vs another method matching, depending on the test case.
 			assertThat(response.getContentAsString()).isEqualTo("test-name1-2");
 		}
 
@@ -1671,7 +1671,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getForwardedUrl()).isEqualTo("messages/new");
-		assertThat(RequestContextUtils.getOutputFlashMap(request).isEmpty()).isTrue();
+		assertThat((Map<?, ?>) RequestContextUtils.getOutputFlashMap(request)).isEmpty();
 
 		// POST -> success
 		request = new MockHttpServletRequest("POST", "/messages");
@@ -1693,7 +1693,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getContentAsString()).isEqualTo("Got: yay!");
-		assertThat(RequestContextUtils.getOutputFlashMap(request).isEmpty()).isTrue();
+		assertThat((Map<?, ?>) RequestContextUtils.getOutputFlashMap(request)).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest  // SPR-15176
@@ -1719,7 +1719,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getContentAsString()).isEqualTo("Got: yay!");
-		assertThat(RequestContextUtils.getOutputFlashMap(request).isEmpty()).isTrue();
+		assertThat((Map<?, ?>) RequestContextUtils.getOutputFlashMap(request)).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -2782,7 +2782,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 			model.put("myKey", "myOriginalValue");
 			ValidTestBean tb = new ValidTestBean();
-			tb.setName(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
+			tb.setName(defaultName.getClass().getSimpleName() + ":" + defaultName);
 			return tb;
 		}
 
@@ -3052,42 +3052,39 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	static class TestViewResolver implements ViewResolver {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
-			return new View() {
-				@Override
-				@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
-				public void render(@Nullable Map model, HttpServletRequest request, HttpServletResponse response)
-						throws Exception {
-					TestBean tb = (TestBean) model.get("testBean");
-					if (tb == null) {
-						tb = (TestBean) model.get("myCommand");
-					}
-					if (tb.getName() != null && tb.getName().endsWith("myDefaultName")) {
-						assertThat(tb.getDate().getYear()).isEqualTo(107);
-					}
-					Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
-					if (errors == null) {
-						errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
-					}
-					if (errors.hasFieldErrors("date")) {
-						throw new IllegalStateException();
-					}
-					if (model.containsKey("ITestBean")) {
-						boolean condition = model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean") instanceof Errors;
-						assertThat(condition).isTrue();
-					}
-					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
-					if (errors.hasFieldErrors("age")) {
-						response.getWriter()
-								.write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
-										"-" + testBeans.get(0).getName() + "-" + model.get("myKey") +
-										(model.containsKey("yourKey") ? "-" + model.get("yourKey") : ""));
-					}
-					else {
-						response.getWriter().write(viewName + "-" + tb.getName() + "-" + tb.getAge() + "-" +
-								errors.getFieldValue("name") + "-" + errors.getFieldValue("age"));
-					}
+			return (model, request, response) -> {
+				TestBean tb = (TestBean) model.get("testBean");
+				if (tb == null) {
+					tb = (TestBean) model.get("myCommand");
+				}
+				if (tb.getName() != null && tb.getName().endsWith("myDefaultName")) {
+					assertThat(tb.getDate().getYear()).isEqualTo(107);
+				}
+				Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
+				if (errors == null) {
+					errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+				}
+				if (errors.hasFieldErrors("date")) {
+					throw new IllegalStateException();
+				}
+				if (model.containsKey("ITestBean")) {
+					boolean condition = model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean") instanceof Errors;
+					assertThat(condition).isTrue();
+				}
+				@SuppressWarnings("unchecked")
+				List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
+				if (errors.hasFieldErrors("age")) {
+					response.getWriter()
+							.write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
+									"-" + testBeans.get(0).getName() + "-" + model.get("myKey") +
+									(model.containsKey("yourKey") ? "-" + model.get("yourKey") : ""));
+				}
+				else {
+					response.getWriter().write(viewName + "-" + tb.getName() + "-" + tb.getAge() + "-" +
+							errors.getFieldValue("name") + "-" + errors.getFieldValue("age"));
 				}
 			};
 		}
@@ -3171,7 +3168,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 				@RequestParam(required = false) boolean flag,
 				@RequestHeader(value = "header", required = false) String header,
 				HttpServletResponse response) throws IOException {
-			response.getWriter().write(String.valueOf(id) + "-" + flag + "-" + String.valueOf(header));
+			response.getWriter().write(id + "-" + flag + "-" + header);
 		}
 	}
 
@@ -3183,7 +3180,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 				@RequestParam(value = "otherId", defaultValue = "") String id2,
 				@RequestHeader(defaultValue = "bar") String header,
 				HttpServletResponse response) throws IOException {
-			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(id2) + "-" + String.valueOf(header));
+			response.getWriter().write(id + "-" + id2 + "-" + header);
 		}
 	}
 
@@ -3195,7 +3192,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 				@RequestHeader(defaultValue = "#{systemProperties.myHeader}") String header,
 				@Value("#{request.contextPath}") String contextPath,
 				HttpServletResponse response) throws IOException {
-			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header) + "-" + contextPath);
+			response.getWriter().write(id + "-" + header + "-" + contextPath);
 		}
 	}
 

@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.3
  */
 @ExtendWith(SpringExtension.class)
-@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
+@DisabledInAotMode("@ContextHierarchy is not supported in AOT")
 class ContextHierarchyInterfaceTests implements ContextHierarchyTestInterface {
 
 	@Autowired

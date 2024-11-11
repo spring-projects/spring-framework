@@ -79,6 +79,10 @@ public abstract class AbstractTypeReference implements TypeReference {
 
 	protected abstract boolean isPrimitive();
 
+	@Override
+	public int compareTo(TypeReference other) {
+		return this.getCanonicalName().compareToIgnoreCase(other.getCanonicalName());
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {

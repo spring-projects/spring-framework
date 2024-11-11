@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,11 @@ import org.springframework.lang.Nullable;
  * The type is based on which constructor is used. Instances of this class are
  * stateful and immutable: use them and discard them.
  *
+ * <p><b>NOTE: As of 6.1.4, this class is effectively superseded by
+ * {@link SqlBinaryValue} and {@link SqlCharacterValue} which are capable of
+ * modern BLOB/CLOB handling while also handling LONGVARBINARY/LONGVARCHAR.</b>
+ * The only reason to keep using this class is a custom {@link LobHandler}.
+ *
  * <p>This class holds a reference to a {@link LobCreator} that must be closed after
  * the update has completed. This is done via a call to the {@link #cleanup()} method.
  * All handling of the {@code LobCreator} is done by the framework classes that use it -
@@ -63,7 +68,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.jdbc.core.JdbcTemplate#update(String, Object[], int[])
  * @see org.springframework.jdbc.object.SqlUpdate#update(Object[])
  * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
+ * @deprecated as of 6.2, in favor of {@link SqlBinaryValue} and {@link SqlCharacterValue}
  */
+@Deprecated(since = "6.2")
 public class SqlLobValue implements DisposableSqlTypeValue {
 
 	@Nullable
@@ -209,7 +216,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	}
 
 	/**
-	 * Close the LobCreator, if any.
+	 * Close the LobCreator.
 	 */
 	@Override
 	public void cleanup() {

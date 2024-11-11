@@ -19,7 +19,7 @@ package org.springframework.dao;
 import org.springframework.lang.Nullable;
 
 /**
- * Exception thrown if certain expected data could not be retrieved, e.g.
+ * Exception thrown if certain expected data could not be retrieved, for example,
  * when looking up specific data via a known identifier. This exception
  * will be thrown either by O/R mapping tools or by DAO implementations.
  *
@@ -33,7 +33,7 @@ public class DataRetrievalFailureException extends NonTransientDataAccessExcepti
 	 * Constructor for DataRetrievalFailureException.
 	 * @param msg the detail message
 	 */
-	public DataRetrievalFailureException(String msg) {
+	public DataRetrievalFailureException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -42,7 +42,7 @@ public class DataRetrievalFailureException extends NonTransientDataAccessExcepti
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public DataRetrievalFailureException(String msg, @Nullable Throwable cause) {
+	public DataRetrievalFailureException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

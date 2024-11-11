@@ -19,9 +19,9 @@ package org.springframework.core.io.buffer;
 /**
  * Exception that indicates the cumulative number of bytes consumed from a
  * stream of {@link DataBuffer DataBuffer}'s exceeded some pre-configured limit.
- * This can be raised when data buffers are cached and aggregated, e.g.
+ * This can be raised when data buffers are cached and aggregated, for example,
  * {@link DataBufferUtils#join}. Or it could also be raised when data buffers
- * have been released but a parsed representation is being aggregated, e.g. async
+ * have been released but a parsed representation is being aggregated, for example, async
  * parsing with Jackson, SSE parsing and aggregating lines per event.
  *
  * @author Rossen Stoyanchev

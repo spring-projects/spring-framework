@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class ComponentScanParserScopedProxyTests {
+class ComponentScanParserScopedProxyTests {
 
 	@Test
-	public void testDefaultScopedProxy() {
+	void testDefaultScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyDefaultTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -49,7 +49,7 @@ public class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	public void testNoScopedProxy() {
+	void testNoScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyNoTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -61,7 +61,7 @@ public class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	public void testInterfacesScopedProxy() throws Exception {
+	void testInterfacesScopedProxy() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -79,7 +79,7 @@ public class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	public void testTargetClassScopedProxy() throws Exception {
+	void testTargetClassScopedProxy() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -97,7 +97,7 @@ public class ComponentScanParserScopedProxyTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testInvalidConfigScopedProxy() throws Exception {
+	public void testInvalidConfigScopedProxy() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
 				new ClassPathXmlApplicationContext("org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml"))
 			.withMessageContaining("Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ import org.springframework.web.util.WebUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link OncePerRequestFilter}.
+ * Tests for {@link OncePerRequestFilter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.1.9
  */
-public class OncePerRequestFilterTests {
+class OncePerRequestFilterTests {
 
 	private final TestOncePerRequestFilter filter = new TestOncePerRequestFilter();
 
@@ -50,7 +50,6 @@ public class OncePerRequestFilterTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("serial")
 	public void setup() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
@@ -61,7 +60,7 @@ public class OncePerRequestFilterTests {
 
 
 	@Test
-	public void filterOnce() throws ServletException, IOException {
+	void filterOnce() throws ServletException, IOException {
 
 		// Already filtered
 		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
@@ -80,7 +79,7 @@ public class OncePerRequestFilterTests {
 	}
 
 	@Test
-	public void shouldNotFilterErrorDispatch() throws ServletException, IOException {
+	void shouldNotFilterErrorDispatch() throws ServletException, IOException {
 
 		initErrorDispatch();
 
@@ -90,7 +89,7 @@ public class OncePerRequestFilterTests {
 	}
 
 	@Test
-	public void shouldNotFilterNestedErrorDispatch() throws ServletException, IOException {
+	void shouldNotFilterNestedErrorDispatch() throws ServletException, IOException {
 
 		initErrorDispatch();
 		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);

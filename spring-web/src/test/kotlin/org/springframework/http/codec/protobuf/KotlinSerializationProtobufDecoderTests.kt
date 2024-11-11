@@ -24,6 +24,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
+import org.springframework.core.codec.DecodingException
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.testfixture.codec.AbstractDecoderTests
 import org.springframework.http.MediaType
@@ -83,6 +84,21 @@ class KotlinSerializationProtobufDecoderTests : AbstractDecoderTests<KotlinSeria
 					.expectNext(pojo2)
 					.expectComplete()
 					.verify()
+		}, null, null)
+	}
+
+	@Test
+	fun decodeToMonoWithUnexpectedFormat() {
+		val input = Mono.just(
+			bufferFactory.allocateBuffer(0),
+		)
+
+		val elementType = ResolvableType.forClass(Pojo::class.java)
+
+		testDecodeToMono(input, elementType, { step: FirstStep<Any> ->
+			step
+				.expectError(DecodingException::class.java)
+				.verify()
 		}, null, null)
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Juergen Hoeller
  */
-public class BeanValidationPostProcessorTests {
+class BeanValidationPostProcessorTests {
 
 	@Test
-	public void testNotNullConstraint() {
+	void testNotNullConstraint() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
@@ -52,7 +52,7 @@ public class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	public void testNotNullConstraintSatisfied() {
+	void testNotNullConstraintSatisfied() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
@@ -64,7 +64,7 @@ public class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	public void testNotNullConstraintAfterInitialization() {
+	void testNotNullConstraintAfterInitialization() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition bvpp = new RootBeanDefinition(BeanValidationPostProcessor.class);
 		bvpp.getPropertyValues().add("afterInitialization", true);
@@ -76,7 +76,7 @@ public class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	public void testNotNullConstraintAfterInitializationWithProxy() {
+	void testNotNullConstraintAfterInitializationWithProxy() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition bvpp = new RootBeanDefinition(BeanValidationPostProcessor.class);
 		bvpp.getPropertyValues().add("afterInitialization", true);
@@ -90,7 +90,7 @@ public class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	public void testSizeConstraint() {
+	void testSizeConstraint() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		RootBeanDefinition bd = new RootBeanDefinition(NotNullConstrainedBean.class);
@@ -105,7 +105,7 @@ public class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	public void testSizeConstraintSatisfied() {
+	void testSizeConstraintSatisfied() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		RootBeanDefinition bd = new RootBeanDefinition(NotNullConstrainedBean.class);

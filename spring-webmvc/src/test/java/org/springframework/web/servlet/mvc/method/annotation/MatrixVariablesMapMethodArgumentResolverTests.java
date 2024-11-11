@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.springframework.web.testfixture.method.MvcAnnotationPredicates
  *
  * @author Rossen Stoyanchev
  */
-public class MatrixVariablesMapMethodArgumentResolverTests {
+class MatrixVariablesMapMethodArgumentResolverTests {
 
 	private MatrixVariableMapMethodArgumentResolver resolver;
 
@@ -58,7 +58,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolver = new MatrixVariableMapMethodArgumentResolver();
 		this.mavContainer = new ModelAndViewContainer();
 		this.request = new MockHttpServletRequest();
@@ -70,7 +70,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 
 		assertThat(this.resolver.supportsParameter(this.testMethod.arg(String.class))).isFalse();
 
@@ -88,7 +88,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 		MultiValueMap<String, String> params = getVariablesFor("cars");
 		params.add("colors", "red");
 		params.add("colors", "green");
@@ -116,7 +116,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentPathVariable() throws Exception {
+	void resolveArgumentPathVariable() throws Exception {
 		MultiValueMap<String, String> params1 = getVariablesFor("cars");
 		params1.add("colors", "red");
 		params1.add("colors", "purple");
@@ -144,7 +144,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNoParams() throws Exception {
+	void resolveArgumentNoParams() throws Exception {
 
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName())
 				.arg(Map.class, String.class, String.class);
@@ -157,7 +157,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMultiValueMapArgumentNoParams() throws Exception {
+	void resolveMultiValueMapArgumentNoParams() throws Exception {
 
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noPathVar())
 				.arg(MultiValueMap.class, String.class, String.class);
@@ -169,7 +169,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveArgumentNoMatch() throws Exception {
+	void resolveArgumentNoMatch() throws Exception {
 		MultiValueMap<String, String> params2 = getVariablesFor("planes");
 		params2.add("colors", "yellow");
 		params2.add("colors", "orange");

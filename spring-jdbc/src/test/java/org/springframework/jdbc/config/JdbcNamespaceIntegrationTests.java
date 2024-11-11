@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.jdbc.config;
-
-import java.util.function.Predicate;
 
 import javax.sql.DataSource;
 
@@ -35,6 +33,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -52,58 +51,56 @@ class JdbcNamespaceIntegrationTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void createEmbeddedDatabase() throws Exception {
+	void createEmbeddedDatabase() {
 		assertCorrectSetup("jdbc-config.xml", "dataSource", "h2DataSource", "derbyDataSource");
 	}
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void createEmbeddedDatabaseAgain() throws Exception {
+	void createEmbeddedDatabaseAgain() {
 		// If Derby isn't cleaned up properly this will fail...
 		assertCorrectSetup("jdbc-config.xml", "derbyDataSource");
 	}
 
 	@Test
-	void createWithResourcePattern() throws Exception {
+	void createWithResourcePattern() {
 		assertCorrectSetup("jdbc-config-pattern.xml", "dataSource");
 	}
 
 	@Test
-	void createWithAnonymousDataSourceAndDefaultDatabaseName() throws Exception {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-default-and-anonymous-datasource.xml",
-			url -> url.endsWith(DEFAULT_DATABASE_NAME));
+	void createWithAnonymousDataSourceAndDefaultDatabaseName() {
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-default-and-anonymous-datasource.xml"))
+				.endsWith(DEFAULT_DATABASE_NAME);
 	}
 
 	@Test
-	void createWithImplicitDatabaseName() throws Exception {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-implicit.xml", url -> url.endsWith("dataSource"));
+	void createWithImplicitDatabaseName() {
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-implicit.xml")).endsWith("dataSource");
 	}
 
 	@Test
-	void createWithExplicitDatabaseName() throws Exception {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-explicit.xml", url -> url.endsWith("customDbName"));
+	void createWithExplicitDatabaseName() {
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-explicit.xml")).endsWith("customDbName");
 	}
 
 	@Test
-	void createWithGeneratedDatabaseName() throws Exception {
-		Predicate<String> urlPredicate = url -> url.startsWith("jdbc:hsqldb:mem:");
-		urlPredicate.and(url -> !url.endsWith("dataSource"));
-		urlPredicate.and(url -> !url.endsWith("shouldBeOverriddenByGeneratedName"));
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-generated.xml", urlPredicate);
+	void createWithGeneratedDatabaseName() {
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-generated.xml")).startsWith("jdbc:hsqldb:mem:")
+				.doesNotEndWith("dataSource").doesNotEndWith("shouldBeOverriddenByGeneratedName");
 	}
 
 	@Test
-	void createWithEndings() throws Exception {
+	void createWithEndings() {
 		assertCorrectSetupAndCloseContext("jdbc-initialize-endings-config.xml", 2, "dataSource");
 	}
 
 	@Test
-	void createWithEndingsNested() throws Exception {
+	void createWithEndingsNested() {
 		assertCorrectSetupAndCloseContext("jdbc-initialize-endings-nested-config.xml", 2, "dataSource");
 	}
 
 	@Test
-	void createAndDestroy() throws Exception {
+	void createAndDestroy() {
 		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-config.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
@@ -116,7 +113,7 @@ class JdbcNamespaceIntegrationTests {
 	}
 
 	@Test
-	void createAndDestroyNestedWithHsql() throws Exception {
+	void createAndDestroyNestedWithHsql() {
 		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
@@ -129,7 +126,7 @@ class JdbcNamespaceIntegrationTests {
 	}
 
 	@Test
-	void createAndDestroyNestedWithH2() throws Exception {
+	void createAndDestroyNestedWithH2() {
 		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config-h2.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
@@ -142,7 +139,7 @@ class JdbcNamespaceIntegrationTests {
 	}
 
 	@Test
-	void multipleDataSourcesHaveDifferentDatabaseNames() throws Exception {
+	void multipleDataSourcesHaveDifferentDatabaseNames() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(new ClassPathResource(
 			"jdbc-config-multiple-datasources.xml", getClass()));
@@ -151,12 +148,12 @@ class JdbcNamespaceIntegrationTests {
 	}
 
 	@Test
-	void initializeWithCustomSeparator() throws Exception {
+	void initializeWithCustomSeparator() {
 		assertCorrectSetupAndCloseContext("jdbc-initialize-custom-separator.xml", 2, "dataSource");
 	}
 
 	@Test
-	void embeddedWithCustomSeparator() throws Exception {
+	void embeddedWithCustomSeparator() {
 		assertCorrectSetupAndCloseContext("jdbc-config-custom-separator.xml", 2, "dataSource");
 	}
 
@@ -191,13 +188,14 @@ class JdbcNamespaceIntegrationTests {
 		}
 	}
 
-	private void assertCorrectSetupForSingleDataSource(String file, Predicate<String> urlPredicate) {
+	@Nullable
+	private String extractDataSourceUrl(String file) {
 		try (ConfigurableApplicationContext context = context(file)) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
 			assertThat(dataSource).isInstanceOf(AbstractDriverBasedDataSource.class);
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
-			assertThat(urlPredicate.test(adbDataSource.getUrl())).isTrue();
+			return adbDataSource.getUrl();
 		}
 	}
 

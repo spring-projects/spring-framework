@@ -11,7 +11,7 @@ Consider the following example of a small data object:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Person {
 
@@ -24,7 +24,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Person(val name: String, val age: Int)
 ----
@@ -45,7 +45,7 @@ example implements `Validator` for `Person` instances:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonValidator implements Validator {
 
@@ -70,7 +70,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonValidator : Validator {
 
@@ -114,7 +114,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class CustomerValidator implements Validator {
 
@@ -155,7 +155,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class CustomerValidator(private val addressValidator: Validator) : Validator {
 
@@ -200,7 +200,7 @@ not involving a binding process. As of 6.1, this has been simplified through a n
 `Validator.validateObject(Object)` method which is available by default now, returning
 a simple ´Errors` representation which can be inspected: typically calling `hasErrors()`
 or the new `failOnError` method for turning the error summary message into an exception
-(e.g. `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
+(for example, `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
 
 
 

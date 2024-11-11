@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,17 +40,17 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Dave Syer
  */
-public class TrickyAspectJPointcutExpressionTests {
+class TrickyAspectJPointcutExpressionTests {
 
 	@Test
-	public void testManualProxyJavaWithUnconditionalPointcut() throws Exception {
+	void testManualProxyJavaWithUnconditionalPointcut() {
 		TestService target = new TestServiceImpl();
 		LogUserAdvice logAdvice = new LogUserAdvice();
 		testAdvice(new DefaultPointcutAdvisor(logAdvice), logAdvice, target, "TestServiceImpl");
 	}
 
 	@Test
-	public void testManualProxyJavaWithStaticPointcut() throws Exception {
+	void testManualProxyJavaWithStaticPointcut() {
 		TestService target = new TestServiceImpl();
 		LogUserAdvice logAdvice = new LogUserAdvice();
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
@@ -59,7 +59,7 @@ public class TrickyAspectJPointcutExpressionTests {
 	}
 
 	@Test
-	public void testManualProxyJavaWithDynamicPointcut() throws Exception {
+	void testManualProxyJavaWithDynamicPointcut() {
 		TestService target = new TestServiceImpl();
 		LogUserAdvice logAdvice = new LogUserAdvice();
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
@@ -68,7 +68,7 @@ public class TrickyAspectJPointcutExpressionTests {
 	}
 
 	@Test
-	public void testManualProxyJavaWithDynamicPointcutAndProxyTargetClass() throws Exception {
+	void testManualProxyJavaWithDynamicPointcutAndProxyTargetClass() {
 		TestService target = new TestServiceImpl();
 		LogUserAdvice logAdvice = new LogUserAdvice();
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
@@ -77,7 +77,7 @@ public class TrickyAspectJPointcutExpressionTests {
 	}
 
 	@Test
-	public void testManualProxyJavaWithStaticPointcutAndTwoClassLoaders() throws Exception {
+	void testManualProxyJavaWithStaticPointcutAndTwoClassLoaders() throws Exception {
 
 		LogUserAdvice logAdvice = new LogUserAdvice();
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
@@ -95,13 +95,12 @@ public class TrickyAspectJPointcutExpressionTests {
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, other, "TestServiceImpl");
 	}
 
-	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, TestService target, String message)
-			throws Exception {
+	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, TestService target, String message) {
 		testAdvice(advisor, logAdvice, target, message, false);
 	}
 
 	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, TestService target, String message,
-			boolean proxyTargetClass) throws Exception {
+			boolean proxyTargetClass) {
 
 		logAdvice.reset();
 
@@ -148,7 +147,7 @@ public class TrickyAspectJPointcutExpressionTests {
 
 	public interface TestService {
 
-		public String sayHello();
+		String sayHello();
 	}
 
 
@@ -162,14 +161,14 @@ public class TrickyAspectJPointcutExpressionTests {
 	}
 
 
-	public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
+	public static class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 
 		private int countBefore = 0;
 
 		private int countThrows = 0;
 
 		@Override
-		public void before(Method method, Object[] objects, @Nullable Object o) throws Throwable {
+		public void before(Method method, Object[] objects, @Nullable Object o) {
 			countBefore++;
 		}
 

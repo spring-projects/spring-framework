@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,29 +34,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Stephane Nicoll
  */
-public class Spr12636Tests {
+class Spr12636Tests {
 
 	private ConfigurableApplicationContext context;
 
 	@AfterEach
-	public void closeContext() {
+	void closeContext() {
 		if (this.context != null) {
 			this.context.close();
 		}
 	}
 
 	@Test
-	public void orderOnImplementation() {
+	void orderOnImplementation() {
 		this.context = new AnnotationConfigApplicationContext(
 				UserServiceTwo.class, UserServiceOne.class, UserServiceCollector.class);
 		UserServiceCollector bean = this.context.getBean(UserServiceCollector.class);
-		assertThat(bean.userServices.get(0)).isSameAs(context.getBean("serviceOne", UserService.class));
-		assertThat(bean.userServices.get(1)).isSameAs(context.getBean("serviceTwo", UserService.class));
+		assertThat(bean.userServices).containsExactly(
+				context.getBean("serviceOne", UserService.class),
+				context.getBean("serviceTwo", UserService.class));
 
 	}
 
 	@Test
-	public void orderOnImplementationWithProxy() {
+	void orderOnImplementationWithProxy() {
 		this.context = new AnnotationConfigApplicationContext(
 				UserServiceTwo.class, UserServiceOne.class, UserServiceCollector.class, AsyncConfig.class);
 
@@ -67,8 +68,7 @@ public class Spr12636Tests {
 		assertThat(AopUtils.isAopProxy(serviceTwo)).isTrue();
 
 		UserServiceCollector bean = this.context.getBean(UserServiceCollector.class);
-		assertThat(bean.userServices.get(0)).isSameAs(serviceOne);
-		assertThat(bean.userServices.get(1)).isSameAs(serviceTwo);
+		assertThat(bean.userServices).containsExactly(serviceOne, serviceTwo);
 	}
 
 	@Configuration

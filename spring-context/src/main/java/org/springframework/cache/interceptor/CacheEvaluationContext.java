@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 
 /**
- * Cache specific evaluation context that adds a method parameters as SpEL
- * variables, in a lazy manner. The lazy nature eliminates unneeded
- * parsing of classes byte code for parameter discovery.
+ * Cache-specific evaluation context that adds method parameters as SpEL
+ * variables, in a lazy manner. The lazy nature avoids unnecessary
+ * parsing of a class's byte code for parameter discovery.
  *
- * <p>Also define a set of "unavailable variables" (i.e. variables that should
- * lead to an exception right the way when they are accessed). This can be useful
+ * <p>Also defines a set of "unavailable variables" (i.e. variables that should
+ * lead to an exception as soon as they are accessed). This can be useful
  * to verify a condition does not match even when not all potential variables
  * are present.
  *
@@ -55,10 +55,10 @@ class CacheEvaluationContext extends MethodBasedEvaluationContext {
 
 
 	/**
-	 * Add the specified variable name as unavailable for that context.
-	 * Any expression trying to access this variable should lead to an exception.
-	 * <p>This permits the validation of expressions that could potentially a
-	 * variable even when such variable isn't available yet. Any expression
+	 * Add the specified variable name as unavailable for this context.
+	 * <p>Any expression trying to access this variable should lead to an exception.
+	 * <p>This permits the validation of expressions that could potentially access
+	 * a variable even when such a variable isn't available yet. Any expression
 	 * trying to use that variable should therefore fail to evaluate.
 	 */
 	public void addUnavailableVariable(String name) {

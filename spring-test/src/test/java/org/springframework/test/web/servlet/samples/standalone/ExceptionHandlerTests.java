@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,30 +184,8 @@ public class ExceptionHandlerTests {
 		}
 	}
 
-	static class Person {
+	record Person(String name) {}
 
-		private final String name;
-
-		Person(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
-	static class Error {
-
-		private final String error;
-
-		Error(String error) {
-			this.error = error;
-		}
-
-		public String getError() {
-			return error;
-		}
-	}
+	record Error(String error) {}
 
 }

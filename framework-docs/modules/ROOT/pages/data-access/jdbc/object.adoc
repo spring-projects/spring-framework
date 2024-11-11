@@ -44,7 +44,7 @@ data from the `t_actor` relation to an instance of the `Actor` class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ActorMappingQuery extends MappingSqlQuery<Actor> {
 
@@ -67,7 +67,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ActorMappingQuery(ds: DataSource) : MappingSqlQuery<Actor>(ds, "select id, first_name, last_name from t_actor where id = ?") {
 
@@ -103,7 +103,7 @@ example shows how to define such a class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	private ActorMappingQuery actorMappingQuery;
 
@@ -112,22 +112,22 @@ Java::
 		this.actorMappingQuery = new ActorMappingQuery(dataSource);
 	}
 
-	public Customer getCustomer(Long id) {
+	public Actor getActor(Long id) {
 		return actorMappingQuery.findObject(id);
 	}
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	private val actorMappingQuery = ActorMappingQuery(dataSource)
 
-	fun getCustomer(id: Long) = actorMappingQuery.findObject(id)
+	fun getActor(id: Long) = actorMappingQuery.findObject(id)
 ----
 ======
 
-The method in the preceding example retrieves the customer with the `id` that is passed in as the
+The method in the preceding example retrieves the actor with the `id` that is passed in as the
 only parameter. Since we want only one object to be returned, we call the `findObject` convenience
 method with the `id` as the parameter. If we had instead a query that returned a
 list of objects and took additional parameters, we would use one of the `execute`
@@ -138,7 +138,7 @@ example shows such a method:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public List<Actor> searchForActors(int age, String namePattern) {
 		return actorSearchMappingQuery.execute(age, namePattern);
@@ -147,7 +147,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun searchForActors(age: Int, namePattern: String) =
 				actorSearchMappingQuery.execute(age, namePattern)
@@ -171,7 +171,7 @@ The following example creates a custom update method named `execute`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.Types;
 	import javax.sql.DataSource;
@@ -201,7 +201,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.Types
 	import javax.sql.DataSource
@@ -247,7 +247,7 @@ as the following code snippet shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
 	new SqlOutParameter("out_first_name", Types.VARCHAR),
@@ -255,7 +255,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	SqlParameter("in_id", Types.NUMERIC),
 	SqlOutParameter("out_first_name", Types.VARCHAR),
@@ -293,7 +293,7 @@ The following listing shows our custom StoredProcedure class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.Types;
 	import java.util.Date;
@@ -342,7 +342,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.Types
 	import java.util.Date
@@ -387,7 +387,7 @@ Oracle REF cursors):
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.util.HashMap;
 	import java.util.Map;
@@ -416,7 +416,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import java.util.HashMap
 	import javax.sql.DataSource
@@ -456,7 +456,7 @@ the supplied `ResultSet`, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
@@ -476,7 +476,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.ResultSet
 	import com.foo.domain.Title
@@ -497,7 +497,7 @@ the supplied `ResultSet`, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
@@ -514,7 +514,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.ResultSet
 	import com.foo.domain.Genre
@@ -537,7 +537,7 @@ delegate to the untyped `execute(Map)` method in the superclass, as the followin
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.Types;
 	import java.util.Date;
@@ -571,7 +571,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import java.sql.Types
 	import java.util.Date

@@ -49,7 +49,7 @@ import org.springframework.util.PatternMatchUtils;
  * "templates/test.ftl"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
- * prefix. E.g.: "redirect:myAction" will trigger a redirect to the given
+ * prefix. For example: "redirect:myAction" will trigger a redirect to the given
  * URL, rather than resolution as standard view name. This is typically used
  * for redirecting to a controller URL after finishing a form workflow.
  *

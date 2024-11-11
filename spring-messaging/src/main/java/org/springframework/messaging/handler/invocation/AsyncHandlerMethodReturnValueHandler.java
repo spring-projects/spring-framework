@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,12 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * @deprecated as of 6.0, in favor of
 	 * {@link #toCompletableFuture(Object, MethodParameter)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	@Nullable
 	default org.springframework.util.concurrent.ListenableFuture<?> toListenableFuture(
 			Object returnValue, MethodParameter returnType) {
+
 		CompletableFuture<?> result = toCompletableFuture(returnValue, returnType);
 		return (result != null ?
 				new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(result) :

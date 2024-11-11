@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -70,6 +71,7 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 	}
 
 	@Override
+	@Nullable
 	public <T> T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
 		return this.restTemplate.exchange(newRequest(values), bodyType).getBody();
 	}

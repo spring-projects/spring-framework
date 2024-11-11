@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class NettyByteBufEncoderTests extends AbstractEncoderTests<NettyByteBufEncoder>
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(ByteBuf.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
@@ -58,7 +58,7 @@ class NettyByteBufEncoderTests extends AbstractEncoderTests<NettyByteBufEncoder>
 
 	@Override
 	@Test
-	public void encode() {
+	protected void encode() {
 		Flux<ByteBuf> input = Flux.just(this.fooBytes, this.barBytes).map(Unpooled::copiedBuffer);
 
 		testEncodeAll(input, ByteBuf.class, step -> step

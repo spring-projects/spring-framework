@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
-@SuppressWarnings({ "unchecked", "deprecation" })
+@SuppressWarnings({"deprecation", "removal"})
 class ListenableFutureTaskTests {
 
 	@Test
@@ -42,11 +42,12 @@ class ListenableFutureTaskTests {
 		Callable<String> callable = () -> s;
 
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
-		task.addCallback(new ListenableFutureCallback<String>() {
+		task.addCallback(new ListenableFutureCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				assertThat(result).isEqualTo(s);
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
 				throw new AssertionError(ex.getMessage(), ex);
@@ -60,18 +61,19 @@ class ListenableFutureTaskTests {
 	}
 
 	@Test
-	void failure() throws Exception {
+	void failure() {
 		final String s = "Hello World";
 		Callable<String> callable = () -> {
 			throw new IOException(s);
 		};
 
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
-		task.addCallback(new ListenableFutureCallback<String>() {
+		task.addCallback(new ListenableFutureCallback<>() {
 			@Override
 			public void onSuccess(String result) {
 				fail("onSuccess not expected");
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
 				assertThat(ex.getMessage()).isEqualTo(s);
@@ -108,7 +110,7 @@ class ListenableFutureTaskTests {
 	}
 
 	@Test
-	void failureWithLambdas() throws Exception {
+	void failureWithLambdas() {
 		final String s = "Hello World";
 		IOException ex = new IOException(s);
 		Callable<String> callable = () -> {

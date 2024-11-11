@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,11 @@ public interface TcpOperations<P> {
 	 * connection is successfully established
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TcpConnectionHandler)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	default org.springframework.util.concurrent.ListenableFuture<Void> connect(
 			TcpConnectionHandler<P> connectionHandler) {
+
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				connectAsync(connectionHandler));
 	}
@@ -58,9 +60,11 @@ public interface TcpOperations<P> {
 	 * initial connection is successfully established
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TcpConnectionHandler, ReconnectStrategy)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	default org.springframework.util.concurrent.ListenableFuture<Void> connect(
 			TcpConnectionHandler<P> connectionHandler, ReconnectStrategy reconnectStrategy) {
+
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				connectAsync(connectionHandler, reconnectStrategy));
 	}
@@ -81,10 +85,10 @@ public interface TcpOperations<P> {
 	 * connection is successfully closed
 	 * @deprecated as of 6.0, in favor of {@link #shutdownAsync()}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	default org.springframework.util.concurrent.ListenableFuture<Void> shutdown() {
-		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
-				shutdownAsync());
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(shutdownAsync());
 	}
 
 	/**

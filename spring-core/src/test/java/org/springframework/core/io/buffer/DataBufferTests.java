@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.io.buffer;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -675,7 +674,39 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void readableByteBuffers(DataBufferFactory bufferFactory) throws IOException {
+	void readableByteBuffers(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(3);
+		dataBuffer.write("abc".getBytes(StandardCharsets.UTF_8));
+		dataBuffer.readPosition(1);
+		dataBuffer.writePosition(2);
+
+
+		byte[] result = new byte[1];
+		try (var iterator = dataBuffer.readableByteBuffers()) {
+			assertThat(iterator).hasNext();
+			int i = 0;
+			while (iterator.hasNext()) {
+				ByteBuffer byteBuffer = iterator.next();
+				assertThat(byteBuffer.position()).isEqualTo(0);
+				assertThat(byteBuffer.limit()).isEqualTo(1);
+				assertThat(byteBuffer.capacity()).isEqualTo(1);
+				assertThat(byteBuffer.remaining()).isEqualTo(1);
+
+				byteBuffer.get(result, i, 1);
+
+				assertThat(iterator).isExhausted();
+			}
+		}
+
+		assertThat(result).containsExactly('b');
+
+		release(dataBuffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void readableByteBuffersJoined(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer dataBuffer = this.bufferFactory.join(Arrays.asList(stringBuffer("a"),
@@ -703,17 +734,26 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	void writableByteBuffers(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(1);
+		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(3);
+		dataBuffer.write("ab".getBytes(StandardCharsets.UTF_8));
+		dataBuffer.readPosition(1);
 
 		try (DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers()) {
 			assertThat(iterator).hasNext();
 			ByteBuffer byteBuffer = iterator.next();
-			byteBuffer.put((byte) 'a');
-			dataBuffer.writePosition(1);
+			assertThat(byteBuffer.position()).isEqualTo(0);
+			assertThat(byteBuffer.limit()).isEqualTo(1);
+			assertThat(byteBuffer.capacity()).isEqualTo(1);
+			assertThat(byteBuffer.remaining()).isEqualTo(1);
+
+			byteBuffer.put((byte) 'c');
+			dataBuffer.writePosition(3);
 
 			assertThat(iterator).isExhausted();
 		}
-		assertThat(dataBuffer.read()).isEqualTo((byte) 'a');
+		byte[] result = new byte[2];
+		dataBuffer.read(result);
+		assertThat(result).containsExactly('b', 'c');
 
 		release(dataBuffer);
 	}
@@ -943,6 +983,23 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		dataBuffer.toByteBuffer(byteBuffer);
 
 		assertThat(StandardCharsets.UTF_8.decode(byteBuffer).toString()).isEqualTo("b");
+	}
+
+	@ParameterizedDataBufferAllocatingTest // gh-31873
+	void repeatedWrites(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = bufferFactory.allocateBuffer(256);
+		String name = "Müller";
+		int repeatCount = 19;
+		for (int i = 0; i < repeatCount; i++) {
+			buffer.write(name, StandardCharsets.UTF_8);
+		}
+		String result = buffer.toString(StandardCharsets.UTF_8);
+		String expected = name.repeat(repeatCount);
+		assertThat(result).isEqualTo(expected);
+
+		release(buffer);
 	}
 
 }

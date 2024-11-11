@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class KotlinSerializationBinaryDecoder<T extends BinaryFormat> e
 	 * decoding to a single {@code DataBuffer},
 	 * {@link java.nio.ByteBuffer ByteBuffer}, {@code byte[]},
 	 * {@link org.springframework.core.io.Resource Resource}, {@code String}, etc.
-	 * It can also occur when splitting the input stream, e.g. delimited text,
+	 * It can also occur when splitting the input stream, for example, delimited text,
 	 * in which case the limit applies to data buffered between delimiters.
 	 * <p>By default this is set to 256K.
 	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
@@ -109,7 +109,15 @@ public abstract class KotlinSerializationBinaryDecoder<T extends BinaryFormat> e
 			}
 			return this.byteArrayDecoder
 					.decodeToMono(inputStream, elementType, mimeType, hints)
-					.map(byteArray -> format().decodeFromByteArray(serializer, byteArray));
+					.handle((byteArray, sink) -> {
+						try {
+							sink.next(format().decodeFromByteArray(serializer, byteArray));
+							sink.complete();
+						}
+						catch (IllegalArgumentException ex) {
+							sink.error(new DecodingException("Decoding error: " + ex.getMessage(), ex));
+						}
+					});
 		});
 	}
 

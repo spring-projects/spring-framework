@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,8 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	private static String initMessage(HttpStatusCode status, String reasonPhrase, @Nullable HttpRequest request) {
-		return status.value() + " " + reasonPhrase +
-				(request != null ? " from " + request.getMethod() + " " + request.getURI() : "");
+		return status.value() + " " + reasonPhrase + (request != null ?
+				" from " + WebClientUtils.getRequestDescription(request.getMethod(), request.getURI()) : "");
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class WebClientResponseException extends WebClientException {
 
 	/**
 	 * Return the raw HTTP status code value.
-	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
+	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
 	 */
 	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {
@@ -272,6 +272,20 @@ public class WebClientResponseException extends WebClientException {
 		this.bodyDecodeFunction = decoderFunction;
 	}
 
+	@Override
+	public String getMessage() {
+		String message = String.valueOf(super.getMessage());
+		if (shouldHintAtResponseFailure()) {
+			return message + ", but response failed with cause: " + getCause();
+		}
+		return message;
+	}
+
+	private boolean shouldHintAtResponseFailure() {
+		return this.statusCode.is1xxInformational() ||
+				this.statusCode.is2xxSuccessful() ||
+				this.statusCode.is3xxRedirection();
+	}
 
 	/**
 	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
@@ -303,40 +317,25 @@ public class WebClientResponseException extends WebClientException {
 			byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
 
 		if (statusCode instanceof HttpStatus httpStatus) {
-			switch (httpStatus) {
-				case BAD_REQUEST:
-					return new WebClientResponseException.BadRequest(statusText, headers, body, charset, request);
-				case UNAUTHORIZED:
-					return new WebClientResponseException.Unauthorized(statusText, headers, body, charset, request);
-				case FORBIDDEN:
-					return new WebClientResponseException.Forbidden(statusText, headers, body, charset, request);
-				case NOT_FOUND:
-					return new WebClientResponseException.NotFound(statusText, headers, body, charset, request);
-				case METHOD_NOT_ALLOWED:
-					return new WebClientResponseException.MethodNotAllowed(statusText, headers, body, charset, request);
-				case NOT_ACCEPTABLE:
-					return new WebClientResponseException.NotAcceptable(statusText, headers, body, charset, request);
-				case CONFLICT:
-					return new WebClientResponseException.Conflict(statusText, headers, body, charset, request);
-				case GONE:
-					return new WebClientResponseException.Gone(statusText, headers, body, charset, request);
-				case UNSUPPORTED_MEDIA_TYPE:
-					return new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
-				case TOO_MANY_REQUESTS:
-					return new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
-				case UNPROCESSABLE_ENTITY:
-					return new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);
-				case INTERNAL_SERVER_ERROR:
-					return new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);
-				case NOT_IMPLEMENTED:
-					return new WebClientResponseException.NotImplemented(statusText, headers, body, charset, request);
-				case BAD_GATEWAY:
-					return new WebClientResponseException.BadGateway(statusText, headers, body, charset, request);
-				case SERVICE_UNAVAILABLE:
-					return new WebClientResponseException.ServiceUnavailable(statusText, headers, body, charset, request);
-				case GATEWAY_TIMEOUT:
-					return new WebClientResponseException.GatewayTimeout(statusText, headers, body, charset, request);
-			}
+			return switch (httpStatus) {
+				case BAD_REQUEST -> new WebClientResponseException.BadRequest(statusText, headers, body, charset, request);
+				case UNAUTHORIZED -> new WebClientResponseException.Unauthorized(statusText, headers, body, charset, request);
+				case FORBIDDEN -> new WebClientResponseException.Forbidden(statusText, headers, body, charset, request);
+				case NOT_FOUND -> new WebClientResponseException.NotFound(statusText, headers, body, charset, request);
+				case METHOD_NOT_ALLOWED -> new WebClientResponseException.MethodNotAllowed(statusText, headers, body, charset, request);
+				case NOT_ACCEPTABLE -> new WebClientResponseException.NotAcceptable(statusText, headers, body, charset, request);
+				case CONFLICT -> new WebClientResponseException.Conflict(statusText, headers, body, charset, request);
+				case GONE -> new WebClientResponseException.Gone(statusText, headers, body, charset, request);
+				case UNSUPPORTED_MEDIA_TYPE -> new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
+				case TOO_MANY_REQUESTS -> new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
+				case UNPROCESSABLE_ENTITY -> new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);
+				case INTERNAL_SERVER_ERROR -> new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);
+				case NOT_IMPLEMENTED -> new WebClientResponseException.NotImplemented(statusText, headers, body, charset, request);
+				case BAD_GATEWAY -> new WebClientResponseException.BadGateway(statusText, headers, body, charset, request);
+				case SERVICE_UNAVAILABLE -> new WebClientResponseException.ServiceUnavailable(statusText, headers, body, charset, request);
+				case GATEWAY_TIMEOUT -> new WebClientResponseException.GatewayTimeout(statusText, headers, body, charset, request);
+				default -> new WebClientResponseException(statusCode, statusText, headers, body, charset, request);
+			};
 		}
 		return new WebClientResponseException(statusCode, statusText, headers, body, charset, request);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.cors;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -57,7 +56,7 @@ public class CorsConfiguration {
 
 	private static final List<String> ALL_LIST = Collections.singletonList(ALL);
 
-	private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
+	private static final OriginPattern ALL_PATTERN = new OriginPattern(ALL);
 
 	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.singletonList(ALL_PATTERN);
 
@@ -91,6 +90,9 @@ public class CorsConfiguration {
 	private Boolean allowCredentials;
 
 	@Nullable
+	private Boolean allowPrivateNetwork;
+
+	@Nullable
 	private Long maxAge;
 
 
@@ -114,6 +116,7 @@ public class CorsConfiguration {
 		this.allowedHeaders = other.allowedHeaders;
 		this.exposedHeaders = other.exposedHeaders;
 		this.allowCredentials = other.allowCredentials;
+		this.allowPrivateNetwork = other.allowPrivateNetwork;
 		this.maxAge = other.maxAge;
 	}
 
@@ -122,10 +125,10 @@ public class CorsConfiguration {
 	 * A list of origins for which cross-origin requests are allowed where each
 	 * value may be one of the following:
 	 * <ul>
-	 * <li>a specific domain, e.g. {@code "https://domain1.com"}
-	 * <li>comma-delimited list of specific domains, e.g.
+	 * <li>a specific domain, for example, {@code "https://domain1.com"}
+	 * <li>comma-delimited list of specific domains, for example,
 	 * {@code "https://a1.com,https://a2.com"}; this is convenient when a value
-	 * is resolved through a property placeholder, e.g. {@code "${origin}"};
+	 * is resolved through a property placeholder, for example, {@code "${origin}"};
 	 * note that such placeholders must be resolved externally.
 	 * <li>the CORS defined special value {@code "*"} for all origins
 	 * </ul>
@@ -133,11 +136,12 @@ public class CorsConfiguration {
 	 * {@code Access-Control-Allow-Origin} response header is set either to the
 	 * matched domain value or to {@code "*"}. Keep in mind however that the
 	 * CORS spec does not allow {@code "*"} when {@link #setAllowCredentials
-	 * allowCredentials} is set to {@code true} and as of 5.3 that combination
-	 * is rejected in favor of using {@link #setAllowedOriginPatterns
-	 * allowedOriginPatterns} instead.
+	 * allowCredentials} is set to {@code true}, and does not recommend {@code "*"}
+	 * when {@link #setAllowPrivateNetwork allowPrivateNetwork} is set to {@code true}.
+	 * As a consequence, those combinations are rejected in favor of using
+	 * {@link #setAllowedOriginPatterns allowedOriginPatterns} instead.
 	 * <p>By default this is not set which means that no origins are allowed.
-	 * However, an instance of this class is often initialized further, e.g. for
+	 * However, an instance of this class is often initialized further, for example, for
 	 * {@code @CrossOrigin}, via {@link #applyPermitDefaultValues()}.
 	 */
 	public void setAllowedOrigins(@Nullable List<String> origins) {
@@ -167,6 +171,7 @@ public class CorsConfiguration {
 	/**
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
+	@SuppressWarnings("NullAway")
 	public void addAllowedOrigin(@Nullable String origin) {
 		if (origin == null) {
 			return;
@@ -193,17 +198,19 @@ public class CorsConfiguration {
 	 * domain1.com on port 8080 or port 8081
 	 * <li>{@literal https://*.domain1.com:[*]} -- domains ending with
 	 * domain1.com on any port, including the default port
-	 * <li>comma-delimited list of patters, e.g.
+	 * <li>comma-delimited list of patters, for example,
 	 * {@code "https://*.a1.com,https://*.a2.com"}; this is convenient when a
-	 * value is resolved through a property placeholder, e.g. {@code "${origin}"};
+	 * value is resolved through a property placeholder, for example, {@code "${origin}"};
 	 * note that such placeholders must be resolved externally.
 	 * </ul>
 	 * <p>In contrast to {@link #setAllowedOrigins(List) allowedOrigins} which
-	 * only supports "*" and cannot be used with {@code allowCredentials}, when
-	 * an allowedOriginPattern is matched, the {@code Access-Control-Allow-Origin}
-	 * response header is set to the matched origin and not to {@code "*"} nor
-	 * to the pattern. Therefore, allowedOriginPatterns can be used in combination
-	 * with {@link #setAllowCredentials} set to {@code true}.
+	 * only supports "*" and cannot be used with {@code allowCredentials} or
+	 * {@code allowPrivateNetwork}, when an {@code allowedOriginPattern} is matched,
+	 * the {@code Access-Control-Allow-Origin} response header is set to the
+	 * matched origin and not to {@code "*"} nor to the pattern.
+	 * Therefore, {@code allowedOriginPatterns} can be used in combination with
+	 * {@link #setAllowCredentials} and {@link #setAllowPrivateNetwork} set to
+	 * {@code true}.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */
@@ -238,6 +245,7 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOriginPatterns} for adding one origin at a time.
 	 * @since 5.3
 	 */
+	@SuppressWarnings("NullAway")
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
 		if (originPattern == null) {
 			return;
@@ -267,19 +275,21 @@ public class CorsConfiguration {
 				case ']' -> withinPortRange = false;
 				case ',' -> {
 					if (!withinPortRange) {
-						valueConsumer.accept(rawValue.substring(start, current).trim());
+						String originValue = rawValue.substring(start, current).trim();
+						valueConsumer.accept(originValue);
 						start = current + 1;
 					}
 				}
 			}
 		}
 		if (start < rawValue.length()) {
-			valueConsumer.accept(rawValue.substring(start));
+			String originValue = rawValue.substring(start).trim();
+			valueConsumer.accept(originValue);
 		}
 	}
 
 	/**
-	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
+	 * Set the HTTP methods to allow, for example, {@code "GET"}, {@code "POST"},
 	 * {@code "PUT"}, etc. The special value {@code "*"} allows all methods.
 	 * <p>{@code Access-Control-Allow-Methods} response header is set either
 	 * to the configured method or to {@code "*"}. Keep in mind however that the
@@ -462,6 +472,33 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * Whether private network access is supported for user-agents restricting such access by default.
+	 * <p>Private network requests are requests whose target server's IP address is more private than
+	 * that from which the request initiator was fetched. For example, a request from a public website
+	 * (https://example.com) to a private website (https://router.local), or a request from a private
+	 * website to localhost.
+	 * <p>Setting this property has an impact on how {@link #setAllowedOrigins(List)
+	 * origins} and {@link #setAllowedOriginPatterns(List) originPatterns} are processed,
+	 * see related API documentation for more details.
+	 * <p>By default this is not set (i.e. private network access is not supported).
+	 * @since 5.3.32
+	 * @see <a href="https://wicg.github.io/private-network-access/">Private network access specifications</a>
+	 */
+	public void setAllowPrivateNetwork(@Nullable Boolean allowPrivateNetwork) {
+		this.allowPrivateNetwork = allowPrivateNetwork;
+	}
+
+	/**
+	 * Return the configured {@code allowPrivateNetwork} flag, or {@code null} if none.
+	 * @since 5.3.32
+	 * @see #setAllowPrivateNetwork(Boolean)
+	 */
+	@Nullable
+	public Boolean getAllowPrivateNetwork() {
+		return this.allowPrivateNetwork;
+	}
+
+	/**
 	 * Configure how long, as a duration, the response from a pre-flight request
 	 * can be cached by clients.
 	 * @since 5.2
@@ -544,6 +581,25 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * Validate that when {@link #setAllowPrivateNetwork allowPrivateNetwork} is {@code true},
+	 * {@link #setAllowedOrigins allowedOrigins} does not contain the special
+	 * value {@code "*"} since this is insecure.
+	 * @throws IllegalArgumentException if the validation fails
+	 * @since 5.3.32
+	 */
+	public void validateAllowPrivateNetwork() {
+		if (this.allowPrivateNetwork == Boolean.TRUE &&
+				this.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {
+
+			throw new IllegalArgumentException(
+					"When allowPrivateNetwork is true, allowedOrigins cannot contain the special value \"*\" " +
+							"as it is not recommended from a security perspective. " +
+							"To allow private network access to a set of origins, list them explicitly " +
+							"or consider using \"allowedOriginPatterns\" instead.");
+		}
+	}
+
+	/**
 	 * Combine the non-null properties of the supplied
 	 * {@code CorsConfiguration} with this one.
 	 * <p>When combining single values like {@code allowCredentials} or
@@ -577,6 +633,10 @@ public class CorsConfiguration {
 		if (allowCredentials != null) {
 			config.setAllowCredentials(allowCredentials);
 		}
+		Boolean allowPrivateNetwork = other.getAllowPrivateNetwork();
+		if (allowPrivateNetwork != null) {
+			config.setAllowPrivateNetwork(allowPrivateNetwork);
+		}
 		Long maxAge = other.getMaxAge();
 		if (maxAge != null) {
 			config.setMaxAge(maxAge);
@@ -600,7 +660,7 @@ public class CorsConfiguration {
 		if (source.contains(ALL) || other.contains(ALL)) {
 			return ALL_LIST;
 		}
-		Set<String> combined = new LinkedHashSet<>(source.size() + other.size());
+		Set<String> combined = CollectionUtils.newLinkedHashSet(source.size() + other.size());
 		combined.addAll(source);
 		combined.addAll(other);
 		return new ArrayList<>(combined);
@@ -618,7 +678,7 @@ public class CorsConfiguration {
 		if (source.contains(ALL_PATTERN) || other.contains(ALL_PATTERN)) {
 			return ALL_PATTERN_LIST;
 		}
-		Set<OriginPattern> combined = new LinkedHashSet<>(source.size() + other.size());
+		Set<OriginPattern> combined = CollectionUtils.newLinkedHashSet(source.size() + other.size());
 		combined.addAll(source);
 		combined.addAll(other);
 		return new ArrayList<>(combined);
@@ -640,6 +700,7 @@ public class CorsConfiguration {
 		if (!ObjectUtils.isEmpty(this.allowedOrigins)) {
 			if (this.allowedOrigins.contains(ALL)) {
 				validateAllowCredentials();
+				validateAllowPrivateNetwork();
 				return ALL;
 			}
 			for (String allowedOrigin : this.allowedOrigins) {
@@ -722,7 +783,7 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Contains both the user-declared pattern (e.g. "https://*.domain.com") and
+	 * Contains both the user-declared pattern (for example, "https://*.domain.com") and
 	 * the regex {@link Pattern} derived from it.
 	 */
 	private static class OriginPattern {

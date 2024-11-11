@@ -77,7 +77,7 @@ and others) and is equivalent to `required=false`.
 | For access to a part in  a `multipart/form-data` request. Supports reactive types.
   See xref:web/webflux/controller/ann-methods/multipart-forms.adoc[Multipart Content] and xref:web/webflux/reactive-spring.adoc#webflux-multipart[Multipart Data].
 
-| `java.util.Map`, `org.springframework.ui.Model`, and `org.springframework.ui.ModelMap`.
+| `java.util.Map` or `org.springframework.ui.Model`
 | For access to the model that is used in HTML controllers and is exposed to templates as
   part of view rendering.
 
@@ -89,9 +89,9 @@ and others) and is equivalent to `required=false`.
   Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
   See "`Any other argument`" later in this table.
 
-| `Errors`, `BindingResult`
+| `Errors` or `BindingResult`
 | For access to errors from validation and data binding for a command object, i.e. a
-  `@ModelAttribute` argument. An `Errors`, or `BindingResult` argument must be declared
+  `@ModelAttribute` argument. An `Errors` or `BindingResult` argument must be declared
   immediately after the validated method argument.
 
 | `SessionStatus` + class-level `@SessionAttributes`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.StringJoiner;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.
@@ -51,10 +50,9 @@ abstract class FormatHelper {
 	 * <p>A String array will have the formatted name "java.lang.String[]".
 	 * @param clazz the Class whose name is to be formatted
 	 * @return a formatted String suitable for message inclusion
-	 * @see ClassUtils#getQualifiedName(Class)
 	 */
 	static String formatClassNameForMessage(@Nullable Class<?> clazz) {
-		return (clazz != null ? ClassUtils.getQualifiedName(clazz) : "null");
+		return (clazz != null ? clazz.getTypeName() : "null");
 	}
 
 }

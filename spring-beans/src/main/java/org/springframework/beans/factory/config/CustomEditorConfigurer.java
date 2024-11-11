@@ -76,7 +76,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>
  * Also supports "java.lang.String[]"-style array class names and primitive
- * class names (e.g. "boolean"). Delegates to {@link ClassUtils} for actual
+ * class names (for example, "boolean"). Delegates to {@link ClassUtils} for actual
  * class name resolution.
  *
  * <p><b>NOTE:</b> Custom property editors registered with this configurer do

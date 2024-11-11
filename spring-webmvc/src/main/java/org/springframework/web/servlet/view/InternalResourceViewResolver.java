@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
  * JSTL API is present.
  *
  * <p>BTW, it's good practice to put JSP files that just serve as views under
- * WEB-INF, to hide them from direct access (e.g. via a manually entered URL).
+ * WEB-INF, to hide them from direct access (for example, via a manually entered URL).
  * Only controllers will be able to access them then.
  *
  * <p><b>Note:</b> When chaining ViewResolvers, an InternalResourceViewResolver

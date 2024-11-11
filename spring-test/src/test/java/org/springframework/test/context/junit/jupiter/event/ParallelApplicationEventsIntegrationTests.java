@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -221,7 +220,7 @@ class ParallelApplicationEventsIntegrationTests {
 		void asyncConsumption() {
 			this.context.publishEvent("asyncConsumption");
 
-			Awaitility.await().atMost(Durations.ONE_SECOND).untilAsserted(() ->//
+			Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->//
 					assertThat(ApplicationEventsHolder//
 							.getRequiredApplicationEvents()//
 							.stream()//

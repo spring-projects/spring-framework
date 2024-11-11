@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * to be removed before a new one can be set for the same key.
  * Supports a list of transaction synchronizations if synchronization is active.
  *
- * <p>Resource management code should check for context-bound resources, e.g.
+ * <p>Resource management code should check for context-bound resources, for example,
  * database connections, via {@code getResource}. Such code is normally not
  * supposed to bind resources to units of work, as this is the responsibility
  * of transaction managers. A further option is to lazily bind on first use if
@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  * doesn't support transaction synchronization.
  *
  * <p>Synchronization is for example used to always return the same resources within
- * a transaction, e.g. a database connection for any given connection factory.
+ * a transaction, for example, a database connection for any given connection factory.
  *
  * @author Mark Paluch
  * @author Juergen Hoeller

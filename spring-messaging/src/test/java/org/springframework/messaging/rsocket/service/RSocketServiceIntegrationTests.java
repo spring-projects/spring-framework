@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,10 +127,12 @@ class RSocketServiceIntegrationTests {
 	@Controller
 	static class ServerController implements Service {
 
+		@Override
 		public Mono<String> echoAsync(String payload) {
 			return Mono.delay(Duration.ofMillis(10)).map(aLong -> payload + " async");
 		}
 
+		@Override
 		public Flux<String> echoStream(String payload) {
 			return Flux.interval(Duration.ofMillis(10)).map(aLong -> payload + " " + aLong);
 		}

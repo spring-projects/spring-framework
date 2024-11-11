@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.executeSqlScr
  *
  * @author Sam Brannen
  * @since 4.0.3
- * @see ScriptUtilsUnitTests
+ * @see ScriptUtilsTests
  */
-public class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationTests {
+class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationTests {
 
 	@Override
 	protected EmbeddedDatabaseType getEmbeddedDatabaseType() {
@@ -40,12 +40,12 @@ public class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationT
 	}
 
 	@BeforeEach
-	public void setUpSchema() throws SQLException {
+	void setUpSchema() throws SQLException {
 		executeSqlScript(db.getConnection(), usersSchema());
 	}
 
 	@Test
-	public void executeSqlScriptContainingMultiLineComments() throws SQLException {
+	void executeSqlScriptContainingMultiLineComments() throws SQLException {
 		executeSqlScript(db.getConnection(), resource("test-data-with-multi-line-comments.sql"));
 		assertUsersDatabaseCreated("Hoeller", "Brannen");
 	}
@@ -54,7 +54,7 @@ public class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationT
 	 * @since 4.2
 	 */
 	@Test
-	public void executeSqlScriptContainingSingleQuotesNestedInsideDoubleQuotes() throws SQLException {
+	void executeSqlScriptContainingSingleQuotesNestedInsideDoubleQuotes() throws SQLException {
 		executeSqlScript(db.getConnection(), resource("users-data-with-single-quotes-nested-in-double-quotes.sql"));
 		assertUsersDatabaseCreated("Hoeller", "Brannen");
 	}

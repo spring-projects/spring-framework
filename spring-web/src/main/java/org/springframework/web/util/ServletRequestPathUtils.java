@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.util.PathMatcher} otherwise.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 5.3
  */
 public abstract class ServletRequestPathUtils {
@@ -186,14 +187,16 @@ public abstract class ServletRequestPathUtils {
 	 */
 	private static final class ServletRequestPath implements RequestPath {
 
+		private final PathElements pathElements;
+
 		private final RequestPath requestPath;
 
 		private final PathContainer contextPath;
 
-		private ServletRequestPath(String rawPath, @Nullable String contextPath, String servletPathPrefix) {
-			Assert.notNull(servletPathPrefix, "`servletPathPrefix` is required");
-			this.requestPath = RequestPath.parse(rawPath, contextPath + servletPathPrefix);
-			this.contextPath = PathContainer.parsePath(StringUtils.hasText(contextPath) ? contextPath : "");
+		private ServletRequestPath(PathElements pathElements) {
+			this.pathElements = pathElements;
+			this.requestPath = pathElements.createRequestPath();
+			this.contextPath = pathElements.createContextPath();
 		}
 
 		@Override
@@ -218,7 +221,7 @@ public abstract class ServletRequestPathUtils {
 
 		@Override
 		public RequestPath modifyContextPath(String contextPath) {
-			throw new UnsupportedOperationException();
+			return new ServletRequestPath(this.pathElements.withContextPath(contextPath));
 		}
 
 
@@ -249,7 +252,7 @@ public abstract class ServletRequestPathUtils {
 			requestUri = (requestUri != null ? requestUri : request.getRequestURI());
 			String servletPathPrefix = getServletPathPrefix(request);
 			return (StringUtils.hasText(servletPathPrefix) ?
-					new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix) :
+					new ServletRequestPath(new PathElements(requestUri, request.getContextPath(), servletPathPrefix)) :
 					RequestPath.parse(requestUri, request.getContextPath()));
 		}
 
@@ -264,6 +267,38 @@ public abstract class ServletRequestPathUtils {
 				return UriUtils.encodePath(servletPath, StandardCharsets.UTF_8);
 			}
 			return null;
+		}
+
+		record PathElements(String rawPath, @Nullable String contextPath, String servletPathPrefix) {
+
+			PathElements {
+				Assert.notNull(servletPathPrefix, "`servletPathPrefix` is required");
+			}
+
+			private RequestPath createRequestPath() {
+				return RequestPath.parse(this.rawPath, this.contextPath + this.servletPathPrefix);
+			}
+
+			private PathContainer createContextPath() {
+				return PathContainer.parsePath(StringUtils.hasText(this.contextPath) ? this.contextPath : "");
+			}
+
+			PathElements withContextPath(String contextPath) {
+				if (!contextPath.startsWith("/") || contextPath.endsWith("/")) {
+					throw new IllegalArgumentException("Invalid contextPath '" + contextPath + "': " +
+							"must start with '/' and not end with '/'");
+				}
+				String contextPathToUse = this.servletPathPrefix + contextPath;
+				if (StringUtils.hasText(this.contextPath())) {
+					throw new IllegalStateException("Could not change context path to '" + contextPathToUse +
+							"': a context path is already specified");
+				}
+				if (!this.rawPath.startsWith(contextPathToUse)) {
+					throw new IllegalArgumentException("Invalid contextPath '" + contextPathToUse + "': " +
+							"must match the start of requestPath: '" + this.rawPath + "'");
+				}
+				return new PathElements(this.rawPath, contextPathToUse, "");
+			}
 		}
 	}
 

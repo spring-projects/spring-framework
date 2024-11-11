@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,16 @@ class DefaultSubscriptionRegistryTests {
 		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertThat(actual).hasSize(1);
+		assertThat(actual.get(sessId)).containsExactly(subId);
+
+		// Register more after destinationCache populated through findSubscriptions,
+		// and make sure it's still only one subscriptionId
+
+		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
+		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
+
+		actual = this.registry.findSubscriptions(createMessage(dest));
 		assertThat(actual).hasSize(1);
 		assertThat(actual.get(sessId)).containsExactly(subId);
 	}
@@ -420,7 +430,7 @@ class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test  // SPR-12665
-	void findSubscriptionsReturnsMapSafeToIterate() throws Exception {
+	void findSubscriptionsReturnsMapSafeToIterate() {
 		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
 		this.registry.registerSubscription(subscribeMessage("sess2", "1", "/foo"));
 
@@ -437,7 +447,7 @@ class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test  // SPR-13185
-	void findSubscriptionsReturnsMapSafeToIterateIncludingValues() throws Exception {
+	void findSubscriptionsReturnsMapSafeToIterateIncludingValues() {
 		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
 		this.registry.registerSubscription(subscribeMessage("sess1", "2", "/foo"));
 
@@ -454,7 +464,7 @@ class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test // SPR-13555
-	void cacheLimitExceeded() throws Exception {
+	void cacheLimitExceeded() {
 		this.registry.setCacheLimit(1);
 		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
 		this.registry.registerSubscription(subscribeMessage("sess1", "2", "/bar"));

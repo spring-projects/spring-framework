@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class CookieAssertionTests {
 				.addInterceptors(new LocaleChangeInterceptor())
 				.addInterceptors(new HandlerInterceptor() {
 					@Override
-					public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+					public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 						response.addCookie(cookie);
 						return true;
 					}
@@ -125,7 +125,7 @@ public class CookieAssertionTests {
 	}
 
 	@Test
-	void testSameSiteNotEquals() throws Exception {
+	void testSameSiteNotEquals() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 						this.mockMvc.perform(get("/")).andExpect(cookie()
 								.sameSite(COOKIE_WITH_ATTRIBUTES_NAME, "Str")))

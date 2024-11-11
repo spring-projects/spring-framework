@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class NettyByteBufDecoderTests extends AbstractDecoderTests<NettyByteBufDecoder>
 
 	@Override
 	@Test
-	public void canDecode() {
+	protected void canDecode() {
 		assertThat(this.decoder.canDecode(ResolvableType.forClass(ByteBuf.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
@@ -58,7 +58,7 @@ class NettyByteBufDecoderTests extends AbstractDecoderTests<NettyByteBufDecoder>
 
 	@Override
 	@Test
-	public void decode() {
+	protected void decode() {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
 				dataBuffer(this.barBytes));
@@ -71,7 +71,7 @@ class NettyByteBufDecoderTests extends AbstractDecoderTests<NettyByteBufDecoder>
 
 	@Override
 	@Test
-	public void decodeToMono() {
+	protected void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(
 				dataBuffer(this.fooBytes),
 				dataBuffer(this.barBytes));

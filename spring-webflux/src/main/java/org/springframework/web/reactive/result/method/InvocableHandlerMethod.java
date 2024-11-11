@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,20 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KType;
+import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -43,6 +47,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -56,6 +61,12 @@ import org.springframework.web.server.ServerWebExchange;
  * Extension of {@link HandlerMethod} that invokes the underlying method with
  * argument values resolved from the current HTTP request through a list of
  * {@link HandlerMethodArgumentResolver}.
+ * <p>By default, the method invocation happens on the thread from which the
+ * {@code Mono} was subscribed to, or in some cases the thread that emitted one
+ * of the resolved arguments (for example, when the request body needs to be decoded).
+ * To ensure a predictable thread for the underlying method's invocation,
+ * a {@link Scheduler} can optionally be provided via
+ * {@link #setInvocationScheduler(Scheduler)}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -79,6 +90,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	@Nullable
 	private MethodValidator methodValidator;
+
+	private Class<?>[] validationGroups = EMPTY_GROUPS;
+
+	@Nullable
+	private Scheduler invocationScheduler;
 
 
 	/**
@@ -113,7 +129,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
-	 * (e.g. default request attribute name).
+	 * (for example, default request attribute name).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer nameDiscoverer) {
@@ -144,8 +160,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
 		this.methodValidator = methodValidator;
+		this.validationGroups = (methodValidator != null ?
+				methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
+	/**
+	 * Set the {@link Scheduler} on which to perform the method invocation.
+	 * @since 6.1.6
+	 */
+	public void setInvocationScheduler(@Nullable Scheduler invocationScheduler) {
+		this.invocationScheduler = invocationScheduler;
+	}
 
 	/**
 	 * Invoke the method for the given exchange.
@@ -154,15 +179,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with a {@link HandlerResult}
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "NullAway"})
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
-			Class<?>[] groups = getValidationGroups();
+		return getMethodArgumentValuesOnScheduler(exchange, bindingContext, providedArgs).flatMap(args -> {
 			if (shouldValidateArguments() && this.methodValidator != null) {
 				this.methodValidator.applyArgumentValidation(
-						getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
+						getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
 			}
 			Object value;
 			Method method = getBridgedMethod();
@@ -211,6 +235,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
+	private Mono<Object[]> getMethodArgumentValuesOnScheduler(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
+		Mono<Object[]> argumentValuesMono = getMethodArgumentValues(exchange, bindingContext, providedArgs);
+		return this.invocationScheduler != null ? argumentValuesMono.publishOn(this.invocationScheduler) : argumentValuesMono;
+	}
+
 	private Mono<Object[]> getMethodArgumentValues(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
@@ -255,11 +285,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
-	private Class<?>[] getValidationGroups() {
-		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
-				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
-	}
-
+	@Contract("_, null -> false")
 	private static boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter adapter) {
 		if (adapter != null && adapter.supportsEmpty()) {
 			if (adapter.isNoValue()) {
@@ -287,6 +313,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return false;
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -296,9 +323,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		private static final String COROUTINE_CONTEXT_ATTRIBUTE = "org.springframework.web.server.CoWebFilter.context";
 
 		@Nullable
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "DataFlowIssue"})
 		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
-				ServerWebExchange exchange) {
+				ServerWebExchange exchange) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 
 			if (isSuspendingFunction) {
 				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
@@ -310,8 +337,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			else {
-				KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
-				if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				// For property accessors
+				if (function == null) {
+					return method.invoke(target, args);
+				}
+				if (!KCallablesJvm.isAccessible(function)) {
 					KCallablesJvm.setAccessible(function, true);
 				}
 				Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
@@ -319,15 +350,28 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				for (KParameter parameter : function.getParameters()) {
 					switch (parameter.getKind()) {
 						case INSTANCE -> argMap.put(parameter, target);
-						case VALUE -> {
-							if (!parameter.isOptional() || args[index] != null) {
-								argMap.put(parameter, args[index]);
+						case VALUE, EXTENSION_RECEIVER -> {
+							Object arg = args[index];
+							if (!(parameter.isOptional() && arg == null)) {
+								KType type = parameter.getType();
+								if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
+										&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+									KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
+									if (!KCallablesJvm.isAccessible(constructor)) {
+										KCallablesJvm.setAccessible(constructor, true);
+									}
+									arg = constructor.call(arg);
+								}
+								argMap.put(parameter, arg);
 							}
 							index++;
 						}
 					}
 				}
 				Object result = function.callBy(argMap);
+				if (result != null && KotlinDetector.isInlineClass(result.getClass())) {
+					return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+				}
 				return (result == Unit.INSTANCE ? null : result);
 			}
 		}

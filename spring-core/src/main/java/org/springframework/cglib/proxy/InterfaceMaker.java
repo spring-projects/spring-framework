@@ -73,7 +73,7 @@ public class InterfaceMaker extends AbstractClassGenerator
     /**
      * Add all the public methods in the specified class.
      * Methods from superclasses are included, except for methods declared in the base
-     * Object class (e.g. <code>getClass</code>, <code>equals</code>, <code>hashCode</code>).
+     * Object class (for example, <code>getClass</code>, <code>equals</code>, <code>hashCode</code>).
      * @param clazz the class containing the methods to add to the interface
      */
     public void add(Class clazz) {

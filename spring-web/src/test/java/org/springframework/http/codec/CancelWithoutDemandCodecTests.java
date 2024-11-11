@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,13 @@ import org.springframework.web.testfixture.xml.Pojo;
  * Test scenarios for data buffer leaks.
  * @author Rossen Stoyanchev
  */
-public class CancelWithoutDemandCodecTests {
+class CancelWithoutDemandCodecTests {
 
 	private final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() {
 		this.bufferFactory.checkForLeaks();
 	}
 
@@ -83,7 +83,7 @@ public class CancelWithoutDemandCodecTests {
 				MediaType.APPLICATION_JSON, Collections.emptyMap());
 
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
+		flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 		subscriber.cancel();
 	}
 
@@ -96,7 +96,7 @@ public class CancelWithoutDemandCodecTests {
 				MediaType.APPLICATION_XML, Collections.emptyMap());
 
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
+		flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 		subscriber.cancel();
 	}
 
@@ -110,12 +110,12 @@ public class CancelWithoutDemandCodecTests {
 				MediaType.APPLICATION_PROTOBUF, Collections.emptyMap());
 
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
+		flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 		subscriber.cancel();
 	}
 
 	@Test // gh-22731
-	public void cancelWithProtobufDecoder() throws InterruptedException {
+	public void cancelWithProtobufDecoder() {
 		ProtobufDecoder decoder = new ProtobufDecoder();
 
 		Mono<DataBuffer> input = Mono.fromCallable(() -> {
@@ -187,7 +187,7 @@ public class CancelWithoutDemandCodecTests {
 		public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 			Flux<? extends DataBuffer> flux = Flux.from(body);
 			BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-			flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
+			flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 			subscriber.cancel();
 			return Mono.empty();
 		}
@@ -196,7 +196,7 @@ public class CancelWithoutDemandCodecTests {
 		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 			Flux<? extends DataBuffer> flux = Flux.from(body).concatMap(Flux::from);
 			BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-			flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
+			flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 			subscriber.cancel();
 			return Mono.empty();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,9 +30,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * {@code @NestedTestConfiguration} is a type-level annotation that is used to
- * configure how Spring test configuration annotations are processed within
- * enclosing class hierarchies (i.e., for <em>inner</em> test classes).
+ * {@code @NestedTestConfiguration} is an annotation that can be applied to a test
+ * class to configure how Spring test configuration annotations are processed
+ * within enclosing class hierarchies (i.e., for <em>inner</em> test classes).
  *
  * <p>If {@code @NestedTestConfiguration} is not <em>present</em> or
  * <em>meta-present</em> on a test class, in its supertype hierarchy, or in its
@@ -58,10 +59,16 @@ import org.springframework.lang.Nullable;
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
- * <p>As of Spring Framework 5.3, the use of this annotation typically only makes
- * sense in conjunction with {@link org.junit.jupiter.api.Nested @Nested} test
- * classes in JUnit Jupiter; however, there may be other testing frameworks with
- * support for nested test classes that could also make use of this annotation.
+ * <p>The use of this annotation typically only makes sense in conjunction with
+ * {@link org.junit.jupiter.api.Nested @Nested} test classes in JUnit Jupiter;
+ * however, there may be other testing frameworks with support for nested test
+ * classes that could also make use of this annotation.
+ *
+ * <p>If you are developing a component that integrates with the Spring TestContext
+ * Framework and needs to support annotation inheritance within enclosing class
+ * hierarchies, you must use the annotation search utilities provided in
+ * {@link TestContextAnnotationUtils} in order to honor
+ * {@code @NestedTestConfiguration} semantics.
  *
  * <h3>Supported Annotations</h3>
  * <p>The <em>Spring TestContext Framework</em> honors {@code @NestedTestConfiguration}
@@ -89,6 +96,7 @@ import org.springframework.lang.Nullable;
  * @since 5.3
  * @see EnclosingConfiguration#INHERIT
  * @see EnclosingConfiguration#OVERRIDE
+ * @see TestContextAnnotationUtils
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -159,7 +167,7 @@ public @interface NestedTestConfiguration {
 				return null;
 			}
 			try {
-				return EnclosingConfiguration.valueOf(name.trim().toUpperCase());
+				return EnclosingConfiguration.valueOf(name.trim().toUpperCase(Locale.ROOT));
 			}
 			catch (IllegalArgumentException ex) {
 				Log logger = LogFactory.getLog(EnclosingConfiguration.class);
@@ -171,7 +179,6 @@ public @interface NestedTestConfiguration {
 				return null;
 			}
 		}
-
 	}
 
 }

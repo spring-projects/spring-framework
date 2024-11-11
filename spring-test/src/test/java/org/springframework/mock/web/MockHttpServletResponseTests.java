@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +45,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 /**
- * Unit tests for {@link MockHttpServletResponse}.
+ * Tests for {@link MockHttpServletResponse}.
  *
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -201,7 +202,7 @@ class MockHttpServletResponseTests {
 		response.setCharacterEncoding("UTF-8");
 		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
-		response.setCharacterEncoding(null);
+		response.setCharacterEncoding((String) null);
 		assertThat(response.getContentType()).isEqualTo("test/plain");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain");
 		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
@@ -259,13 +260,11 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test
-	void httpHeaderNameCasingIsPreserved() throws Exception {
+	void httpHeaderNameCasingIsPreserved() {
 		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");
 		Collection<String> responseHeaders = response.getHeaderNames();
-		assertThat(responseHeaders).isNotNull();
-		assertThat(responseHeaders).hasSize(1);
-		assertThat(responseHeaders.iterator().next()).as("HTTP header casing not being preserved").isEqualTo(headerName);
+		assertThat(responseHeaders).containsExactly(headerName);
 	}
 
 	@Test
@@ -276,12 +275,13 @@ class MockHttpServletResponseTests {
 		cookie.setMaxAge(0);
 		cookie.setSecure(true);
 		cookie.setHttpOnly(true);
+		cookie.setAttribute("Partitioned", "");
 
 		response.addCookie(cookie);
 
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("foo=bar; Path=/path; Domain=example.com; " +
 				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
-				"Secure; HttpOnly"));
+				"Secure; HttpOnly; Partitioned"));
 	}
 
 	@Test
@@ -400,8 +400,8 @@ class MockHttpServletResponseTests {
 	void addDateHeader() {
 		response.addDateHeader(LAST_MODIFIED, 1437472800000L);
 		response.addDateHeader(LAST_MODIFIED, 1437472801000L);
-		assertThat(response.getHeaders(LAST_MODIFIED).get(0)).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
-		assertThat(response.getHeaders(LAST_MODIFIED).get(1)).isEqualTo("Tue, 21 Jul 2015 10:00:01 GMT");
+		assertThat(response.getHeaders(LAST_MODIFIED)).containsExactly(
+				"Tue, 21 Jul 2015 10:00:00 GMT", "Tue, 21 Jul 2015 10:00:01 GMT");
 	}
 
 	@Test
@@ -619,6 +619,14 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentType()).isEqualTo("text/plain");
 		contentTypeHeader = response.getHeader(CONTENT_TYPE);
 		assertThat(contentTypeHeader).isEqualTo("text/plain");
+	}
+
+	@Test  // gh-33019
+	void contentAsStringEncodingWithJson() throws IOException {
+		String content = "{\"name\": \"Jürgen\"}";
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.getWriter().write(content);
+		assertThat(response.getContentAsString()).isEqualTo(content);
 	}
 
 }

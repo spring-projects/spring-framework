@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class MapDataSourceLookupTests {
+class MapDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "dataSource";
 
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void getDataSourcesReturnsUnmodifiableMap() throws Exception {
+	public void getDataSourcesReturnsUnmodifiableMap() {
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
 		Map dataSources = lookup.getDataSources();
 
@@ -46,7 +46,7 @@ public class MapDataSourceLookupTests {
 	}
 
 	@Test
-	public void lookupSunnyDay() throws Exception {
+	void lookupSunnyDay() {
 		Map<String, DataSource> dataSources = new HashMap<>();
 		StubDataSource expectedDataSource = new StubDataSource();
 		dataSources.put(DATA_SOURCE_NAME, expectedDataSource);
@@ -58,7 +58,7 @@ public class MapDataSourceLookupTests {
 	}
 
 	@Test
-	public void setDataSourcesIsAnIdempotentOperation() throws Exception {
+	void setDataSourcesIsAnIdempotentOperation() {
 		Map<String, DataSource> dataSources = new HashMap<>();
 		StubDataSource expectedDataSource = new StubDataSource();
 		dataSources.put(DATA_SOURCE_NAME, expectedDataSource);
@@ -71,7 +71,7 @@ public class MapDataSourceLookupTests {
 	}
 
 	@Test
-	public void addingDataSourcePermitsOverride() throws Exception {
+	void addingDataSourcePermitsOverride() {
 		Map<String, DataSource> dataSources = new HashMap<>();
 		StubDataSource overriddenDataSource = new StubDataSource();
 		StubDataSource expectedDataSource = new StubDataSource();
@@ -86,7 +86,7 @@ public class MapDataSourceLookupTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void getDataSourceWhereSuppliedMapHasNonDataSourceTypeUnderSpecifiedKey() throws Exception {
+	public void getDataSourceWhereSuppliedMapHasNonDataSourceTypeUnderSpecifiedKey() {
 		Map dataSources = new HashMap();
 		dataSources.put(DATA_SOURCE_NAME, new Object());
 		MapDataSourceLookup lookup = new MapDataSourceLookup(dataSources);
@@ -96,7 +96,7 @@ public class MapDataSourceLookupTests {
 	}
 
 	@Test
-	public void getDataSourceWhereSuppliedMapHasNoEntryForSpecifiedKey() throws Exception {
+	void getDataSourceWhereSuppliedMapHasNoEntryForSpecifiedKey() {
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
 
 		assertThatExceptionOfType(DataSourceLookupFailureException.class).isThrownBy(() ->

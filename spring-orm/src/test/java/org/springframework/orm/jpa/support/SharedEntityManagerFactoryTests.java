@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-public class SharedEntityManagerFactoryTests {
+class SharedEntityManagerFactoryTests {
 
 	@Test
-	public void testValidUsage() {
+	void testValidUsage() {
 		Object o = new Object();
 
 		EntityManager mockEm = mock();
@@ -72,7 +72,7 @@ public class SharedEntityManagerFactoryTests {
 			TransactionSynchronizationManager.unbindResource(mockEmf);
 		}
 
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		verify(mockEm).contains(o);
 		verify(mockEm).close();
 	}

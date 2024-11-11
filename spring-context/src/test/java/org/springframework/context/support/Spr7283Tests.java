@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,8 @@ class Spr7283Tests {
 	void listWithInconsistentElementTypes() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("spr7283.xml", getClass());
 		List<?> list = ctx.getBean("list", List.class);
-		assertThat(list).hasSize(2);
-		assertThat(list.get(0)).isInstanceOf(A.class);
-		assertThat(list.get(1)).isInstanceOf(B.class);
+		assertThat(list).satisfiesExactly(zero -> assertThat(zero).isInstanceOf(A.class),
+				one -> assertThat(one).isInstanceOf(B.class));
 		ctx.close();
 	}
 

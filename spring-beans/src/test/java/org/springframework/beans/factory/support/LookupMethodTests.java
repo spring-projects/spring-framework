@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Karl Pietrzak
  * @author Juergen Hoeller
  */
-public class LookupMethodTests {
+class LookupMethodTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("lookupMethodTests.xml", getClass()));
@@ -44,7 +44,7 @@ public class LookupMethodTests {
 
 
 	@Test
-	public void testWithoutConstructorArg() {
+	void testWithoutConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		Object expected = bean.get();
@@ -52,7 +52,7 @@ public class LookupMethodTests {
 	}
 
 	@Test
-	public void testWithOverloadedArg() {
+	void testWithOverloadedArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.get("haha");
@@ -61,7 +61,7 @@ public class LookupMethodTests {
 	}
 
 	@Test
-	public void testWithOneConstructorArg() {
+	void testWithOneConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
@@ -70,7 +70,7 @@ public class LookupMethodTests {
 	}
 
 	@Test
-	public void testWithTwoConstructorArg() {
+	void testWithTwoConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.getTwoArguments("haha", 72);
@@ -80,7 +80,7 @@ public class LookupMethodTests {
 	}
 
 	@Test
-	public void testWithThreeArgsShouldFail() {
+	void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		assertThatExceptionOfType(AbstractMethodError.class).as("does not have a three arg constructor")
@@ -88,7 +88,7 @@ public class LookupMethodTests {
 	}
 
 	@Test
-	public void testWithOverriddenLookupMethod() {
+	void testWithOverriddenLookupMethod() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("extendedBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
@@ -98,7 +98,7 @@ public class LookupMethodTests {
 	}
 
 	@Test
-	public void testWithGenericBean() {
+	void testWithGenericBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(NumberBean.class);
 		bd.getMethodOverrides().addOverride(new LookupOverride("getDoubleStore", null));
 		bd.getMethodOverrides().addOverride(new LookupOverride("getFloatStore", null));

@@ -45,7 +45,7 @@ class SimpleNamespaceContextTests {
 
 
 	@Test
-	void getNamespaceURI_withNull() throws Exception {
+	void getNamespaceURI_withNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.getNamespaceURI(null));
 	}
@@ -77,7 +77,7 @@ class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	void getPrefix_withNull() throws Exception {
+	void getPrefix_withNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.getPrefix(null));
 	}
@@ -100,13 +100,13 @@ class SimpleNamespaceContextTests {
 	}
 
 	@Test
-	void getPrefixes_withNull() throws Exception {
+	void getPrefixes_withNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				context.getPrefixes(null));
 	}
 
 	@Test
-	void getPrefixes_IteratorIsNotModifiable() throws Exception {
+	void getPrefixes_IteratorIsNotModifiable() {
 		context.bindNamespaceUri(prefix, namespaceUri);
 		Iterator<String> iterator = context.getPrefixes(namespaceUri);
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(

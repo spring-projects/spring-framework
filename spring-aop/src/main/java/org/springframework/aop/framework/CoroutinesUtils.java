@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,19 @@ import org.springframework.lang.Nullable;
  */
 abstract class CoroutinesUtils {
 
-	static Object asFlow(Object publisher) {
-		return ReactiveFlowKt.asFlow((Publisher<?>) publisher);
+	static Object asFlow(@Nullable Object publisher) {
+		if (publisher instanceof Publisher<?> rsPublisher) {
+			return ReactiveFlowKt.asFlow(rsPublisher);
+		}
+		else {
+			throw new IllegalArgumentException("Not a Reactive Streams Publisher: " + publisher);
+		}
 	}
 
 	@Nullable
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	static Object awaitSingleOrNull(Object value, Object continuation) {
-		return MonoKt.awaitSingleOrNull(value instanceof Mono mono ? mono : Mono.just(value),
+	static Object awaitSingleOrNull(@Nullable Object value, Object continuation) {
+		return MonoKt.awaitSingleOrNull(value instanceof Mono mono ? mono : Mono.justOrEmpty(value),
 				(Continuation<Object>) continuation);
 	}
 

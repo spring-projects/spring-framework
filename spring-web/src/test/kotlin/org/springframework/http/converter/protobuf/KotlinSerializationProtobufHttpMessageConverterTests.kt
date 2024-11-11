@@ -24,12 +24,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
+import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.testfixture.http.MockHttpInputMessage
 import org.springframework.web.testfixture.http.MockHttpOutputMessage
 import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
 import kotlin.reflect.javaType
 import kotlin.reflect.typeOf
@@ -69,20 +69,20 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 			assertThat(converter.canRead(NotSerializableBean::class.java, mimeType)).isFalse()
 
 			assertThat(converter.canRead(Map::class.java, mimeType)).isFalse()
-			assertThat(converter.canRead(typeTokenOf<Map<String, SerializableBean>>(), Map::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<Map<String, SerializableBean>>(), mimeType)).isTrue()
 			assertThat(converter.canRead(List::class.java, mimeType)).isFalse()
-			assertThat(converter.canRead(typeTokenOf<List<SerializableBean>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<List<SerializableBean>>(), mimeType)).isTrue()
 			assertThat(converter.canRead(Set::class.java, mimeType)).isFalse()
-			assertThat(converter.canRead(typeTokenOf<Set<SerializableBean>>(), Set::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<Set<SerializableBean>>(), mimeType)).isTrue()
 
-			assertThat(converter.canRead(typeTokenOf<List<Int>>(), List::class.java, mimeType)).isTrue()
-			assertThat(converter.canRead(typeTokenOf<ArrayList<Int>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<ArrayList<Int>>(),mimeType)).isTrue()
 
-			assertThat(converter.canRead(typeTokenOf<Ordered>(), Ordered::class.java, mimeType)).isFalse()
-			assertThat(converter.canRead(typeTokenOf<List<Ordered>>(), List::class.java, mimeType)).isFalse()
+			assertThat(converter.canRead(resolvableTypeOf<Ordered>(), mimeType)).isFalse()
+			assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), mimeType)).isFalse()
 		}
 		assertThat(converter.canRead(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(converter.canRead(typeTokenOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -93,20 +93,20 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 			assertThat(converter.canWrite(NotSerializableBean::class.java, mimeType)).isFalse()
 
 			assertThat(converter.canWrite(Map::class.java, mimeType)).isFalse()
-			assertThat(converter.canWrite(typeTokenOf<Map<String, SerializableBean>>(), Map::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<Map<String, SerializableBean>>(), Map::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(List::class.java, mimeType)).isFalse()
-			assertThat(converter.canWrite(typeTokenOf<List<SerializableBean>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<List<SerializableBean>>(), List::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(Set::class.java, mimeType)).isFalse()
-			assertThat(converter.canWrite(typeTokenOf<Set<SerializableBean>>(), Set::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<Set<SerializableBean>>(), Set::class.java, mimeType)).isTrue()
 
-			assertThat(converter.canWrite(typeTokenOf<List<Int>>(), List::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(typeTokenOf<ArrayList<Int>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<ArrayList<Int>>(), List::class.java, mimeType)).isTrue()
 
-			assertThat(converter.canWrite(typeTokenOf<Ordered>(), Ordered::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, mimeType)).isFalse()
 		}
 
 		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -152,8 +152,8 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 		for (mimeType in mediaTypes) {
 			val inputMessage = MockHttpInputMessage(serializableBeanArrayBody)
 			inputMessage.headers.contentType = mimeType
-			val result = converter.read(typeOf<List<SerializableBean>>().javaType, null, inputMessage)
-					as List<SerializableBean>
+			val result = converter.read(ResolvableType.forType(typeOf<List<SerializableBean>>().javaType), inputMessage,
+				null) as List<SerializableBean>
 
 			assertThat(result).hasSize(1)
 			assertThat(result[0].bytes).containsExactly(*serializableBean.bytes)
@@ -216,7 +216,7 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 	fun writeGenericCollection() {
 		val outputMessage = MockHttpOutputMessage()
 
-		this.converter.write(listOf(serializableBean), typeOf<List<SerializableBean>>().javaType, null, outputMessage)
+		this.converter.write(listOf(serializableBean), ResolvableType.forType(typeOf<List<SerializableBean>>().javaType), null, outputMessage, null)
 
 		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
@@ -238,10 +238,10 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 	open class TypeBase<T>
 
-	inline fun <reified T> typeTokenOf(): Type {
+	private inline fun <reified T> resolvableTypeOf(): ResolvableType {
 		val base = object : TypeBase<T>() {}
 		val superType = base::class.java.genericSuperclass!!
-		return (superType as ParameterizedType).actualTypeArguments.first()!!
+		return ResolvableType.forType((superType as ParameterizedType).actualTypeArguments.first()!!)
 	}
 
 }

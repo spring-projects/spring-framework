@@ -1,65 +1,14 @@
 [[mvc-config-interceptors]]
 = Interceptors
 
-In Java configuration, you can register interceptors to apply to incoming requests, as
-the following example shows:
+You can register interceptors to apply to incoming requests, as the following example shows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim",role="primary"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig implements WebMvcConfigurer {
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
-		@Override
-		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(new LocaleChangeInterceptor());
-			registry.addInterceptor(new ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
-----
-	@Configuration
-	@EnableWebMvc
-	class WebConfig : WebMvcConfigurer {
-
-		override fun addInterceptors(registry: InterceptorRegistry) {
-			registry.addInterceptor(LocaleChangeInterceptor())
-			registry.addInterceptor(ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**")
-		}
-	}
-----
-======
-
-The following example shows how to achieve the same configuration in XML:
-
-[source,xml,indent=0,subs="verbatim"]
-----
-	<mvc:interceptors>
-		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
-		<mvc:interceptor>
-			<mvc:mapping path="/**"/>
-			<mvc:exclude-mapping path="/admin/**"/>
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
-		</mvc:interceptor>
-	</mvc:interceptors>
-----
-
-NOTE: Interceptors are not ideally suited as a security layer due to the potential
-for a mismatch with annotated controller path matching, which can also match trailing
-slashes and path extensions transparently, along with other path matching options. Many
-of these options have been deprecated but the potential for a mismatch remains.
-Generally, we recommend using Spring Security which includes a dedicated
-https://docs.spring.io/spring-security/reference/servlet/integrations/mvc.html#mvc-requestmatcher[MvcRequestMatcher]
-to align with Spring MVC path matching and also has a security firewall that blocks many
-unwanted characters in URL paths.
+WARNING: Interceptors are not ideally suited as a security layer due to the potential for
+a mismatch with annotated controller path matching. Generally, we recommend using Spring
+Security, or alternatively a similar approach integrated with the Servlet filter chain,
+and applied as early as possible.
 
 NOTE: The XML config declares interceptors as `MappedInterceptor` beans, and those are in
 turn detected by any `HandlerMapping` bean, including those from other frameworks.

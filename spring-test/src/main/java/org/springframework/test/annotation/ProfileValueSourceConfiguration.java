@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@code ProfileValueSourceConfiguration} is a class-level annotation for use
- * with JUnit 4 which is used to specify what type of {@link ProfileValueSource}
+ * {@code ProfileValueSourceConfiguration} is an annotation that can be applied
+ * to a JUnit 4 based test class to specify what type of {@link ProfileValueSource}
  * to use when retrieving <em>profile values</em> configured via
  * {@link IfProfileValue @IfProfileValue}.
  *

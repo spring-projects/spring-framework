@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @since 6.1
  */
-public class JdbcClientIndexedParameterTests {
+class JdbcClientIndexedParameterTests {
 
 	private static final String SELECT_INDEXED_PARAMETERS =
 			"select id, forename from custmr where id = ? and country = ?";
@@ -84,7 +84,7 @@ public class JdbcClientIndexedParameterTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		given(dataSource.getConnection()).willReturn(connection);
 		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
 		given(preparedStatement.getConnection()).willReturn(connection);
@@ -95,7 +95,7 @@ public class JdbcClientIndexedParameterTests {
 
 
 	@Test
-	public void queryWithResultSetExtractor() throws SQLException {
+	void queryWithResultSetExtractor() throws SQLException {
 		given(resultSet.next()).willReturn(true);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -122,7 +122,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryWithResultSetExtractorNoParameters() throws SQLException {
+	void queryWithResultSetExtractorNoParameters() throws SQLException {
 		given(resultSet.next()).willReturn(true);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -145,7 +145,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryWithRowCallbackHandler() throws SQLException {
+	void queryWithRowCallbackHandler() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -172,7 +172,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryWithRowCallbackHandlerNoParameters() throws SQLException {
+	void queryWithRowCallbackHandlerNoParameters() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -195,7 +195,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryWithRowMapper() throws SQLException {
+	void queryWithRowMapper() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -223,7 +223,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryWithRowMapperNoParameters() throws SQLException {
+	void queryWithRowMapperNoParameters() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -247,7 +247,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryForObjectWithRowMapper() throws SQLException {
+	void queryForObjectWithRowMapper() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -274,7 +274,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void queryForStreamWithRowMapper() throws SQLException {
+	void queryForStreamWithRowMapper() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -307,7 +307,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void update() throws SQLException {
+	void update() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.add(1);
@@ -323,7 +323,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void updateWithTypedParameters() throws SQLException {
+	void updateWithTypedParameters() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.add(new SqlParameterValue(Types.DECIMAL, 1));
@@ -339,7 +339,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void updateWithGeneratedKeys() throws SQLException {
+	void updateWithGeneratedKeys() throws SQLException {
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
 		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
@@ -363,7 +363,7 @@ public class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	public void updateWithGeneratedKeysAndKeyColumnNames() throws SQLException {
+	void updateWithGeneratedKeysAndKeyColumnNames() throws SQLException {
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
 		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);

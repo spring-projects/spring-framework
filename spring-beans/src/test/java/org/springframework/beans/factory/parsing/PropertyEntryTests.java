@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,27 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link PropertyEntry}.
+ * Tests for {@link PropertyEntry}.
  *
  * @author Rick Evans
  * @author Chris Beams
  */
-public class PropertyEntryTests {
+class PropertyEntryTests {
 
 	@Test
-	public void testCtorBailsOnNullPropertyNameArgument() throws Exception {
+	void testCtorBailsOnNullPropertyNameArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertyEntry(null));
 	}
 
 	@Test
-	public void testCtorBailsOnEmptyPropertyNameArgument() throws Exception {
+	void testCtorBailsOnEmptyPropertyNameArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertyEntry(""));
 	}
 
 	@Test
-	public void testCtorBailsOnWhitespacedPropertyNameArgument() throws Exception {
+	void testCtorBailsOnWhitespacedPropertyNameArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertyEntry("\t   "));
 	}

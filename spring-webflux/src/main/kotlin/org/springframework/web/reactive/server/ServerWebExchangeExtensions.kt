@@ -88,4 +88,4 @@ suspend fun ServerWebExchange.awaitSession(): WebSession =
 	ReplaceWith("principal(supplier)", "org.springframework.web.server.principal"),
 )
 fun ServerWebExchange.Builder.principal(supplier: suspend () -> Principal): ServerWebExchange.Builder
-        = principal(mono(Dispatchers.Unconfined) { supplier.invoke() })
+		= principal(mono(Dispatchers.Unconfined) { supplier.invoke() })

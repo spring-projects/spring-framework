@@ -63,7 +63,7 @@ public @interface MatrixVariable {
 
 	/**
 	 * The name of the URI path variable where the matrix variable is located,
-	 * if necessary for disambiguation (e.g. a matrix variable with the same
+	 * if necessary for disambiguation (for example, a matrix variable with the same
 	 * name present in more than one path segment).
 	 */
 	String pathVar() default ValueConstants.DEFAULT_NONE;

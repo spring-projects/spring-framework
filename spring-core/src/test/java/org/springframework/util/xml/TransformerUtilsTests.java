@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link TransformerUtils}.
+ * Tests for {@link TransformerUtils}.
  *
  * @author Rick Evans
  * @author Arjen Poutsma
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class TransformerUtilsTests {
 
 	@Test
-	void enableIndentingSunnyDay() throws Exception {
+	void enableIndentingSunnyDay() {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
@@ -52,7 +52,7 @@ class TransformerUtilsTests {
 	}
 
 	@Test
-	void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
+	void enableIndentingSunnyDayWithCustomKosherIndentAmount() {
 		final String indentAmountProperty = "10";
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer, Integer.parseInt(indentAmountProperty));
@@ -65,7 +65,7 @@ class TransformerUtilsTests {
 	}
 
 	@Test
-	void disableIndentingSunnyDay() throws Exception {
+	void disableIndentingSunnyDay() {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.disableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
@@ -74,25 +74,25 @@ class TransformerUtilsTests {
 	}
 
 	@Test
-	void enableIndentingWithNullTransformer() throws Exception {
+	void enableIndentingWithNullTransformer() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.enableIndenting(null));
 	}
 
 	@Test
-	void disableIndentingWithNullTransformer() throws Exception {
+	void disableIndentingWithNullTransformer() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.disableIndenting(null));
 	}
 
 	@Test
-	void enableIndentingWithNegativeIndentAmount() throws Exception {
+	void enableIndentingWithNegativeIndentAmount() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.enableIndenting(new StubTransformer(), -21938));
 	}
 
 	@Test
-	void enableIndentingWithZeroIndentAmount() throws Exception {
+	void enableIndentingWithZeroIndentAmount() {
 		TransformerUtils.enableIndenting(new StubTransformer(), 0);
 	}
 

@@ -8,7 +8,7 @@ the expression. The following listing shows a minimal example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String falseString = parser.parseExpression(
 			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
@@ -16,7 +16,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val falseString = parser.parseExpression(
 			"false ? 'trueExp' : 'falseExp'").getValue(String::class.java)
@@ -30,7 +30,7 @@ realistic example follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	parser.parseExpression("name").setValue(societyContext, "IEEE");
 	societyContext.setVariable("queryName", "Nikola Tesla");
@@ -45,7 +45,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	parser.parseExpression("name").setValue(societyContext, "IEEE")
 	societyContext.setVariable("queryName", "Nikola Tesla")

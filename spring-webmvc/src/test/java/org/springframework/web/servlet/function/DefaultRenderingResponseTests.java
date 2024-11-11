@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.function;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Map;
 
@@ -38,12 +37,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class DefaultRenderingResponseTests {
+class DefaultRenderingResponseTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
+	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
 	@Test
-	public void create() throws Exception {
+	void create() throws Exception {
 		String name = "foo";
 		RenderingResponse result = RenderingResponse.create(name).build();
 
@@ -55,7 +54,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void status() throws Exception {
+	void status() throws Exception {
 		HttpStatus status = HttpStatus.I_AM_A_TEAPOT;
 		RenderingResponse result = RenderingResponse.create("foo").status(status).build();
 
@@ -67,7 +66,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void headers() throws Exception {
+	void headers() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", "bar");
 		RenderingResponse result = RenderingResponse.create("foo")
@@ -83,7 +82,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttribute() throws Exception {
+	void modelAttribute() throws Exception {
 		RenderingResponse result = RenderingResponse.create("foo")
 				.modelAttribute("foo", "bar").build();
 
@@ -97,7 +96,7 @@ public class DefaultRenderingResponseTests {
 
 
 	@Test
-	public void modelAttributeConventions() throws Exception {
+	void modelAttributeConventions() throws Exception {
 		RenderingResponse result = RenderingResponse.create("foo")
 				.modelAttribute("bar").build();
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -108,7 +107,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttributes() throws Exception {
+	void modelAttributes() throws Exception {
 		Map<String, String> model = Collections.singletonMap("foo", "bar");
 		RenderingResponse result = RenderingResponse.create("foo")
 				.modelAttributes(model).build();
@@ -120,7 +119,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void modelAttributesConventions() throws Exception {
+	void modelAttributesConventions() throws Exception {
 		RenderingResponse result = RenderingResponse.create("foo")
 				.modelAttributes("bar").build();
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -131,7 +130,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void cookies() throws Exception {
+	void cookies() throws Exception {
 		MultiValueMap<String, Cookie> newCookies = new LinkedMultiValueMap<>();
 		newCookies.add("name", new Cookie("name", "value"));
 		RenderingResponse result =
@@ -146,7 +145,7 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
-	public void notModifiedEtag() throws Exception {
+	void notModifiedEtag() throws Exception {
 		String etag = "\"foo\"";
 		RenderingResponse result = RenderingResponse.create("bar")
 				.header(HttpHeaders.ETAG, etag)
@@ -163,9 +162,9 @@ public class DefaultRenderingResponseTests {
 
 
 	@Test
-	public void notModifiedLastModified() throws Exception {
+	void notModifiedLastModified() throws Exception {
 		ZonedDateTime now = ZonedDateTime.now();
-		ZonedDateTime oneMinuteBeforeNow = now.minus(1, ChronoUnit.MINUTES);
+		ZonedDateTime oneMinuteBeforeNow = now.minusMinutes(1);
 
 		RenderingResponse result = RenderingResponse.create("bar")
 				.header(HttpHeaders.LAST_MODIFIED, DateTimeFormatter.RFC_1123_DATE_TIME.format(oneMinuteBeforeNow))

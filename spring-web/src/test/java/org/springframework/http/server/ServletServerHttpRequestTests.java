@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,12 +33,13 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class ServletServerHttpRequestTests {
+class ServletServerHttpRequestTests {
 
 	private ServletServerHttpRequest request;
 
@@ -58,7 +60,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	void getUriForSimplePath() throws URISyntaxException {
+	void getUriForSimplePath() {
 		URI uri = URI.create("https://example.com/path");
 		mockRequest.setScheme(uri.getScheme());
 		mockRequest.setServerName(uri.getHost());
@@ -69,7 +71,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	void getUriWithQueryString() throws URISyntaxException {
+	void getUriWithQueryString() {
 		URI uri = URI.create("https://example.com/path?query");
 		mockRequest.setScheme(uri.getScheme());
 		mockRequest.setServerName(uri.getHost());
@@ -79,28 +81,32 @@ public class ServletServerHttpRequestTests {
 		assertThat(request.getURI()).isEqualTo(uri);
 	}
 
-	@Test  // SPR-16414
-	void getUriWithQueryParam() throws URISyntaxException {
+	// gh-20960
+	@ParameterizedTest(name = "{displayName}({arguments})")
+	@CsvSource(delimiter='|', value = {
+			"query=foo    | ?query=foo",
+			"query=foo%%x | ?query=foo%25%25x"
+	})
+	void getUriWithMalformedQueryParam(String inputQuery, String expectedQuery) {
 		mockRequest.setScheme("https");
 		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
 		mockRequest.setRequestURI("/path");
-		mockRequest.setQueryString("query=foo");
-		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/path?query=foo"));
+		mockRequest.setQueryString(inputQuery);
+		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/path" + expectedQuery));
 	}
 
-	@Test  // SPR-16414
-	void getUriWithMalformedQueryParam() throws URISyntaxException {
+	@Test
+	void getUriWithMalformedPath() {
 		mockRequest.setScheme("https");
 		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
-		mockRequest.setRequestURI("/path");
-		mockRequest.setQueryString("query=foo%%x");
-		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/path"));
+		mockRequest.setRequestURI("/p%th");
+		assertThatIllegalStateException().isThrownBy(() -> request.getURI());
 	}
 
 	@Test  // SPR-13876
-	void getUriWithEncoding() throws URISyntaxException {
+	void getUriWithEncoding() {
 		URI uri = URI.create("https://example.com/%E4%B8%AD%E6%96%87" +
 				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
 		mockRequest.setScheme(uri.getScheme());
@@ -125,6 +131,7 @@ public class ServletServerHttpRequestTests {
 		assertThat(headers).as("No HttpHeaders returned").isNotNull();
 		assertThat(headers.containsKey(headerName)).as("Invalid headers returned").isTrue();
 		List<String> headerValues = headers.get(headerName);
+		assertThat(headerValues).as("No header values returned").isNotNull();
 		assertThat(headerValues.size()).as("Invalid header values returned").isEqualTo(2);
 		assertThat(headerValues.contains(headerValue1)).as("Invalid header values returned").isTrue();
 		assertThat(headerValues.contains(headerValue2)).as("Invalid header values returned").isTrue();
@@ -151,7 +158,7 @@ public class ServletServerHttpRequestTests {
 		assertThat(headers.getContentType()).isNull();
 	}
 
-	@Test // gh-27957
+	@Test  // gh-27957
 	void getHeadersWithWildcardContentType() {
 		mockRequest.setContentType("*/*");
 		mockRequest.removeHeader("Content-Type");
@@ -167,7 +174,7 @@ public class ServletServerHttpRequestTests {
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
 
-	@Test // gh-13318
+	@Test  // gh-13318
 	void getFormBody() throws IOException {
 		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
 		mockRequest.setMethod("POST");
@@ -190,7 +197,7 @@ public class ServletServerHttpRequestTests {
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
 
-	@Test // gh-31327
+	@Test  // gh-31327
 	void getFormBodyWhenQueryParamsAlsoPresent() throws IOException {
 		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
 		mockRequest.setMethod("POST");
@@ -202,6 +209,25 @@ public class ServletServerHttpRequestTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		byte[] content = "foo=bar".getBytes(StandardCharsets.UTF_8);
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
+	}
+
+	@Test  // gh-32471
+	void getFormBodyWhenNotEncodedCharactersPresent() throws IOException {
+		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
+		mockRequest.setMethod("POST");
+		mockRequest.addParameter("name", "Test");
+		mockRequest.addParameter("lastName", "Test@er");
+		mockRequest.addHeader("Content-Length", 26);
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertThat(result).isEqualTo("name=Test&lastName=Test%40er".getBytes(StandardCharsets.UTF_8));
+		assertThat(request.getHeaders().getContentLength()).isEqualTo(result.length);
+	}
+
+	@Test
+	void attributes() {
+		request.getAttributes().put("foo", "bar");
+		assertThat(mockRequest.getAttribute("foo")).isEqualTo("bar");
 	}
 
 }

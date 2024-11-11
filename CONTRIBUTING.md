@@ -18,7 +18,7 @@ First off, thank you for taking the time to contribute! :+1: :tada:
 
 This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
 By participating you are expected to uphold this code.
-Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+Please report unacceptable behavior to spring-code-of-conduct@spring.io.
 
 ### How to Contribute
 
@@ -86,7 +86,7 @@ multiple edits or corrections of the same logical change. See
 for an overview of streamlining the commit history.
 
 1. Format commit messages using 55 characters for the subject line, 72 characters per line
-for the description, followed by the issue fixed, e.g. `Closes gh-22276`. See the
+for the description, followed by the issue fixed, for example, `Closes gh-22276`. See the
 [Commit Guidelines section of Pro Git](https://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
 for best practices around commit messages, and use `git log` to see some examples.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +50,11 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private final URI uri;
 
-	private final RequestPath path;
+	@Nullable
+	private final String contextPath;
+
+	@Nullable
+	private RequestPath path;
 
 	private final HttpHeaders headers;
 
@@ -68,6 +75,9 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Nullable
 	private String logPrefix;
 
+	@Nullable
+	private Supplier<Map<String, Object>> attributesSupplier;
+
 
 	/**
 	 * Constructor with the method, URI and headers for the request.
@@ -86,7 +96,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 		this.method = method;
 		this.uri = uri;
-		this.path = RequestPath.parse(uri, contextPath);
+		this.contextPath = contextPath;
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
@@ -123,7 +133,20 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
+	public Map<String, Object> getAttributes() {
+		if (this.attributesSupplier != null) {
+			return this.attributesSupplier.get();
+		}
+		else {
+			return Collections.emptyMap();
+		}
+	}
+
+	@Override
 	public RequestPath getPath() {
+		if (this.path == null) {
+			this.path = RequestPath.parse(this.uri, this.contextPath);
+		}
 		return this.path;
 	}
 
@@ -230,4 +253,12 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return getId();
 	}
 
+	/**
+	 * Set the attribute supplier.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use.
+	 */
+	public void setAttributesSupplier(Supplier<Map<String, Object>> attributesSupplier) {
+		this.attributesSupplier = attributesSupplier;
+	}
 }

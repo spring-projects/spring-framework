@@ -186,7 +186,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * Resolve the target class to convert the payload to.
 	 * <p>By default this is simply {@link MethodParameter#getParameterType()}
 	 * but that can be overridden to select a more specific target type after
-	 * also taking into account the "Content-Type", e.g. return {@code String}
+	 * also taking into account the "Content-Type", for example, return {@code String}
 	 * if target type is {@code Object} and {@code "Content-Type:text/**"}.
 	 * @param parameter the target method parameter
 	 * @param message the message being processed

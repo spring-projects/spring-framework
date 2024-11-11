@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class HandlerStrategiesTests {
+class HandlerStrategiesTests {
 
 	@Test
-	public void empty() {
+	void empty() {
 		HandlerStrategies strategies = HandlerStrategies.empty().build();
-		assertThat(strategies.messageReaders().isEmpty()).isTrue();
-		assertThat(strategies.messageWriters().isEmpty()).isTrue();
-		assertThat(strategies.viewResolvers().isEmpty()).isTrue();
+		assertThat(strategies.messageReaders()).isEmpty();
+		assertThat(strategies.messageWriters()).isEmpty();
+		assertThat(strategies.viewResolvers()).isEmpty();
 	}
 
 	@Test
-	public void withDefaults() {
+	void withDefaults() {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
-		assertThat(strategies.messageReaders().isEmpty()).isFalse();
-		assertThat(strategies.messageWriters().isEmpty()).isFalse();
-		assertThat(strategies.viewResolvers().isEmpty()).isTrue();
+		assertThat(strategies.messageReaders()).isNotEmpty();
+		assertThat(strategies.messageWriters()).isNotEmpty();
+		assertThat(strategies.viewResolvers()).isEmpty();
 	}
 
 }

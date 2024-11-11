@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,29 +132,29 @@ public class RequestContext {
 	 * Create a new RequestContext for the given request, using the request attributes for Errors retrieval.
 	 * <p>This only works with InternalResourceViews, as Errors instances are part of the model and not
 	 * normally exposed as request attributes. It will typically be used within JSPs or custom tags.
-	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
+	 * <p>As of 6.2, this will work within a DispatcherServlet request as well as with the root
+	 * WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.ServletContext)
 	 */
 	public RequestContext(HttpServletRequest request) {
-		this(request, null, null, null);
+		this(request, null, request.getServletContext(), null);
 	}
 
 	/**
 	 * Create a new RequestContext for the given request, using the request attributes for Errors retrieval.
 	 * <p>This only works with InternalResourceViews, as Errors instances are part of the model and not
 	 * normally exposed as request attributes. It will typically be used within JSPs or custom tags.
-	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
+	 * <p>As of 6.2, this will work within a DispatcherServlet request as well as with the root
+	 * WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, jakarta.servlet.ServletContext, Map)
 	 */
 	public RequestContext(HttpServletRequest request, HttpServletResponse response) {
-		this(request, response, null, null);
+		this(request, response, request.getServletContext(), null);
 	}
 
 	/**
@@ -176,8 +176,8 @@ public class RequestContext {
 	/**
 	 * Create a new RequestContext for the given request, using the given model attributes for Errors retrieval.
 	 * <p>This works with all View implementations. It will typically be used by View implementations.
-	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
+	 * <p>As of 6.2, this will work within a DispatcherServlet request as well as with the root
+	 * WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view (can be {@code null},
 	 * using the request attributes for Errors retrieval)
@@ -185,7 +185,7 @@ public class RequestContext {
 	 * @see #RequestContext(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, jakarta.servlet.ServletContext, Map)
 	 */
 	public RequestContext(HttpServletRequest request, @Nullable Map<String, Object> model) {
-		this(request, null, null, model);
+		this(request, null, request.getServletContext(), model);
 	}
 
 	/**
@@ -282,13 +282,6 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the current WebApplicationContext as MessageSource.
-	 */
-	public final MessageSource getMessageSource() {
-		return this.webApplicationContext;
-	}
-
-	/**
 	 * Return the model Map that this RequestContext encapsulates, if any.
 	 * @return the populated model Map, or {@code null} if none available
 	 */
@@ -298,12 +291,21 @@ public class RequestContext {
 	}
 
 	/**
+	 * Return the MessageSource to use (typically the current WebApplicationContext).
+	 * <p>Note: As of 6.2, this method is non-final and therefore overridable.
+	 */
+	public MessageSource getMessageSource() {
+		return this.webApplicationContext;
+	}
+
+	/**
 	 * Return the current Locale (falling back to the request locale; never {@code null}).
 	 * <p>Typically coming from a DispatcherServlet's {@link LocaleResolver}.
 	 * Also includes a fallback check for JSTL's Locale attribute.
+	 * <p>Note: As of 6.2, this method is non-final and therefore overridable.
 	 * @see RequestContextUtils#getLocale
 	 */
-	public final Locale getLocale() {
+	public Locale getLocale() {
 		return (this.locale != null ? this.locale : getFallbackLocale());
 	}
 
@@ -474,7 +476,7 @@ public class RequestContext {
 	 * Is default HTML escaping active? Falls back to {@code false} in case of no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
-		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
+		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape);
 	}
 
 	/**
@@ -493,7 +495,7 @@ public class RequestContext {
 	 * @since 4.1.2
 	 */
 	public boolean isResponseEncodedHtmlEscape() {
-		return (this.responseEncodedHtmlEscape == null || this.responseEncodedHtmlEscape.booleanValue());
+		return (this.responseEncodedHtmlEscape == null || this.responseEncodedHtmlEscape);
 	}
 
 	/**
@@ -661,7 +663,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
-		String msg = this.webApplicationContext.getMessage(code, args, defaultMessage, getLocale());
+		String msg = getMessageSource().getMessage(code, args, defaultMessage, getLocale());
 		if (msg == null) {
 			return "";
 		}
@@ -709,12 +711,12 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, @Nullable Object[] args, boolean htmlEscape) throws NoSuchMessageException {
-		String msg = this.webApplicationContext.getMessage(code, args, getLocale());
+		String msg = getMessageSource().getMessage(code, args, getLocale());
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance), using the "defaultHtmlEscape" setting.
+	 * Retrieve the given MessageSourceResolvable (for example, an ObjectError instance), using the "defaultHtmlEscape" setting.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -724,14 +726,14 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance).
+	 * Retrieve the given MessageSourceResolvable (for example, an ObjectError instance).
 	 * @param resolvable the MessageSourceResolvable
 	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable, boolean htmlEscape) throws NoSuchMessageException {
-		String msg = this.webApplicationContext.getMessage(resolvable, getLocale());
+		String msg = getMessageSource().getMessage(resolvable, getLocale());
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
@@ -907,7 +909,7 @@ public class RequestContext {
 
 	/**
 	 * Create a BindStatus for the given bind object, using the "defaultHtmlEscape" setting.
-	 * @param path the bean and property path for which values and errors will be resolved (e.g. "person.age")
+	 * @param path the bean and property path for which values and errors will be resolved (for example, "person.age")
 	 * @return the new BindStatus instance
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
@@ -917,7 +919,7 @@ public class RequestContext {
 
 	/**
 	 * Create a BindStatus for the given bind object, using the "defaultHtmlEscape" setting.
-	 * @param path the bean and property path for which values and errors will be resolved (e.g. "person.age")
+	 * @param path the bean and property path for which values and errors will be resolved (for example, "person.age")
 	 * @param htmlEscape create a BindStatus with automatic HTML escaping?
 	 * @return the new BindStatus instance
 	 * @throws IllegalStateException if no corresponding Errors object found

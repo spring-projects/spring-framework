@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,18 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.StringJoiner;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.AnnotationSpec;
+import org.springframework.javapoet.AnnotationSpec.Builder;
 import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.FieldSpec;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class to register warnings that the compiler may trigger on
@@ -36,7 +41,7 @@ import org.springframework.lang.Nullable;
  * @since 6.1
  * @see SuppressWarnings
  */
-class CodeWarnings {
+public class CodeWarnings {
 
 	private final Set<String> warnings = new LinkedHashSet<>();
 
@@ -57,7 +62,7 @@ class CodeWarnings {
 	 */
 	public CodeWarnings detectDeprecation(AnnotatedElement... elements) {
 		for (AnnotatedElement element : elements) {
-			register(element.getAnnotation(Deprecated.class));
+			registerDeprecationIfNecessary(element);
 		}
 		return this;
 	}
@@ -73,14 +78,56 @@ class CodeWarnings {
 	}
 
 	/**
+	 * Detect the presence of {@link Deprecated} on the signature of the
+	 * specified {@link ResolvableType}.
+	 * @param resolvableType a type signature
+	 * @return {@code this} instance
+	 * @since 6.1.8
+	 */
+	public CodeWarnings detectDeprecation(ResolvableType resolvableType) {
+		if (ResolvableType.NONE.equals(resolvableType)) {
+			return this;
+		}
+		Class<?> type = ClassUtils.getUserClass(resolvableType.toClass());
+		detectDeprecation(type);
+		if (resolvableType.hasGenerics() && !resolvableType.hasUnresolvableGenerics()) {
+			for (ResolvableType generic : resolvableType.getGenerics()) {
+				detectDeprecation(generic);
+			}
+		}
+		return this;
+	}
+
+	/**
 	 * Include {@link SuppressWarnings} on the specified method if necessary.
 	 * @param method the method to update
 	 */
 	public void suppress(MethodSpec.Builder method) {
-		if (this.warnings.isEmpty()) {
-			return;
+		suppress(annotationBuilder -> method.addAnnotation(annotationBuilder.build()));
+	}
+
+	/**
+	 * Include {@link SuppressWarnings} on the specified type if necessary.
+	 * @param type the type to update
+	 */
+	public void suppress(TypeSpec.Builder type) {
+		suppress(annotationBuilder -> type.addAnnotation(annotationBuilder.build()));
+	}
+
+	/**
+	 * Consume the builder for {@link SuppressWarnings} if necessary. If this
+	 * instance has no warnings registered, the consumer is not invoked.
+	 * @param annotationSpec a consumer of the {@link AnnotationSpec.Builder}
+	 * @see MethodSpec.Builder#addAnnotation(AnnotationSpec)
+	 * @see TypeSpec.Builder#addAnnotation(AnnotationSpec)
+	 * @see FieldSpec.Builder#addAnnotation(AnnotationSpec)
+	 */
+	protected void suppress(Consumer<AnnotationSpec.Builder> annotationSpec) {
+		if (!this.warnings.isEmpty()) {
+			Builder annotation = AnnotationSpec.builder(SuppressWarnings.class)
+					.addMember("value", generateValueCode());
+			annotationSpec.accept(annotation);
 		}
-		method.addAnnotation(buildAnnotationSpec());
 	}
 
 	/**
@@ -89,6 +136,16 @@ class CodeWarnings {
 	 */
 	protected Set<String> getWarnings() {
 		return Collections.unmodifiableSet(this.warnings);
+	}
+
+	private void registerDeprecationIfNecessary(@Nullable AnnotatedElement element) {
+		if (element == null) {
+			return;
+		}
+		register(element.getAnnotation(Deprecated.class));
+		if (element instanceof Class<?> type) {
+			registerDeprecationIfNecessary(type.getEnclosingClass());
+		}
 	}
 
 	private void register(@Nullable Deprecated annotation) {
@@ -102,11 +159,6 @@ class CodeWarnings {
 		}
 	}
 
-	private AnnotationSpec buildAnnotationSpec() {
-		return AnnotationSpec.builder(SuppressWarnings.class)
-				.addMember("value", generateValueCode()).build();
-	}
-
 	private CodeBlock generateValueCode() {
 		if (this.warnings.size() == 1) {
 			return CodeBlock.of("$S", this.warnings.iterator().next());
@@ -118,9 +170,7 @@ class CodeWarnings {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", CodeWarnings.class.getSimpleName(), "")
-				.add(this.warnings.toString())
-				.toString();
+		return CodeWarnings.class.getSimpleName() + this.warnings;
 	}
 
 }

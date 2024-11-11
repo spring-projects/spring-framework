@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link InternalResourceView}.
+ * Tests for {@link InternalResourceView}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class InternalResourceViewTests {
+class InternalResourceViewTests {
 
-	@SuppressWarnings("serial")
 	private static final Map<String, Object> model = Map.of("foo", "bar", "I", 1L);
 
 	private static final String url = "forward-to";
@@ -59,13 +58,13 @@ public class InternalResourceViewTests {
 	 * If the url property isn't supplied, view initialization should fail.
 	 */
 	@Test
-	public void rejectsNullUrl() throws Exception {
+	void rejectsNullUrl() {
 		assertThatIllegalArgumentException().isThrownBy(
 				view::afterPropertiesSet);
 	}
 
 	@Test
-	public void forward() throws Exception {
+	void forward() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
 		request.setContextPath("/mycontext");
 		request.setServletPath("/myservlet");
@@ -88,7 +87,7 @@ public class InternalResourceViewTests {
 	}
 
 	@Test
-	public void alwaysInclude() throws Exception {
+	void alwaysInclude() throws Exception {
 		given(request.getAttribute(View.PATH_VARIABLES)).willReturn(null);
 		given(request.getRequestDispatcher(url)).willReturn(new MockRequestDispatcher(url));
 
@@ -103,7 +102,7 @@ public class InternalResourceViewTests {
 	}
 
 	@Test
-	public void includeOnAttribute() throws Exception {
+	void includeOnAttribute() throws Exception {
 		given(request.getAttribute(View.PATH_VARIABLES)).willReturn(null);
 		given(request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE)).willReturn("somepath");
 		given(request.getRequestDispatcher(url)).willReturn(new MockRequestDispatcher(url));
@@ -118,7 +117,7 @@ public class InternalResourceViewTests {
 	}
 
 	@Test
-	public void includeOnCommitted() throws Exception {
+	void includeOnCommitted() throws Exception {
 		given(request.getAttribute(View.PATH_VARIABLES)).willReturn(null);
 		given(request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE)).willReturn(null);
 		given(request.getRequestDispatcher(url)).willReturn(new MockRequestDispatcher(url));

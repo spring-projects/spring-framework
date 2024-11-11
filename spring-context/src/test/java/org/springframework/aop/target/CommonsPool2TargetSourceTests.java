@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class CommonsPool2TargetSourceTests {
 	private DefaultListableBeanFactory beanFactory;
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource(getClass().getSimpleName() + "-context.xml", getClass()));
@@ -186,8 +186,8 @@ class CommonsPool2TargetSourceTests {
 		pooledInstances[9] = targetSource.getTarget();
 
 		// release all objects
-		for (int i = 0; i < pooledInstances.length; i++) {
-			targetSource.releaseTarget(pooledInstances[i]);
+		for (Object pooledInstance : pooledInstances) {
+			targetSource.releaseTarget(pooledInstance);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
- * Unit tests for {@link RequestMappingInfo}.
+ * Tests for {@link RequestMappingInfo}.
  *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingInfoTests {
+class RequestMappingInfoTests {
 
 	// TODO: CORS pre-flight (see @Disabled)
 
 	@Test
-	public void createEmpty() {
+	void createEmpty() {
 		RequestMappingInfo info = paths().build();
 
 		PathPattern emptyPattern = (new PathPatternParser()).parse("");
@@ -83,14 +83,14 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void throwWhenInvalidPattern() {
+	void throwWhenInvalidPattern() {
 		assertThatExceptionOfType(PatternParseException.class).isThrownBy(() ->
 				paths("/{foo").build())
 			.withMessageContaining("Expected close capture character after variable name }");
 	}
 
 	@Test
-	public void prependPatternWithSlash() {
+	void prependPatternWithSlash() {
 		RequestMappingInfo actual = paths("foo").build();
 		List<PathPattern> patterns = new ArrayList<>(actual.getPatternsCondition().getPatterns());
 		assertThat(patterns).hasSize(1);
@@ -98,7 +98,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void matchPatternsCondition() {
+	void matchPatternsCondition() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 
 		RequestMappingInfo info = paths("/foo*", "/bar").build();
@@ -113,7 +113,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void matchParamsCondition() {
+	void matchParamsCondition() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo?foo=bar"));
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
@@ -128,7 +128,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void matchHeadersCondition() {
+	void matchHeadersCondition() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/foo").header("foo", "bar").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
@@ -144,7 +144,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void matchConsumesCondition() {
+	void matchConsumesCondition() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/foo").contentType(MediaType.TEXT_PLAIN).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
@@ -160,7 +160,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void matchProducesCondition() {
+	void matchProducesCondition() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/foo").accept(MediaType.TEXT_PLAIN).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
@@ -176,7 +176,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void matchCustomCondition() {
+	void matchCustomCondition() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo?foo=bar"));
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
@@ -193,7 +193,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	public void compareTwoHttpMethodsOneParam() {
+	void compareTwoHttpMethodsOneParam() {
 		RequestMappingInfo none = paths().build();
 		RequestMappingInfo oneMethod = paths().methods(RequestMethod.GET).build();
 		RequestMappingInfo oneMethodOneParam = paths().methods(RequestMethod.GET).params("foo").build();
@@ -205,13 +205,11 @@ public class RequestMappingInfoTests {
 		Collections.shuffle(list);
 		list.sort(comparator);
 
-		assertThat(list.get(0)).isEqualTo(oneMethodOneParam);
-		assertThat(list.get(1)).isEqualTo(oneMethod);
-		assertThat(list.get(2)).isEqualTo(none);
+		assertThat(list).containsExactly(oneMethodOneParam, oneMethod, none);
 	}
 
 	@Test
-	public void equals() {
+	void equals() {
 		RequestMappingInfo info1 = paths("/foo").methods(RequestMethod.GET)
 				.params("foo=bar").headers("foo=bar")
 				.consumes("text/plain").produces("text/plain")
@@ -233,7 +231,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET, RequestMethod.POST)
@@ -242,7 +240,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -251,7 +249,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -260,7 +258,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -269,7 +267,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -278,7 +276,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=customBar"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 
 		info2 = paths("/foo").methods(RequestMethod.GET)
@@ -287,7 +285,7 @@ public class RequestMappingInfoTests {
 				.customCondition(new ParamsRequestCondition("customFoo=NOOOOOO"))
 				.build();
 
-		assertThat(info1.equals(info2)).isFalse();
+		assertThat(info1).isNotEqualTo(info2);
 		assertThat(info2.hashCode()).isNotEqualTo(info1.hashCode());
 	}
 

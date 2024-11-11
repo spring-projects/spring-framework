@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class PropertiesLoaderSupport {
 
 
 	/**
-	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
+	 * Set local properties, for example, via the "props" tag in XML bean definitions.
 	 * These can be considered defaults, to be overridden by properties
 	 * loaded from files.
 	 */
@@ -70,7 +70,7 @@ public abstract class PropertiesLoaderSupport {
 	}
 
 	/**
-	 * Set local properties, e.g. via the "props" tag in XML bean definitions,
+	 * Set local properties, for example, via the "props" tag in XML bean definitions,
 	 * allowing for merging multiple properties sets into one.
 	 */
 	public void setPropertiesArray(Properties... propertiesArray) {
@@ -80,7 +80,7 @@ public abstract class PropertiesLoaderSupport {
 	/**
 	 * Set a location of a properties file to be loaded.
 	 * <p>Can point to a classic properties file or to an XML file
-	 * that follows JDK 1.5's properties XML format.
+	 * that follows Java's properties XML format.
 	 */
 	public void setLocation(Resource location) {
 		this.locations = new Resource[] {location};
@@ -89,7 +89,7 @@ public abstract class PropertiesLoaderSupport {
 	/**
 	 * Set locations of properties files to be loaded.
 	 * <p>Can point to classic properties files or to XML files
-	 * that follow JDK 1.5's properties XML format.
+	 * that follow Java's properties XML format.
 	 * <p>Note: Properties defined in later files will override
 	 * properties defined earlier files, in case of overlapping keys.
 	 * Hence, make sure that the most specific files are the last

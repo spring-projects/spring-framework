@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.expression.spel;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.ThrowableTypeAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -42,14 +44,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for property access.
+ * Tests for property access.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Joyce Zhan
  * @author Sam Brannen
  */
-public class PropertyAccessTests extends AbstractExpressionTests {
+class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	void simpleAccess01() {
@@ -58,7 +60,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 	@Test
 	void simpleAccess02() {
-		evaluate("placeOfBirth.city", "SmilJan", String.class);
+		evaluate("placeOfBirth.city", "Smiljan", String.class);
 	}
 
 	@Test
@@ -83,11 +85,11 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	void accessingOnNullObject() {
 		SpelExpression expr = (SpelExpression) parser.parseExpression("madeup");
 		EvaluationContext context = new StandardEvaluationContext(null);
-		assertThatExceptionOfType(SpelEvaluationException.class)
+		assertThatSpelEvaluationException()
 			.isThrownBy(() -> expr.getValue(context))
 			.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
 		assertThat(expr.isWritable(context)).isFalse();
-		assertThatExceptionOfType(SpelEvaluationException.class)
+		assertThatSpelEvaluationException()
 			.isThrownBy(() -> expr.setValue(context, "abc"))
 			.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 	}
@@ -117,8 +119,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertThat((int) i).isEqualTo(99);
 
 		// Cannot set it to a string value
-		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
-				flibbleexpr.setValue(ctx, "not allowed"));
+		assertThatSpelEvaluationException().isThrownBy(() -> flibbleexpr.setValue(ctx, "not allowed"));
 		// message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
 		// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
 		// System.out.println(e.getMessage());
@@ -145,10 +146,25 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void accessingPropertyOfClass() {
+	void accessingPropertyOfJavaLangClass() {
 		Expression expression = parser.parseExpression("name");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
 		assertThat(value).isEqualTo("java.lang.String");
+	}
+
+	@Test  // gh-33216
+	void accessingPropertyOfJavaTimeZoneIdDeclaredInNonPublicSubclass() throws Exception {
+		String ID = "CET";
+		ZoneId zoneId = ZoneId.of(ID);
+
+		// Prerequisites for this use case:
+		assertThat(zoneId.getClass()).isPackagePrivate();
+		assertThat(zoneId.getId()).isEqualTo(ID);
+
+		Expression expression = parser.parseExpression("id");
+
+		String result = expression.getValue(new StandardEvaluationContext(zoneId), String.class);
+		assertThat(result).isEqualTo(ID);
 	}
 
 	@Test
@@ -173,8 +189,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	@Test
 	void noGetClassAccess() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				parser.parseExpression("'a'.class.name").getValue(context));
+		assertThatSpelEvaluationException().isThrownBy(() -> parser.parseExpression("'a'.class.name").getValue(context));
 	}
 
 	@Test
@@ -187,8 +202,13 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		target.setName("p2");
 		assertThat(expr.getValue(context, target)).isEqualTo("p2");
 
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				parser.parseExpression("name='p3'").getValue(context, target));
+		assertThatSpelEvaluationException()
+				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target))
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
+
+		assertThatSpelEvaluationException()
+				.isThrownBy(() -> parser.parseExpression("['name']='p4'").getValue(context, target))
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	@Test
@@ -201,8 +221,9 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		RecordPerson target2 = new RecordPerson("p2");
 		assertThat(expr.getValue(context, target2)).isEqualTo("p2");
 
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				parser.parseExpression("name='p3'").getValue(context, target2));
+		assertThatSpelEvaluationException()
+				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target2))
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	@Test
@@ -248,7 +269,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	void propertyAccessWithoutMethodResolver() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 		Person target = new Person("p1");
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+		assertThatSpelEvaluationException().isThrownBy(() ->
 				parser.parseExpression("name.substring(1)").getValue(context, target));
 	}
 
@@ -274,9 +295,14 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	void propertyAccessWithArrayIndexOutOfBounds() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 		Expression expression = parser.parseExpression("stringArrayOfThreeItems[3]");
-		assertThatExceptionOfType(SpelEvaluationException.class)
+		assertThatSpelEvaluationException()
 			.isThrownBy(() -> expression.getValue(context, new Inventor()))
 			.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS);
+	}
+
+
+	private ThrowableTypeAssert<SpelEvaluationException> assertThatSpelEvaluationException() {
+		return assertThatExceptionOfType(SpelEvaluationException.class);
 	}
 
 
@@ -291,7 +317,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			if (!(target instanceof String)) {
 				throw new RuntimeException("Assertion Failed! target should be String");
 			}
@@ -299,7 +325,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			if (!(target instanceof String)) {
 				throw new RuntimeException("Assertion Failed! target should be String");
 			}
@@ -307,7 +333,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			if (!name.equals("flibbles")) {
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			}

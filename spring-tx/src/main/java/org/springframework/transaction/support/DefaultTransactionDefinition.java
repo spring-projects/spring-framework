@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/**
-	 * Create a new DefaultTransactionDefinition, with default settings.
+	 * Create a new {@code DefaultTransactionDefinition} with default settings.
 	 * Can be modified through bean property setters.
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
@@ -118,7 +118,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Create a new DefaultTransactionDefinition with the given
+	 * Create a new {@code DefaultTransactionDefinition} with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface
@@ -227,7 +227,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	public final void setTimeout(int timeout) {
 		if (timeout < TIMEOUT_DEFAULT) {
-			throw new IllegalArgumentException("Timeout must be a positive integer or TIMEOUT_DEFAULT");
+			throw new IllegalArgumentException("Timeout must be a non-negative integer or TIMEOUT_DEFAULT");
 		}
 		this.timeout = timeout;
 	}

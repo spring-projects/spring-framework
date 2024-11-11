@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,11 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
 
 /**
- * By default, when the DispatcherServlet can't find a handler for a request it
- * sends a 404 response. However, if its property "throwExceptionIfNoHandlerFound"
- * is set to {@code true} this exception is raised and may be handled with
- * a configured HandlerExceptionResolver.
+ * Thrown when the {@link DispatcherServlet} can't find a handler for a request,
+ * which may be handled with a configured {@link HandlerExceptionResolver}.
  *
  * @author Brian Clozel
  * @since 4.0
- * @see DispatcherServlet#setThrowExceptionIfNoHandlerFound(boolean)
  * @see DispatcherServlet#noHandlerFound(HttpServletRequest, HttpServletResponse)
  */
 @SuppressWarnings("serial")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class BeanNameGenerationTests {
+class BeanNameGenerationTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -43,7 +43,7 @@ public class BeanNameGenerationTests {
 	}
 
 	@Test
-	public void naming() {
+	void naming() {
 		String className = GeneratedNameBean.class.getName();
 
 		String targetName = className + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + "0";

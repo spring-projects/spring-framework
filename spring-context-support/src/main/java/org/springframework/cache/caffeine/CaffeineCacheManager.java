@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,10 +204,17 @@ public class CaffeineCacheManager implements CacheManager {
 	 * {@link #setAllowNullValues setAllowNullValues(false)}. This makes the semantics
 	 * of CompletableFuture-based access simpler and optimizes retrieval performance
 	 * since a Caffeine-provided CompletableFuture handle does not have to get wrapped.
+	 * <p>If you come here for the adaptation of reactive types such as a Reactor
+	 * {@code Mono} or {@code Flux} onto asynchronous caching, we recommend the standard
+	 * arrangement for caching the produced values asynchronously in 6.1 through enabling
+	 * this Caffeine mode. If this is not immediately possible/desirable for existing
+	 * apps, you may set the system property "spring.cache.reactivestreams.ignore=true"
+	 * to restore 6.0 behavior where reactive handles are treated as regular values.
 	 * @since 6.1
 	 * @see Caffeine#buildAsync()
 	 * @see Cache#retrieve(Object)
 	 * @see Cache#retrieve(Object, Supplier)
+	 * @see org.springframework.cache.interceptor.CacheAspectSupport#IGNORE_REACTIVESTREAMS_PROPERTY_NAME
 	 */
 	public void setAsyncCacheMode(boolean asyncCacheMode) {
 		if (this.asyncCacheMode != asyncCacheMode) {
@@ -294,6 +301,17 @@ public class CaffeineCacheManager implements CacheManager {
 	public void registerCustomCache(String name, AsyncCache<Object, Object> cache) {
 		this.customCacheNames.add(name);
 		this.cacheMap.put(name, adaptCaffeineCache(name, cache));
+	}
+
+	/**
+	 * Remove the specified cache from this cache manager, applying to
+	 * custom caches as well as dynamically registered caches at runtime.
+	 * @param name the name of the cache
+	 * @since 6.1.15
+	 */
+	public void removeCache(String name) {
+		this.customCacheNames.remove(name);
+		this.cacheMap.remove(name);
 	}
 
 	/**

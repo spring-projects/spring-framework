@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Brian Clozel
  * @author Stephane Nicoll
  */
-public class PayloadMethodArgumentResolverTests {
+class PayloadMethodArgumentResolverTests {
 
 	private PayloadMethodArgumentResolver resolver;
 
@@ -72,7 +72,7 @@ public class PayloadMethodArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolver = new PayloadMethodArgumentResolver(new StringMessageConverter(), testValidator());
 
 		Method payloadMethod = PayloadMethodArgumentResolverTests.class.getDeclaredMethod(
@@ -91,7 +91,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.paramAnnotated)).isTrue();
 		assertThat(this.resolver.supportsParameter(this.paramNotAnnotated)).isTrue();
 
@@ -103,7 +103,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveRequired() throws Exception {
+	void resolveRequired() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 		Object actual = this.resolver.resolveArgument(paramAnnotated, message);
 
@@ -111,7 +111,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveRequiredEmpty() {
+	void resolveRequiredEmpty() {
 		Message<?> message = MessageBuilder.withPayload("").build();
 		 // required but empty
 		assertThatExceptionOfType(MethodArgumentNotValidException.class)
@@ -119,7 +119,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveRequiredEmptyNonAnnotatedParameter() {
+	void resolveRequiredEmptyNonAnnotatedParameter() {
 		Message<?> message = MessageBuilder.withPayload("").build();
 		// required but empty
 		assertThatExceptionOfType(MethodArgumentNotValidException.class)
@@ -127,13 +127,13 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNotRequired() throws Exception {
+	void resolveNotRequired() throws Exception {
 		Message<?> emptyByteArrayMessage = MessageBuilder.withPayload(new byte[0]).build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyByteArrayMessage)).isNull();
 
 		Message<?> emptyStringMessage = MessageBuilder.withPayload(" 	").build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyStringMessage)).isNull();
-		assertThat(((Optional<?>) this.resolver.resolveArgument(this.paramOptional, emptyStringMessage)).isEmpty()).isTrue();
+		assertThat(((Optional<?>) this.resolver.resolveArgument(this.paramOptional, emptyStringMessage))).isEmpty();
 
 		Message<?> emptyOptionalMessage = MessageBuilder.withPayload(Optional.empty()).build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyOptionalMessage)).isNull();
@@ -143,7 +143,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalTarget() throws Exception {
+	void resolveOptionalTarget() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 		Object actual = this.resolver.resolveArgument(paramOptional, message);
 
@@ -151,7 +151,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptionalSource() throws Exception {
+	void resolveOptionalSource() throws Exception {
 		Message<?> message = MessageBuilder.withPayload(Optional.of("ABC".getBytes())).build();
 		Object actual = this.resolver.resolveArgument(paramAnnotated, message);
 
@@ -159,7 +159,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNonConvertibleParam() {
+	void resolveNonConvertibleParam() {
 		Message<?> notEmptyMessage = MessageBuilder.withPayload(123).build();
 
 		assertThatExceptionOfType(MessageConversionException.class)
@@ -168,7 +168,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveSpelExpressionNotSupported() {
+	void resolveSpelExpressionNotSupported() {
 		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 
 		assertThatIllegalStateException()
@@ -176,13 +176,13 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveValidation() throws Exception {
+	void resolveValidation() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 		this.resolver.resolveArgument(this.paramValidated, message);
 	}
 
 	@Test
-	public void resolveFailValidation() {
+	void resolveFailValidation() {
 		// See testValidator()
 		Message<?> message = MessageBuilder.withPayload("invalidValue".getBytes()).build();
 
@@ -191,7 +191,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveFailValidationNoConversionNecessary() {
+	void resolveFailValidationNoConversionNecessary() {
 		Message<?> message = MessageBuilder.withPayload("invalidValue").build();
 
 		assertThatExceptionOfType(MethodArgumentNotValidException.class)
@@ -199,7 +199,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNonAnnotatedParameter() throws Exception {
+	void resolveNonAnnotatedParameter() throws Exception {
 		Message<?> notEmptyMessage = MessageBuilder.withPayload("ABC".getBytes()).build();
 		assertThat(this.resolver.resolveArgument(this.paramNotAnnotated, notEmptyMessage)).isEqualTo("ABC");
 
@@ -209,7 +209,7 @@ public class PayloadMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNonAnnotatedParameterFailValidation() {
+	void resolveNonAnnotatedParameterFailValidation() {
 		// See testValidator()
 		Message<?> message = MessageBuilder.withPayload("invalidValue".getBytes()).build();
 

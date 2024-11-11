@@ -62,6 +62,7 @@ class WiretapConnector implements ClientHttpConnector {
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
@@ -181,6 +182,7 @@ class WiretapConnector implements ClientHttpConnector {
 			return this.publisherNested;
 		}
 
+		@SuppressWarnings("NullAway")
 		public Mono<byte[]> getContent() {
 			return Mono.defer(() -> {
 				if (this.content.scan(Scannable.Attr.TERMINATED) == Boolean.TRUE) {
@@ -188,7 +190,7 @@ class WiretapConnector implements ClientHttpConnector {
 				}
 				if (!this.hasContentConsumer) {
 					// Couple of possible cases:
-					//  1. Mock server never consumed request body (e.g. error before read)
+					//  1. Mock server never consumed request body (for example, error before read)
 					//  2. FluxExchangeResult: getResponseBodyContent called before getResponseBody
 					//noinspection ConstantConditions
 					(this.publisher != null ? this.publisher : this.publisherNested)

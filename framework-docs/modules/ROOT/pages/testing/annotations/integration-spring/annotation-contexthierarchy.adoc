@@ -1,18 +1,18 @@
 [[spring-testing-annotation-contexthierarchy]]
 = `@ContextHierarchy`
 
-`@ContextHierarchy` is a class-level annotation that is used to define a hierarchy of
-`ApplicationContext` instances for integration tests. `@ContextHierarchy` should be
-declared with a list of one or more `@ContextConfiguration` instances, each of which
-defines a level in the context hierarchy. The following examples demonstrate the use of
-`@ContextHierarchy` within a single test class (`@ContextHierarchy` can also be used
-within a test class hierarchy):
+`@ContextHierarchy` is an annotation that can be applied to a test class to define a
+hierarchy of `ApplicationContext` instances for integration tests. `@ContextHierarchy`
+should be declared with a list of one or more `@ContextConfiguration` instances, each of
+which defines a level in the context hierarchy. The following examples demonstrate the
+use of `@ContextHierarchy` within a single test class (`@ContextHierarchy` can also be
+used within a test class hierarchy):
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextHierarchy({
 		@ContextConfiguration("/parent-config.xml"),
@@ -25,7 +25,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextHierarchy(
 		ContextConfiguration("/parent-config.xml"),
@@ -40,7 +40,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@WebAppConfiguration
 	@ContextHierarchy({
@@ -54,7 +54,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@WebAppConfiguration
 	@ContextHierarchy(

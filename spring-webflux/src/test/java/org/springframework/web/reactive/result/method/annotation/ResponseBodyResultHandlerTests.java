@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
 import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
- * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
+ * Tests for {@link ResponseBodyResultHandler}.When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * <ul>
  * <li>{@code MessageWriterResultHandlerTests},
@@ -64,13 +64,13 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class ResponseBodyResultHandlerTests {
+class ResponseBodyResultHandlerTests {
 
 	private ResponseBodyResultHandler resultHandler;
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
 		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writerList.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
@@ -83,7 +83,7 @@ public class ResponseBodyResultHandlerTests {
 
 
 	@Test
-	public void supports() {
+	void supports() {
 		Object controller = new TestController();
 		Method method;
 
@@ -96,7 +96,7 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	@Test
-	public void supportsRestController() {
+	void supportsRestController() {
 		Object controller = new TestRestController();
 		Method method;
 
@@ -156,7 +156,7 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	@Test
-	public void defaultOrder() {
+	void defaultOrder() {
 		assertThat(this.resultHandler.getOrder()).isEqualTo(100);
 	}
 

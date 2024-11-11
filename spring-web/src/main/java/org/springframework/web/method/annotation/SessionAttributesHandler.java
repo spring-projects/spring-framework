@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.annotation;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
@@ -48,11 +50,21 @@ import org.springframework.web.context.request.WebRequest;
  */
 public class SessionAttributesHandler {
 
+	/**
+	 * Key for known-attribute-names storage (a String array) as a session attribute.
+	 * <p>This is necessary for consistent handling of type-based session attributes
+	 * in distributed session scenarios where handler methods from the same class
+	 * may get invoked on different servers.
+	 * @since 6.1.4
+	 */
+	public static final String SESSION_KNOWN_ATTRIBUTE = SessionAttributesHandler.class.getName() + ".KNOWN";
+
+
 	private final Set<String> attributeNames = new HashSet<>();
 
 	private final Set<Class<?>> attributeTypes = new HashSet<>();
 
-	private final Set<String> knownAttributeNames = Collections.newSetFromMap(new ConcurrentHashMap<>(4));
+	private final Set<String> knownAttributeNames = ConcurrentHashMap.newKeySet(4);
 
 	private final SessionAttributeStore sessionAttributeStore;
 
@@ -96,12 +108,12 @@ public class SessionAttributesHandler {
 	 */
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
-		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
+		if (this.attributeTypes.contains(attributeType)) {
 			this.knownAttributeNames.add(attributeName);
 			return true;
 		}
 		else {
-			return false;
+			return this.attributeNames.contains(attributeName);
 		}
 	}
 
@@ -117,6 +129,13 @@ public class SessionAttributesHandler {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
 		});
+
+		// Store known attribute names in session (for distributed sessions)
+		// Only necessary for type-based attributes which get added to knownAttributeNames when touched.
+		if (!this.attributeTypes.isEmpty()) {
+			this.sessionAttributeStore.storeAttribute(request,
+					SESSION_KNOWN_ATTRIBUTE, StringUtils.toStringArray(this.knownAttributeNames));
+		}
 	}
 
 	/**
@@ -127,6 +146,15 @@ public class SessionAttributesHandler {
 	 * @return a map with handler session attributes, possibly empty
 	 */
 	public Map<String, Object> retrieveAttributes(WebRequest request) {
+		// Restore known attribute names from session (for distributed sessions)
+		// Only necessary for type-based attributes which get added to knownAttributeNames when touched.
+		if (!this.attributeTypes.isEmpty()) {
+			Object known = this.sessionAttributeStore.retrieveAttribute(request, SESSION_KNOWN_ATTRIBUTE);
+			if (known instanceof String[] retrievedAttributeNames) {
+				this.knownAttributeNames.addAll(Arrays.asList(retrievedAttributeNames));
+			}
+		}
+
 		Map<String, Object> attributes = new HashMap<>();
 		for (String name : this.knownAttributeNames) {
 			Object value = this.sessionAttributeStore.retrieveAttribute(request, name);

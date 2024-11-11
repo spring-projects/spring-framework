@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,15 +101,39 @@ class InterceptingClientHttpRequestFactoryTests {
 
 		requestMock = new MockClientHttpRequest() {
 			@Override
-			protected ClientHttpResponse executeInternal() throws IOException {
+			protected ClientHttpResponse executeInternal() {
 				List<String> headerValues = getHeaders().get(headerName);
-				assertThat(headerValues).hasSize(2);
-				assertThat(headerValues.get(0)).isEqualTo(headerValue);
-				assertThat(headerValues.get(1)).isEqualTo(otherValue);
+				assertThat(headerValues).containsExactly(headerValue, otherValue);
 				return responseMock;
 			}
 		};
 		requestMock.getHeaders().add(headerName, headerValue);
+
+		requestFactory = new InterceptingClientHttpRequestFactory(requestFactoryMock, Collections.singletonList(interceptor));
+
+		ClientHttpRequest request = requestFactory.createRequest(URI.create("https://example.com"), HttpMethod.GET);
+		request.execute();
+	}
+
+	@Test
+	void changeAttribute() throws Exception {
+		final String attrName = "Foo";
+		final String attrValue = "Bar";
+
+		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
+			System.out.println("interceptor");
+			request.getAttributes().put(attrName, attrValue);
+			return execution.execute(request, body);
+		};
+
+		requestMock = new MockClientHttpRequest() {
+			@Override
+			protected ClientHttpResponse executeInternal() {
+				System.out.println("execute");
+				assertThat(getAttributes()).containsEntry(attrName, attrValue);
+				return responseMock;
+			}
+		};
 
 		requestFactory = new InterceptingClientHttpRequestFactory(requestFactoryMock, Collections.singletonList(interceptor));
 
@@ -180,6 +204,7 @@ class InterceptingClientHttpRequestFactoryTests {
 		ClientHttpRequest request = requestFactory.createRequest(URI.create("https://example.com"), HttpMethod.GET);
 		request.execute();
 		assertThat(Arrays.equals(changedBody, requestMock.getBodyAsBytes())).isTrue();
+		assertThat(requestMock.getHeaders().getContentLength()).isEqualTo(changedBody.length);
 	}
 
 

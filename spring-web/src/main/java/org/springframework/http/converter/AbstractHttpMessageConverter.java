@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,7 +218,6 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 						public OutputStream getBody() {
 							return outputStream;
 						}
-
 						@Override
 						public HttpHeaders getHeaders() {
 							return headers;
@@ -304,8 +303,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Indicates whether this message converter can
 	 * {@linkplain #write(Object, MediaType, HttpOutputMessage) write} the
 	 * given object multiple times.
-	 *
-	 * <p>Default implementation returns {@code false}.
+	 * <p>The default implementation returns {@code false}.
 	 * @param t the object t
 	 * @return {@code true} if {@code t} can be written repeatedly;
 	 * {@code false} otherwise

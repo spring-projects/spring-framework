@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ class CandidateComponentsIndexerTests {
 
 	@Test
 	void embeddedCandidatesAreDetected()
-			throws IOException, ClassNotFoundException {
+			throws ClassNotFoundException {
 		// Validate nested type structure
 		String nestedType = "org.springframework.context.index.sample.SampleEmbedded.Another$AnotherPublicCandidate";
 		Class<?> type = ClassUtils.forName(nestedType, getClass().getClassLoader());
@@ -249,8 +249,7 @@ class CandidateComponentsIndexerTests {
 		File metadataFile = new File(outputLocation, MetadataStore.METADATA_PATH);
 		if (metadataFile.isFile()) {
 			try (FileInputStream fileInputStream = new FileInputStream(metadataFile)) {
-				CandidateComponentsMetadata metadata = PropertiesMarshaller.read(fileInputStream);
-				return metadata;
+				return PropertiesMarshaller.read(fileInputStream);
 			}
 			catch (IOException ex) {
 				throw new IllegalStateException("Failed to read metadata from disk", ex);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
- * Unit tests for {@link MethodBasedEvaluationContext}.
+ * Tests for {@link MethodBasedEvaluationContext}.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @author Sergey Podgurskiy
  */
-public class MethodBasedEvaluationContextTests {
+class MethodBasedEvaluationContextTests {
 
 	private final ParameterNameDiscoverer paramDiscover = new DefaultParameterNameDiscoverer();
 
 
 	@Test
-	public void simpleArguments() {
+	void simpleArguments() {
 		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", String.class, Boolean.class);
 		MethodBasedEvaluationContext context = createEvaluationContext(method, "test", true);
 
@@ -57,7 +57,7 @@ public class MethodBasedEvaluationContextTests {
 	}
 
 	@Test
-	public void nullArgument() {
+	void nullArgument() {
 		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", String.class, Boolean.class);
 		MethodBasedEvaluationContext context = createEvaluationContext(method, null, null);
 
@@ -71,7 +71,7 @@ public class MethodBasedEvaluationContextTests {
 	}
 
 	@Test
-	public void varArgEmpty() {
+	void varArgEmpty() {
 		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
 		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null});
 
@@ -85,7 +85,7 @@ public class MethodBasedEvaluationContextTests {
 	}
 
 	@Test
-	public void varArgNull() {
+	void varArgNull() {
 		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
 		MethodBasedEvaluationContext context = createEvaluationContext(method, null, null);
 
@@ -99,7 +99,7 @@ public class MethodBasedEvaluationContextTests {
 	}
 
 	@Test
-	public void varArgSingle() {
+	void varArgSingle() {
 		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
 		MethodBasedEvaluationContext context = createEvaluationContext(method, null, "hello");
 
@@ -113,7 +113,7 @@ public class MethodBasedEvaluationContextTests {
 	}
 
 	@Test
-	public void varArgMultiple() {
+	void varArgMultiple() {
 		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
 		MethodBasedEvaluationContext context = createEvaluationContext(method, null, "hello", "hi");
 

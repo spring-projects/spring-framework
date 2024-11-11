@@ -94,6 +94,7 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
+	@Nullable
 	public ApplicationContext getApplicationContext() {
 		return getDelegate().getApplicationContext();
 	}

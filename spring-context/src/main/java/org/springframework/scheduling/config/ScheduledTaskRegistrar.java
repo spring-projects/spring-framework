@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -295,8 +295,8 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 
 	/**
 	 * Add a {@link Runnable} task to be triggered per the given cron {@code expression}.
-	 * <p>As of Spring Framework 5.2, this method will not register the task if the
-	 * {@code expression} is equal to {@link #CRON_DISABLED}.
+	 * <p>This method will not register the task if the {@code expression} is
+	 * equal to {@link #CRON_DISABLED}.
 	 */
 	public void addCronTask(Runnable task, String expression) {
 		if (!CRON_DISABLED.equals(expression)) {

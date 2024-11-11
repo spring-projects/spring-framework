@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.messaging;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -37,16 +36,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Gary Russell
  * @author Juergen Hoeller
  */
-public class MessageHeadersTests {
+class MessageHeadersTests {
 
 	@Test
-	public void testTimestamp() {
+	void testTimestamp() {
 		MessageHeaders headers = new MessageHeaders(null);
 		assertThat(headers.getTimestamp()).isNotNull();
 	}
 
 	@Test
-	public void testTimestampOverwritten() throws Exception {
+	void testTimestampOverwritten() throws Exception {
 		MessageHeaders headers1 = new MessageHeaders(null);
 		Thread.sleep(50L);
 		MessageHeaders headers2 = new MessageHeaders(headers1);
@@ -54,59 +53,59 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void testTimestampProvided() throws Exception {
+	void testTimestampProvided() {
 		MessageHeaders headers = new MessageHeaders(null, null, 10L);
 		assertThat(headers.getTimestamp()).isEqualTo(10L);
 	}
 
 	@Test
-	public void testTimestampProvidedNullValue() throws Exception {
-		Map<String, Object> input = Collections.<String, Object>singletonMap(MessageHeaders.TIMESTAMP, 1L);
+	void testTimestampProvidedNullValue() {
+		Map<String, Object> input = Collections.singletonMap(MessageHeaders.TIMESTAMP, 1L);
 		MessageHeaders headers = new MessageHeaders(input, null, null);
 		assertThat(headers.getTimestamp()).isNotNull();
 	}
 
 	@Test
-	public void testTimestampNone() throws Exception {
+	void testTimestampNone() {
 		MessageHeaders headers = new MessageHeaders(null, null, -1L);
 		assertThat(headers.getTimestamp()).isNull();
 	}
 
 	@Test
-	public void testIdOverwritten() throws Exception {
+	void testIdOverwritten() {
 		MessageHeaders headers1 = new MessageHeaders(null);
 		MessageHeaders headers2 = new MessageHeaders(headers1);
 		assertThat(headers2.getId()).isNotSameAs(headers1.getId());
 	}
 
 	@Test
-	public void testId() {
+	void testId() {
 		MessageHeaders headers = new MessageHeaders(null);
 		assertThat(headers.getId()).isNotNull();
 	}
 
 	@Test
-	public void testIdProvided() {
+	void testIdProvided() {
 		UUID id = new UUID(0L, 25L);
 		MessageHeaders headers = new MessageHeaders(null, id, null);
 		assertThat(headers.getId()).isEqualTo(id);
 	}
 
 	@Test
-	public void testIdProvidedNullValue() {
-		Map<String, Object> input = Collections.<String, Object>singletonMap(MessageHeaders.ID, new UUID(0L, 25L));
+	void testIdProvidedNullValue() {
+		Map<String, Object> input = Collections.singletonMap(MessageHeaders.ID, new UUID(0L, 25L));
 		MessageHeaders headers = new MessageHeaders(input, null, null);
 		assertThat(headers.getId()).isNotNull();
 	}
 
 	@Test
-	public void testIdNone() {
+	void testIdNone() {
 		MessageHeaders headers = new MessageHeaders(null, MessageHeaders.ID_VALUE_NONE, null);
 		assertThat(headers.getId()).isNull();
 	}
 
 	@Test
-	public void testNonTypedAccessOfHeaderValue() {
+	void testNonTypedAccessOfHeaderValue() {
 		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
@@ -115,7 +114,7 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void testTypedAccessOfHeaderValue() {
+	void testTypedAccessOfHeaderValue() {
 		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
@@ -124,7 +123,7 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void testHeaderValueAccessWithIncorrectType() {
+	void testHeaderValueAccessWithIncorrectType() {
 		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
@@ -134,32 +133,30 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void testNullHeaderValue() {
+	void testNullHeaderValue() {
 		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThat(headers.get("nosuchattribute")).isNull();
 	}
 
 	@Test
-	public void testNullHeaderValueWithTypedAccess() {
+	void testNullHeaderValueWithTypedAccess() {
 		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThat(headers.get("nosuchattribute", String.class)).isNull();
 	}
 
 	@Test
-	public void testHeaderKeys() {
+	void testHeaderKeys() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("key1", "val1");
 		map.put("key2", 123);
 		MessageHeaders headers = new MessageHeaders(map);
-		Set<String> keys = headers.keySet();
-		assertThat(keys.contains("key1")).isTrue();
-		assertThat(keys.contains("key2")).isTrue();
+		assertThat(headers).containsKeys("key1", "key2");
 	}
 
 	@Test
-	public void serializeWithAllSerializableHeaders() throws Exception {
+	void serializeWithAllSerializableHeaders() throws Exception {
 		Map<String, Object> map = new HashMap<>();
 		map.put("name", "joe");
 		map.put("age", 42);
@@ -172,7 +169,7 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void serializeWithNonSerializableHeader() throws Exception {
+	void serializeWithNonSerializableHeader() throws Exception {
 		Object address = new Object();
 		Map<String, Object> map = new HashMap<>();
 		map.put("name", "joe");
@@ -186,7 +183,7 @@ public class MessageHeadersTests {
 	}
 
 	@Test
-	public void subclassWithCustomIdAndNoTimestamp() {
+	void subclassWithCustomIdAndNoTimestamp() {
 		final AtomicLong id = new AtomicLong();
 		@SuppressWarnings("serial")
 		class MyMH extends MessageHeaders {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConnection;
@@ -63,7 +65,6 @@ import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -100,9 +101,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-
-	private static final BufferedReader EMPTY_BUFFERED_READER =
-			new BufferedReader(new StringReader(""));
 
 	/**
 	 * Date formats as specified in the HTTP RFC.
@@ -259,6 +257,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String requestedSessionId;
 
 	@Nullable
+	private String uriTemplate;
+
+	@Nullable
 	private String requestURI;
 
 	private String servletPath = "";
@@ -384,6 +385,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// ---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		checkActive();
 		return this.attributes.get(name);
@@ -638,6 +640,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.parameters.get(name);
@@ -737,7 +740,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			this.reader = EMPTY_BUFFERED_READER;
+			this.reader = new BufferedReader(new StringReader(""));
 		}
 		return this.reader;
 	}
@@ -922,7 +925,19 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public AsyncContext startAsync(ServletRequest request, @Nullable ServletResponse response) {
 		Assert.state(this.asyncSupported, "Async not supported");
 		this.asyncStarted = true;
-		this.asyncContext = new MockAsyncContext(request, response);
+		MockAsyncContext newAsyncContext = new MockAsyncContext(request, response);
+		if (this.asyncContext != null) {
+			try {
+				AsyncEvent startEvent = new AsyncEvent(newAsyncContext);
+				for (AsyncListener asyncListener : this.asyncContext.getListeners()) {
+					asyncListener.onStartAsync(startEvent);
+				}
+			}
+			catch (IOException ex) {
+				// ignore failures
+			}
+		}
+		this.asyncContext = newAsyncContext;
 		return this.asyncContext;
 	}
 
@@ -1020,7 +1035,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-	private static String encodeCookies(@NonNull Cookie... cookies) {
+	private static String encodeCookies(Cookie... cookies) {
 		return Arrays.stream(cookies)
 				.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
 				.collect(Collectors.joining("; "));
@@ -1272,6 +1287,24 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.requestedSessionId;
 	}
 
+	/**
+	 * Set the original URI template used to prepare the request, if any.
+	 * @param uriTemplate the URI template used to set up the request, if any
+	 * @since 6.2
+	 */
+	public void setUriTemplate(@Nullable String uriTemplate) {
+		this.uriTemplate = uriTemplate;
+	}
+
+	/**
+	 * Return the original URI template used to prepare the request, if any.
+	 * @since 6.2
+	 */
+	@Nullable
+	public String getUriTemplate() {
+		return this.uriTemplate;
+	}
+
 	public void setRequestURI(@Nullable String requestURI) {
 		this.requestURI = requestURI;
 	}
@@ -1427,7 +1460,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Best effort to detect a Servlet path mapping, e.g. {@code "/foo/*"}, by
+	 * Best effort to detect a Servlet path mapping, for example, {@code "/foo/*"}, by
 	 * checking whether the length of requestURI > contextPath + servletPath.
 	 * This helps {@link org.springframework.web.util.ServletRequestPathUtils}
 	 * to take into account the Servlet path when parsing the requestURI.

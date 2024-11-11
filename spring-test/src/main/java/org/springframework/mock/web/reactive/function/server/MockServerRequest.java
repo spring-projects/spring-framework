@@ -569,6 +569,7 @@ public final class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Nullable
 		public InetSocketAddress host() {
 			return delegate().getHost();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.test.web.client.match;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -31,7 +33,7 @@ import static org.hamcrest.Matchers.hasXPath;
 
 
 /**
- * Unit tests for {@link ContentRequestMatchers}.
+ * Tests for {@link ContentRequestMatchers}.
  *
  * @author Rossen Stoyanchev
  */
@@ -49,7 +51,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testContentTypeNoMatch1() throws Exception {
+	public void testContentTypeNoMatch1() {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -57,7 +59,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testContentTypeNoMatch2() throws Exception {
+	public void testContentTypeNoMatch2() {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -125,6 +127,76 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
+	public void testMultipartData() throws Exception {
+		String contentType = "multipart/form-data;boundary=1234567890";
+		String body = """
+				--1234567890\r
+				Content-Disposition: form-data; name="name 1"\r
+				\r
+				vølue 1\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 2"\r
+				\r
+				value 🙂\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 3"\r
+				\r
+				value 漢字\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 4"\r
+				\r
+				\r
+				--1234567890--\r
+				""";
+
+		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
+		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("name 1", "vølue 1");
+		map.add("name 2", "value 🙂");
+		map.add("name 3", "value 漢字");
+		map.add("name 4", "");
+		MockRestRequestMatchers.content().multipartData(map).match(this.request);
+	}
+
+	@Test
+	public void testMultipartDataContains() throws Exception {
+		String contentType = "multipart/form-data;boundary=1234567890";
+		String body = """
+				--1234567890\r
+				Content-Disposition: form-data; name="name 1"\r
+				\r
+				vølue 1\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 2"\r
+				\r
+				value 🙂\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 3"\r
+				\r
+				value 漢字\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 4"\r
+				\r
+				\r
+				--1234567890--\r
+				""";
+
+		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
+		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
+
+		MockRestRequestMatchers.content()
+				.multipartDataContains(Map.of(
+						"name 1", "vølue 1",
+						"name 2", "value 🙂",
+						"name 3", "value 漢字",
+						"name 4", "")
+				)
+				.match(this.request);
+	}
+
+	@Test
 	public void testXml() throws Exception {
 		String content = "<foo><bar>baz</bar><bar>bazz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
@@ -163,12 +235,34 @@ public class ContentRequestMatchersTests {
 
 		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}")
 				.match(this.request);
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", JsonCompareMode.LENIENT)
+				.match(this.request);
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonLenientMatchWithDeprecatedBooleanFlag() throws Exception {
+		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is allowed\" \n}";
+		this.request.getBody().write(content.getBytes());
+
 		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", false)
 				.match(this.request);
 	}
 
 	@Test
 	public void testJsonStrictMatch() throws Exception {
+		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
+		this.request.getBody().write(content.getBytes());
+
+		MockRestRequestMatchers
+				.content()
+				.json("{\n \"foo array\":[\"first\",\"second\"] , \"foo\": \"bar\" \n}", JsonCompareMode.STRICT)
+				.match(this.request);
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonStrictMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -191,12 +285,38 @@ public class ContentRequestMatchersTests {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				MockRestRequestMatchers
 						.content()
+						.json("{\n \"foo\" : \"bar\"  \n}", JsonCompareMode.LENIENT)
+						.match(this.request));
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonLenientNoMatchWithDeprecatedBooleanFlag() throws Exception {
+		String content = "{\n \"bar\" : \"foo\"  \n}";
+		this.request.getBody().write(content.getBytes());
+
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				MockRestRequestMatchers
+						.content()
 						.json("{\n \"foo\" : \"bar\"  \n}", false)
 						.match(this.request));
 	}
 
 	@Test
 	public void testJsonStrictNoMatch() throws Exception {
+		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
+		this.request.getBody().write(content.getBytes());
+
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				MockRestRequestMatchers
+						.content()
+						.json("{\n \"foo array\":[\"second\",\"first\"] \n}", JsonCompareMode.STRICT)
+						.match(this.request));
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonStrictNoMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
 		this.request.getBody().write(content.getBytes());
 

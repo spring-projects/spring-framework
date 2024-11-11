@@ -29,7 +29,7 @@ import org.springframework.http.HttpHeaders;
  * part is either a {@link FormFieldPart} or a {@link FilePart}.
  *
  * <p>Multipart requests may also be used outside a browser for data of any
- * content type (e.g. JSON, PDF, etc).
+ * content type (for example, JSON, PDF, etc).
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev

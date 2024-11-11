@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,37 +117,14 @@ public @interface Scheduled {
 
 	/**
 	 * A time zone for which the cron expression will be resolved. By default, this
-	 * attribute is the empty String (i.e. the server's local time zone will be used).
+	 * attribute is the empty String (i.e. the scheduler's time zone will be used).
 	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)},
-	 * or an empty String to indicate the server's default time zone
+	 * or an empty String to indicate the scheduler's default time zone
 	 * @since 4.0
 	 * @see org.springframework.scheduling.support.CronTrigger#CronTrigger(String, java.util.TimeZone)
 	 * @see java.util.TimeZone
 	 */
 	String zone() default "";
-
-	/**
-	 * Execute the annotated method with a fixed period between the end of the
-	 * last invocation and the start of the next.
-	 * <p>The time unit is milliseconds by default but can be overridden via
-	 * {@link #timeUnit}.
-	 * @return the delay
-	 */
-	long fixedDelay() default -1;
-
-	/**
-	 * Execute the annotated method with a fixed period between the end of the
-	 * last invocation and the start of the next.
-	 * <p>The time unit is milliseconds by default but can be overridden via
-	 * {@link #timeUnit}.
-	 * <p>This attribute variant supports Spring-style "${...}" placeholders
-	 * as well as SpEL expressions.
-	 * @return the delay as a String value &mdash; for example, a placeholder
-	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
-	 * @since 3.2.2
-	 * @see #fixedDelay()
-	 */
-	String fixedDelayString() default "";
 
 	/**
 	 * Execute the annotated method with a fixed period between invocations.
@@ -159,16 +136,60 @@ public @interface Scheduled {
 
 	/**
 	 * Execute the annotated method with a fixed period between invocations.
-	 * <p>The time unit is milliseconds by default but can be overridden via
-	 * {@link #timeUnit}.
-	 * <p>This attribute variant supports Spring-style "${...}" placeholders
-	 * as well as SpEL expressions.
-	 * @return the period as a String value &mdash; for example, a placeholder
-	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
+	 * <p>The duration String can be in several formats:
+	 * <ul>
+	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
+	 * milliseconds by default unless overridden via {@link #timeUnit()} (prefer
+	 * using {@link #fixedDelay()} in that case)</li>
+	 * <li>any of the known {@link org.springframework.format.annotation.DurationFormat.Style
+	 * DurationFormat.Style}: the {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 ISO8601}
+	 * style or the {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE SIMPLE} style
+	 * &mdash; using the {@link #timeUnit()} as fallback if the string doesn't contain an explicit unit</li>
+	 * <li>one of the above, with Spring-style "${...}" placeholders as well as SpEL expressions</li>
+	 * </ul>
+	 * @return the period as a String value &mdash; for example a placeholder,
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 java.time.Duration} compliant value
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE simple format} compliant value
 	 * @since 3.2.2
 	 * @see #fixedRate()
 	 */
 	String fixedRateString() default "";
+
+	/**
+	 * Execute the annotated method with a fixed period between the end of the
+	 * last invocation and the start of the next.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
+	 * <p><b>NOTE: With virtual threads, fixed rates and cron triggers are recommended
+	 * over fixed delays.</b> Fixed-delay tasks operate on a single scheduler thread
+	 * with {@link org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler}.
+	 * @return the delay
+	 */
+	long fixedDelay() default -1;
+
+	/**
+	 * Execute the annotated method with a fixed period between the end of the
+	 * last invocation and the start of the next.
+	 * <p>The duration String can be in several formats:
+	 * <ul>
+	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
+	 * milliseconds by default unless overridden via {@link #timeUnit()} (prefer
+	 * using {@link #fixedDelay()} in that case)</li>
+	 * <li>any of the known {@link org.springframework.format.annotation.DurationFormat.Style
+	 * DurationFormat.Style}: the {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 ISO8601}
+	 * style or the {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE SIMPLE} style
+	 * &mdash; using the {@link #timeUnit()} as fallback if the string doesn't contain an explicit unit</li>
+	 * </ul>
+	 * <p><b>NOTE: With virtual threads, fixed rates and cron triggers are recommended
+	 * over fixed delays.</b> Fixed-delay tasks operate on a single scheduler thread
+	 * with {@link org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler}.
+	 * @return the delay as a String value &mdash; for example a placeholder,
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 java.time.Duration} compliant value
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE simple format} compliant value
+	 * @since 3.2.2
+	 * @see #fixedDelay()
+	 */
+	String fixedDelayString() default "";
 
 	/**
 	 * Number of units of time to delay before the first execution of a
@@ -183,12 +204,20 @@ public @interface Scheduled {
 	/**
 	 * Number of units of time to delay before the first execution of a
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
-	 * <p>The time unit is milliseconds by default but can be overridden via
-	 * {@link #timeUnit}.
-	 * <p>This attribute variant supports Spring-style "${...}" placeholders
-	 * as well as SpEL expressions.
-	 * @return the initial delay as a String value &mdash; for example, a placeholder
-	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
+	 * <p>The duration String can be in several formats:
+	 * <ul>
+	 *     <li>a plain integer &mdash; which is interpreted to represent a duration in
+	 *     milliseconds by default unless overridden via {@link #timeUnit()} (prefer
+	 *     using {@link #fixedDelay()} in that case)</li>
+	 *     <li>any of the known {@link org.springframework.format.annotation.DurationFormat.Style
+	 *     DurationFormat.Style}: the {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 ISO8601}
+	 *     style or the {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE SIMPLE} style
+	 *     &mdash; using the {@link #timeUnit()} as fallback if the string doesn't contain an explicit unit</li>
+	 *     <li>one of the above, with Spring-style "${...}" placeholders as well as SpEL expressions</li>
+	 * </ul>
+	 * @return the initial delay as a String value &mdash; for example a placeholder,
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 java.time.Duration} compliant value
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE simple format} compliant value
 	 * @since 3.2.2
 	 * @see #initialDelay()
 	 */

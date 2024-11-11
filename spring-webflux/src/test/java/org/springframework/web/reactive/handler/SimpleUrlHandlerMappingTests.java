@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 
 /**
- * Unit tests for {@link SimpleUrlHandlerMapping}.
+ * Tests for {@link SimpleUrlHandlerMapping}.
  *
  * @author Rossen Stoyanchev
  */
-public class SimpleUrlHandlerMappingTests {
+class SimpleUrlHandlerMappingTests {
 
 	@Test
-	@SuppressWarnings("resource")
 	void handlerMappingJavaConfig() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
+		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext(WebConfig.class);
 
 		HandlerMapping handlerMapping = (HandlerMapping) wac.getBean("handlerMapping");
 		Object mainController = wac.getBean("mainController");
@@ -61,10 +58,8 @@ public class SimpleUrlHandlerMappingTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	void handlerMappingXmlConfig() {
 		ClassPathXmlApplicationContext wac = new ClassPathXmlApplicationContext("map.xml", getClass());
-		wac.refresh();
 
 		HandlerMapping handlerMapping = wac.getBean("mapping", HandlerMapping.class);
 		Object mainController = wac.getBean("mainController");
@@ -106,7 +101,6 @@ public class SimpleUrlHandlerMappingTests {
 		if (bean != null) {
 			assertThat(actual).isNotNull();
 			assertThat(actual).isSameAs(bean);
-			//noinspection OptionalGetWithoutIsPresent
 			PathContainer path = exchange.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 			assertThat(path).isNotNull();
 			assertThat(path.value()).isEqualTo(pathWithinMapping);

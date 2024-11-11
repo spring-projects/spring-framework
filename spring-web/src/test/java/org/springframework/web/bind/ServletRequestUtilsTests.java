@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class ServletRequestUtilsTests {
 
 	@Test
 	void testIntParameters() throws ServletRequestBindingException {
-		request.addParameter("param", new String[] {"1", "2", "3"});
+		request.addParameter("param", "1", "2", "3");
 
 		request.addParameter("param2", "1");
 		request.addParameter("param2", "2");
@@ -100,7 +100,7 @@ class ServletRequestUtilsTests {
 
 	@Test
 	void testLongParameters() throws ServletRequestBindingException {
-		request.setParameter("param", new String[] {"1", "2", "3"});
+		request.setParameter("param", "1", "2", "3");
 
 		request.setParameter("param2", "0");
 		request.setParameter("param2", "1");
@@ -113,7 +113,7 @@ class ServletRequestUtilsTests {
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredLongParameters(request, "param2"));
 
-		request.setParameter("param2", new String[] {"1", "2"});
+		request.setParameter("param2", "1", "2");
 		values = ServletRequestUtils.getRequiredLongParameters(request, "param2");
 		assertThat(values).containsExactly(1, 2);
 
@@ -147,7 +147,7 @@ class ServletRequestUtilsTests {
 
 	@Test
 	void testFloatParameters() throws ServletRequestBindingException {
-		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
+		request.addParameter("param", "1.5", "2.5", "3");
 
 		request.addParameter("param2", "1.5");
 		request.addParameter("param2", "2");
@@ -185,7 +185,7 @@ class ServletRequestUtilsTests {
 
 	@Test
 	void testDoubleParameters() throws ServletRequestBindingException {
-		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
+		request.addParameter("param", "1.5", "2.5", "3");
 
 		request.addParameter("param2", "1.5");
 		request.addParameter("param2", "2");
@@ -227,7 +227,7 @@ class ServletRequestUtilsTests {
 
 	@Test
 	void testBooleanParameters() throws ServletRequestBindingException {
-		request.addParameter("param", new String[] {"true", "yes", "off", "1", "bogus"});
+		request.addParameter("param", "true", "yes", "off", "1", "bogus");
 
 		request.addParameter("param2", "false");
 		request.addParameter("param2", "true");

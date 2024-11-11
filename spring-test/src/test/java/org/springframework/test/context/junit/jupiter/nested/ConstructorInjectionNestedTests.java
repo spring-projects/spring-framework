@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class ConstructorInjectionNestedTests {
 		}
 
 		@Test
-		void nestedTest() throws Exception {
+		void nestedTest() {
 			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
 		}
@@ -87,7 +87,7 @@ class ConstructorInjectionNestedTests {
 		}
 
 		@Test
-		void nestedTest() throws Exception {
+		void nestedTest() {
 			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
 		}
@@ -104,7 +104,7 @@ class ConstructorInjectionNestedTests {
 		}
 
 		@Test
-		void nestedTest() throws Exception {
+		void nestedTest() {
 			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
 		}
@@ -123,7 +123,7 @@ class ConstructorInjectionNestedTests {
 		}
 
 		@Test
-		void nestedTest() throws Exception {
+		void nestedTest() {
 			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
 			assertThat(answer).isEqualTo(42);

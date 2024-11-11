@@ -77,7 +77,7 @@ public interface ContextLoader {
 	 * <strong>must</strong> register a JVM shutdown hook for itself. Unless the
 	 * context gets closed early, all context instances will be automatically
 	 * closed on JVM shutdown. This allows for freeing external resources held by
-	 * beans within the context, e.g. temporary files.
+	 * beans within the context, for example, temporary files.
 	 * @param locations the resource locations to use to load the application context
 	 * @return a new application context
 	 * @throws Exception if context loading failed

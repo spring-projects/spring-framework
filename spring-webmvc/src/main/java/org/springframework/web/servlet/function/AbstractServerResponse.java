@@ -67,6 +67,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 
 	@Override
 	@Deprecated
+	@SuppressWarnings("removal")
 	public int rawStatusCode() {
 		return this.statusCode.value();
 	}
@@ -82,6 +83,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	}
 
 	@Override
+	@Nullable
 	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response,
 			Context context) throws ServletException, IOException {
 

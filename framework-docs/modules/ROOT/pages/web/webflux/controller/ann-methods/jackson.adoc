@@ -17,7 +17,7 @@ which allows rendering only a subset of all fields in an `Object`. To use it wit
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	public class UserController {
@@ -59,7 +59,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	class UserController {
@@ -81,7 +81,7 @@ Kotlin::
 ----
 ======
 
-NOTE: `@JsonView` allows an array of view classes but you can only specify only one per
+NOTE: `@JsonView` allows an array of view classes but you can specify only one per
 controller method. Use a composite interface if you need to activate multiple views.
 
 

@@ -12,7 +12,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	@RequestMapping("/pets")
@@ -35,7 +35,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.ui.set
 
@@ -61,7 +61,7 @@ Kotlin::
 
 By default, method parameters that use this annotation are required, but you can specify that
 a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to
-`false` or by declaring the argument with an `java.util.Optional` wrapper.
+`false` or by declaring the argument with a `java.util.Optional` wrapper.
 
 Type conversion is automatically applied if the target method parameter type is not
 `String`. See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
@@ -72,6 +72,48 @@ values for the same parameter name.
 When an `@RequestParam` annotation is declared as a `Map<String, String>` or
 `MultiValueMap<String, String>`, without a parameter name specified in the annotation,
 then the map is populated with the request parameter values for each given parameter name.
+The following example shows how to do so with form data processing:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	@RequestMapping("/pets")
+	class EditPetForm {
+
+		// ...
+
+		@PostMapping(path = "/process", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+		public String processForm(@RequestParam MultiValueMap<String, String> params) {
+			// ...
+		}
+
+		// ...
+	}
+----
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	@RequestMapping("/pets")
+	class EditPetForm {
+
+		// ...
+
+		@PostMapping("/process", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+		fun processForm(@RequestParam params: MultiValueMap<String, String>): String {
+			// ...
+		}
+
+		// ...
+
+	}
+----
+======
 
 Note that use of `@RequestParam` is optional (for example, to set its attributes).
 By default, any argument that is a simple value type (as determined by

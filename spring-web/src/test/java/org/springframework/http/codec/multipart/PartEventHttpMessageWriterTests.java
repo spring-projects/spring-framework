@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.codec.multipart.MultipartHttpMessageWriterTests.parse;
 
 /**
- * Unit tests for {@link PartHttpMessageWriter}.
+ * Tests for {@link PartHttpMessageWriter}.
  *
  * @author Arjen Poutsma
  */
-public class PartEventHttpMessageWriterTests extends AbstractLeakCheckingTests {
+class PartEventHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final PartEventHttpMessageWriter writer = new PartEventHttpMessageWriter();
 
@@ -51,7 +51,7 @@ public class PartEventHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.writer.canWrite(ResolvableType.forClass(PartEvent.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(FilePartEvent.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(FormPartEvent.class), MediaType.MULTIPART_FORM_DATA)).isTrue();

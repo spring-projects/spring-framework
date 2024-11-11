@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,9 +70,9 @@ public interface ServerResponse {
 	 * Return the status code of this response as integer.
 	 * @return the status as an integer
 	 * @since 5.2
-	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
+	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	int rawStatusCode();
 
 	/**
@@ -339,7 +339,7 @@ public interface ServerResponse {
 		B cacheControl(CacheControl cacheControl);
 
 		/**
-		 * Configure one or more request header names (e.g. "Accept-Language") to
+		 * Configure one or more request header names (for example, "Accept-Language") to
 		 * add to the "Vary" response header to inform clients that the response is
 		 * subject to content negotiation and variances based on the value of the
 		 * given request headers. The configured request header names are added only
@@ -419,6 +419,20 @@ public interface ServerResponse {
 		 * @since 5.2
 		 */
 		Mono<ServerResponse> bodyValue(Object body);
+
+		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * This is a shortcut for using a {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
+		 * @param body the body of the response
+		 * @param bodyType the type of the body, used to capture the generic type
+		 * @param <T> the type of the body
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a
+		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
+		 * @since 6.2
+		 */
+		<T> Mono<ServerResponse> bodyValue(T body, ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Set the body from the given {@code Publisher}. Shortcut for

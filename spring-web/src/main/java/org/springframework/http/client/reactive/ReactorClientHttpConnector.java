@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import io.netty.util.AttributeKey;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
@@ -44,17 +46,23 @@ import org.springframework.util.Assert;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLifecycle {
 
+	/**
+	 * Channel attribute key under which {@code WebClient} request attributes are stored as a Map.
+	 * @since 6.2
+	 */
+	public static final AttributeKey<Map<String, Object>> ATTRIBUTES_KEY =
+			AttributeKey.valueOf(ReactorClientHttpRequest.class.getName() + ".ATTRIBUTES");
+
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpConnector.class);
 
 	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
-
-	private HttpClient httpClient;
 
 	@Nullable
 	private final ReactorResourceFactory resourceFactory;
@@ -62,19 +70,32 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	@Nullable
 	private final Function<HttpClient, HttpClient> mapper;
 
-	private volatile boolean running = true;
+	@Nullable
+	private volatile HttpClient httpClient;
+
+	private boolean lazyStart = false;
 
 	private final Object lifecycleMonitor = new Object();
 
 
 	/**
 	 * Default constructor. Initializes {@link HttpClient} via:
-	 * <pre class="code">
-	 * HttpClient.create().compress()
-	 * </pre>
+	 * <pre class="code">HttpClient.create().compress(true)</pre>
 	 */
 	public ReactorClientHttpConnector() {
 		this.httpClient = defaultInitializer.apply(HttpClient.create());
+		this.resourceFactory = null;
+		this.mapper = null;
+	}
+
+	/**
+	 * Constructor with a pre-configured {@code HttpClient} instance.
+	 * @param httpClient the client to use
+	 * @since 5.1
+	 */
+	public ReactorClientHttpConnector(HttpClient httpClient) {
+		Assert.notNull(httpClient, "HttpClient is required");
+		this.httpClient = httpClient;
 		this.resourceFactory = null;
 		this.mapper = null;
 	}
@@ -98,37 +119,19 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	 * @since 5.1
 	 */
 	public ReactorClientHttpConnector(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
-		this.httpClient = createHttpClient(resourceFactory, mapper);
 		this.resourceFactory = resourceFactory;
 		this.mapper = mapper;
+		if (resourceFactory.isRunning()) {
+			this.httpClient = createHttpClient(resourceFactory, mapper);
+		}
+		else {
+			this.lazyStart = true;
+		}
 	}
 
-	private static HttpClient createHttpClient(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
-		ConnectionProvider provider = resourceFactory.getConnectionProvider();
-		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
-		return defaultInitializer.andThen(mapper).andThen(applyLoopResources(resourceFactory))
-				.apply(HttpClient.create(provider));
-	}
-
-	private static Function<HttpClient, HttpClient> applyLoopResources(ReactorResourceFactory factory) {
-		return httpClient -> {
-			LoopResources resources = factory.getLoopResources();
-			Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
-			return httpClient.runOn(resources);
-		};
-	}
-
-
-	/**
-	 * Constructor with a pre-configured {@code HttpClient} instance.
-	 * @param httpClient the client to use
-	 * @since 5.1
-	 */
-	public ReactorClientHttpConnector(HttpClient httpClient) {
-		Assert.notNull(httpClient, "HttpClient is required");
-		this.httpClient = httpClient;
-		this.resourceFactory = null;
-		this.mapper = null;
+	private static HttpClient createHttpClient(ReactorResourceFactory factory, Function<HttpClient, HttpClient> mapper) {
+		return defaultInitializer.andThen(mapper).andThen(httpClient -> httpClient.runOn(factory.getLoopResources()))
+				.apply(HttpClient.create(factory.getConnectionProvider()));
 	}
 
 
@@ -136,12 +139,31 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		AtomicReference<ReactorClientHttpResponse> responseRef = new AtomicReference<>();
+		HttpClient httpClient = this.httpClient;
+		if (httpClient == null) {
+			Assert.state(this.resourceFactory != null && this.mapper != null, "Illegal configuration");
+			if (this.resourceFactory.isRunning()) {
+				// Retain HttpClient instance if resource factory has been started in the meantime,
+				// considering this connector instance as lazily started as well.
+				synchronized (this.lifecycleMonitor) {
+					httpClient = this.httpClient;
+					if (httpClient == null && this.lazyStart) {
+						httpClient = createHttpClient(this.resourceFactory, this.mapper);
+						this.httpClient = httpClient;
+						this.lazyStart = false;
+					}
+				}
+			}
+			if (httpClient == null) {
+				httpClient = createHttpClient(this.resourceFactory, this.mapper);
+			}
+		}
 
-		HttpClient.RequestSender requestSender = this.httpClient
+		HttpClient.RequestSender requestSender = httpClient
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()));
 
 		requestSender = setUri(requestSender, uri);
+		AtomicReference<ReactorClientHttpResponse> responseRef = new AtomicReference<>();
 
 		return requestSender
 				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
@@ -176,46 +198,36 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound);
 	}
 
+
 	@Override
 	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				if (this.resourceFactory != null && this.mapper != null) {
+		if (this.resourceFactory != null && this.mapper != null) {
+			synchronized (this.lifecycleMonitor) {
+				if (this.httpClient == null) {
 					this.httpClient = createHttpClient(this.resourceFactory, this.mapper);
+					this.lazyStart = false;
 				}
-				else {
-					logger.warn("Restarting a ReactorClientHttpConnector bean is only supported with externally managed Reactor Netty resources");
-				}
-				this.running = true;
 			}
+		}
+		else {
+			logger.warn("Restarting a ReactorClientHttpConnector bean is only supported " +
+					"with externally managed Reactor Netty resources");
 		}
 	}
 
 	@Override
 	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				this.running = false;
+		if (this.resourceFactory != null && this.mapper != null) {
+			synchronized (this.lifecycleMonitor) {
+				this.httpClient = null;
+				this.lazyStart = false;
 			}
 		}
 	}
 
 	@Override
-	public final void stop(Runnable callback) {
-		synchronized (this.lifecycleMonitor) {
-			stop();
-			callback.run();
-		}
-	}
-
-	@Override
 	public boolean isRunning() {
-		return this.running;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return false;
+		return (this.httpClient != null);
 	}
 
 	@Override

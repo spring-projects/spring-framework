@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class SubProtocolWebSocketHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
 		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
 		given(mqttHandler.getSupportedProtocols()).willReturn(List.of("MQTT"));
@@ -79,7 +79,7 @@ public class SubProtocolWebSocketHandlerTests {
 
 
 	@Test
-	public void subProtocolMatch() throws Exception {
+	void subProtocolMatch() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
@@ -90,7 +90,7 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void subProtocolDefaultHandlerOnly() throws Exception {
+	void subProtocolDefaultHandlerOnly() throws Exception {
 		this.webSocketHandler.setDefaultProtocolHandler(stompHandler);
 		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
@@ -100,7 +100,7 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void subProtocolNoMatch() throws Exception {
+	void subProtocolNoMatch() {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.session.setAcceptedProtocol("wamp");
@@ -110,7 +110,7 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void nullSubProtocol() throws Exception {
+	void nullSubProtocol() throws Exception {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 
@@ -121,7 +121,7 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void emptySubProtocol() throws Exception {
+	void emptySubProtocol() throws Exception {
 		this.session.setAcceptedProtocol("");
 		this.webSocketHandler.setDefaultProtocolHandler(this.defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
@@ -133,7 +133,7 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void noSubProtocolOneHandler() throws Exception {
+	void noSubProtocolOneHandler() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(List.of(stompHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
 
@@ -142,14 +142,14 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void noSubProtocolTwoHandlers() throws Exception {
+	void noSubProtocolTwoHandlers() {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
 	@Test
-	public void noSubProtocolNoDefaultHandler() throws Exception {
+	void noSubProtocolNoDefaultHandler() {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.webSocketHandler.afterConnectionEstablished(session));
@@ -182,13 +182,18 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.start();
 		this.webSocketHandler.handleMessage(session1, new TextMessage("foo"));
 
+		TestWebSocketSession session3 = new TestWebSocketSession("id3");
+		session3.setOpen(true);
+		session3.setAcceptedProtocol("v12.stomp");
+		this.webSocketHandler.afterConnectionEstablished(session1);
+
 		assertThat(session1.isOpen()).isTrue();
 		assertThat(session1.getCloseStatus()).isNull();
 
 		assertThat(session2.isOpen()).isFalse();
 		assertThat(session2.getCloseStatus()).isEqualTo(CloseStatus.SESSION_NOT_RELIABLE);
 
-		assertThat(handlerAccessor.getPropertyValue("lastSessionCheckTime")).as("lastSessionCheckTime not updated").isNotEqualTo(sixtyOneSecondsAgo);
+		assertThat(handlerAccessor.getPropertyValue("lastSessionCheckTime")).isNotEqualTo(sixtyOneSecondsAgo);
 	}
 
 }

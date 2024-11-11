@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,15 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link ProducesRequestCondition}.
+ * Tests for {@link ProducesRequestCondition}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class ProducesRequestConditionTests {
+class ProducesRequestConditionTests {
 
 	@Test
-	public void match() {
+	void match() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 		HttpServletRequest request = createRequest("text/plain");
 
@@ -49,7 +49,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchNegated() {
+	void matchNegated() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 		HttpServletRequest request = createRequest("text/plain");
 
@@ -57,7 +57,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchNegatedWithoutAcceptHeader() {
+	void matchNegatedWithoutAcceptHeader() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 
 		assertThat(condition.getMatchingCondition(new MockHttpServletRequest())).isNotNull();
@@ -65,13 +65,13 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void getProducibleMediaTypes() {
+	void getProducibleMediaTypes() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!application/xml");
 		assertThat(condition.getProducibleMediaTypes()).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void matchWildcard() {
+	void matchWildcard() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/*");
 		HttpServletRequest request = createRequest("text/plain");
 
@@ -79,7 +79,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchMultiple() {
+	void matchMultiple() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain", "application/xml");
 		HttpServletRequest request = createRequest("text/plain");
 
@@ -87,7 +87,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchSingle() {
+	void matchSingle() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 		HttpServletRequest request = createRequest("application/xml");
 
@@ -115,7 +115,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchParseError() {
+	void matchParseError() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 		HttpServletRequest request = createRequest("bogus");
 
@@ -123,7 +123,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchParseErrorWithNegation() {
+	void matchParseErrorWithNegation() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 		HttpServletRequest request = createRequest("bogus");
 
@@ -131,7 +131,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void matchByRequestParameter() {
+	void matchByRequestParameter() {
 		String[] produces = {"text/plain"};
 		String[] headers = {};
 		ProducesRequestCondition condition = new ProducesRequestCondition(produces, headers);
@@ -168,7 +168,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		ProducesRequestCondition html = new ProducesRequestCondition("text/html");
 		ProducesRequestCondition xml = new ProducesRequestCondition("application/xml");
 		ProducesRequestCondition none = new ProducesRequestCondition();
@@ -200,7 +200,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToWithSingleExpression() {
+	void compareToWithSingleExpression() {
 		HttpServletRequest request = createRequest("text/plain");
 
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
@@ -214,7 +214,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToMultipleExpressions() {
+	void compareToMultipleExpressions() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("*/*", "text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/*", "text/plain;q=0.7");
 
@@ -228,7 +228,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToMultipleExpressionsAndMultipleAcceptHeaderValues() {
+	void compareToMultipleExpressionsAndMultipleAcceptHeaderValues() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/*", "text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/*", "application/xml");
 
@@ -252,7 +252,7 @@ public class ProducesRequestConditionTests {
 	// SPR-8536
 
 	@Test
-	public void compareToMediaTypeAll() {
+	void compareToMediaTypeAll() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
@@ -287,7 +287,7 @@ public class ProducesRequestConditionTests {
 	// SPR-9021
 
 	@Test
-	public void compareToMediaTypeAllWithParameter() {
+	void compareToMediaTypeAllWithParameter() {
 		HttpServletRequest request = createRequest("*/*;q=0.9");
 
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
@@ -298,7 +298,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToEqualMatch() {
+	void compareToEqualMatch() {
 		HttpServletRequest request = createRequest("text/*");
 
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
@@ -312,7 +312,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareEmptyInvalidAccept() {
+	void compareEmptyInvalidAccept() {
 		HttpServletRequest request = createRequest("foo");
 
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
@@ -323,7 +323,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void combine() {
+	void combine() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/xml");
 
@@ -332,7 +332,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void combineWithDefault() {
+	void combineWithDefault() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition();
 
@@ -341,7 +341,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void instantiateWithProducesAndHeaderConditions() {
+	void instantiateWithProducesAndHeaderConditions() {
 		String[] produces = new String[] {"text/plain"};
 		String[] headers = new String[]{"foo=bar", "accept=application/xml,application/pdf"};
 		ProducesRequestCondition condition = new ProducesRequestCondition(produces, headers);
@@ -350,7 +350,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void getMatchingCondition() {
+	void getMatchingCondition() {
 		HttpServletRequest request = createRequest("text/plain");
 
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain", "application/xml");

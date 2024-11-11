@@ -28,6 +28,7 @@ public class DeprecatedForRemovalMemberConfiguration {
 		return "deprecated";
 	}
 
+	@SuppressWarnings("removal")
 	public String deprecatedParameter(DeprecatedForRemovalBean bean) {
 		return bean.toString();
 	}

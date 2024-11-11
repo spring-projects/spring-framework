@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ public final class ResourceBundleHint implements ConditionalHint {
 		this.reachableType = builder.reachableType;
 	}
 
+
 	/**
 	 * Return the {@code baseName} of the resource bundle.
-	 * @return the base name
 	 */
 	public String getBaseName() {
 		return this.baseName;
@@ -56,22 +56,16 @@ public final class ResourceBundleHint implements ConditionalHint {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		ResourceBundleHint that = (ResourceBundleHint) o;
-		return this.baseName.equals(that.baseName)
-				&& Objects.equals(this.reachableType, that.reachableType);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ResourceBundleHint that &&
+				this.baseName.equals(that.baseName) && Objects.equals(this.reachableType, that.reachableType)));
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.baseName, this.reachableType);
 	}
+
 
 	/**
 	 * Builder for {@link ResourceBundleHint}.
@@ -88,10 +82,8 @@ public final class ResourceBundleHint implements ConditionalHint {
 		}
 
 		/**
-		 * Make this hint conditional on the fact that the specified type
-		 * can be resolved.
-		 * @param reachableType the type that should be reachable for this
-		 * hint to apply
+		 * Make this hint conditional on the fact that the specified type can be resolved.
+		 * @param reachableType the type that should be reachable for this hint to apply
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder onReachableType(TypeReference reachableType) {
@@ -109,14 +101,12 @@ public final class ResourceBundleHint implements ConditionalHint {
 		}
 
 		/**
-		 * Creates a {@link ResourceBundleHint} based on the state of this
-		 * builder.
+		 * Create a {@link ResourceBundleHint} based on the state of this builder.
 		 * @return a resource bundle hint
 		 */
 		ResourceBundleHint build() {
 			return new ResourceBundleHint(this);
 		}
-
 	}
 
 }

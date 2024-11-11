@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -366,10 +366,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					logger.debug("Failed to send message to MessageChannel in session " + session.getId(), ex);
 				}
 				else if (logger.isErrorEnabled()) {
-					// Skip unsent CONNECT messages (likely auth issues)
-					if (!isConnect || sent) {
-						logger.error("Failed to send message to MessageChannel in session " + session.getId() +
-								":" + ex.getMessage());
+					// Skip for unsent CONNECT or SUBSCRIBE (likely authentication/authorization issues)
+					if (sent || !(isConnect || StompCommand.SUBSCRIBE.equals(command))) {
+						logger.error("Failed to send message to MessageChannel in session " +
+								session.getId() + ":" + ex.getMessage());
 					}
 				}
 				handleError(session, ex, message);
@@ -413,7 +413,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			session.sendMessage(new TextMessage(bytes));
 		}
 		catch (Throwable ex) {
-			// Could be part of normal workflow (e.g. browser tab closed)
+			// Could be part of normal workflow (for example, browser tab closed)
 			logger.debug("Failed to send STOMP ERROR to client", ex);
 		}
 		finally {
@@ -534,7 +534,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			throw ex;
 		}
 		catch (Throwable ex) {
-			// Could be part of normal workflow (e.g. browser tab closed)
+			// Could be part of normal workflow (for example, browser tab closed)
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to send WebSocket message to client in session " + session.getId(), ex);
 			}

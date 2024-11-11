@@ -28,6 +28,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -46,6 +47,7 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (isTransactional(beanClass)) {
@@ -81,9 +83,6 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
 			Class<?>[] proxyInterfaces = ClassUtils.getAllInterfacesForClass(this.beanClass);
-			if (proxyInterfaces.length == 0) {
-				return;
-			}
 			for (Class<?> proxyInterface : proxyInterfaces) {
 				runtimeHints.reflection().registerType(proxyInterface, MemberCategory.INVOKE_DECLARED_METHODS);
 			}

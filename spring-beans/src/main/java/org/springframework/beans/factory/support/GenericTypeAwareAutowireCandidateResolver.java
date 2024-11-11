@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Basic {@link AutowireCandidateResolver} that performs a full generic type
  * match with the candidate's type if the dependency is declared as a generic type
- * (e.g. {@code Repository<Customer>}).
+ * (for example, {@code Repository<Customer>}).
  *
  * <p>This is the base class for
  * {@link org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver},
@@ -73,6 +73,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	 * Match the given dependency type with its generic type information against the given
 	 * candidate bean definition.
 	 */
+	@SuppressWarnings("NullAway")
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
 		if (dependencyType.getType() instanceof Class) {
@@ -98,22 +99,6 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 						targetType = dbd.targetType;
 						if (targetType == null) {
 							targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
-						}
-					}
-				}
-			}
-			else {
-				// Pre-existing target type: In case of a generic FactoryBean type,
-				// unwrap nested generic type when matching a non-FactoryBean type.
-				Class<?> resolvedClass = targetType.resolve();
-				if (resolvedClass != null && FactoryBean.class.isAssignableFrom(resolvedClass)) {
-					Class<?> typeToBeMatched = dependencyType.resolve();
-					if (typeToBeMatched != null && !FactoryBean.class.isAssignableFrom(typeToBeMatched)) {
-						targetType = targetType.getGeneric();
-						if (descriptor.fallbackMatchAllowed()) {
-							// Matching the Class-based type determination for FactoryBean
-							// objects in the lazy-determination getType code path below.
-							targetType = ResolvableType.forClass(targetType.resolve());
 						}
 					}
 				}
@@ -144,12 +129,33 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		if (cacheType) {
 			rbd.targetType = targetType;
 		}
-		if (descriptor.fallbackMatchAllowed() &&
-				(targetType.hasUnresolvableGenerics() || targetType.resolve() == Properties.class)) {
-			// Fallback matches allow unresolvable generics, e.g. plain HashMap to Map<String,String>;
+
+		// Pre-declared target type: In case of a generic FactoryBean type,
+		// unwrap nested generic type when matching a non-FactoryBean type.
+		Class<?> targetClass = targetType.resolve();
+		if (targetClass != null && FactoryBean.class.isAssignableFrom(targetClass)) {
+			Class<?> classToMatch = dependencyType.resolve();
+			if (classToMatch != null && !FactoryBean.class.isAssignableFrom(classToMatch) &&
+					!classToMatch.isAssignableFrom(targetClass)) {
+				targetType = targetType.getGeneric();
+				if (descriptor.fallbackMatchAllowed()) {
+					// Matching the Class-based type determination for FactoryBean
+					// objects in the lazy-determination getType code path above.
+					targetType = ResolvableType.forClass(targetType.resolve());
+				}
+			}
+		}
+
+		if (descriptor.fallbackMatchAllowed()) {
+			// Fallback matches allow unresolvable generics, for example, plain HashMap to Map<String,String>;
 			// and pragmatically also java.util.Properties to any Map (since despite formally being a
 			// Map<Object,Object>, java.util.Properties is usually perceived as a Map<String,String>).
-			return true;
+			if (targetType.hasUnresolvableGenerics()) {
+				return dependencyType.isAssignableFromResolvedPart(targetType);
+			}
+			else if (targetType.resolve() == Properties.class) {
+				return true;
+			}
 		}
 		// Full check for complex generic type match...
 		return dependencyType.isAssignableFrom(targetType);

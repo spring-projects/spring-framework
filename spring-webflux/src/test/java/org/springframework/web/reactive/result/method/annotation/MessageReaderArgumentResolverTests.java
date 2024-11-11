@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.server.PayloadTooLargeException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -64,11 +65,11 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.post;
 
 /**
- * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
+ * Tests for {@link AbstractMessageReaderArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  */
-public class MessageReaderArgumentResolverTests {
+class MessageReaderArgumentResolverTests {
 
 	private AbstractMessageReaderArgumentResolver resolver = resolver(new Jackson2JsonDecoder());
 
@@ -78,7 +79,7 @@ public class MessageReaderArgumentResolverTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setValidator(new TestBeanValidator());
 		this.bindingContext = new BindingContext(initializer);
@@ -87,7 +88,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void missingContentType() throws Exception {
+	void missingContentType() {
 		MockServerHttpRequest request = post("/path").body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
@@ -101,7 +102,7 @@ public class MessageReaderArgumentResolverTests {
 	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests
 
 	@Test @SuppressWarnings("unchecked") // SPR-9942
-	public void emptyBody() throws Exception {
+	public void emptyBody() {
 		MockServerHttpRequest request = post("/path").contentType(MediaType.APPLICATION_JSON).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
@@ -112,8 +113,26 @@ public class MessageReaderArgumentResolverTests {
 		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
 	}
 
+	@Test @SuppressWarnings("unchecked")
+	public void tooLargeBody() {
+		StringBuilder bodyBuilder = new StringBuilder();
+		while (bodyBuilder.toString().getBytes().length < 256 * 1024) {
+			bodyBuilder.append("The default maximum input length is 256kb.");
+		}
+		String body = "{\"bar\":\"BARBAR\",\"foo\":\"" + bodyBuilder + "\"}";
+
+		MockServerHttpRequest request = post("/path").contentType(MediaType.APPLICATION_JSON).body(body);
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.arg(type);
+		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
+				param, true, this.bindingContext, exchange).block();
+
+		StepVerifier.create(result).expectError(PayloadTooLargeException.class).verify();
+	}
+
 	@Test
-	public void monoTestBean() throws Exception {
+	void monoTestBean() {
 		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -123,7 +142,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void fluxTestBean() throws Exception {
+	void fluxTestBean() {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -133,7 +152,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void singleTestBean() throws Exception {
+	void singleTestBean() {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(Single.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -143,7 +162,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void maybeTestBean() throws Exception {
+	void maybeTestBean() {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(Maybe.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -153,7 +172,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void observableTestBean() throws Exception {
+	void observableTestBean() {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Observable.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -163,7 +182,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void flowableTestBean() throws Exception {
+	void flowableTestBean() {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Flowable.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -173,7 +192,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void futureTestBean() throws Exception {
+	void futureTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(CompletableFuture.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -183,7 +202,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void testBean() throws Exception {
+	void testBean() {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		MethodParameter param = this.testMethod.arg(TestBean.class);
 		TestBean value = resolveValue(param, body);
@@ -192,7 +211,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void map() throws Exception {
+	void map() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		Map<String, String> map = new HashMap<>();
 		map.put("foo", "f1");
@@ -205,7 +224,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void list() throws Exception {
+	void list() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(List.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -215,7 +234,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void monoList() throws Exception {
+	void monoList() {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Mono.class, forClassWithGenerics(List.class, TestBean.class));
 		MethodParameter param = this.testMethod.arg(type);
@@ -226,7 +245,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void array() throws Exception {
+	void array() {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		MethodParameter param = this.testMethod.arg(TestBean[].class);
 		TestBean[] value = resolveValue(param, body);
@@ -235,7 +254,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void validateMonoTestBean() throws Exception {
+	void validateMonoTestBean() {
 		String body = "{\"bar\":\"b1\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
@@ -245,7 +264,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	public void validateFluxTestBean() throws Exception {
+	void validateFluxTestBean() {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);

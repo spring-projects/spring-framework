@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link InvocableHandlerMethod}.
+ * Tests for {@link InvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class InvocableHandlerMethodTests {
+class InvocableHandlerMethodTests {
 
 	private final Message<?> message = mock();
 
@@ -52,7 +52,7 @@ public class InvocableHandlerMethodTests {
 
 
 	@Test
-	public void resolveArg() {
+	void resolveArg() {
 		this.resolvers.add(new StubArgumentResolver(99));
 		this.resolvers.add(new StubArgumentResolver("value"));
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
@@ -66,7 +66,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void resolveNoArgValue() {
+	void resolveNoArgValue() {
 		this.resolvers.add(new StubArgumentResolver(Integer.class));
 		this.resolvers.add(new StubArgumentResolver(String.class));
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
@@ -78,7 +78,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void cannotResolveArg() {
+	void cannotResolveArg() {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		assertThatExceptionOfType(MethodArgumentResolutionException.class).isThrownBy(() ->
 				invokeAndBlock(new Handler(), method))
@@ -86,7 +86,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void resolveProvidedArg() {
+	void resolveProvidedArg() {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invokeAndBlock(new Handler(), method, 99, "value");
 
@@ -96,7 +96,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void resolveProvidedArgFirst() {
+	void resolveProvidedArgFirst() {
 		this.resolvers.add(new StubArgumentResolver(1));
 		this.resolvers.add(new StubArgumentResolver("value1"));
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
@@ -106,7 +106,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void exceptionInResolvingArg() {
+	void exceptionInResolvingArg() {
 		this.resolvers.add(new InvocableHandlerMethodTests.ExceptionRaisingArgumentResolver());
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -114,7 +114,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void illegalArgumentException() {
+	void illegalArgumentException() {
 		this.resolvers.add(new StubArgumentResolver(Integer.class, "__not_an_int__"));
 		this.resolvers.add(new StubArgumentResolver("value"));
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
@@ -129,7 +129,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void invocationTargetException() {
+	void invocationTargetException() {
 		Method method = ResolvableMethod.on(Handler.class).argTypes(Throwable.class).resolveMethod();
 
 		Throwable expected = new Throwable("error");
@@ -138,7 +138,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void voidMethod() {
+	void voidMethod() {
 		this.resolvers.add(new StubArgumentResolver(double.class, 5.25));
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0.0d)).method();
 		Handler handler = new Handler();
@@ -151,7 +151,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void voidMonoMethod() {
+	void voidMonoMethod() {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(Handler::handleAsync).method();
 		Handler handler = new Handler();
 		Object value = invokeAndBlock(handler, method);

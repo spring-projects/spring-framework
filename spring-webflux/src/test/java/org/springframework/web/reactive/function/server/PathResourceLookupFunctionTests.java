@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 /**
  * @author Arjen Poutsma
  */
-public class PathResourceLookupFunctionTests {
+class PathResourceLookupFunctionTests {
 
 	@Test
-	public void normal() throws Exception {
+	void normal() throws Exception {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/server/");
 
 		PathResourceLookupFunction
@@ -60,7 +60,7 @@ public class PathResourceLookupFunctionTests {
 	}
 
 	@Test
-	public void subPath() throws Exception {
+	void subPath() throws Exception {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/server/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
@@ -83,7 +83,7 @@ public class PathResourceLookupFunctionTests {
 	}
 
 	@Test
-	public void notFound() throws Exception {
+	void notFound() {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/server/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
@@ -96,7 +96,7 @@ public class PathResourceLookupFunctionTests {
 	}
 
 	@Test
-	public void composeResourceLookupFunction() throws Exception {
+	void composeResourceLookupFunction() {
 		ClassPathResource defaultResource = new ClassPathResource("response.txt", getClass());
 
 		Function<ServerRequest, Mono<Resource>> lookupFunction =

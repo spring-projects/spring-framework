@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for {@link DelegatingSmartContextLoader}.
+ * Tests for {@link DelegatingSmartContextLoader}.
  *
  * @author Sam Brannen
  * @since 3.1
@@ -99,12 +99,12 @@ class DelegatingSmartContextLoaderTests {
 		}
 
 		@Test
-		void loadContextWithNullConfig() throws Exception {
+		void loadContextWithNullConfig() {
 			assertThatIllegalArgumentException().isThrownBy(() -> loader.loadContext((MergedContextConfiguration) null));
 		}
 
 		@Test
-		void loadContextWithoutLocationsAndConfigurationClasses() throws Exception {
+		void loadContextWithoutLocationsAndConfigurationClasses() {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 					getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
 			assertThatIllegalStateException()
@@ -117,7 +117,7 @@ class DelegatingSmartContextLoaderTests {
 		 * @since 4.1
 		 */
 		@Test
-		void loadContextWithLocationsAndConfigurationClasses() throws Exception {
+		void loadContextWithLocationsAndConfigurationClasses() {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
 					new String[] {"test.xml"}, new Class<?>[] {getClass()}, EMPTY_STRING_ARRAY, loader);
 			assertThatIllegalStateException()

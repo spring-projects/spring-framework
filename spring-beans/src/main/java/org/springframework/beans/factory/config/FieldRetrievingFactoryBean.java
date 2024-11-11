@@ -140,7 +140,7 @@ public class FieldRetrievingFactoryBean
 
 	/**
 	 * Set a fully qualified static field name to retrieve,
-	 * e.g. "example.MyExampleClass.MY_EXAMPLE_FIELD".
+	 * for example, "example.MyExampleClass.MY_EXAMPLE_FIELD".
 	 * Convenient alternative to specifying targetClass and targetField.
 	 * @see #setTargetClass
 	 * @see #setTargetField
@@ -167,6 +167,7 @@ public class FieldRetrievingFactoryBean
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchFieldException {
 		if (this.targetClass != null && this.targetObject != null) {
 			throw new IllegalArgumentException("Specify either targetClass or targetObject, not both");
@@ -189,7 +190,7 @@ public class FieldRetrievingFactoryBean
 			if (lastDotIndex == -1 || lastDotIndex == this.staticField.length()) {
 				throw new IllegalArgumentException(
 						"staticField must be a fully qualified class plus static field name: " +
-						"e.g. 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
+						"for example, 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
 			}
 			String className = this.staticField.substring(0, lastDotIndex);
 			String fieldName = this.staticField.substring(lastDotIndex + 1);
@@ -226,6 +227,7 @@ public class FieldRetrievingFactoryBean
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		return (this.fieldObject != null ? this.fieldObject.getType() : null);
 	}

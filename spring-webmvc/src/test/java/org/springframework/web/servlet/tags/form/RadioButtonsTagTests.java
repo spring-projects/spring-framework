@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.Tag;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -59,7 +58,6 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	private TestBean bean;
 
 	@Override
-	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonsTag() {
 			@Override
@@ -71,7 +69,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiValueArray() throws Exception {
+	void withMultiValueArray() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		int result = this.tag.doStartTag();
@@ -110,7 +108,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiValueArrayAndDynamicAttributes() throws Exception {
+	void withMultiValueArrayAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -164,7 +162,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiValueArrayWithDelimiter() throws Exception {
+	void withMultiValueArrayWithDelimiter() throws Exception {
 		this.tag.setDelimiter("<br/>");
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
@@ -210,7 +208,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiValueMap() throws Exception {
+	void withMultiValueMap() throws Exception {
 		this.tag.setPath("stringArray");
 		Map m = new LinkedHashMap();
 		m.put("foo", "FOO");
@@ -254,7 +252,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiValueMapWithDelimiter() throws Exception {
+	void withMultiValueMapWithDelimiter() throws Exception {
 		String delimiter = " | ";
 		this.tag.setDelimiter(delimiter);
 		this.tag.setPath("stringArray");
@@ -300,7 +298,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiValueWithEditor() throws Exception {
+	void withMultiValueWithEditor() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"   foo", "   bar", "   baz"});
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -343,7 +341,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void collectionOfPets() throws Exception {
+	void collectionOfPets() throws Exception {
 		this.tag.setPath("pets");
 		List allPets = new ArrayList();
 		allPets.add(new ItemPet("Rudiger"));
@@ -408,7 +406,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void collectionOfPetsWithEditor() throws Exception {
+	void collectionOfPetsWithEditor() throws Exception {
 		this.tag.setPath("pets");
 		List allPets = new ArrayList();
 		allPets.add(new ItemPet("Rudiger"));
@@ -478,7 +476,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withoutItemsEnumBindTarget() throws Exception {
+	void withoutItemsEnumBindTarget() throws Exception {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
@@ -501,7 +499,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withoutItemsEnumBindTargetWithExplicitLabelsAndValues() throws Exception {
+	void withoutItemsEnumBindTargetWithExplicitLabelsAndValues() throws Exception {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
@@ -526,14 +524,14 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withNullValue() throws Exception {
+	void withNullValue() {
 		this.tag.setPath("name");
 		assertThatIllegalArgumentException().as("null value when binding to a non-boolean").isThrownBy(
 				this.tag::doStartTag);
 	}
 
 	@Test
-	public void hiddenElementOmittedOnDisabled() throws Exception {
+	void hiddenElementOmittedOnDisabled() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setDisabled(true);
@@ -559,7 +557,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void spanElementCustomizable() throws Exception {
+	void spanElementCustomizable() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setElement("element");
@@ -577,7 +575,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void dynamicTypeAttribute() throws JspException {
+	void dynamicTypeAttribute() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.tag.setDynamicAttribute(null, "type", "email"))
 			.withMessage("Attribute type=\"email\" is not allowed");

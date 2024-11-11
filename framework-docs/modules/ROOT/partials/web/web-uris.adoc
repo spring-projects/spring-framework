@@ -8,7 +8,7 @@
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	UriComponents uriComponents = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}") // <1>
@@ -26,7 +26,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uriComponents = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}") // <1>
@@ -50,7 +50,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
@@ -62,7 +62,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
@@ -80,7 +80,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
@@ -90,7 +90,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
@@ -105,7 +105,7 @@ You can shorten it further still with a full URI template, as the following exam
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
@@ -114,7 +114,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
@@ -144,7 +144,7 @@ The following example shows how to configure a `RestTemplate`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
@@ -158,7 +158,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode
 
@@ -177,7 +177,7 @@ The following example configures a `WebClient`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
@@ -190,7 +190,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode
 
@@ -210,7 +210,7 @@ that holds configuration and preferences, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String baseUrl = "https://example.com";
 	DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);
@@ -222,7 +222,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val baseUrl = "https://example.com"
 	val uriBuilderFactory = DefaultUriBuilderFactory(baseUrl)
@@ -232,6 +232,34 @@ Kotlin::
 			.build("Westin", "123")
 ----
 ======
+
+
+[[uri-parsing]]
+= URI Parsing
+[.small]#Spring MVC and Spring WebFlux#
+
+`UriComponentsBuilder` supports two URI parser types:
+
+1. RFC parser -- this parser type expects URI strings to conform to RFC 3986 syntax,
+and treats deviations from the syntax as illegal.
+
+2. WhatWG parser -- this parser is based on the
+https://github.com/web-platform-tests/wpt/tree/master/url[URL parsing algorithm] in the
+https://url.spec.whatwg.org[WhatWG URL Living standard]. It provides lenient handling of
+a wide range of cases of unexpected input. Browsers implement this in order to handle
+leniently user typed URL's. For more details, see the URL Living Standard and URL parsing
+https://github.com/web-platform-tests/wpt/tree/master/url[test cases].
+
+By default, `RestClient`, `WebClient`, and `RestTemplate` use the RFC parser type, and
+expect applications to provide with URL templates that conform to RFC syntax. To change
+that you can customize the `UriBuilderFactory` on any of the clients.
+
+Applications and frameworks may further rely on `UriComponentsBuilder` for their own needs
+to parse user provided URL's in order to inspect and possibly validated URI components
+such as the scheme, host, port, path, and query. Such components can decide to use the
+WhatWG parser type in order to handle URL's more leniently, and to align with the way
+browsers parse URI's, in case of a redirect to the input URL or if it is included in a
+response to a browser.
 
 
 [[uri-encoding]]
@@ -264,7 +292,7 @@ The following example uses the first option:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
@@ -277,7 +305,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
@@ -296,7 +324,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
@@ -305,7 +333,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
@@ -319,7 +347,7 @@ You can shorten it further still with a full URI template, as the following exam
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	URI uri = UriComponentsBuilder.fromUriString("/hotel list/{city}?q={q}")
 			.build("New York", "foo+bar");
@@ -327,7 +355,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val uri = UriComponentsBuilder.fromUriString("/hotel list/{city}?q={q}")
 			.build("New York", "foo+bar")
@@ -342,7 +370,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String baseUrl = "https://example.com";
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
@@ -358,7 +386,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val baseUrl = "https://example.com"
 	val factory = DefaultUriBuilderFactory(baseUrl).apply {
@@ -389,7 +417,7 @@ template.
 encode URI component value _after_ URI variables are expanded.
 * `NONE`: No encoding is applied.
 
-The `RestTemplate` is set to `EncodingMode.URI_COMPONENT` for historic
+The `RestTemplate` is set to `EncodingMode.URI_COMPONENT` for historical
 reasons and for backwards compatibility. The `WebClient` relies on the default value
 in `DefaultUriBuilderFactory`, which was changed from `EncodingMode.URI_COMPONENT` in
 5.0.x to `EncodingMode.TEMPLATE_AND_VALUES` in 5.1.

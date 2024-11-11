@@ -73,7 +73,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	 * resolving the problem "detail" through a {@code MessageSource}
 	 * @since 6.0
 	 */
-	protected HttpMediaTypeException(String message, List<MediaType> supportedMediaTypes,
+	protected HttpMediaTypeException(@Nullable String message, List<MediaType> supportedMediaTypes,
 			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
 
 		super(message);
@@ -102,6 +102,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	}
 
 	@Override
+	@Nullable
 	public Object[] getDetailMessageArguments() {
 		return this.messageDetailArguments;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public abstract class JmxUtils {
 	/**
 	 * Create a {@code String[]} representing the argument signature of a
 	 * method. Each element in the array is the fully qualified class name
-	 * of the corresponding argument in the methods signature.
+	 * of the corresponding argument in the method's signature.
 	 * @param method the method to build an argument signature for
 	 * @return the signature as array of argument types
 	 */

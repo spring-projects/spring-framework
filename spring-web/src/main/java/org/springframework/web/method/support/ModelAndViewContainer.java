@@ -165,7 +165,7 @@ public class ModelAndViewContainer {
 	 * returns either the "default" model (template rendering) or the "redirect"
 	 * model (redirect URL preparation). Use of this method may be needed for
 	 * advanced cases when access to the "default" model is needed regardless,
-	 * e.g. to save model attributes specified via {@code @SessionAttributes}.
+	 * for example, to save model attributes specified via {@code @SessionAttributes}.
 	 * @return the default model (never {@code null})
 	 * @since 4.1.4
 	 */
@@ -184,7 +184,7 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Whether the controller has returned a redirect instruction, e.g. a
+	 * Whether the controller has returned a redirect instruction, for example, a
 	 * "redirect:" prefixed view name, a RedirectView instance, etc.
 	 */
 	public void setRedirectModelScenario(boolean redirectModelScenario) {
@@ -253,7 +253,7 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Whether the request has been handled fully within the handler, e.g.
+	 * Whether the request has been handled fully within the handler, for example,
 	 * {@code @ResponseBody} method, and therefore view resolution is not
 	 * necessary. This flag can also be set when controller methods declare an
 	 * argument of type {@code ServletResponse} or {@code OutputStream}).

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,14 @@ import org.springframework.util.StringUtils;
  * <a href="https://www.manpagez.com/man/5/crontab/">crontab expression</a>
  * that can calculate the next time it matches.
  *
- * <p>{@code CronExpression} instances are created through
- * {@link #parse(String)}; the next match is determined with
- * {@link #next(Temporal)}.
+ * <p>{@code CronExpression} instances are created through {@link #parse(String)};
+ * the next match is determined with {@link #next(Temporal)}.
+ *
+ * <p>Supports a Quartz day-of-month/week field with an L/# expression. Follows
+ * common cron conventions in every other respect, including 0-6 for SUN-SAT
+ * (plus 7 for SUN as well). Note that Quartz deviates from the day-of-week
+ * convention in cron through 1-7 for SUN-SAT whereas Spring strictly follows
+ * cron even in combination with the optional Quartz-specific L/# expressions.
  *
  * @author Arjen Poutsma
  * @since 5.3
@@ -137,11 +142,11 @@ public final class CronExpression {
 	 *
 	 * <p>Example expressions:
 	 * <ul>
-	 * <li>{@code "0 0 * * * *"} = the top of every hour of every day.</li>
-	 * <li><code>"*&#47;10 * * * * *"</code> = every ten seconds.</li>
-	 * <li>{@code "0 0 8-10 * * *"} = 8, 9 and 10 o'clock of every day.</li>
-	 * <li>{@code "0 0 6,19 * * *"} = 6:00 AM and 7:00 PM every day.</li>
-	 * <li>{@code "0 0/30 8-10 * * *"} = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
+	 * <li>{@code "0 0 * * * *"} = the top of every hour of every day</li>
+	 * <li><code>"*&#47;10 * * * * *"</code> = every ten seconds</li>
+	 * <li>{@code "0 0 8-10 * * *"} = 8, 9 and 10 o'clock of every day</li>
+	 * <li>{@code "0 0 6,19 * * *"} = 6:00 AM and 7:00 PM every day</li>
+	 * <li>{@code "0 0/30 8-10 * * *"} = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day</li>
 	 * <li>{@code "0 0 9-17 * * MON-FRI"} = on the hour nine-to-five weekdays</li>
 	 * <li>{@code "0 0 0 25 12 ?"} = every Christmas Day at midnight</li>
 	 * <li>{@code "0 0 0 L * *"} = last day of the month at midnight</li>
@@ -154,13 +159,13 @@ public final class CronExpression {
 	 * <li>{@code "0 0 0 ? * MON#1"} = the first Monday in the month at midnight</li>
 	 * </ul>
 	 *
-	 * <p>The following macros are also supported:
+	 * <p>The following macros are also supported.
 	 * <ul>
-	 * <li>{@code "@yearly"} (or {@code "@annually"}) to run un once a year, i.e. {@code "0 0 0 1 1 *"},</li>
-	 * <li>{@code "@monthly"} to run once a month, i.e. {@code "0 0 0 1 * *"},</li>
-	 * <li>{@code "@weekly"} to run once a week, i.e. {@code "0 0 0 * * 0"},</li>
-	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"},</li>
-	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}.</li>
+	 * <li>{@code "@yearly"} (or {@code "@annually"}) to run un once a year, i.e. {@code "0 0 0 1 1 *"}</li>
+	 * <li>{@code "@monthly"} to run once a month, i.e. {@code "0 0 0 1 * *"}</li>
+	 * <li>{@code "@weekly"} to run once a week, i.e. {@code "0 0 0 * * 0"}</li>
+	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"}</li>
+	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}</li>
 	 * </ul>
 	 * @param expression the expression string to parse
 	 * @return the parsed {@code CronExpression} object
@@ -168,7 +173,7 @@ public final class CronExpression {
 	 * the cron format
 	 */
 	public static CronExpression parse(String expression) {
-		Assert.hasLength(expression, "Expression string must not be empty");
+		Assert.hasLength(expression, "Expression must not be empty");
 
 		expression = resolveMacros(expression);
 

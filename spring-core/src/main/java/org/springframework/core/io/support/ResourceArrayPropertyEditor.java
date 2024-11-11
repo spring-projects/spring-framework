@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,23 +33,26 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Editor for {@link org.springframework.core.io.Resource} arrays, to
  * automatically convert {@code String} location patterns
- * (e.g. {@code "file:C:/my*.txt"} or {@code "classpath*:myfile.txt"})
+ * (for example, {@code "file:C:/my*.txt"} or {@code "classpath*:myfile.txt"})
  * to {@code Resource} array properties. Can also translate a collection
  * or array of location patterns into a merged Resource array.
  *
  * <p>A path may contain {@code ${...}} placeholders, to be
  * resolved as {@link org.springframework.core.env.Environment} properties:
- * e.g. {@code ${user.dir}}. Unresolvable placeholders are ignored by default.
+ * for example, {@code ${user.dir}}. Unresolvable placeholders are ignored by default.
  *
  * <p>Delegates to a {@link ResourcePatternResolver},
  * by default using a {@link PathMatchingResourcePatternResolver}.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
+ * @author Stephane Nicoll
  * @since 1.1.2
  * @see org.springframework.core.io.Resource
  * @see ResourcePatternResolver
@@ -108,17 +111,30 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Treat the given text as a location pattern and convert it to a Resource array.
+	 * Treat the given text as a location pattern or comma delimited location patterns
+	 * and convert it to a Resource array.
 	 */
 	@Override
 	public void setAsText(String text) {
 		String pattern = resolvePath(text).trim();
+		String[] locationPatterns = StringUtils.commaDelimitedListToStringArray(pattern);
+		if (locationPatterns.length == 1) {
+			setValue(getResources(locationPatterns[0]));
+		}
+		else {
+			Resource[] resources = Arrays.stream(locationPatterns).map(String::trim)
+					.map(this::getResources).flatMap(Arrays::stream).toArray(Resource[]::new);
+			setValue(resources);
+		}
+	}
+
+	private Resource[] getResources(String locationPattern) {
 		try {
-			setValue(this.resourcePatternResolver.getResources(pattern));
+			return this.resourcePatternResolver.getResources(locationPattern);
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException(
-					"Could not resolve resource location pattern [" + pattern + "]: " + ex.getMessage());
+					"Could not resolve resource location pattern [" + locationPattern + "]: " + ex.getMessage());
 		}
 	}
 

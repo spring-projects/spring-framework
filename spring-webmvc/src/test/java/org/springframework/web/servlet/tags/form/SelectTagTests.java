@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +67,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 
 	@Override
-	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new SelectTag() {
 			@Override
@@ -79,7 +78,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void dynamicAttributes() throws JspException {
+	void dynamicAttributes() throws JspException {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -99,7 +98,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void emptyItems() throws Exception {
+	void emptyItems() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Collections.EMPTY_LIST);
 
@@ -113,7 +112,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void nullItems() throws Exception {
+	void nullItems() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(null);
 
@@ -127,21 +126,21 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withList() throws Exception {
+	void withList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
 		assertList(true);
 	}
 
 	@Test
-	public void withResolvedList() throws Exception {
+	void withResolvedList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
 		assertList(true);
 	}
 
 	@Test
-	public void withOtherValue() throws Exception {
+	void withOtherValue() throws Exception {
 		TestBean tb = getTestBean();
 		tb.setCountry("AT");
 		this.tag.setPath("country");
@@ -150,7 +149,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withNullValue() throws Exception {
+	void withNullValue() throws Exception {
 		TestBean tb = getTestBean();
 		tb.setCountry(null);
 		this.tag.setPath("country");
@@ -159,7 +158,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withListAndNoLabel() throws Exception {
+	void withListAndNoLabel() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -169,7 +168,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withListAndTransformTag() throws Exception {
+	void withListAndTransformTag() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
 		assertList(true);
@@ -184,7 +183,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withListAndTransformTagAndEditor() throws Exception {
+	void withListAndTransformTagAndEditor() throws Exception {
 		this.tag.setPath("realCountry");
 		this.tag.setItems(Country.getCountries());
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), "testBean");
@@ -211,7 +210,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withListAndEditor() throws Exception {
+	void withListAndEditor() throws Exception {
 		this.tag.setPath("realCountry");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -236,7 +235,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void nestedPathWithListAndEditorAndNullValue() throws Exception {
+	void nestedPathWithListAndEditorAndNullValue() throws Exception {
 		this.tag.setPath("bean.realCountry");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -250,7 +249,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
 			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
-				if (text==null || text.length()==0) {
+				if (text == null || text.isEmpty()) {
 					setValue(null);
 					return;
 				}
@@ -275,7 +274,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void nestedPathWithListAndEditor() throws Exception {
+	void nestedPathWithListAndEditor() throws Exception {
 		this.tag.setPath("bean.realCountry");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -302,7 +301,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withListAndEditorAndNullValue() throws Exception {
+	void withListAndEditorAndNullValue() throws Exception {
 		this.tag.setPath("realCountry");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -333,7 +332,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMap() throws Exception {
+	void withMap() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setItems(getSexes());
 		int result = this.tag.doStartTag();
@@ -341,7 +340,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withInvalidList() throws Exception {
+	void withInvalidList() {
 		this.tag.setPath("country");
 		this.tag.setItems(new TestBean());
 		this.tag.setItemValue("isoCode");
@@ -352,7 +351,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withNestedOptions() throws Exception {
+	void withNestedOptions() throws Exception {
 		this.tag.setPath("country");
 		int result = this.tag.doStartTag();
 		assertThat(result).isEqualTo(Tag.EVAL_BODY_INCLUDE);
@@ -371,21 +370,21 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withStringArray() throws Exception {
+	void withStringArray() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(getNames());
 		assertStringArray();
 	}
 
 	@Test
-	public void withResolvedStringArray() throws Exception {
+	void withResolvedStringArray() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(getNames());
 		assertStringArray();
 	}
 
 	@Test
-	public void withIntegerArray() throws Exception {
+	void withIntegerArray() throws Exception {
 		this.tag.setPath("someIntegerArray");
 		Integer[] array = new Integer[50];
 		for (int i = 0; i < array.length; i++) {
@@ -418,7 +417,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withFloatCustom() throws Exception {
+	void withFloatCustom() throws Exception {
 		PropertyEditor propertyEditor = new SimpleFloatEditor();
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, propertyEditor);
@@ -456,7 +455,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiList() throws Exception {
+	void withMultiList() throws Exception {
 		List list = new ArrayList();
 		list.add(Country.COUNTRY_UK);
 		list.add(Country.COUNTRY_AT);
@@ -493,7 +492,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withElementFormatter() throws Exception {
+	void withElementFormatter() throws Exception {
 		this.bean.setRealCountry(Country.COUNTRY_UK);
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -504,7 +503,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 				return object.getName();
 			}
 			@Override
-			public Country parse(String text, Locale locale) throws ParseException {
+			public Country parse(String text, Locale locale) {
 				return new Country(text, text);
 			}
 		});
@@ -538,7 +537,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiListAndElementFormatter() throws Exception {
+	void withMultiListAndElementFormatter() throws Exception {
 		List list = new ArrayList();
 		list.add(Country.COUNTRY_UK);
 		list.add(Country.COUNTRY_AT);
@@ -552,7 +551,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 				return object.getName();
 			}
 			@Override
-			public Country parse(String text, Locale locale) throws ParseException {
+			public Country parse(String text, Locale locale) {
 				return new Country(text, text);
 			}
 		});
@@ -590,7 +589,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiListAndCustomEditor() throws Exception {
+	void withMultiListAndCustomEditor() throws Exception {
 		List list = new ArrayList();
 		list.add(Country.COUNTRY_UK);
 		list.add(Country.COUNTRY_AT);
@@ -634,7 +633,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withMultiMap() throws Exception {
+	void withMultiMap() throws Exception {
 		Map someMap = new HashMap();
 		someMap.put("M", "Male");
 		someMap.put("F", "Female");
@@ -685,11 +684,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 	 * </ul>
 	 */
 	@Test
-	public void withMultiMapWithItemValueAndItemLabel() throws Exception {
+	void withMultiMapWithItemValueAndItemLabel() throws Exception {
 		// Save original default locale.
 		final Locale defaultLocale = Locale.getDefault();
 		// Use a locale that doesn't result in the generation of HTML entities
-		// (e.g., not German, where \u00e4 becomes &auml;)
+		// (for example, not German, where \u00e4 becomes &auml;)
 		Locale.setDefault(Locale.US);
 
 		try {
@@ -756,7 +755,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void multipleForCollection() throws Exception {
+	void multipleForCollection() throws Exception {
 		this.bean.setSomeList(new ArrayList());
 
 		this.tag.setPath("someList");
@@ -786,7 +785,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void multipleWithStringValue() throws Exception {
+	void multipleWithStringValue() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -815,7 +814,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void multipleExplicitlyTrue() throws Exception {
+	void multipleExplicitlyTrue() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -844,7 +843,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void multipleExplicitlyFalse() throws Exception {
+	void multipleExplicitlyFalse() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -870,7 +869,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void multipleWithBooleanTrue() throws Exception {
+	void multipleWithBooleanTrue() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -899,7 +898,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void multipleWithBooleanFalse() throws Exception {
+	void multipleWithBooleanFalse() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems(Country.getCountries());
 		this.tag.setItemValue("isoCode");
@@ -947,7 +946,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	private Map getCountryToLocaleMap() {
-		Map map = new TreeMap((o1, o2) -> ((Country)o1).getName().compareTo(((Country)o2).getName()));
+		Map map = new TreeMap(Comparator.comparing(o -> ((Country) o).getName()));
 		map.put(Country.COUNTRY_AT, LOCALE_AT);
 		map.put(Country.COUNTRY_NL, LOCALE_NL);
 		map.put(Country.COUNTRY_US, Locale.US);

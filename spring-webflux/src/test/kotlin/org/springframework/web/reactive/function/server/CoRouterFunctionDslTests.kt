@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,11 @@ import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpMethod.PATCH
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
+import org.springframework.web.server.CoWebFilter
+import org.springframework.web.server.CoWebFilterChain
+import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse
 import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.test.StepVerifier
 
@@ -90,16 +94,6 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
-	fun resourceByPath() {
-		val mockRequest = get("https://example.com/org/springframework/web/reactive/function/response.txt")
-				.build()
-		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
-		StepVerifier.create(sampleRouter().route(request))
-				.expectNextCount(1)
-				.verifyComplete()
-	}
-
-	@Test
 	fun method() {
 		val mockRequest = patch("https://example.com/")
 				.build()
@@ -119,7 +113,34 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
+	fun pathExtension() {
+		val mockRequest = get("https://example.com/test.properties").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request))
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	@Test
 	fun resource() {
+		val mockRequest = get("https://example.com/response2.txt").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request))
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	@Test
+	fun resources() {
+		val mockRequest = get("https://example.com/resources/response.txt").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request))
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	@Test
+	fun resourcesLookupFunction() {
 		val mockRequest = get("https://example.com/response.txt").build()
 		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
@@ -190,6 +211,45 @@ class CoRouterFunctionDslTests {
 	}
 
 	@Test
+	fun nestedContextProvider() {
+		val mockRequest = get("https://example.com/nested/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(nestedRouterWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun nestedContextProviderWithOverride() {
+		val mockRequest = get("https://example.com/nested/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(nestedRouterWithContextProviderOverride.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun doubleNestedContextProvider() {
+		val mockRequest = get("https://example.com/nested/nested/")
+			.header("Custom-Header", "foo")
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(nestedRouterWithContextProvider.route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("context")!!.contains("foo")
+			}
+			.verifyComplete()
+	}
+
+	@Test
 	fun contextProviderAndFilter() {
 		val mockRequest = get("https://example.com/")
 			.header("Custom-Header", "bar")
@@ -202,6 +262,16 @@ class CoRouterFunctionDslTests {
 				}
 			}
 			.verifyComplete()
+	}
+
+	@Test
+	fun webFilterAndContext() {
+		val strategies = HandlerStrategies.builder().webFilter(MyCoWebFilterWithContext()).build()
+		val httpHandler = RouterFunctions.toHttpHandler(routerWithoutContext, strategies)
+		val mockRequest = get("https://example.com/").build()
+		val mockResponse = MockServerHttpResponse()
+		StepVerifier.create(httpHandler.handle(mockRequest, mockResponse)).verifyComplete()
+		assertThat(mockResponse.headers.getFirst("context")).contains("Filter context")
 	}
 
 	@Test
@@ -228,8 +298,8 @@ class CoRouterFunctionDslTests {
 			listOf(mapOf("foo" to "bar"), mapOf("foo" to "n1")),
 			listOf(mapOf("baz" to "qux"), mapOf("foo" to "n1")),
 			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
-		);
-		assertThat(visitor.visitCount()).isEqualTo(7);
+		)
+		assertThat(visitor.visitCount()).isEqualTo(7)
 	}
 
 	private fun sampleRouter() = coRouter {
@@ -252,8 +322,9 @@ class CoRouterFunctionDslTests {
 			GET("/api/foo/", ::handle)
 		}
 		headers({ it.header("bar").isNotEmpty() }, ::handle)
-		resources("/org/springframework/web/reactive/function/**",
-				ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+		resource(path("/response2.txt"), ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+		resources("/resources/**",
+			ClassPathResource("/org/springframework/web/reactive/function/"))
 		resources {
 			if (it.path() == "/response.txt") {
 				ClassPathResource("/org/springframework/web/reactive/function/response.txt")
@@ -261,6 +332,9 @@ class CoRouterFunctionDslTests {
 			else {
 				null
 			}
+		}
+		GET(pathExtension { it == "properties" }) {
+			ok().bodyValueAndAwait("foo=bar")
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").buildAndAwait() }
@@ -306,6 +380,42 @@ class CoRouterFunctionDslTests {
 			else {
 				next.invoke(request)
 			}
+		}
+	}
+
+	private val nestedRouterWithContextProvider = coRouter {
+		context {
+			CoroutineName(it.headers().firstHeader("Custom-Header")!!)
+		}
+		"/nested".nest {
+			GET("/") {
+				ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+			}
+			"/nested".nest {
+				GET("/") {
+					ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+				}
+			}
+		}
+	}
+
+	private val nestedRouterWithContextProviderOverride = coRouter {
+		context {
+			CoroutineName("parent-context")
+		}
+		"/nested".nest {
+			context {
+				CoroutineName(it.headers().firstHeader("Custom-Header")!!)
+			}
+			GET("/") {
+				ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
+			}
+		}
+	}
+
+	private val routerWithoutContext = coRouter {
+		GET("/") {
+			ok().header("context", currentCoroutineContext().toString()).buildAndAwait()
 		}
 	}
 
@@ -369,3 +479,12 @@ class CoRouterFunctionDslTests {
 
 @Suppress("UNUSED_PARAMETER")
 private suspend fun handle(req: ServerRequest) = ServerResponse.ok().buildAndAwait()
+
+
+private class MyCoWebFilterWithContext : CoWebFilter() {
+	override suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain) {
+		withContext(CoroutineName("Filter context")) {
+			chain.filter(exchange)
+		}
+	}
+}

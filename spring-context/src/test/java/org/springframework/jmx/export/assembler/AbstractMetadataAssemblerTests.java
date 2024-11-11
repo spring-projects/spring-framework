@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
-import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.ITestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -49,20 +49,20 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	protected static final String CACHE_ENTRIES_METRIC = "CacheEntries";
 
 	@Test
-	public void testDescription() throws Exception {
+	void testDescription() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		assertThat(info.getDescription()).as("The descriptions are not the same").isEqualTo("My Managed Bean");
 	}
 
 	@Test
-	public void testAttributeDescriptionOnSetter() throws Exception {
+	void testAttributeDescriptionOnSetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute(AGE_ATTRIBUTE);
 		assertThat(attr.getDescription()).as("The description for the age attribute is incorrect").isEqualTo("The Age Attribute");
 	}
 
 	@Test
-	public void testAttributeDescriptionOnGetter() throws Exception {
+	void testAttributeDescriptionOnGetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute(NAME_ATTRIBUTE);
 		assertThat(attr.getDescription()).as("The description for the name attribute is incorrect").isEqualTo("The Name Attribute");
@@ -72,14 +72,14 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	 * Tests the situation where the attribute is only defined on the getter.
 	 */
 	@Test
-	public void testReadOnlyAttribute() throws Exception {
+	void testReadOnlyAttribute() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute(AGE_ATTRIBUTE);
 		assertThat(attr.isWritable()).as("The age attribute should not be writable").isFalse();
 	}
 
 	@Test
-	public void testReadWriteAttribute() throws Exception {
+	void testReadWriteAttribute() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute(NAME_ATTRIBUTE);
 		assertThat(attr.isWritable()).as("The name attribute should be writable").isTrue();
@@ -90,7 +90,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	 * Tests the situation where the property only has a getter.
 	 */
 	@Test
-	public void testWithOnlySetter() throws Exception {
+	void testWithOnlySetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute("NickName");
 		assertThat(attr).as("Attribute should not be null").isNotNull();
@@ -100,14 +100,14 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	 * Tests the situation where the property only has a setter.
 	 */
 	@Test
-	public void testWithOnlyGetter() throws Exception {
+	void testWithOnlyGetter() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
 		assertThat(attr).as("Attribute should not be null").isNotNull();
 	}
 
 	@Test
-	public void testManagedResourceDescriptor() throws Exception {
+	void testManagedResourceDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getMBeanDescriptor();
 
@@ -121,7 +121,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testAttributeDescriptor() throws Exception {
+	void testAttributeDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(NAME_ATTRIBUTE).getDescriptor();
 
@@ -132,7 +132,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testOperationDescriptor() throws Exception {
+	void testOperationDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getOperation("myOperation").getDescriptor();
 
@@ -141,7 +141,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testOperationParameterMetadata() throws Exception {
+	void testOperationParameterMetadata() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanOperationInfo oper = info.getOperation("add");
 		MBeanParameterInfo[] params = oper.getSignature();
@@ -155,8 +155,8 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testWithCglibProxy() throws Exception {
-		IJmxTestBean tb = createJmxTestBean();
+	void testWithCglibProxy() throws Exception {
+		Object tb = createJmxTestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);
 		pf.addAdvice(new NopInterceptor());
@@ -183,7 +183,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testMetricDescription() throws Exception {
+	void testMetricDescription() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo metric = inf.getAttribute(QUEUE_SIZE_METRIC);
 		ModelMBeanOperationInfo operation = inf.getOperation("getQueueSize");
@@ -192,7 +192,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testMetricDescriptor() throws Exception {
+	void testMetricDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(QUEUE_SIZE_METRIC).getDescriptor();
 		assertThat(desc.getFieldValue("currencyTimeLimit")).as("Currency Time Limit should be 20").isEqualTo("20");
@@ -205,7 +205,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	}
 
 	@Test
-	public void testMetricDescriptorDefaults() throws Exception {
+	void testMetricDescriptorDefaults() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(CACHE_ENTRIES_METRIC).getDescriptor();
 		assertThat(desc.getFieldValue("currencyTimeLimit")).as("Currency Time Limit should not be populated").isNull();
@@ -230,7 +230,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		return 9;
 	}
 
-	protected IJmxTestBean createJmxTestBean() {
+	protected ITestBean createJmxTestBean() {
 		return new JmxTestBean();
 	}
 

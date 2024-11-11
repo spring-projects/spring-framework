@@ -65,7 +65,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	abstract void defaultContainerFactory();
 
 	@Test
-	abstract void jmsHandlerMethodFactoryConfiguration() throws JMSException;
+	abstract void jmsHandlerMethodFactoryConfiguration();
 
 	@Test
 	abstract void jmsListenerIsRepeatable();

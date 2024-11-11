@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.gargoylesoftware.htmlunit.FormEncodingType;
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.htmlunit.FormEncodingType;
+import org.htmlunit.HttpMethod;
+import org.htmlunit.WebClient;
+import org.htmlunit.WebRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
- * Unit tests for {@link HtmlUnitRequestBuilder}.
+ * Tests for {@link HtmlUnitRequestBuilder}.
  *
  * @author Rob Winch
  * @author Sam Brannen
@@ -340,11 +340,11 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestLocalPort() throws Exception {
+	void buildRequestLocalPortMatchingDefault() throws Exception {
 		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocalPort()).isEqualTo(80);
+		assertThat(actualRequest.getLocalPort()).isEqualTo(-1);
 	}
 
 	@Test
@@ -439,7 +439,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestPathInfo() throws Exception {
+	void buildRequestPathInfo() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getPathInfo()).isNull();
@@ -466,7 +466,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestProtocol() throws Exception {
+	void buildRequestProtocol() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getProtocol()).isEqualTo("HTTP/1.1");
@@ -534,14 +534,14 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestRemoteAddr() throws Exception {
+	void buildRequestRemoteAddr() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getRemoteAddr()).isEqualTo("127.0.0.1");
 	}
 
 	@Test
-	void buildRequestRemoteHost() throws Exception {
+	void buildRequestRemoteHost() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getRemoteAddr()).isEqualTo("127.0.0.1");
@@ -574,7 +574,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestRequestedSessionId() throws Exception {
+	void buildRequestRequestedSessionId() {
 		String sessionId = "session-id";
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId);
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
@@ -583,7 +583,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestRequestedSessionIdNull() throws Exception {
+	void buildRequestRequestedSessionIdNull() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getRequestedSessionId()).isNull();
@@ -618,7 +618,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestServerName() throws Exception {
+	void buildRequestServerName() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getServerName()).isEqualTo("example.com");
@@ -626,10 +626,18 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	void buildRequestServerPort() throws Exception {
-		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
+		webRequest.setUrl(new URL("http://localhost:8080/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServerPort()).isEqualTo(80);
+		assertThat(actualRequest.getServerPort()).isEqualTo(8080);
+	}
+
+	@Test
+	void buildRequestServerPortMatchingDefault() throws Exception {
+		webRequest.setUrl(new URL("http://localhost/test/this/here"));
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getServerPort()).isEqualTo(-1);
 	}
 
 	@Test
@@ -641,14 +649,14 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestServletContext() throws Exception {
+	void buildRequestServletContext() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getServletContext()).isEqualTo(servletContext);
 	}
 
 	@Test
-	void buildRequestServletPath() throws Exception {
+	void buildRequestServletPath() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getServletPath()).isEqualTo("/this/here");
@@ -665,7 +673,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSession() throws Exception {
+	void buildRequestSession() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession newSession = actualRequest.getSession();
@@ -682,7 +690,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSessionWithExistingSession() throws Exception {
+	void buildRequestSessionWithExistingSession() {
 		String sessionId = "session-id";
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId);
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
@@ -703,7 +711,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSessionTrue() throws Exception {
+	void buildRequestSessionTrue() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession session = actualRequest.getSession(true);
@@ -711,7 +719,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSessionFalseIsNull() throws Exception {
+	void buildRequestSessionFalseIsNull() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession session = actualRequest.getSession(false);
@@ -719,7 +727,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSessionFalseWithExistingSession() throws Exception {
+	void buildRequestSessionFalseWithExistingSession() {
 		String sessionId = "session-id";
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId);
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
@@ -729,14 +737,14 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSessionIsNew() throws Exception {
+	void buildRequestSessionIsNew() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getSession().isNew()).isTrue();
 	}
 
 	@Test
-	void buildRequestSessionIsNewFalse() throws Exception {
+	void buildRequestSessionIsNewFalse() {
 		String sessionId = "session-id";
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId);
 
@@ -746,7 +754,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestSessionInvalidate() throws Exception {
+	void buildRequestSessionInvalidate() {
 		String sessionId = "session-id";
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId);
 
@@ -890,7 +898,7 @@ public class HtmlUnitRequestBuilderTests {
 
 
 	private void assertSingleSessionCookie(String expected) {
-		com.gargoylesoftware.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
+		org.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
 		if (expected == null || expected.contains("Expires=Thu, 01-Jan-1970 00:00:01 GMT")) {
 			assertThat(jsessionidCookie).isNull();
 			return;

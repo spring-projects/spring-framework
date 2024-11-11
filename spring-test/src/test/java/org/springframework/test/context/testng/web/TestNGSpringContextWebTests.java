@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextConfiguration
 @WebAppConfiguration
-public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTests implements ServletContextAware {
+class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTests implements ServletContextAware {
 
 	@Configuration
 	static class Config {
@@ -88,7 +88,7 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void basicWacFeatures() throws Exception {
+	void basicWacFeatures() throws Exception {
 		assertThat(wac.getServletContext()).as("ServletContext should be set in the WAC.").isNotNull();
 
 		assertThat(servletContext).as("ServletContext should have been set via ServletContextAware.").isNotNull();
@@ -113,7 +113,7 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void fooEnigmaAutowired() {
+	void fooEnigmaAutowired() {
 		assertThat(foo).isEqualTo("enigma");
 	}
 

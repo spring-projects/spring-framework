@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,15 @@ final class SimpleClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public InputStream getBody() throws IOException {
-		InputStream errorStream = this.connection.getErrorStream();
-		this.responseStream = (errorStream != null ? errorStream : this.connection.getInputStream());
+		if (this.responseStream == null) {
+			if (this.connection.getResponseCode() >= 400) {
+				InputStream errorStream = this.connection.getErrorStream();
+				this.responseStream = (errorStream != null) ? errorStream : InputStream.nullInputStream();
+			}
+			else {
+				this.responseStream = this.connection.getInputStream();
+			}
+		}
 		return this.responseStream;
 	}
 

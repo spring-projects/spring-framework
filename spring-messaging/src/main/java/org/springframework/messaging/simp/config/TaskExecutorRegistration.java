@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
  */
 public class TaskExecutorRegistration {
 
+	private final boolean externallyDefined;
+
 	private final ThreadPoolTaskExecutor taskExecutor;
 
 	@Nullable
@@ -49,6 +51,7 @@ public class TaskExecutorRegistration {
 	 * {@link ThreadPoolTaskExecutor}.
 	 */
 	public TaskExecutorRegistration() {
+		this.externallyDefined = false;
 		this.taskExecutor = new ThreadPoolTaskExecutor();
 		this.taskExecutor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
 		this.taskExecutor.setAllowCoreThreadTimeOut(true);
@@ -60,6 +63,7 @@ public class TaskExecutorRegistration {
 	 * @param taskExecutor the executor to use
 	 */
 	public TaskExecutorRegistration(ThreadPoolTaskExecutor taskExecutor) {
+		this.externallyDefined = true;
 		Assert.notNull(taskExecutor, "ThreadPoolTaskExecutor must not be null");
 		this.taskExecutor = taskExecutor;
 	}
@@ -122,6 +126,15 @@ public class TaskExecutorRegistration {
 		return this;
 	}
 
+	/**
+	 * Specify if the task executor has been supplied.
+	 * @return {@code true} if the task executor was provided, {@code false} if
+	 * it has been created internally
+	 * @since 6.2
+	 */
+	protected boolean isExternallyDefined() {
+		return this.externallyDefined;
+	}
 
 	protected ThreadPoolTaskExecutor getTaskExecutor() {
 		if (this.corePoolSize != null) {

@@ -9,7 +9,7 @@
 
 	<bean id="dao" class="org.springframework.orm.jpa.support.PersistenceInjectionTests$DefaultPublicPersistenceUnitSetterNamedPerson"/>
 
-	<bean class="org.springframework.orm.jpa.support.PersistenceInjectionTests$DefaultPublicPersistenceContextSetter"/>
+	<bean class="org.springframework.orm.jpa.support.PersistenceInjectionTests$DefaultPublicPersistenceContextSetter" lazy-init="true"/>
 
 	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor">
 		<property name="proxyTargetClass" value="true"/>

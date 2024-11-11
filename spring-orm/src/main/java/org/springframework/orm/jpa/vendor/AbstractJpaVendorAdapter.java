@@ -91,7 +91,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * <p><b>NOTE: Do not set this flag to 'true' while also setting JPA's
 	 * {@code jakarta.persistence.schema-generation.database.action} property.</b>
 	 * These two schema generation mechanisms - standard JPA versus provider-native -
-	 * are mutually exclusive, e.g. with Hibernate 5.
+	 * are mutually exclusive, for example, with Hibernate 5.
 	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
 	 */
 	public void setGenerateDdl(boolean generateDdl) {

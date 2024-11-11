@@ -116,13 +116,6 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 		return null;
 	}
 
-	/**
-	 * Nothing to release.
-	 */
-	@Override
-	public void releaseTarget(Object target) {
-	}
-
 
 	/**
 	 * Returns the canonical instance on deserialization in case

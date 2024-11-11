@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class Inventor {
 		return inventions;
 	}
 
-	public void setInventions(String[] inventions) {
+	public void setInventions(String... inventions) {
 		this.inventions = inventions;
 	}
 
@@ -119,23 +119,23 @@ public class Inventor {
 
 	public int throwException(int valueIn) throws Exception {
 		counter++;
-		if (valueIn==1) {
-			throw new IllegalArgumentException("IllegalArgumentException for 1");
-		}
-		if (valueIn==2) {
-			throw new RuntimeException("RuntimeException for 2");
-		}
-		if (valueIn==4) {
-			throw new TestException();
+		switch (valueIn) {
+			case 1 -> throw new IllegalArgumentException("IllegalArgumentException for 1");
+			case 2 -> throw new RuntimeException("RuntimeException for 2");
+			case 4 -> throw new TestException();
 		}
 		return valueIn;
 	}
 
 	@SuppressWarnings("serial")
-	static class TestException extends Exception {}
+	public static class TestException extends Exception {}
 
 	public String throwException(PlaceOfBirth pob) {
 		return pob.getCity();
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getName() {
@@ -198,7 +198,7 @@ public class Inventor {
 	}
 
 	public String aVarargsMethod2(int i, String... strings) {
-		return String.valueOf(i) + "-" + Arrays.toString(strings);
+		return i + "-" + Arrays.toString(strings);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -213,7 +213,23 @@ public class Inventor {
 		return str1 + "-" + String.join("-", strings);
 	}
 
+	public String formatObjectVarargs(String format, Object... args) {
+		return String.format(format, args);
+	}
+
+	public String formatPrimitiveVarargs(String format, int... nums) {
+		Object[] args = new Object[nums.length];
+		for (int i = 0; i < nums.length; i++) {
+			args[i] = nums[i];
+		}
+		return String.format(format, args);
+	}
+
+
 	public Inventor(String... strings) {
+		if (strings.length > 0) {
+			this.name = strings[0];
+		}
 	}
 
 	public boolean getSomeProperty() {

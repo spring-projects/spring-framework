@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,11 @@ import org.hibernate.dialect.HANAColumnStoreDialect;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.Informix10Dialect;
 import org.hibernate.dialect.MySQL57Dialect;
+import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.Oracle12cDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
+import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
@@ -51,7 +53,7 @@ import org.springframework.util.ClassUtils;
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common
  * configuration settings. Also supports the detection of annotated packages (through
  * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()}),
- * e.g. containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
+ * for example, containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
  * along with Spring-driven entity scanning which requires no {@code persistence.xml}
  * ({@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPackagesToScan}).
  *
@@ -101,7 +103,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
 	 * unless a user-specified connection handling mode property indicates otherwise;
 	 * switch this flag to {@code false} to avoid that interference.
-	 * <p><b>NOTE: For a persistence unit with transaction type JTA e.g. on WebLogic,
+	 * <p><b>NOTE: For a persistence unit with transaction type JTA, for example, on WebLogic,
 	 * the connection release mode will never be altered from its provider default,
 	 * i.e. not be forced to {@code DELAYED_ACQUISITION_AND_HOLD} by this flag.</b>
 	 * Alternatively, set Hibernate's "hibernate.connection.handling_mode"
@@ -174,7 +176,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the target database
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
-	@SuppressWarnings("deprecation")  // for DerbyDialect and PostgreSQLDialect on Hibernate 6.2
+	@SuppressWarnings("deprecation")  // for OracleDialect on Hibernate 5.6 and DerbyDialect/PostgreSQLDialect on Hibernate 6.2
 	@Nullable
 	protected Class<?> determineDatabaseDialectClass(Database database) {
 		if (oldDialectsPresent) {  // Hibernate <6.2
@@ -193,17 +195,17 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 				default -> null;
 			};
 		}
-		else {  // Hibernate 6.2 aligned
+		else {  // Hibernate 6.2+ aligned
 			return switch (database) {
 				case DB2 -> DB2Dialect.class;
 				case DERBY -> org.hibernate.dialect.DerbyDialect.class;
 				case H2 -> H2Dialect.class;
 				case HANA -> HANAColumnStoreDialect.class;
 				case HSQL -> HSQLDialect.class;
-				case MYSQL -> MySQL57Dialect.class;
-				case ORACLE -> Oracle12cDialect.class;
+				case MYSQL -> MySQLDialect.class;
+				case ORACLE -> org.hibernate.dialect.OracleDialect.class;
 				case POSTGRESQL -> org.hibernate.dialect.PostgreSQLDialect.class;
-				case SQL_SERVER -> SQLServer2012Dialect.class;
+				case SQL_SERVER -> SQLServerDialect.class;
 				case SYBASE -> SybaseDialect.class;
 				default -> null;
 			};

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
-public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests {
+class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests {
 
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
@@ -40,14 +40,14 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 	}
 
 	@Test
-	public void testKeyStrategy() {
+	void testKeyStrategy() {
 		CacheInterceptor ci = this.ctx.getBean(
 				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
 		assertThat(ci.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
 	}
 
 	@Test
-	public void cacheResolver() {
+	void cacheResolver() {
 		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace-resolver.xml");
 
@@ -57,7 +57,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 	}
 
 	@Test
-	public void bothSetOnlyResolverIsUsed() {
+	void bothSetOnlyResolverIsUsed() {
 		ConfigurableApplicationContext context = new GenericXmlApplicationContext(
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace-manager-resolver.xml");
 
@@ -67,7 +67,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 	}
 
 	@Test
-	public void testCacheErrorHandler() {
+	void testCacheErrorHandler() {
 		CacheInterceptor ci = this.ctx.getBean(
 				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
 		assertThat(ci.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));

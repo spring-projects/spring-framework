@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Juergen Hoeller
  */
-public class StompCommandTests {
+class StompCommandTests {
 
 	private static final Collection<StompCommand> destinationRequired =
 			Arrays.asList(StompCommand.SEND, StompCommand.SUBSCRIBE, StompCommand.MESSAGE);
@@ -59,7 +59,7 @@ public class StompCommandTests {
 
 
 	@Test
-	public void getMessageType() throws Exception {
+	void getMessageType() {
 		for (StompCommand stompCommand : StompCommand.values()) {
 			SimpMessageType simp = messageTypes.get(stompCommand);
 			if (simp == null) {
@@ -70,28 +70,28 @@ public class StompCommandTests {
 	}
 
 	@Test
-	public void requiresDestination() throws Exception {
+	void requiresDestination() {
 		for (StompCommand stompCommand : StompCommand.values()) {
 			assertThat(stompCommand.requiresDestination()).isEqualTo(destinationRequired.contains(stompCommand));
 		}
 	}
 
 	@Test
-	public void requiresSubscriptionId() throws Exception {
+	void requiresSubscriptionId() {
 		for (StompCommand stompCommand : StompCommand.values()) {
 			assertThat(stompCommand.requiresSubscriptionId()).isEqualTo(subscriptionIdRequired.contains(stompCommand));
 		}
 	}
 
 	@Test
-	public void requiresContentLength() throws Exception {
+	void requiresContentLength() {
 		for (StompCommand stompCommand : StompCommand.values()) {
 			assertThat(stompCommand.requiresContentLength()).isEqualTo(contentLengthRequired.contains(stompCommand));
 		}
 	}
 
 	@Test
-	public void isBodyAllowed() throws Exception {
+	void isBodyAllowed() {
 		for (StompCommand stompCommand : StompCommand.values()) {
 			assertThat(stompCommand.isBodyAllowed()).isEqualTo(bodyAllowed.contains(stompCommand));
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scheduling.quartz;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -90,6 +91,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler) throws SchedulerConfigException {
 		// Absolutely needs thread-bound DataSource to initialize.
 		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();
@@ -155,7 +157,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource,
 					DatabaseMetaData::getDatabaseProductName);
 			productName = JdbcUtils.commonDatabaseName(productName);
-			if (productName != null && productName.toLowerCase().contains("hsql")) {
+			if (productName != null && productName.toLowerCase(Locale.ROOT).contains("hsql")) {
 				setUseDBLocks(false);
 				setLockHandler(new SimpleSemaphore());
 			}

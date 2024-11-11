@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void existsFail() throws Exception {
+	public void existsFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/persons/1")).andExpect(header().exists("X-Custom-Header")));
 	}
@@ -169,13 +169,13 @@ public class HeaderAssertionTests {
 	}
 
 	@Test // SPR-10771
-	public void doesNotExistFail() throws Exception {
+	public void doesNotExistFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist(LAST_MODIFIED)));
 	}
 
 	@Test
-	public void longValueWithIncorrectResponseHeaderValue() throws Exception {
+	public void longValueWithIncorrectResponseHeaderValue() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/persons/1")).andExpect(header().longValue("X-Rate-Limiting", 1)));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 			return request
 					.body(BodyExtractors.toMultipartData())
 					.flatMap(map -> {
-						Map<String, Part> parts = map.toSingleValueMap();
+						Map<String, Part> parts = map.asSingleValueMap();
 						try {
 							assertThat(parts).hasSize(2);
 							assertThat(((FilePart) parts.get("fooPart")).filename()).isEqualTo("foo.txt");
@@ -240,9 +240,8 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 		public Mono<ServerResponse> transferTo(ServerRequest request) {
 			return request.body(BodyExtractors.toParts())
-					.filter(FilePart.class::isInstance)
+					.ofType(FilePart.class)
 					.next()
-					.cast(FilePart.class)
 					.flatMap(part -> createTempFile()
 							.flatMap(tempFile ->
 									part.transferTo(tempFile)
@@ -255,23 +254,22 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 					.collectList()
 					.flatMap((List<List<PartEvent>> data) -> {
 						assertThat(data).hasSize(2);
-
-						List<PartEvent> fileData = data.get(0);
-						assertThat(fileData).hasSize(1);
-						assertThat(fileData.get(0)).isInstanceOf(FilePartEvent.class);
-						FilePartEvent filePartEvent = (FilePartEvent) fileData.get(0);
-						assertThat(filePartEvent.name()).isEqualTo("fooPart");
-						assertThat(filePartEvent.filename()).isEqualTo("foo.txt");
-						DataBufferUtils.release(filePartEvent.content());
-
-						List<PartEvent> fieldData = data.get(1);
-						assertThat(fieldData).hasSize(1);
-						assertThat(fieldData.get(0)).isInstanceOf(FormPartEvent.class);
-						FormPartEvent formPartEvent = (FormPartEvent) fieldData.get(0);
-						assertThat(formPartEvent.name()).isEqualTo("barPart");
-						assertThat(formPartEvent.content().toString(StandardCharsets.UTF_8)).isEqualTo("bar");
-						DataBufferUtils.release(filePartEvent.content());
-
+						assertThat(data.get(0)).satisfiesExactly(
+								zero -> assertThat(zero).isInstanceOfSatisfying(FilePartEvent.class, filePartEvent -> {
+									assertThat(filePartEvent.name()).isEqualTo("fooPart");
+									assertThat(filePartEvent.filename()).isEqualTo("foo.txt");
+									DataBufferUtils.release(filePartEvent.content());
+								}),
+								one -> assertThat(one).isInstanceOfSatisfying(FilePartEvent.class, filePartEvent -> {
+									assertThat(filePartEvent.name()).isEqualTo("fooPart");
+									assertThat(filePartEvent.filename()).isEqualTo("foo.txt");
+									DataBufferUtils.release(filePartEvent.content());
+								}));
+						assertThat(data.get(1)).singleElement().isInstanceOfSatisfying(FormPartEvent.class, formPartEvent -> {
+							assertThat(formPartEvent.name()).isEqualTo("barPart");
+							assertThat(formPartEvent.content().toString(StandardCharsets.UTF_8)).isEqualTo("bar");
+							DataBufferUtils.release(formPartEvent.content());
+						});
 						return ServerResponse.ok().build();
 					});
 		}

@@ -9,13 +9,13 @@ You can make an introduction by using the `@DeclareParents` annotation. This ann
 is used to declare that matching types have a new parent (hence the name). For example,
 given an interface named `UsageTracked` and an implementation of that interface named
 `DefaultUsageTracked`, the following aspect declares that all implementors of service
-interfaces also implement the `UsageTracked` interface (e.g. for statistics via JMX):
+interfaces also implement the `UsageTracked` interface (for example, for statistics via JMX):
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Aspect
 	public class UsageTracking {
@@ -33,7 +33,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Aspect
 	class UsageTracking {
@@ -63,16 +63,16 @@ you would write the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
-	val usageTracked = context.getBean("myService", UsageTracked.class)
+	val usageTracked = context.getBean<UsageTracked>("myService")
 ----
 ======
 

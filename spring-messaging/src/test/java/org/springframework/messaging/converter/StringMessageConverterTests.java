@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,33 +35,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class StringMessageConverterTests {
+class StringMessageConverterTests {
 
 	private final StringMessageConverter converter = new StringMessageConverter();
 
 
 	@Test
-	public void fromByteArrayMessage() {
+	void fromByteArrayMessage() {
 		Message<byte[]> message = MessageBuilder.withPayload(
 				"ABC".getBytes()).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo("ABC");
 	}
 
 	@Test
-	public void fromStringMessage() {
+	void fromStringMessage() {
 		Message<String> message = MessageBuilder.withPayload(
 				"ABC").setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo("ABC");
 	}
 
 	@Test
-	public void fromMessageNoContentTypeHeader() {
+	void fromMessageNoContentTypeHeader() {
 		Message<byte[]> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo("ABC");
 	}
 
 	@Test
-	public void fromMessageCharset() {
+	void fromMessageCharset() {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.ISO_8859_1))
 				.setHeader(MessageHeaders.CONTENT_TYPE, new MimeType("text", "plain", StandardCharsets.ISO_8859_1)).build();
@@ -69,27 +69,27 @@ public class StringMessageConverterTests {
 	}
 
 	@Test
-	public void fromMessageDefaultCharset() {
+	void fromMessageDefaultCharset() {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo(payload);
 	}
 
 	@Test
-	public void fromMessageTargetClassNotSupported() {
+	void fromMessageTargetClassNotSupported() {
 		Message<byte[]> message = MessageBuilder.withPayload("ABC".getBytes()).build();
 		assertThat(this.converter.fromMessage(message, Integer.class)).isNull();
 	}
 
 	@Test
-	public void fromMessageByteArray() {
+	void fromMessageByteArray() {
 		Message<byte[]> message = MessageBuilder.withPayload(
 				"ABC".getBytes()).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
 		assertThat(this.converter.fromMessage(message, String.class)).isEqualTo("ABC");
 	}
 
 	@Test
-	public void toMessage() {
+	void toMessage() {
 		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN);
 		MessageHeaders headers = new MessageHeaders(map);

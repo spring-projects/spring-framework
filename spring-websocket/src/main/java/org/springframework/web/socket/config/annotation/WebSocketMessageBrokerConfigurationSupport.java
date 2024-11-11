@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,14 @@ import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.DefaultSimpUserRegistry;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.messaging.WebSocketAnnotationMethodMessageHandler;
+import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 
 /**
  * Extends {@link AbstractMessageBrokerConfiguration} and adds configuration for
@@ -66,8 +68,11 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 			AbstractSubscribableChannel clientInboundChannel,AbstractSubscribableChannel clientOutboundChannel,
 			SimpMessagingTemplate brokerMessagingTemplate) {
 
-		return new WebSocketAnnotationMethodMessageHandler(
+		WebSocketAnnotationMethodMessageHandler handler = new WebSocketAnnotationMethodMessageHandler(
 				clientInboundChannel, clientOutboundChannel, brokerMessagingTemplate);
+
+		handler.setPhase(getPhase());
+		return handler;
 	}
 
 	@Override
@@ -93,14 +98,22 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		}
 		registerStompEndpoints(registry);
 		OrderedMessageChannelDecorator.configureInterceptor(clientInboundChannel, registry.isPreserveReceiveOrder());
-		return registry.getHandlerMapping();
+		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
+		if (handlerMapping instanceof WebSocketHandlerMapping webSocketMapping) {
+			webSocketMapping.setPhase(getPhase());
+		}
+		return handlerMapping;
 	}
 
 	@Bean
 	public WebSocketHandler subProtocolWebSocketHandler(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel) {
 
-		return new SubProtocolWebSocketHandler(clientInboundChannel, clientOutboundChannel);
+		SubProtocolWebSocketHandler handler =
+				new SubProtocolWebSocketHandler(clientInboundChannel, clientOutboundChannel);
+
+		handler.setPhase(getPhase());
+		return handler;
 	}
 
 	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {

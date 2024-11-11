@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import static org.springframework.transaction.support.TransactionSynchronization
  * @since 3.1
  */
 @ContextConfiguration
-public class AnnotationConfigTransactionalTestNGSpringContextTests
+class AnnotationConfigTransactionalTestNGSpringContextTests
 		extends AbstractTransactionalTestNGSpringContextTests {
 
 	private static final String JANE = "jane";
@@ -112,7 +112,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void autowiringFromConfigClass() {
+	void autowiringFromConfigClass() {
 		assertThat(employee).as("The employee should have been autowired.").isNotNull();
 		assertThat(employee.getName()).isEqualTo("John Smith");
 
@@ -127,7 +127,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@BeforeMethod
-	void setUp() throws Exception {
+	void setUp() {
 		numSetUpCalls++;
 		if (isActualTransactionActive()) {
 			numSetUpCallsInTransaction++;
@@ -136,7 +136,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@Test
-	public void modifyTestDataWithinTransaction() {
+	void modifyTestDataWithinTransaction() {
 		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
@@ -144,7 +144,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@AfterMethod
-	void tearDown() throws Exception {
+	void tearDown() {
 		numTearDownCalls++;
 		if (isActualTransactionActive()) {
 			numTearDownCallsInTransaction++;

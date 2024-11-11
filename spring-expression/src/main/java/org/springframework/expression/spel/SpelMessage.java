@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.expression.spel;
 
 import java.text.MessageFormat;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Contains all the messages that can be produced by the Spring Expression Language.
- * Each message has a kind (info, warn, error) and a code number. Tests can be written to
+ *
+ * <p>Each message has a kind (info, warn, error) and a code number. Tests can be written to
  * expect particular code numbers rather than particular text, enabling the message text
  * to more easily be modified and the tests to run successfully in different locales.
  *
@@ -76,7 +79,7 @@ public enum SpelMessage {
 			"Cannot compare instances of {0} and {1}"),
 
 	INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION(Kind.ERROR, 1014,
-			"Incorrect number of arguments for function, {0} supplied but function takes {1}"),
+			"Incorrect number of arguments for function ''{0}'': {1} supplied but function takes {2}"),
 
 	INVALID_TYPE_FOR_SELECTION(Kind.ERROR, 1015,
 			"Cannot perform selection on input data of type ''{0}''"),
@@ -100,7 +103,7 @@ public enum SpelMessage {
 			"A problem occurred whilst attempting to access the property ''{0}'': ''{1}''"),
 
 	FUNCTION_REFERENCE_CANNOT_BE_INVOKED(Kind.ERROR, 1022,
-			"The function ''{0}'' mapped to an object of type ''{1}'' which cannot be invoked"),
+			"The function ''{0}'' mapped to an object of type ''{1}'' cannot be invoked"),
 
 	EXCEPTION_DURING_FUNCTION_CALL(Kind.ERROR, 1023,
 			"A problem occurred whilst attempting to invoke the function ''{0}'': ''{1}''"),
@@ -209,7 +212,7 @@ public enum SpelMessage {
 			"No bean resolver registered in the context to resolve access to bean ''{0}''"),
 
 	EXCEPTION_DURING_BEAN_RESOLUTION(Kind.ERROR, 1058,
-			"A problem occurred when trying to resolve bean ''{0}'':''{1}''"),
+			"A problem occurred when trying to resolve bean ''{0}'': ''{1}''"),
 
 	INVALID_BEAN_REFERENCE(Kind.ERROR, 1059,
 			"@ or & can only be followed by an identifier or a quoted name"),
@@ -288,7 +291,20 @@ public enum SpelMessage {
 
 	/** @since 6.0.13 */
 	NEGATIVE_REPEATED_TEXT_COUNT(Kind.ERROR, 1081,
-			"Repeat count ''{0}'' must not be negative");
+			"Repeat count ''{0}'' must not be negative"),
+
+	/** @since 6.1.15 */
+	UNSUPPORTED_CHARACTER(Kind.ERROR, 1082,
+			"Unsupported character ''{0}'' ({1}) encountered in expression"),
+
+	/** @since 6.2 */
+	EXCEPTION_DURING_INDEX_READ(Kind.ERROR, 1083,
+			"A problem occurred while attempting to read index ''{0}'' in ''{1}''"),
+
+	/** @since 6.2 */
+	EXCEPTION_DURING_INDEX_WRITE(Kind.ERROR, 1084,
+			"A problem occurred while attempting to write index ''{0}'' in ''{1}''");
+
 
 
 	private final Kind kind;
@@ -312,7 +328,7 @@ public enum SpelMessage {
 	 * @return a formatted message
 	 * @since 4.3.5
 	 */
-	public String formatMessage(Object... inserts) {
+	public String formatMessage(@Nullable Object... inserts) {
 		StringBuilder formattedMessage = new StringBuilder();
 		formattedMessage.append("EL").append(this.code);
 		if (this.kind == Kind.ERROR) {

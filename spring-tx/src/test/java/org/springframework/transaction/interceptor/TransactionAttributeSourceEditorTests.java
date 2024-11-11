@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link TransactionAttributeSourceEditor}.
+ * Tests for {@link TransactionAttributeSourceEditor}.
  *
- * <p>Format is: {@code FQN.Method=tx attribute representation}
+ * <p>Format is: {@code <fully-qualified class name>.<method-name>=tx attribute representation}
  *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 26.04.2003
  */
-public class TransactionAttributeSourceEditorTests {
+class TransactionAttributeSourceEditorTests {
 
 	private final TransactionAttributeSourceEditor editor = new TransactionAttributeSourceEditor();
 
 
 	@Test
-	public void nullValue() throws Exception {
+	void nullValue() throws Exception {
 		editor.setAsText(null);
 		TransactionAttributeSource tas = (TransactionAttributeSource) editor.getValue();
 
@@ -49,13 +49,13 @@ public class TransactionAttributeSourceEditorTests {
 	}
 
 	@Test
-	public void invalidFormat() throws Exception {
+	void invalidFormat() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText("foo=bar"));
 	}
 
 	@Test
-	public void matchesSpecific() throws Exception {
+	void matchesSpecific() throws Exception {
 		editor.setAsText("""
 				java.lang.Object.hashCode=PROPAGATION_REQUIRED
 				java.lang.Object.equals=PROPAGATION_MANDATORY
@@ -82,7 +82,7 @@ public class TransactionAttributeSourceEditorTests {
 	}
 
 	@Test
-	public void matchesAll() throws Exception {
+	void matchesAll() throws Exception {
 		editor.setAsText("java.lang.Object.*=PROPAGATION_REQUIRED");
 		TransactionAttributeSource tas = (TransactionAttributeSource) editor.getValue();
 

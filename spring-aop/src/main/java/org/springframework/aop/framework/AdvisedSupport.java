@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +34,7 @@ import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -85,10 +85,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private boolean preFiltered = false;
 
 	/** The AdvisorChainFactory to use. */
-	private AdvisorChainFactory advisorChainFactory;
-
-	/** Cache with Method as key and advisor chain List as value. */
-	private transient Map<MethodCacheKey, List<Object>> methodCache;
+	private AdvisorChainFactory advisorChainFactory = DefaultAdvisorChainFactory.INSTANCE;
 
 	/**
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
@@ -102,15 +99,36 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	private List<Advisor> advisors = new ArrayList<>();
 
+	/**
+	 * List of minimal {@link AdvisorKeyEntry} instances,
+	 * to be assigned to the {@link #advisors} field on reduction.
+	 * @since 6.0.10
+	 * @see #reduceToAdvisorKey
+	 */
 	private List<Advisor> advisorKey = this.advisors;
+
+	/** Cache with Method as key and advisor chain List as value. */
+	@Nullable
+	private transient Map<MethodCacheKey, List<Object>> methodCache;
+
+	/** Cache with shared interceptors which are not method-specific. */
+	@Nullable
+	private transient volatile List<Object> cachedInterceptors;
+
+	/**
+	 * Optional field for {@link AopProxy} implementations to store metadata in.
+	 * Used by {@link JdkDynamicAopProxy}.
+	 * @since 6.1.3
+	 * @see JdkDynamicAopProxy#JdkDynamicAopProxy(AdvisedSupport)
+	 */
+	@Nullable
+	transient volatile Object proxyMetadataCache;
 
 
 	/**
 	 * No-arg constructor for use as a JavaBean.
 	 */
 	public AdvisedSupport() {
-		this.advisorChainFactory = DefaultAdvisorChainFactory.INSTANCE;
-		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 	/**
@@ -118,17 +136,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param interfaces the proxied interfaces
 	 */
 	public AdvisedSupport(Class<?>... interfaces) {
-		this();
 		setInterfaces(interfaces);
-	}
-
-	/**
-	 * Internal constructor for {@link #getConfigurationOnlyCopy()}.
-	 * @since 6.0.10
-	 */
-	private AdvisedSupport(AdvisorChainFactory advisorChainFactory, Map<MethodCacheKey, List<Object>> methodCache) {
-		this.advisorChainFactory = advisorChainFactory;
-		this.methodCache = methodCache;
 	}
 
 
@@ -215,15 +223,15 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Add a new proxied interface.
-	 * @param intf the additional interface to proxy
+	 * @param ifc the additional interface to proxy
 	 */
-	public void addInterface(Class<?> intf) {
-		Assert.notNull(intf, "Interface must not be null");
-		if (!intf.isInterface()) {
-			throw new IllegalArgumentException("[" + intf.getName() + "] is not an interface");
+	public void addInterface(Class<?> ifc) {
+		Assert.notNull(ifc, "Interface must not be null");
+		if (!ifc.isInterface()) {
+			throw new IllegalArgumentException("[" + ifc.getName() + "] is not an interface");
 		}
-		if (!this.interfaces.contains(intf)) {
-			this.interfaces.add(intf);
+		if (!this.interfaces.contains(ifc)) {
+			this.interfaces.add(ifc);
 			adviceChanged();
 		}
 	}
@@ -231,12 +239,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Remove a proxied interface.
 	 * <p>Does nothing if the given interface isn't proxied.
-	 * @param intf the interface to remove from the proxy
+	 * @param ifc the interface to remove from the proxy
 	 * @return {@code true} if the interface was removed; {@code false}
 	 * if the interface was not found and hence could not be removed
 	 */
-	public boolean removeInterface(Class<?> intf) {
-		return this.interfaces.remove(intf);
+	public boolean removeInterface(Class<?> ifc) {
+		return this.interfaces.remove(ifc);
 	}
 
 	@Override
@@ -245,10 +253,32 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	@Override
-	public boolean isInterfaceProxied(Class<?> intf) {
+	public boolean isInterfaceProxied(Class<?> ifc) {
 		for (Class<?> proxyIntf : this.interfaces) {
-			if (intf.isAssignableFrom(proxyIntf)) {
+			if (ifc.isAssignableFrom(proxyIntf)) {
 				return true;
+			}
+		}
+		return false;
+	}
+
+	boolean hasUserSuppliedInterfaces() {
+		for (Class<?> ifc : this.interfaces) {
+			if (!SpringProxy.class.isAssignableFrom(ifc) && !isAdvisorIntroducedInterface(ifc)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isAdvisorIntroducedInterface(Class<?> ifc) {
+		for (Advisor advisor : this.advisors) {
+			if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
+				for (Class<?> introducedInterface : introductionAdvisor.getInterfaces()) {
+					if (introducedInterface == ifc) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -362,8 +392,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private void validateIntroductionAdvisor(IntroductionAdvisor advisor) {
 		advisor.validateInterfaces();
 		// If the advisor passed validation, we can make the change.
-		Class<?>[] ifcs = advisor.getInterfaces();
-		for (Class<?> ifc : ifcs) {
+		for (Class<?> ifc : advisor.getInterfaces()) {
 			addInterface(ifc);
 		}
 	}
@@ -482,15 +511,45 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return a List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
-		return this.methodCache.computeIfAbsent(new MethodCacheKey(method), k ->
-				this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this, method, targetClass));
+		List<Object> cachedInterceptors;
+		if (this.methodCache != null) {
+			// Method-specific cache for method-specific pointcuts
+			MethodCacheKey cacheKey = new MethodCacheKey(method);
+			cachedInterceptors = this.methodCache.get(cacheKey);
+			if (cachedInterceptors == null) {
+				cachedInterceptors = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+						this, method, targetClass);
+				this.methodCache.put(cacheKey, cachedInterceptors);
+			}
+		}
+		else {
+			// Shared cache since there are no method-specific advisors (see below).
+			cachedInterceptors = this.cachedInterceptors;
+			if (cachedInterceptors == null) {
+				cachedInterceptors = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+						this, method, targetClass);
+				this.cachedInterceptors = cachedInterceptors;
+			}
+		}
+		return cachedInterceptors;
 	}
 
 	/**
 	 * Invoked when advice has changed.
 	 */
 	protected void adviceChanged() {
-		this.methodCache.clear();
+		this.methodCache = null;
+		this.cachedInterceptors = null;
+		this.proxyMetadataCache = null;
+
+		// Initialize method cache if necessary; otherwise,
+		// cachedInterceptors is going to be shared (see above).
+		for (Advisor advisor : this.advisors) {
+			if (advisor instanceof PointcutAdvisor) {
+				this.methodCache = new ConcurrentHashMap<>();
+				break;
+			}
+		}
 	}
 
 	/**
@@ -529,39 +588,34 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * replacing the {@link TargetSource}.
 	 */
 	AdvisedSupport getConfigurationOnlyCopy() {
-		AdvisedSupport copy = new AdvisedSupport(this.advisorChainFactory, this.methodCache);
+		AdvisedSupport copy = new AdvisedSupport();
 		copy.copyFrom(this);
 		copy.targetSource = EmptyTargetSource.forClass(getTargetClass(), getTargetSource().isStatic());
+		copy.preFiltered = this.preFiltered;
+		copy.advisorChainFactory = this.advisorChainFactory;
 		copy.interfaces = new ArrayList<>(this.interfaces);
 		copy.advisors = new ArrayList<>(this.advisors);
 		copy.advisorKey = new ArrayList<>(this.advisors.size());
 		for (Advisor advisor : this.advisors) {
 			copy.advisorKey.add(new AdvisorKeyEntry(advisor));
 		}
+		copy.methodCache = this.methodCache;
+		copy.cachedInterceptors = this.cachedInterceptors;
+		copy.proxyMetadataCache = this.proxyMetadataCache;
 		return copy;
 	}
 
 	void reduceToAdvisorKey() {
 		this.advisors = this.advisorKey;
-		this.methodCache = Collections.emptyMap();
+		this.methodCache = null;
+		this.cachedInterceptors = null;
+		this.proxyMetadataCache = null;
 	}
 
 	Object getAdvisorKey() {
 		return this.advisorKey;
 	}
 
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization; just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		this.methodCache = new ConcurrentHashMap<>(32);
-	}
 
 	@Override
 	public String toProxyConfigString() {
@@ -581,6 +635,19 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append("targetSource [").append(this.targetSource).append("]; ");
 		sb.append(super.toString());
 		return sb.toString();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize method cache if necessary.
+		adviceChanged();
 	}
 
 
@@ -633,7 +700,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #getConfigurationOnlyCopy()
 	 * @see #getAdvisorKey()
 	 */
-	private static class AdvisorKeyEntry implements Advisor {
+	private static final class AdvisorKeyEntry implements Advisor {
 
 		private final Class<?> adviceType;
 
@@ -642,7 +709,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Nullable
 		private final String methodMatcherKey;
-
 
 		public AdvisorKeyEntry(Advisor advisor) {
 			this.adviceType = advisor.getAdvice().getClass();

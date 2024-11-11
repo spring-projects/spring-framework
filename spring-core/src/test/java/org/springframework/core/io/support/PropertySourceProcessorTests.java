@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,15 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link PropertySourceProcessor}.
+ * Tests for {@link PropertySourceProcessor}.
  *
  * @author Sam Brannen
  * @since 6.0.12
@@ -73,8 +75,8 @@ class PropertySourceProcessorTests {
 	class FailOnErrorTests {
 
 		@Test
-		void processorFailsOnIllegalArgumentException() {
-			assertProcessorFailsOnError(IllegalArgumentExceptionPropertySourceFactory.class, IllegalArgumentException.class);
+		void processorFailsOnPlaceholderResolutionException() {
+			assertProcessorFailsOnError(PlaceholderResolutionExceptionPropertySourceFactory.class, PlaceholderResolutionException.class);
 		}
 
 		@Test
@@ -98,7 +100,7 @@ class PropertySourceProcessorTests {
 
 		@Test
 		void processorIgnoresIllegalArgumentException() {
-			assertProcessorIgnoresFailure(IllegalArgumentExceptionPropertySourceFactory.class);
+			assertProcessorIgnoresFailure(PlaceholderResolutionExceptionPropertySourceFactory.class);
 		}
 
 		@Test
@@ -134,11 +136,11 @@ class PropertySourceProcessorTests {
 	}
 
 
-	private static class IllegalArgumentExceptionPropertySourceFactory implements PropertySourceFactory {
+	private static class PlaceholderResolutionExceptionPropertySourceFactory implements PropertySourceFactory {
 
 		@Override
-		public PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
-			throw new IllegalArgumentException("bogus");
+		public PropertySource<?> createPropertySource(String name, EncodedResource resource) {
+			throw mock(PlaceholderResolutionException.class);
 		}
 	}
 

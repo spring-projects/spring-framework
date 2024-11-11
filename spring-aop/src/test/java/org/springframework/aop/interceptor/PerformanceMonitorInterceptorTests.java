@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import static org.mockito.Mockito.verify;
  * @author Rick Evans
  * @author Chris Beams
  */
-public class PerformanceMonitorInterceptorTests {
+class PerformanceMonitorInterceptorTests {
 
 	@Test
-	public void testSuffixAndPrefixAssignment() {
+	void testSuffixAndPrefixAssignment() {
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
 
 		assertThat(interceptor.getPrefix()).isNotNull();
@@ -49,9 +49,9 @@ public class PerformanceMonitorInterceptorTests {
 	}
 
 	@Test
-	public void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
+	void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
 		MethodInvocation mi = mock();
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
+		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 
 		Log log = mock();
 
@@ -62,10 +62,10 @@ public class PerformanceMonitorInterceptorTests {
 	}
 
 	@Test
-	public void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
+	void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
 		MethodInvocation mi = mock();
 
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
+		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.proceed()).willThrow(new IllegalArgumentException());
 		Log log = mock();
 

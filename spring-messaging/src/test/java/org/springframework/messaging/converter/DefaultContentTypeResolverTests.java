@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,48 +30,47 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.converter.DefaultContentTypeResolver}.
+ * Tests for {@link DefaultContentTypeResolver}.
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultContentTypeResolverTests {
+class DefaultContentTypeResolverTests {
 
 	private final DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 
 
 	@Test
-	public void resolve() {
+	void resolve() {
 		MessageHeaders headers = headers(MimeTypeUtils.APPLICATION_JSON);
 		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
 	@Test
-	public void resolveStringContentType() {
+	void resolveStringContentType() {
 		MessageHeaders headers = headers(MimeTypeUtils.APPLICATION_JSON_VALUE);
 		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
 	@Test
-	public void resolveInvalidStringContentType() {
+	void resolveInvalidStringContentType() {
 		MessageHeaders headers = headers("invalidContentType");
 		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() -> this.resolver.resolve(headers));
 	}
 
 	@Test
-	public void resolveUnknownHeaderType() {
+	void resolveUnknownHeaderType() {
 		MessageHeaders headers = headers(1);
 		assertThatIllegalArgumentException().isThrownBy(() -> this.resolver.resolve(headers));
 	}
 
 	@Test
-	public void resolveNoContentTypeHeader() {
+	void resolveNoContentTypeHeader() {
 		MessageHeaders headers = new MessageHeaders(Collections.emptyMap());
 		assertThat(this.resolver.resolve(headers)).isNull();
 	}
 
 	@Test
-	public void resolveDefaultMimeType() {
+	void resolveDefaultMimeType() {
 		this.resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		MessageHeaders headers = new MessageHeaders(Collections.emptyMap());
 
@@ -79,7 +78,7 @@ public class DefaultContentTypeResolverTests {
 	}
 
 	@Test
-	public void resolveDefaultMimeTypeWithNoHeader() {
+	void resolveDefaultMimeTypeWithNoHeader() {
 		this.resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		assertThat(this.resolver.resolve(null)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}

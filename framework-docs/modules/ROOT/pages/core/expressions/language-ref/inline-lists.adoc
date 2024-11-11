@@ -7,7 +7,7 @@ You can directly express lists in an expression by using `{}` notation.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to a Java list containing the four numbers
 	List numbers = (List) parser.parseExpression("{1,2,3,4}").getValue(context);
@@ -17,7 +17,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to a Java list containing the four numbers
 	val numbers = parser.parseExpression("{1,2,3,4}").getValue(context) as List<*>

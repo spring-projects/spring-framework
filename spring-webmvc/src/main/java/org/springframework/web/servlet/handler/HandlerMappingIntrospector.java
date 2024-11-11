@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import jakarta.servlet.Filter;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,16 +46,20 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.server.RequestPath;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.PreFlightRequestHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -87,7 +92,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @since 4.3.1
  */
 public class HandlerMappingIntrospector
-		implements CorsConfigurationSource, ApplicationContextAware, InitializingBean {
+		implements CorsConfigurationSource, PreFlightRequestHandler, ApplicationContextAware, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(HandlerMappingIntrospector.class.getName());
 
@@ -172,6 +177,49 @@ public class HandlerMappingIntrospector
 		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
 	}
 
+	/**
+	 * Return {@code true} if all {@link HandlerMapping} beans
+	 * {@link HandlerMapping#usesPathPatterns() use parsed PathPatterns},
+	 * and {@code false} if any don't.
+	 * @since 6.2
+	 */
+	public boolean allHandlerMappingsUsePathPatternParser() {
+		Assert.state(this.handlerMappings != null, "Not yet initialized via afterPropertiesSet.");
+		return getHandlerMappings().stream().allMatch(HandlerMapping::usesPathPatterns);
+	}
+
+
+	/**
+	 * Find the matching {@link HandlerMapping} for the request, and invoke the
+	 * handler it returns as a {@link PreFlightRequestHandler}.
+	 * @throws NoHandlerFoundException if no handler matches the request
+	 * @since 6.2
+	 */
+	public void handlePreFlight(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Assert.state(this.handlerMappings != null, "Not yet initialized via afterPropertiesSet.");
+		Assert.state(CorsUtils.isPreFlightRequest(request), "Not a pre-flight request.");
+		RequestPath previousPath = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
+		try {
+			ServletRequestPathUtils.parseAndCache(request);
+			for (HandlerMapping mapping : this.handlerMappings) {
+				HandlerExecutionChain chain = mapping.getHandler(request);
+				if (chain != null) {
+					Object handler = chain.getHandler();
+					if (handler instanceof PreFlightRequestHandler preFlightHandler) {
+						preFlightHandler.handlePreFlight(request, response);
+						return;
+					}
+					throw new IllegalStateException("Expected PreFlightRequestHandler: " + handler.getClass());
+				}
+			}
+			throw new NoHandlerFoundException(
+					request.getMethod(), request.getRequestURI(), new ServletServerHttpRequest(request).getHeaders());
+		}
+		finally {
+			ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
+		}
+	}
+
 
 	/**
 	 * {@link Filter} that looks up the {@code MatchableHandlerMapping} and
@@ -191,8 +239,12 @@ public class HandlerMappingIntrospector
 	public Filter createCacheFilter() {
 		return (request, response, chain) -> {
 			CachedResult previous = setCache((HttpServletRequest) request);
-			chain.doFilter(request, response);
-			resetCache(request, previous);
+			try {
+				chain.doFilter(request, response);
+			}
+			finally {
+				resetCache(request, previous);
+			}
 		};
 	}
 
@@ -206,7 +258,7 @@ public class HandlerMappingIntrospector
 	 * @since 6.0.14
 	 */
 	@Nullable
-	private CachedResult setCache(HttpServletRequest request) {
+	public CachedResult setCache(HttpServletRequest request) {
 		CachedResult previous = (CachedResult) request.getAttribute(CACHED_RESULT_ATTRIBUTE);
 		if (previous == null || !previous.matches(request)) {
 			HttpServletRequest wrapped = new AttributesPreservingRequest(request);
@@ -245,7 +297,7 @@ public class HandlerMappingIntrospector
 	 * a filter after delegating to the rest of the chain.
 	 * @since 6.0.14
 	 */
-	private void resetCache(ServletRequest request, @Nullable CachedResult cachedResult) {
+	public void resetCache(ServletRequest request, @Nullable CachedResult cachedResult) {
 		request.setAttribute(CACHED_RESULT_ATTRIBUTE, cachedResult);
 	}
 
@@ -363,7 +415,7 @@ public class HandlerMappingIntrospector
 	 * @since 6.0.14
 	 */
 	@SuppressWarnings("serial")
-	private static final class CachedResult {
+	public static final class CachedResult {
 
 		private final DispatcherType dispatcherType;
 
@@ -395,7 +447,7 @@ public class HandlerMappingIntrospector
 
 		public boolean matches(HttpServletRequest request) {
 			return (this.dispatcherType.equals(request.getDispatcherType()) &&
-					this.requestURI.matches(request.getRequestURI()));
+					this.requestURI.equals(request.getRequestURI()));
 		}
 
 		@Nullable
@@ -496,6 +548,7 @@ public class HandlerMappingIntrospector
 		}
 
 		@Override
+		@Nullable
 		public Object getAttribute(String name) {
 			return this.attributes.get(name);
 		}
@@ -528,6 +581,7 @@ public class HandlerMappingIntrospector
 		}
 
 		@Override
+		@Nullable
 		public PathPatternParser getPatternParser() {
 			return this.delegate.getPatternParser();
 		}

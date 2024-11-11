@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
@@ -28,7 +27,6 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -209,7 +207,7 @@ public class PrintingResultHandler implements ResultHandler {
 	protected void printModelAndView(@Nullable ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
-		if (mav == null || mav.getModel().size() == 0) {
+		if (mav == null || mav.getModel().isEmpty()) {
 			this.printer.printValue("Model", null);
 		}
 		else {
@@ -250,9 +248,7 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printValue("Error message", response.getErrorMessage());
 		this.printer.printValue("Headers", getResponseHeaders(response));
 		this.printer.printValue("Content type", response.getContentType());
-		String body = (MediaType.APPLICATION_JSON_VALUE.equals(response.getContentType()) ?
-				response.getContentAsString(StandardCharsets.UTF_8) : response.getContentAsString());
-		this.printer.printValue("Body", body);
+		this.printer.printValue("Body", response.getContentAsString());
 		this.printer.printValue("Forwarded URL", response.getForwardedUrl());
 		this.printer.printValue("Redirected URL", response.getRedirectedUrl());
 		printCookies(response.getCookies());

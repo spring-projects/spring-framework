@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import org.springframework.jdbc.support.SqlValue;
 
 /**
  * Subinterface of {@link org.springframework.jdbc.support.SqlValue}
- * that supports passing in XML data to specified column and adds a
- * cleanup callback, to be invoked after the value has been set and
- * the corresponding statement has been executed.
+ * that specifically indicates passing in XML data to a specified column.
  *
  * @author Thomas Risberg
  * @since 2.5.5
  * @see org.springframework.jdbc.support.SqlValue
+ * @deprecated as of 6.2, in favor of a direct {@link SqlValue} implementation
  */
+@Deprecated(since = "6.2")
 public interface SqlXmlValue extends SqlValue {
 
 }

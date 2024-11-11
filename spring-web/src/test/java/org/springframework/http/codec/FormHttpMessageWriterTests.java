@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,20 +39,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sebastien Deleuze
  */
-public class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
+class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final FormHttpMessageWriter writer = new FormHttpMessageWriter();
 
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		// No generic information
 		assertThat(this.writer.canWrite(
-				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
+				ResolvableType.forInstance(new LinkedMultiValueMap<>()),
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		assertThat(this.writer.canWrite(
@@ -73,7 +73,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void writeForm() {
+	void writeForm() {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -88,7 +88,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				.expectComplete()
 				.verify();
 		HttpHeaders headers = response.getHeaders();
-		assertThat(headers.getContentType().toString()).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_FORM_URLENCODED);
 		assertThat(headers.getContentLength()).isEqualTo(expected.length());
 	}
 

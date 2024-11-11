@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.springframework.aot.hint.ReflectionHints;
@@ -64,6 +65,28 @@ public class ReflectiveRuntimeHintsRegistrar {
 			AnnotatedElement element = entry.element();
 			entry.processor().registerReflectionHints(runtimeHints.reflection(), element);
 		});
+	}
+
+	/**
+	 * Specify if the given {@code type} is a valid candidate.
+	 * @param type the type to inspect
+	 * @return {@code true} if the type uses {@link Reflective} in a way that
+	 * is supported by this registrar
+	 * @since 6.2
+	 */
+	public boolean isCandidate(Class<?> type) {
+		if (isReflective(type)) {
+			return true;
+		}
+		AtomicBoolean candidate = new AtomicBoolean(false);
+		doWithReflectiveConstructors(type, constructor -> candidate.set(true));
+		if (!candidate.get()) {
+			ReflectionUtils.doWithFields(type, field -> candidate.set(true), this::isReflective);
+		}
+		if (!candidate.get()) {
+			ReflectionUtils.doWithMethods(type, method -> candidate.set(true), this::isReflective);
+		}
+		return candidate.get();
 	}
 
 	private void processType(Set<Entry> entries, Class<?> typeToProcess) {

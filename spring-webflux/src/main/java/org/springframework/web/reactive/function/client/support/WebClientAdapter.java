@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,18 +152,6 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 	 * @since 6.1
 	 */
 	public static WebClientAdapter create(WebClient webClient) {
-		return new WebClientAdapter(webClient);
-	}
-
-	/**
-	 * Create a {@link WebClientAdapter} for the given {@code WebClient} instance.
-	 * @param webClient the client to use
-	 * @return the created adapter instance
-	 * @deprecated in favor of {@link #create(WebClient)} aligning with other adapter
-	 * implementations; to be removed in 6.2.
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public static WebClientAdapter forClient(WebClient webClient) {
 		return new WebClientAdapter(webClient);
 	}
 

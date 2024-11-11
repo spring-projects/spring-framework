@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -485,7 +485,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			if (this.host != null) {
 				uriBuilder.append(this.host);
 			}
-			if (getPort() != -1) {
+			if (StringUtils.hasText(this.port) && !this.port.equals("-1")) {
 				uriBuilder.append(':').append(this.port);
 			}
 		}
@@ -590,25 +590,25 @@ final class HierarchicalUriComponents extends UriComponents {
 		AUTHORITY {
 			@Override
 			public boolean isAllowed(int c) {
-				return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+				return (isUnreservedOrSubDelimiter(c) || ':' == c || '@' == c);
 			}
 		},
 		USER_INFO {
 			@Override
 			public boolean isAllowed(int c) {
-				return isUnreserved(c) || isSubDelimiter(c) || ':' == c;
+				return (isUnreservedOrSubDelimiter(c) || ':' == c);
 			}
 		},
 		HOST_IPV4 {
 			@Override
 			public boolean isAllowed(int c) {
-				return isUnreserved(c) || isSubDelimiter(c);
+				return isUnreservedOrSubDelimiter(c);
 			}
 		},
 		HOST_IPV6 {
 			@Override
 			public boolean isAllowed(int c) {
-				return isUnreserved(c) || isSubDelimiter(c) || '[' == c || ']' == c || ':' == c;
+				return (isUnreservedOrSubDelimiter(c) || '[' == c || ']' == c || ':' == c);
 			}
 		},
 		PORT {
@@ -620,7 +620,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		PATH {
 			@Override
 			public boolean isAllowed(int c) {
-				return isPchar(c) || '/' == c;
+				return (isPchar(c) || '/' == c);
 			}
 		},
 		PATH_SEGMENT {
@@ -632,7 +632,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		QUERY {
 			@Override
 			public boolean isAllowed(int c) {
-				return isPchar(c) || '/' == c || '?' == c;
+				return (isPchar(c) || '/' == c || '?' == c);
 			}
 		},
 		QUERY_PARAM {
@@ -642,14 +642,14 @@ final class HierarchicalUriComponents extends UriComponents {
 					return false;
 				}
 				else {
-					return isPchar(c) || '/' == c || '?' == c;
+					return (isPchar(c) || '/' == c || '?' == c);
 				}
 			}
 		},
 		FRAGMENT {
 			@Override
 			public boolean isAllowed(int c) {
-				return isPchar(c) || '/' == c || '?' == c;
+				return (isPchar(c) || '/' == c || '?' == c);
 			}
 		},
 		URI {
@@ -658,6 +658,15 @@ final class HierarchicalUriComponents extends UriComponents {
 				return isUnreserved(c);
 			}
 		};
+
+		private static final boolean[] unreservedOrSubDelimiterArray = new boolean[128];
+
+		static {
+			for (int i = 0; i < 128; i++) {
+				char c = (char) i;
+				unreservedOrSubDelimiterArray[i] = (URI.isUnreserved(c) || URI.isSubDelimiter(c));
+			}
+		}
 
 		/**
 		 * Indicates whether the given character is allowed in this URI component.
@@ -694,8 +703,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isSubDelimiter(int c) {
-			return ('!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
-					',' == c || ';' == c || '=' == c);
+			return ('!' == c || '$' == c || '&' == c || '\'' == c ||
+					'(' == c || ')' == c || '*' == c || '+' == c || ',' == c || ';' == c || '=' == c);
 		}
 
 		/**
@@ -719,8 +728,16 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isPchar(int c) {
-			return (isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c);
+			return (isUnreservedOrSubDelimiter(c) || ':' == c || '@' == c);
 		}
+
+		/**
+		 * Combined check whether a character is unreserved or a sub-delimiter.
+		 */
+		protected boolean isUnreservedOrSubDelimiter(int c) {
+			return (c < unreservedOrSubDelimiterArray.length && c >= 0 && unreservedOrSubDelimiterArray[c]);
+		}
+
 	}
 
 
@@ -822,7 +839,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * Whether the given String is a single URI variable that can be
 		 * expanded. It must have '{' and '}' surrounding non-empty text and no
 		 * nested placeholders unless it is a variable with regex syntax,
-		 * e.g. {@code "/{year:\d{1,4}}"}.
+		 * for example, {@code "/{year:\d{1,4}}"}.
 		 */
 		private boolean isUriVariable(CharSequence source) {
 			if (source.length() < 2 || source.charAt(0) != '{' || source.charAt(source.length() -1) != '}') {
@@ -1077,6 +1094,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
+		@Nullable
 		public Object getValue(@Nullable String name) {
 			Object value = this.delegate.getValue(name);
 			if (ObjectUtils.isArray(value)) {

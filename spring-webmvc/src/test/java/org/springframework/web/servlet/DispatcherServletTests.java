@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ import static org.mockito.Mockito.verify;
  * @author Rob Harrop
  * @author Sam Brannen
  */
-public class DispatcherServletTests {
+class DispatcherServletTests {
 
 	private static final String URL_KNOWN_ONLY_PARENT = "/knownOnlyToParent.do";
 
@@ -96,7 +96,7 @@ public class DispatcherServletTests {
 
 
 	@BeforeEach
-	public void setup() throws ServletException {
+	void setup() throws ServletException {
 		MockServletConfig complexConfig = new MockServletConfig(getServletContext(), "complex");
 		complexConfig.addInitParameter("publishContext", "false");
 		complexConfig.addInitParameter("class", "notWritable");
@@ -560,7 +560,7 @@ public class DispatcherServletTests {
 	}
 
 	@Test
-	void notDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
+	void notDetectAllHandlerExceptionResolvers() throws ServletException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -575,7 +575,7 @@ public class DispatcherServletTests {
 	}
 
 	@Test
-	void notDetectAllViewResolvers() throws ServletException, IOException {
+	void notDetectAllViewResolvers() throws ServletException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -686,7 +686,7 @@ public class DispatcherServletTests {
 		assertThat(myServlet.getServletConfig().getServletName()).isEqualTo("complex");
 		assertThat(myServlet.getServletConfig().getServletContext()).isEqualTo(getServletContext());
 		complexDispatcherServlet.destroy();
-		assertThat((Object) myServlet.getServletConfig()).isNull();
+		assertThat(myServlet.getServletConfig()).isNull();
 	}
 
 	@Test
@@ -710,7 +710,7 @@ public class DispatcherServletTests {
 	}
 
 	@Test
-	void withNoViewAndSamePath() throws Exception {
+	void withNoViewAndSamePath() {
 		InternalResourceViewResolver vr = (InternalResourceViewResolver) complexDispatcherServlet
 				.getWebApplicationContext().getBean("viewResolver2");
 		vr.setSuffix("");
@@ -817,7 +817,6 @@ public class DispatcherServletTests {
 		assertThatIllegalArgumentException().as("non-configurable Environment").isThrownBy(() ->
 				servlet.setEnvironment(new DummyEnvironment()));
 		class CustomServletEnvironment extends StandardServletEnvironment { }
-		@SuppressWarnings("serial")
 		DispatcherServlet custom = new DispatcherServlet() {
 			@Override
 			protected ConfigurableWebEnvironment createEnvironment() {

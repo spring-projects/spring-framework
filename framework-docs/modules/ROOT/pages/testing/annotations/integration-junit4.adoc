@@ -13,10 +13,10 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runne
 [[integration-testing-annotations-junit4-ifprofilevalue]]
 == `@IfProfileValue`
 
-`@IfProfileValue` indicates that the annotated test is enabled for a specific testing
-environment. If the configured `ProfileValueSource` returns a matching `value` for the
-provided `name`, the test is enabled. Otherwise, the test is disabled and, effectively,
-ignored.
+`@IfProfileValue` indicates that the annotated test class or test method is enabled for a
+specific testing environment. If the configured `ProfileValueSource` returns a matching
+`value` for the provided `name`, the test is enabled. Otherwise, the test is disabled
+and, effectively, ignored.
 
 You can apply `@IfProfileValue` at the class level, the method level, or both.
 Class-level usage of `@IfProfileValue` takes precedence over method-level usage for any
@@ -31,7 +31,7 @@ The following example shows a test that has an `@IfProfileValue` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
 	@Test
@@ -43,7 +43,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
 	@Test
@@ -63,7 +63,7 @@ Consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"}) // <1>
 	@Test
@@ -75,7 +75,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="test-groups", values=["unit-tests", "integration-tests"]) // <1>
 	@Test
@@ -90,17 +90,18 @@ Kotlin::
 [[integration-testing-annotations-junit4-profilevaluesourceconfiguration]]
 == `@ProfileValueSourceConfiguration`
 
-`@ProfileValueSourceConfiguration` is a class-level annotation that specifies what type
-of `ProfileValueSource` to use when retrieving profile values configured through the
-`@IfProfileValue` annotation. If `@ProfileValueSourceConfiguration` is not declared for a
-test, `SystemProfileValueSource` is used by default. The following example shows how to
-use `@ProfileValueSourceConfiguration`:
+`@ProfileValueSourceConfiguration` is an annotation that can be applied to a test class
+to specify what type of `ProfileValueSource` to use when retrieving profile values
+configured through the `@IfProfileValue` annotation. If
+`@ProfileValueSourceConfiguration` is not declared for a test, `SystemProfileValueSource`
+is used by default. The following example shows how to use
+`@ProfileValueSourceConfiguration`:
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ProfileValueSourceConfiguration(CustomProfileValueSource.class) // <1>
 	public class CustomProfileValueSourceTests {
@@ -111,7 +112,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ProfileValueSourceConfiguration(CustomProfileValueSource::class) // <1>
 	class CustomProfileValueSourceTests {
@@ -137,7 +138,7 @@ example shows how to use it:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Timed(millis = 1000) // <1>
 	public void testProcessWithOneSecondTimeout() {
@@ -148,7 +149,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Timed(millis = 1000) // <1>
 	fun testProcessWithOneSecondTimeout() {
@@ -182,7 +183,7 @@ following example shows how to use the `@Repeat` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repeat(10) // <1>
 	@Test
@@ -194,7 +195,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repeat(10) // <1>
 	@Test

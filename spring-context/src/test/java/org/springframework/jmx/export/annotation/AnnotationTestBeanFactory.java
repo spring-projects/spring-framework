@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.annotation;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.jmx.IJmxTestBean;
 
 /**
  * @author Juergen Hoeller
@@ -31,12 +30,12 @@ public class AnnotationTestBeanFactory implements FactoryBean<FactoryCreatedAnno
 	}
 
 	@Override
-	public FactoryCreatedAnnotationTestBean getObject() throws Exception {
+	public FactoryCreatedAnnotationTestBean getObject() {
 		return this.instance;
 	}
 
 	@Override
-	public Class<? extends IJmxTestBean> getObjectType() {
+	public Class<? extends AnnotationTestBean> getObjectType() {
 		return FactoryCreatedAnnotationTestBean.class;
 	}
 

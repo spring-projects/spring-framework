@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class RequestPredicateAttributesTests {
+class RequestPredicateAttributesTests {
 
 	private DefaultServerRequest request;
 
 	@BeforeEach
-	public void createRequest() {
+	void createRequest() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com/path").build();
 		MockServerWebExchange webExchange = MockServerWebExchange.from(request);
 		webExchange.getAttributes().put("exchange", "bar");
@@ -48,7 +48,7 @@ public class RequestPredicateAttributesTests {
 
 
 	@Test
-	public void negateSucceed() {
+	void negateSucceed() {
 		RequestPredicate predicate = new AddAttributePredicate(false, "predicate", "baz").negate();
 
 		boolean result = predicate.test(this.request);
@@ -59,7 +59,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void negateFail() {
+	void negateFail() {
 		RequestPredicate predicate = new AddAttributePredicate(true, "predicate", "baz").negate();
 
 		boolean result = predicate.test(this.request);
@@ -70,7 +70,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void andBothSucceed() {
+	void andBothSucceed() {
 		RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
 		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
@@ -84,7 +84,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void andLeftSucceed() {
+	void andLeftSucceed() {
 		RequestPredicate left = new AddAttributePredicate(true, "left", "bar");
 		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
@@ -98,7 +98,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void andRightSucceed() {
+	void andRightSucceed() {
 		RequestPredicate left = new AddAttributePredicate(false, "left", "bar");
 		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
@@ -112,7 +112,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void andBothFail() {
+	void andBothFail() {
 		RequestPredicate left = new AddAttributePredicate(false, "left", "bar");
 		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
@@ -126,7 +126,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void orBothSucceed() {
+	void orBothSucceed() {
 		RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
 		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
@@ -140,7 +140,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void orLeftSucceed() {
+	void orLeftSucceed() {
 		RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
 		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
@@ -154,7 +154,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void orRightSucceed() {
+	void orRightSucceed() {
 		RequestPredicate left = new AddAttributePredicate(false, "left", "baz");
 		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
@@ -168,7 +168,7 @@ public class RequestPredicateAttributesTests {
 	}
 
 	@Test
-	public void orBothFail() {
+	void orBothFail() {
 		RequestPredicate left = new AddAttributePredicate(false, "left", "baz");
 		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
 		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
@@ -200,7 +200,7 @@ public class RequestPredicateAttributesTests {
 
 		@Override
 		protected Result testInternal(ServerRequest request) {
-			return Result.of(this.result, serverRequest -> serverRequest.attributes().put(this.key, this.value));
+			return Result.of(this.result, attributes -> attributes.put(this.key, this.value));
 		}
 	}
 

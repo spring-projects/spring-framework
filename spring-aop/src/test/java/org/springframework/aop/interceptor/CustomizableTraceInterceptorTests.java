@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ class CustomizableTraceInterceptorTests {
 	void sunnyDayPathLogsCorrectlyWithPrettyMuchAllPlaceholdersMatching() throws Throwable {
 		MethodInvocation methodInvocation = mock();
 
-		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
+		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(methodInvocation.getThis()).willReturn(this);
 		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", 2L});
 		given(methodInvocation.proceed()).willReturn("Hello!");
@@ -177,7 +177,6 @@ class CustomizableTraceInterceptorTests {
 	 * is properly configured in {@link CustomizableTraceInterceptor}.
 	 */
 	@Test
-	@SuppressWarnings("deprecation")
 	void supportedPlaceholderValues() {
 		assertThat(ALLOWED_PLACEHOLDERS).containsExactlyInAnyOrderElementsOf(getPlaceholderConstantValues());
 	}

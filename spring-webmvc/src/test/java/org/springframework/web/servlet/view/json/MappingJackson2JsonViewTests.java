@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-public class MappingJackson2JsonViewTests {
+class MappingJackson2JsonViewTests {
 
 	private MappingJackson2JsonView view = new MappingJackson2JsonView();
 
@@ -75,12 +75,12 @@ public class MappingJackson2JsonViewTests {
 
 
 	@Test
-	public void isExposePathVars() {
+	void isExposePathVars() {
 		assertThat(view.isExposePathVariables()).as("Must not expose path variables").isFalse();
 	}
 
 	@Test
-	public void renderSimpleMap() throws Exception {
+	void renderSimpleMap() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
@@ -101,7 +101,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderWithSelectedContentType() throws Exception {
+	void renderWithSelectedContentType() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "bar");
 
@@ -117,7 +117,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderCaching() throws Exception {
+	void renderCaching() throws Exception {
 		view.setDisableCaching(false);
 
 		Map<String, Object> model = new HashMap<>();
@@ -126,17 +126,17 @@ public class MappingJackson2JsonViewTests {
 
 		view.render(model, request, response);
 
-		assertThat((Object) response.getHeader("Cache-Control")).isNull();
+		assertThat(response.getHeader("Cache-Control")).isNull();
 	}
 
 	@Test
-	public void renderSimpleMapPrefixed() throws Exception {
+	void renderSimpleMapPrefixed() throws Exception {
 		view.setPrefixJson(true);
 		renderSimpleMap();
 	}
 
 	@Test
-	public void renderSimpleBean() throws Exception {
+	void renderSimpleBean() throws Exception {
 		Object bean = new TestBeanSimple();
 		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
@@ -152,7 +152,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderWithPrettyPrint() throws Exception {
+	void renderWithPrettyPrint() throws Exception {
 		ModelMap model = new ModelMap("foo", new TestBeanSimple());
 
 		view.setPrettyPrint(true);
@@ -165,21 +165,21 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderSimpleBeanPrefixed() throws Exception {
+	void renderSimpleBeanPrefixed() throws Exception {
 		view.setPrefixJson(true);
 		renderSimpleBean();
 		assertThat(response.getContentAsString()).startsWith(")]}', ");
 	}
 
 	@Test
-	public void renderSimpleBeanNotPrefixed() throws Exception {
+	void renderSimpleBeanNotPrefixed() throws Exception {
 		view.setPrefixJson(false);
 		renderSimpleBean();
 		assertThat(response.getContentAsString()).doesNotStartWith(")]}', ");
 	}
 
 	@Test
-	public void renderWithCustomSerializerLocatedByAnnotation() throws Exception {
+	void renderWithCustomSerializerLocatedByAnnotation() throws Exception {
 		Object bean = new TestBeanSimpleAnnotated();
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", bean);
@@ -193,7 +193,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderWithCustomSerializerLocatedByFactory() throws Exception {
+	void renderWithCustomSerializerLocatedByFactory() throws Exception {
 		SerializerFactory factory = new DelegatingSerializerFactory(null);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializerFactory(factory);
@@ -214,7 +214,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderOnlyIncludedAttributes() throws Exception {
+	void renderOnlyIncludedAttributes() throws Exception {
 
 		Set<String> attrs = new HashSet<>();
 		attrs.add("foo");
@@ -238,7 +238,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void filterSingleKeyModel() throws Exception {
+	void filterSingleKeyModel() {
 		view.setExtractValueFromSingleKeyModel(true);
 
 		Map<String, Object> model = new HashMap<>();
@@ -252,7 +252,7 @@ public class MappingJackson2JsonViewTests {
 
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void filterTwoKeyModel() throws Exception {
+	void filterTwoKeyModel() {
 		view.setExtractValueFromSingleKeyModel(true);
 
 		Map<String, Object> model = new HashMap<>();
@@ -269,7 +269,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderSimpleBeanWithJsonView() throws Exception {
+	void renderSimpleBeanWithJsonView() throws Exception {
 		Object bean = new TestBeanSimple();
 		Map<String, Object> model = new HashMap<>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
@@ -288,7 +288,7 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderSimpleBeanWithFilters() throws Exception {
+	void renderSimpleBeanWithFilters() throws Exception {
 		TestSimpleBeanFiltered bean = new TestSimpleBeanFiltered();
 		bean.setProperty1("value");
 		bean.setProperty2("value");

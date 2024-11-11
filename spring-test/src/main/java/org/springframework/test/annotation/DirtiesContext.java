@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import java.lang.annotation.Target;
  * will be supplied a new context.
  *
  * <p>{@code @DirtiesContext} may be used as a class-level and method-level
- * annotation within the same class or class hierarchy. In such scenarios, the
- * {@code ApplicationContext} will be marked as <em>dirty</em> before or
+ * annotation within the same test class or test class hierarchy. In such scenarios,
+ * the {@code ApplicationContext} will be marked as <em>dirty</em> before or
  * after any such annotated method as well as before or after the current test
  * class, depending on the configured {@link #methodMode} and {@link #classMode}.
  * When {@code @DirtiesContext} is declared at both the class level and the
@@ -141,7 +141,7 @@ public @interface DirtiesContext {
 		 * The associated {@code ApplicationContext} will be marked as
 		 * <em>dirty</em> after the corresponding test method.
 		 */
-		AFTER_METHOD;
+		AFTER_METHOD
 	}
 
 
@@ -178,7 +178,7 @@ public @interface DirtiesContext {
 		 * The associated {@code ApplicationContext} will be marked as
 		 * <em>dirty</em> after the test class.
 		 */
-		AFTER_CLASS;
+		AFTER_CLASS
 	}
 
 
@@ -212,7 +212,7 @@ public @interface DirtiesContext {
 		 * at the lowest level in the context hierarchy that is visible from the
 		 * current test.
 		 */
-		CURRENT_LEVEL;
+		CURRENT_LEVEL
 	}
 
 }

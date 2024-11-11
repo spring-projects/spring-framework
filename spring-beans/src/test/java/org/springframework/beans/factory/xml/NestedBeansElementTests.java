@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  */
-public class NestedBeansElementTests {
+class NestedBeansElementTests {
 	private final Resource XML =
 		new ClassPathResource("NestedBeansElementTests-context.xml", this.getClass());
 
 	@Test
-	public void getBean_withoutActiveProfile() {
+	void getBean_withoutActiveProfile() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(XML);
 
@@ -46,11 +46,12 @@ public class NestedBeansElementTests {
 	}
 
 	@Test
-	public void getBean_withActiveProfile() {
+	void getBean_withActiveProfile() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		env.setActiveProfiles("dev");
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAllowBeanDefinitionOverriding(true);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setEnvironment(env);
 		reader.loadBeanDefinitions(XML);

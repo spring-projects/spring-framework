@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class ChannelSendOperatorTests {
 
 
 	@Test
-	void errorBeforeFirstItem() throws Exception {
+	void errorBeforeFirstItem() {
 		IllegalStateException error = new IllegalStateException("boo");
 		Mono<Void> completion = Mono.<String>error(error).as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().block();
@@ -59,7 +59,7 @@ class ChannelSendOperatorTests {
 	}
 
 	@Test
-	void completionBeforeFirstItem() throws Exception {
+	void completionBeforeFirstItem() {
 		Mono<Void> completion = Flux.<String>empty().as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().block();
 
@@ -71,15 +71,14 @@ class ChannelSendOperatorTests {
 	}
 
 	@Test
-	void writeOneItem() throws Exception {
+	void writeOneItem() {
 		Mono<Void> completion = Flux.just("one").as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().block();
 
 		assertThat(signal).isNotNull();
 		assertThat(signal.isOnComplete()).as("Unexpected signal: " + signal).isTrue();
 
-		assertThat(this.writer.items).hasSize(1);
-		assertThat(this.writer.items.get(0)).isEqualTo("one");
+		assertThat(this.writer.items).containsExactly("one");
 		assertThat(this.writer.completed).isTrue();
 	}
 
@@ -93,10 +92,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.isOnComplete()).as("Unexpected signal: " + signal).isTrue();
 
-		assertThat(this.writer.items).hasSize(3);
-		assertThat(this.writer.items.get(0)).isEqualTo("one");
-		assertThat(this.writer.items.get(1)).isEqualTo("two");
-		assertThat(this.writer.items.get(2)).isEqualTo("three");
+		assertThat(this.writer.items).containsExactly("one", "two", "three");
 		assertThat(this.writer.completed).isTrue();
 	}
 
@@ -117,10 +113,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.getThrowable()).as("Unexpected signal: " + signal).isSameAs(error);
 
-		assertThat(this.writer.items).hasSize(3);
-		assertThat(this.writer.items.get(0)).isEqualTo("1");
-		assertThat(this.writer.items.get(1)).isEqualTo("2");
-		assertThat(this.writer.items.get(2)).isEqualTo("3");
+		assertThat(this.writer.items).containsExactly("1", "2", "3");
 		assertThat(this.writer.error).isSameAs(error);
 	}
 
@@ -169,9 +162,9 @@ class ChannelSendOperatorTests {
 					return Mono.never();
 				});
 
-		operator.subscribe(new BaseSubscriber<Void>() {});
+		operator.subscribe(new BaseSubscriber<>() {});
 		try {
-			writeSubscriber.signalDemand(1);  // Let cached signals ("foo" and error) be published..
+			writeSubscriber.signalDemand(1);  // Let cached signals ("foo" and error) be published
 		}
 		catch (Throwable ex) {
 			assertThat(ex.getCause()).isNotNull();
@@ -186,7 +179,7 @@ class ChannelSendOperatorTests {
 
 		// 1. First item received
 		// 2. writeFunction applied and writeCompletionBarrier subscribed to it
-		// 3. writeFunction fails, e.g. to flush status and headers, before request(n) from server
+		// 3. writeFunction fails, for example, to flush status and headers, before request(n) from server
 
 		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
@@ -224,7 +217,7 @@ class ChannelSendOperatorTests {
 	}
 
 
-	private <T> Mono<Void> sendOperator(Publisher<String> source){
+	private Mono<Void> sendOperator(Publisher<String> source){
 		return new ChannelSendOperator<>(source, writer::send);
 	}
 

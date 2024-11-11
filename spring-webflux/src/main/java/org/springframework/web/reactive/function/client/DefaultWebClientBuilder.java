@@ -319,18 +319,14 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				.orElse(null) : null);
 
 		HttpHeaders defaultHeaders = copyDefaultHeaders();
-
 		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
 
-		return new DefaultWebClient(exchange,
-				filterFunctions,
-				initUriBuilderFactory(),
-				defaultHeaders,
-				defaultCookies,
+		return new DefaultWebClient(
+				exchange, filterFunctions,
+				initUriBuilderFactory(), defaultHeaders, defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
-				this.observationRegistry,
-				this.observationConvention,
+				this.observationRegistry, this.observationConvention,
 				new DefaultWebClientBuilder(this));
 	}
 
@@ -374,26 +370,22 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Nullable
 	private HttpHeaders copyDefaultHeaders() {
-		if (this.defaultHeaders != null) {
-			HttpHeaders copy = new HttpHeaders();
-			this.defaultHeaders.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
-			return HttpHeaders.readOnlyHttpHeaders(copy);
-		}
-		else {
+		if (this.defaultHeaders == null) {
 			return null;
 		}
+		HttpHeaders headers = new HttpHeaders();
+		this.defaultHeaders.forEach((key, values) -> headers.put(key, new ArrayList<>(values)));
+		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
 	@Nullable
 	private MultiValueMap<String, String> copyDefaultCookies() {
-		if (this.defaultCookies != null) {
-			MultiValueMap<String, String> copy = new LinkedMultiValueMap<>(this.defaultCookies.size());
-			this.defaultCookies.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
-			return CollectionUtils.unmodifiableMultiValueMap(copy);
-		}
-		else {
+		if (this.defaultCookies == null) {
 			return null;
 		}
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>(this.defaultCookies.size());
+		this.defaultCookies.forEach((key, values) -> map.put(key, new ArrayList<>(values)));
+		return CollectionUtils.unmodifiableMultiValueMap(map);
 	}
 
 }

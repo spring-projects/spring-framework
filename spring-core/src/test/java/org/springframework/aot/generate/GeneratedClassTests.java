@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,14 @@ class GeneratedClassTests {
 		GeneratedClass innerGeneratedClass2 = generatedClass.getOrAdd("Inner", emptyTypeCustomizer);
 		GeneratedClass innerGeneratedClass3 = generatedClass.getOrAdd("Inner", emptyTypeCustomizer);
 		assertThat(innerGeneratedClass).isSameAs(innerGeneratedClass2).isSameAs(innerGeneratedClass3);
+	}
+
+	@Test
+	void generateJavaFileIsAnnotatedWithGenerated() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		assertThat(generatedClass.generateJavaFile().toString())
+				.contains("@Generated")
+				.contains("import " + Generated.class.getName() + ";");
 	}
 
 	@Test

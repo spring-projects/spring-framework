@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class UriTemplateServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
+class UriTemplateServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
 	@SuppressWarnings("unused")
 	static Stream<Boolean> pathPatternsArguments() {
@@ -664,7 +664,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		}
 
 		@Override
-		public View resolveViewName(final String viewName, Locale locale) throws Exception {
+		public View resolveViewName(final String viewName, Locale locale) {
 			return new AbstractView () {
 				@Override
 				public String getContentType() {
@@ -672,7 +672,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 				}
 				@Override
 				protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
-						HttpServletResponse response) throws Exception {
+						HttpServletResponse response) {
 					for (String key : attrsToValidate.keySet()) {
 						assertThat(model.containsKey(key)).as("Model should contain attribute named " + key).isTrue();
 						assertThat(model.get(key)).isEqualTo(attrsToValidate.get(key));

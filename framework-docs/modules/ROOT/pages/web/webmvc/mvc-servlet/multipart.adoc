@@ -32,7 +32,7 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -50,7 +50,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class AppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test fixture for {@link ContentNegotiationConfigurer} tests.
  * @author Rossen Stoyanchev
  */
-public class ContentNegotiationConfigurerTests {
+class ContentNegotiationConfigurerTests {
 
 	private ContentNegotiationConfigurer configurer;
 
@@ -46,7 +46,7 @@ public class ContentNegotiationConfigurerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
 		this.configurer = new ContentNegotiationConfigurer(this.servletRequest.getServletContext());
@@ -54,7 +54,7 @@ public class ContentNegotiationConfigurerTests {
 
 
 	@Test
-	public void defaultSettings() throws Exception {
+	void defaultSettings() throws Exception {
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
 		this.servletRequest.setRequestURI("/flower.gif");
@@ -79,7 +79,7 @@ public class ContentNegotiationConfigurerTests {
 	}
 
 	@Test
-	public void addMediaTypes() throws Exception {
+	void addMediaTypes() throws Exception {
 		this.configurer.favorParameter(true);
 		this.configurer.mediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
@@ -90,7 +90,7 @@ public class ContentNegotiationConfigurerTests {
 	}
 
 	@Test
-	public void favorParameter() throws Exception {
+	void favorParameter() throws Exception {
 		this.configurer.favorParameter(true);
 		this.configurer.parameterName("f");
 		this.configurer.mediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
@@ -99,11 +99,11 @@ public class ContentNegotiationConfigurerTests {
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addParameter("f", "json");
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
-	public void ignoreAcceptHeader() throws Exception {
+	void ignoreAcceptHeader() throws Exception {
 		this.configurer.ignoreAcceptHeader(true);
 		this.configurer.favorParameter(true);
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
@@ -115,15 +115,15 @@ public class ContentNegotiationConfigurerTests {
 	}
 
 	@Test
-	public void setDefaultContentType() throws Exception {
+	void setDefaultContentType() throws Exception {
 		this.configurer.defaultContentType(MediaType.APPLICATION_JSON);
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
-	public void setMultipleDefaultContentTypes() throws Exception {
+	void setMultipleDefaultContentTypes() throws Exception {
 		this.configurer.defaultContentType(MediaType.APPLICATION_JSON, MediaType.ALL);
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
@@ -131,11 +131,11 @@ public class ContentNegotiationConfigurerTests {
 	}
 
 	@Test
-	public void setDefaultContentTypeStrategy() throws Exception {
+	void setDefaultContentTypeStrategy() throws Exception {
 		this.configurer.defaultContentTypeStrategy(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(manager.resolveMediaTypes(this.webRequest)).element(0).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 }

@@ -64,7 +64,7 @@ public class MissingRequestValueException extends ServletRequestBindingException
 
 
 	/**
-	 * Whether the request value was present but converted to {@code null}, e.g. via
+	 * Whether the request value was present but converted to {@code null}, for example, via
 	 * {@code org.springframework.core.convert.support.IdToEntityConverter}.
 	 */
 	public boolean isMissingAfterConversion() {

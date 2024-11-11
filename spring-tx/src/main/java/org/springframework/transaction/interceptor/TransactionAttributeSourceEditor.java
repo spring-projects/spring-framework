@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * {@link TransactionAttributeEditor} in this package.
  *
  * <p>Strings are in property syntax, with the form:<br>
- * {@code FQCN.methodName=<transaction attribute string>}
+ * {@code <fully-qualified class name>.<method-name>=<transaction attribute string>}
  *
  * <p>For example:<br>
  * {@code com.mycompany.mycode.MyClass.myMethod=PROPAGATION_MANDATORY,ISOLATION_DEFAULT}
@@ -39,7 +39,8 @@ import org.springframework.util.StringUtils;
  *
  * <p>Note: Will register all overloaded methods for a given name.
  * Does not support explicit registration of certain overloaded methods.
- * Supports "xxx*" mappings, e.g. "notify*" for "notify" and "notifyAll".
+ * Supports "xxx*" mappings &mdash; for example, "notify*" will match against
+ * "notify" and "notifyAll".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

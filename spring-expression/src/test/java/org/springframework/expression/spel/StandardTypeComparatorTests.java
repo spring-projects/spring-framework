@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.support.StandardTypeComparator;
-import org.springframework.lang.NonNull;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for type comparison
+ * Tests for type comparison
  *
  * @author Andy Clement
  * @author Giovanni Dall'Oglio Risso
  */
-public class StandardTypeComparatorTests {
+class StandardTypeComparatorTests {
 
 	@Test
 	void testPrimitives() throws EvaluationException {
@@ -122,7 +121,7 @@ public class StandardTypeComparatorTests {
 	}
 
 	@Test
-	public void shouldUseCustomComparator() {
+	void shouldUseCustomComparator() {
 		TypeComparator comparator = new StandardTypeComparator();
 		ComparableType t1 = new ComparableType(1);
 		ComparableType t2 = new ComparableType(2);
@@ -134,6 +133,7 @@ public class StandardTypeComparatorTests {
 		assertThat(comparator.compare(t2, t1)).isPositive();
 	}
 
+
 	static class ComparableType implements Comparable<ComparableType> {
 
 		private final int id;
@@ -143,10 +143,9 @@ public class StandardTypeComparatorTests {
 		}
 
 		@Override
-		public int compareTo(@NonNull ComparableType other) {
+		public int compareTo(ComparableType other) {
 			return this.id - other.id;
 		}
-
 	}
 
 }

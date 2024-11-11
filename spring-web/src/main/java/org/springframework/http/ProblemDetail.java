@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Representation for an RFC 7807 problem detail. Includes spec-defined
+ * Representation for an RFC 9457 problem detail. Includes spec-defined
  * properties, and a {@link #getProperties() properties} map for additional,
  * non-standard properties.
  *
@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>For an extended response, an application can also create a subclass with
  * additional properties. Subclasses can use the protected copy constructor to
- * re-create an existing {@code ProblemDetail} instance as the subclass, e.g.
+ * re-create an existing {@code ProblemDetail} instance as the subclass, for example,
  * from an {@code @ControllerAdvice} such as
  * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler} or
  * {@link org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler}.
@@ -45,7 +45,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 6.0
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7807">RFC 7807</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc9457">RFC 9457</a>
  * @see org.springframework.web.ErrorResponse
  * @see org.springframework.web.ErrorResponseException
  */
@@ -301,7 +301,7 @@ public class ProblemDetail {
 	/**
 	 * Create a {@code ProblemDetail} instance with the given status and detail.
 	 */
-	public static ProblemDetail forStatusAndDetail(HttpStatusCode status, String detail) {
+	public static ProblemDetail forStatusAndDetail(HttpStatusCode status, @Nullable String detail) {
 		Assert.notNull(status, "HttpStatusCode is required");
 		ProblemDetail problemDetail = forStatus(status.value());
 		problemDetail.setDetail(detail);

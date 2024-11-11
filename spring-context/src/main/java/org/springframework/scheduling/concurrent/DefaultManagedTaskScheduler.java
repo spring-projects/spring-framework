@@ -28,6 +28,8 @@ import org.springframework.jndi.JndiTemplate;
 /**
  * JNDI-based variant of {@link ConcurrentTaskScheduler}, performing a default lookup for
  * JSR-236's "java:comp/DefaultManagedScheduledExecutorService" in a Jakarta EE environment.
+ * Expected to be exposed as a bean, in particular as the default lookup happens in the
+ * standard {@link InitializingBean#afterPropertiesSet()} callback.
  *
  * <p>Note: This class is not strictly JSR-236 based; it can work with any regular
  * {@link java.util.concurrent.ScheduledExecutorService} that can be found in JNDI.

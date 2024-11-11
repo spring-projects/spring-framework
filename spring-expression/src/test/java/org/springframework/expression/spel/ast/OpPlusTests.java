@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,113 +35,107 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for SpEL's plus operator.
+ * Tests for SpEL's {@link OpPlus} operator.
  *
  * @author Ivo Smid
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.2
- * @see OpPlus
  */
-public class OpPlusTests {
+class OpPlusTests {
+
+	private final ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+
 
 	@Test
-	public void test_emptyOperands() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new OpPlus(-1, -1));
+	void emptyOperands() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new OpPlus(-1, -1));
 	}
 
 	@Test
-	public void test_unaryPlusWithStringLiteral() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+	void unaryPlusWithStringLiteral() {
+		StringLiteral stringLiteral = new StringLiteral("word", -1, -1, "word");
 
-		StringLiteral str = new StringLiteral("word", -1, -1, "word");
-
-		OpPlus o = new OpPlus(-1, -1, str);
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
-				o.getValueInternal(expressionState));
+		OpPlus operator = new OpPlus(-1, -1, stringLiteral);
+		assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> operator.getValueInternal(expressionState));
 	}
 
 	@Test
-	public void test_unaryPlusWithNumberOperand() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+	void unaryPlusWithIntegerOperand() {
+		IntLiteral intLiteral = new IntLiteral("123", -1, -1, 123);
+		OpPlus operator = new OpPlus(-1, -1, intLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
-		{
-			RealLiteral realLiteral = new RealLiteral("123.00", -1, -1, 123.0);
-			OpPlus o = new OpPlus(-1, -1, realLiteral);
-			TypedValue value = o.getValueInternal(expressionState);
-
-			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Double.class);
-			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Double.class);
-			assertThat(value.getValue()).isEqualTo(realLiteral.getLiteralValue().getValue());
-		}
-
-		{
-			IntLiteral intLiteral = new IntLiteral("123", -1, -1, 123);
-			OpPlus o = new OpPlus(-1, -1, intLiteral);
-			TypedValue value = o.getValueInternal(expressionState);
-
-			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Integer.class);
-			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
-			assertThat(value.getValue()).isEqualTo(intLiteral.getLiteralValue().getValue());
-		}
-
-		{
-			LongLiteral longLiteral = new LongLiteral("123", -1, -1, 123L);
-			OpPlus o = new OpPlus(-1, -1, longLiteral);
-			TypedValue value = o.getValueInternal(expressionState);
-
-			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Long.class);
-			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Long.class);
-			assertThat(value.getValue()).isEqualTo(longLiteral.getLiteralValue().getValue());
-		}
+		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Integer.class);
+		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
+		assertThat(value.getValue()).isEqualTo(intLiteral.getLiteralValue().getValue());
 	}
 
 	@Test
-	public void test_binaryPlusWithNumberOperands() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+	void unaryPlusWithLongOperand() {
+		LongLiteral longLiteral = new LongLiteral("123", -1, -1, 123L);
+		OpPlus operator = new OpPlus(-1, -1, longLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
-		{
-			RealLiteral n1 = new RealLiteral("123.00", -1, -1, 123.0);
-			RealLiteral n2 = new RealLiteral("456.00", -1, -1, 456.0);
-			OpPlus o = new OpPlus(-1, -1, n1, n2);
-			TypedValue value = o.getValueInternal(expressionState);
-
-			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Double.class);
-			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Double.class);
-			assertThat(value.getValue()).isEqualTo(123.0 + 456.0);
-		}
-
-		{
-			LongLiteral n1 = new LongLiteral("123", -1, -1, 123L);
-			LongLiteral n2 = new LongLiteral("456", -1, -1, 456L);
-			OpPlus o = new OpPlus(-1, -1, n1, n2);
-			TypedValue value = o.getValueInternal(expressionState);
-
-			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Long.class);
-			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Long.class);
-			assertThat(value.getValue()).isEqualTo(123L + 456L);
-		}
-
-		{
-			IntLiteral n1 = new IntLiteral("123", -1, -1, 123);
-			IntLiteral n2 = new IntLiteral("456", -1, -1, 456);
-			OpPlus o = new OpPlus(-1, -1, n1, n2);
-			TypedValue value = o.getValueInternal(expressionState);
-
-			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Integer.class);
-			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
-			assertThat(value.getValue()).isEqualTo(123 + 456);
-		}
+		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Long.class);
+		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Long.class);
+		assertThat(value.getValue()).isEqualTo(longLiteral.getLiteralValue().getValue());
 	}
 
 	@Test
-	public void test_binaryPlusWithStringOperands() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+	void unaryPlusWithRealOperand() {
+		RealLiteral realLiteral = new RealLiteral("123.00", -1, -1, 123.0);
+		OpPlus operator = new OpPlus(-1, -1, realLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
-		StringLiteral n1 = new StringLiteral("\"foo\"", -1, -1, "\"foo\"");
-		StringLiteral n2 = new StringLiteral("\"bar\"", -1, -1, "\"bar\"");
-		OpPlus o = new OpPlus(-1, -1, n1, n2);
-		TypedValue value = o.getValueInternal(expressionState);
+		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Double.class);
+		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Double.class);
+		assertThat(value.getValue()).isEqualTo(realLiteral.getLiteralValue().getValue());
+	}
+
+	@Test
+	void binaryPlusWithIntegerOperands() {
+		IntLiteral n1 = new IntLiteral("123", -1, -1, 123);
+		IntLiteral n2 = new IntLiteral("456", -1, -1, 456);
+		OpPlus operator = new OpPlus(-1, -1, n1, n2);
+		TypedValue value = operator.getValueInternal(expressionState);
+
+		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Integer.class);
+		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
+		assertThat(value.getValue()).isEqualTo(123 + 456);
+	}
+
+	@Test
+	void binaryPlusWithLongOperands() {
+		LongLiteral n1 = new LongLiteral("123", -1, -1, 123L);
+		LongLiteral n2 = new LongLiteral("456", -1, -1, 456L);
+		OpPlus operator = new OpPlus(-1, -1, n1, n2);
+		TypedValue value = operator.getValueInternal(expressionState);
+
+		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Long.class);
+		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Long.class);
+		assertThat(value.getValue()).isEqualTo(123L + 456L);
+	}
+
+	@Test
+	void binaryPlusWithRealOperands() {
+		RealLiteral n1 = new RealLiteral("123.00", -1, -1, 123.0);
+		RealLiteral n2 = new RealLiteral("456.00", -1, -1, 456.0);
+		OpPlus operator = new OpPlus(-1, -1, n1, n2);
+		TypedValue value = operator.getValueInternal(expressionState);
+
+		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Double.class);
+		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Double.class);
+		assertThat(value.getValue()).isEqualTo(123.0 + 456.0);
+	}
+
+	@Test
+	void binaryPlusWithStringOperands() {
+		StringLiteral str1 = new StringLiteral("\"foo\"", -1, -1, "\"foo\"");
+		StringLiteral str2 = new StringLiteral("\"bar\"", -1, -1, "\"bar\"");
+		OpPlus operator = new OpPlus(-1, -1, str1, str2);
+		TypedValue value = operator.getValueInternal(expressionState);
 
 		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(String.class);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(String.class);
@@ -149,13 +143,11 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithLeftStringOperand() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
-
-		StringLiteral n1 = new StringLiteral("\"number is \"", -1, -1, "\"number is \"");
-		LongLiteral n2 = new LongLiteral("123", -1, -1, 123);
-		OpPlus o = new OpPlus(-1, -1, n1, n2);
-		TypedValue value = o.getValueInternal(expressionState);
+	void binaryPlusWithLeftStringOperand() {
+		StringLiteral stringLiteral = new StringLiteral("\"number is \"", -1, -1, "\"number is \"");
+		LongLiteral longLiteral = new LongLiteral("123", -1, -1, 123);
+		OpPlus operator = new OpPlus(-1, -1, stringLiteral, longLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
 		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(String.class);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(String.class);
@@ -163,13 +155,11 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithRightStringOperand() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
-
-		LongLiteral n1 = new LongLiteral("123", -1, -1, 123);
-		StringLiteral n2 = new StringLiteral("\" is a number\"", -1, -1, "\" is a number\"");
-		OpPlus o = new OpPlus(-1, -1, n1, n2);
-		TypedValue value = o.getValueInternal(expressionState);
+	void binaryPlusWithRightStringOperand() {
+		LongLiteral longLiteral = new LongLiteral("123", -1, -1, 123);
+		StringLiteral stringLiteral = new StringLiteral("\" is a number\"", -1, -1, "\" is a number\"");
+		OpPlus operator = new OpPlus(-1, -1, longLiteral, stringLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
 		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(String.class);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(String.class);
@@ -177,24 +167,23 @@ public class OpPlusTests {
 	}
 
 	@Test
-	public void test_binaryPlusWithTime_ToString() {
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
+	void binaryPlusWithSqlTimeToString() {
 		Time time = new Time(new Date().getTime());
 
 		VariableReference var = new VariableReference("timeVar", -1, -1);
 		var.setValue(expressionState, time);
 
-		StringLiteral n2 = new StringLiteral("\" is now\"", -1, -1, "\" is now\"");
-		OpPlus o = new OpPlus(-1, -1, var, n2);
-		TypedValue value = o.getValueInternal(expressionState);
+		StringLiteral stringLiteral = new StringLiteral("\" is now\"", -1, -1, "\" is now\"");
+		OpPlus operator = new OpPlus(-1, -1, var, stringLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
 		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(String.class);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(String.class);
-		assertThat(value.getValue()).isEqualTo((time + " is now"));
+		assertThat(value.getValue()).isEqualTo(time + " is now");
 	}
 
 	@Test
-	public void test_binaryPlusWithTimeConverted() {
+	void binaryPlusWithTimeConverted() {
 		SimpleDateFormat format = new SimpleDateFormat("hh :--: mm :--: ss", Locale.ENGLISH);
 
 		GenericConversionService conversionService = new GenericConversionService();
@@ -209,13 +198,13 @@ public class OpPlusTests {
 		VariableReference var = new VariableReference("timeVar", -1, -1);
 		var.setValue(expressionState, time);
 
-		StringLiteral n2 = new StringLiteral("\" is now\"", -1, -1, "\" is now\"");
-		OpPlus o = new OpPlus(-1, -1, var, n2);
-		TypedValue value = o.getValueInternal(expressionState);
+		StringLiteral stringLiteral = new StringLiteral("\" is now\"", -1, -1, "\" is now\"");
+		OpPlus operator = new OpPlus(-1, -1, var, stringLiteral);
+		TypedValue value = operator.getValueInternal(expressionState);
 
 		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(String.class);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(String.class);
-		assertThat(value.getValue()).isEqualTo((format.format(time) + " is now"));
+		assertThat(value.getValue()).isEqualTo(format.format(time) + " is now");
 	}
 
 }

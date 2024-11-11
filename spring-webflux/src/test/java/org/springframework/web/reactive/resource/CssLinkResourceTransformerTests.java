@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
- * Unit tests for {@link CssLinkResourceTransformer}.
+ * Tests for {@link CssLinkResourceTransformer}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -165,7 +165,7 @@ class CssLinkResourceTransformerTests {
 	}
 
 	@Test // https://github.com/spring-projects/spring-framework/issues/22602
-	void transformEmptyUrlFunction() throws Exception {
+	void transformEmptyUrlFunction() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/empty_url_function.css"));
 		Resource css = getResource("empty_url_function.css");
 		String expected = """

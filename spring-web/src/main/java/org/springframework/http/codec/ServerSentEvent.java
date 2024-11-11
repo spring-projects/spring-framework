@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.codec;
 import java.time.Duration;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.
@@ -103,14 +104,29 @@ public final class ServerSentEvent<T> {
 
 
 	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ServerSentEvent<?> that &&
+				ObjectUtils.nullSafeEquals(this.id, that.id) &&
+				ObjectUtils.nullSafeEquals(this.event, that.event) &&
+				ObjectUtils.nullSafeEquals(this.retry, that.retry) &&
+				ObjectUtils.nullSafeEquals(this.comment, that.comment) &&
+				ObjectUtils.nullSafeEquals(this.data, that.data)));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHash(this.id, this.event, this.retry, this.comment, this.data);
+	}
+
+	@Override
 	public String toString() {
-		return ("ServerSentEvent [id = '" + this.id + "\', event='" + this.event + "\', retry=" +
+		return ("ServerSentEvent [id = '" + this.id + "', event='" + this.event + "', retry=" +
 				this.retry + ", comment='" + this.comment + "', data=" + this.data + ']');
 	}
 
 
 	/**
-	 * Return a builder for a {@code SseEvent}.
+	 * Return a builder for a {@code ServerSentEvent}.
 	 * @param <T> the type of data that this event contains
 	 * @return the builder
 	 */
@@ -119,7 +135,7 @@ public final class ServerSentEvent<T> {
 	}
 
 	/**
-	 * Return a builder for a {@code SseEvent}, populated with the given {@linkplain #data() data}.
+	 * Return a builder for a {@code ServerSentEvent}, populated with the given {@linkplain #data() data}.
 	 * @param <T> the type of data that this event contains
 	 * @return the builder
 	 */
@@ -129,7 +145,7 @@ public final class ServerSentEvent<T> {
 
 
 	/**
-	 * A mutable builder for a {@code SseEvent}.
+	 * A mutable builder for a {@code ServerSentEvent}.
 	 *
 	 * @param <T> the type of data that this event contains
 	 */

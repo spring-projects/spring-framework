@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -64,6 +66,11 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		@Override
 		public HttpHeaders getHeaders() {
 			return HttpHeaders.EMPTY;
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			return Collections.emptyMap();
 		}
 	};
 
@@ -137,10 +144,10 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			this.headers = HttpHeaders.writableHttpHeaders(this.originalResponse.headers().asHttpHeaders());
+			this.headers = new HttpHeaders(this.originalResponse.headers().asHttpHeaders());
 		}
 		return this.headers;
 	}
@@ -159,7 +166,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private MultiValueMap<String, ResponseCookie> getCookies() {
 		if (this.cookies == null) {
 			this.cookies = new LinkedMultiValueMap<>(this.originalResponse.cookies());
@@ -212,7 +219,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		return new DefaultClientResponse(httpResponse, this.strategies,
 				this.originalResponse != null ? this.originalResponse.logPrefix() : "",
-				this.request.getMethod() + " " + this.request.getURI(),
+				WebClientUtils.getRequestDescription(this.request.getMethod(), this.request.getURI()),
 				() -> this.request);
 	}
 
@@ -256,13 +263,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		}
 
 		@Override
-		@SuppressWarnings("ConstantConditions")
+		@SuppressWarnings({"ConstantConditions", "NullAway"})
 		public HttpHeaders getHeaders() {
 			return (this.headers != null ? this.headers : this.originalResponse.headers().asHttpHeaders());
 		}
 
 		@Override
-		@SuppressWarnings("ConstantConditions")
+		@SuppressWarnings({"ConstantConditions", "NullAway"})
 		public MultiValueMap<String, ResponseCookie> getCookies() {
 			return (this.cookies != null ? this.cookies : this.originalResponse.cookies());
 		}

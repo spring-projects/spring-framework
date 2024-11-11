@@ -79,7 +79,7 @@ public sealed interface HttpStatusCode extends Serializable permits DefaultHttpS
 	/**
 	 * Whether this {@code HttpStatusCode} shares the same integer {@link #value() value} as the other status code.
 	 * <p>Useful for comparisons that take deprecated aliases into account or compare arbitrary implementations
-	 * of {@code HttpStatusCode} (e.g. in place of {@link HttpStatus#equals(Object) HttpStatus enum equality}).
+	 * of {@code HttpStatusCode} (for example, in place of {@link HttpStatus#equals(Object) HttpStatus enum equality}).
 	 * @param other the other {@code HttpStatusCode} to compare
 	 * @return true if the two {@code HttpStatusCode} objects share the same integer {@code value()}, false otherwise
 	 * @since 6.0.5

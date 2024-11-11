@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class GsonFactoryBeanTests {
 
 
 	@Test
-	void serializeNulls() throws Exception {
+	void serializeNulls() {
 		this.factory.setSerializeNulls(true);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -47,7 +47,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void serializeNullsFalse() throws Exception {
+	void serializeNullsFalse() {
 		this.factory.setSerializeNulls(false);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -57,7 +57,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void prettyPrinting() throws Exception {
+	void prettyPrinting() {
 		this.factory.setPrettyPrinting(true);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -67,7 +67,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void prettyPrintingFalse() throws Exception {
+	void prettyPrintingFalse() {
 		this.factory.setPrettyPrinting(false);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -78,7 +78,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void disableHtmlEscaping() throws Exception {
+	void disableHtmlEscaping() {
 		this.factory.setDisableHtmlEscaping(true);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -89,7 +89,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void disableHtmlEscapingFalse() throws Exception {
+	void disableHtmlEscapingFalse() {
 		this.factory.setDisableHtmlEscaping(false);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -100,7 +100,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void customizeDateFormatPattern() throws Exception {
+	void customizeDateFormatPattern() {
 		this.factory.setDateFormatPattern(DATE_FORMAT);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -117,7 +117,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void customizeDateFormatNone() throws Exception {
+	void customizeDateFormatNone() {
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
 		DateBean bean = new DateBean();
@@ -128,13 +128,14 @@ class GsonFactoryBeanTests {
 		cal.set(Calendar.DATE, 1);
 		Date date = cal.getTime();
 		bean.setDate(date);
+		// \p{Zs} matches any Unicode space character
 		assertThat(gson.toJson(bean))
 				.startsWith("{\"date\":\"Jan 1, 2014")
-				.endsWith("12:00:00 AM\"}");
+				.matches(".+?12:00:00\\p{Zs}AM\"}");
 	}
 
 	@Test
-	void base64EncodeByteArrays() throws Exception {
+	void base64EncodeByteArrays() {
 		this.factory.setBase64EncodeByteArrays(true);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();
@@ -145,7 +146,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void base64EncodeByteArraysDisableHtmlEscaping() throws Exception {
+	void base64EncodeByteArraysDisableHtmlEscaping() {
 		this.factory.setBase64EncodeByteArrays(true);
 		this.factory.setDisableHtmlEscaping(true);
 		this.factory.afterPropertiesSet();
@@ -157,7 +158,7 @@ class GsonFactoryBeanTests {
 	}
 
 	@Test
-	void base64EncodeByteArraysFalse() throws Exception {
+	void base64EncodeByteArraysFalse() {
 		this.factory.setBase64EncodeByteArrays(false);
 		this.factory.afterPropertiesSet();
 		Gson gson = this.factory.getObject();

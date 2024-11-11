@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,8 +86,7 @@ public final class CachedIntrospectionResults {
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
-	static final Set<ClassLoader> acceptedClassLoaders =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	static final Set<ClassLoader> acceptedClassLoaders = ConcurrentHashMap.newKeySet(16);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
@@ -109,7 +107,7 @@ public final class CachedIntrospectionResults {
 	 * Accept the given ClassLoader as cache-safe, even if its classes would
 	 * not qualify as cache-safe in this CachedIntrospectionResults class.
 	 * <p>This configuration method is only relevant in scenarios where the Spring
-	 * classes reside in a 'common' ClassLoader (e.g. the system ClassLoader)
+	 * classes reside in a 'common' ClassLoader (for example, the system ClassLoader)
 	 * whose lifecycle is not coupled to the application. In such a scenario,
 	 * CachedIntrospectionResults would by default not cache any of the application's
 	 * classes, since they would create a leak in the common ClassLoader.
@@ -292,7 +290,7 @@ public final class CachedIntrospectionResults {
 				currClass = currClass.getSuperclass();
 			}
 
-			// Check for record-style accessors without prefix: e.g. "lastName()"
+			// Check for record-style accessors without prefix: for example, "lastName()"
 			// - accessor method directly referring to instance field of same name
 			// - same convention for component accessors of Java 15 record classes
 			introspectPlainAccessors(beanClass, readMethodNames);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/index");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -63,7 +63,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/index.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -72,7 +72,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/index;a=A;b=B");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -83,7 +83,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/index.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("mypre_index_mysuf");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -93,7 +93,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/index.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("mypre_index");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -103,7 +103,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/index.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index_mysuf");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -112,7 +112,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/docs/cvs/commit.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -122,7 +122,7 @@ class UrlFilenameViewControllerTests {
 		exposePathInMapping(request, "/docs/**");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("cvs/commit");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -132,7 +132,7 @@ class UrlFilenameViewControllerTests {
 		exposePathInMapping(request, "/docs/cvs/commit.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest
@@ -143,7 +143,7 @@ class UrlFilenameViewControllerTests {
 		ServletRequestPathUtils.parseAndCache(request);
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@Test
@@ -170,9 +170,8 @@ class UrlFilenameViewControllerTests {
 
 	/**
 	 * This is the expected behavior, and it now has a test to prove it.
-	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2789
 	 */
-	@PathPatternsParameterizedTest
+	@PathPatternsParameterizedTest // SPR-2789
 	void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line(
 			Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 
@@ -180,7 +179,7 @@ class UrlFilenameViewControllerTests {
 		MockHttpServletRequest request = requestFactory.apply("/products/view.html");
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("products/view");
-		assertThat(mv.getModel().isEmpty()).isTrue();
+		assertThat(mv.getModel()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,18 +38,18 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Test fixture for {@link HeadersMethodArgumentResolver} tests.
  * @author Rossen Stoyanchev
  */
-public class HeadersMethodArgumentResolverTests {
+class HeadersMethodArgumentResolverTests {
 
 	private final HeadersMethodArgumentResolver resolver = new HeadersMethodArgumentResolver();
 
-	private Message<byte[]> message =
+	private final Message<byte[]> message =
 			MessageBuilder.withPayload(new byte[0]).copyHeaders(Collections.singletonMap("foo", "bar")).build();
 
 	private final ResolvableMethod resolvable = ResolvableMethod.on(getClass()).named("handleMessage").build();
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 
 		assertThat(this.resolver.supportsParameter(
 				this.resolvable.annotPresent(Headers.class).arg(Map.class, String.class, Object.class))).isTrue();
@@ -62,33 +62,32 @@ public class HeadersMethodArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void resolveArgumentAnnotated() {
+	void resolveArgumentAnnotated() {
 		MethodParameter param = this.resolvable.annotPresent(Headers.class).arg(Map.class, String.class, Object.class);
 		Map<String, Object> headers = resolveArgument(param);
 		assertThat(headers.get("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	public void resolveArgumentAnnotatedNotMap() {
+	void resolveArgumentAnnotatedNotMap() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				resolveArgument(this.resolvable.annotPresent(Headers.class).arg(String.class)));
 	}
 
 	@Test
-	public void resolveArgumentMessageHeaders() {
+	void resolveArgumentMessageHeaders() {
 		MessageHeaders headers = resolveArgument(this.resolvable.arg(MessageHeaders.class));
 		assertThat(headers.get("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	public void resolveArgumentMessageHeaderAccessor() {
+	void resolveArgumentMessageHeaderAccessor() {
 		MessageHeaderAccessor headers = resolveArgument(this.resolvable.arg(MessageHeaderAccessor.class));
 		assertThat(headers.getHeader("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	public void resolveArgumentMessageHeaderAccessorSubclass() {
+	void resolveArgumentMessageHeaderAccessorSubclass() {
 		TestMessageHeaderAccessor headers = resolveArgument(this.resolvable.arg(TestMessageHeaderAccessor.class));
 		assertThat(headers.getHeader("foo")).isEqualTo("bar");
 	}

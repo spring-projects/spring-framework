@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,17 +32,20 @@ import jakarta.persistence.PersistenceException;
 
 import org.springframework.context.index.CandidateComponentsIndex;
 import org.springframework.context.index.CandidateComponentsIndexLoader;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.ClassFormatException;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -59,7 +61,12 @@ public final class PersistenceManagedTypesScanner {
 
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
-	private static final Set<AnnotationTypeFilter> entityTypeFilters = new LinkedHashSet<>(4);
+	private static final String IGNORE_CLASSFORMAT_PROPERTY_NAME = "spring.classformat.ignore";
+
+	private static final boolean shouldIgnoreClassFormatException =
+			SpringProperties.getFlag(IGNORE_CLASSFORMAT_PROPERTY_NAME);
+
+	private static final Set<AnnotationTypeFilter> entityTypeFilters = CollectionUtils.newLinkedHashSet(4);
 
 	static {
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
@@ -73,11 +80,31 @@ public final class PersistenceManagedTypesScanner {
 	@Nullable
 	private final CandidateComponentsIndex componentsIndex;
 
+	private final ManagedClassNameFilter managedClassNameFilter;
 
+
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 */
 	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
+		this(resourceLoader, null);
+	}
+
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 * @param managedClassNameFilter an optional predicate to filter entity classes
+	 * @since 6.1.4
+	 */
+	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader,
+			@Nullable ManagedClassNameFilter managedClassNameFilter) {
+
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
+		this.managedClassNameFilter = (managedClassNameFilter != null ? managedClassNameFilter : className -> true);
 	}
+
 
 	/**
 	 * Scan the specified packages and return a {@link PersistenceManagedTypes} that
@@ -99,7 +126,7 @@ public final class PersistenceManagedTypesScanner {
 			for (AnnotationTypeFilter filter : entityTypeFilters) {
 				candidates.addAll(this.componentsIndex.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
 			}
-			scanResult.managedClassNames.addAll(candidates);
+			scanResult.managedClassNames.addAll(candidates.stream().filter(this.managedClassNameFilter::matches).toList());
 			scanResult.managedPackages.addAll(this.componentsIndex.getCandidateTypes(pkg, "package-info"));
 			return;
 		}
@@ -108,12 +135,12 @@ public final class PersistenceManagedTypesScanner {
 			String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
 			Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+			MetadataReaderFactory factory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 			for (Resource resource : resources) {
 				try {
-					MetadataReader reader = readerFactory.getMetadataReader(resource);
+					MetadataReader reader = factory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
-					if (matchesFilter(reader, readerFactory)) {
+					if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
 						scanResult.managedClassNames.add(className);
 						if (scanResult.persistenceUnitRootUrl == null) {
 							URL url = resource.getURL();
@@ -130,6 +157,14 @@ public final class PersistenceManagedTypesScanner {
 				catch (FileNotFoundException ex) {
 					// Ignore non-readable resource
 				}
+				catch (ClassFormatException ex) {
+					if (!shouldIgnoreClassFormatException) {
+						throw new PersistenceException("Incompatible class format in " + resource, ex);
+					}
+				}
+				catch (Throwable ex) {
+					throw new PersistenceException("Failed to read candidate component class: " + resource, ex);
+				}
 			}
 		}
 		catch (IOException ex) {
@@ -141,14 +176,15 @@ public final class PersistenceManagedTypesScanner {
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
 	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
+	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory factory) throws IOException {
 		for (TypeFilter filter : entityTypeFilters) {
-			if (filter.match(reader, readerFactory)) {
+			if (filter.match(reader, factory)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
 
 	private static class ScanResult {
 
@@ -163,6 +199,6 @@ public final class PersistenceManagedTypesScanner {
 			return new SimplePersistenceManagedTypes(this.managedClassNames,
 					this.managedPackages, this.persistenceUnitRootUrl);
 		}
-
 	}
+
 }

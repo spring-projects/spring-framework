@@ -112,7 +112,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 
 	/**
 	 * This implementation delegates to {@code ServletContext.getResourceAsStream},
-	 * which returns {@code null} in case of a non-readable resource (e.g. a directory).
+	 * which returns {@code null} in case of a non-readable resource (for example, a directory).
 	 * @see jakarta.servlet.ServletContext#getResourceAsStream(String)
 	 */
 	@Override

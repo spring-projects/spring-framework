@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * "useNewConnection" property to false. In this case you <i>MUST</i> use a non-transactional
  * storage engine like MYISAM when defining the incrementer table.
  *
- * <p>As of Spring Framework 5.3.7, {@code MySQLMaxValueIncrementer} is compatible with
+ * <p>Note that {@code MySQLMaxValueIncrementer} is compatible with
  * <a href="https://dev.mysql.com/doc/refman/8.0/en/mysql-tips.html#safe-updates">MySQL safe updates mode</a>.
  *
  * @author Jean-Pierre Pawlak
@@ -104,7 +104,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 	 * {@code false} is sufficient if the storage engine of the sequence table
 	 * is non-transactional (like MYISAM), avoiding the effort of acquiring an
 	 * extra {@code Connection} for the increment operation.
-	 * <p>Default is {@code true} since Spring Framework 5.0.
+	 * <p>Default is {@code true}.
 	 * @since 4.3.6
 	 * @see DataSource#getConnection()
 	 */

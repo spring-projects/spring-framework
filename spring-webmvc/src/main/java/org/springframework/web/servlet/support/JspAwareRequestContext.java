@@ -95,6 +95,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * request, session or application scope; if not found, returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	protected TimeZone getFallbackTimeZone() {
 		if (jstlPresent) {
 			TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());

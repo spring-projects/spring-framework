@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class WildcardPathElement extends PathElement {
 				}
 				else {
 					return (matchingContext.isMatchOptionalTrailingSeparator() &&  // if optional slash is on...
-							segmentData != null && segmentData.length() > 0 &&  // and there is at least one character to match the *...
+							segmentData != null && !segmentData.isEmpty() &&  // and there is at least one character to match the *...
 							(pathIndex + 1) == matchingContext.pathLength &&   // and the next path element is the end of the candidate...
 							matchingContext.isSeparator(pathIndex));  // and the final element is a separator
 				}
@@ -74,7 +74,7 @@ class WildcardPathElement extends PathElement {
 		}
 		else {
 			// Within a path (e.g. /aa/*/bb) there must be at least one character to match the wildcard
-			if (segmentData == null || segmentData.length() == 0) {
+			if (segmentData == null || segmentData.isEmpty()) {
 				return false;
 			}
 			return (this.next != null && this.next.matches(pathIndex, matchingContext));

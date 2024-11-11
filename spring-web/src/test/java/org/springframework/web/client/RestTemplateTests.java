@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -50,6 +51,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -73,7 +75,7 @@ import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.parseMediaType;
 
 /**
- * Unit tests for {@link RestTemplate}.
+ * Tests for {@link RestTemplate}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -105,7 +107,6 @@ class RestTemplateTests {
 
 	@Test // gh-29008
 	void defaultMessageConvertersWithKotlinSerialization() {
-		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
 		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(
@@ -127,7 +128,7 @@ class RestTemplateTests {
 	@Test
 	void setMessageConvertersPreconditions() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> template.setMessageConverters((List<HttpMessageConverter<?>>) null))
+				.isThrownBy(() -> template.setMessageConverters(null))
 				.withMessage("At least one HttpMessageConverter is required");
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> template.setMessageConverters(Arrays.asList(null, this.converter)))
@@ -524,9 +525,7 @@ class RestTemplateTests {
 					.map(Entry::getValue)
 					.toList();
 
-			assertThat(accepts).hasSize(1);
-			assertThat(accepts.get(0)).hasSize(1);
-			assertThat(accepts.get(0).get(0)).isEqualTo("application/json");
+			assertThat(accepts).singleElement().isEqualTo(List.of("application/json"));
 		}
 	}
 
@@ -655,7 +654,7 @@ class RestTemplateTests {
 	@SuppressWarnings("rawtypes")
 	void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock();
-		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
+		template.setMessageConverters(Collections.singletonList(converter));
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -672,6 +671,41 @@ class RestTemplateTests {
 		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
 		given(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(converter.read(eq(intList.getType()), eq(null), any(HttpInputMessage.class))).willReturn(expected);
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.set("MyHeader", "MyValue");
+		HttpEntity<String> requestEntity = new HttpEntity<>("Hello World", entityHeaders);
+		ResponseEntity<List<Integer>> result = template.exchange("https://example.com", POST, requestEntity, intList);
+		assertThat(result.getBody()).as("Invalid POST result").isEqualTo(expected);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(requestHeaders.getFirst("MyHeader")).as("Invalid custom header").isEqualTo("MyValue");
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
+
+		verify(response).close();
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	void exchangeParameterizedTypeWithSmartConverter() throws Exception {
+		SmartHttpMessageConverter converter = mock();
+		template.setMessageConverters(Collections.singletonList(converter));
+		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
+		given(converter.canRead(ResolvableType.forType(intList.getType()), null)).willReturn(true);
+		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(converter.canWrite(ResolvableType.forClass(String.class), String.class, null)).willReturn(true);
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(POST, "https://example.com", requestHeaders);
+		List<Integer> expected = Collections.singletonList(42);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
+		responseHeaders.setContentLength(10);
+		mockResponseStatus(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
+		given(converter.canRead(ResolvableType.forType(intList.getType()), MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(ResolvableType.forType(intList.getType())), any(HttpInputMessage.class), eq(null))).willReturn(expected);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
@@ -766,12 +800,11 @@ class RestTemplateTests {
 		given(request.getHeaders()).willReturn(requestHeaders);
 	}
 
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());
 		given(response.getStatusCode()).willReturn(responseStatus);
-		given(response.getRawStatusCode()).willReturn(responseStatus.value());
 		given(response.getStatusText()).willReturn(responseStatus.getReasonPhrase());
 	}
 

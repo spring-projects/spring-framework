@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.config;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
@@ -70,13 +69,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  */
-public class HandlersBeanDefinitionParserTests {
+class HandlersBeanDefinitionParserTests {
 
 	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 
 	@Test
-	public void webSocketHandlers() {
+	void webSocketHandlers() {
 		loadBeanDefinitions("websocket-config-handlers.xml");
 
 		Map<String, HandlerMapping> handlersMap = this.appContext.getBeansOfType(HandlerMapping.class);
@@ -88,7 +87,7 @@ public class HandlersBeanDefinitionParserTests {
 			assertThat(condition2).isTrue();
 			SimpleUrlHandlerMapping shm = (SimpleUrlHandlerMapping) hm;
 
-			if (shm.getUrlMap().keySet().contains("/foo")) {
+			if (shm.getUrlMap().containsKey("/foo")) {
 				assertThat(shm.getUrlMap()).containsOnlyKeys("/foo", "/bar");
 				WebSocketHttpRequestHandler handler = (WebSocketHttpRequestHandler) shm.getUrlMap().get("/foo");
 				assertThat(handler).isNotNull();
@@ -97,7 +96,7 @@ public class HandlersBeanDefinitionParserTests {
 				assertThat(handshakeHandler).isNotNull();
 				boolean condition1 = handshakeHandler instanceof DefaultHandshakeHandler;
 				assertThat(condition1).isTrue();
-				assertThat(handler.getHandshakeInterceptors().isEmpty()).isFalse();
+				assertThat(handler.getHandshakeInterceptors()).isNotEmpty();
 				boolean condition = handler.getHandshakeInterceptors().get(0) instanceof OriginHandshakeInterceptor;
 				assertThat(condition).isTrue();
 			}
@@ -110,7 +109,7 @@ public class HandlersBeanDefinitionParserTests {
 				assertThat(handshakeHandler).isNotNull();
 				boolean condition1 = handshakeHandler instanceof DefaultHandshakeHandler;
 				assertThat(condition1).isTrue();
-				assertThat(handler.getHandshakeInterceptors().isEmpty()).isFalse();
+				assertThat(handler.getHandshakeInterceptors()).isNotEmpty();
 				boolean condition = handler.getHandshakeInterceptors().get(0) instanceof OriginHandshakeInterceptor;
 				assertThat(condition).isTrue();
 			}
@@ -118,7 +117,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void webSocketHandlersAttributes() {
+	void webSocketHandlersAttributes() {
 		loadBeanDefinitions("websocket-config-handlers-attributes.xml");
 
 		HandlerMapping handlerMapping = this.appContext.getBean(HandlerMapping.class);
@@ -153,7 +152,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void sockJs() {
+	void sockJs() {
 		loadBeanDefinitions("websocket-config-handlers-sockjs.xml");
 
 		SimpleUrlHandlerMapping handlerMapping = this.appContext.getBean(SimpleUrlHandlerMapping.class);
@@ -196,7 +195,7 @@ public class HandlersBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void sockJsAttributes() {
+	void sockJsAttributes() {
 		loadBeanDefinitions("websocket-config-handlers-sockjs-attributes.xml");
 
 		SimpleUrlHandlerMapping handlerMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
@@ -243,7 +242,7 @@ public class HandlersBeanDefinitionParserTests {
 		if (handler instanceof WebSocketHandlerDecorator) {
 			handler = ((WebSocketHandlerDecorator) handler).getLastHandler();
 		}
-		assertThat(handlerClass.isInstance(handler)).isTrue();
+		assertThat(handler).isInstanceOf(handlerClass);
 	}
 }
 
@@ -312,36 +311,36 @@ class BarTestInterceptor extends FooTestInterceptor {
 }
 
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings("rawtypes")
 class TestTaskScheduler implements TaskScheduler {
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
+	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Instant startTime) {
+	public ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
 		return null;
 	}
 }
@@ -355,12 +354,12 @@ class TestMessageCodec implements SockJsMessageCodec {
 	}
 
 	@Override
-	public String[] decode(String content) throws IOException {
+	public String[] decode(String content) {
 		return new String[0];
 	}
 
 	@Override
-	public String[] decodeInputStream(InputStream content) throws IOException {
+	public String[] decodeInputStream(InputStream content) {
 		return new String[0];
 	}
 }

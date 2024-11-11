@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.asm.Opcodes;
 import org.springframework.expression.PropertyAccessor;
 
 /**
- * A compilable property accessor is able to generate bytecode that represents
+ * A compilable {@link PropertyAccessor} is able to generate bytecode that represents
  * the access operation, facilitating compilation to bytecode of expressions
  * that use the accessor.
  *
@@ -41,12 +41,13 @@ public interface CompilablePropertyAccessor extends PropertyAccessor, Opcodes {
 	Class<?> getPropertyType();
 
 	/**
-	 * Generate the bytecode the performs the access operation into the specified MethodVisitor
-	 * using context information from the codeflow where necessary.
+	 * Generate the bytecode that performs the access operation into the specified
+	 * {@link MethodVisitor} using context information from the {@link CodeFlow}
+	 * where necessary.
 	 * @param propertyName the name of the property
-	 * @param mv the Asm method visitor into which code should be generated
-	 * @param cf the current state of the expression compiler
+	 * @param methodVisitor the ASM method visitor into which code should be generated
+	 * @param codeFlow the current state of the expression compiler
 	 */
-	void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf);
+	void generateCode(String propertyName, MethodVisitor methodVisitor, CodeFlow codeFlow);
 
 }

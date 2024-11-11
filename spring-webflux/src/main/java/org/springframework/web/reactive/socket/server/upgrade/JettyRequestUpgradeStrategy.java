@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A WebSocket {@code RequestUpgradeStrategy} for Jetty 11.
+ * A WebSocket {@code RequestUpgradeStrategy} for Jetty 12 EE10.
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4

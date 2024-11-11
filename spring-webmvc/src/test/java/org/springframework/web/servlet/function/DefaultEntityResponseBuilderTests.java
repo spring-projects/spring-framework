@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.function;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultEntityResponseBuilderTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
+	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
 	@Test
 	void fromObject() {
@@ -60,14 +59,14 @@ class DefaultEntityResponseBuilderTests {
 	void fromObjectTypeReference() {
 		String body = "foo";
 		EntityResponse<String> response = EntityResponse.fromObject(body,
-				new ParameterizedTypeReference<String>() {})
+				new ParameterizedTypeReference<>() {})
 				.build();
 
 		assertThat(response.entity()).isSameAs(body);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	void status() {
 		String body = "foo";
 		EntityResponse<String> result =
@@ -160,7 +159,7 @@ class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result =
 				EntityResponse.fromObject("foo").cookie(cookie)
 						.build();
-		assertThat(result.cookies().get("name").contains(cookie)).isTrue();
+		assertThat(result.cookies().get("name")).contains(cookie);
 	}
 
 	@Test
@@ -195,7 +194,7 @@ class DefaultEntityResponseBuilderTests {
 	@Test
 	void notModifiedLastModified() throws ServletException, IOException {
 		ZonedDateTime now = ZonedDateTime.now();
-		ZonedDateTime oneMinuteBeforeNow = now.minus(1, ChronoUnit.MINUTES);
+		ZonedDateTime oneMinuteBeforeNow = now.minusMinutes(1);
 
 		EntityResponse<String> entityResponse = EntityResponse.fromObject("bar")
 				.lastModified(oneMinuteBeforeNow)

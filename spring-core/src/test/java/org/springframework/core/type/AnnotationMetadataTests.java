@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,7 +297,7 @@ class AnnotationMetadataTests {
 	 * behaves the same.
 	 */
 	@Test  // gh-31041
-	void multipleComposedRepeatableAnnotationsUsingAnnotatedElementUtils() throws Exception {
+	void multipleComposedRepeatableAnnotationsUsingAnnotatedElementUtils() {
 		Class<?> element = MultipleComposedRepeatableAnnotationsClass.class;
 
 		Set<TestComponentScan> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(element, TestComponentScan.class);
@@ -313,7 +313,7 @@ class AnnotationMetadataTests {
 	 * behaves the same.
 	 */
 	@Test  // gh-31041
-	void multipleRepeatableAnnotationsInContainersUsingAnnotatedElementUtils() throws Exception {
+	void multipleRepeatableAnnotationsInContainersUsingAnnotatedElementUtils() {
 		Class<?> element = MultipleRepeatableAnnotationsInContainersClass.class;
 
 		Set<TestComponentScan> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(element, TestComponentScan.class);
@@ -325,11 +325,13 @@ class AnnotationMetadataTests {
 
 	private static void assertRepeatableAnnotations(AnnotationMetadata metadata) {
 		Set<AnnotationAttributes> attributesSet =
-				metadata.getMergedRepeatableAnnotationAttributes(TestComponentScan.class, TestComponentScans.class, false);
+				metadata.getMergedRepeatableAnnotationAttributes(TestComponentScan.class, TestComponentScans.class, true);
 		assertThat(attributesSet.stream().map(attributes -> attributes.getStringArray("value")).flatMap(Arrays::stream))
 				.containsExactly("A", "B", "C", "D");
 		assertThat(attributesSet.stream().map(attributes -> attributes.getStringArray("basePackages")).flatMap(Arrays::stream))
 				.containsExactly("A", "B", "C", "D");
+		assertThat(attributesSet.stream().map(attributes -> attributes.getStringArray("basePackageClasses")).flatMap(Arrays::stream))
+				.containsExactly("java.lang.String", "java.lang.Integer");
 	}
 
 	private static void assertRepeatableAnnotationsSortedByReversedMetaDistance(AnnotationMetadata metadata) {
@@ -421,9 +423,9 @@ class AnnotationMetadataTests {
 		assertThat(method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value")).isEqualTo("direct");
 		assertThat(method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("myValue")).isEqualTo("direct");
 		List<Object> allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
-		assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<Object>(Arrays.asList("direct", "meta")));
+		assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "meta")));
 		allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
-		assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<Object>(Arrays.asList("direct")));
+		assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(List.of("direct")));
 
 		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isTrue();
 
@@ -463,9 +465,9 @@ class AnnotationMetadataTests {
 
 			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value")).isEqualTo("direct");
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
-			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<Object>(Arrays.asList("direct", "meta")));
+			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "meta")));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
-			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<Object>(Arrays.asList("direct", "")));
+			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "")));
 			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additional")).isEqualTo("");
 			assertThat(((String[]) metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additionalArray"))).isEmpty();
 		}
@@ -496,7 +498,7 @@ class AnnotationMetadataTests {
 
 			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value")).isEqualTo("direct");
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
-			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<Object>(Arrays.asList("direct", "meta")));
+			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "meta")));
 		}
 	}
 
@@ -693,16 +695,16 @@ class AnnotationMetadataTests {
 	public @interface ScanPackagesCandD {
 	}
 
-	@TestComponentScan("A")
+	@TestComponentScan(basePackages = "A", basePackageClasses = String.class)
 	@ScanPackageC
 	@ScanPackageD
-	@TestComponentScan("B")
+	@TestComponentScan(basePackages = "B", basePackageClasses = Integer.class)
 	static class MultipleComposedRepeatableAnnotationsClass {
 	}
 
-	@TestComponentScan("A")
+	@TestComponentScan(basePackages = "A", basePackageClasses = String.class)
 	@ScanPackagesCandD
-	@TestComponentScans(@TestComponentScan("B"))
+	@TestComponentScans(@TestComponentScan(basePackages = "B", basePackageClasses = Integer.class))
 	static class MultipleRepeatableAnnotationsInContainersClass {
 	}
 

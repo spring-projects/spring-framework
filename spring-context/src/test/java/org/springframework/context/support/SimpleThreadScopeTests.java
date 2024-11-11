@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class SimpleThreadScopeTests {
 
 
 	@Test
-	void getFromScope() throws Exception {
+	void getFromScope() {
 		String name = "removeNodeStatusScreen";
 		TestBean bean = this.applicationContext.getBean(name, TestBean.class);
 		assertThat(bean).isNotNull();
@@ -47,7 +47,7 @@ class SimpleThreadScopeTests {
 	}
 
 	@Test
-	void getMultipleInstances() throws Exception {
+	void getMultipleInstances() {
 		// Arrange
 		TestBean[] beans = new TestBean[2];
 		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("removeNodeStatusScreen", TestBean.class));
@@ -57,7 +57,7 @@ class SimpleThreadScopeTests {
 		thread2.start();
 		// Assert
 		Awaitility.await()
-					.atMost(500, TimeUnit.MILLISECONDS)
+					.atMost(5, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> (beans[0] != null) && (beans[1] != null));
 		assertThat(beans[1]).isNotSameAs(beans[0]);

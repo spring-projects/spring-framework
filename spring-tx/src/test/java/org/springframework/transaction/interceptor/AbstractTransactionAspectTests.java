@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.MockCallbackPreferringTransactionManager;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -33,6 +32,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.interceptor.TransactionAspectSupport.TransactionInfo;
+import org.springframework.transaction.testfixture.MockCallbackPreferringTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -66,7 +66,7 @@ public abstract class AbstractTransactionAspectTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		getNameMethod = ITestBean.class.getMethod("getName");
 		setNameMethod = ITestBean.class.getMethod("setName", String.class);
 		exceptionalMethod = ITestBean.class.getMethod("exceptional", Throwable.class);
@@ -74,7 +74,7 @@ public abstract class AbstractTransactionAspectTests {
 
 
 	@Test
-	public void noTransaction() throws Exception {
+	void noTransaction() throws Exception {
 		PlatformTransactionManager ptm = mock();
 
 		TestBean tb = new TestBean();
@@ -97,7 +97,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * Check that a transaction is created and committed.
 	 */
 	@Test
-	public void transactionShouldSucceed() throws Exception {
+	void transactionShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -123,7 +123,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * CallbackPreferringPlatformTransactionManager.
 	 */
 	@Test
-	public void transactionShouldSucceedWithCallbackPreference() throws Exception {
+	void transactionShouldSucceedWithCallbackPreference() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -143,7 +143,7 @@ public abstract class AbstractTransactionAspectTests {
 	}
 
 	@Test
-	public void transactionExceptionPropagatedWithCallbackPreference() throws Throwable {
+	void transactionExceptionPropagatedWithCallbackPreference() throws Throwable {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -167,7 +167,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * Check that two transactions are created and committed.
 	 */
 	@Test
-	public void twoTransactionsShouldSucceed() throws Exception {
+	void twoTransactionsShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas1 = new MapTransactionAttributeSource();
@@ -196,7 +196,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * Check that a transaction is created and committed.
 	 */
 	@Test
-	public void transactionShouldSucceedWithNotNew() throws Exception {
+	void transactionShouldSucceedWithNotNew() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -219,7 +219,7 @@ public abstract class AbstractTransactionAspectTests {
 	}
 
 	@Test
-	public void enclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
+	void enclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -234,7 +234,7 @@ public abstract class AbstractTransactionAspectTests {
 
 		TestBean outer = new TestBean() {
 			@Override
-			public void exceptional(Throwable t) throws Throwable {
+			public void exceptional(Throwable t) {
 				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
 				assertThat(ti.hasTransaction()).isTrue();
 				assertThat(getSpouse().getName()).isEqualTo(spouseName);
@@ -265,7 +265,7 @@ public abstract class AbstractTransactionAspectTests {
 	}
 
 	@Test
-	public void enclosingTransactionWithNestedTransactionOnAdvisedInside() throws Throwable {
+	void enclosingTransactionWithNestedTransactionOnAdvisedInside() throws Throwable {
 		final TransactionAttribute outerTxatt = new DefaultTransactionAttribute();
 		final TransactionAttribute innerTxatt = new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_NESTED);
 
@@ -287,7 +287,7 @@ public abstract class AbstractTransactionAspectTests {
 
 		TestBean outer = new TestBean() {
 			@Override
-			public void exceptional(Throwable t) throws Throwable {
+			public void exceptional(Throwable t) {
 				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
 				assertThat(ti.hasTransaction()).isTrue();
 				assertThat(ti.getTransactionAttribute()).isEqualTo(outerTxatt);
@@ -322,42 +322,42 @@ public abstract class AbstractTransactionAspectTests {
 	}
 
 	@Test
-	public void rollbackOnCheckedException() throws Throwable {
+	void rollbackOnCheckedException() throws Throwable {
 		doTestRollbackOnException(new Exception(), true, false);
 	}
 
 	@Test
-	public void noRollbackOnCheckedException() throws Throwable {
+	void noRollbackOnCheckedException() throws Throwable {
 		doTestRollbackOnException(new Exception(), false, false);
 	}
 
 	@Test
-	public void rollbackOnUncheckedException() throws Throwable {
+	void rollbackOnUncheckedException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), true, false);
 	}
 
 	@Test
-	public void noRollbackOnUncheckedException() throws Throwable {
+	void noRollbackOnUncheckedException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), false, false);
 	}
 
 	@Test
-	public void rollbackOnCheckedExceptionWithRollbackException() throws Throwable {
+	void rollbackOnCheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new Exception(), true, true);
 	}
 
 	@Test
-	public void noRollbackOnCheckedExceptionWithRollbackException() throws Throwable {
+	void noRollbackOnCheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new Exception(), false, true);
 	}
 
 	@Test
-	public void rollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
+	void rollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), true, true);
 	}
 
 	@Test
-	public void noRollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
+	void noRollbackOnUncheckedExceptionWithRollbackException() throws Throwable {
 		doTestRollbackOnException(new RuntimeException(), false, true);
 	}
 
@@ -367,7 +367,6 @@ public abstract class AbstractTransactionAspectTests {
 	 * @param ex exception to be thrown by the target
 	 * @param shouldRollback whether this should cause a transaction rollback
 	 */
-	@SuppressWarnings("serial")
 	protected void doTestRollbackOnException(
 			final Exception ex, final boolean shouldRollback, boolean rollbackException) throws Exception {
 
@@ -429,7 +428,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * Test that TransactionStatus.setRollbackOnly works.
 	 */
 	@Test
-	public void programmaticRollback() throws Exception {
+	void programmaticRollback() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = getNameMethod;
@@ -464,7 +463,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * Shouldn't invoke target method.
 	 */
 	@Test
-	public void cannotCreateTransaction() throws Exception {
+	void cannotCreateTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = getNameMethod;
@@ -500,7 +499,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * infrastructure exception was thrown to the client
 	 */
 	@Test
-	public void cannotCommitTransaction() throws Exception {
+	void cannotCommitTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = setNameMethod;

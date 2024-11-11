@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,28 +45,30 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link StatementCreatorUtils}.
+ *
  * @author Juergen Hoeller
  * @since 31.08.2004
  */
-public class StatementCreatorUtilsTests {
+class StatementCreatorUtilsTests {
 
 	private PreparedStatement preparedStatement = mock();
 
 
 	@Test
-	public void testSetParameterValueWithNullAndType() throws SQLException {
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, null, null);
+	void testSetParameterValueWithNullAndType() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, null);
 		verify(preparedStatement).setNull(1, Types.VARCHAR);
 	}
 
 	@Test
-	public void testSetParameterValueWithNullAndTypeName() throws SQLException {
+	void testSetParameterValueWithNullAndTypeName() throws SQLException {
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, "mytype", null);
 		verify(preparedStatement).setNull(1, Types.VARCHAR, "mytype");
 	}
 
 	@Test
-	public void testSetParameterValueWithNullAndUnknownType() throws SQLException {
+	void testSetParameterValueWithNullAndUnknownType() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
 		Connection con = mock();
 		DatabaseMetaData dbmd = mock();
@@ -74,13 +76,13 @@ public class StatementCreatorUtilsTests {
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(dbmd.getDriverName()).willReturn("Oracle Driver");
 		given(con.getMetaData()).willReturn(dbmd);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null);
 		verify(preparedStatement).setNull(1, Types.NULL);
 		StatementCreatorUtils.shouldIgnoreGetParameterType = false;
 	}
 
 	@Test
-	public void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
+	void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
 		Connection con = mock();
 		DatabaseMetaData dbmd = mock();
@@ -88,7 +90,7 @@ public class StatementCreatorUtilsTests {
 		given(con.getMetaData()).willReturn(dbmd);
 		given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
 		given(dbmd.getDriverName()).willReturn("Informix Driver");
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null);
 		verify(dbmd).getDatabaseProductName();
 		verify(dbmd).getDriverName();
 		verify(preparedStatement).setObject(1, null);
@@ -96,7 +98,7 @@ public class StatementCreatorUtilsTests {
 	}
 
 	@Test
-	public void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
+	void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
 		Connection con = mock();
 		DatabaseMetaData dbmd = mock();
@@ -104,7 +106,7 @@ public class StatementCreatorUtilsTests {
 		given(con.getMetaData()).willReturn(dbmd);
 		given(dbmd.getDatabaseProductName()).willReturn("Apache Derby");
 		given(dbmd.getDriverName()).willReturn("Apache Derby Embedded Driver");
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null);
 		verify(dbmd).getDatabaseProductName();
 		verify(dbmd).getDriverName();
 		verify(preparedStatement).setNull(1, Types.VARCHAR);
@@ -112,118 +114,118 @@ public class StatementCreatorUtilsTests {
 	}
 
 	@Test
-	public void testSetParameterValueWithNullAndGetParameterTypeWorking() throws SQLException {
+	void testSetParameterValueWithNullAndGetParameterTypeWorking() throws SQLException {
 		ParameterMetaData pmd = mock();
 		given(preparedStatement.getParameterMetaData()).willReturn(pmd);
 		given(pmd.getParameterType(1)).willReturn(Types.SMALLINT);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null);
 		verify(pmd).getParameterType(1);
 		verify(preparedStatement, never()).getConnection();
 		verify(preparedStatement).setNull(1, Types.SMALLINT);
 	}
 
 	@Test
-	public void testSetParameterValueWithString() throws SQLException {
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, null, "test");
+	void testSetParameterValueWithString() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.VARCHAR, "test");
 		verify(preparedStatement).setString(1, "test");
 	}
 
 	@Test
-	public void testSetParameterValueWithStringAndSpecialType() throws SQLException {
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.CHAR, null, "test");
+	void testSetParameterValueWithStringAndSpecialType() throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.CHAR, "test");
 		verify(preparedStatement).setObject(1, "test", Types.CHAR);
 	}
 
 	@Test public void testSetParameterValueWithStringAndUnknownType() throws SQLException {
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, "test");
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, "test");
 		verify(preparedStatement).setString(1, "test");
 	}
 
 	@Test
-	public void testSetParameterValueWithSqlDate() throws SQLException {
+	void testSetParameterValueWithSqlDate() throws SQLException {
 		java.sql.Date date = new java.sql.Date(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.DATE, null, date);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.DATE, date);
 		verify(preparedStatement).setDate(1, date);
 	}
 
 	@Test
-	public void testSetParameterValueWithDateAndUtilDate() throws SQLException {
+	void testSetParameterValueWithDateAndUtilDate() throws SQLException {
 		java.util.Date date = new java.util.Date(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.DATE, null, date);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.DATE, date);
 		verify(preparedStatement).setDate(1, new java.sql.Date(1000));
 	}
 
 	@Test
-	public void testSetParameterValueWithDateAndCalendar() throws SQLException {
+	void testSetParameterValueWithDateAndCalendar() throws SQLException {
 		java.util.Calendar cal = new GregorianCalendar();
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.DATE, null, cal);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.DATE, cal);
 		verify(preparedStatement).setDate(1, new java.sql.Date(cal.getTime().getTime()), cal);
 	}
 
 	@Test
-	public void testSetParameterValueWithSqlTime() throws SQLException {
+	void testSetParameterValueWithSqlTime() throws SQLException {
 		java.sql.Time time = new java.sql.Time(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIME, null, time);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIME, time);
 		verify(preparedStatement).setTime(1, time);
 	}
 
 	@Test
-	public void testSetParameterValueWithTimeAndUtilDate() throws SQLException {
+	void testSetParameterValueWithTimeAndUtilDate() throws SQLException {
 		java.util.Date date = new java.util.Date(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIME, null, date);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIME, date);
 		verify(preparedStatement).setTime(1, new java.sql.Time(1000));
 	}
 
 	@Test
-	public void testSetParameterValueWithTimeAndCalendar() throws SQLException {
+	void testSetParameterValueWithTimeAndCalendar() throws SQLException {
 		java.util.Calendar cal = new GregorianCalendar();
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIME, null, cal);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIME, cal);
 		verify(preparedStatement).setTime(1, new java.sql.Time(cal.getTime().getTime()), cal);
 	}
 
 	@Test
-	public void testSetParameterValueWithSqlTimestamp() throws SQLException {
+	void testSetParameterValueWithSqlTimestamp() throws SQLException {
 		java.sql.Timestamp timestamp = new java.sql.Timestamp(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP, null, timestamp);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP, timestamp);
 		verify(preparedStatement).setTimestamp(1, timestamp);
 	}
 
 	@Test
-	public void testSetParameterValueWithTimestampAndUtilDate() throws SQLException {
+	void testSetParameterValueWithTimestampAndUtilDate() throws SQLException {
 		java.util.Date date = new java.util.Date(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP, null, date);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP, date);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(1000));
 	}
 
 	@Test
-	public void testSetParameterValueWithTimestampAndCalendar() throws SQLException {
+	void testSetParameterValueWithTimestampAndCalendar() throws SQLException {
 		java.util.Calendar cal = new GregorianCalendar();
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP, null, cal);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP, cal);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 	}
 
 	@Test
-	public void testSetParameterValueWithDateAndUnknownType() throws SQLException {
+	void testSetParameterValueWithDateAndUnknownType() throws SQLException {
 		java.util.Date date = new java.util.Date(1000);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, date);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, date);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(1000));
 	}
 
 	@Test
-	public void testSetParameterValueWithCalendarAndUnknownType() throws SQLException {
+	void testSetParameterValueWithCalendarAndUnknownType() throws SQLException {
 		java.util.Calendar cal = new GregorianCalendar();
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, cal);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, cal);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("javaTimeTypes")
 	public void testSetParameterValueWithJavaTimeTypes(Object o, int sqlType) throws SQLException {
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, sqlType, null, o);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, sqlType, o);
 		verify(preparedStatement).setObject(1, o, sqlType);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("javaTimeTypes")
 	void javaTimeTypesToSqlParameterType(Object o, int expectedSqlType) {
 		assertThat(StatementCreatorUtils.javaTypeToSqlParameterType(o.getClass()))
@@ -248,7 +250,7 @@ public class StatementCreatorUtilsTests {
 	public void testSetParameterValueWithOffsetDateTimeAndNotSupported() throws SQLException {
 		OffsetDateTime time = OffsetDateTime.now();
 		doThrow(new SQLFeatureNotSupportedException()).when(preparedStatement).setObject(1, time, Types.TIMESTAMP_WITH_TIMEZONE);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null, time);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, time);
 		verify(preparedStatement).setObject(1, time, Types.TIMESTAMP_WITH_TIMEZONE);
 		verify(preparedStatement).setObject(1, time);
 	}
@@ -256,7 +258,7 @@ public class StatementCreatorUtilsTests {
 	@Test  // gh-30556
 	public void testSetParameterValueWithNullAndNotSupported() throws SQLException {
 		doThrow(new SQLFeatureNotSupportedException()).when(preparedStatement).setNull(1, Types.TIMESTAMP_WITH_TIMEZONE);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null, null);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null);
 		verify(preparedStatement).setNull(1, Types.TIMESTAMP_WITH_TIMEZONE);
 		verify(preparedStatement).setNull(1, Types.NULL);
 	}
@@ -268,7 +270,7 @@ public class StatementCreatorUtilsTests {
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(con.getMetaData()).willReturn(dbmd);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, "test");
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, "test");
 		verify(preparedStatement).setString(1, "test");
 	}
 
@@ -281,7 +283,7 @@ public class StatementCreatorUtilsTests {
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(dbmd.getDriverName()).willReturn("Oracle Driver");
 		given(con.getMetaData()).willReturn(dbmd);
-		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, null);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null);
 		verify(preparedStatement).setNull(1, Types.NULL);
 		StatementCreatorUtils.shouldIgnoreGetParameterType = false;
 	}

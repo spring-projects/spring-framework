@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.core;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.util.StringValueResolver;
 
@@ -24,11 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 /**
- * Unit tests for {@link SimpleAliasRegistry}.
+ * Tests for {@link SimpleAliasRegistry}.
  *
  * @author Juergen Hoeller
  * @author Nha Vuong
@@ -46,12 +49,7 @@ class SimpleAliasRegistryTests {
 	private static final String ALIAS1 = "alias1";
 	private static final String ALIAS2 = "alias2";
 	private static final String ALIAS3 = "alias3";
-	// TODO Change ALIAS4 to "alias4".
-	// When ALIAS4 is "testAlias4", resolveAliasesWithComplexPlaceholderReplacement() passes.
-	// If you change ALIAS4 to "alias4", resolveAliasesWithComplexPlaceholderReplacement() fails.
-	// Those assertions pass for values such as "x", "xx", "xxx", and "xxxx" but fail with values
-	// such as "xxxxx", "testAli", ...
-	private static final String ALIAS4 = "testAlias4";
+	private static final String ALIAS4 = "alias4";
 	private static final String ALIAS5 = "alias5";
 
 
@@ -92,7 +90,21 @@ class SimpleAliasRegistryTests {
 	}
 
 	@Test
-	void removeAlias() {
+	void removeNullAlias() {
+		assertThatNullPointerException().isThrownBy(() -> registry.removeAlias(null));
+	}
+
+	@Test
+	void removeNonExistentAlias() {
+		String alias = NICKNAME;
+		assertDoesNotHaveAlias(REAL_NAME, alias);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> registry.removeAlias(alias))
+				.withMessage("No alias '%s' registered", alias);
+	}
+
+	@Test
+	void removeExistingAlias() {
 		registerAlias(REAL_NAME, NICKNAME);
 		assertHasAlias(REAL_NAME, NICKNAME);
 
@@ -128,8 +140,7 @@ class SimpleAliasRegistryTests {
 		// No aliases registered, so no cycles possible.
 		assertThatNoException().isThrownBy(() -> registry.checkForAliasCircle(NAME1, ALIAS1));
 
-		// NAME1 -> ALIAS1
-		registerAlias(NAME1, ALIAS1);
+		registerAlias(NAME1, ALIAS1); // ALIAS1 -> NAME1
 
 		// No cycles possible.
 		assertThatNoException().isThrownBy(() -> registry.checkForAliasCircle(NAME1, ALIAS1));
@@ -139,8 +150,7 @@ class SimpleAliasRegistryTests {
 				.isThrownBy(() -> registerAlias(ALIAS1, NAME1)) // internally invokes checkForAliasCircle()
 				.withMessageContaining("'%s' is a direct or indirect alias for '%s'", ALIAS1, NAME1);
 
-		// NAME1 -> ALIAS1 -> ALIAS2
-		registerAlias(ALIAS1, ALIAS2);
+		registerAlias(ALIAS1, ALIAS2); // ALIAS2 -> ALIAS1 -> NAME1
 		assertThatIllegalStateException()
 				// NAME1 -> ALIAS1 -> ALIAS2 -> NAME1
 				.isThrownBy(() -> registerAlias(ALIAS2, NAME1)) // internally invokes checkForAliasCircle()
@@ -154,13 +164,14 @@ class SimpleAliasRegistryTests {
 
 	@Test
 	void resolveAliasesWithoutPlaceholderReplacement() {
-		// Resolver returns input unmodified.
-		StringValueResolver valueResolver = str -> str;
+		StringValueResolver valueResolver = new StubStringValueResolver();
 
 		registerAlias(NAME1, ALIAS1);
 		registerAlias(NAME1, ALIAS3);
 		registerAlias(NAME2, ALIAS2);
 		registerAlias(NAME2, ALIAS4);
+		assertThat(registry.getAliases(NAME1)).containsExactlyInAnyOrder(ALIAS1, ALIAS3);
+		assertThat(registry.getAliases(NAME2)).containsExactlyInAnyOrder(ALIAS2, ALIAS4);
 
 		registry.resolveAliases(valueResolver);
 		assertThat(registry.getAliases(NAME1)).containsExactlyInAnyOrder(ALIAS1, ALIAS3);
@@ -174,46 +185,126 @@ class SimpleAliasRegistryTests {
 
 	@Test
 	void resolveAliasesWithPlaceholderReplacement() {
-		StringValueResolver mock = mock();
+		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
+			NAME1, NAME2,
+			ALIAS1, ALIAS2
+		));
 
 		registerAlias(NAME1, ALIAS1);
+		assertThat(registry.getAliases(NAME1)).containsExactly(ALIAS1);
 
-		given(mock.resolveStringValue(NAME1)).willReturn(NAME2);
-		given(mock.resolveStringValue(ALIAS1)).willReturn(ALIAS2);
-
-		registry.resolveAliases(mock);
+		registry.resolveAliases(valueResolver);
 		assertThat(registry.getAliases(NAME1)).isEmpty();
 		assertThat(registry.getAliases(NAME2)).containsExactly(ALIAS2);
 
 		registry.removeAlias(ALIAS2);
+		assertThat(registry.getAliases(NAME1)).isEmpty();
 		assertThat(registry.getAliases(NAME2)).isEmpty();
 	}
 
 	@Test
-	void resolveAliasesWithComplexPlaceholderReplacement() {
-		StringValueResolver mock = mock();
+	void resolveAliasesWithPlaceholderReplacementConflict() {
+		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(ALIAS1, ALIAS2));
 
+		registerAlias(NAME1, ALIAS1);
+		registerAlias(NAME2, ALIAS2);
+
+		// Original state:
+		// ALIAS1 -> NAME1
+		// ALIAS2 -> NAME2
+
+		// State after processing original entry (ALIAS1 -> NAME1):
+		// ALIAS2 -> NAME1 --> Conflict: entry for ALIAS2 already exists
+		// ALIAS2 -> NAME2
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> registry.resolveAliases(valueResolver))
+				.withMessage("Cannot register resolved alias '%s' (original: '%s') for name '%s': " +
+						"It is already registered for name '%s'.", ALIAS2, ALIAS1, NAME1, NAME2);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"alias4", "test", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
+	void resolveAliasesWithComplexPlaceholderReplacementWithAliasSwitching(String aliasX) {
+		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
+			ALIAS3, ALIAS1,
+			aliasX, ALIAS5,
+			ALIAS5, ALIAS2
+		));
+
+		// Since SimpleAliasRegistry ensures that aliases are processed in declaration
+		// order, we need to register ALIAS5 *before* aliasX to support our use case.
 		registerAlias(NAME3, ALIAS3);
-		registerAlias(NAME4, ALIAS4);
 		registerAlias(NAME5, ALIAS5);
+		registerAlias(NAME4, aliasX);
 
-		given(mock.resolveStringValue(NAME3)).willReturn(NAME4);
-		given(mock.resolveStringValue(NAME4)).willReturn(NAME4);
-		given(mock.resolveStringValue(NAME5)).willReturn(NAME5);
-		given(mock.resolveStringValue(ALIAS3)).willReturn(ALIAS4);
-		given(mock.resolveStringValue(ALIAS4)).willReturn(ALIAS5);
-		given(mock.resolveStringValue(ALIAS5)).willReturn(ALIAS5);
-		assertThatIllegalStateException().isThrownBy(() -> registry.resolveAliases(mock));
+		// Original state:
+		// ALIAS3 -> NAME3
+		// ALIAS5 -> NAME5
+		// aliasX -> NAME4
 
-		given(mock.resolveStringValue(NAME4)).willReturn(NAME5);
-		given(mock.resolveStringValue(ALIAS4)).willReturn(ALIAS4);
-		assertThatIllegalStateException().isThrownBy(() -> registry.resolveAliases(mock));
+		// State after processing original entry (ALIAS3 -> NAME3):
+		// ALIAS1 -> NAME3
+		// ALIAS5 -> NAME5
+		// aliasX -> NAME4
 
-		given(mock.resolveStringValue(NAME4)).willReturn(NAME4);
-		given(mock.resolveStringValue(ALIAS4)).willReturn(ALIAS5);
-		registry.resolveAliases(mock);
-		assertThat(registry.getAliases(NAME4)).containsExactly(ALIAS4);
-		assertThat(registry.getAliases(NAME5)).containsExactly(ALIAS5);
+		// State after processing original entry (ALIAS5 -> NAME5):
+		// ALIAS1 -> NAME3
+		// ALIAS2 -> NAME5
+		// aliasX -> NAME4
+
+		// State after processing original entry (aliasX -> NAME4):
+		// ALIAS1 -> NAME3
+		// ALIAS2 -> NAME5
+		// ALIAS5 -> NAME4
+
+		registry.resolveAliases(valueResolver);
+		assertThat(registry.getAliases(NAME3)).containsExactly(ALIAS1);
+		assertThat(registry.getAliases(NAME4)).containsExactly(ALIAS5);
+		assertThat(registry.getAliases(NAME5)).containsExactly(ALIAS2);
+	}
+
+	@ParameterizedTest  // gh-32024
+	@ValueSource(strings = {"alias4", "test", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
+	void resolveAliasesWithComplexPlaceholderReplacementWithAliasAndNameSwitching(String aliasX) {
+		StringValueResolver valueResolver = new StubStringValueResolver(Map.of(
+			ALIAS3, ALIAS1,
+			aliasX, ALIAS5,
+			ALIAS5, ALIAS2,
+			NAME3, NAME4,
+			NAME4, NAME3
+		));
+
+		// Since SimpleAliasRegistry ensures that aliases are processed in declaration
+		// order, we need to register ALIAS5 *before* aliasX to support our use case.
+		registerAlias(NAME3, ALIAS3);
+		registerAlias(NAME5, ALIAS5);
+		registerAlias(NAME4, aliasX);
+
+		// Original state:
+		// ALIAS3 -> NAME3
+		// ALIAS5 -> NAME5
+		// aliasX -> NAME4
+
+		// State after processing original entry (ALIAS3 -> NAME3):
+		// ALIAS5 -> NAME5
+		// aliasX -> NAME4
+		// ALIAS1 -> NAME4
+
+		// State after processing original entry (ALIAS5 -> NAME5):
+		// aliasX -> NAME4
+		// ALIAS1 -> NAME4
+		// ALIAS2 -> NAME5
+
+		// State after processing original entry (aliasX -> NAME4):
+		// ALIAS1 -> NAME4
+		// ALIAS2 -> NAME5
+		// alias5 -> NAME3
+
+		registry.resolveAliases(valueResolver);
+		assertThat(registry.getAliases(NAME3)).containsExactly(ALIAS5);
+		assertThat(registry.getAliases(NAME4)).containsExactly(ALIAS1);
+		assertThat(registry.getAliases(NAME5)).containsExactly(ALIAS2);
 	}
 
 	private void registerAlias(String name, String alias) {
@@ -226,6 +317,30 @@ class SimpleAliasRegistryTests {
 
 	private void assertDoesNotHaveAlias(String name, String alias) {
 		assertThat(registry.hasAlias(name, alias)).isFalse();
+	}
+
+
+	/**
+	 * {@link StringValueResolver} that replaces each value with a supplied
+	 * placeholder and otherwise returns the original value if no placeholder
+	 * is configured.
+	 */
+	private static class StubStringValueResolver implements StringValueResolver {
+
+		private final Map<String, String> placeholders;
+
+		StubStringValueResolver() {
+			this(Map.of());
+		}
+
+		StubStringValueResolver(Map<String, String> placeholders) {
+			this.placeholders = placeholders;
+		}
+
+		@Override
+		public String resolveStringValue(String str) {
+			return this.placeholders.getOrDefault(str, str);
+		}
 	}
 
 }

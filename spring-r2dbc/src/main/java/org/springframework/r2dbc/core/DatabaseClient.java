@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -56,6 +57,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.3
  */
 public interface DatabaseClient extends ConnectionAccessor {
@@ -69,7 +71,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	/**
 	 * Specify a static {@code sql} statement to run. Contract for specifying an
 	 * SQL call along with options leading to the execution. The SQL string can
-	 * contain either native parameter bind markers or named parameters (e.g.
+	 * contain either native parameter bind markers or named parameters (for example,
 	 * {@literal :foo, :bar}) when {@link NamedParameterExpander} is enabled.
 	 * @param sql the SQL statement
 	 * @return a new {@link GenericExecuteSpec}
@@ -82,7 +84,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	 * Specify an {@linkplain Supplier SQL supplier} that provides SQL to run.
 	 * Contract for specifying an SQL call along with options leading to
 	 * the execution. The SQL string can contain either native parameter
-	 * bind markers or named parameters (e.g. {@literal :foo, :bar}) when
+	 * bind markers or named parameters (for example, {@literal :foo, :bar}) when
 	 * {@link NamedParameterExpander} is enabled.
 	 * <p>Accepts {@link PreparedOperation} as SQL and binding {@link Supplier}.
 	 * <p>{@code DatabaseClient} implementations should defer the resolution of
@@ -190,6 +192,18 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @param type the parameter type
 		 */
 		GenericExecuteSpec bindNull(String name, Class<?> type);
+
+		/**
+		 * Bind the parameter values from the given source list,
+		 * registering each as a positional parameter using their order
+		 * in the given list as their index.
+		 * @param source the source list of parameters, with their order
+		 * as position and each value either a scalar value
+		 * or a {@link io.r2dbc.spi.Parameter}
+		 * @since 6.2
+		 * @see #bind(int, Object)
+		 */
+		GenericExecuteSpec bindValues(List<?> source);
 
 		/**
 		 * Bind the parameter values from the given source map,

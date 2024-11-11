@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package org.springframework.jms.core;
  * @author Juergen Hoeller
  * @since 06.01.2005
  */
-public class JmsTemplateJtaTests extends JmsTemplateTests {
+class JmsTemplateJtaTests extends JmsTemplateTests {
 
 	@Override
 	protected boolean useTransactedSession() {

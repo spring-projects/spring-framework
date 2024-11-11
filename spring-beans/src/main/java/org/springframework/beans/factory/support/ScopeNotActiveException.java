@@ -20,7 +20,7 @@ import org.springframework.beans.factory.BeanCreationException;
 
 /**
  * A subclass of {@link BeanCreationException} which indicates that the target scope
- * is not active, e.g. in case of request or session scope.
+ * is not active, for example, in case of request or session scope.
  *
  * @author Juergen Hoeller
  * @since 5.3

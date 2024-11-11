@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnot
  * @author Stephane Nicoll
  * @author Sam Brannen
  */
-public class JCacheAspectJNamespaceConfigTests extends AbstractJCacheAnnotationTests {
+class JCacheAspectJNamespaceConfigTests extends AbstractJCacheAnnotationTests {
 
 	@Override
 	protected ApplicationContext getApplicationContext() {

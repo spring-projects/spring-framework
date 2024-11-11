@@ -10,9 +10,9 @@ rebuilt for any subsequent test that requires a context with the same configurat
 metadata.
 
 You can use `@DirtiesContext` as both a class-level and a method-level annotation within
-the same class or class hierarchy. In such scenarios, the `ApplicationContext` is marked
-as dirty before or after any such annotated method as well as before or after the current
-test class, depending on the configured `methodMode` and `classMode`. When
+the same test class or test class hierarchy. In such scenarios, the `ApplicationContext`
+is marked as dirty before or after any such annotated method as well as before or after
+the current test class, depending on the configured `methodMode` and `classMode`. When
 `@DirtiesContext` is declared at both the class level and the method level, the
 configured modes from both annotations will be honored. For example, if the class mode is
 set to `BEFORE_EACH_TEST_METHOD` and the method mode is set to `AFTER_METHOD`, the
@@ -28,7 +28,7 @@ configuration scenarios:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(classMode = BEFORE_CLASS) // <1>
 	class FreshContextTests {
@@ -39,7 +39,7 @@ Java::
 +
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(classMode = BEFORE_CLASS) // <1>
 	class FreshContextTests {
@@ -56,7 +56,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext // <1>
 	class ContextDirtyingTests {
@@ -67,7 +67,7 @@ Java::
 +
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext // <1>
 	class ContextDirtyingTests {
@@ -85,7 +85,7 @@ mode set to `BEFORE_EACH_TEST_METHOD.`
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD) // <1>
 	class FreshContextTests {
@@ -96,7 +96,7 @@ Java::
 +
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD) // <1>
 	class FreshContextTests {
@@ -114,7 +114,7 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD) // <1>
 	class ContextDirtyingTests {
@@ -125,7 +125,7 @@ Java::
 +
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD) // <1>
 	class ContextDirtyingTests {
@@ -143,7 +143,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(methodMode = BEFORE_METHOD) // <1>
 	@Test
@@ -155,7 +155,7 @@ Java::
 +
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext(methodMode = BEFORE_METHOD) // <1>
 	@Test
@@ -173,7 +173,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext // <1>
 	@Test
@@ -185,7 +185,7 @@ Java::
 +
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@DirtiesContext // <1>
 	@Test
@@ -211,7 +211,7 @@ as the following example shows.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextHierarchy({
 		@ContextConfiguration("/parent-config.xml"),
@@ -234,7 +234,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextHierarchy(
 		ContextConfiguration("/parent-config.xml"),

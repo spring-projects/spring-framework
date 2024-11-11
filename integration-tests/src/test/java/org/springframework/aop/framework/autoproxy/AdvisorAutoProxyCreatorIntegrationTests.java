@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -61,12 +60,12 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	/**
 	 * Return a bean factory with attributes and EnterpriseServices configured.
 	 */
-	protected BeanFactory getBeanFactory() throws IOException {
+	protected BeanFactory getBeanFactory() {
 		return new ClassPathXmlApplicationContext(DEFAULT_CONTEXT, CLASS);
 	}
 
 	@Test
-	void testDefaultExclusionPrefix() throws Exception {
+	void testDefaultExclusionPrefix() {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
 		assertThat(aapc.getAdvisorBeanNamePrefix()).isEqualTo((ADVISOR_APC_BEAN_NAME + DefaultAdvisorAutoProxyCreator.SEPARATOR));
 		assertThat(aapc.isUsePrefix()).isFalse();
@@ -76,21 +75,21 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	 * If no pointcuts match (no attrs) there should be proxying.
 	 */
 	@Test
-	void testNoProxy() throws Exception {
+	void testNoProxy() {
 		BeanFactory bf = getBeanFactory();
 		Object o = bf.getBean("noSetters");
 		assertThat(AopUtils.isAopProxy(o)).isFalse();
 	}
 
 	@Test
-	void testTxIsProxied() throws Exception {
+	void testTxIsProxied() {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertThat(AopUtils.isAopProxy(test)).isTrue();
 	}
 
 	@Test
-	void testRegexpApplied() throws Exception {
+	void testRegexpApplied() {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		MethodCounter counter = (MethodCounter) bf.getBean("countingAdvice");
@@ -100,7 +99,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	void testTransactionAttributeOnMethod() throws Exception {
+	void testTransactionAttributeOnMethod() {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 
@@ -166,7 +165,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	void testProgrammaticRollback() throws Exception {
+	void testProgrammaticRollback() {
 		BeanFactory bf = getBeanFactory();
 
 		Object bean = bf.getBean(TXMANAGER_BEAN_NAME);
@@ -250,7 +249,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		setAdvice(new TxCountingBeforeAdvice());
 	}
 

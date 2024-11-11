@@ -98,7 +98,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		WebAsyncUtils.getAsyncManager(request).registerCallableInterceptor(KEY,
 				new CallableProcessingInterceptor() {
 					@Override
-					public <T> void postProcess(NativeWebRequest r, Callable<T> task, Object value) {
+					public <T> void postProcess(NativeWebRequest r, Callable<T> task, @Nullable Object value) {
 						// We got the result, must also wait for the dispatch
 						getMvcResult(request).setAsyncResult(value);
 					}
@@ -107,7 +107,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		WebAsyncUtils.getAsyncManager(request).registerDeferredResultInterceptor(KEY,
 				new DeferredResultProcessingInterceptor() {
 					@Override
-					public <T> void postProcess(NativeWebRequest r, DeferredResult<T> result, Object value) {
+					public <T> void postProcess(NativeWebRequest r, DeferredResult<T> result, @Nullable Object value) {
 						getMvcResult(request).setAsyncResult(value);
 					}
 				});
@@ -118,6 +118,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 	}
 
 	@Override
+	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		HandlerExecutionChain chain = super.getHandler(request);
 		if (chain != null) {
@@ -138,6 +139,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 	}
 
 	@Override
+	@Nullable
 	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) throws Exception {
 

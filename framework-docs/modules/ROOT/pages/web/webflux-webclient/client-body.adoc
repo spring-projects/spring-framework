@@ -8,7 +8,7 @@ like `Mono` or Kotlin Coroutines `Deferred` as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Person> personMono = ... ;
 
@@ -22,7 +22,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val personDeferred: Deferred<Person> = ...
 
@@ -41,7 +41,7 @@ You can also have a stream of objects be encoded, as the following example shows
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Flux<Person> personFlux = ... ;
 
@@ -55,7 +55,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val people: Flow<Person> = ...
 
@@ -75,7 +75,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Person person = ... ;
 
@@ -89,7 +89,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val person: Person = ...
 
@@ -115,7 +115,7 @@ content is automatically set to `application/x-www-form-urlencoded` by the
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MultiValueMap<String, String> formData = ... ;
 
@@ -128,7 +128,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val formData: MultiValueMap<String, String> = ...
 
@@ -146,7 +146,7 @@ You can also supply form data in-line by using `BodyInserters`, as the following
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import static org.springframework.web.reactive.function.BodyInserters.*;
 
@@ -159,7 +159,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.reactive.function.BodyInserters.*
 
@@ -185,7 +185,7 @@ multipart request. The following example shows how to create a `MultiValueMap<St
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MultipartBodyBuilder builder = new MultipartBodyBuilder();
 	builder.part("fieldPart", "fieldValue");
@@ -198,7 +198,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val builder = MultipartBodyBuilder().apply {
 		part("fieldPart", "fieldValue")
@@ -224,7 +224,7 @@ through the `body` method, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MultipartBodyBuilder builder = ...;
 
@@ -237,7 +237,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val builder: MultipartBodyBuilder = ...
 
@@ -261,7 +261,7 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import static org.springframework.web.reactive.function.BodyInserters.*;
 
@@ -274,7 +274,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.reactive.function.BodyInserters.*
 
@@ -304,7 +304,7 @@ For instance, this sample will POST a multipart form containing a form field and
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 Resource resource = ...
 Mono<String> result = webClient
@@ -320,7 +320,7 @@ Mono<String> result = webClient
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 var resource: Resource = ...
 var result: Mono<String> = webClient

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,11 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -66,7 +68,6 @@ class RestTemplateObservationTests {
 
 	private final ResponseErrorHandler errorHandler = mock();
 
-	@SuppressWarnings("unchecked")
 	private final HttpMessageConverter<String> converter = mock();
 
 	private final RestTemplate template = new RestTemplate(List.of(converter));
@@ -158,6 +159,31 @@ class RestTemplateObservationTests {
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN");
 	}
 
+	@Test // gh-32060
+	void executeShouldRecordErrorsThrownByErrorHandler() throws Exception {
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		given(errorHandler.hasError(any())).willThrow(new IllegalStateException("error handler"));
+
+		assertThatIllegalStateException().isThrownBy(() ->
+				template.execute("https://example.org", GET, null, null));
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "IllegalStateException");
+	}
+
+	@Test // gh-32060
+	void executeShouldCreateObservationScope() throws Exception {
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		ObservationErrorHandler observationErrorHandler = new ObservationErrorHandler(observationRegistry);
+		template.setErrorHandler(observationErrorHandler);
+
+		template.execute("https://example.org", GET, null, null);
+		assertThat(observationErrorHandler.currentObservation).isNotNull();
+	}
+
 
 	private void mockSentRequest(HttpMethod method, String uri) throws Exception {
 		mockSentRequest(method, uri, new HttpHeaders());
@@ -202,6 +228,28 @@ class RestTemplateObservationTests {
 		@Override
 		public void onStart(ClientRequestObservationContext context) {
 			assertThat(context.getCarrier()).isNotNull();
+		}
+	}
+
+	static class ObservationErrorHandler implements ResponseErrorHandler {
+
+		final TestObservationRegistry observationRegistry;
+
+		@Nullable
+		Observation currentObservation;
+
+		ObservationErrorHandler(TestObservationRegistry observationRegistry) {
+			this.observationRegistry = observationRegistry;
+		}
+
+		@Override
+		public boolean hasError(ClientHttpResponse response) throws IOException {
+			return true;
+		}
+
+		@Override
+		public void handleError(ClientHttpResponse response) throws IOException {
+			currentObservation = this.observationRegistry.getCurrentObservation();
 		}
 	}
 

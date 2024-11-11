@@ -22,7 +22,7 @@ The following code shows the simple profiling aspect discussed earlier:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package x.y;
 
@@ -61,7 +61,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package x.y
 

@@ -21,6 +21,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -48,6 +49,9 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	private final HttpClient httpClient;
 
 	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
+
+	@Nullable
+	private Duration readTimeout;
 
 
 	/**
@@ -91,12 +95,24 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 		this.bufferFactory = bufferFactory;
 	}
 
+	/**
+	 * Set the underlying {@code HttpClient}'s read timeout as a {@code Duration}.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.2
+	 * @see java.net.http.HttpRequest.Builder#timeout
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "readTimeout is required");
+		this.readTimeout = readTimeout;
+	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(
 			HttpMethod method, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		JdkClientHttpRequest jdkClientHttpRequest = new JdkClientHttpRequest(method, uri, this.bufferFactory);
+		JdkClientHttpRequest jdkClientHttpRequest = new JdkClientHttpRequest(method, uri, this.bufferFactory,
+				this.readTimeout);
 
 		return requestCallback.apply(jdkClientHttpRequest).then(Mono.defer(() -> {
 			HttpRequest httpRequest = jdkClientHttpRequest.getNativeRequest();

@@ -16,7 +16,7 @@ See xref:testing/testcontext-framework.adoc[TestContext Framework] for more deta
 * Spring MVC Test: A framework, also known as `MockMvc`, for testing annotated controllers
 through the `DispatcherServlet` (that is, supporting annotations), complete with the
 Spring MVC infrastructure but without an HTTP server.
-See xref:testing/spring-mvc-test-framework.adoc[Spring MVC Test] for more details.
+See xref:testing/mockmvc.adoc[Spring MVC Test] for more details.
 
 * Client-side REST: `spring-test` provides a `MockRestServiceServer` that you can use as
 a mock server for testing client-side code that internally uses the `RestTemplate`.

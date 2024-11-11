@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Brian Clozel
  * @author Stephane Nicoll
  */
-public class ContentCachingRequestWrapperTests {
+class ContentCachingRequestWrapperTests {
 
 	protected static final String FORM_CONTENT_TYPE = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
@@ -90,6 +90,13 @@ public class ContentCachingRequestWrapperTests {
 	}
 
 	@Test
+	void shouldNotAllocateMoreThanCacheLimit() throws Exception {
+		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(createGetRequest("Hello World"), CONTENT_CACHE_LIMIT);
+		assertThat(wrapper).extracting("cachedContent.initialBlockSize").isEqualTo(CONTENT_CACHE_LIMIT);
+	}
+
+
+	@Test
 	void cachedContentWithOverflow() throws Exception {
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(
 				createGetRequest("Hello World"), CONTENT_CACHE_LIMIT) {
@@ -99,8 +106,8 @@ public class ContentCachingRequestWrapperTests {
 			}
 		};
 
-		assertThatIllegalStateException().isThrownBy(() ->
-						wrapper.getInputStream().readAllBytes())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> wrapper.getInputStream().readAllBytes())
 				.withMessage("3");
 	}
 
@@ -112,7 +119,7 @@ public class ContentCachingRequestWrapperTests {
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(request);
 		// getting request parameters will consume the request body
-		assertThat(wrapper.getParameterMap().isEmpty()).isFalse();
+		assertThat(wrapper.getParameterMap()).isNotEmpty();
 		assertThat(new String(wrapper.getContentAsByteArray())).isEqualTo("first=value&second=foo&second=bar");
 		// SPR-12810 : inputstream body should be consumed
 		assertThat(new String(wrapper.getInputStream().readAllBytes())).isEmpty();

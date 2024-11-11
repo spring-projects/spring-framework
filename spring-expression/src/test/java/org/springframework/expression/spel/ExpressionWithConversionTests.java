@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Andy Clement
  * @author Dave Syer
  */
-public class ExpressionWithConversionTests extends AbstractExpressionTests {
+class ExpressionWithConversionTests extends AbstractExpressionTests {
 
 	private static List<String> listOfString = new ArrayList<>();
 	private static TypeDescriptor typeDescriptorForListOfString = null;
@@ -59,7 +59,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 	}
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		ExpressionWithConversionTests.typeDescriptorForListOfString = new TypeDescriptor(ExpressionWithConversionTests.class.getDeclaredField("listOfString"));
 		ExpressionWithConversionTests.typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionWithConversionTests.class.getDeclaredField("listOfInteger"));
 	}
@@ -69,7 +69,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 	 * Test the service can convert what we are about to use in the expression evaluation tests.
 	 */
 	@Test
-	public void testConversionsAvailable() throws Exception {
+	void testConversionsAvailable() {
 		TypeConvertorUsingConversionService tcs = new TypeConvertorUsingConversionService();
 
 		// ArrayList containing List<Integer> to List<String>
@@ -87,7 +87,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetParameterizedList() throws Exception {
+	void testSetParameterizedList() {
 		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parser.parseExpression("listOfInteger.size()");
 		assertThat(e.getValue(context, Integer.class)).isZero();
@@ -101,7 +101,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testCoercionToCollectionOfPrimitive() throws Exception {
+	void testCoercionToCollectionOfPrimitive() throws Exception {
 
 		class TestTarget {
 			@SuppressWarnings("unused")
@@ -134,7 +134,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testConvert() {
+	void testConvert() {
 		Foo root = new Foo("bar");
 		Collection<String> foos = Collections.singletonList("baz");
 

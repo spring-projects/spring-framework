@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class RequestAndSessionScopedBeanTests {
+class RequestAndSessionScopedBeanTests {
 
 	@Test
-	@SuppressWarnings("resource")
-	public void testPutBeanInRequest() {
+	void testPutBeanInRequest() {
 		String targetBeanName = "target";
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -71,8 +70,7 @@ public class RequestAndSessionScopedBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void testPutBeanInSession() {
+	void testPutBeanInSession() {
 		String targetBeanName = "target";
 		HttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));

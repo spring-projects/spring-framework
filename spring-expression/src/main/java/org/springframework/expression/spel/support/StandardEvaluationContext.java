@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.MethodFilter;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
@@ -47,6 +48,16 @@ import org.springframework.util.Assert;
  * specific {@link ClassLoader} to ensure that the SpEL expression parser is able
  * to reliably locate user types. See {@link #setTypeLocator(TypeLocator)} for
  * details.
+ *
+ * <p>In addition to support for setting and looking up variables as defined in
+ * the {@link EvaluationContext} API, {@code StandardEvaluationContext} also
+ * provides support for registering and looking up functions. The
+ * {@code registerFunction(...)} methods provide a convenient way to register a
+ * function as a {@link Method} or a {@link MethodHandle}; however, a function
+ * can also be registered via {@link #setVariable(String, Object)} or
+ * {@link #setVariables(Map)}. Since functions share a namespace with the variables
+ * in this evaluation context, care must be taken to ensure that function names
+ * and variable names do not overlap.
  *
  * <p>For a simpler, builder-style context variant for data-binding purposes,
  * consider using {@link SimpleEvaluationContext} instead which allows for
@@ -72,6 +83,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	@Nullable
 	private volatile List<PropertyAccessor> propertyAccessors;
+
+	@Nullable
+	private volatile List<IndexAccessor> indexAccessors;
 
 	@Nullable
 	private volatile List<ConstructorResolver> constructorResolvers;
@@ -143,6 +157,56 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public boolean removePropertyAccessor(PropertyAccessor accessor) {
 		return initPropertyAccessors().remove(accessor);
+	}
+
+	/**
+	 * Set the list of index accessors to use in this evaluation context.
+	 * <p>Replaces any previously configured index accessors.
+	 * @since 6.2
+	 * @see #getIndexAccessors()
+	 * @see #addIndexAccessor(IndexAccessor)
+	 * @see #removeIndexAccessor(IndexAccessor)
+	 */
+	public void setIndexAccessors(List<IndexAccessor> indexAccessors) {
+		this.indexAccessors = indexAccessors;
+	}
+
+	/**
+	 * Get the list of index accessors configured in this evaluation context.
+	 * @since 6.2
+	 * @see #setIndexAccessors(List)
+	 * @see #addIndexAccessor(IndexAccessor)
+	 * @see #removeIndexAccessor(IndexAccessor)
+	 */
+	@Override
+	public List<IndexAccessor> getIndexAccessors() {
+		return initIndexAccessors();
+	}
+
+	/**
+	 * Add the supplied index accessor to this evaluation context.
+	 * @param indexAccessor the index accessor to add
+	 * @since 6.2
+	 * @see #getIndexAccessors()
+	 * @see #setIndexAccessors(List)
+	 * @see #removeIndexAccessor(IndexAccessor)
+	 */
+	public void addIndexAccessor(IndexAccessor indexAccessor) {
+		initIndexAccessors().add(indexAccessor);
+	}
+
+	/**
+	 * Remove the supplied index accessor from this evaluation context.
+	 * @param indexAccessor the index accessor to remove
+	 * @return {@code true} if the index accessor was removed, {@code false} if
+	 * the index accessor was not configured in this evaluation context
+	 * @since 6.2
+	 * @see #getIndexAccessors()
+	 * @see #setIndexAccessors(List)
+	 * @see #addIndexAccessor(IndexAccessor)
+	 */
+	public boolean removeIndexAccessor(IndexAccessor indexAccessor) {
+		return initIndexAccessors().remove(indexAccessor);
 	}
 
 	public void setConstructorResolvers(List<ConstructorResolver> constructorResolvers) {
@@ -253,6 +317,25 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return this.operatorOverloader;
 	}
 
+	/**
+	 * Set a named variable in this evaluation context to a specified value.
+	 * <p>If the specified {@code name} is {@code null}, it will be ignored. If
+	 * the specified {@code value} is {@code null}, the named variable will be
+	 * removed from this evaluation context.
+	 * <p>In contrast to {@link #assignVariable(String,java.util.function.Supplier)},
+	 * this method should only be invoked programmatically when interacting directly
+	 * with the {@code EvaluationContext} &mdash; for example, to provide initial
+	 * configuration for the context.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain StandardEvaluationContext
+	 * class-level documentation} for details.
+	 * @param name the name of the variable to set
+	 * @param value the value to be placed in the variable
+	 * @see #setVariables(Map)
+	 * @see #registerFunction(String, Method)
+	 * @see #registerFunction(String, MethodHandle)
+	 * @see #lookupVariable(String)
+	 */
 	@Override
 	public void setVariable(@Nullable String name, @Nullable Object value) {
 		// For backwards compatibility, we ignore null names here...
@@ -269,8 +352,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Set multiple named variables in this evaluation context to given values.
+	 * Set multiple named variables in this evaluation context to the specified values.
 	 * <p>This is a convenience variant of {@link #setVariable(String, Object)}.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain StandardEvaluationContext
+	 * class-level documentation} for details.
 	 * @param variables the names and values of the variables to set
 	 * @see #setVariable(String, Object)
 	 */
@@ -279,12 +365,12 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Register the specified Method as a SpEL function.
-	 * <p>Note: Function names share a namespace with the variables in this
-	 * evaluation context, as populated by {@link #setVariable(String, Object)}.
-	 * Make sure that specified function names and variable names do not overlap.
+	 * Register the specified {@link Method} as a SpEL function.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain StandardEvaluationContext
+	 * class-level documentation} for details.
 	 * @param name the name of the function
-	 * @param method the Method to register
+	 * @param method the {@code Method} to register
 	 * @see #registerFunction(String, MethodHandle)
 	 */
 	public void registerFunction(String name, Method method) {
@@ -292,12 +378,12 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Register the specified MethodHandle as a SpEL function.
-	 * <p>Note: Function names share a namespace with the variables in this
-	 * evaluation context, as populated by {@link #setVariable(String, Object)}.
-	 * Make sure that specified function names and variable names do not overlap.
+	 * Register the specified {@link MethodHandle} as a SpEL function.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain StandardEvaluationContext
+	 * class-level documentation} for details.
 	 * @param name the name of the function
-	 * @param methodHandle the MethodHandle to register
+	 * @param methodHandle the {@link MethodHandle} to register
 	 * @since 6.1
 	 * @see #registerFunction(String, Method)
 	 */
@@ -305,6 +391,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.variables.put(name, methodHandle);
 	}
 
+	/**
+	 * Look up a named variable or function within this evaluation context.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain StandardEvaluationContext
+	 * class-level documentation} for details.
+	 * @param name the name of the variable or function to look up
+	 * @return the value of the variable or function, or {@code null} if not found
+	 */
 	@Override
 	@Nullable
 	public Object lookupVariable(String name) {
@@ -333,19 +427,20 @@ public class StandardEvaluationContext implements EvaluationContext {
 	/**
 	 * Apply the internal delegates of this instance to the specified
 	 * {@code evaluationContext}. Typically invoked right after the new context
-	 * instance has been created to reuse the delegates. Do not modify the
+	 * instance has been created to reuse the delegates. Does not modify the
 	 * {@linkplain #setRootObject(Object) root object} or any registered
-	 * {@linkplain #setVariables(Map) variables}.
+	 * {@linkplain #setVariable variables or functions}.
 	 * @param evaluationContext the evaluation context to update
 	 * @since 6.1.1
 	 */
 	public void applyDelegatesTo(StandardEvaluationContext evaluationContext) {
 		// Triggers initialization for default delegates
-		evaluationContext.setConstructorResolvers(new ArrayList<>(this.getConstructorResolvers()));
-		evaluationContext.setMethodResolvers(new ArrayList<>(this.getMethodResolvers()));
-		evaluationContext.setPropertyAccessors(new ArrayList<>(this.getPropertyAccessors()));
-		evaluationContext.setTypeLocator(this.getTypeLocator());
-		evaluationContext.setTypeConverter(this.getTypeConverter());
+		evaluationContext.setConstructorResolvers(new ArrayList<>(getConstructorResolvers()));
+		evaluationContext.setMethodResolvers(new ArrayList<>(getMethodResolvers()));
+		evaluationContext.setPropertyAccessors(new ArrayList<>(getPropertyAccessors()));
+		evaluationContext.setIndexAccessors(new ArrayList<>(getIndexAccessors()));
+		evaluationContext.setTypeLocator(getTypeLocator());
+		evaluationContext.setTypeConverter(getTypeConverter());
 
 		evaluationContext.beanResolver = this.beanResolver;
 		evaluationContext.operatorOverloader = this.operatorOverloader;
@@ -360,6 +455,15 @@ public class StandardEvaluationContext implements EvaluationContext {
 			accessors = new ArrayList<>(5);
 			accessors.add(new ReflectivePropertyAccessor());
 			this.propertyAccessors = accessors;
+		}
+		return accessors;
+	}
+
+	private List<IndexAccessor> initIndexAccessors() {
+		List<IndexAccessor> accessors = this.indexAccessors;
+		if (accessors == null) {
+			accessors = new ArrayList<>(5);
+			this.indexAccessors = accessors;
 		}
 		return accessors;
 	}
@@ -385,8 +489,8 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return resolvers;
 	}
 
-	private static <T> void addBeforeDefault(List<T> resolvers, T resolver) {
-		resolvers.add(resolvers.size() - 1, resolver);
+	private static <T> void addBeforeDefault(List<T> list, T element) {
+		list.add(list.size() - 1, element);
 	}
 
 }

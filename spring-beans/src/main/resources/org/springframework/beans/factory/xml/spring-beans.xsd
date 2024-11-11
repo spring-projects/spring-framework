@@ -90,7 +90,7 @@
 	elements followed, etc.  If none of the specified profiles are active at time of
 	parsing, then the entire element and its contents will be ignored.
 
-	If a profile is prefixed with the NOT operator '!', e.g.
+	If a profile is prefixed with the NOT operator '!', for example,
 
 		<beans profile="p1,!p2">
 
@@ -152,8 +152,8 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	A default bean name pattern for identifying autowire candidates:
-	e.g. "*Service", "data*", "*Service*", "data*Service".
-	Also accepts a comma-separated list of patterns: e.g. "*Service,*Dao".
+	for example, "*Service", "data*", "*Service*", "data*Service".
+	Also accepts a comma-separated list of patterns: for example, "*Service,*Dao".
 	See the documentation for the 'autowire-candidate' attribute of the
 	'bean' element for the semantic details of autowire candidate beans.
 					]]></xsd:documentation>
@@ -270,7 +270,7 @@
 		<xsd:attribute name="class" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The fully qualified name of the bean's class, except if it serves only
+	The fully-qualified name of the bean's class, unless it serves only
 	as a parent definition for child bean definitions.
 				]]></xsd:documentation>
 			</xsd:annotation>
@@ -308,7 +308,7 @@
 
 	Singletons are most commonly used, and are ideal for multi-threaded
 	service objects. Further scopes, such as "request" or "session", might
-	be supported by extended bean factories (e.g. in a web environment).
+	be supported by extended bean factories (for example, in a web environment).
 
 	Inner bean definitions inherit the scope of their containing bean
 	definition, unless explicitly specified: The inner bean will be a
@@ -341,7 +341,7 @@
 	Hence, it needs to be specified per concrete bean definition. It can be
 	shared through the 'default-lazy-init' attribute at the 'beans' level
 	and potentially inherited from outer 'beans' defaults in case of nested
-	'beans' sections (e.g. with different profiles).
+	'beans' sections (for example, with different profiles).
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -389,7 +389,7 @@
 	Hence, it needs to be specified per concrete bean definition. It can be
 	shared through the 'default-autowire' attribute at the 'beans' level
 	and potentially inherited from outer 'beans' defaults in case of nested
-	'beans' sections (e.g. with different profiles).
+	'beans' sections (for example, with different profiles).
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:simpleType>
@@ -595,7 +595,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The exact index of the argument in the constructor argument list.
-	Only needed to avoid ambiguities, e.g. in case of 2 arguments of
+	Only needed to avoid ambiguities, for example, in case of 2 arguments of
 	the exact same type.
 					]]></xsd:documentation>
 				</xsd:annotation>
@@ -604,7 +604,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The exact type of the constructor argument. Only needed to avoid
-	ambiguities, e.g. in case of 2 single argument constructors
+	ambiguities, for example, in case of 2 single argument constructors
 	that can both be converted from a String.
 					]]></xsd:documentation>
 				</xsd:annotation>
@@ -613,7 +613,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The exact name of the argument in the constructor argument list.
-	Only needed to avoid ambiguities, e.g. in case of 2 arguments of
+	Only needed to avoid ambiguities, for example, in case of 2 arguments of
 	the exact same type. Note: This requires debug symbols to be
 	stored in the class file in order to introspect argument names!
 					]]></xsd:documentation>
@@ -765,8 +765,8 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Specification of the type of an overloaded method argument as a String.
-	For convenience, this may be a substring of the FQN. E.g. all the
-	following would match "java.lang.String":
+	For convenience, this may be a substring of the fully-qualified class name.
+	For example, all the following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str
@@ -899,7 +899,7 @@
 			<xsd:documentation><![CDATA[
 	An array can contain multiple inner bean, ref, collection, or value elements.
 	This configuration element will always result in an array, even when being
-	defined e.g. as a value for a map with value type Object.
+	defined, for example, as a value for a map with value type Object.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -1091,7 +1091,7 @@
 		<xsd:attribute name="value-type" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The default Java type for nested values. Must be a fully qualified
+	The default Java type for nested values. Must be a fully-qualified
 	class name.
 				]]></xsd:documentation>
 			</xsd:annotation>
@@ -1120,7 +1120,7 @@
 				<xsd:attribute name="key-type" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The default Java type for nested entry keys. Must be a fully qualified
+	The default Java type for nested entry keys. Must be a fully-qualified
 	class name.
 						]]></xsd:documentation>
 					</xsd:annotation>

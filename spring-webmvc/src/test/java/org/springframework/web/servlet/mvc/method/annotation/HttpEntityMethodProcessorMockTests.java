@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -103,16 +102,12 @@ class HttpEntityMethodProcessorMockTests {
 
 	private HttpEntityMethodProcessor processor;
 
-	@SuppressWarnings("unchecked")
 	private HttpMessageConverter<String> stringHttpMessageConverter = mock();
 
-	@SuppressWarnings("unchecked")
 	private HttpMessageConverter<Resource> resourceMessageConverter = mock();
 
-	@SuppressWarnings("unchecked")
 	private HttpMessageConverter<Object> resourceRegionMessageConverter = mock();
 
-	@SuppressWarnings("unchecked")
 	private HttpMessageConverter<Object> jsonMessageConverter = mock();
 
 	private MethodParameter paramHttpEntity;
@@ -165,7 +160,7 @@ class HttpEntityMethodProcessorMockTests {
 				stringHttpMessageConverter, resourceMessageConverter, resourceRegionMessageConverter, jsonMessageConverter));
 
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class,
-				Integer.TYPE, RequestEntity.class);
+				int.class, RequestEntity.class);
 
 		paramHttpEntity = new MethodParameter(handle1, 0);
 		paramRequestEntity = new MethodParameter(handle1, 3);
@@ -247,7 +242,7 @@ class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test
-	void shouldFailResolvingWhenConverterCannotRead() throws Exception {
+	void shouldFailResolvingWhenConverterCannotRead() {
 		MediaType contentType = TEXT_PLAIN;
 		servletRequest.setMethod("POST");
 		servletRequest.addHeader("Content-Type", contentType.toString());
@@ -260,7 +255,7 @@ class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test
-	void shouldFailResolvingWhenContentTypeNotSupported() throws Exception {
+	void shouldFailResolvingWhenContentTypeNotSupported() {
 		servletRequest.setMethod("POST");
 		servletRequest.setContent("some content".getBytes(StandardCharsets.UTF_8));
 		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
@@ -378,7 +373,7 @@ class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test
-	void shouldFailHandlingWhenContentTypeNotSupported() throws Exception {
+	void shouldFailHandlingWhenContentTypeNotSupported() {
 		String body = "Foo";
 		ResponseEntity<String> returnValue = new ResponseEntity<>(body, HttpStatus.OK);
 		MediaType accepted = MediaType.APPLICATION_ATOM_XML;
@@ -426,7 +421,7 @@ class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test
-	void shouldFailHandlingWhenConverterCannotWrite() throws Exception {
+	void shouldFailHandlingWhenConverterCannotWrite() {
 		String body = "Foo";
 		ResponseEntity<String> returnValue = new ResponseEntity<>(body, HttpStatus.OK);
 		MediaType accepted = TEXT_PLAIN;
@@ -442,7 +437,7 @@ class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test  // SPR-9142
-	void shouldFailHandlingWhenAcceptHeaderIllegal() throws Exception {
+	void shouldFailHandlingWhenAcceptHeaderIllegal() {
 		ResponseEntity<String> returnValue = new ResponseEntity<>("Body", HttpStatus.ACCEPTED);
 		servletRequest.addHeader("Accept", "01");
 
@@ -474,7 +469,7 @@ class HttpEntityMethodProcessorMockTests {
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
 		verify(stringHttpMessageConverter).write(eq("body"), eq(TEXT_PLAIN), outputMessage.capture());
 		assertThat(mavContainer.isRequestHandled()).isTrue();
-		assertThat(outputMessage.getValue().getHeaders().get("header").get(0)).isEqualTo("headerValue");
+		assertThat(outputMessage.getValue().getHeaders().get("header")).containsExactly("headerValue");
 	}
 
 	@Test
@@ -739,7 +734,7 @@ class HttpEntityMethodProcessorMockTests {
 		ZonedDateTime dateTime = ofEpochMilli(new Date().getTime()).atZone(GMT);
 		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
 
-		long justModified = dateTime.plus(1, ChronoUnit.SECONDS).toEpochSecond() * 1000;
+		long justModified = dateTime.plusSeconds(1).toEpochSecond() * 1000;
 		ResponseEntity<String> returnValue = ResponseEntity.ok()
 				.lastModified(justModified).body("body");
 		initStringMessageConversion(TEXT_PLAIN);

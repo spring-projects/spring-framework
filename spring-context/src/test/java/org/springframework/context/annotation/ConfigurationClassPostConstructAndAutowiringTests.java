@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class ConfigurationClassPostConstructAndAutowiringTests {
+class ConfigurationClassPostConstructAndAutowiringTests {
 
 	/**
 	 * Prior to the fix for SPR-8080, this method would succeed due to ordering of
 	 * configuration class registration.
 	 */
 	@Test
-	public void control() {
+	void control() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config1.class, Config2.class);
 		ctx.refresh();
@@ -62,7 +62,7 @@ public class ConfigurationClassPostConstructAndAutowiringTests {
 	 * configuration class registration.
 	 */
 	@Test
-	public void originalReproCase() {
+	void originalReproCase() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config2.class, Config1.class);
 		ctx.refresh();

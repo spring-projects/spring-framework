@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,6 +205,7 @@ public class TestContextAotGenerator {
 			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 			generateAotTestContextInitializerMappings(initializerClassMappings);
 			generateAotTestAttributeMappings();
+			registerSkippedExceptionTypes();
 		}
 		finally {
 			resetAotFactories();
@@ -351,6 +352,7 @@ public class TestContextAotGenerator {
 			}
 			catch (Exception ex) {
 				Throwable cause = (ex instanceof ContextLoadException cle ? cle.getCause() : ex);
+				Assert.state(cause != null, "Cause must not be null");
 				throw new TestContextAotException(
 						"Failed to load ApplicationContext for AOT processing for test class [%s]"
 							.formatted(testClass.getName()), cause);
@@ -369,7 +371,7 @@ public class TestContextAotGenerator {
 		registerDeclaredConstructors(testContextBootstrapper.getClass()); // @BootstrapWith
 		testContextBootstrapper.getTestExecutionListeners().forEach(listener -> {
 			registerDeclaredConstructors(listener.getClass()); // @TestExecutionListeners
-			if (listener instanceof AotTestExecutionListener aotListener) {
+			if (!isDisabledInAotMode.test(testClass) && listener instanceof AotTestExecutionListener aotListener) {
 				aotListener.processAheadOfTime(this.runtimeHints, testClass, getClass().getClassLoader());
 			}
 		});
@@ -420,6 +422,20 @@ public class TestContextAotGenerator {
 
 	private void registerDeclaredConstructors(Class<?> type) {
 		this.runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
+	}
+
+	/**
+	 * Register hints for skipped exception types loaded via reflection in
+	 * {@link org.springframework.test.context.TestContextManager}.
+	 * @since 6.1.2
+	 */
+	private void registerSkippedExceptionTypes() {
+		Stream.of(
+				"org.opentest4j.TestAbortedException",
+				"org.junit.AssumptionViolatedException",
+				"org.testng.SkipException")
+			.map(TypeReference::of)
+			.forEach(this.runtimeHints.reflection()::registerType);
 	}
 
 	private static boolean getFailOnErrorFlag() {

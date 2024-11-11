@@ -31,7 +31,7 @@ import org.springframework.util.CollectionUtils;
  * instances and mapping to bean names; the latter is required for non-singleton handlers.
  *
  * <p>The "urlMap" property is suitable for populating the handler map with
- * bean references, e.g. via the map element in XML bean definitions.
+ * bean references, for example, via the map element in XML bean definitions.
  *
  * <p>Mappings to bean names can be set via the "mappings" property, in a form
  * accepted by the {@code java.util.Properties} class, as follows:

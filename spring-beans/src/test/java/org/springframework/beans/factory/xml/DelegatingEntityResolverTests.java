@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,27 +23,27 @@ import org.xml.sax.InputSource;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link DelegatingEntityResolver} class.
+ * Tests for {@link DelegatingEntityResolver}.
  *
  * @author Rick Evans
  * @author Chris Beams
  */
-public class DelegatingEntityResolverTests {
+class DelegatingEntityResolverTests {
 
 	@Test
-	public void testCtorWhereDtdEntityResolverIsNull() throws Exception {
+	void testCtorWhereDtdEntityResolverIsNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingEntityResolver(null, new NoOpEntityResolver()));
 	}
 
 	@Test
-	public void testCtorWhereSchemaEntityResolverIsNull() throws Exception {
+	void testCtorWhereSchemaEntityResolverIsNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingEntityResolver(new NoOpEntityResolver(), null));
 	}
 
 	@Test
-	public void testCtorWhereEntityResolversAreBothNull() throws Exception {
+	void testCtorWhereEntityResolversAreBothNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingEntityResolver(null, null));
 	}

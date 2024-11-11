@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class ServletServerHttpResponseTests {
+class ServletServerHttpResponseTests {
 
 	private ServletServerHttpResponse response;
 
@@ -73,6 +73,19 @@ public class ServletServerHttpResponseTests {
 		assertThat(mockResponse.getHeader("Content-Type")).as("Invalid Content-Type").isEqualTo("text/plain;charset=UTF-8");
 		assertThat(mockResponse.getContentType()).as("Invalid Content-Type").isEqualTo("text/plain;charset=UTF-8");
 		assertThat(mockResponse.getCharacterEncoding()).as("Invalid Content-Type").isEqualTo("UTF-8");
+	}
+
+	@Test
+	void getHeadersWithNoContentType() {
+		this.response = new ServletServerHttpResponse(this.mockResponse);
+		assertThat(this.response.getHeaders().get(HttpHeaders.CONTENT_TYPE)).isNull();
+	}
+
+	@Test
+	void getHeadersWithContentType() {
+		this.mockResponse.setContentType(MediaType.TEXT_PLAIN_VALUE);
+		this.response = new ServletServerHttpResponse(this.mockResponse);
+		assertThat(this.response.getHeaders().get(HttpHeaders.CONTENT_TYPE)).containsExactly(MediaType.TEXT_PLAIN_VALUE);
 	}
 
 	@Test

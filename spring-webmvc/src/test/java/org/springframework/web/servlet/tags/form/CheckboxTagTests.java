@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.Tag;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -55,7 +54,6 @@ class CheckboxTagTests extends AbstractFormTagTests {
 	private TestBean bean;
 
 	@Override
-	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new CheckboxTag() {
 			@Override
@@ -611,7 +609,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	void withNullValue() throws Exception {
+	void withNullValue() {
 		this.tag.setPath("name");
 		assertThatIllegalArgumentException().as("null value binding to a non-boolean").isThrownBy(
 				this.tag::doStartTag);
@@ -641,7 +639,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	void dynamicTypeAttribute() throws JspException {
+	void dynamicTypeAttribute() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.tag.setDynamicAttribute(null, "type", "email"))
 			.withMessage("Attribute type=\"email\" is not allowed");
@@ -694,7 +692,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 	}
 
 
-	private class MyStringTrimmerEditor extends StringTrimmerEditor {
+	private static class MyStringTrimmerEditor extends StringTrimmerEditor {
 
 		public int count = 0;
 
@@ -710,7 +708,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 	}
 
 
-	private class MyIntegerEditor extends PropertyEditorSupport {
+	private static class MyIntegerEditor extends PropertyEditorSupport {
 
 		public int count = 0;
 

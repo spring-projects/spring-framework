@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,19 +167,21 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 		MergedAnnotation<A> result = null;
 		for (int i = 0; i < this.annotations.length; i++) {
 			MergedAnnotation<?> root = this.annotations[i];
-			AnnotationTypeMappings mappings = this.mappings[i];
-			for (int mappingIndex = 0; mappingIndex < mappings.size(); mappingIndex++) {
-				AnnotationTypeMapping mapping = mappings.get(mappingIndex);
-				if (!isMappingForType(mapping, requiredType)) {
-					continue;
-				}
-				MergedAnnotation<A> candidate = (mappingIndex == 0 ? (MergedAnnotation<A>) root :
-						TypeMappedAnnotation.createIfPossible(mapping, root, IntrospectionFailureLogger.INFO));
-				if (candidate != null && (predicate == null || predicate.test(candidate))) {
-					if (selector.isBestCandidate(candidate)) {
-						return candidate;
+			if (root != null) {
+				AnnotationTypeMappings mappings = this.mappings[i];
+				for (int mappingIndex = 0; mappingIndex < mappings.size(); mappingIndex++) {
+					AnnotationTypeMapping mapping = mappings.get(mappingIndex);
+					if (!isMappingForType(mapping, requiredType)) {
+						continue;
 					}
-					result = (result != null ? selector.select(result, candidate) : candidate);
+					MergedAnnotation<A> candidate = (mappingIndex == 0 ? (MergedAnnotation<A>) root :
+							TypeMappedAnnotation.createIfPossible(mapping, root, IntrospectionFailureLogger.INFO));
+					if (candidate != null && (predicate == null || predicate.test(candidate))) {
+						if (selector.isBestCandidate(candidate)) {
+							return candidate;
+						}
+						result = (result != null ? selector.select(result, candidate) : candidate);
+					}
 				}
 			}
 		}

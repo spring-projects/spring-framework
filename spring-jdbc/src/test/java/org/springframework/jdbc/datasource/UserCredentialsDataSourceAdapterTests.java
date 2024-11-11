@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @since 28.05.2004
  */
-public class UserCredentialsDataSourceAdapterTests {
+class UserCredentialsDataSourceAdapterTests {
 
 	@Test
-	public void testStaticCredentials() throws SQLException {
+	void testStaticCredentials() throws SQLException {
 		DataSource dataSource = mock();
 		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);
@@ -47,7 +47,7 @@ public class UserCredentialsDataSourceAdapterTests {
 	}
 
 	@Test
-	public void testNoCredentials() throws SQLException {
+	void testNoCredentials() throws SQLException {
 		DataSource dataSource = mock();
 		Connection connection = mock();
 		given(dataSource.getConnection()).willReturn(connection);
@@ -57,7 +57,7 @@ public class UserCredentialsDataSourceAdapterTests {
 	}
 
 	@Test
-	public void testThreadBoundCredentials() throws SQLException {
+	void testThreadBoundCredentials() throws SQLException {
 		DataSource dataSource = mock();
 		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);

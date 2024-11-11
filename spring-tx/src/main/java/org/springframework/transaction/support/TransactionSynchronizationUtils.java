@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public abstract class TransactionSynchronizationUtils {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
 
-	private static final boolean aopAvailable = ClassUtils.isPresent(
+	private static final boolean aopPresent = ClassUtils.isPresent(
 			"org.springframework.aop.scope.ScopedObject", TransactionSynchronizationUtils.class.getClassLoader());
 
 
@@ -67,7 +67,7 @@ public abstract class TransactionSynchronizationUtils {
 		if (resourceRef instanceof InfrastructureProxy infrastructureProxy) {
 			resourceRef = infrastructureProxy.getWrappedObject();
 		}
-		if (aopAvailable) {
+		if (aopPresent) {
 			// now unwrap scoped proxy
 			resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
 		}
@@ -81,8 +81,38 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#flush()
 	 */
 	public static void triggerFlush() {
-		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
-			synchronization.flush();
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.flush();
+			}
+		}
+	}
+
+	/**
+	 * Trigger {@code flush} callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a {@code savepoint} callback
+	 * @since 6.2
+	 * @see TransactionSynchronization#savepoint
+	 */
+	static void triggerSavepoint(Object savepoint) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.savepoint(savepoint);
+			}
+		}
+	}
+
+	/**
+	 * Trigger {@code flush} callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a {@code savepointRollback} callback
+	 * @since 6.2
+	 * @see TransactionSynchronization#savepointRollback
+	 */
+	static void triggerSavepointRollback(Object savepoint) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.savepointRollback(savepoint);
+			}
 		}
 	}
 

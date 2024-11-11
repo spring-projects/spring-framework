@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,26 @@
 
 package org.springframework.core.env;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.testfixture.env.MockPropertySource;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
 
 /**
- * Unit tests for {@link StandardEnvironment}.
+ * Tests for {@link StandardEnvironment}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -207,9 +211,9 @@ class StandardEnvironmentTests {
 	void defaultProfileWithCircularPlaceholder() {
 		try {
 			System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
-			assertThatIllegalArgumentException()
+			assertThatExceptionOfType(PlaceholderResolutionException.class)
 				.isThrownBy(environment::getDefaultProfiles)
-				.withMessage("Circular placeholder reference 'spring.profiles.default' in property definitions");
+				.withMessageContaining("Circular placeholder reference 'spring.profiles.default'");
 		}
 		finally {
 			System.clearProperty(DEFAULT_PROFILES_PROPERTY_NAME);
@@ -300,6 +304,12 @@ class StandardEnvironmentTests {
 			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isEqualTo(DISALLOWED_PROPERTY_VALUE);
 			assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isEqualTo(NON_STRING_PROPERTY_VALUE);
 			assertThat(systemProperties.get(NON_STRING_PROPERTY_NAME)).isEqualTo(STRING_PROPERTY_VALUE);
+
+			PropertiesPropertySource systemPropertySource = (PropertiesPropertySource)
+					environment.getPropertySources().get(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+			Set<String> expectedKeys = new HashSet<>(System.getProperties().stringPropertyNames());
+			expectedKeys.add(STRING_PROPERTY_NAME);  // filtered out by stringPropertyNames due to non-String value
+			assertThat(Set.of(systemPropertySource.getPropertyNames())).isEqualTo(expectedKeys);
 		}
 		finally {
 			System.clearProperty(ALLOWED_PROPERTY_NAME);
@@ -315,6 +325,7 @@ class StandardEnvironmentTests {
 		assertThat(systemEnvironment).isNotNull();
 		assertThat(System.getenv()).isSameAs(systemEnvironment);
 	}
+
 
 	@Nested
 	class GetActiveProfiles {
@@ -364,6 +375,7 @@ class StandardEnvironmentTests {
 			}
 		}
 	}
+
 
 	@Nested
 	class AcceptsProfilesTests {
@@ -447,33 +459,29 @@ class StandardEnvironmentTests {
 			environment.addActiveProfile("p2");
 			assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isTrue();
 		}
-
 	}
+
 
 	@Nested
 	class MatchesProfilesTests {
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withEmptyArgumentList() {
 			assertThatIllegalArgumentException().isThrownBy(environment::matchesProfiles);
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withNullArgumentList() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles((String[]) null));
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withNullArgument() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles((String) null));
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", null));
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withEmptyArgument() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles(""));
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", ""));
@@ -481,13 +489,11 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withInvalidNotOperator() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", "!"));
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withInvalidCompoundExpressionGrouping() {
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 | p2 & p3"));
 			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 & p2 | p3"));
@@ -495,7 +501,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void activeProfileSetProgrammatically() {
 			assertThat(environment.matchesProfiles("p1", "p2")).isFalse();
 
@@ -510,7 +515,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void activeProfileSetViaProperty() {
 			assertThat(environment.matchesProfiles("p1")).isFalse();
 
@@ -519,7 +523,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void defaultProfile() {
 			assertThat(environment.matchesProfiles("pd")).isFalse();
 
@@ -532,7 +535,6 @@ class StandardEnvironmentTests {
 		}
 
 		@Test
-		@SuppressWarnings("deprecation")
 		void withNotOperator() {
 			assertThat(environment.matchesProfiles("p1")).isFalse();
 			assertThat(environment.matchesProfiles("!p1")).isTrue();
@@ -559,7 +561,6 @@ class StandardEnvironmentTests {
 			assertThat(environment.matchesProfiles("p2 & (foo | p1)")).isTrue();
 			assertThat(environment.matchesProfiles("foo", "(p2 & p1)")).isTrue();
 		}
-
 	}
 
 }

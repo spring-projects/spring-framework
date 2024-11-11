@@ -74,7 +74,8 @@ The `format` subpackages provide several `Formatter` implementations as a conven
 The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
 `PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
-a `java.text.DateFormat`.
+a `java.text.DateFormat`, as well as a `DurationFormatter` to format `Duration` objects
+in different styles defined in the `@DurationFormat.Style` enum (see <<format-annotations-api>>).
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
@@ -82,7 +83,7 @@ The following `DateFormatter` is an example `Formatter` implementation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.format.datetime;
 
@@ -118,7 +119,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	class DateFormatter(private val pattern: String) : Formatter<Date> {
 
@@ -179,7 +180,7 @@ annotation to a formatter to let a number style or pattern be specified:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
@@ -216,7 +217,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class NumberFormatAnnotationFormatterFactory : AnnotationFormatterFactory<NumberFormat> {
 
@@ -255,7 +256,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyModel {
 
@@ -266,7 +267,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyModel(
 		@field:NumberFormat(style = Style.CURRENCY) private val decimal: BigDecimal
@@ -280,7 +281,8 @@ Kotlin::
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
-`Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
+`Long`, `@DurationFormat` to format `Duration` fields in ISO8601 and simplified styles,
+and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
 (for millisecond timestamps) as well as JSR-310 `java.time`.
 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
@@ -290,7 +292,7 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyModel {
 
@@ -301,7 +303,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyModel(
 		@DateTimeFormat(iso=ISO.DATE) private val date: Date
@@ -316,7 +318,7 @@ Kotlin::
 The `FormatterRegistry` is an SPI for registering formatters and converters.
 `FormattingConversionService` is an implementation of `FormatterRegistry` suitable for
 most environments. You can programmatically or declaratively configure this variant
-as a Spring bean, e.g. by using `FormattingConversionServiceFactoryBean`. Because this
+as a Spring bean, for example, by using `FormattingConversionServiceFactoryBean`. Because this
 implementation also implements `ConversionService`, you can directly configure it
 for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
 

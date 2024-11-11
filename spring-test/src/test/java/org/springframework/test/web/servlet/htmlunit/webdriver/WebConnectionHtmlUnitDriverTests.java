@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
 
-import com.gargoylesoftware.htmlunit.WebConnection;
-import com.gargoylesoftware.htmlunit.WebRequest;
+import org.htmlunit.WebConnection;
+import org.htmlunit.WebRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 /**
- * Unit tests for {@link WebConnectionHtmlUnitDriver}.
+ * Tests for {@link WebConnectionHtmlUnitDriver}.
  *
  * @author Rob Winch
  * @author Sam Brannen
@@ -47,6 +47,7 @@ class WebConnectionHtmlUnitDriverTests {
 
 	@Mock
 	private WebConnection connection;
+
 
 	@BeforeEach
 	void setup() throws Exception {

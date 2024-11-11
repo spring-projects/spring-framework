@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,14 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTests {
+class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	private final Map<String, Object> attributes = new HashMap<>();
 	private final WebSocketHandler wsHandler = mock();
 
 
 	@Test
-	public void defaultConstructor() throws Exception {
+	void defaultConstructor() throws Exception {
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 		this.servletRequest.getSession().setAttribute("bar", "baz");
@@ -57,7 +57,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 	}
 
 	@Test
-	public void constructorWithAttributeNames() throws Exception {
+	void constructorWithAttributeNames() throws Exception {
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 		this.servletRequest.getSession().setAttribute("bar", "baz");
@@ -72,7 +72,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 	}
 
 	@Test
-	public void doNotCopyHttpSessionId() throws Exception {
+	void doNotCopyHttpSessionId() throws Exception {
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 
@@ -86,7 +86,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 
 	@Test
-	public void doNotCopyAttributes() throws Exception {
+	void doNotCopyAttributes() throws Exception {
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 
@@ -99,7 +99,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 	}
 
 	@Test
-	public void doNotCauseSessionCreation() throws Exception {
+	void doNotCauseSessionCreation() throws Exception {
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 

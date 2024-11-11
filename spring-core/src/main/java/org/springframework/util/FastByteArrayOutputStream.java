@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -32,12 +33,12 @@ import org.springframework.lang.Nullable;
  * its sibling {@link ResizableByteArrayOutputStream}.
  *
  * <p>Unlike {@link java.io.ByteArrayOutputStream}, this implementation is backed
- * by a {@link java.util.ArrayDeque} of {@code byte[]} instead of 1 constantly
- * resizing {@code byte[]}. It does not copy buffers when it gets expanded.
+ * by a {@link java.util.ArrayDeque} of {@code byte[]} buffers instead of one
+ * constantly resizing {@code byte[]}. It does not copy buffers when it gets expanded.
  *
  * <p>The initial buffer is only created when the stream is first written.
- * There is also no copying of the internal buffer if its content is extracted
- * with the {@link #writeTo(OutputStream)} method.
+ * There is also no copying of the internal buffers if the stream's content is
+ * extracted via the {@link #writeTo(OutputStream)} method.
  *
  * @author Craig Andrews
  * @author Juergen Hoeller
@@ -71,16 +72,16 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 
 	/**
-	 * Create a new <code>FastByteArrayOutputStream</code>
-	 * with the default initial capacity of 256 bytes.
+	 * Create a new {@code FastByteArrayOutputStream} with the default initial
+	 * capacity of 256 bytes.
 	 */
 	public FastByteArrayOutputStream() {
 		this(DEFAULT_BLOCK_SIZE);
 	}
 
 	/**
-	 * Create a new <code>FastByteArrayOutputStream</code>
-	 * with the specified initial capacity.
+	 * Create a new {@code FastByteArrayOutputStream} with the specified initial
+	 * capacity.
 	 * @param initialBlockSize the initial buffer size in bytes
 	 */
 	public FastByteArrayOutputStream(int initialBlockSize) {
@@ -149,34 +150,52 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Convert the buffer's contents into a string decoding bytes using the
+	 * Convert this stream's contents to a string by decoding the bytes using the
 	 * platform's default character set. The length of the new {@code String}
 	 * is a function of the character set, and hence may not be equal to the
-	 * size of the buffer.
+	 * size of the buffers.
 	 * <p>This method always replaces malformed-input and unmappable-character
 	 * sequences with the default replacement string for the platform's
 	 * default character set. The {@linkplain java.nio.charset.CharsetDecoder}
 	 * class should be used when more control over the decoding process is
 	 * required.
-	 * @return a String decoded from the buffer's contents
+	 * @return a String decoded from this stream's contents
+	 * @see #toString(Charset)
 	 */
 	@Override
 	public String toString() {
-		return new String(toByteArrayUnsafe());
+		return toString(Charset.defaultCharset());
 	}
 
+	/**
+	 * Convert this stream's contents to a string by decoding the bytes using the
+	 * specified {@link Charset}.
+	 * @param charset the {@link Charset} to use to decode the bytes
+	 * @return a String decoded from this stream's contents
+	 * @since 6.1.2
+	 * @see #toString()
+	 */
+	public String toString(Charset charset) {
+		if (size() == 0) {
+			return "";
+		}
+		if (this.buffers.size() == 1) {
+			return new String(this.buffers.getFirst(), 0, this.index, charset);
+		}
+		return new String(toByteArrayUnsafe(), charset);
+	}
 
 	// Custom methods
 
 	/**
-	 * Return the number of bytes stored in this <code>FastByteArrayOutputStream</code>.
+	 * Return the number of bytes stored in this {@code FastByteArrayOutputStream}.
 	 */
 	public int size() {
 		return (this.alreadyBufferedSize + this.index);
 	}
 
 	/**
-	 * Convert the stream's data to a byte array and return the byte array.
+	 * Convert this stream's contents to a byte array and return the byte array.
 	 * <p>Also replaces the internal structures with the byte array to
 	 * conserve memory: if the byte array is being created anyway, we might
 	 * as well as use it. This approach also means that if this method is
@@ -184,7 +203,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	 * a no-op.
 	 * <p>This method is "unsafe" as it returns the internal buffer.
 	 * Callers should not modify the returned buffer.
-	 * @return the current contents of this output stream, as a byte array.
+	 * @return the current contents of this stream as a byte array
 	 * @see #size()
 	 * @see #toByteArray()
 	 */
@@ -200,8 +219,8 @@ public class FastByteArrayOutputStream extends OutputStream {
 	/**
 	 * Create a newly allocated byte array.
 	 * <p>Its size is the current size of this output stream, and it will
-	 * contain the valid contents of the internal buffer.
-	 * @return the current contents of this output stream, as a byte array
+	 * contain the valid contents of the internal buffers.
+	 * @return the current contents of this stream as a byte array
 	 * @see #size()
 	 * @see #toByteArrayUnsafe()
 	 */
@@ -211,7 +230,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Reset the contents of this <code>FastByteArrayOutputStream</code>.
+	 * Reset the contents of this {@code FastByteArrayOutputStream}.
 	 * <p>All currently accumulated output in the output stream is discarded.
 	 * The output stream can be used again.
 	 */
@@ -224,19 +243,21 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Get an {@link InputStream} to retrieve the data in this OutputStream.
-	 * <p>Note that if any methods are called on the OutputStream
+	 * Get an {@link InputStream} to retrieve the contents of this
+	 * {@code FastByteArrayOutputStream}.
+	 * <p>Note that if any methods are called on this {@code FastByteArrayOutputStream}
 	 * (including, but not limited to, any of the write methods, {@link #reset()},
 	 * {@link #toByteArray()}, and {@link #toByteArrayUnsafe()}) then the
-	 * {@link java.io.InputStream}'s behavior is undefined.
-	 * @return {@link InputStream} of the contents of this OutputStream
+	 * {@code InputStream}'s behavior is undefined.
+	 * @return {@code  InputStream} of the contents of this {@code FastByteArrayOutputStream}
 	 */
 	public InputStream getInputStream() {
 		return new FastByteArrayInputStream(this);
 	}
 
 	/**
-	 * Write the buffers content to the given OutputStream.
+	 * Write the contents of this {@code FastByteArrayOutputStream} to the given
+	 * {@link OutputStream}.
 	 * @param out the OutputStream to write to
 	 */
 	public void writeTo(OutputStream out) throws IOException {
@@ -253,7 +274,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Resize the internal buffer size to a specified capacity.
+	 * Resize the internal buffer size to the specified capacity.
 	 * @param targetCapacity the desired size of the buffer
 	 * @throws IllegalArgumentException if the given capacity is smaller than
 	 * the actual size of the content stored in the buffer already
@@ -322,7 +343,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 	/**
 	 * An implementation of {@link java.io.InputStream} that reads from a given
-	 * <code>FastByteArrayOutputStream</code>.
+	 * {@code FastByteArrayOutputStream}.
 	 */
 	private static final class FastByteArrayInputStream extends UpdateMessageDigestInputStream {
 
@@ -340,8 +361,8 @@ public class FastByteArrayOutputStream extends OutputStream {
 		private int totalBytesRead = 0;
 
 		/**
-		 * Create a new <code>FastByteArrayOutputStreamInputStream</code> backed
-		 * by the given <code>FastByteArrayOutputStream</code>.
+		 * Create a new {@code FastByteArrayInputStream} backed by the given
+		 * {@code FastByteArrayOutputStream}.
 		 */
 		public FastByteArrayInputStream(FastByteArrayOutputStream fastByteArrayOutputStream) {
 			this.fastByteArrayOutputStream = fastByteArrayOutputStream;

@@ -179,7 +179,7 @@
 			<property name="offset" value="0"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
-			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF"/>
+			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF"/>
 			<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
@@ -200,6 +200,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.UpperEllCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.ArrayTypeStyleCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.OuterTypeFilenameCheck"/>
+		<module name="UnnecessarySemicolonInEnumeration"/>
 
 		<!-- Regexp -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
@@ -212,6 +213,45 @@
 			<property name="format" value="[ \t]+$"/>
 			<property name="illegalPattern" value="true"/>
 			<property name="message" value="Trailing whitespace"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="atSinceVersionConvention"/>
+			<property name="format" value="\@since \d+\.\d+\.0"/>
+			<property name="maximum" value="0"/>
+			<property name="message"
+					  value="@since should use Major.Minor version convention instead of Major.Minor.0"/>
+			<property name="ignoreComments" value="false"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="primitiveClassLiterals"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="(Boolean|Character|Byte|Short|Integer|Long|Float|Double|Void)\.TYPE"/>
+			<property name="message" value="Please use class literals for primitives and void -- for example, int.class instead of Integer.TYPE."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="toLowerCaseWithoutLocale"/>
+			<property name="format" value="\.toLowerCase\(\)"/>
+			<property name="maximum" value="0"/>
+			<property name="message"
+					  value="String.toLowerCase() should be String.toLowerCase(Locale.ROOT)"/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="toUpperCaseWithoutLocale"/>
+			<property name="format" value="\.toUpperCase\(\)"/>
+			<property name="maximum" value="0"/>
+			<property name="message"
+					  value="String.toUpperCase() should be String.toUpperCase(Locale.ROOT)"/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="systemOutErrPrint"/>
+			<property name="format" value="System\.(out|err)\.print"/>
+			<property name="maximum" value="0"/>
+			<property name="message"
+					  value="Printing to System.out and System.err is forbidden in the main codebase"/>
+			<property name="ignoreComments" value="true"/>
 		</module>
 		<module
 			name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">

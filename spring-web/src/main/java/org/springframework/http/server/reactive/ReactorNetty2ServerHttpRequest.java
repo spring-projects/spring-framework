@@ -50,6 +50,7 @@ import org.springframework.util.MultiValueMap;
  * <p>This class is based on {@link ReactorServerHttpRequest}.
  *
  * @author Violeta Georgieva
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
@@ -144,8 +145,8 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		for (CharSequence name : this.request.cookies().keySet()) {
-			for (HttpCookiePair cookie : this.request.cookies().get(name)) {
+		for (CharSequence name : this.request.allCookies().keySet()) {
+			for (HttpCookiePair cookie : this.request.allCookies().get(name)) {
 				CharSequence cookieValue = cookie.value();
 				HttpCookie httpCookie = new HttpCookie(name.toString(), cookieValue != null ? cookieValue.toString() : null);
 				cookies.add(name.toString(), httpCookie);

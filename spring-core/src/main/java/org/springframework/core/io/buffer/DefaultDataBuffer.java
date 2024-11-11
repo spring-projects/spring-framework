@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,19 +80,21 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	/**
 	 * Directly exposes the native {@code ByteBuffer} that this buffer is based
-	 * on also updating the {@code ByteBuffer's} position and limit to match
-	 * the current {@link #readPosition()} and {@link #readableByteCount()}.
+	 * on. The {@linkplain ByteBuffer#position() position} of the returned
+	 * {@code ByteBuffer} is set to the {@linkplain #readPosition() read
+	 * position}, and the {@linkplain ByteBuffer#limit()} to the
+	 * {@linkplain #writePosition() write position}.
 	 * @return the wrapped byte buffer
 	 */
 	public ByteBuffer getNativeBuffer() {
-		this.byteBuffer.position(this.readPosition);
-		this.byteBuffer.limit(readableByteCount());
-		return this.byteBuffer;
+		return this.byteBuffer.duplicate()
+				.position(this.readPosition)
+				.limit(this.writePosition);
 	}
 
 	private void setNativeBuffer(ByteBuffer byteBuffer) {
 		this.byteBuffer = byteBuffer;
-		this.capacity = byteBuffer.remaining();
+		this.capacity = byteBuffer.capacity();
 	}
 
 
@@ -353,7 +355,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer split(int index) {
+	public DefaultDataBuffer split(int index) {
 		checkIndex(index);
 
 		ByteBuffer split = this.byteBuffer.duplicate().clear()
@@ -371,7 +373,7 @@ public class DefaultDataBuffer implements DataBuffer {
 				.slice();
 		this.writePosition = Math.max(this.writePosition, index) - index;
 		this.readPosition = Math.max(this.readPosition, index) - index;
-		capacity(this.byteBuffer.capacity());
+		this.capacity = this.byteBuffer.capacity();
 
 		return result;
 	}
@@ -416,16 +418,15 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DataBuffer.ByteBufferIterator readableByteBuffers() {
-		ByteBuffer readOnly = this.byteBuffer.asReadOnlyBuffer();
-		readOnly.clear().position(this.readPosition).limit(this.writePosition - this.readPosition);
+		ByteBuffer readOnly = this.byteBuffer.slice(this.readPosition, readableByteCount())
+				.asReadOnlyBuffer();
 		return new ByteBufferIterator(readOnly);
 	}
 
 	@Override
 	public DataBuffer.ByteBufferIterator writableByteBuffers() {
-		ByteBuffer duplicate = this.byteBuffer.duplicate();
-		duplicate.clear().position(this.writePosition).limit(this.capacity - this.writePosition);
-		return new ByteBufferIterator(duplicate);
+		ByteBuffer slice = this.byteBuffer.slice(this.writePosition, writableByteCount());
+		return new ByteBufferIterator(slice);
 	}
 
 	@Override

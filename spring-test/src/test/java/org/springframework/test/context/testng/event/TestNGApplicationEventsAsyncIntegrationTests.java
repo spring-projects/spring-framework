@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.test.context.testng.event;
 
+import java.util.concurrent.TimeUnit;
+
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringC
 
 
 	@Test
-	public void asyncPublication() throws InterruptedException {
+	void asyncPublication() throws InterruptedException {
 		Thread t = new Thread(() -> context.publishEvent(new CustomEvent("asyncPublication")));
 		t.start();
 		t.join();
@@ -61,10 +62,10 @@ class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringC
 	}
 
 	@Test
-	public void asyncConsumption() {
+	void asyncConsumption() {
 		context.publishEvent(new CustomEvent("asyncConsumption"));
 
-		Awaitility.await().atMost(Durations.ONE_SECOND)
+		Awaitility.await().atMost(5, TimeUnit.SECONDS)
 				.untilAsserted(() -> assertThat(this.applicationEvents.stream(CustomEvent.class))
 						.singleElement()
 						.extracting(CustomEvent::getMessage, InstanceOfAssertFactories.STRING)

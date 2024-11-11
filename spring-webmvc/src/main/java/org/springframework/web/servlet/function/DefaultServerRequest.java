@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import java.nio.charset.Charset;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -55,6 +58,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -80,6 +84,7 @@ import org.springframework.web.util.UriBuilder;
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Patrick Strawderman
  * @since 5.2
  */
 class DefaultServerRequest implements ServerRequest {
@@ -108,7 +113,7 @@ class DefaultServerRequest implements ServerRequest {
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
 		this.attributes = new ServletAttributesMap(servletRequest);
 
-		// DispatcherServlet parses the path but for other scenarios (e.g. tests) we might need to
+		// DispatcherServlet parses the path but for other scenarios (for example, tests) we might need to
 
 		this.requestPath = (ServletRequestPathUtils.hasParsedRequestPath(servletRequest) ?
 				ServletRequestPathUtils.getParsedRequestPath(servletRequest) :
@@ -206,7 +211,13 @@ class DefaultServerRequest implements ServerRequest {
 					return (T) genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}
 			}
-			if (messageConverter.canRead(bodyClass, contentType)) {
+			else if (messageConverter instanceof SmartHttpMessageConverter<?> smartMessageConverter) {
+				ResolvableType resolvableType = ResolvableType.forType(bodyType);
+				if (smartMessageConverter.canRead(resolvableType, contentType)) {
+					return (T) smartMessageConverter.read(resolvableType, this.serverHttpRequest, null);
+				}
+			}
+			else if (messageConverter.canRead(bodyClass, contentType)) {
 				HttpMessageConverter<T> theConverter =
 						(HttpMessageConverter<T>) messageConverter;
 				Class<? extends T> clazz = (Class<? extends T>) bodyClass;
@@ -374,6 +385,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Nullable
 		public InetSocketAddress host() {
 			return this.httpHeaders.getHost();
 		}
@@ -475,12 +487,72 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public Set<Entry<String, Object>> entrySet() {
-			return Collections.list(this.servletRequest.getAttributeNames()).stream()
-					.map(name -> {
-						Object value = this.servletRequest.getAttribute(name);
-						return new SimpleImmutableEntry<>(name, value);
-					})
-					.collect(Collectors.toSet());
+			return new AbstractSet<>() {
+				@Override
+				public Iterator<Entry<String, Object>> iterator() {
+					return new Iterator<>() {
+
+						private final Iterator<String> attributes = ServletAttributesMap.this.servletRequest.getAttributeNames().asIterator();
+
+						@Override
+						public boolean hasNext() {
+							return this.attributes.hasNext();
+						}
+
+						@Override
+						public Entry<String, Object> next() {
+							String attribute = this.attributes.next();
+							Object value = ServletAttributesMap.this.servletRequest.getAttribute(attribute);
+							return new SimpleImmutableEntry<>(attribute, value);
+						}
+					};
+				}
+
+				@Override
+				public boolean isEmpty() {
+					return ServletAttributesMap.this.isEmpty();
+				}
+
+				@Override
+				public int size() {
+					return ServletAttributesMap.this.size();
+				}
+
+				@Override
+				public boolean contains(Object o) {
+					if (!(o instanceof Map.Entry<?,?> entry)) {
+						return false;
+					}
+					String attribute = (String) entry.getKey();
+					Object value = ServletAttributesMap.this.servletRequest.getAttribute(attribute);
+					return value != null && value.equals(entry.getValue());
+				}
+
+				@Override
+				public boolean addAll(Collection<? extends Entry<String, Object>> c) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public boolean remove(Object o) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public boolean removeAll(Collection<?> c) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public boolean retainAll(Collection<?> c) {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public void clear() {
+					throw new UnsupportedOperationException();
+				}
+			};
 		}
 
 		@Override
@@ -502,6 +574,22 @@ class DefaultServerRequest implements ServerRequest {
 			Object value = this.servletRequest.getAttribute(name);
 			this.servletRequest.removeAttribute(name);
 			return value;
+		}
+
+		@Override
+		public int size() {
+			Enumeration<String> attributes = this.servletRequest.getAttributeNames();
+			int size = 0;
+			while (attributes.hasMoreElements()) {
+				size++;
+				attributes.nextElement();
+			}
+			return size;
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return !this.servletRequest.getAttributeNames().hasMoreElements();
 		}
 	}
 
@@ -595,6 +683,11 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public void sendRedirect(String location) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		// @Override - on Servlet 6.1
+		public void sendRedirect(String location, int sc, boolean clearBuffer) throws IOException {
 			throw new UnsupportedOperationException();
 		}
 

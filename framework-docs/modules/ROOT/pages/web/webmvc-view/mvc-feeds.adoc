@@ -14,7 +14,7 @@ empty). The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SampleContentAtomView extends AbstractAtomFeedView {
 
@@ -34,7 +34,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class SampleContentAtomView : AbstractAtomFeedView() {
 		
@@ -57,7 +57,7 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as the follow
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SampleContentRssView extends AbstractRssFeedView {
 
@@ -77,7 +77,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class SampleContentRssView : AbstractRssFeedView() {
 

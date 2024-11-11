@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,11 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
- * Unit tests for {@link ProtobufDecoder}.
+ * Tests for {@link ProtobufDecoder}.
  *
  * @author Sebastien Deleuze
  */
-public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
+class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	private final SecondMsg secondMsg = SecondMsg.newBuilder().setBlah(123).build();
 
@@ -61,7 +61,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 
 
 	@Test
-	public void extensionRegistryNull() {
+	void extensionRegistryNull() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new ProtobufDecoder(null));
 	}
 
@@ -86,7 +86,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test
-	public void decodeChunksToMono() {
+	void decodeChunksToMono() {
 		byte[] full = this.testMsg1.toByteArray();
 		byte[] chunk1 = Arrays.copyOfRange(full, 0, full.length / 2);
 		byte[] chunk2 = Arrays.copyOfRange(full, chunk1.length, full.length);
@@ -162,11 +162,8 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	@SuppressWarnings("deprecation")
 	public void decodeSplitMessageSize() {
 		this.decoder.setMaxMessageSize(100009);
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < 10000; i++) {
-			builder.append("azertyuiop");
-		}
-		Msg bigMessage = Msg.newBuilder().setFoo(builder.toString()).setBlah(secondMsg2).build();
+		Msg bigMessage = Msg.newBuilder().setFoo("azertyuiop".repeat(10000))
+				.setBlah(secondMsg2).build();
 
 		Flux<DataBuffer> input = Flux.just(bigMessage, bigMessage)
 				.flatMap(msg -> Mono.defer(() -> {
@@ -214,7 +211,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test
-	public void exceedMaxSize() {
+	void exceedMaxSize() {
 		this.decoder.setMaxMessageSize(1);
 		Mono<DataBuffer> input = dataBuffer(this.testMsg1);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link UnmodifiableMultiValueMap}.
+ * Tests for {@link UnmodifiableMultiValueMap}.
  *
  * @author Arjen Poutsma
  * @since 6.0
@@ -41,7 +41,6 @@ import static org.mockito.Mockito.mock;
 class UnmodifiableMultiValueMapTests {
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void delegation() {
 		MultiValueMap<String, String> mock = mock();
 		UnmodifiableMultiValueMap<String, String> map = new UnmodifiableMultiValueMap<>(mock);
@@ -50,7 +49,7 @@ class UnmodifiableMultiValueMapTests {
 		assertThat(map).hasSize(1);
 
 		given(mock.isEmpty()).willReturn(false);
-		assertThat(map.isEmpty()).isFalse();
+		assertThat(map).isNotEmpty();
 
 		given(mock.containsKey("foo")).willReturn(true);
 		assertThat(map.containsKey("foo")).isTrue();
@@ -95,7 +94,7 @@ class UnmodifiableMultiValueMapTests {
 				() -> map.computeIfPresent("foo", (s1, s2) -> List.of("bar")));
 		assertThatUnsupportedOperationException().isThrownBy(() -> map.compute("foo", (s1, s2) -> List.of("bar")));
 		assertThatUnsupportedOperationException().isThrownBy(() -> map.merge("foo", List.of("bar"), (s1, s2) -> s1));
-		assertThatUnsupportedOperationException().isThrownBy(() -> map.clear());
+		assertThatUnsupportedOperationException().isThrownBy(map::clear);
 	}
 
 	@Test
@@ -137,7 +136,7 @@ class UnmodifiableMultiValueMapTests {
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.addAll(mock(List.class)));
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.retainAll(mock(List.class)));
 		assertThatUnsupportedOperationException().isThrownBy(() -> set.removeAll(mock(List.class)));
-		assertThatUnsupportedOperationException().isThrownBy(() -> set.clear());
+		assertThatUnsupportedOperationException().isThrownBy(set::clear);
 	}
 
 	@Test
@@ -177,7 +176,7 @@ class UnmodifiableMultiValueMapTests {
 		assertThatUnsupportedOperationException().isThrownBy(() -> values.removeAll(List.of(List.of("foo"))));
 		assertThatUnsupportedOperationException().isThrownBy(() -> values.retainAll(List.of(List.of("foo"))));
 		assertThatUnsupportedOperationException().isThrownBy(() -> values.removeIf(s -> true));
-		assertThatUnsupportedOperationException().isThrownBy(() -> values.clear());
+		assertThatUnsupportedOperationException().isThrownBy(values::clear);
 	}
 
 	private static ThrowableTypeAssert<UnsupportedOperationException> assertThatUnsupportedOperationException() {

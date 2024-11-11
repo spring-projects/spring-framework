@@ -41,7 +41,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * Construct a {@code NestedRuntimeException} with the specified detail message.
 	 * @param msg the detail message
 	 */
-	public NestedRuntimeException(String msg) {
+	public NestedRuntimeException(@Nullable String msg) {
 		super(msg);
 	}
 

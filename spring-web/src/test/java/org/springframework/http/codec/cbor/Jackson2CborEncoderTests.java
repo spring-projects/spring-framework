@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
- * Unit tests for {@link Jackson2CborEncoder}.
+ * Tests for {@link Jackson2CborEncoder}.
  *
  * @author Sebastien Deleuze
  */
-public class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
+class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
 
 	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");
 
@@ -66,7 +66,7 @@ public class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void canEncode() {
+	void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, CBOR_MIME_TYPE)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, null)).isTrue();
@@ -76,7 +76,7 @@ public class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void canNotEncode() {
+	void canNotEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class), APPLICATION_XML)).isFalse();
 
@@ -85,14 +85,14 @@ public class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void encode() {
+	void encode() {
 		Pojo value = new Pojo("foo", "bar");
 		DataBuffer result = encoder.encodeValue(value, this.bufferFactory, ResolvableType.forClass(Pojo.class), CBOR_MIME_TYPE, null);
 		pojoConsumer(value).accept(result);
 	}
 
 	@Test
-	public void encodeStream() {
+	void encodeStream() {
 		Pojo pojo1 = new Pojo("foo", "bar");
 		Pojo pojo2 = new Pojo("foofoo", "barbar");
 		Pojo pojo3 = new Pojo("foofoofoo", "barbarbar");

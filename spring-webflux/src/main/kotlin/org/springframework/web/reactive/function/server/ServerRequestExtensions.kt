@@ -23,7 +23,6 @@ import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.Part
-import org.springframework.util.CollectionUtils
 import org.springframework.util.MultiValueMap
 import org.springframework.web.server.WebSession
 import reactor.core.publisher.Flux
@@ -36,7 +35,7 @@ import kotlin.reflect.KClass
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
- * 
+ *
  * @author Sebastien Deleuze
  * @since 5.0
  */
@@ -193,3 +192,13 @@ fun ServerRequest.Headers.contentLengthOrNull(): Long? =
  */
 fun ServerRequest.Headers.contentTypeOrNull(): MediaType? =
 		contentType().orElse(null)
+
+/**
+ * Nullable variant of [ServerRequest.pathVariable].
+ *
+ * @author George Papadopoulos
+ * @since 6.2
+ */
+fun ServerRequest.pathVariableOrNull(name: String): String? {
+	return pathVariables()[name]
+}

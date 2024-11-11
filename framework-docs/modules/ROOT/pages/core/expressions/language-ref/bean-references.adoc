@@ -1,65 +1,73 @@
 [[expressions-bean-references]]
 = Bean References
 
-If the evaluation context has been configured with a bean resolver, you can
-look up beans from an expression by using the `@` symbol. The following example shows how
+If the evaluation context has been configured with a bean resolver, you can look up beans
+from an expression by using the `@` symbol as a prefix. The following example shows how
 to do so:
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	StandardEvaluationContext context = new StandardEvaluationContext();
 	context.setBeanResolver(new MyBeanResolver());
 
-	// This will end up calling resolve(context,"something") on MyBeanResolver during evaluation
-	Object bean = parser.parseExpression("@something").getValue(context);
+	// This will end up calling resolve(context, "someBean") on MyBeanResolver
+	// during evaluation.
+	Object bean = parser.parseExpression("@someBean").getValue(context);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val context = StandardEvaluationContext()
 	context.setBeanResolver(MyBeanResolver())
 
-	// This will end up calling resolve(context,"something") on MyBeanResolver during evaluation
-	val bean = parser.parseExpression("@something").getValue(context)
+	// This will end up calling resolve(context, "someBean") on MyBeanResolver
+	// during evaluation.
+	val bean = parser.parseExpression("@someBean").getValue(context)
 ----
 ======
 
-To access a factory bean itself, you should instead prefix the bean name with an `&` symbol.
-The following example shows how to do so:
+[NOTE]
+====
+If a bean name contains a dot (`.`) or other special characters, you must provide the
+name of the bean as a _string literal_ – for example, `@'order.service'`.
+====
+
+To access a factory bean itself, you should instead prefix the bean name with an `&`
+symbol. The following example shows how to do so:
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	StandardEvaluationContext context = new StandardEvaluationContext();
 	context.setBeanResolver(new MyBeanResolver());
 
-	// This will end up calling resolve(context,"&foo") on MyBeanResolver during evaluation
-	Object bean = parser.parseExpression("&foo").getValue(context);
+	// This will end up calling resolve(context, "&someFactoryBean") on
+	// MyBeanResolver during evaluation.
+	Object factoryBean = parser.parseExpression("&someFactoryBean").getValue(context);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val context = StandardEvaluationContext()
 	context.setBeanResolver(MyBeanResolver())
 
-	// This will end up calling resolve(context,"&foo") on MyBeanResolver during evaluation
-	val bean = parser.parseExpression("&foo").getValue(context)
+	// This will end up calling resolve(context, "&someFactoryBean") on
+	// MyBeanResolver during evaluation.
+	val factoryBean = parser.parseExpression("&someFactoryBean").getValue(context)
 ----
 ======
-
-

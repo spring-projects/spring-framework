@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
 public class AsyncConfigurerSupport implements AsyncConfigurer {
 
 	@Override
+	@Nullable
 	public Executor getAsyncExecutor() {
 		return null;
 	}

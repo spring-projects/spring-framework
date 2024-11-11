@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -79,6 +79,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Sebastien Deleuze
  * @author Eddú Meléndez
+ * @author Hyoungjune Kim
  */
 @SuppressWarnings("deprecation")
 class Jackson2ObjectMapperBuilderTests {
@@ -278,21 +280,25 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
-	void wellKnownModules() throws JsonProcessingException, UnsupportedEncodingException {
+	void wellKnownModules() throws JsonProcessingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
 		Path file = Paths.get("foo");
-		assertThat(new String(objectMapper.writeValueAsBytes(file), "UTF-8")).endsWith("foo\"");
+		assertThat(new String(objectMapper.writeValueAsBytes(file), StandardCharsets.UTF_8))
+				.endsWith("foo\"");
 
 		Optional<String> optional = Optional.of("test");
-		assertThat(new String(objectMapper.writeValueAsBytes(optional), "UTF-8")).isEqualTo("\"test\"");
+		assertThat(new String(objectMapper.writeValueAsBytes(optional), StandardCharsets.UTF_8))
+				.isEqualTo("\"test\"");
 
 
-		assertThatCode(() -> objectMapper.readValue("{\"x\":1,\"y\":2}", ParameterModuleDto.class)).doesNotThrowAnyException();
+		assertThatCode(() -> objectMapper.readValue("{\"x\":1,\"y\":2}", ParameterModuleDto.class))
+				.doesNotThrowAnyException();
 
 		// Kotlin module
 		IntRange range = new IntRange(1, 3);
-		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3}");
+		assertThat(new String(objectMapper.writeValueAsBytes(range), StandardCharsets.UTF_8))
+				.isEqualTo("{\"start\":1,\"end\":3}");
 	}
 
 	@Test  // gh-22576
@@ -585,6 +591,13 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
+	void yaml() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.yaml().build();
+		assertThat(objectMapper).isNotNull();
+		assertThat(objectMapper.getFactory().getClass()).isEqualTo(YAMLFactory.class);
+	}
+
+	@Test
 	void visibility() throws JsonProcessingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.visibility(PropertyAccessor.GETTER, Visibility.NONE)
@@ -744,7 +757,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 	static class FooSerializer extends JsonSerializer<Foo> {
 		@Override
-		public void serialize(Foo value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+		public void serialize(Foo value, JsonGenerator gen, SerializerProvider serializers) {
 		}
 
 		@Override
@@ -755,7 +768,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 	static class BarSerializer extends JsonSerializer<Bar> {
 		@Override
-		public void serialize(Bar value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+		public void serialize(Bar value, JsonGenerator gen, SerializerProvider serializers) {
 		}
 		@Override
 		public Class<Bar> handledType() {

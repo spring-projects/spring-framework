@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,16 +39,40 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  */
-public class MessageHeaderAccessorTests {
+class MessageHeaderAccessorTests {
 
 	@Test
-	public void newEmptyHeaders() {
+	void newEmptyHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		assertThat(accessor.toMap()).isEmpty();
 	}
 
 	@Test
-	public void existingHeaders() throws InterruptedException {
+	void fromEmptyMap() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMap(Collections.emptyMap());
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void fromNullMap() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMap(null);
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void fromEmptyMessageHeaders() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMessageHeaders(new MessageHeaders(Collections.emptyMap()));
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void fromNullMessageHeaders() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMessageHeaders(null);
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void existingHeaders() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("bar", "baz");
@@ -63,7 +87,33 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void existingHeadersModification() throws InterruptedException {
+	void fromMapWithExistingHeaders() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("foo", "bar");
+		map.put("bar", "baz");
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMap(map);
+		MessageHeaders actual = accessor.getMessageHeaders();
+
+		assertThat(actual).hasSize(3);
+		assertThat(actual.get("foo")).isEqualTo("bar");
+		assertThat(actual.get("bar")).isEqualTo("baz");
+	}
+
+	@Test
+	void fromMessageHeaderWithExistingHeaders() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("foo", "bar");
+		map.put("bar", "baz");
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMessageHeaders(new MessageHeaders(map));
+		MessageHeaders actual = accessor.getMessageHeaders();
+
+		assertThat(actual).hasSize(3);
+		assertThat(actual.get("foo")).isEqualTo("bar");
+		assertThat(actual.get("bar")).isEqualTo("baz");
+	}
+
+	@Test
+	void existingHeadersModification() throws InterruptedException {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("bar", "baz");
@@ -82,7 +132,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void testRemoveHeader() {
+	void testRemoveHeader() {
 		Message<?> message = new GenericMessage<>("payload", Collections.singletonMap("foo", "bar"));
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor(message);
 		accessor.removeHeader("foo");
@@ -91,7 +141,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void testRemoveHeaderEvenIfNull() {
+	void testRemoveHeaderEvenIfNull() {
 		Message<?> message = new GenericMessage<>("payload", Collections.singletonMap("foo", null));
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor(message);
 		accessor.removeHeader("foo");
@@ -100,7 +150,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void removeHeaders() {
+	void removeHeaders() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("bar", "baz");
@@ -116,7 +166,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void copyHeaders() {
+	void copyHeaders() {
 		Map<String, Object> map1 = new HashMap<>();
 		map1.put("foo", "bar");
 		GenericMessage<String> message = new GenericMessage<>("payload", map1);
@@ -134,7 +184,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void copyHeadersIfAbsent() {
+	void copyHeadersIfAbsent() {
 		Map<String, Object> map1 = new HashMap<>();
 		map1.put("foo", "bar");
 		GenericMessage<String> message = new GenericMessage<>("payload", map1);
@@ -152,17 +202,16 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void copyHeadersFromNullMap() {
+	void copyHeadersFromNullMap() {
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.copyHeaders(null);
 		headers.copyHeadersIfAbsent(null);
 
-		assertThat(headers.getMessageHeaders()).hasSize(1);
-		assertThat(headers.getMessageHeaders().keySet()).isEqualTo(Collections.singleton("id"));
+		assertThat(headers.getMessageHeaders()).containsOnlyKeys(Collections.singleton("id"));
 	}
 
 	@Test
-	public void toMap() {
+	void toMap() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 
 		accessor.setHeader("foo", "bar1");
@@ -184,7 +233,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void leaveMutable() {
+	void leaveMutable() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
@@ -198,7 +247,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void leaveMutableDefaultBehavior() {
+	void leaveMutableDefaultBehavior() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setHeader("foo", "bar");
 		MessageHeaders headers = accessor.getMessageHeaders();
@@ -217,14 +266,14 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void getAccessor() {
+	void getAccessor() {
 		MessageHeaderAccessor expected = new MessageHeaderAccessor();
 		Message<?> message = MessageBuilder.createMessage("payload", expected.getMessageHeaders());
 		assertThat(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class)).isSameAs(expected);
 	}
 
 	@Test
-	public void getMutableAccessorSameInstance() {
+	void getMutableAccessorSameInstance() {
 		TestMessageHeaderAccessor expected = new TestMessageHeaderAccessor();
 		expected.setLeaveMutable(true);
 		Message<?> message = MessageBuilder.createMessage("payload", expected.getMessageHeaders());
@@ -236,7 +285,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void getMutableAccessorNewInstance() {
+	void getMutableAccessorNewInstance() {
 		Message<?> message = MessageBuilder.withPayload("payload").build();
 
 		MessageHeaderAccessor actual = MessageHeaderAccessor.getMutableAccessor(message);
@@ -245,7 +294,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void getMutableAccessorNewInstanceMatchingType() {
+	void getMutableAccessorNewInstanceMatchingType() {
 		TestMessageHeaderAccessor expected = new TestMessageHeaderAccessor();
 		Message<?> message = MessageBuilder.createMessage("payload", expected.getMessageHeaders());
 
@@ -256,20 +305,20 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void timestampEnabled() {
+	void timestampEnabled() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setEnableTimestamp(true);
 		assertThat(accessor.getMessageHeaders().getTimestamp()).isNotNull();
 	}
 
 	@Test
-	public void timestampDefaultBehavior() {
+	void timestampDefaultBehavior() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		assertThat((Object) accessor.getMessageHeaders().getTimestamp()).isNull();
+		assertThat(accessor.getMessageHeaders().getTimestamp()).isNull();
 	}
 
 	@Test
-	public void idGeneratorCustom() {
+	void idGeneratorCustom() {
 		final UUID id = new UUID(0L, 23L);
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setIdGenerator(() -> id);
@@ -277,22 +326,22 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void idGeneratorDefaultBehavior() {
+	void idGeneratorDefaultBehavior() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		assertThat(accessor.getMessageHeaders().getId()).isNotNull();
 	}
 
 
 	@Test
-	public void idTimestampWithMutableHeaders() {
+	void idTimestampWithMutableHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setIdGenerator(() -> MessageHeaders.ID_VALUE_NONE);
 		accessor.setEnableTimestamp(false);
 		accessor.setLeaveMutable(true);
 		MessageHeaders headers = accessor.getMessageHeaders();
 
-		assertThat((Object) headers.getId()).isNull();
-		assertThat((Object) headers.getTimestamp()).isNull();
+		assertThat(headers.getId()).isNull();
+		assertThat(headers.getTimestamp()).isNull();
 
 		final UUID id = new UUID(0L, 23L);
 		accessor.setIdGenerator(() -> id);
@@ -304,7 +353,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void getShortLogMessagePayload() {
+	void getShortLogMessagePayload() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
@@ -320,7 +369,7 @@ public class MessageHeaderAccessorTests {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("a".repeat(80));
-		final String payload = sb.toString() + " > 80";
+		final String payload = sb + " > 80";
 
 		String actual = accessor.getShortLogMessage(payload);
 		assertThat(actual).isEqualTo("headers={contentType=text/plain} payload=" + sb + "...(truncated)");
@@ -338,7 +387,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void getDetailedLogMessagePayload() {
+	void getDetailedLogMessagePayload() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
@@ -372,7 +421,7 @@ public class MessageHeaderAccessorTests {
 	}
 
 	@Test
-	public void serializeMutableHeaders() throws Exception {
+	void serializeMutableHeaders() throws Exception {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
 		Message<String> message = new GenericMessage<>("test", headers);

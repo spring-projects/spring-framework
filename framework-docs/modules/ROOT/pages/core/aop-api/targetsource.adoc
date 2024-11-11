@@ -38,7 +38,7 @@ You can change the target by using the `swap()` method on HotSwappableTargetSour
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 	Object oldTarget = swapper.swap(newTarget);
@@ -46,7 +46,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val swapper = beanFactory.getBean("swapper") as HotSwappableTargetSource
 	val oldTarget = swapper.swap(newTarget)
@@ -152,7 +152,7 @@ The cast is defined as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 	System.out.println("Max pool size is " + conf.getMaxSize());
@@ -160,7 +160,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val conf = beanFactory.getBean("businessObject") as PoolingConfig
 	println("Max pool size is " + conf.maxSize)
@@ -168,7 +168,7 @@ Kotlin::
 ======
 
 NOTE: Pooling stateless service objects is not usually necessary. We do not believe it should
-be the default choice, as most stateless objects are naturally thread safe, and instance
+be the default choice, as most stateless objects are naturally thread-safe, and instance
 pooling is problematic if resources are cached.
 
 Simpler pooling is available by using auto-proxying. You can set the `TargetSource` implementations
@@ -221,8 +221,8 @@ NOTE: `ThreadLocal` instances come with serious issues (potentially resulting in
 incorrectly using them in multi-threaded and multi-classloader environments. You
 should always consider wrapping a `ThreadLocal` in some other class and never directly use
 the `ThreadLocal` itself (except in the wrapper class). Also, you should
-always remember to correctly set and unset (where the latter simply involves a call to
-`ThreadLocal.set(null)`) the resource local to the thread. Unsetting should be done in
+always remember to correctly set and unset (where the latter involves a call to
+`ThreadLocal.remove()`) the resource local to the thread. Unsetting should be done in
 any case, since not unsetting it might result in problematic behavior. Spring's
 `ThreadLocal` support does this for you and should always be considered in favor of using
 `ThreadLocal` instances without other proper handling code.

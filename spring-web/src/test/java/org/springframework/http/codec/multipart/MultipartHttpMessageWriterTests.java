@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link MultipartHttpMessageWriter}.
+ * Tests for {@link MultipartHttpMessageWriter}.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
+class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private final MultipartHttpMessageWriter writer =
 			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());
@@ -65,7 +65,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA)).isTrue();
@@ -88,7 +88,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	public void writeMultipartFormData() throws Exception {
+	void writeMultipartFormData() throws Exception {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
 			@Override

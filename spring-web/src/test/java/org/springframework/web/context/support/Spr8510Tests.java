@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,16 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * Tests the interaction between a WebApplicationContext and ContextLoaderListener with
  * regard to config location precedence, overriding and defaulting in programmatic
- * configuration use cases, e.g. with WebApplicationInitializer.
+ * configuration use cases, for example, with WebApplicationInitializer.
  *
  * @author Chris Beams
  * @since 3.1
  * @see org.springframework.web.context.ContextLoaderTests
  */
-public class Spr8510Tests {
+class Spr8510Tests {
 
 	@Test
-	public void abstractRefreshableWAC_respectsProgrammaticConfigLocations() {
+	void abstractRefreshableWAC_respectsProgrammaticConfigLocations() {
 		XmlWebApplicationContext ctx = new XmlWebApplicationContext();
 		ctx.setConfigLocation("programmatic.xml");
 		ContextLoaderListener cll = new ContextLoaderListener(ctx);
@@ -58,7 +58,7 @@ public class Spr8510Tests {
 	 * hybrid web.xml + WebApplicationInitializer cases.
 	 */
 	@Test
-	public void abstractRefreshableWAC_respectsInitParam_overProgrammaticConfigLocations() {
+	void abstractRefreshableWAC_respectsInitParam_overProgrammaticConfigLocations() {
 		XmlWebApplicationContext ctx = new XmlWebApplicationContext();
 		ctx.setConfigLocation("programmatic.xml");
 		ContextLoaderListener cll = new ContextLoaderListener(ctx);
@@ -76,7 +76,7 @@ public class Spr8510Tests {
 	 * then fall back to the ContextLoaderListener init-param if present.
 	 */
 	@Test
-	public void abstractRefreshableWAC_fallsBackToInitParam() {
+	void abstractRefreshableWAC_fallsBackToInitParam() {
 		XmlWebApplicationContext ctx = new XmlWebApplicationContext();
 		//ctx.setConfigLocation("programmatic.xml"); // nothing set programmatically
 		ContextLoaderListener cll = new ContextLoaderListener(ctx);
@@ -93,7 +93,7 @@ public class Spr8510Tests {
 	 * Ensure that any custom default locations are still respected.
 	 */
 	@Test
-	public void customAbstractRefreshableWAC_fallsBackToInitParam() {
+	void customAbstractRefreshableWAC_fallsBackToInitParam() {
 		XmlWebApplicationContext ctx = new XmlWebApplicationContext() {
 			@Override
 			protected String[] getDefaultConfigLocations() {
@@ -116,7 +116,7 @@ public class Spr8510Tests {
 	 * context nor the context loader listener, then fall back to default values.
 	 */
 	@Test
-	public void abstractRefreshableWAC_fallsBackToConventionBasedNaming() {
+	void abstractRefreshableWAC_fallsBackToConventionBasedNaming() {
 		XmlWebApplicationContext ctx = new XmlWebApplicationContext();
 		//ctx.setConfigLocation("programmatic.xml"); // nothing set programmatically
 		ContextLoaderListener cll = new ContextLoaderListener(ctx);
@@ -134,7 +134,7 @@ public class Spr8510Tests {
 	 * Ensure that ContextLoaderListener and GenericWebApplicationContext interact nicely.
 	 */
 	@Test
-	public void genericWAC() {
+	void genericWAC() {
 		GenericWebApplicationContext ctx = new GenericWebApplicationContext();
 		ContextLoaderListener cll = new ContextLoaderListener(ctx);
 
@@ -148,7 +148,7 @@ public class Spr8510Tests {
 	 * Ensure that ContextLoaderListener and AnnotationConfigApplicationContext interact nicely.
 	 */
 	@Test
-	public void annotationConfigWAC() {
+	void annotationConfigWAC() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 
 		ctx.scan("does.not.matter");

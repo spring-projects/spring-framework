@@ -291,7 +291,7 @@ public interface WebClient {
 		/**
 		 * Configure the {@link ClientHttpConnector} to use. This is useful for
 		 * plugging in and/or customizing options of the underlying HTTP client
-		 * library (e.g. SSL).
+		 * library (for example, SSL).
 		 * <p>By default this is set to
 		 * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector
 		 * ReactorClientHttpConnector}.
@@ -388,14 +388,14 @@ public interface WebClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 */
 		S uri(String uri, Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 */
 		S uri(String uri, Map<String, ?> uriVariables);
@@ -692,8 +692,37 @@ public interface WebClient {
 		 * @throws IllegalArgumentException if {@code body} is a
 		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
 		 * @since 5.2
+		 * @see #bodyValue(Object, ParameterizedTypeReference)
 		 */
 		RequestHeadersSpec<?> bodyValue(Object body);
+
+		/**
+		 * Shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
+		 * For example:
+		 * <p><pre class="code">
+		 * List&lt;Person&gt; list = ... ;
+		 *
+		 * Mono&lt;Void&gt; result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .bodyValue(list, new ParameterizedTypeReference&lt;List&lt;Person&gt;&gt;() {};)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
+		 * <p>For multipart requests consider providing
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap} prepared
+		 * with {@link org.springframework.http.client.MultipartBodyBuilder
+		 * MultipartBodyBuilder}.
+		 * @param body the value to write to the request body
+		 * @param bodyType the type of the body, used to capture the generic type
+		 * @param <T> the type of the body
+		 * @return this builder
+		 * @throws IllegalArgumentException if {@code body} is a
+		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
+		 * @since 6.2
+		 */
+		<T> RequestHeadersSpec<?> bodyValue(T body, ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Shortcut for {@link #body(BodyInserter)} with a
@@ -795,7 +824,7 @@ public interface WebClient {
 		 *     .retrieve()
 		 *     .bodyToMono(Account.class)
 		 *     .onErrorResume(WebClientResponseException.class,
-		 *          ex -&gt; ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
+		 *          ex -&gt; ex.getStatusCode().value() == 404 ? Mono.empty() : Mono.error(ex));
 		 * </pre>
 		 * @param statusPredicate to match responses with
 		 * @param exceptionFunction to map the response to an error signal

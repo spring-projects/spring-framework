@@ -311,9 +311,7 @@ public final class TestCompiler {
 			Errors errors = new Errors();
 			CompilationTask task = this.compiler.getTask(null, fileManager, errors,
 					this.compilerOptions, null, compilationUnits);
-			if (!this.processors.isEmpty()) {
-				task.setProcessors(this.processors);
-			}
+			task.setProcessors(this.processors);
 			boolean result = task.call();
 			if (!result || errors.hasReportedErrors()) {
 				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);

@@ -29,7 +29,7 @@ publishing {
 					developer {
 						id = "jhoeller"
 						name = "Juergen Hoeller"
-						email = "jhoeller@pivotal.io"
+						email = "juergen.hoeller@broadcom.com"
 					}
 				}
 				issueManagement {

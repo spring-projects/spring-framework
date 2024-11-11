@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ViewControllerRegistryTests {
+class ViewControllerRegistryTests {
 
 	private ViewControllerRegistry registry;
 
@@ -47,7 +47,7 @@ public class ViewControllerRegistryTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.registry = new ViewControllerRegistry(new StaticApplicationContext());
 		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
@@ -55,12 +55,12 @@ public class ViewControllerRegistryTests {
 
 
 	@Test
-	public void noViewControllers() {
+	void noViewControllers() {
 		assertThat(this.registry.buildHandlerMapping()).isNull();
 	}
 
 	@Test
-	public void addViewController() {
+	void addViewController() {
 		this.registry.addViewController("/path").setViewName("viewName");
 		ParameterizableViewController controller = getController("/path");
 
@@ -71,7 +71,7 @@ public class ViewControllerRegistryTests {
 	}
 
 	@Test
-	public void addViewControllerWithDefaultViewName() {
+	void addViewControllerWithDefaultViewName() {
 		this.registry.addViewController("/path");
 		ParameterizableViewController controller = getController("/path");
 
@@ -82,7 +82,7 @@ public class ViewControllerRegistryTests {
 	}
 
 	@Test
-	public void addRedirectViewController() throws Exception {
+	void addRedirectViewController() throws Exception {
 		this.registry.addRedirectViewController("/path", "/redirectTo");
 		RedirectView redirectView = getRedirectView("/path");
 		this.request.setQueryString("a=b");
@@ -95,7 +95,7 @@ public class ViewControllerRegistryTests {
 	}
 
 	@Test
-	public void addRedirectViewControllerWithCustomSettings() throws Exception {
+	void addRedirectViewControllerWithCustomSettings() throws Exception {
 		this.registry.addRedirectViewController("/path", "/redirectTo")
 				.setContextRelative(false)
 				.setKeepQueryParams(true)
@@ -112,7 +112,7 @@ public class ViewControllerRegistryTests {
 	}
 
 	@Test
-	public void addStatusController() {
+	void addStatusController() {
 		this.registry.addStatusController("/path", HttpStatus.NOT_FOUND);
 		ParameterizableViewController controller = getController("/path");
 
@@ -123,7 +123,7 @@ public class ViewControllerRegistryTests {
 	}
 
 	@Test
-	public void order() {
+	void order() {
 		this.registry.addViewController("/path");
 		SimpleUrlHandlerMapping handlerMapping = this.registry.buildHandlerMapping();
 		assertThat(handlerMapping.getOrder()).isEqualTo(1);

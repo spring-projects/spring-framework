@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockFilterConfig;
+import org.springframework.mock.web.MockFilterRegistration;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -64,13 +66,13 @@ final class MockMvcFilterDecorator implements Filter {
 
 	private final boolean hasPatterns;
 
-	/** Patterns that require an exact match, e.g. "/test" */
+	/** Patterns that require an exact match, for example, "/test". */
 	private final List<String> exactMatches = new ArrayList<>();
 
-	/** Patterns that require the URL to have a specific prefix, e.g. "/test/*" */
+	/** Patterns that require the URL to have a specific prefix, for example, "/test/*". */
 	private final List<String> startsWithMatches = new ArrayList<>();
 
-	/** Patterns that require the request URL to have a specific suffix, e.g. "*.html" */
+	/** Patterns that require the request URL to have a specific suffix, for example, "*.html". */
 	private final List<String> endsWithMatches = new ArrayList<>();
 
 
@@ -98,20 +100,29 @@ final class MockMvcFilterDecorator implements Filter {
 		Assert.notNull(delegate, "filter cannot be null");
 		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
 		this.delegate = delegate;
-		this.filterConfigInitializer = getFilterConfigInitializer(filterName, initParams);
+		this.filterConfigInitializer = getFilterConfigInitializer(delegate, filterName, initParams);
 		this.dispatcherTypes = dispatcherTypes;
 		this.hasPatterns = initPatterns(urlPatterns);
 	}
 
 	private static Function<ServletContext, FilterConfig> getFilterConfigInitializer(
-			@Nullable String filterName, @Nullable Map<String, String> initParams) {
+			Filter delegate, @Nullable String filterName, @Nullable Map<String, String> initParams) {
+
+		String className = delegate.getClass().getName();
 
 		return servletContext -> {
 			MockFilterConfig filterConfig = (filterName != null ?
 					new MockFilterConfig(servletContext, filterName) : new MockFilterConfig(servletContext));
+
 			if (initParams != null) {
 				initParams.forEach(filterConfig::addInitParameter);
 			}
+
+			if (servletContext instanceof MockServletContext mockServletContext) {
+				mockServletContext.addFilterRegistration(filterName != null ?
+						new MockFilterRegistration(className, filterName) : new MockFilterRegistration(className));
+			}
+
 			return filterConfig;
 		};
 	}

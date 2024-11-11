@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class PayloadApplicationEventTests {
 		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this,
 				new NumberHolder<>(42), ResolvableType.forClassWithGenerics(NumberHolder.class, Integer.class));
 		ac.publishEvent(event);
-		assertThat(ac.getBean(NumberHolderListener.class).events.contains(event.getPayload())).isTrue();
+		assertThat(ac.getBean(NumberHolderListener.class).events).contains(event.getPayload());
 		ac.close();
 	}
 
@@ -91,7 +91,7 @@ class PayloadApplicationEventTests {
 		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this,
 				new NumberHolder<>(42), ResolvableType.forClassWithGenerics(NumberHolder.class, Integer.class));
 		ac.publishEvent(event);
-		assertThat(parent.getBean(NumberHolderListener.class).events.contains(event.getPayload())).isTrue();
+		assertThat(parent.getBean(NumberHolderListener.class).events).contains(event.getPayload());
 		ac.close();
 		parent.close();
 	}
@@ -99,7 +99,7 @@ class PayloadApplicationEventTests {
 	@Test
 	@SuppressWarnings("resource")
 	void testPayloadObjectWithPayloadType() {
-		final Object payload = new NumberHolder<>(42);
+		final NumberHolder<Integer> payload = new NumberHolder<>(42);
 
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(NumberHolderListener.class) {
 			@Override
@@ -110,14 +110,14 @@ class PayloadApplicationEventTests {
 			}
 		};
 
-		assertThat(ac.getBean(NumberHolderListener.class).events.contains(payload)).isTrue();
+		assertThat(ac.getBean(NumberHolderListener.class).events).contains(payload);
 		ac.close();
 	}
 
 	@Test
 	@SuppressWarnings("resource")
 	void testPayloadObjectWithPayloadTypeOnParentContext() {
-		final Object payload = new NumberHolder<>(42);
+		final NumberHolder<Integer> payload = new NumberHolder<>(42);
 
 		ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext(NumberHolderListener.class);
 		ConfigurableApplicationContext ac = new GenericApplicationContext(parent) {
@@ -130,7 +130,7 @@ class PayloadApplicationEventTests {
 		};
 		ac.refresh();
 
-		assertThat(parent.getBean(NumberHolderListener.class).events.contains(payload)).isTrue();
+		assertThat(parent.getBean(NumberHolderListener.class).events).contains(payload);
 		ac.close();
 		parent.close();
 	}
@@ -142,7 +142,7 @@ class PayloadApplicationEventTests {
 
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
-		assertThat(ac.getBean(AuditableListener.class).events.contains(event)).isTrue();
+		assertThat(ac.getBean(AuditableListener.class).events).contains(event);
 		ac.close();
 	}
 
@@ -155,7 +155,7 @@ class PayloadApplicationEventTests {
 
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
-		assertThat(parent.getBean(AuditableListener.class).events.contains(event)).isTrue();
+		assertThat(parent.getBean(AuditableListener.class).events).contains(event);
 		ac.close();
 		parent.close();
 	}
@@ -165,7 +165,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
 
 		ConfigurableApplicationContext ac = new GenericApplicationContext();
 		ac.addApplicationListener(listener);
@@ -174,7 +174,7 @@ class PayloadApplicationEventTests {
 
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
-		assertThat(events.contains(event)).isTrue();
+		assertThat(events).contains(event);
 		ac.close();
 	}
 
@@ -183,7 +183,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListenerOnParentContext() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
 
 		ConfigurableApplicationContext parent = new GenericApplicationContext();
 		parent.addApplicationListener(listener);
@@ -194,7 +194,7 @@ class PayloadApplicationEventTests {
 
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
-		assertThat(events.contains(event)).isTrue();
+		assertThat(events).contains(event);
 		ac.close();
 		parent.close();
 	}
@@ -213,7 +213,7 @@ class PayloadApplicationEventTests {
 
 		String payload = "xyz";
 		ac.publishEvent(payload);
-		assertThat(events.contains(payload)).isTrue();
+		assertThat(events).contains(payload);
 		ac.close();
 	}
 
@@ -233,7 +233,7 @@ class PayloadApplicationEventTests {
 
 		String payload = "xyz";
 		ac.publishEvent(payload);
-		assertThat(events.contains(payload)).isTrue();
+		assertThat(events).contains(payload);
 		ac.close();
 		parent.close();
 	}
@@ -245,7 +245,7 @@ class PayloadApplicationEventTests {
 
 		String payload = "xyz";
 		ac.publishEvent(payload);
-		assertThat(ac.getBean(PlainPayloadListener.class).events.contains(payload)).isTrue();
+		assertThat(ac.getBean(PlainPayloadListener.class).events).contains(payload);
 		ac.close();
 	}
 
@@ -258,7 +258,7 @@ class PayloadApplicationEventTests {
 
 		String payload = "xyz";
 		ac.publishEvent(payload);
-		assertThat(parent.getBean(PlainPayloadListener.class).events.contains(payload)).isTrue();
+		assertThat(parent.getBean(PlainPayloadListener.class).events).contains(payload);
 		ac.close();
 		parent.close();
 	}

@@ -31,6 +31,7 @@ import org.springframework.util.MultiValueMap;
 class ProfileCondition implements Condition {
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
 		if (attrs != null) {

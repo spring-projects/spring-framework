@@ -59,7 +59,7 @@ is meta-annotated with `@Component`, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -74,7 +74,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -103,7 +103,7 @@ customization of the `proxyMode`. The following listing shows the definition of 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -123,7 +123,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(AnnotationTarget.TYPE, AnnotationTarget.FUNCTION)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -142,7 +142,7 @@ You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Service
 	@SessionScope
@@ -153,7 +153,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Service
 	@SessionScope
@@ -169,7 +169,7 @@ You can also override the value for the `proxyMode`, as the following example sh
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Service
 	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
@@ -180,7 +180,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Service
 	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
@@ -207,7 +207,7 @@ are eligible for such autodetection:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Service
 	public class SimpleMovieLister {
@@ -222,7 +222,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Service
 	class SimpleMovieLister(private val movieFinder: MovieFinder)
@@ -233,7 +233,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	public class JpaMovieFinder implements MovieFinder {
@@ -243,7 +243,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	class JpaMovieFinder : MovieFinder {
@@ -262,7 +262,7 @@ comma- or semicolon- or space-separated list that includes the parent package of
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example")
@@ -273,7 +273,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"])
@@ -317,8 +317,8 @@ exposed based on security policies in some environments -- for example, standalo
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests -- see
 {stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
-On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
-However, make sure that your component classes are exported in your `module-info`
+On the module path (Java Module System), Spring's classpath scanning generally works as
+expected. However, make sure that your component classes are exported in your `module-info`
 descriptors. If you expect Spring to invoke non-public members of your classes, make
 sure that they are 'opened' (that is, that they use an `opens` declaration instead of an
 `exports` declaration in your `module-info` descriptor).
@@ -380,7 +380,7 @@ and using "`stub`" repositories instead:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example",
@@ -393,7 +393,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"],
@@ -438,7 +438,7 @@ annotated classes. The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class FactoryMethodComponent {
@@ -457,7 +457,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	class FactoryMethodComponent {
@@ -480,11 +480,15 @@ factory method and other bean definition properties, such as a qualifier value t
 the `@Qualifier` annotation. Other method-level annotations that can be specified are
 `@Scope`, `@Lazy`, and custom qualifier annotations.
 
-TIP: In addition to its role for component initialization, you can also place the `@Lazy`
+[[beans-factorybeans-annotations-lazy-injection-points]]
+[TIP]
+====
+In addition to its role for component initialization, you can also place the `@Lazy`
 annotation on injection points marked with `@Autowired` or `@Inject`. In this context,
 it leads to the injection of a lazy-resolution proxy. However, such a proxy approach
 is rather limited. For sophisticated lazy interactions, in particular in combination
 with optional dependencies, we recommend `ObjectProvider<MyTargetBean>` instead.
+====
 
 Autowired fields and methods are supported, as previously discussed, with additional
 support for autowiring of `@Bean` methods. The following example shows how to do so:
@@ -493,7 +497,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class FactoryMethodComponent {
@@ -532,7 +536,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	class FactoryMethodComponent {
@@ -585,7 +589,7 @@ The following example shows how to use `InjectionPoint`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class FactoryMethodComponent {
@@ -599,7 +603,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	class FactoryMethodComponent {
@@ -699,7 +703,7 @@ following component classes were detected, the names would be `myMovieLister` an
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Service("myMovieLister")
 	public class SimpleMovieLister {
@@ -709,7 +713,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Service("myMovieLister")
 	class SimpleMovieLister {
@@ -722,7 +726,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	public class MovieFinderImpl implements MovieFinder {
@@ -732,7 +736,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repository
 	class MovieFinderImpl : MovieFinder {
@@ -751,7 +755,7 @@ and bean definition show.
 TIP: If you run into naming conflicts due to multiple autodetected components having the
 same non-qualified class name (i.e., classes with identical names but residing in
 different packages), you may need to configure a `BeanNameGenerator` that defaults to the
-fully qualified class name for the generated bean name. As of Spring Framework 5.2.3, the
+fully qualified class name for the generated bean name. The
 `FullyQualifiedAnnotationBeanNameGenerator` located in package
 `org.springframework.context.annotation` can be used for such purposes.
 
@@ -759,7 +763,7 @@ fully qualified class name for the generated bean name. As of Spring Framework 5
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
@@ -770,7 +774,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"], nameGenerator = MyNameGenerator::class)
@@ -806,7 +810,7 @@ scope within the annotation, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scope("prototype")
 	@Repository
@@ -817,7 +821,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Scope("prototype")
 	@Repository
@@ -849,7 +853,7 @@ an annotation and a bean definition shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
@@ -860,7 +864,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"], scopeResolver = MyScopeResolver::class)
@@ -887,7 +891,7 @@ the following configuration results in standard JDK dynamic proxies:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
@@ -898,7 +902,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"], scopedProxy = ScopedProxyMode.INTERFACES)
@@ -920,7 +924,8 @@ Kotlin::
 [[beans-scanning-qualifiers]]
 == Providing Qualifier Metadata with Annotations
 
-The `@Qualifier` annotation is discussed in xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
+The `@Qualifier` annotation is discussed in
+xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
 The examples in that section demonstrate the use of the `@Qualifier` annotation and
 custom qualifier annotations to provide fine-grained control when you resolve autowire
 candidates. Because those examples were based on XML bean definitions, the qualifier
@@ -934,7 +939,7 @@ technique:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	@Qualifier("Action")
@@ -945,7 +950,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	@Qualifier("Action")
@@ -957,7 +962,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	@Genre("Action")
@@ -968,7 +973,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	@Genre("Action")
@@ -982,7 +987,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	@Offline
@@ -993,7 +998,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 @Component
 @Offline

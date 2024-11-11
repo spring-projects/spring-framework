@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
@@ -52,6 +53,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
@@ -126,7 +128,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedSseTest
 	void sseAsEvent(HttpServer httpServer, ClientHttpConnector connector) throws Exception {
-		assumeTrue(httpServer instanceof JettyHttpServer);
+		assumeTrue(httpServer instanceof JettyHttpServer || httpServer instanceof JettyCoreHttpServer);
 
 		startServer(httpServer, connector);
 
@@ -134,7 +136,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<Person>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		verifyPersonEvents(result);
 	}
@@ -147,7 +149,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
-				.bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<Person>>() {});
+				.bodyToFlux(new ParameterizedTypeReference<>() {});
 
 		verifyPersonEvents(result);
 	}
@@ -201,7 +203,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@RequestMapping("/sse")
 	static class SseController {
 
-		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 50);
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(1), 50);
 
 		private final Sinks.Empty<Void> cancelSink = Sinks.empty();
 
@@ -277,7 +279,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				return false;
 			}
 			Person person = (Person) o;
-			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
+			return Objects.equals(this.name, person.name);
 		}
 
 		@Override
@@ -301,18 +303,21 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	static Stream<Arguments> arguments() {
 		return Stream.of(
-			args(new JettyHttpServer(), new ReactorClientHttpConnector()),
-			args(new JettyHttpServer(), new JettyClientHttpConnector()),
-			args(new JettyHttpServer(), new HttpComponentsClientHttpConnector()),
-			args(new ReactorHttpServer(), new ReactorClientHttpConnector()),
-			args(new ReactorHttpServer(), new JettyClientHttpConnector()),
-			args(new ReactorHttpServer(), new HttpComponentsClientHttpConnector()),
-			args(new TomcatHttpServer(), new ReactorClientHttpConnector()),
-			args(new TomcatHttpServer(), new JettyClientHttpConnector()),
-			args(new TomcatHttpServer(), new HttpComponentsClientHttpConnector()),
-			args(new UndertowHttpServer(), new ReactorClientHttpConnector()),
-			args(new UndertowHttpServer(), new JettyClientHttpConnector()),
-			args(new UndertowHttpServer(), new HttpComponentsClientHttpConnector())
+				args(new JettyHttpServer(), new ReactorClientHttpConnector()),
+				args(new JettyHttpServer(), new JettyClientHttpConnector()),
+				args(new JettyHttpServer(), new HttpComponentsClientHttpConnector()),
+				args(new JettyCoreHttpServer(), new ReactorClientHttpConnector()),
+				args(new JettyCoreHttpServer(), new JettyClientHttpConnector()),
+				args(new JettyCoreHttpServer(), new HttpComponentsClientHttpConnector()),
+				args(new ReactorHttpServer(), new ReactorClientHttpConnector()),
+				args(new ReactorHttpServer(), new JettyClientHttpConnector()),
+				args(new ReactorHttpServer(), new HttpComponentsClientHttpConnector()),
+				args(new TomcatHttpServer(), new ReactorClientHttpConnector()),
+				args(new TomcatHttpServer(), new JettyClientHttpConnector()),
+				args(new TomcatHttpServer(), new HttpComponentsClientHttpConnector()),
+				args(new UndertowHttpServer(), new ReactorClientHttpConnector()),
+				args(new UndertowHttpServer(), new JettyClientHttpConnector()),
+				args(new UndertowHttpServer(), new HttpComponentsClientHttpConnector())
 		);
 	}
 

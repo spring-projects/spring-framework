@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptor;
 
 /**
- * Unit tests for {@link TestContextAnnotationUtils} that verify support for
+ * Tests for {@link TestContextAnnotationUtils} that verify support for
  * overridden meta-annotation attributes.
  *
  * <p>See <a href="https://jira.spring.io/browse/SPR-10181">SPR-10181</a>.

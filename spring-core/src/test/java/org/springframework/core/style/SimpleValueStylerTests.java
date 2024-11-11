@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link SimpleValueStyler}.
+ * Tests for {@link SimpleValueStyler}.
  *
  * @author Sam Brannen
  * @since 6.0
@@ -41,7 +41,7 @@ class SimpleValueStylerTests {
 		private final SimpleValueStyler styler = new SimpleValueStyler();
 
 		@Test
-		void styleBasics() throws NoSuchMethodException {
+		void styleBasics() {
 			assertThat(styler.style(null)).isEqualTo("null");
 			assertThat(styler.style(true)).isEqualTo("true");
 			assertThat(styler.style(99.9)).isEqualTo("99.9");

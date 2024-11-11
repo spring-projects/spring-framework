@@ -22,7 +22,7 @@ import org.springframework.messaging.Message;
 /**
  * Contract for mapping conditions to messages.
  *
- * <p>Message conditions can be combined (e.g. type + method-level conditions),
+ * <p>Message conditions can be combined (for example, type + method-level conditions),
  * matched to a specific Message, as well as compared to each other in the
  * context of a Message to determine which one matches a request more closely.
  *

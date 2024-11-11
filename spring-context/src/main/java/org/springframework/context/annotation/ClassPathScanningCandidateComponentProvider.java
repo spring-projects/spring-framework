@@ -36,6 +36,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.index.CandidateComponentsIndex;
 import org.springframework.context.index.CandidateComponentsIndexLoader;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
@@ -47,6 +48,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.ClassFormatException;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -92,6 +94,18 @@ import org.springframework.util.ClassUtils;
 public class ClassPathScanningCandidateComponentProvider implements EnvironmentCapable, ResourceLoaderAware {
 
 	static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+
+	/**
+	 * System property that instructs Spring to ignore class format exceptions during
+	 * classpath scanning, in particular for unsupported class file versions.
+	 * By default, such a class format mismatch leads to a classpath scanning failure.
+	 * @since 6.1.2
+	 * @see ClassFormatException
+	 */
+	public static final String IGNORE_CLASSFORMAT_PROPERTY_NAME = "spring.classformat.ignore";
+
+	private static final boolean shouldIgnoreClassFormatException =
+			SpringProperties.getFlag(IGNORE_CLASSFORMAT_PROPERTY_NAME);
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -480,9 +494,20 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 						logger.trace("Ignored non-readable " + resource + ": " + ex.getMessage());
 					}
 				}
+				catch (ClassFormatException ex) {
+					if (shouldIgnoreClassFormatException) {
+						if (debugEnabled) {
+							logger.debug("Ignored incompatible class format in " + resource + ": " + ex.getMessage());
+						}
+					}
+					else {
+						throw new BeanDefinitionStoreException("Incompatible class format in " + resource +
+								": set system property 'spring.classformat.ignore' to 'true' " +
+								"if you mean to ignore such files during classpath scanning", ex);
+					}
+				}
 				catch (Throwable ex) {
-					throw new BeanDefinitionStoreException(
-							"Failed to read candidate component class: " + resource, ex);
+					throw new BeanDefinitionStoreException("Failed to read candidate component class: " + resource, ex);
 				}
 			}
 		}

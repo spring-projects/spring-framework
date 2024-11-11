@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +28,12 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+import org.springframework.web.servlet.view.FragmentsRendering;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ModelAndViewMethodReturnValueHandlerTests {
+class ModelAndViewMethodReturnValueHandlerTests {
 
 	private ModelAndViewMethodReturnValueHandler handler;
 
@@ -49,22 +54,25 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.handler = new ModelAndViewMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 		this.returnParamModelAndView = getReturnValueParam("modelAndView");
 	}
 
 
 	@Test
-	public void supportsReturnType() throws Exception {
+	void supportsReturnType() throws Exception {
 		assertThat(handler.supportsReturnType(returnParamModelAndView)).isTrue();
+		assertThat(handler.supportsReturnType(getReturnValueParam("fragmentsRendering"))).isTrue();
+		assertThat(handler.supportsReturnType(getReturnValueParam("fragmentsCollection"))).isTrue();
+
 		assertThat(handler.supportsReturnType(getReturnValueParam("viewName"))).isFalse();
 	}
 
 	@Test
-	public void handleViewReference() throws Exception {
+	void handleViewReference() throws Exception {
 		ModelAndView mav = new ModelAndView("viewName", "attrName", "attrValue");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
 
@@ -73,7 +81,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void handleViewInstance() throws Exception {
+	void handleViewInstance() throws Exception {
 		ModelAndView mav = new ModelAndView(new RedirectView(), "attrName", "attrValue");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
 
@@ -82,14 +90,30 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void handleNull() throws Exception {
+	void handleFragmentsRendering() throws Exception {
+		FragmentsRendering rendering = FragmentsRendering.with("viewName").build();
+
+		handler.handleReturnValue(rendering, returnParamModelAndView, mavContainer, webRequest);
+		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);
+	}
+
+	@Test
+	void handleFragmentsCollection() throws Exception {
+		Collection<ModelAndView> fragments = List.of(new ModelAndView("viewName"));
+
+		handler.handleReturnValue(fragments, returnParamModelAndView, mavContainer, webRequest);
+		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);
+	}
+
+	@Test
+	void handleNull() throws Exception {
 		handler.handleReturnValue(null, returnParamModelAndView, mavContainer, webRequest);
 
 		assertThat(mavContainer.isRequestHandled()).isTrue();
 	}
 
 	@Test
-	public void handleRedirectAttributesWithViewReference() throws Exception {
+	void handleRedirectAttributesWithViewReference() throws Exception {
 		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
@@ -102,7 +126,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void handleRedirectAttributesWithViewName() throws Exception {
+	void handleRedirectAttributesWithViewName() throws Exception {
 		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
@@ -116,7 +140,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void handleRedirectAttributesWithCustomPrefix() throws Exception {
+	void handleRedirectAttributesWithCustomPrefix() throws Exception {
 		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
@@ -131,7 +155,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void handleRedirectAttributesWithoutRedirect() throws Exception {
+	void handleRedirectAttributesWithoutRedirect() throws Exception {
 		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
@@ -140,7 +164,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 		ModelMap model = mavContainer.getModel();
 		assertThat(mavContainer.getView()).isNull();
-		assertThat(mavContainer.getModel().isEmpty()).isTrue();
+		assertThat(mavContainer.getModel()).isEmpty();
 		assertThat(model).as("RedirectAttributes should not be used if controller doesn't redirect").isNotSameAs(redirectAttributes);
 	}
 
@@ -170,6 +194,16 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@SuppressWarnings("unused")
 	String viewName() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	FragmentsRendering fragmentsRendering() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	Collection<ModelAndView> fragmentsCollection() {
 		return null;
 	}
 

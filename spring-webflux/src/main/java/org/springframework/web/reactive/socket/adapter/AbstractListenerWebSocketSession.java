@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Base class for {@link WebSocketSession} implementations that bridge between
- * event-listener WebSocket APIs (e.g. Jakarta WebSocket API (JSR-356), Jetty,
+ * event-listener WebSocket APIs (for example, Jakarta WebSocket API (JSR-356), Jetty,
  * Undertow) and Reactive Streams.
  *
  * <p>Also implements {@code Subscriber<Void>} so it can be used to subscribe to
@@ -112,7 +112,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		return (canSuspendReceiving() ? Flux.from(this.receivePublisher) :
+		return (canSuspendReceiving() ?
+				Flux.from(this.receivePublisher) :
 				Flux.from(this.receivePublisher).onBackpressureBuffer(RECEIVE_BUFFER_SIZE));
 	}
 
@@ -240,6 +241,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 
+	/**
+	 * Read publisher for inbound WebSocket messages.
+	 */
 	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 
 		private volatile Queue<Object> pendingMessages = Queues.unbounded(Queues.SMALL_BUFFER_SIZE).get();
@@ -269,7 +273,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		@Nullable
-		protected WebSocketMessage read() throws IOException {
+		protected WebSocketMessage read() {
 			return (WebSocketMessage) this.pendingMessages.poll();
 		}
 
@@ -290,8 +294,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected void discardData() {
+			Queue<Object> queue = this.pendingMessages;
+			this.pendingMessages = Queues.empty().get(); // prevent further reading
 			while (true) {
-				WebSocketMessage message = (WebSocketMessage) this.pendingMessages.poll();
+				WebSocketMessage message = (WebSocketMessage) queue.poll();
 				if (message == null) {
 					return;
 				}
@@ -302,7 +308,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 
 	/**
-	 * Processor to send web socket messages.
+	 * Write processor for outbound WebSocket messages.
 	 */
 	protected final class WebSocketSendProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
 

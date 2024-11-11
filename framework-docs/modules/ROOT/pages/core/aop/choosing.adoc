@@ -59,7 +59,7 @@ For example, in the @AspectJ style you can write something like the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Pointcut("execution(* get*())")
 	public void propertyAccess() {}
@@ -73,7 +73,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Pointcut("execution(* get*())")
 	fun propertyAccess() {}

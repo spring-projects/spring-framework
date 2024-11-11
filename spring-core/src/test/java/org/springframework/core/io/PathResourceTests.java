@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for the {@link PathResource} class.
+ * Tests for {@link PathResource}.
  *
  * @author Philippe Marschall
  * @author Phillip Webb
@@ -161,13 +161,13 @@ class PathResourceTests {
 	}
 
 	@Test
-	void getInputStreamForDir() throws IOException {
+	void getInputStreamForDir() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::getInputStream);
 	}
 
 	@Test
-	void getInputStreamForNonExistingFile() throws IOException {
+	void getInputStreamForNonExistingFile() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::getInputStream);
 	}
@@ -192,7 +192,7 @@ class PathResourceTests {
 	}
 
 	@Test
-	void getFileUnsupported() throws IOException {
+	void getFileUnsupported() {
 		Path path = mock();
 		given(path.normalize()).willReturn(path);
 		given(path.toFile()).willThrow(new UnsupportedOperationException());
@@ -222,13 +222,13 @@ class PathResourceTests {
 	}
 
 	@Test
-	void createRelativeFromDir() throws IOException {
+	void createRelativeFromDir() {
 		Resource resource = new PathResource(TEST_DIR).createRelative("example.properties");
 		assertThat(resource).isEqualTo(new PathResource(TEST_FILE));
 	}
 
 	@Test
-	void createRelativeFromFile() throws IOException {
+	void createRelativeFromFile() {
 		Resource resource = new PathResource(TEST_FILE).createRelative("../example.properties");
 		assertThat(resource).isEqualTo(new PathResource(TEST_FILE));
 	}
@@ -316,7 +316,7 @@ class PathResourceTests {
 	}
 
 	@Test
-	void getReadableByteChannelForNonExistingFile() throws IOException {
+	void getReadableByteChannelForNonExistingFile() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::readableChannel);
 	}

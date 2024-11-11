@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
@@ -133,6 +134,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 		}
 
 		Request request = this.httpClient.newRequest(uri).method(httpMethod.name());
+		request.timeout(this.readTimeout, TimeUnit.MILLISECONDS);
 		return new JettyClientHttpRequest(request, this.readTimeout);
 	}
 }

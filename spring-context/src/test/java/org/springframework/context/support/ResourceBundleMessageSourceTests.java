@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,8 +126,7 @@ class ResourceBundleMessageSourceTests {
 		if (alwaysUseMessageFormat) {
 			pvs.add("alwaysUseMessageFormat", Boolean.TRUE);
 		}
-		Class<?> clazz = reloadable ?
-				(Class<?>) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
+		Class<?> clazz = reloadable ? ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
 		ac.registerSingleton("messageSource", clazz, pvs);
 		ac.refresh();
 
@@ -401,29 +400,19 @@ class ResourceBundleMessageSourceTests {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 
 		List<String> filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
-		assertThat(filenames).hasSize(1);
-		assertThat(filenames.get(0)).isEqualTo("messages_en");
+		assertThat(filenames).containsExactly("messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", Locale.UK);
-		assertThat(filenames).hasSize(2);
-		assertThat(filenames.get(1)).isEqualTo("messages_en");
-		assertThat(filenames.get(0)).isEqualTo("messages_en_GB");
+		assertThat(filenames).containsExactly("messages_en_GB", "messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "GB", "POSIX"));
-		assertThat(filenames).hasSize(3);
-		assertThat(filenames.get(2)).isEqualTo("messages_en");
-		assertThat(filenames.get(1)).isEqualTo("messages_en_GB");
-		assertThat(filenames.get(0)).isEqualTo("messages_en_GB_POSIX");
+		assertThat(filenames).containsExactly("messages_en_GB_POSIX","messages_en_GB", "messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "", "POSIX"));
-		assertThat(filenames).hasSize(2);
-		assertThat(filenames.get(1)).isEqualTo("messages_en");
-		assertThat(filenames.get(0)).isEqualTo("messages_en__POSIX");
+		assertThat(filenames).containsExactly("messages_en__POSIX", "messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "UK", "POSIX"));
-		assertThat(filenames).hasSize(2);
-		assertThat(filenames.get(1)).isEqualTo("messages__UK");
-		assertThat(filenames.get(0)).isEqualTo("messages__UK_POSIX");
+		assertThat(filenames).containsExactly("messages__UK_POSIX", "messages__UK");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
 		assertThat(filenames).isEmpty();

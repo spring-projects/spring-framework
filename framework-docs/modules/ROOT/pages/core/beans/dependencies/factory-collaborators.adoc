@@ -34,7 +34,7 @@ injection:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleMovieLister {
 
@@ -52,7 +52,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// a constructor so that the Spring container can inject a MovieFinder
 	class SimpleMovieLister(private val movieFinder: MovieFinder) {
@@ -77,7 +77,7 @@ being instantiated. Consider the following class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package x.y;
 
@@ -91,7 +91,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package x.y
 
@@ -127,7 +127,7 @@ by type without help. Consider the following class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package examples;
 
@@ -148,7 +148,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package examples
 
@@ -159,10 +159,12 @@ Kotlin::
 ----
 ======
 
-.[[beans-factory-ctor-arguments-type]]Constructor argument type matching
---
+[discrete]
+[[beans-factory-ctor-arguments-type]]
+==== Constructor argument type matching
+
 In the preceding scenario, the container can use type matching with simple types if
-you explicitly specify the type of the constructor argument by using the `type` attribute,
+you explicitly specify the type of the constructor argument via the `type` attribute,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -172,10 +174,11 @@ as the following example shows:
 		<constructor-arg type="java.lang.String" value="42"/>
 	</bean>
 ----
---
 
-.[[beans-factory-ctor-arguments-index]]Constructor argument index
---
+[discrete]
+[[beans-factory-ctor-arguments-index]]
+==== Constructor argument index
+
 You can use the `index` attribute to specify explicitly the index of constructor arguments,
 as the following example shows:
 
@@ -191,10 +194,11 @@ In addition to resolving the ambiguity of multiple simple values, specifying an 
 resolves ambiguity where a constructor has two arguments of the same type.
 
 NOTE: The index is 0-based.
---
 
-.[[beans-factory-ctor-arguments-name]]Constructor argument name
---
+[discrete]
+[[beans-factory-ctor-arguments-name]]
+==== Constructor argument name
+
 You can also use the constructor parameter name for value disambiguation, as the following
 example shows:
 
@@ -207,8 +211,8 @@ example shows:
 ----
 
 Keep in mind that, to make this work out of the box, your code must be compiled with the
-debug flag enabled so that Spring can look up the parameter name from the constructor.
-If you cannot or do not want to compile your code with the debug flag, you can use the
+`-parameters` flag enabled so that Spring can look up the parameter name from the constructor.
+If you cannot or do not want to compile your code with the `-parameters` flag, you can use the
 https://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.html[@ConstructorProperties]
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
@@ -217,7 +221,7 @@ then have to look as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package examples;
 
@@ -235,7 +239,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package examples
 
@@ -244,7 +248,6 @@ Kotlin::
 	constructor(val years: Int, val ultimateAnswer: String)
 ----
 ======
---
 
 
 [[beans-setter-injection]]
@@ -262,7 +265,7 @@ on container specific interfaces, base classes, or annotations.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleMovieLister {
 
@@ -280,7 +283,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 class SimpleMovieLister {
 
@@ -437,7 +440,7 @@ The following example shows the corresponding `ExampleBean` class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBean {
 
@@ -463,7 +466,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 class ExampleBean {
 	lateinit var beanOne: AnotherBean
@@ -500,7 +503,7 @@ The following example shows the corresponding `ExampleBean` class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBean {
 
@@ -521,7 +524,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 class ExampleBean(
 		private val beanOne: AnotherBean,
@@ -554,7 +557,7 @@ The following example shows the corresponding `ExampleBean` class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBean {
 
@@ -578,7 +581,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ExampleBean private constructor() {
 		companion object {

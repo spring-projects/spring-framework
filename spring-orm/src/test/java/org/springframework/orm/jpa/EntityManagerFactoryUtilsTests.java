@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,14 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-public class EntityManagerFactoryUtilsTests {
+class EntityManagerFactoryUtilsTests {
 
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.EntityManagerFactoryUtils.doGetEntityManager(EntityManagerFactory)'
 	 */
 	@Test
-	public void testDoGetEntityManager() {
+	void testDoGetEntityManager() {
 		// test null assertion
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				EntityManagerFactoryUtils.doGetTransactionalEntityManager(null, null));
@@ -60,11 +60,11 @@ public class EntityManagerFactoryUtilsTests {
 
 		// no tx active
 		assertThat(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null)).isNull();
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 	}
 
 	@Test
-	public void testDoGetEntityManagerWithTx() throws Exception {
+	void testDoGetEntityManagerWithTx() {
 		try {
 			EntityManagerFactory factory = mock();
 			EntityManager manager = mock();
@@ -80,11 +80,11 @@ public class EntityManagerFactoryUtilsTests {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
 
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 	}
 
 	@Test
-	public void testTranslatesIllegalStateException() {
+	void testTranslatesIllegalStateException() {
 		IllegalStateException ise = new IllegalStateException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ise);
 		assertThat(dex.getCause()).isSameAs(ise);
@@ -93,7 +93,7 @@ public class EntityManagerFactoryUtilsTests {
 	}
 
 	@Test
-	public void testTranslatesIllegalArgumentException() {
+	void testTranslatesIllegalArgumentException() {
 		IllegalArgumentException iae = new IllegalArgumentException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(iae);
 		assertThat(dex.getCause()).isSameAs(iae);
@@ -105,7 +105,7 @@ public class EntityManagerFactoryUtilsTests {
 	 * We do not convert unknown exceptions. They may result from user code.
 	 */
 	@Test
-	public void testDoesNotTranslateUnfamiliarException() {
+	void testDoesNotTranslateUnfamiliarException() {
 		UnsupportedOperationException userRuntimeException = new UnsupportedOperationException();
 		assertThat(EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(userRuntimeException)).as("Exception should not be wrapped").isNull();
 	}

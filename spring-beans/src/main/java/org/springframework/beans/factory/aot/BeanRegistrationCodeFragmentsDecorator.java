@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,39 +58,39 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	public CodeBlock generateNewBeanDefinitionCode(GenerationContext generationContext,
 			ResolvableType beanType, BeanRegistrationCode beanRegistrationCode) {
 
-		return this.delegate.generateNewBeanDefinitionCode(generationContext,
-				beanType, beanRegistrationCode);
+		return this.delegate.generateNewBeanDefinitionCode(generationContext, beanType, beanRegistrationCode);
 	}
 
 	@Override
-	public CodeBlock generateSetBeanDefinitionPropertiesCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
-			Predicate<String> attributeFilter) {
+	public CodeBlock generateSetBeanDefinitionPropertiesCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
 
 		return this.delegate.generateSetBeanDefinitionPropertiesCode(
 				generationContext, beanRegistrationCode, beanDefinition, attributeFilter);
 	}
 
 	@Override
-	public CodeBlock generateSetBeanInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,
-			List<MethodReference> postProcessors) {
+	public CodeBlock generateSetBeanInstanceSupplierCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			CodeBlock instanceSupplierCode, List<MethodReference> postProcessors) {
 
 		return this.delegate.generateSetBeanInstanceSupplierCode(generationContext,
 				beanRegistrationCode, instanceSupplierCode, postProcessors);
 	}
 
 	@Override
-	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut) {
+	public CodeBlock generateInstanceSupplierCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			boolean allowDirectSupplierShortcut) {
 
 		return this.delegate.generateInstanceSupplierCode(generationContext,
 				beanRegistrationCode, allowDirectSupplierShortcut);
 	}
 
 	@Override
-	public CodeBlock generateReturnCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode) {
+	public CodeBlock generateReturnCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 
 		return this.delegate.generateReturnCode(generationContext, beanRegistrationCode);
 	}

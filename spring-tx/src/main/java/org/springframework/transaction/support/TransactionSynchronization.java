@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,8 +89,36 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 	}
 
 	/**
+	 * Invoked on creation of a new savepoint, either when a nested transaction
+	 * is started against an existing transaction or on a programmatic savepoint
+	 * via {@link org.springframework.transaction.TransactionStatus}.
+	 * <p>This synchronization callback is invoked right <i>after</i> the creation
+	 * of the resource savepoint, with the given savepoint object already active.
+	 * @param savepoint the associated savepoint object (primarily as a key for
+	 * identifying the savepoint but also castable to the resource savepoint type)
+	 * @since 6.2
+	 * @see org.springframework.transaction.SavepointManager#createSavepoint
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
+	 */
+	default void savepoint(Object savepoint) {
+	}
+
+	/**
+	 * Invoked in case of a rollback to the previously created savepoint.
+	 * <p>This synchronization callback is invoked right <i>before</i> the rollback
+	 * of the resource savepoint, with the given savepoint object still active.
+	 * @param savepoint the associated savepoint object (primarily as a key for
+	 * identifying the savepoint but also castable to the resource savepoint type)
+	 * @since 6.2
+	 * @see #savepoint
+	 * @see org.springframework.transaction.SavepointManager#rollbackToSavepoint
+	 */
+	default void savepointRollback(Object savepoint) {
+	}
+
+	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
-	 * Can e.g. flush transactional O/R Mapping sessions to the database.
+	 * Can, for example, flush transactional O/R Mapping sessions to the database.
 	 * <p>This callback does <i>not</i> mean that the transaction will actually be committed.
 	 * A rollback decision can still occur after this method has been called. This callback
 	 * is rather meant to perform work that's only relevant if a commit still has a chance
@@ -122,7 +150,7 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 	/**
 	 * Invoked after transaction commit. Can perform further operations right
 	 * <i>after</i> the main transaction has <i>successfully</i> committed.
-	 * <p>Can e.g. commit further operations that are supposed to follow on a successful
+	 * <p>Can, for example, commit further operations that are supposed to follow on a successful
 	 * commit of the main transaction, like confirmation messages or emails.
 	 * <p><b>NOTE:</b> The transaction will have been committed already, but the
 	 * transactional resources might still be active and accessible. As a consequence,

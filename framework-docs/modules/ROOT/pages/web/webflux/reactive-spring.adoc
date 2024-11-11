@@ -88,7 +88,7 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
@@ -97,7 +97,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val adapter = ReactorHttpHandlerAdapter(handler)
@@ -110,7 +110,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
@@ -120,7 +120,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val adapter = UndertowHttpHandlerAdapter(handler)
@@ -134,7 +134,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	Servlet servlet = new TomcatHttpHandlerAdapter(handler);
@@ -151,7 +151,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val servlet = TomcatHttpHandlerAdapter(handler)
@@ -173,7 +173,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	Servlet servlet = new JettyHttpHandlerAdapter(handler);
@@ -192,7 +192,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val servlet = JettyHttpHandlerAdapter(handler)
@@ -305,14 +305,14 @@ Spring ApplicationContext, or that can be registered directly with it:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<MultiValueMap<String, String>> getFormData();
 ----
 
 Kotlin::
 +
-[source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,Kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	suspend fun getFormData(): MultiValueMap<String, String>
 ----
@@ -334,14 +334,14 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 ----
 
 Kotlin::
 +
-[source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,Kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	suspend fun getMultipartData(): MultiValueMap<String, Part>
 ----
@@ -419,6 +419,24 @@ controllers. However, when you use it with Spring Security, we advise relying on
 
 See the section on xref:web/webflux-cors.adoc[CORS] and the xref:web/webflux-cors.adoc#webflux-cors-webfilter[CORS `WebFilter`] for more details.
 
+[[filters.url-handler]]
+=== URL Handler
+[.small]#xref:web/webmvc/filters.adoc#filters.url-handler[See equivalent in the Servlet stack]#
+
+You may want your controller endpoints to match routes with or without a trailing slash in the URL path.
+For example, both "GET /home" and "GET /home/" should be handled by a controller method annotated with `@GetMapping("/home")`.
+
+Adding trailing slash variants to all mapping declarations is not the best way to handle this use case.
+The `UrlHandlerFilter` web filter has been designed for this purpose. It can be configured to:
+
+* respond with an HTTP redirect status when receiving URLs with trailing slashes, sending browsers to the non-trailing slash URL variant.
+* mutate the request to act as if the request was sent without a trailing slash and continue the processing of the request.
+
+Here is how you can instantiate and configure a `UrlHandlerFilter` for a blog application:
+
+include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
+
+
 
 [[webflux-exception-handler]]
 == Exceptions
@@ -453,7 +471,7 @@ The following table describes the available `WebExceptionHandler` implementation
 
 [[webflux-codecs]]
 == Codecs
-[.small]#xref:integration/rest-clients.adoc#rest-message-conversion[See equivalent in the Servlet stack]#
+[.small]#xref:web/webmvc/message-converters.adoc#message-converters[See equivalent in the Servlet stack]#
 
 The `spring-web` and `spring-core` modules provide support for serializing and
 deserializing byte content to and from higher level objects through non-blocking I/O with
@@ -468,7 +486,7 @@ to encode and decode HTTP message content.
 * An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to adapt it for use in a web
 application, while a `Decoder` can be wrapped with `DecoderHttpMessageReader`.
 * {spring-framework-api}/core/io/buffer/DataBuffer.html[`DataBuffer`] abstracts different
-byte buffer representations (e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`, etc.) and is
+byte buffer representations (for example, Netty `ByteBuf`, `java.nio.ByteBuffer`, etc.) and is
 what all codecs work on. See xref:core/databuffer-codec.adoc[Data Buffers and Codecs] in the
 "Spring Core" section for more on this topic.
 
@@ -493,8 +511,8 @@ The `Jackson2Decoder` works as follows:
 * Jackson's asynchronous, non-blocking parser is used to aggregate a stream of byte chunks
 into ``TokenBuffer``'s each representing a JSON object.
 * Each `TokenBuffer` is passed to Jackson's `ObjectMapper` to create a higher level object.
-* When decoding to a single-value publisher (e.g. `Mono`), there is one `TokenBuffer`.
-* When decoding to a multi-value publisher (e.g. `Flux`), each `TokenBuffer` is passed to
+* When decoding to a single-value publisher (for example, `Mono`), there is one `TokenBuffer`.
+* When decoding to a multi-value publisher (for example, `Flux`), each `TokenBuffer` is passed to
 the `ObjectMapper` as soon as enough bytes are received for a fully formed object. The
 input content can be a JSON array, or any
 https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format such as NDJSON,
@@ -502,7 +520,7 @@ JSON Lines, or JSON Text Sequences.
 
 The `Jackson2Encoder` works as follows:
 
-* For a single value publisher (e.g. `Mono`), simply serialize it through the
+* For a single value publisher (for example, `Mono`), simply serialize it through the
 `ObjectMapper`.
 * For a multi-value publisher with `application/json`, by default collect the values with
 `Flux#collectToList()` and then serialize the resulting collection.
@@ -561,6 +579,18 @@ request body. For this reason applications have to consistently use `getMultipar
 for repeated, map-like access to parts, or otherwise rely on the
 `SynchronossPartHttpMessageReader` for a one-time access to `Flux<Part>`.
 
+
+[[webflux-codecs-protobuf]]
+=== Protocol Buffers
+
+`ProtobufEncoder` and `ProtobufDecoder` supporting decoding and encoding "application/x-protobuf", "application/octet-stream"
+and "application/vnd.google.protobuf" content for `com.google.protobuf.Message` types. They also support stream of values
+if content is received/sent with the "delimited" parameter along the content type (like "application/x-protobuf;delimited=true").
+This requires the "com.google.protobuf:protobuf-java" library, version 3.29 and higher.
+
+The `ProtobufJsonDecoder` and `ProtobufJsonEncoder` variants support reading and writing JSON documents to and from Protobuf messages.
+They require the "com.google.protobuf:protobuf-java-util" dependency. Note, the JSON variants do not support reading stream of messages,
+see the {spring-framework-api}/http/codec/protobuf/ProtobufJsonDecoder.html[javadoc of `ProtobufJsonDecoder`] for more details.
 
 [[webflux-codecs-limits]]
 === Limits
@@ -664,7 +694,7 @@ The following example shows how to do so for server-side requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -679,7 +709,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -698,7 +728,7 @@ The following example shows how to do so for client-side requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Consumer<ClientCodecConfigurer> consumer = configurer ->
 			configurer.defaultCodecs().enableLoggingRequestDetails(true);
@@ -710,7 +740,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val consumer: (ClientCodecConfigurer) -> Unit  = { configurer -> configurer.defaultCodecs().enableLoggingRequestDetails(true) }
 
@@ -748,7 +778,7 @@ The following example shows how to do so for client-side requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient webClient = WebClient.builder()
 			.codecs(configurer -> {
@@ -760,7 +790,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val webClient = WebClient.builder()
 			.codecs({ configurer ->

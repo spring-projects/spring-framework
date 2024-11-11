@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  * @author Arjen Poutsma
  * @author Brian Clozel
  */
-public class DefaultServerRequestTests {
+class DefaultServerRequestTests {
 
 	private final List<HttpMessageReader<?>> messageReaders = Arrays.asList(
 			new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()),
@@ -86,7 +86,7 @@ public class DefaultServerRequestTests {
 
 
 	@Test
-	public void method() {
+	void method() {
 		HttpMethod method = HttpMethod.HEAD;
 		DefaultServerRequest request = new DefaultServerRequest(
 				MockServerWebExchange.from(MockServerHttpRequest.method(method, "https://example.com")),
@@ -96,7 +96,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void uri() {
+	void uri() {
 		URI uri = URI.create("https://example.com");
 
 		DefaultServerRequest request = new DefaultServerRequest(
@@ -107,7 +107,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void uriBuilder() throws URISyntaxException {
+	void uriBuilder() throws URISyntaxException {
 		URI uri = new URI("http", "localhost", "/path", "a=1", null);
 		DefaultServerRequest request = new DefaultServerRequest(
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, uri)),
@@ -123,7 +123,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void attribute() {
+	void attribute() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.method(HttpMethod.GET, "https://example.com"));
 		exchange.getAttributes().put("foo", "bar");
@@ -134,7 +134,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void queryParams() {
+	void queryParams() {
 		DefaultServerRequest request = new DefaultServerRequest(
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo=bar")),
 				this.messageReaders);
@@ -143,7 +143,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void emptyQueryParam() {
+	void emptyQueryParam() {
 		DefaultServerRequest request = new DefaultServerRequest(
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo")),
 				this.messageReaders);
@@ -152,7 +152,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void absentQueryParam() {
+	void absentQueryParam() {
 		DefaultServerRequest request = new DefaultServerRequest(
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo")),
 				this.messageReaders);
@@ -161,7 +161,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void pathVariable() {
+	void pathVariable() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
@@ -173,7 +173,7 @@ public class DefaultServerRequestTests {
 
 
 	@Test
-	public void pathVariableNotFound() {
+	void pathVariableNotFound() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
@@ -185,7 +185,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void pathVariables() {
+	void pathVariables() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		exchange.getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
@@ -196,7 +196,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void header() {
+	void header() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		List<MediaType> accept =
 				Collections.singletonList(MediaType.APPLICATION_JSON);
@@ -229,7 +229,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void cookies() {
+	void cookies() {
 		HttpCookie cookie = new HttpCookie("foo", "bar");
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.method(HttpMethod.GET, "https://example.com").cookie(cookie));
@@ -318,8 +318,7 @@ public class DefaultServerRequestTests {
 			DefaultServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), messageReaders);
 
 			Mono<Map<String, String>> resultMono = request.bodyToMono(
-					new ParameterizedTypeReference<Map<String, String>>() {
-					});
+					new ParameterizedTypeReference<>() {});
 			StepVerifier.create(resultMono)
 					.expectError(ServerWebInputException.class)
 					.verify();
@@ -387,7 +386,7 @@ public class DefaultServerRequestTests {
 
 
 	@Test
-	public void formData() {
+	void formData() {
 		byte[] bytes = "foo=bar&baz=qux".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -411,7 +410,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void multipartData() {
+	void multipartData() {
 		String data = """
 				--12345
 				Content-Disposition: form-data; name="foo"

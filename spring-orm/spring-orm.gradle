@@ -10,7 +10,6 @@ dependencies {
 	optional(project(":spring-context"))
 	optional(project(":spring-web"))
 	optional("jakarta.servlet:jakarta.servlet-api")
-	optional("jakarta.validation:jakarta.validation-api")
 	optional("org.eclipse.persistence:org.eclipse.persistence.jpa")
 	optional("org.hibernate:hibernate-core-jakarta")
 	testImplementation(project(":spring-core-test"))

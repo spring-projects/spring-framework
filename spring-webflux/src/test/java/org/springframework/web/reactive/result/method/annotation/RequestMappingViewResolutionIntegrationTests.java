@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,6 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 
 		URI uri = URI.create("http://localhost:" + this.port + "/redirect");
 		RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.ALL).build();
-		@SuppressWarnings("resource")
 		ResponseEntity<Void> response = new RestTemplate(factory).exchange(request, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
@@ -112,10 +111,11 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 
 		@Bean
 		public FreeMarkerConfigurer freeMarkerConfig() {
-			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setPreferFileSystemAccess(false);
-			configurer.setTemplateLoaderPath("classpath*:org/springframework/web/reactive/view/freemarker/");
-			return configurer;
+			// No need to configure a custom template loader path via setTemplateLoaderPath(),
+			// since FreeMarkerConfigurer already registers a
+			// new ClassTemplateLoader(FreeMarkerConfigurer.class, ""), which automatically
+			// finds template files in the same package as this test class.
+			return new FreeMarkerConfigurer();
 		}
 	}
 

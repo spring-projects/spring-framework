@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ro
 
 /**
  * Unit tests covering cases where a user defines an invalid Configuration
- * class, e.g.: forgets to annotate with {@link Configuration} or declares
+ * class, for example: forgets to annotate with {@link Configuration} or declares
  * a Configuration class as final.
  *
  * @author Chris Beams
  */
-public class InvalidConfigurationClassDefinitionTests {
+class InvalidConfigurationClassDefinitionTests {
 
 	@Test
-	public void configurationClassesMayNotBeFinal() {
+	void configurationClassesMayNotBeFinal() {
 		@Configuration
 		final class Config { }
 

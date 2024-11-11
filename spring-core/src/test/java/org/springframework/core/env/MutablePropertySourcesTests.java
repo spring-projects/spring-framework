@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,12 +99,12 @@ class MutablePropertySourcesTests {
 		assertThat(sources).hasSize(6);
 		assertThat(sources.contains("a")).isFalse();
 
-		assertThat((Object) sources.remove("a")).isNull();
+		assertThat(sources.remove("a")).isNull();
 		assertThat(sources).hasSize(6);
 
 		String bogusPS = "bogus";
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				sources.addAfter(bogusPS, new MockPropertySource("h")))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> sources.addAfter(bogusPS, new MockPropertySource("h")))
 			.withMessageContaining("does not exist");
 
 		sources.addFirst(new MockPropertySource("a"));
@@ -121,16 +121,16 @@ class MutablePropertySourcesTests {
 
 		sources.replace("a-replaced", new MockPropertySource("a"));
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				sources.replace(bogusPS, new MockPropertySource("bogus-replaced")))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> sources.replace(bogusPS, new MockPropertySource("bogus-replaced")))
 			.withMessageContaining("does not exist");
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				sources.addBefore("b", new MockPropertySource("b")))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> sources.addBefore("b", new MockPropertySource("b")))
 			.withMessageContaining("cannot be added relative to itself");
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				sources.addAfter("b", new MockPropertySource("b")))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> sources.addAfter("b", new MockPropertySource("b")))
 			.withMessageContaining("cannot be added relative to itself");
 	}
 
@@ -149,8 +149,7 @@ class MutablePropertySourcesTests {
 		assertThat(it.hasNext()).isTrue();
 		assertThat(it.next().getName()).isEqualTo("test");
 
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
-				it::remove);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(it::remove);
 		assertThat(it.hasNext()).isFalse();
 	}
 

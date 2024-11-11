@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy for components that process failures related to application contexts
@@ -41,6 +42,6 @@ public interface ApplicationContextFailureProcessor {
 	 * @param context the application context that did not load successfully
 	 * @param exception the exception thrown while loading the application context
 	 */
-	void processLoadFailure(ApplicationContext context, Throwable exception);
+	void processLoadFailure(ApplicationContext context, @Nullable Throwable exception);
 
 }

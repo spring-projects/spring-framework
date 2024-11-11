@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import org.springframework.messaging.support.MessageBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for SimpMessageTypeMessageCondition.
+ * Tests for {@link SimpMessageTypeMessageCondition}.
  *
  * @author Rossen Stoyanchev
  */
-public class SimpMessageTypeMessageConditionTests {
+class SimpMessageTypeMessageConditionTests {
 
 	@Test
-	public void combine() {
+	void combine() {
 		SimpMessageType messageType = SimpMessageType.MESSAGE;
 		SimpMessageType subscribeType = SimpMessageType.SUBSCRIBE;
 
@@ -46,7 +46,7 @@ public class SimpMessageTypeMessageConditionTests {
 	}
 
 	@Test
-	public void getMatchingCondition() {
+	void getMatchingCondition() {
 		Message<?> message = message(SimpMessageType.MESSAGE);
 		SimpMessageTypeMessageCondition condition = condition(SimpMessageType.MESSAGE);
 		SimpMessageTypeMessageCondition actual = condition.getMatchingCondition(message);
@@ -56,7 +56,7 @@ public class SimpMessageTypeMessageConditionTests {
 	}
 
 	@Test
-	public void getMatchingConditionNoMessageType() {
+	void getMatchingConditionNoMessageType() {
 		Message<?> message = message(null);
 		SimpMessageTypeMessageCondition condition = condition(SimpMessageType.MESSAGE);
 
@@ -64,7 +64,7 @@ public class SimpMessageTypeMessageConditionTests {
 	}
 
 	@Test
-	public void compareTo() {
+	void compareTo() {
 		Message<byte[]> message = message(null);
 		assertThat(condition(SimpMessageType.MESSAGE).compareTo(condition(SimpMessageType.MESSAGE), message)).isEqualTo(0);
 		assertThat(condition(SimpMessageType.MESSAGE).compareTo(condition(SimpMessageType.SUBSCRIBE), message)).isEqualTo(0);

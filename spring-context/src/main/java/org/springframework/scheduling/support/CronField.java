@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.ValueRange;
+import java.util.Locale;
 import java.util.function.BiFunction;
 
 import org.springframework.lang.Nullable;
@@ -29,17 +30,24 @@ import org.springframework.util.StringUtils;
 
 /**
  * Single field in a cron pattern. Created using the {@code parse*} methods,
- * main and only entry point is {@link #nextOrSame(Temporal)}.
+ * the main and only entry point is {@link #nextOrSame(Temporal)}.
+ *
+ * <p>Supports a Quartz day-of-month/week field with an L/# expression. Follows
+ * common cron conventions in every other respect, including 0-6 for SUN-SAT
+ * (plus 7 for SUN as well). Note that Quartz deviates from the day-of-week
+ * convention in cron through 1-7 for SUN-SAT whereas Spring strictly follows
+ * cron even in combination with the optional Quartz-specific L/# expressions.
  *
  * @author Arjen Poutsma
  * @since 5.3
  */
 abstract class CronField {
 
-	private static final String[] MONTHS = new String[]{"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP",
-			"OCT", "NOV", "DEC"};
+	private static final String[] MONTHS = new String[]
+			{"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
-	private static final String[] DAYS = new String[]{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+	private static final String[] DAYS = new String[]
+			{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
 
 	private final Type type;
 
@@ -48,11 +56,12 @@ abstract class CronField {
 		this.type = type;
 	}
 
+
 	/**
 	 * Return a {@code CronField} enabled for 0 nanoseconds.
 	 */
 	public static CronField zeroNanos() {
-		return BitsCronField.zeroNanos();
+		return BitsCronField.ZERO_NANOS;
 	}
 
 	/**
@@ -135,7 +144,7 @@ abstract class CronField {
 	}
 
 	private static String replaceOrdinals(String value, String[] list) {
-		value = value.toUpperCase();
+		value = value.toUpperCase(Locale.ROOT);
 		for (int i = 0; i < list.length; i++) {
 			String replacement = Integer.toString(i + 1);
 			value = StringUtils.replace(value, list[i], replacement);
@@ -169,6 +178,7 @@ abstract class CronField {
 	 * day-of-month, month, day-of-week.
 	 */
 	protected enum Type {
+
 		NANO(ChronoField.NANO_OF_SECOND, ChronoUnit.SECONDS),
 		SECOND(ChronoField.SECOND_OF_MINUTE, ChronoUnit.MINUTES, ChronoField.NANO_OF_SECOND),
 		MINUTE(ChronoField.MINUTE_OF_HOUR, ChronoUnit.HOURS, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
@@ -177,20 +187,17 @@ abstract class CronField {
 		MONTH(ChronoField.MONTH_OF_YEAR, ChronoUnit.YEARS, ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
 		DAY_OF_WEEK(ChronoField.DAY_OF_WEEK, ChronoUnit.WEEKS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND);
 
-
 		private final ChronoField field;
 
 		private final ChronoUnit higherOrder;
 
 		private final ChronoField[] lowerOrders;
 
-
 		Type(ChronoField field, ChronoUnit higherOrder, ChronoField... lowerOrders) {
 			this.field = field;
 			this.higherOrder = higherOrder;
 			this.lowerOrders = lowerOrders;
 		}
-
 
 		/**
 		 * Return the value of this type for the given temporal.

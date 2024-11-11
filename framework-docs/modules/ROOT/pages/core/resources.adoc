@@ -280,14 +280,14 @@ snippet of code was run against a `ClassPathXmlApplicationContext` instance:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Resource template = ctx.getResource("some/resource/path/myTemplate.txt");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val template = ctx.getResource("some/resource/path/myTemplate.txt")
 ----
@@ -309,14 +309,14 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val template = ctx.getResource("classpath:some/resource/path/myTemplate.txt")
 ----
@@ -329,14 +329,14 @@ Similarly, you can force a `UrlResource` to be used by specifying any of the sta
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Resource template = ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val template = ctx.getResource("file:///some/resource/path/myTemplate.txt")
 ----
@@ -346,14 +346,14 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt")
 ----
@@ -505,7 +505,7 @@ property of type `Resource`.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package example;
 
@@ -523,7 +523,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyBean(var template: Resource)
 ----
@@ -571,7 +571,7 @@ The following example demonstrates how to achieve this.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class MyBean {
@@ -588,7 +588,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	class MyBean(@Value("\${template.path}") private val template: Resource)
@@ -606,7 +606,7 @@ can be injected into the `MyBean` constructor.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class MyBean {
@@ -623,7 +623,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	class MyBean(@Value("\${templates.path}") private val templates: Resource[])
@@ -657,14 +657,14 @@ specific application context. For example, consider the following example, which
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = ClassPathXmlApplicationContext("conf/appContext.xml")
 ----
@@ -677,7 +677,7 @@ used. However, consider the following example, which creates a `FileSystemXmlApp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/appContext.xml");
@@ -685,7 +685,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = FileSystemXmlApplicationContext("conf/appContext.xml")
 ----
@@ -702,7 +702,7 @@ definitions. Consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");
@@ -710,7 +710,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = FileSystemXmlApplicationContext("classpath:conf/appContext.xml")
 ----
@@ -749,7 +749,7 @@ classpath) can be instantiated:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext(
 		new String[] {"services.xml", "repositories.xml"}, MessengerService.class);
@@ -757,7 +757,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = ClassPathXmlApplicationContext(arrayOf("services.xml", "repositories.xml"), MessengerService::class.java)
 ----
@@ -843,7 +843,7 @@ special `classpath*:` prefix, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");
@@ -851,7 +851,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = ClassPathXmlApplicationContext("classpath*:conf/appContext.xml")
 ----
@@ -905,8 +905,8 @@ policies in some environments -- for example, stand-alone applications on JDK 1.
 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
 {stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
-On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
-Putting resources into a dedicated directory is highly recommendable here as well,
+On the module path (Java Module System), Spring's classpath scanning generally works as
+expected. Putting resources into a dedicated directory is highly recommendable here as well,
 avoiding the aforementioned portability problems with searching the jar file root level.
 ====
 
@@ -955,7 +955,7 @@ In practice, this means the following examples are equivalent:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/context.xml");
@@ -963,7 +963,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = FileSystemXmlApplicationContext("conf/context.xml")
 ----
@@ -973,7 +973,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("/conf/context.xml");
@@ -981,7 +981,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = FileSystemXmlApplicationContext("/conf/context.xml")
 ----
@@ -994,7 +994,7 @@ case is relative and the other absolute):
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("some/resource/path/myTemplate.txt");
@@ -1002,7 +1002,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx: FileSystemXmlApplicationContext = ...
 	ctx.getResource("some/resource/path/myTemplate.txt")
@@ -1013,7 +1013,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("/some/resource/path/myTemplate.txt");
@@ -1021,7 +1021,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx: FileSystemXmlApplicationContext = ...
 	ctx.getResource("/some/resource/path/myTemplate.txt")
@@ -1037,7 +1037,7 @@ show how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
 	ctx.getResource("file:///some/resource/path/myTemplate.txt");
@@ -1045,7 +1045,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
 	ctx.getResource("file:///some/resource/path/myTemplate.txt")
@@ -1056,7 +1056,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	ApplicationContext ctx =
@@ -1065,7 +1065,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	val ctx = FileSystemXmlApplicationContext("file:///conf/context.xml")

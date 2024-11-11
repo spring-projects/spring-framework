@@ -101,7 +101,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 	private Cache resolveExceptionCache(CacheOperationInvocationContext<CacheResultOperation> context) {
 		CacheResolver exceptionCacheResolver = context.getOperation().getExceptionCacheResolver();
 		if (exceptionCacheResolver != null) {
-			return extractFrom(context.getOperation().getExceptionCacheResolver().resolveCaches(context));
+			return extractFrom(exceptionCacheResolver.resolveCaches(context));
 		}
 		return null;
 	}

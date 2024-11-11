@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class ModelMapTests {
+class ModelMapTests {
 
 	@Test
-	public void testNoArgCtorYieldsEmptyModel() throws Exception {
+	void testNoArgCtorYieldsEmptyModel() {
 		assertThat(new ModelMap()).isEmpty();
 	}
 
@@ -52,7 +52,7 @@ public class ModelMapTests {
 	 * SPR-2185 - Null model assertion causes backwards compatibility issue
 	 */
 	@Test
-	public void testAddNullObjectWithExplicitKey() throws Exception {
+	void testAddNullObjectWithExplicitKey() {
 		ModelMap model = new ModelMap();
 		model.addAttribute("foo", null);
 		assertThat(model.containsKey("foo")).isTrue();
@@ -63,14 +63,14 @@ public class ModelMapTests {
 	 * SPR-2185 - Null model assertion causes backwards compatibility issue
 	 */
 	@Test
-	public void testAddNullObjectViaCtorWithExplicitKey() throws Exception {
+	void testAddNullObjectViaCtorWithExplicitKey() {
 		ModelMap model = new ModelMap("foo", null);
 		assertThat(model.containsKey("foo")).isTrue();
 		assertThat(model.get("foo")).isNull();
 	}
 
 	@Test
-	public void testNamedObjectCtor() throws Exception {
+	void testNamedObjectCtor() {
 		ModelMap model = new ModelMap("foo", "bing");
 		assertThat(model).hasSize(1);
 		String bing = (String) model.get("foo");
@@ -79,7 +79,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testUnnamedCtorScalar() throws Exception {
+	void testUnnamedCtorScalar() {
 		ModelMap model = new ModelMap("foo", "bing");
 		assertThat(model).hasSize(1);
 		String bing = (String) model.get("foo");
@@ -88,7 +88,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testOneArgCtorWithScalar() throws Exception {
+	void testOneArgCtorWithScalar() {
 		ModelMap model = new ModelMap("bing");
 		assertThat(model).hasSize(1);
 		String string = (String) model.get("string");
@@ -97,14 +97,14 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testOneArgCtorWithNull() {
+	void testOneArgCtorWithNull() {
 		//Null model arguments added without a name being explicitly supplied are not allowed
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ModelMap(null));
 	}
 
 	@Test
-	public void testOneArgCtorWithCollection() throws Exception {
+	void testOneArgCtorWithCollection() {
 		ModelMap model = new ModelMap(new String[]{"foo", "boing"});
 		assertThat(model).hasSize(1);
 		String[] strings = (String[]) model.get("stringList");
@@ -115,14 +115,14 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testOneArgCtorWithEmptyCollection() throws Exception {
+	void testOneArgCtorWithEmptyCollection() {
 		ModelMap model = new ModelMap(new HashSet<>());
 		// must not add if collection is empty...
 		assertThat(model).isEmpty();
 	}
 
 	@Test
-	public void testAddObjectWithNull() throws Exception {
+	void testAddObjectWithNull() {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -130,7 +130,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAddObjectWithEmptyArray() throws Exception {
+	void testAddObjectWithEmptyArray() {
 		ModelMap model = new ModelMap(new int[]{});
 		assertThat(model).hasSize(1);
 		int[] ints = (int[]) model.get("intList");
@@ -139,21 +139,21 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAddAllObjectsWithNullMap() throws Exception {
+	void testAddAllObjectsWithNullMap() {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Map<String, ?>) null);
 		assertThat(model).isEmpty();
 	}
 
 	@Test
-	public void testAddAllObjectsWithNullCollection() throws Exception {
+	void testAddAllObjectsWithNullCollection() {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Collection<Object>) null);
 		assertThat(model).isEmpty();
 	}
 
 	@Test
-	public void testAddAllObjectsWithSparseArrayList() throws Exception {
+	void testAddAllObjectsWithSparseArrayList() {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
 		ArrayList<String> list = new ArrayList<>();
@@ -164,7 +164,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAddMap() throws Exception {
+	void testAddMap() {
 		Map<String, String> map = new HashMap<>();
 		map.put("one", "one-value");
 		map.put("two", "two-value");
@@ -176,7 +176,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAddObjectNoKeyOfSameTypeOverrides() throws Exception {
+	void testAddObjectNoKeyOfSameTypeOverrides() {
 		ModelMap model = new ModelMap();
 		model.addAttribute("foo");
 		model.addAttribute("bar");
@@ -186,7 +186,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAddListOfTheSameObjects() throws Exception {
+	void testAddListOfTheSameObjects() {
 		List<TestBean> beans = new ArrayList<>();
 		beans.add(new TestBean("one"));
 		beans.add(new TestBean("two"));
@@ -197,7 +197,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testMergeMapWithOverriding() throws Exception {
+	void testMergeMapWithOverriding() {
 		Map<String, TestBean> beans = new HashMap<>();
 		beans.put("one", new TestBean("one"));
 		beans.put("two", new TestBean("two"));
@@ -210,7 +210,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testInnerClass() throws Exception {
+	void testInnerClass() {
 		ModelMap map = new ModelMap();
 		SomeInnerClass inner = new SomeInnerClass();
 		map.addAttribute(inner);
@@ -218,7 +218,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testInnerClassWithTwoUpperCaseLetters() throws Exception {
+	void testInnerClassWithTwoUpperCaseLetters() {
 		ModelMap map = new ModelMap();
 		UKInnerClass inner = new UKInnerClass();
 		map.addAttribute(inner);
@@ -226,7 +226,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAopCglibProxy() throws Exception {
+	void testAopCglibProxy() {
 		ModelMap map = new ModelMap();
 		ProxyFactory factory = new ProxyFactory();
 		SomeInnerClass val = new SomeInnerClass();
@@ -238,7 +238,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAopJdkProxy() throws Exception {
+	void testAopJdkProxy() {
 		ModelMap map = new ModelMap();
 		ProxyFactory factory = new ProxyFactory();
 		Map<?, ?> target = new HashMap<>();
@@ -250,7 +250,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAopJdkProxyWithMultipleInterfaces() throws Exception {
+	void testAopJdkProxyWithMultipleInterfaces() {
 		ModelMap map = new ModelMap();
 		Map<?, ?> target = new HashMap<>();
 		ProxyFactory factory = new ProxyFactory();
@@ -265,7 +265,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testAopJdkProxyWithDetectedInterfaces() throws Exception {
+	void testAopJdkProxyWithDetectedInterfaces() {
 		ModelMap map = new ModelMap();
 		Map<?, ?> target = new HashMap<>();
 		ProxyFactory factory = new ProxyFactory(target);
@@ -275,7 +275,7 @@ public class ModelMapTests {
 	}
 
 	@Test
-	public void testRawJdkProxy() throws Exception {
+	void testRawJdkProxy() {
 		ModelMap map = new ModelMap();
 		Object proxy = Proxy.newProxyInstance(
 				getClass().getClassLoader(),

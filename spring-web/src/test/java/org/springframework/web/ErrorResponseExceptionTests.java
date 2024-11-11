@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -51,6 +52,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -68,7 +70,7 @@ import static org.mockito.BDDMockito.when;
  *
  * @author Rossen Stoyanchev
  */
-public class ErrorResponseExceptionTests {
+class ErrorResponseExceptionTests {
 
 	private final MethodParameter methodParameter =
 			new MethodParameter(ResolvableMethod.on(getClass()).resolveMethod("handle"), 0);
@@ -415,6 +417,28 @@ public class ErrorResponseExceptionTests {
 		assertThat(ex.getHeaders()).isEmpty();
 	}
 
+	@Test // gh-30300
+	void responseStatusException() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		try {
+			String reason = "bad.request";
+			String message = "Breaking Bad Request";
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(reason, locale, message);
+
+			ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
+
+			ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
+			assertThat(problemDetail.getDetail()).isEqualTo(message);
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
 	private void assertStatus(ErrorResponse ex, HttpStatus status) {
 		ProblemDetail body = ex.getBody();
 		assertThat(ex.getStatusCode()).isEqualTo(status);
@@ -435,7 +459,7 @@ public class ErrorResponseExceptionTests {
 			ErrorResponse ex, @Nullable String suffix, @Nullable Object[] arguments) {
 
 		assertThat(ex.getDetailMessageCode())
-				.isEqualTo(ErrorResponse.getDefaultDetailMessageCode(((Exception) ex).getClass(), suffix));
+				.isEqualTo(ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), suffix));
 
 		if (arguments != null) {
 			assertThat(ex.getDetailMessageArguments()).containsExactlyElementsOf(Arrays.asList(arguments));

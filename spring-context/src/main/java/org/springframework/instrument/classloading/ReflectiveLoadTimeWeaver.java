@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,6 @@ import org.springframework.util.ReflectionUtils;
  * (such as the application server's class loader which is not visible to the
  * web application). There is no direct API dependency between this LoadTimeWeaver
  * adapter and the underlying ClassLoader, just a 'loose' method contract.
- *
- * <p>This is the LoadTimeWeaver to use e.g. with the Resin application server
- * version 3.1+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -624,7 +624,7 @@ class BindTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	void bindTagWithoutBean() throws JspException {
+	void bindTagWithoutBean() {
 		PageContext pc = createPageContext();
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -886,7 +886,7 @@ class BindTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	void transformTagOutsideBindTag() throws JspException {
+	void transformTagOutsideBindTag() {
 		// first set up the pagecontext and the bean
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
@@ -994,11 +994,7 @@ class BindTagTests extends AbstractTagTests {
 		assertThat(pc.getAttribute("theString")).isEqualTo("name");
 	}
 
-	/**
-	 * SPR-4022
-	 */
-	@SuppressWarnings("serial")
-	@Test
+	@Test // SPR-4022
 	void nestingInFormTag() throws JspException {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();

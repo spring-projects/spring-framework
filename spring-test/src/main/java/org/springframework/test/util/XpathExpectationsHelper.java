@@ -223,7 +223,7 @@ public class XpathExpectationsHelper {
 	/**
 	 * Parse the given XML content to a {@link Document}.
 	 * @param xml the content to parse
-	 * @param encoding optional content encoding, if provided as metadata (e.g. in HTTP headers)
+	 * @param encoding optional content encoding, if provided as metadata (for example, in HTTP headers)
 	 * @return the parsed document
 	 */
 	protected Document parseXmlByteArray(byte[] xml, @Nullable String encoding) throws Exception {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link SessionLocaleResolver}.
+ * Tests for {@link SessionLocaleResolver}.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -65,14 +65,14 @@ class SessionLocaleResolverTests {
 	}
 
 	@Test
-	void resolveLocaleWithoutSession() throws Exception {
+	void resolveLocaleWithoutSession() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		assertThat(resolver.resolveLocale(request)).isEqualTo(request.getLocale());
 	}
 
 	@Test
-	void resolveLocaleWithoutSessionAndDefaultLocale() throws Exception {
+	void resolveLocaleWithoutSessionAndDefaultLocale() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		resolver.setDefaultLocale(Locale.GERMAN);
@@ -81,7 +81,7 @@ class SessionLocaleResolverTests {
 	}
 
 	@Test
-	void setLocaleToNullLocale() throws Exception {
+	void setLocaleToNullLocale() {
 		request.addPreferredLocale(Locale.TAIWAN);
 		request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, Locale.GERMAN);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ class SockJsServiceTests extends AbstractHttpRequestTests {
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 		CorsConfiguration corsConfiguration = this.service.getCorsConfiguration(this.servletRequest);
-		assertThat(corsConfiguration.getAllowedOrigins().isEmpty()).isTrue();
+		assertThat(corsConfiguration.getAllowedOrigins()).isEmpty();
 
 		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.example"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
@@ -281,7 +281,7 @@ class SockJsServiceTests extends AbstractHttpRequestTests {
 
 		@Override
 		protected void handleRawWebSocketRequest(ServerHttpRequest req, ServerHttpResponse res,
-				WebSocketHandler handler) throws IOException {
+				WebSocketHandler handler) {
 		}
 
 		@Override

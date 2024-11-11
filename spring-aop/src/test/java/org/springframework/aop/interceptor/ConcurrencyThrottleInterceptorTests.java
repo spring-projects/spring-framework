@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 06.04.2004
  */
-public class ConcurrencyThrottleInterceptorTests {
+class ConcurrencyThrottleInterceptorTests {
 
 	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptorTests.class);
 
@@ -44,7 +44,7 @@ public class ConcurrencyThrottleInterceptorTests {
 
 
 	@Test
-	public void testSerializable() throws Exception {
+	void testSerializable() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setInterfaces(ITestBean.class);
@@ -63,12 +63,12 @@ public class ConcurrencyThrottleInterceptorTests {
 	}
 
 	@Test
-	public void testMultipleThreadsWithLimit1() {
+	void testMultipleThreadsWithLimit1() {
 		testMultipleThreads(1);
 	}
 
 	@Test
-	public void testMultipleThreadsWithLimit10() {
+	void testMultipleThreadsWithLimit10() {
 		testMultipleThreads(10);
 	}
 
@@ -111,8 +111,8 @@ public class ConcurrencyThrottleInterceptorTests {
 
 	private static class ConcurrencyThread extends Thread {
 
-		private ITestBean proxy;
-		private Throwable ex;
+		private final ITestBean proxy;
+		private final Throwable ex;
 
 		public ConcurrencyThread(ITestBean proxy, Throwable ex) {
 			this.proxy = proxy;

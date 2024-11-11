@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,11 @@ import org.springframework.core.annotation.AliasFor;
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.0
- * @see SimpleReflectiveProcessor
  * @see ReflectiveRuntimeHintsRegistrar
+ * @see RegisterReflection @RegisterReflection
  * @see RegisterReflectionForBinding @RegisterReflectionForBinding
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.CONSTRUCTOR,
-		ElementType.FIELD, ElementType.METHOD })
+@Target({ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Reflective {

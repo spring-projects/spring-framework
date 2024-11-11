@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class LookupOverride extends MethodOverride {
 
 
 	/**
-	 * Construct a new LookupOverride.
+	 * Construct a new {@code LookupOverride}.
 	 * @param methodName the name of the method to override
 	 * @param beanName the name of the bean in the current {@code BeanFactory} that the
 	 * overridden method should return (may be {@code null} for type-based bean retrieval)
@@ -60,7 +60,7 @@ public class LookupOverride extends MethodOverride {
 	}
 
 	/**
-	 * Construct a new LookupOverride.
+	 * Construct a new {@code LookupOverride}.
 	 * @param method the method declaration to override
 	 * @param beanName the name of the bean in the current {@code BeanFactory} that the
 	 * overridden method should return (may be {@code null} for type-based bean retrieval)
@@ -73,7 +73,7 @@ public class LookupOverride extends MethodOverride {
 
 
 	/**
-	 * Return the name of the bean that should be returned by this method.
+	 * Return the name of the bean that should be returned by this {@code LookupOverride}.
 	 */
 	@Nullable
 	public String getBeanName() {

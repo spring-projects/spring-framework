@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public @interface NumberFormat {
 
 		/**
 		 * The default format for the annotated type: typically 'number' but possibly
-		 * 'currency' for a money type (e.g. {@code javax.money.MonetaryAmount)}.
+		 * 'currency' for a money type (for example, {@code javax.money.MonetaryAmount}).
 		 * @since 4.2
 		 */
 		DEFAULT,

@@ -9,7 +9,7 @@ depending on the response status:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Person> entityMono = client.get()
 			.uri("/persons/1")
@@ -27,7 +27,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val entity = client.get()
   .uri("/persons/1")

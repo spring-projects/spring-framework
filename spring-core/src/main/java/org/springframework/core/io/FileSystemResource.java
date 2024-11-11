@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@ import org.springframework.util.StringUtils;
  * Supports resolution as a {@code File} and also as a {@code URL}.
  * Implements the extended {@link WritableResource} interface.
  *
- * <p>Note: As of Spring Framework 5.0, this {@link Resource} implementation uses
- * NIO.2 API for read/write interactions. As of 5.1, it may be constructed with a
- * {@link java.nio.file.Path} handle in which case it will perform all file system
- * interactions via NIO.2, only resorting to {@link File} on {@link #getFile()}.
+ * <p>Note: This {@link Resource} implementation uses NIO.2 API for read/write
+ * interactions and may be constructed with a {@link java.nio.file.Path} handle
+ * in which case it will perform all file system interactions via NIO.2, only
+ * resorting to {@link File} on {@link #getFile()}.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -74,7 +74,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * <p>Note: When building relative resources via {@link #createRelative},
 	 * it makes a difference whether the specified resource base path here
 	 * ends with a slash or not. In the case of "C:/dir1/", relative paths
-	 * will be built underneath that root: e.g. relative path "dir2" &rarr;
+	 * will be built underneath that root: for example, relative path "dir2" &rarr;
 	 * "C:/dir1/dir2". In the case of "C:/dir1", relative paths will apply
 	 * at the same directory level: relative path "dir2" &rarr; "C:/dir2".
 	 * @param path a file path
@@ -91,7 +91,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * Create a new {@code FileSystemResource} from a {@link File} handle.
 	 * <p>Note: When building relative resources via {@link #createRelative},
 	 * the relative path will apply <i>at the same directory level</i>:
-	 * e.g. new File("C:/dir1"), relative path "dir2" &rarr; "C:/dir2"!
+	 * for example, new File("C:/dir1"), relative path "dir2" &rarr; "C:/dir2"!
 	 * If you prefer to have relative paths built underneath the given root directory,
 	 * use the {@link #FileSystemResource(String) constructor with a file path}
 	 * to append a trailing slash to the root path: "C:/dir1/", which indicates
@@ -115,7 +115,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * path cleaning and {@link #createRelative(String)} handling.
 	 * <p>Note: When building relative resources via {@link #createRelative},
 	 * the relative path will apply <i>at the same directory level</i>:
-	 * e.g. Paths.get("C:/dir1"), relative path "dir2" &rarr; "C:/dir2"!
+	 * for example, Paths.get("C:/dir1"), relative path "dir2" &rarr; "C:/dir2"!
 	 * If you prefer to have relative paths built underneath the given root directory,
 	 * use the {@link #FileSystemResource(String) constructor with a file path}
 	 * to append a trailing slash to the root path: "C:/dir1/", which indicates

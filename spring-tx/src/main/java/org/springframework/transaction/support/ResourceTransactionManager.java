@@ -37,7 +37,7 @@ public interface ResourceTransactionManager extends PlatformTransactionManager {
 
 	/**
 	 * Return the resource factory that this transaction manager operates on,
-	 * e.g. a JDBC DataSource or a JMS ConnectionFactory.
+	 * for example, a JDBC DataSource or a JMS ConnectionFactory.
 	 * <p>This target resource factory is usually used as resource key for
 	 * {@link TransactionSynchronizationManager}'s resource bindings per thread.
 	 * @return the target resource factory (never {@code null})

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,11 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alef Arendsen
  */
-public class LobSupportTests {
+@SuppressWarnings("deprecation")
+class LobSupportTests {
 
 	@Test
-	public void testCreatingPreparedStatementCallback() throws SQLException {
+	void testCreatingPreparedStatementCallback() throws SQLException {
 		LobHandler handler = mock();
 		LobCreator creator = mock();
 		PreparedStatement ps = mock();
@@ -69,7 +70,7 @@ public class LobSupportTests {
 	}
 
 	@Test
-	public void testAbstractLobStreamingResultSetExtractorNoRows() throws SQLException {
+	void testAbstractLobStreamingResultSetExtractorNoRows() throws SQLException {
 		ResultSet rs = mock();
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(false);
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class)
@@ -78,7 +79,7 @@ public class LobSupportTests {
 	}
 
 	@Test
-	public void testAbstractLobStreamingResultSetExtractorOneRow() throws SQLException {
+	void testAbstractLobStreamingResultSetExtractorOneRow() throws SQLException {
 		ResultSet rs = mock();
 		given(rs.next()).willReturn(true, false);
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(false);
@@ -87,7 +88,7 @@ public class LobSupportTests {
 	}
 
 	@Test
-	public void testAbstractLobStreamingResultSetExtractorMultipleRows() throws SQLException {
+	void testAbstractLobStreamingResultSetExtractorMultipleRows() throws SQLException {
 		ResultSet rs = mock();
 		given(rs.next()).willReturn(true, true, false);
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(false);
@@ -97,7 +98,7 @@ public class LobSupportTests {
 	}
 
 	@Test
-	public void testAbstractLobStreamingResultSetExtractorCorrectException() throws SQLException {
+	void testAbstractLobStreamingResultSetExtractorCorrectException() throws SQLException {
 		ResultSet rs = mock();
 		given(rs.next()).willReturn(true);
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(true);
@@ -106,7 +107,7 @@ public class LobSupportTests {
 	}
 
 	private AbstractLobStreamingResultSetExtractor<Void> getResultSetExtractor(final boolean ex) {
-		AbstractLobStreamingResultSetExtractor<Void> lobRse = new AbstractLobStreamingResultSetExtractor<>() {
+		return new AbstractLobStreamingResultSetExtractor<>() {
 			@Override
 			protected void streamData(ResultSet rs) throws SQLException, IOException {
 				if (ex) {
@@ -117,7 +118,6 @@ public class LobSupportTests {
 				}
 			}
 		};
-		return lobRse;
 	}
 
 }

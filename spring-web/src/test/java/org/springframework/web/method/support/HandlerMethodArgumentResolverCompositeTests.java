@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Rossen Stoyanchev
  */
-public class HandlerMethodArgumentResolverCompositeTests {
+class HandlerMethodArgumentResolverCompositeTests {
 
 	private HandlerMethodArgumentResolverComposite resolverComposite;
 
@@ -41,7 +41,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.resolverComposite = new HandlerMethodArgumentResolverComposite();
 
 		Method method = getClass().getDeclaredMethod("handle", Integer.class, String.class);
@@ -51,7 +51,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@Test
-	public void supportsParameter() throws Exception {
+	void supportsParameter() {
 		this.resolverComposite.addResolver(new StubArgumentResolver(Integer.class));
 
 		assertThat(this.resolverComposite.supportsParameter(paramInt)).isTrue();
@@ -59,7 +59,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
+	void resolveArgument() throws Exception {
 		this.resolverComposite.addResolver(new StubArgumentResolver(55));
 		Object resolvedValue = this.resolverComposite.resolveArgument(paramInt, null, null, null);
 
@@ -67,7 +67,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 	}
 
 	@Test
-	public void checkArgumentResolverOrder() throws Exception {
+	void checkArgumentResolverOrder() throws Exception {
 		this.resolverComposite.addResolver(new StubArgumentResolver(1));
 		this.resolverComposite.addResolver(new StubArgumentResolver(2));
 		Object resolvedValue = this.resolverComposite.resolveArgument(paramInt, null, null, null);
@@ -76,7 +76,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 	}
 
 	@Test
-	public void noSuitableArgumentResolver() throws Exception {
+	void noSuitableArgumentResolver() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.resolverComposite.resolveArgument(paramStr, null, null, null));
 	}

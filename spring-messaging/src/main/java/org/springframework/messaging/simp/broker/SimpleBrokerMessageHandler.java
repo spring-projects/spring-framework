@@ -84,8 +84,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	/**
 	 * Create a SimpleBrokerMessageHandler instance with the given message channels
 	 * and destination prefixes.
-	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param clientInboundChannel the channel for receiving messages from clients (for example, WebSocket clients)
+	 * @param clientOutboundChannel the channel for sending messages to clients (for example, WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
 	 * @param destinationPrefixes prefixes to use to filter out messages
 	 */

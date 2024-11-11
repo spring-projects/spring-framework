@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * <p>Note that at shutdown, someone should close the underlying
  * {@code Connection} via the {@code close()} method. Client code will
  * never call close on the {@code Connection} handle if it is
- * SmartConnectionFactory-aware (e.g. uses
+ * SmartConnectionFactory-aware (for example, uses
  * {@link ConnectionFactoryUtils#releaseConnection(Connection, ConnectionFactory)}).
  *
  * <p>If client code will call {@link Connection#close()} in the
@@ -70,13 +70,15 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	private boolean suppressClose;
 
 	/** Override auto-commit state?. */
-	private @Nullable Boolean autoCommit;
+	@Nullable
+	private Boolean autoCommit;
 
 	/** Wrapped Connection. */
 	private final AtomicReference<Connection> target = new AtomicReference<>();
 
 	/** Proxy Connection. */
-	private @Nullable Connection connection;
+	@Nullable
+	private Connection connection;
 
 	private final Mono<? extends Connection> connectionEmitter;
 
@@ -251,27 +253,24 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		@Override
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			switch (method.getName()) {
-				case "equals":
-					// Only consider equal when proxies are identical.
-					return proxy == args[0];
-				case "hashCode":
-					// Use hashCode of PersistenceManager proxy.
-					return System.identityHashCode(proxy);
-				case "unwrap":
-					return this.target;
-				case "close":
-					// Handle close method: suppress, not valid.
-					return Mono.empty();
-			}
-
-			// Invoke method on target Connection.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
+				case "equals" -> proxy == args[0];
+				// Use hashCode of Connection proxy.
+				case "hashCode" -> System.identityHashCode(proxy);
+				case "unwrap" -> this.target;
+				// Handle close method: suppress, not valid.
+				case "close" -> Mono.empty();
+				default -> {
+					try {
+						// Invoke method on target Connection.
+						yield method.invoke(this.target, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 	}
 

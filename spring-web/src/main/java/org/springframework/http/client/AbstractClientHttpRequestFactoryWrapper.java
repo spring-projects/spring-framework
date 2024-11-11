@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@link ClientHttpRequestFactory} implementations
- * that decorate another request factory.
+ * that decorate another delegate request factory.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -52,6 +52,14 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 	@Override
 	public final ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		return createRequest(uri, httpMethod, this.requestFactory);
+	}
+
+	/**
+	 * Return the delegate request factory.
+	 * @since 6.1.4
+	 */
+	public ClientHttpRequestFactory getDelegate() {
+		return this.requestFactory;
 	}
 
 	/**

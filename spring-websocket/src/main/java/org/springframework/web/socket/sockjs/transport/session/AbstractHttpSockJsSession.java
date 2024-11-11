@@ -190,7 +190,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	/**
 	 * Handle the first request for receiving messages on a SockJS HTTP transport
 	 * based session.
-	 * <p>Long polling-based transports (e.g. "xhr", "jsonp") complete the request
+	 * <p>Long polling-based transports (for example, "xhr", "jsonp") complete the request
 	 * after writing the open frame. Streaming-based transports ("xhr_streaming",
 	 * "eventsource", and "htmlfile") leave the response open longer for further
 	 * streaming of message frames but will also close it eventually after some
@@ -229,7 +229,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				// Let "our" handler know before sending the open frame to the remote handler
 				delegateConnectionEstablished();
 				handleRequestInternal(request, response, true);
-				// Request might have been reset (e.g. polling sessions do after writing)
+				// Request might have been reset (for example, polling sessions do after writing)
 				this.readyToSend = isActive();
 			}
 			catch (Throwable ex) {
@@ -242,7 +242,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	/**
 	 * Handle all requests, except the first one, to receive messages on a SockJS
 	 * HTTP transport based session.
-	 * <p>Long polling-based transports (e.g. "xhr", "jsonp") complete the request
+	 * <p>Long polling-based transports (for example, "xhr", "jsonp") complete the request
 	 * after writing any buffered message frames (or the next one). Streaming-based
 	 * transports ("xhr_streaming", "eventsource", and "htmlfile") leave the
 	 * response open longer for further streaming of message frames but will also
@@ -340,7 +340,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 					control.complete();
 				}
 				catch (Throwable ex) {
-					// Could be part of normal workflow (e.g. browser tab closed)
+					// Could be part of normal workflow (for example, browser tab closed)
 					logger.debug("Failed to complete request: " + ex.getMessage());
 				}
 			}

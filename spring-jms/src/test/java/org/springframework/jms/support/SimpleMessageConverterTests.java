@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for the {@link SimpleMessageConverter} class.
+ * Tests for {@link SimpleMessageConverter}.
  *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 18.09.2004
  */
-public class SimpleMessageConverterTests {
+class SimpleMessageConverterTests {
 
 	@Test
-	public void testStringConversion() throws JMSException {
+	void testStringConversion() throws JMSException {
 		Session session = mock();
 		TextMessage message = mock();
 
@@ -65,7 +65,7 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testByteArrayConversion() throws JMSException {
+	void testByteArrayConversion() throws JMSException {
 		Session session = mock();
 		BytesMessage message = mock();
 
@@ -84,7 +84,7 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testMapConversion() throws JMSException {
+	void testMapConversion() throws JMSException {
 
 		Session session = mock();
 		MapMessage message = mock();
@@ -107,7 +107,7 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testSerializableConversion() throws JMSException {
+	void testSerializableConversion() throws JMSException {
 		Session session = mock();
 		ObjectMessage message = mock();
 
@@ -122,19 +122,19 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testToMessageThrowsExceptionIfGivenNullObjectToConvert() throws Exception {
+	void testToMessageThrowsExceptionIfGivenNullObjectToConvert() {
 		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
 				new SimpleMessageConverter().toMessage(null, null));
 	}
 
 	@Test
-	public void testToMessageThrowsExceptionIfGivenIncompatibleObjectToConvert() throws Exception {
+	void testToMessageThrowsExceptionIfGivenIncompatibleObjectToConvert() {
 		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
 				new SimpleMessageConverter().toMessage(new Object(), null));
 	}
 
 	@Test
-	public void testToMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
+	void testToMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
 		Session session = mock();
 		ObjectMessage message = mock();
 
@@ -144,7 +144,7 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testFromMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
+	void testFromMessageSimplyReturnsMessageAsIsIfSuppliedWithMessage() throws JMSException {
 		Message message = mock();
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
@@ -153,7 +153,7 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testMapConversionWhereMapHasNonStringTypesForKeys() throws JMSException {
+	void testMapConversionWhereMapHasNonStringTypesForKeys() throws JMSException {
 		MapMessage message = mock();
 		Session session = mock();
 		given(session.createMapMessage()).willReturn(message);
@@ -167,7 +167,7 @@ public class SimpleMessageConverterTests {
 	}
 
 	@Test
-	public void testMapConversionWhereMapHasNNullForKey() throws JMSException {
+	void testMapConversionWhereMapHasNNullForKey() throws JMSException {
 		MapMessage message = mock();
 		Session session = mock();
 		given(session.createMapMessage()).willReturn(message);

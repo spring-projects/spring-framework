@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,9 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource
  */
 public class MetadataNamingStrategy implements ObjectNamingStrategy, InitializingBean {
+
+	private static final char[] QUOTABLE_CHARS = new char[] {',', '=', ':', '"'};
+
 
 	/**
 	 * The {@code JmxAttributeSource} implementation to use for reading metadata.
@@ -132,10 +135,23 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 				}
 				Hashtable<String, String> properties = new Hashtable<>();
 				properties.put("type", ClassUtils.getShortName(managedClass));
-				properties.put("name", beanKey);
+				properties.put("name", quoteIfNecessary(beanKey));
 				return ObjectNameManager.getInstance(domain, properties);
 			}
 		}
+	}
+
+	private static String quoteIfNecessary(String value) {
+		return shouldQuote(value) ? ObjectName.quote(value) : value;
+	}
+
+	private static boolean shouldQuote(String value) {
+		for (char quotableChar : QUOTABLE_CHARS) {
+			if (value.indexOf(quotableChar) != -1) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

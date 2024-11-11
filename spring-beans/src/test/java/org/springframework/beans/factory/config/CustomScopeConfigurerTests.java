@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link CustomScopeConfigurer}.
+ * Tests for {@link CustomScopeConfigurer}.
  *
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class CustomScopeConfigurerTests {
+class CustomScopeConfigurerTests {
 
 	private static final String FOO_SCOPE = "fooScope";
 
@@ -43,13 +43,13 @@ public class CustomScopeConfigurerTests {
 
 
 	@Test
-	public void testWithNoScopes() {
+	void testWithNoScopes() {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.postProcessBeanFactory(factory);
 	}
 
 	@Test
-	public void testSunnyDayWithBonaFideScopeInstance() {
+	void testSunnyDayWithBonaFideScopeInstance() {
 		Scope scope = mock();
 		factory.registerScope(FOO_SCOPE, scope);
 		Map<String, Object> scopes = new HashMap<>();
@@ -60,27 +60,27 @@ public class CustomScopeConfigurerTests {
 	}
 
 	@Test
-	public void testSunnyDayWithBonaFideScopeClass() {
+	void testSunnyDayWithBonaFideScopeClass() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, NoOpScope.class);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		assertThat(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope).isTrue();
+		assertThat(factory.getRegisteredScope(FOO_SCOPE)).isInstanceOf(NoOpScope.class);
 	}
 
 	@Test
-	public void testSunnyDayWithBonaFideScopeClassName() {
+	void testSunnyDayWithBonaFideScopeClassName() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, NoOpScope.class.getName());
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		assertThat(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope).isTrue();
+		assertThat(factory.getRegisteredScope(FOO_SCOPE)).isInstanceOf(NoOpScope.class);
 	}
 
 	@Test
-	public void testWhereScopeMapHasNullScopeValueInEntrySet() {
+	void testWhereScopeMapHasNullScopeValueInEntrySet() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, null);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
@@ -90,7 +90,7 @@ public class CustomScopeConfigurerTests {
 	}
 
 	@Test
-	public void testWhereScopeMapHasNonScopeInstanceInEntrySet() {
+	void testWhereScopeMapHasNonScopeInstanceInEntrySet() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, this);  // <-- not a valid value...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
@@ -101,7 +101,7 @@ public class CustomScopeConfigurerTests {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void testWhereScopeMapHasNonStringTypedScopeNameInKeySet() {
+	void testWhereScopeMapHasNonStringTypedScopeNameInKeySet() {
 		Map scopes = new HashMap();
 		scopes.put(this, new NoOpScope());  // <-- not a valid value (the key)...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();

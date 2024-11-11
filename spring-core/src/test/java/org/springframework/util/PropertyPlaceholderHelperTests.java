@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,28 @@
 package org.springframework.util;
 
 import java.util.Properties;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link PropertyPlaceholderHelper}.
+ *
  * @author Rob Harrop
+ * @author Stephane Nicoll
  */
 class PropertyPlaceholderHelperTests {
 
@@ -103,9 +115,58 @@ class PropertyPlaceholderHelperTests {
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
 
-		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, false);
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, null, false);
+		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				helper.replacePlaceholders(text, props));
 	}
+
+	@Nested
+	class DefaultValueTests {
+
+		private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", null, true);
+
+		@ParameterizedTest(name = "{0} -> {1}")
+		@MethodSource("defaultValues")
+		void defaultValueIsApplied(String text, String value) {
+			Properties properties = new Properties();
+			properties.setProperty("one", "1");
+			properties.setProperty("two", "2");
+			assertThat(this.helper.replacePlaceholders(text, properties)).isEqualTo(value);
+		}
+
+		@Test
+		void defaultValueIsNotEvaluatedEarly() {
+			PlaceholderResolver resolver = mockPlaceholderResolver("one", "1");
+			assertThat(this.helper.replacePlaceholders("This is ${one:or${two}}", resolver)).isEqualTo("This is 1");
+			verify(resolver).resolvePlaceholder("one");
+			verify(resolver, never()).resolvePlaceholder("two");
+		}
+
+		static Stream<Arguments> defaultValues() {
+			return Stream.of(
+					Arguments.of("${invalid:test}", "test"),
+					Arguments.of("${invalid:${one}}", "1"),
+					Arguments.of("${invalid:${one}${two}}", "12"),
+					Arguments.of("${invalid:${one}:${two}}", "1:2"),
+					Arguments.of("${invalid:${also_invalid:test}}", "test"),
+					Arguments.of("${invalid:${also_invalid:${one}}}", "1")
+			);
+		}
+
+	}
+
+	PlaceholderResolver mockPlaceholderResolver(String... pairs) {
+		if (pairs.length % 2 == 1) {
+			throw new IllegalArgumentException("size must be even, it is a set of key=value pairs");
+		}
+		PlaceholderResolver resolver = mock(PlaceholderResolver.class);
+		for (int i = 0; i < pairs.length; i += 2) {
+			String key = pairs[i];
+			String value = pairs[i + 1];
+			given(resolver.resolvePlaceholder(key)).willReturn(value);
+		}
+		return resolver;
+	}
+
 
 }

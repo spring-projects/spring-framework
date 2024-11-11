@@ -304,7 +304,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			objectWriter.writeValue(writer, object);
 		}
 		else {
-			// Jackson usually defaults to UTF-8 but can also go straight to bytes, e.g. for Smile.
+			// Jackson usually defaults to UTF-8 but can also go straight to bytes, for example, for Smile.
 			// We use a direct byte array argument for the latter case to work as well.
 			objectWriter.writeValue(bos, object);
 		}
@@ -445,7 +445,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * typically parsing a type id message property.
 	 * <p>The default implementation parses the configured type id property name
 	 * and consults the configured type id mapping. This can be overridden with
-	 * a different strategy, e.g. doing some heuristics based on message origin.
+	 * a different strategy, for example, doing some heuristics based on message origin.
 	 * @param message the JMS Message from which to get the type id property
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #setTypeIdOnMessage(Object, jakarta.jms.Message)

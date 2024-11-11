@@ -11,7 +11,7 @@
 	</description>
 
 	<bean id="aapc" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
-		<!-- This common interceptor will be applied always, before custom lockable advisor -->
+		<!-- This common interceptor will be applied before the custom lockable advisor -->
 		<property name="interceptorNames">
 			<value>nopInterceptor</value>
 		</property>
@@ -44,4 +44,3 @@
 	<bean id="packageVisibleMethod" class="org.springframework.aop.framework.autoproxy.PackageVisibleMethod"/>
 
 </beans>
-

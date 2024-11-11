@@ -36,7 +36,7 @@ A simple PDF view for a word list could extend
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PdfWordList extends AbstractPdfView {
 
@@ -53,7 +53,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PdfWordList : AbstractPdfView() {
 

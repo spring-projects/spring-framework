@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,17 +37,17 @@ import static org.mockito.Mockito.mock;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class ThrowsAdviceInterceptorTests {
+class ThrowsAdviceInterceptorTests {
 
 	@Test
-	public void testNoHandlerMethods() {
+	void testNoHandlerMethods() {
 		// should require one handler method at least
 		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
 				new ThrowsAdviceInterceptor(new Object()));
 	}
 
 	@Test
-	public void testNotInvoked() throws Throwable {
+	void testNotInvoked() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		Object ret = new Object();
@@ -58,7 +58,7 @@ public class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	public void testNoHandlerMethodForThrowable() throws Throwable {
+	void testNoHandlerMethodForThrowable() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		assertThat(ti.getHandlerMethodCount()).isEqualTo(2);
@@ -70,7 +70,7 @@ public class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	public void testCorrectHandlerUsed() throws Throwable {
+	void testCorrectHandlerUsed() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		FileNotFoundException ex = new FileNotFoundException();
@@ -84,7 +84,7 @@ public class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	public void testCorrectHandlerUsedForSubclass() throws Throwable {
+	void testCorrectHandlerUsedForSubclass() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
@@ -97,10 +97,9 @@ public class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	public void testHandlerMethodThrowsException() throws Throwable {
+	void testHandlerMethodThrowsException() throws Throwable {
 		final Throwable t = new Throwable();
 
-		@SuppressWarnings("serial")
 		MyThrowsHandler th = new MyThrowsHandler() {
 			@Override
 			public void afterThrowing(RemoteException ex) throws Throwable {

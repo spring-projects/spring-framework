@@ -34,7 +34,7 @@ public abstract class NonTransientDataAccessException extends DataAccessExceptio
 	 * Constructor for NonTransientDataAccessException.
 	 * @param msg the detail message
 	 */
-	public NonTransientDataAccessException(String msg) {
+	public NonTransientDataAccessException(@Nullable String msg) {
 		super(msg);
 	}
 

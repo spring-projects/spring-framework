@@ -23,7 +23,7 @@ example uses only one configuration method (we show examples of multiple methods
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -47,7 +47,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -85,7 +85,7 @@ listing shows how it works:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -111,7 +111,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -150,7 +150,7 @@ You can limit the columns for an insert by specifying a list of column names wit
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -177,7 +177,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -217,7 +217,7 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -241,7 +241,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -267,7 +267,7 @@ convenient `addValue` method that can be chained. The following example shows ho
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -293,7 +293,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -323,12 +323,12 @@ use these alternative input classes.
 
 The `SimpleJdbcCall` class uses metadata in the database to look up names of `in`
 and `out` parameters so that you do not have to explicitly declare them. You can
-declare parameters if you prefer to do that or if you have parameters (such as `ARRAY`
-or `STRUCT`) that do not have an automatic mapping to a Java class. The first example
-shows a simple procedure that returns only scalar values in `VARCHAR` and `DATE` format
-from a MySQL database. The example procedure reads a specified actor entry and returns
-`first_name`, `last_name`, and `birth_date` columns in the form of `out` parameters.
-The following listing shows the first example:
+declare parameters if you prefer to do that or if you have parameters that do not
+have an automatic mapping to a Java class. The first example shows a simple procedure
+that returns only scalar values in `VARCHAR` and `DATE` format from a MySQL database.
+The example procedure reads a specified actor entry and returns `first_name`,
+`last_name`, and `birth_date` columns in the form of `out` parameters. The following
+listing shows the first example:
 
 [source,sql,indent=0,subs="verbatim,quotes"]
 ----
@@ -359,7 +359,7 @@ of the stored procedure):
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -388,7 +388,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -437,7 +437,7 @@ the constructor of your `SimpleJdbcCall`. The following example shows this confi
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -456,7 +456,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -502,7 +502,7 @@ the preceding example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -529,7 +529,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -567,7 +567,7 @@ similar to the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
 	new SqlOutParameter("out_first_name", Types.VARCHAR),
@@ -575,7 +575,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	SqlParameter("in_id", Types.NUMERIC),
 	SqlOutParameter("out_first_name", Types.VARCHAR),
@@ -636,7 +636,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -662,7 +662,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -720,7 +720,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -746,7 +746,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 

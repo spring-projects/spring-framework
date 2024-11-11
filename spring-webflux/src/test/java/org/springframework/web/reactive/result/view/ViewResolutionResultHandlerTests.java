@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
@@ -80,6 +81,12 @@ class ViewResolutionResultHandlerTests {
 
 		testSupports(on(Handler.class).resolveReturnType(Rendering.class));
 		testSupports(on(Handler.class).resolveReturnType(Mono.class, Rendering.class));
+
+		testSupports(on(Handler.class).resolveReturnType(FragmentsRendering.class));
+		testSupports(on(Handler.class).resolveReturnType(Flux.class, Fragment.class));
+		testSupports(on(Handler.class).resolveReturnType(List.class, Fragment.class));
+		testSupports(on(Handler.class).resolveReturnType(
+				Mono.class, ResolvableType.forClassWithGenerics(List.class, Fragment.class)));
 
 		testSupports(on(Handler.class).resolveReturnType(View.class));
 		testSupports(on(Handler.class).resolveReturnType(Mono.class, View.class));
@@ -194,6 +201,20 @@ class ViewResolutionResultHandlerTests {
 		ServerWebExchange exchange = testHandle("/path", returnType, returnValue, expected, resolver);
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
 		assertThat(exchange.getResponse().getHeaders().getFirst("h")).isEqualTo("h1");
+	}
+
+	@Test // gh-33498
+	void handleRedirect() {
+		HttpStatus status = HttpStatus.MOVED_PERMANENTLY;
+		Rendering returnValue = Rendering.redirectTo("foo").status(status).build();
+		MethodParameter returnType = on(Handler.class).resolveReturnType(Rendering.class);
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		resultHandler(new UrlBasedViewResolver()).handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
+		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create("foo"));
 	}
 
 	@Test
@@ -396,7 +417,7 @@ class ViewResolutionResultHandlerTests {
 				response.getHeaders().setContentType(mediaType);
 			}
 			model = new TreeMap<>(model);
-			String value = this.name + ": " + model.toString();
+			String value = this.name + ": " + model;
 			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
 			DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(byteBuffer);
 			return response.writeWith(Flux.just(dataBuffer));
@@ -433,6 +454,11 @@ class ViewResolutionResultHandlerTests {
 
 		Rendering rendering() { return null; }
 		Mono<Rendering> monoRendering() { return null; }
+
+		FragmentsRendering fragmentsRendering() { return null; }
+		Flux<Fragment> fragmentFlux() { return null; }
+		Mono<List<Fragment>> monoFragmentList() { return null; }
+		List<Fragment> fragmentList() { return null; }
 
 		View view() { return null; }
 		Mono<View> monoView() { return null; }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 import org.springframework.util.ReflectionUtils
+import kotlin.coroutines.Continuation
 
 /**
  * Abstract tests for Kotlin [ParameterNameDiscoverer] aware implementations.
@@ -33,24 +34,32 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 	fun getParameterNamesOnInterface() {
 		val method = ReflectionUtils.findMethod(MessageService::class.java, "sendMessage", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualParams).contains("message")
+		assertThat(actualParams).containsExactly("message")
 	}
 
 	@Test
 	fun getParameterNamesOnClass() {
 		val constructor = ReflectionUtils.accessibleConstructor(MessageServiceImpl::class.java,String::class.java)
 		val actualConstructorParams = parameterNameDiscoverer.getParameterNames(constructor)
-		assertThat(actualConstructorParams).contains("message")
+		assertThat(actualConstructorParams).containsExactly("message")
 		val method = ReflectionUtils.findMethod(MessageServiceImpl::class.java, "sendMessage", String::class.java)!!
 		val actualMethodParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualMethodParams).contains("message")
+		assertThat(actualMethodParams).containsExactly("message")
+	}
+
+	@Test
+	fun getParameterNamesOnSuspendingFunction() {
+		val method = ReflectionUtils.findMethod(CoroutinesMessageService::class.java, "sendMessage",
+			String::class.java, Continuation::class.java)!!
+		val actualMethodParams = parameterNameDiscoverer.getParameterNames(method)
+		assertThat(actualMethodParams).containsExactly("message")
 	}
 
 	@Test
 	fun getParameterNamesOnExtensionMethod() {
 		val method = ReflectionUtils.findMethod(UtilityClass::class.java, "identity", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)!!
-		assertThat(actualParams).contains("\$receiver")
+		assertThat(actualParams).containsExactly("\$receiver")
 	}
 
 	interface MessageService {
@@ -63,6 +72,10 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 
 	class UtilityClass {
 		fun String.identity() = this
+	}
+
+	class CoroutinesMessageService {
+		suspend fun sendMessage(message: String) = message
 	}
 
 }

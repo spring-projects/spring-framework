@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.web.servlet.StubMvcResult;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -38,7 +39,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void typeNoMatch() throws Exception {
+	void typeNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().contentType("text/plain").match(getStubMvcResult(CONTENT)));
 	}
@@ -49,7 +50,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void stringNoMatch() throws Exception {
+	void stringNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().encoding("bogus").match(getStubMvcResult(CONTENT)));
 	}
@@ -61,7 +62,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void stringMatcherNoMatch() throws Exception {
+	void stringMatcherNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().string(Matchers.equalTo("bogus")).match(getStubMvcResult(CONTENT)));
 	}
@@ -72,7 +73,7 @@ class ContentResultMatchersTests {
 	}
 
 	@Test
-	void bytesNoMatch() throws Exception {
+	void bytesNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().bytes("bogus".getBytes()).match(getStubMvcResult(CONTENT)));
 	}
@@ -80,25 +81,52 @@ class ContentResultMatchersTests {
 	@Test
 	void jsonLenientMatch() throws Exception {
 		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}").match(getStubMvcResult(CONTENT));
+		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}",
+				JsonCompareMode.LENIENT).match(getStubMvcResult(CONTENT));
+	}
+
+	@Test
+	@Deprecated
+	void jsonLenientMatchWithDeprecatedBooleanFlag() throws Exception {
 		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}", false).match(getStubMvcResult(CONTENT));
 	}
 
 	@Test
 	void jsonStrictMatch() throws Exception {
-		new ContentResultMatchers().json("{\n \"foo\":\"bar\",   \"foo array\":[\"foo\",\"bar\"] \n}", true).match(getStubMvcResult(CONTENT));
-		new ContentResultMatchers().json("{\n \"foo array\":[\"foo\",\"bar\"], \"foo\":\"bar\" \n}", true).match(getStubMvcResult(CONTENT));
+		new ContentResultMatchers().json("{\n \"foo\":\"bar\",   \"foo array\":[\"foo\",\"bar\"] \n}",
+				JsonCompareMode.STRICT).match(getStubMvcResult(CONTENT));
+		new ContentResultMatchers().json("{\n \"foo array\":[\"foo\",\"bar\"], \"foo\":\"bar\" \n}",
+				JsonCompareMode.STRICT).match(getStubMvcResult(CONTENT));
 	}
 
 	@Test
-	void jsonLenientNoMatch() throws Exception {
+	@Deprecated
+	void jsonStrictMatchWithDeprecatedBooleanFlag() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\":\"bar\",   \"foo array\":[\"foo\",\"bar\"] \n}", true)
+				.match(getStubMvcResult(CONTENT));
+		new ContentResultMatchers().json("{\n \"foo array\":[\"foo\",\"bar\"], \"foo\":\"bar\" \n}", true)
+				.match(getStubMvcResult(CONTENT));
+	}
+
+	@Test
+	void jsonLenientNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new ContentResultMatchers().json("{\n\"fooo\":\"bar\"\n}").match(getStubMvcResult(CONTENT)));
 	}
 
 	@Test
-	void jsonStrictNoMatch() throws Exception {
+	void jsonStrictNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				new ContentResultMatchers().json("{\"foo\":\"bar\",   \"foo array\":[\"bar\",\"foo\"]}", true).match(getStubMvcResult(CONTENT)));
+				new ContentResultMatchers().json("{\"foo\":\"bar\",   \"foo array\":[\"bar\",\"foo\"]}",
+						JsonCompareMode.STRICT).match(getStubMvcResult(CONTENT)));
+	}
+
+	@Test
+	@Deprecated
+	void jsonStrictNoMatchWithDeprecatedBooleanFlag() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				new ContentResultMatchers().json("{\"foo\":\"bar\",   \"foo array\":[\"bar\",\"foo\"]}", true)
+						.match(getStubMvcResult(CONTENT)));
 	}
 
 	@Test  // gh-23622

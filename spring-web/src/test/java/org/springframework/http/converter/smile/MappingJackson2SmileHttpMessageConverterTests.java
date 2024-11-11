@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,28 +34,28 @@ import static org.assertj.core.api.Assertions.within;
  *
  * @author Sebastien Deleuze
  */
-public class MappingJackson2SmileHttpMessageConverterTests {
+class MappingJackson2SmileHttpMessageConverterTests {
 
 	private final MappingJackson2SmileHttpMessageConverter converter = new MappingJackson2SmileHttpMessageConverter();
 	private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isFalse();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "xml"))).isFalse();
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isFalse();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "xml"))).isFalse();
 	}
 
 	@Test
-	public void read() throws IOException {
+	void read() throws IOException {
 		MyBean body = new MyBean();
 		body.setString("Foo");
 		body.setNumber(42);
@@ -76,7 +76,7 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
+	void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");

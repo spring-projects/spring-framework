@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Rod Johnson
  */
-public class JtaTransactionManagerSerializationTests {
+class JtaTransactionManagerSerializationTests {
 
 	@Test
-	public void serializable() throws Exception {
+	void serializable() throws Exception {
 		UserTransaction ut1 = mock();
 		UserTransaction ut2 = mock();
 		TransactionManager tm = mock();

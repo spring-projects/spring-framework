@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ResourceHandlerFunctionTests {
+class ResourceHandlerFunctionTests {
 
 	private final Resource resource = new ClassPathResource("response.txt", getClass());
 
@@ -53,7 +53,7 @@ public class ResourceHandlerFunctionTests {
 
 
 	@BeforeEach
-	public void createContext() {
+	void createContext() {
 		HandlerStrategies strategies = HandlerStrategies.withDefaults();
 		context = new ServerResponse.Context() {
 			@Override
@@ -69,7 +69,7 @@ public class ResourceHandlerFunctionTests {
 
 
 	@Test
-	public void get() throws IOException {
+	void get() throws IOException {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
@@ -106,7 +106,7 @@ public class ResourceHandlerFunctionTests {
 	}
 
 	@Test
-	public void head() throws IOException {
+	void head() throws IOException {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 
@@ -132,7 +132,7 @@ public class ResourceHandlerFunctionTests {
 	}
 
 	@Test
-	public void options() {
+	void options() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("http://localhost"));
 		MockServerHttpResponse mockResponse = exchange.getResponse();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,14 +50,15 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Unit tests for {@link WebHttpHandlerBuilder}.
+ * Tests for {@link WebHttpHandlerBuilder}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class WebHttpHandlerBuilderTests {
+class WebHttpHandlerBuilderTests {
 
 	@Test  // SPR-15074
 	void orderedWebFilterBeans() {
@@ -171,6 +173,14 @@ public class WebHttpHandlerBuilderTests {
 		TestObservationRegistry observationRegistry = applicationContext.getBean(TestObservationRegistry.class);
 		TestObservationRegistryAssert.assertThat(observationRegistry).hasObservationWithNameEqualTo("http.server.requests")
 				.that().hasLowCardinalityKeyValue("uri", "UNKNOWN");
+	}
+
+	@Test
+	void shouldRejectDuplicateObservationConvention() {
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(ObservationConfig.class,
+				DuplicateConventionObservationConfig.class);
+		assertThatThrownBy(() -> WebHttpHandlerBuilder.applicationContext(applicationContext).build())
+				.isInstanceOf(NoUniqueBeanDefinitionException.class);
 	}
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
@@ -311,6 +321,16 @@ public class WebHttpHandlerBuilderTests {
 		@Bean
 		public WebHandler webHandler() {
 			return exchange -> exchange.getResponse().setComplete();
+		}
+
+	}
+
+	@Configuration
+	static class DuplicateConventionObservationConfig {
+
+		@Bean
+		public ServerRequestObservationConvention duplicateRequestObservationConvention() {
+			return new DefaultServerRequestObservationConvention();
 		}
 
 	}

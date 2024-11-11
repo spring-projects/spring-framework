@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.dao;
 
+import org.springframework.lang.Nullable;
+
 /**
- * Exception thrown when an attempt to insert or update data
+ * Exception thrown when an attempt to execute an SQL statement fails to map
+ * the given data, typically but no limited to an insert or update data
  * results in violation of an integrity constraint. Note that this
  * is not purely a relational concept; integrity constraints such
  * as unique primary keys are required by most database types.
  *
- * <p>Serves as a superclass for more specific exceptions, e.g.
+ * <p>Serves as a superclass for more specific exceptions, for example,
  * {@link DuplicateKeyException}. However, it is generally
  * recommended to handle {@code DataIntegrityViolationException}
  * itself instead of relying on specific exception subclasses.
@@ -36,7 +39,7 @@ public class DataIntegrityViolationException extends NonTransientDataAccessExcep
 	 * Constructor for DataIntegrityViolationException.
 	 * @param msg the detail message
 	 */
-	public DataIntegrityViolationException(String msg) {
+	public DataIntegrityViolationException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -45,7 +48,7 @@ public class DataIntegrityViolationException extends NonTransientDataAccessExcep
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public DataIntegrityViolationException(String msg, Throwable cause) {
+	public DataIntegrityViolationException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

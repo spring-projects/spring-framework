@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.aop.testfixture.mixin.LockMixinAdvisor;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.NonNull;
@@ -52,8 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-@SuppressWarnings("serial")
-public class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
+class CglibProxyTests extends AbstractAopProxyTests {
 
 	private static final String DEPENDENCY_CHECK_CONTEXT =
 			CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
@@ -80,13 +78,13 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 
 	@Test
-	public void testNullConfig() {
+	void nullConfig() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new CglibAopProxy(null));
 	}
 
 	@Test
-	public void testNoTarget() {
+	void noTarget() {
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(new NopInterceptor());
 		AopProxy aop = createAopProxy(pc);
@@ -94,7 +92,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testProtectedMethodInvocation() {
+	void protectedMethodInvocation() {
 		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
 		bean.value = "foo";
 		mockTargetSource.setTarget(bean);
@@ -111,7 +109,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testPackageMethodInvocation() {
+	void packageMethodInvocation() {
 		PackageMethodTestBean bean = new PackageMethodTestBean();
 		bean.value = "foo";
 		mockTargetSource.setTarget(bean);
@@ -128,7 +126,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testProxyCanBeClassNotInterface() {
+	void proxyCanBeClassNotInterface() {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		mockTargetSource.setTarget(raw);
@@ -146,7 +144,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testMethodInvocationDuringConstructor() {
+	void methodInvocationDuringConstructor() {
 		CglibTestBean bean = new CglibTestBean();
 		bean.setName("Rob Harrop");
 
@@ -160,7 +158,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testToStringInvocation() {
+	void toStringInvocation() {
 		PrivateCglibTestBean bean = new PrivateCglibTestBean();
 		bean.setName("Rob Harrop");
 
@@ -174,7 +172,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testUnadvisedProxyCreationWithCallDuringConstructor() {
+	void unadvisedProxyCreationWithCallDuringConstructor() {
 		CglibTestBean target = new CglibTestBean();
 		target.setName("Rob Harrop");
 
@@ -189,7 +187,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testMultipleProxies() {
+	void multipleProxies() {
 		TestBean target = new TestBean();
 		target.setAge(20);
 		TestBean target2 = new TestBean();
@@ -235,7 +233,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testMultipleProxiesForIntroductionAdvisor() {
+	void multipleProxiesForIntroductionAdvisor() {
 		TestBean target1 = new TestBean();
 		target1.setAge(20);
 		TestBean target2 = new TestBean();
@@ -259,7 +257,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testWithNoArgConstructor() {
+	void withNoArgConstructor() {
 		NoArgCtorTestBean target = new NoArgCtorTestBean("b", 1);
 		target.reset();
 
@@ -274,7 +272,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testProxyAProxy() {
+	void proxyAProxy() {
 		ITestBean target = new TestBean();
 
 		mockTargetSource.setTarget(target);
@@ -295,7 +293,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testProxyAProxyWithAdditionalInterface() {
+	void proxyAProxyWithAdditionalInterface() {
 		ITestBean target = new TestBean();
 		mockTargetSource.setTarget(target);
 
@@ -353,7 +351,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testExceptionHandling() {
+	void exceptionHandling() {
 		ExceptionThrower bean = new ExceptionThrower();
 		mockTargetSource.setTarget(bean);
 
@@ -376,14 +374,14 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void testWithDependencyChecking() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass());
-		ctx.getBean("testBean");
+	void withDependencyChecking() {
+		try (ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass())) {
+			ctx.getBean("testBean");
+		}
 	}
 
 	@Test
-	public void testAddAdviceAtRuntime() {
+	void addAdviceAtRuntime() {
 		TestBean bean = new TestBean();
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
 
@@ -405,7 +403,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testProxyProtectedMethod() {
+	void proxyProtectedMethod() {
 		CountingBeforeAdvice advice = new CountingBeforeAdvice();
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		proxyFactory.addAdvice(advice);
@@ -417,15 +415,14 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 	@Test
-	public void testProxyTargetClassInCaseOfNoInterfaces() {
+	void proxyTargetClassInCaseOfNoInterfaces() {
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
 		assertThat(proxy.add(1, 3)).isEqualTo(4);
 	}
 
 	@Test  // SPR-13328
-	@SuppressWarnings("unchecked")
-	public void testVarargsWithEnumArray() {
+	void varargsWithEnumArray() {
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
 		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
@@ -461,13 +458,13 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 	public enum MyEnum implements MyInterface {
 
-		A, B;
+		A, B
 	}
 
 
 	public enum MyOtherEnum implements MyInterface {
 
-		C, D;
+		C, D
 	}
 
 
@@ -485,7 +482,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 			return finallyInvoked;
 		}
 
-		public void doTest() throws Exception {
+		public void doTest() {
 			try {
 				throw new ApplicationContextException("foo");
 			}
@@ -589,7 +586,7 @@ class CglibTestBean {
 class UnsupportedInterceptor implements MethodInterceptor {
 
 	@Override
-	public Object invoke(MethodInvocation mi) throws Throwable {
+	public Object invoke(MethodInvocation mi) {
 		throw new UnsupportedOperationException(mi.getMethod().getName());
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,13 +59,13 @@ class PartEventHttpMessageReaderTests {
 	private final PartEventHttpMessageReader reader = new PartEventHttpMessageReader();
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(this.reader.canRead(forClass(PartEvent.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 		assertThat(this.reader.canRead(forClass(PartEvent.class), null)).isTrue();
 	}
 
 	@Test
-	public void simple() {
+	void simple() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
 
@@ -79,7 +79,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void noHeaders() {
+	void noHeaders() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-header.multipart", getClass()), "boundary");
 		Flux<PartEvent> result = this.reader.read(forClass(PartEvent.class), request, emptyMap());
@@ -90,7 +90,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void noEndBoundary() {
+	void noEndBoundary() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-end-boundary.multipart", getClass()), "boundary");
 
@@ -102,7 +102,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void garbage() {
+	void garbage() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("garbage-1.multipart", getClass()), "boundary");
 
@@ -115,7 +115,7 @@ class PartEventHttpMessageReaderTests {
 
 
 	@Test
-	public void noEndHeader() {
+	void noEndHeader() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-end-header.multipart", getClass()), "boundary");
 		Flux<PartEvent> result = this.reader.read(forClass(PartEvent.class), request, emptyMap());
@@ -126,7 +126,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void noEndBody() {
+	void noEndBody() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-end-body.multipart", getClass()), "boundary");
 		Flux<PartEvent> result = this.reader.read(forClass(PartEvent.class), request, emptyMap());
@@ -137,7 +137,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void noBody() {
+	void noBody() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-body.multipart", getClass()), "boundary");
 		Flux<PartEvent> result = this.reader.read(forClass(PartEvent.class), request, emptyMap());
@@ -150,7 +150,7 @@ class PartEventHttpMessageReaderTests {
 
 
 	@Test
-	public void cancel() {
+	void cancel() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
 		Flux<PartEvent> result = this.reader.read(forClass(PartEvent.class), request, emptyMap());
@@ -164,7 +164,7 @@ class PartEventHttpMessageReaderTests {
 
 
 	@Test
-	public void firefox() {
+	void firefox() {
 
 		MockServerHttpRequest request = createRequest(new ClassPathResource("firefox.multipart", getClass()),
 				"---------------------------18399284482060392383840973206");
@@ -186,7 +186,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void chrome() {
+	void chrome() {
 
 		MockServerHttpRequest request = createRequest(new ClassPathResource("chrome.multipart", getClass()),
 				"----WebKitFormBoundaryEveBLvRT65n21fwU");
@@ -207,7 +207,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void safari() {
+	void safari() {
 
 		MockServerHttpRequest request = createRequest(new ClassPathResource("safari.multipart", getClass()),
 				"----WebKitFormBoundaryG8fJ50opQOML0oGD");
@@ -238,6 +238,7 @@ class PartEventHttpMessageReaderTests {
 		Flux<PartEvent> result = reader.read(forClass(PartEvent.class), request, emptyMap());
 
 		StepVerifier.create(result)
+				.assertNext(form(headers -> assertThat(headers).isEmpty(), "This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak."))
 				.expectError(DecodingException.class)
 				.verify();
 	}
@@ -275,7 +276,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void utf8Headers() {
+	void utf8Headers() {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("utf8.multipart", getClass()), "\"simple-boundary\"");
 
@@ -288,7 +289,7 @@ class PartEventHttpMessageReaderTests {
 	}
 
 	@Test
-	public void exceedHeaderLimit() {
+	void exceedHeaderLimit() {
 		Flux<DataBuffer> body = DataBufferUtils
 				.readByteChannel((new ClassPathResource("files.multipart", getClass()))::readableChannel, bufferFactory,
 						282);

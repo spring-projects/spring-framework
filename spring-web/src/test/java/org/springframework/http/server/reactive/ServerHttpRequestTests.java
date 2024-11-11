@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,22 +42,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link AbstractServerHttpRequest}.
+ * Tests for {@link AbstractServerHttpRequest}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @author Brian Clozel
  */
-public class ServerHttpRequestTests {
+class ServerHttpRequestTests {
 
 	@Test
-	public void queryParamsNone() throws Exception {
+	void queryParamsNone() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path").getQueryParams();
 		assertThat(params).isEmpty();
 	}
 
 	@Test
-	public void queryParams() throws Exception {
+	void queryParams() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=A&b=B").getQueryParams();
 		assertThat(params).hasSize(2);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList("A"));
@@ -65,7 +65,7 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
-	public void queryParamsWithMultipleValues() throws Exception {
+	void queryParamsWithMultipleValues() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=1&a=2").getQueryParams();
 		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Arrays.asList("1", "2"));
@@ -79,34 +79,34 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
-	public void queryParamsWithEmptyValue() throws Exception {
+	void queryParamsWithEmptyValue() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=").getQueryParams();
 		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList(""));
 	}
 
 	@Test
-	public void queryParamsWithNoValue() throws Exception {
+	void queryParamsWithNoValue() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a").getQueryParams();
 		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList(null));
 	}
 
 	@Test
-	public void mutateRequestMethod() throws Exception {
+	void mutateRequestMethod() throws Exception {
 		ServerHttpRequest request = createRequest("/").mutate().method(HttpMethod.DELETE).build();
 		assertThat(request.getMethod()).isEqualTo(HttpMethod.DELETE);
 	}
 
 	@Test
-	public void mutateSslInfo() throws Exception {
+	void mutateSslInfo() throws Exception {
 		SslInfo sslInfo = mock();
 		ServerHttpRequest request = createRequest("/").mutate().sslInfo(sslInfo).build();
 		assertThat(request.getSslInfo()).isSameAs(sslInfo);
 	}
 
 	@Test
-	public void mutateUriAndPath() throws Exception {
+	void mutateUriAndPath() throws Exception {
 		String baseUri = "https://aaa.org:8080/a";
 
 		ServerHttpRequest request = createRequest(baseUri).mutate().uri(URI.create("https://bbb.org:9090/b")).build();
@@ -130,12 +130,12 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
-	public void mutateWithInvalidPath() {
+	void mutateWithInvalidPath() {
 		assertThatIllegalArgumentException().isThrownBy(() -> createRequest("/").mutate().path("foo-bar"));
 	}
 
 	@Test
-	public void mutateHeadersViaConsumer() throws Exception {
+	void mutateHeadersViaConsumer() throws Exception {
 		String headerName = "key";
 		String headerValue1 = "value1";
 		String headerValue2 = "value2";
@@ -151,7 +151,7 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
-	public void mutateHeaderBySettingHeaderValues() throws Exception {
+	void mutateHeaderBySettingHeaderValues() throws Exception {
 		String headerName = "key";
 		String headerValue1 = "value1";
 		String headerValue2 = "value2";
@@ -198,7 +198,7 @@ public class ServerHttpRequestTests {
 	void mutateContextPathWithoutUpdatingPathShouldFail() throws Exception {
 		ServerHttpRequest request = createRequest("/context/path", "/context");
 
-		assertThatThrownBy(() -> request.mutate().contextPath("/fail").build())
+		assertThatThrownBy(() -> request.mutate().contextPath("/fail").build().getPath())
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid contextPath '/fail': must match the start of requestPath: '/context/path'");
 	}

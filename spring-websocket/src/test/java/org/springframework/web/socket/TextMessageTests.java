@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Shinobu Aoki
  * @author Juergen Hoeller
  */
-public class TextMessageTests {
+class TextMessageTests {
 
 	@Test
-	public void toStringWithAscii() {
+	void toStringWithAscii() {
 		String expected = "foo,bar";
 		TextMessage actual = new TextMessage(expected);
 		assertThat(actual.getPayload()).isEqualTo(expected);
@@ -38,7 +38,7 @@ public class TextMessageTests {
 	}
 
 	@Test
-	public void toStringWithMultibyteString() {
+	void toStringWithMultibyteString() {
 		String expected = "\u3042\u3044\u3046\u3048\u304a";
 		TextMessage actual = new TextMessage(expected);
 		assertThat(actual.getPayload()).isEqualTo(expected);

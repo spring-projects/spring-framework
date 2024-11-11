@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,17 +70,16 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
 import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
- * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
+ * Tests for {@link ResponseEntityResultHandler}. When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * <ul>
  * <li>{@code MessageWriterResultHandlerTests},
  * <li>{@code ContentNegotiatingResultHandlerSupportTests}
  * </ul>
+ *
  * @author Rossen Stoyanchev
  */
 class ResponseEntityResultHandlerTests {
-
-	private static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
 	private final ResponseEntityResultHandler resultHandler = createHandler();
 
@@ -457,10 +456,10 @@ class ResponseEntityResultHandlerTests {
 		handler.handleResult(exchange, result).block();
 
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(halMediaType);
-		assertThat(exchange.getResponse().getBodyAsString().block()).isEqualTo(
-				"{" + NEWLINE_SYSTEM_PROPERTY +
-						"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY +
-						"}");
+		assertThat(exchange.getResponse().getBodyAsString().block()).isEqualToNormalizingNewlines("""
+				{
+				\s "name" : "Jason"
+				}""");
 	}
 
 	@Test  // gh-24539

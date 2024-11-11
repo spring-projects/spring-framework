@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ import static org.mockito.Mockito.mock;
  * @author Mark Paluch
  * @author Enric Sala
  */
-public class TransactionalOperatorTests {
+class TransactionalOperatorTests {
 
 	ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 
 
 	@Test
-	public void commitWithMono() {
+	void commitWithMono() {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.just(true).as(operator::transactional)
 				.as(StepVerifier::create)
@@ -57,7 +57,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void monoSubscriptionNotCancelled() {
+	void monoSubscriptionNotCancelled() {
 		AtomicBoolean cancelled = new AtomicBoolean();
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.just(true).doOnCancel(() -> cancelled.set(true)).as(operator::transactional)
@@ -70,7 +70,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void cancellationPropagatedToMono() {
+	void cancellationPropagatedToMono() {
 		AtomicBoolean cancelled = new AtomicBoolean();
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.create(sink -> sink.onCancel(() -> cancelled.set(true))).as(operator::transactional)
@@ -84,7 +84,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void cancellationPropagatedToFlux() {
+	void cancellationPropagatedToFlux() {
 		AtomicBoolean cancelled = new AtomicBoolean();
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Flux.create(sink -> sink.onCancel(() -> cancelled.set(true))).as(operator::transactional)
@@ -98,7 +98,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void rollbackWithMono() {
+	void rollbackWithMono() {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.error(new IllegalStateException()).as(operator::transactional)
 				.as(StepVerifier::create)
@@ -108,7 +108,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void commitFailureWithMono() {
+	void commitFailureWithMono() {
 		ReactiveTransactionManager tm = mock(ReactiveTransactionManager.class);
 		given(tm.getReactiveTransaction(any())).willReturn(Mono.just(mock(ReactiveTransaction.class)));
 		PublisherProbe<Void> commit = PublisherProbe.of(Mono.error(IOException::new));
@@ -125,7 +125,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void rollbackFailureWithMono() {
+	void rollbackFailureWithMono() {
 		ReactiveTransactionManager tm = mock(ReactiveTransactionManager.class);
 		given(tm.getReactiveTransaction(any())).willReturn(Mono.just(mock(ReactiveTransaction.class)));
 		PublisherProbe<Void> commit = PublisherProbe.empty();
@@ -145,7 +145,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void commitWithFlux() {
+	void commitWithFlux() {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Flux.just(1, 2, 3, 4).as(operator::transactional)
 				.as(StepVerifier::create)
@@ -156,7 +156,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void rollbackWithFlux() {
+	void rollbackWithFlux() {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Flux.error(new IllegalStateException()).as(operator::transactional)
 				.as(StepVerifier::create)
@@ -166,7 +166,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void commitFailureWithFlux() {
+	void commitFailureWithFlux() {
 		ReactiveTransactionManager tm = mock(ReactiveTransactionManager.class);
 		given(tm.getReactiveTransaction(any())).willReturn(Mono.just(mock(ReactiveTransaction.class)));
 		PublisherProbe<Void> commit = PublisherProbe.of(Mono.error(IOException::new));
@@ -184,7 +184,7 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
-	public void rollbackFailureWithFlux() {
+	void rollbackFailureWithFlux() {
 		ReactiveTransactionManager tm = mock(ReactiveTransactionManager.class);
 		given(tm.getReactiveTransaction(any())).willReturn(Mono.just(mock(ReactiveTransaction.class)));
 		PublisherProbe<Void> commit = PublisherProbe.empty();

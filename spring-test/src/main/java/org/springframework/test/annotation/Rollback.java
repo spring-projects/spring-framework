@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ import java.lang.annotation.Target;
  * {@code @Rollback} defines rollback semantics for the specific test method,
  * potentially overriding class-level default commit or rollback semantics.
  *
- * <p>As of Spring Framework 4.2, {@code @Commit} can be used as direct
- * replacement for {@code @Rollback(false)}.
+ * <p>{@code @Commit} can be used as direct replacement for {@code @Rollback(false)}.
  *
  * <p><strong>Warning</strong>: Declaring {@code @Commit} and {@code @Rollback}
  * on the same test method or on the same test class is unsupported and may

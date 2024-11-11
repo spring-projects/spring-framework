@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,18 @@ import org.springframework.util.StringUtils;
  */
 abstract class DateTimeFormatterUtils {
 
+	/**
+	 * Create a {@link DateTimeFormatter} for the supplied pattern, configured with
+	 * {@linkplain ResolverStyle#STRICT strict} resolution.
+	 * <p>Note that the strict resolution does not affect the parsing.
+	 * @param pattern the pattern to use
+	 * @return a new {@code DateTimeFormatter}
+	 * @see ResolverStyle#STRICT
+	 */
 	static DateTimeFormatter createStrictDateTimeFormatter(String pattern) {
-		// Using strict parsing to align with Joda-Time and standard DateFormat behavior:
-		// otherwise, an overflow like e.g. Feb 29 for a non-leap-year wouldn't get rejected.
-		// However, with strict parsing, a year digit needs to be specified as 'u'...
+		// Using strict resolution to align with Joda-Time and standard DateFormat behavior:
+		// otherwise, an overflow like, for example, Feb 29 for a non-leap-year wouldn't get rejected.
+		// However, with strict resolution, a year digit needs to be specified as 'u'...
 		String patternToUse = StringUtils.replace(pattern, "yy", "uu");
 		return DateTimeFormatter.ofPattern(patternToUse).withResolverStyle(ResolverStyle.STRICT);
 	}

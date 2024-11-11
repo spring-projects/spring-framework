@@ -223,6 +223,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	@Nullable
 	protected Object fromStoreValue(@Nullable Object storeValue) {
 		if (storeValue != null && this.serialization != null) {
 			try {

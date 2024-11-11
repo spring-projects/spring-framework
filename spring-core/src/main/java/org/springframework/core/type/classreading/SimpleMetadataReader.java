@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.lang.Nullable;
  */
 final class SimpleMetadataReader implements MetadataReader {
 
-	private static final int PARSING_OPTIONS = ClassReader.SKIP_DEBUG
-			| ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES;
+	private static final int PARSING_OPTIONS =
+			(ClassReader.SKIP_DEBUG | ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES);
 
 	private final Resource resource;
 
@@ -56,8 +56,10 @@ final class SimpleMetadataReader implements MetadataReader {
 				return new ClassReader(is);
 			}
 			catch (IllegalArgumentException ex) {
-				throw new IOException("ASM ClassReader failed to parse class file - " +
-						"probably due to a new Java class file version that isn't supported yet: " + resource, ex);
+				throw new ClassFormatException("ASM ClassReader failed to parse class file - " +
+						"probably due to a new Java class file version that is not supported yet. " +
+						"Consider compiling with a lower '-target' or upgrade your framework version. " +
+						"Affected class: " + resource, ex);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
- * Unit tests for {@link RequestAttributeMethodArgumentResolver}.
+ * Tests for {@link RequestAttributeMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public class RequestAttributeMethodArgumentResolverTests extends AbstractRequestAttributesArgumentResolverTests {
+class RequestAttributeMethodArgumentResolverTests extends AbstractRequestAttributesArgumentResolverTests {
 
 	@Override
 	protected HandlerMethodArgumentResolver createResolver() {

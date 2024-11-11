@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 4.2
  */
-public class XlsViewTests {
+class XlsViewTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -50,12 +50,11 @@ public class XlsViewTests {
 
 
 	@Test
-	@SuppressWarnings("resource")
-	public void testXls() throws Exception {
+	void testXls() throws Exception {
 		View excelView = new AbstractXlsView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, Workbook workbook,
-					HttpServletRequest request, HttpServletResponse response) throws Exception {
+					HttpServletRequest request, HttpServletResponse response) {
 				Sheet sheet = workbook.createSheet("Test Sheet");
 				Row row = sheet.createRow(0);
 				Cell cell = row.createCell(0);
@@ -74,12 +73,11 @@ public class XlsViewTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void testXlsxView() throws Exception {
+	void testXlsxView() throws Exception {
 		View excelView = new AbstractXlsxView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, Workbook workbook,
-					HttpServletRequest request, HttpServletResponse response) throws Exception {
+					HttpServletRequest request, HttpServletResponse response) {
 				Sheet sheet = workbook.createSheet("Test Sheet");
 				Row row = sheet.createRow(0);
 				Cell cell = row.createCell(0);
@@ -98,12 +96,11 @@ public class XlsViewTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void testXlsxStreamingView() throws Exception {
+	void testXlsxStreamingView() throws Exception {
 		View excelView = new AbstractXlsxStreamingView() {
 			@Override
 			protected void buildExcelDocument(Map<String, Object> model, Workbook workbook,
-					HttpServletRequest request, HttpServletResponse response) throws Exception {
+					HttpServletRequest request, HttpServletResponse response) {
 				Sheet sheet = workbook.createSheet("Test Sheet");
 				Row row = sheet.createRow(0);
 				Cell cell = row.createCell(0);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,7 +150,7 @@ class XStreamMarshallerTests {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		StreamResult result = new StreamResult(os);
 		marshaller.marshal(flight, result);
-		String s = os.toString("UTF-8");
+		String s = os.toString(StandardCharsets.UTF_8);
 		assertThat(XmlContent.of(s)).isSimilarToIgnoringWhitespace(EXPECTED_STRING);
 	}
 
@@ -206,7 +207,7 @@ class XStreamMarshallerTests {
 	}
 
 	@Test
-	void converters() throws Exception {
+	void converters() {
 		marshaller.setConverters(new EncodedByteArrayConverter());
 		byte[] buf = {0x1, 0x2};
 
@@ -229,7 +230,7 @@ class XStreamMarshallerTests {
 
 	@Test
 	void useAttributesFor() throws Exception {
-		marshaller.setUseAttributeForTypes(Long.TYPE);
+		marshaller.setUseAttributeForTypes(long.class);
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";
@@ -238,7 +239,7 @@ class XStreamMarshallerTests {
 
 	@Test
 	void useAttributesForStringClassMap() throws Exception {
-		marshaller.setUseAttributeFor(Collections.singletonMap("flightNumber", Long.TYPE));
+		marshaller.setUseAttributeFor(Collections.singletonMap("flightNumber", long.class));
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
 		String expected = "<flight flightNumber=\"42\" />";

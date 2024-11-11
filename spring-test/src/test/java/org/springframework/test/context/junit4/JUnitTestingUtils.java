@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class JUnitTestingUtils {
 	 */
 	public static void runTestsAndAssertCounters(Computer computer, int expectedStartedCount, int expectedFailedCount,
 			int expectedFinishedCount, int expectedIgnoredCount, int expectedAssumptionFailedCount,
-			Class<?>... testClasses) throws Exception {
+			Class<?>... testClasses) {
 
 		JUnitCore junit = new JUnitCore();
 		TrackingRunListener listener = new TrackingRunListener();

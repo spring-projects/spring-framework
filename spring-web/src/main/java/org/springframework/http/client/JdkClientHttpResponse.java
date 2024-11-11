@@ -27,6 +27,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -48,16 +49,15 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 	private final InputStream body;
 
 
-	public JdkClientHttpResponse(HttpResponse<InputStream> response) {
+	public JdkClientHttpResponse(HttpResponse<InputStream> response, @Nullable InputStream body) {
 		this.response = response;
 		this.headers = adaptHeaders(response);
-		InputStream inputStream = response.body();
-		this.body = (inputStream != null ? inputStream : InputStream.nullInputStream());
+		this.body = (body != null ? body : InputStream.nullInputStream());
 	}
 
 	private static HttpHeaders adaptHeaders(HttpResponse<?> response) {
 		Map<String, List<String>> rawHeaders = response.headers().map();
-		Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(rawHeaders.size(), Locale.ENGLISH);
+		Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(rawHeaders.size(), Locale.ROOT);
 		MultiValueMap<String, String> multiValueMap = CollectionUtils.toMultiValueMap(map);
 		multiValueMap.putAll(rawHeaders);
 		return HttpHeaders.readOnlyHttpHeaders(multiValueMap);

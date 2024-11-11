@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>Both Spring MVC and Spring WebFlux support this annotation through a
  * {@code RequestMappingHandlerMapping} and {@code RequestMappingHandlerAdapter}
- * in their respective modules and package structure. For the exact list of
+ * in their respective modules and package structures. For the exact list of
  * supported handler method arguments and return types in each, please use the
  * reference documentation links below:
  * <ul>
@@ -47,16 +47,23 @@ import org.springframework.core.annotation.AliasFor;
  * </li>
  * </ul>
  *
- * <p><strong>Note:</strong> This annotation can be used both at the class and
+ * <p><strong>NOTE:</strong> This annotation can be used both at the class and
  * at the method level. In most cases, at the method level applications will
  * prefer to use one of the HTTP method specific variants
  * {@link GetMapping @GetMapping}, {@link PostMapping @PostMapping},
  * {@link PutMapping @PutMapping}, {@link DeleteMapping @DeleteMapping}, or
- * {@link PatchMapping @PatchMapping}.</p>
+ * {@link PatchMapping @PatchMapping}.
  *
- * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
- * make sure to consistently put <i>all</i> your mapping annotations - such as
- * {@code @RequestMapping} and {@code @SessionAttributes} - on
+ * <p><strong>NOTE:</strong> This annotation cannot be used in conjunction with
+ * other {@code @RequestMapping} annotations that are declared on the same element
+ * (class, interface, or method). If multiple {@code @RequestMapping} annotations
+ * are detected on the same element, a warning will be logged, and only the first
+ * mapping will be used. This also applies to composed {@code @RequestMapping}
+ * annotations such as {@code @GetMapping}, {@code @PostMapping}, etc.
+ *
+ * <p><b>NOTE:</b> When using controller interfaces (for example, for AOP proxying),
+ * make sure to consistently put <i>all</i> your mapping annotations &mdash; such
+ * as {@code @RequestMapping} and {@code @SessionAttributes} &mdash; on
  * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Juergen Hoeller
@@ -87,25 +94,21 @@ public @interface RequestMapping {
 	String name() default "";
 
 	/**
-	 * The primary mapping expressed by this annotation.
+	 * The path mapping URIs &mdash; for example, {@code "/profile"}.
 	 * <p>This is an alias for {@link #path}. For example,
-	 * {@code @RequestMapping("/foo")} is equivalent to
-	 * {@code @RequestMapping(path="/foo")}.
-	 * <p><b>Supported at the type level as well as at the method level!</b>
-	 * When used at the type level, all method-level mappings inherit
-	 * this primary mapping, narrowing it for a specific handler method.
-	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
-	 * explicitly is effectively mapped to an empty path.
+	 * {@code @RequestMapping("/profile")} is equivalent to
+	 * {@code @RequestMapping(path="/profile")}.
+	 * <p>See {@link #path} for further details.
 	 */
 	@AliasFor("path")
 	String[] value() default {};
 
 	/**
-	 * The path mapping URIs (e.g. {@code "/profile"}).
-	 * <p>Ant-style path patterns are also supported (e.g. {@code "/profile/**"}).
-	 * At the method level, relative paths (e.g. {@code "edit"}) are supported
+	 * The path mapping URIs &mdash; for example, {@code "/profile"}.
+	 * <p>Ant-style path patterns are also supported (for example, {@code "/profile/**"}).
+	 * At the method level, relative paths (for example, {@code "edit"}) are supported
 	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. <code>"/${profile_path}"</code>).
+	 * Path mapping URIs may contain placeholders (for example, <code>"/${profile_path}"</code>).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
@@ -199,7 +202,7 @@ public @interface RequestMapping {
 	 * produces = MediaType.TEXT_PLAIN_VALUE
 	 * produces = "text/plain;charset=UTF-8"
 	 * </pre>
-	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
+	 * <p>If a declared media type contains a parameter (for example, "charset=UTF-8",
 	 * "type=feed", "type=entry") and if a compatible media type from the request
 	 * has that parameter too, then the parameter values must match. Otherwise,
 	 * if the media type from the request does not contain the parameter, it is

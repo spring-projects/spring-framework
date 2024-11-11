@@ -1,10 +1,11 @@
 [[expressions]]
 = Spring Expression Language (SpEL)
 
-The Spring Expression Language ("`SpEL`" for short) is a powerful expression language that
+The Spring Expression Language ("SpEL" for short) is a powerful expression language that
 supports querying and manipulating an object graph at runtime. The language syntax is
-similar to Unified EL but offers additional features, most notably method invocation and
-basic string templating functionality.
+similar to the https://jakarta.ee/specifications/expression-language/[Jakarta Expression
+Language] but offers additional features, most notably method invocation and basic string
+templating functionality.
 
 While there are several other Java expression languages available -- OGNL, MVEL, and JBoss
 EL, to name a few -- the Spring Expression Language was created to provide the Spring
@@ -33,26 +34,24 @@ populate them are listed at the end of the chapter.
 The expression language supports the following functionality:
 
 * Literal expressions
-* Boolean and relational operators
-* Regular expressions
-* Class expressions
 * Accessing properties, arrays, lists, and maps
-* Method invocation
-* Assignment
-* Calling constructors
-* Bean references
-* Array construction
 * Inline lists
 * Inline maps
-* Ternary operator
+* Array construction
+* Relational operators
+* Regular expressions
+* Logical operators
+* String operators
+* Mathematical operators
+* Assignment
+* Type expressions
+* Method invocation
+* Constructor invocation
 * Variables
-* User-defined functions added to the context
-  * reflective invocation of `Method`
-  * various cases of `MethodHandle`
+* User-defined functions
+* Bean references
+* Ternary, Elvis, and safe-navigation operators
 * Collection projection
 * Collection selection
 * Templated expressions
-
-
-
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,21 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
@@ -49,6 +52,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -546,11 +550,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * well as direct equality.
 	 * <p>The default implementation of this method stores disallowed field patterns
 	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
-	 * form. As of Spring Framework 5.2.21, the default implementation also transforms
-	 * disallowed field patterns to {@linkplain String#toLowerCase() lowercase} to
-	 * support case-insensitive pattern matching in {@link #isAllowed}. Subclasses
-	 * which override this method must therefore take both of these transformations
-	 * into account.
+	 * form and also transforms disallowed field patterns to
+	 * {@linkplain String#toLowerCase() lowercase} to support case-insensitive
+	 * pattern matching in {@link #isAllowed}. Subclasses which override this
+	 * method must therefore take both of these transformations into account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
@@ -568,7 +571,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		else {
 			String[] fieldPatterns = new String[disallowedFields.length];
 			for (int i = 0; i < fieldPatterns.length; i++) {
-				fieldPatterns[i] = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]).toLowerCase();
+				String field = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]);
+				fieldPatterns[i] = field.toLowerCase(Locale.ROOT);
 			}
 			this.disallowedFields = fieldPatterns;
 		}
@@ -682,7 +686,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 	}
 
-	private void assertValidators(Validator... validators) {
+	@SuppressWarnings("NullAway")
+	private void assertValidators(@Nullable Validator... validators) {
 		Object target = getTarget();
 		for (Validator validator : validators) {
 			if (validator != null && (target != null && !validator.supports(target.getClass()))) {
@@ -741,6 +746,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * {@link #setExcludedValidators(Predicate) exclude predicate}.
 	 * @since 6.1
 	 */
+	@SuppressWarnings("NullAway")
 	public List<Validator> getValidatorsToApply() {
 		return (this.excludedValidators != null ?
 				this.validators.stream().filter(validator -> !this.excludedValidators.test(validator)).toList() :
@@ -946,11 +952,24 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 				String paramPath = nestedPath + lookupName;
 				Class<?> paramType = paramTypes[i];
+				ResolvableType resolvableType = ResolvableType.forMethodParameter(param);
+
 				Object value = valueResolver.resolveValue(paramPath, paramType);
 
-				if (value == null && shouldCreateObject(param)) {
-					ResolvableType type = ResolvableType.forMethodParameter(param);
-					args[i] = createObject(type, paramPath + ".", valueResolver);
+				if (value == null) {
+					if (List.class.isAssignableFrom(paramType)) {
+						value = createList(paramPath, paramType, resolvableType, valueResolver);
+					}
+					else if (Map.class.isAssignableFrom(paramType)) {
+						value = createMap(paramPath, paramType, resolvableType, valueResolver);
+					}
+					else if (paramType.isArray()) {
+						value = createArray(paramPath, resolvableType, valueResolver);
+					}
+				}
+
+				if (value == null && shouldConstructArgument(param) && hasValuesFor(paramPath, valueResolver)) {
+					args[i] = createObject(resolvableType, paramPath + ".", valueResolver);
 				}
 				else {
 					try {
@@ -1008,17 +1027,108 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return (isOptional && !nestedPath.isEmpty() ? Optional.ofNullable(result) : result);
 	}
 
-	private static boolean shouldCreateObject(MethodParameter param) {
+	/**
+	 * Whether to instantiate the constructor argument of the given type,
+	 * matching its own constructor arguments to bind values.
+	 * <p>By default, simple value types, maps, collections, and arrays are
+	 * excluded from nested constructor binding initialization.
+	 * @since 6.1.2
+	 */
+	protected boolean shouldConstructArgument(MethodParameter param) {
 		Class<?> type = param.nestedIfOptional().getNestedParameterType();
-		return !(BeanUtils.isSimpleValueType(type) ||
-				Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) || type.isArray());
+		return !BeanUtils.isSimpleValueType(type) && !type.getPackageName().startsWith("java.");
+	}
+
+	private boolean hasValuesFor(String paramPath, ValueResolver resolver) {
+		for (String name : resolver.getNames()) {
+			if (name.startsWith(paramPath + ".")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private <V> List<V> createList(
+			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
+
+		ResolvableType elementType = type.getNested(2);
+		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
+		if (indexes == null) {
+			return null;
+		}
+		int size = (indexes.last() < this.autoGrowCollectionLimit ? indexes.last() + 1 : 0);
+		List<V> list = (List<V>) CollectionFactory.createCollection(paramType, size);
+		indexes.forEach(i -> list.add(null));
+		for (int index : indexes) {
+			list.set(index, (V) createObject(elementType, paramPath + "[" + index + "].", valueResolver));
+		}
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private <V> Map<String, V> createMap(
+			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
+
+		ResolvableType elementType = type.getNested(2);
+		Map<String, V> map = null;
+		for (String name : valueResolver.getNames()) {
+			if (!name.startsWith(paramPath + "[")) {
+				continue;
+			}
+			int startIdx = paramPath.length() + 1;
+			int endIdx = name.indexOf(']', startIdx);
+			String nestedPath = name.substring(0, endIdx + 2);
+			boolean quoted = (endIdx - startIdx > 2 && name.charAt(startIdx) == '\'' && name.charAt(endIdx - 1) == '\'');
+			String key = (quoted ? name.substring(startIdx + 1, endIdx - 1) : name.substring(startIdx, endIdx));
+			if (map == null) {
+				map = CollectionFactory.createMap(paramType, 16);
+			}
+			if (!map.containsKey(key)) {
+				map.put(key, (V) createObject(elementType, nestedPath, valueResolver));
+			}
+		}
+		return map;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private <V> V[] createArray(String paramPath, ResolvableType type, ValueResolver valueResolver) {
+		ResolvableType elementType = type.getNested(2);
+		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
+		if (indexes == null) {
+			return null;
+		}
+		int size = (indexes.last() < this.autoGrowCollectionLimit ? indexes.last() + 1: 0);
+		V[] array = (V[]) Array.newInstance(elementType.resolve(), size);
+		for (int index : indexes) {
+			array[index] = (V) createObject(elementType, paramPath + "[" + index + "].", valueResolver);
+		}
+		return array;
+	}
+
+	@Nullable
+	private static SortedSet<Integer> getIndexes(String paramPath, ValueResolver valueResolver) {
+		SortedSet<Integer> indexes = null;
+		for (String name : valueResolver.getNames()) {
+			if (name.startsWith(paramPath + "[")) {
+				int endIndex = name.indexOf(']', paramPath.length() + 2);
+				String rawIndex = name.substring(paramPath.length() + 1, endIndex);
+				int index = Integer.parseInt(rawIndex);
+				indexes = (indexes != null ? indexes : new TreeSet<>());
+				indexes.add(index);
+			}
+		}
+		return indexes;
 	}
 
 	private void validateConstructorArgument(
 			Class<?> constructorClass, String nestedPath, String name, @Nullable Object value) {
 
 		Object[] hints = null;
-		if (this.targetType.getSource() instanceof MethodParameter parameter) {
+		if (this.targetType != null && this.targetType.getSource() instanceof MethodParameter parameter) {
 			for (Annotation ann : parameter.getParameterAnnotations()) {
 				hints = ValidationAnnotationUtils.determineValidationHints(ann);
 				if (hints != null) {
@@ -1140,7 +1250,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		String[] allowed = getAllowedFields();
 		String[] disallowed = getDisallowedFields();
 		return ((ObjectUtils.isEmpty(allowed) || PatternMatchUtils.simpleMatch(allowed, field)) &&
-				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field.toLowerCase())));
+				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field.toLowerCase(Locale.ROOT))));
 	}
 
 	/**
@@ -1151,6 +1261,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #getBindingErrorProcessor
 	 * @see BindingErrorProcessor#processMissingFieldError
 	 */
+	@SuppressWarnings("NullAway")
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
 		String[] requiredFields = getRequiredFields();
 		if (!ObjectUtils.isEmpty(requiredFields)) {
@@ -1285,7 +1396,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Strategy for {@link #construct constructor binding} to look up the values
 	 * to bind to a given constructor parameter.
 	 */
-	@FunctionalInterface
 	public interface ValueResolver {
 
 		/**
@@ -1297,6 +1407,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		 */
 		@Nullable
 		Object resolveValue(String name, Class<?> type);
+
+		/**
+		 * Return the names of all property values.
+		 * @since 6.1.2
+		 */
+		Set<String> getNames();
+
 	}
 
 

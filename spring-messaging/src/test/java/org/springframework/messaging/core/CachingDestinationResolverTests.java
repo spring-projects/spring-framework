@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link CachingDestinationResolverProxy}.
+ * Tests for {@link CachingDestinationResolverProxy}.
  *
  * @author Agim Emruli
  * @author Juergen Hoeller
  */
-public class CachingDestinationResolverTests {
+class CachingDestinationResolverTests {
 
 	@Test
-	public void cachedDestination() {
-		@SuppressWarnings("unchecked")
+	void cachedDestination() {
 		DestinationResolver<String> resolver = mock();
 		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>(resolver);
 
@@ -52,14 +51,14 @@ public class CachingDestinationResolverTests {
 	}
 
 	@Test
-	public void noTargetSet() {
+	void noTargetSet() {
 		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>();
 		assertThatIllegalArgumentException().isThrownBy(
 				resolverProxy::afterPropertiesSet);
 	}
 
 	@Test
-	public void nullTargetThroughConstructor() {
+	void nullTargetThroughConstructor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new CachingDestinationResolverProxy<String>(null));
 	}

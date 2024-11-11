@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,16 +56,16 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 	private final MethodValidationAdapter validationAdapter;
 
-	private final Predicate<MethodParameter> modelAttribitePredicate;
+	private final Predicate<MethodParameter> modelAttributePredicate;
 
 	private final Predicate<MethodParameter> requestParamPredicate;
 
 
 	private HandlerMethodValidator(MethodValidationAdapter validationAdapter,
-			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		this.validationAdapter = validationAdapter;
-		this.modelAttribitePredicate = modelAttribitePredicate;
+		this.modelAttributePredicate = modelAttributePredicate;
 		this.requestParamPredicate = requestParamPredicate;
 	}
 
@@ -98,13 +98,13 @@ public final class HandlerMethodValidator implements MethodValidator {
 					}
 				}
 			}
-			if (result.getAllValidationResults().size() == bindingResultCount) {
+			if (result.getParameterValidationResults().size() == bindingResultCount) {
 				return;
 			}
 		}
 
 		throw new HandlerMethodValidationException(
-				result, this.modelAttribitePredicate, this.requestParamPredicate);
+				result, this.modelAttributePredicate, this.requestParamPredicate);
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 	@Nullable
 	public static MethodValidator from(
 			@Nullable WebBindingInitializer initializer, @Nullable ParameterNameDiscoverer paramNameDiscoverer,
-			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		if (initializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
 			Validator validator = getValidator(configurableInitializer);
@@ -156,7 +156,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 				if (codesResolver != null) {
 					adapter.setMessageCodesResolver(codesResolver);
 				}
-				return new HandlerMethodValidator(adapter, modelAttribitePredicate, requestParamPredicate);
+				return new HandlerMethodValidator(adapter, modelAttributePredicate, requestParamPredicate);
 			}
 		}
 		return null;

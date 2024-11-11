@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link ResourceBundleEditor} class.
+ * Tests for {@link ResourceBundleEditor}.
  *
  * @author Rick Evans
  * @author Chris Beams
  */
-public class ResourceBundleEditorTests {
+class ResourceBundleEditorTests {
 
 	private static final String BASE_NAME = ResourceBundleEditorTests.class.getName();
 
@@ -37,7 +37,7 @@ public class ResourceBundleEditorTests {
 
 
 	@Test
-	public void testSetAsTextWithJustBaseName() {
+	void testSetAsTextWithJustBaseName() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME);
 		Object value = editor.getValue();
@@ -49,7 +49,7 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	public void testSetAsTextWithBaseNameThatEndsInDefaultSeparator() {
+	void testSetAsTextWithBaseNameThatEndsInDefaultSeparator() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "_");
 		Object value = editor.getValue();
@@ -61,7 +61,7 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	public void testSetAsTextWithBaseNameAndLanguageCode() {
+	void testSetAsTextWithBaseNameAndLanguageCode() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "Lang" + "_en");
 		Object value = editor.getValue();
@@ -73,7 +73,7 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	public void testSetAsTextWithBaseNameLanguageAndCountryCode() {
+	void testSetAsTextWithBaseNameLanguageAndCountryCode() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountry" + "_en_GB");
 		Object value = editor.getValue();
@@ -85,7 +85,7 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	public void testSetAsTextWithTheKitchenSink() {
+	void testSetAsTextWithTheKitchenSink() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountryDialect" + "_en_GB_GLASGOW");
 		Object value = editor.getValue();
@@ -97,28 +97,28 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	public void testSetAsTextWithNull() {
+	void testSetAsTextWithNull() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText(null));
 	}
 
 	@Test
-	public void testSetAsTextWithEmptyString() {
+	void testSetAsTextWithEmptyString() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText(""));
 	}
 
 	@Test
-	public void testSetAsTextWithWhiteSpaceString() {
+	void testSetAsTextWithWhiteSpaceString() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText("   "));
 	}
 
 	@Test
-	public void testSetAsTextWithJustSeparatorString() {
+	void testSetAsTextWithJustSeparatorString() {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText("_"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.Page;
+import org.htmlunit.WebClient;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-
 
 /**
  * Integration tests for {@link MockMvcWebConnection}.
@@ -61,17 +60,18 @@ public class MockMvcWebConnectionTests {
 	}
 
 	@Test
-	public void contextPathEmpty() throws IOException {
+	public void contextPathEmpty() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 		// Empty context path (root context) should not match to a URL with a context path
-		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
-				this.webClient.getPage("http://localhost/context/a"))
-			.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
+		assertThatExceptionOfType(FailingHttpStatusCodeException.class)
+				.isThrownBy(() -> this.webClient.getPage("http://localhost/context/a"))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
+
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient));
 		// No context is the same providing an empty context path
-		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
-				this.webClient.getPage("http://localhost/context/a"))
-		.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
+		assertThatExceptionOfType(FailingHttpStatusCodeException.class)
+				.isThrownBy(() -> this.webClient.getPage("http://localhost/context/a"))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
 	}
 
 	@Test
@@ -84,20 +84,19 @@ public class MockMvcWebConnectionTests {
 	@Test
 	public void infiniteForward() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
-		assertThatIllegalStateException().isThrownBy(() -> this.webClient.getPage("http://localhost/infiniteForward"))
-						.withMessage("Forwarded 100 times in a row, potential infinite forward loop");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.webClient.getPage("http://localhost/infiniteForward"))
+				.withMessage("Forwarded 100 times in a row, potential infinite forward loop");
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void contextPathDoesNotStartWithSlash() throws IOException {
+	public void contextPathDoesNotStartWithSlash() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockMvcWebConnection(this.mockMvc, this.webClient, "context"));
 	}
 
 	@Test
-	@SuppressWarnings("resource")
-	public void contextPathEndsWithSlash() throws IOException {
+	public void contextPathEndsWithSlash() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockMvcWebConnection(this.mockMvc, this.webClient, "/context/"));
 	}

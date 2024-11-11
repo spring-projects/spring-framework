@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link org.springframework.messaging.simp.SimpSessionScope}.
+ * Tests for {@link SimpSessionScope}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class SimpSessionScopeTests {
+class SimpSessionScopeTests {
 
 	private SimpSessionScope scope = new SimpSessionScope();
 
@@ -47,17 +47,17 @@ public class SimpSessionScopeTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		SimpAttributesContextHolder.resetAttributes();
 	}
 
 	@Test
-	public void get() {
+	void get() {
 		this.simpAttributes.setAttribute("name", "value");
 		Object actual = this.scope.get("name", this.objectFactory);
 
@@ -65,7 +65,7 @@ public class SimpSessionScopeTests {
 	}
 
 	@Test
-	public void getWithObjectFactory() {
+	void getWithObjectFactory() {
 		given(this.objectFactory.getObject()).willReturn("value");
 		Object actual = this.scope.get("name", this.objectFactory);
 
@@ -74,7 +74,7 @@ public class SimpSessionScopeTests {
 	}
 
 	@Test
-	public void remove() {
+	void remove() {
 		this.simpAttributes.setAttribute("name", "value");
 
 		Object removed = this.scope.remove("name");
@@ -86,7 +86,7 @@ public class SimpSessionScopeTests {
 	}
 
 	@Test
-	public void registerDestructionCallback() {
+	void registerDestructionCallback() {
 		Runnable runnable = mock();
 		this.scope.registerDestructionCallback("name", runnable);
 
@@ -95,7 +95,7 @@ public class SimpSessionScopeTests {
 	}
 
 	@Test
-	public void getSessionId() {
+	void getSessionId() {
 		assertThat(this.scope.getConversationId()).isEqualTo("session1");
 	}
 

@@ -55,8 +55,9 @@ plugins.withType(JavaPlugin).configureEach {
 				languageVersion = testLanguageVersion
 			}
 			// Enable Java experimental support in Bytebuddy
-			// Remove when JDK 22 is supported by Mockito
-			if (testLanguageVersion == JavaLanguageVersion.of(22)) {
+			// Bytebuddy 1.15.4 supports JDK <= 24
+			// see https://github.com/raphw/byte-buddy/blob/master/release-notes.md
+			if (testLanguageVersion.compareTo(JavaLanguageVersion.of(24)) > 0 ) {
 				jvmArgs("-Dnet.bytebuddy.experimental=true")
 			}
 		}
@@ -87,12 +88,12 @@ rootProject.ext {
 gradle.taskGraph.afterTask { Task task, TaskState state ->
 	if (!resolvedMainToolchain && task instanceof JavaCompile && task.javaCompiler.isPresent()) {
 		def metadata = task.javaCompiler.get().metadata
-		task.project.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		task.project.develocity.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
 		resolvedMainToolchain = true
 	}
 	if (testToolchainConfigured() && !resolvedTestToolchain && task instanceof Test && task.javaLauncher.isPresent()) {
 		def metadata = task.javaLauncher.get().metadata
-		task.project.buildScan.value('Test toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		task.project.develocity.buildScan.value('Test toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
 		resolvedTestToolchain = true
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,24 @@
 package org.springframework.http.client.reactive;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.hc.client5.http.cookie.Cookie;
+import org.apache.hc.client5.http.cookie.CookieOrigin;
+import org.apache.hc.client5.http.cookie.CookieSpec;
+import org.apache.hc.client5.http.cookie.MalformedCookieException;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.Message;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -43,71 +51,75 @@ import org.springframework.util.MultiValueMap;
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
-class HttpComponentsClientHttpResponse implements ClientHttpResponse {
-
-	private final DataBufferFactory dataBufferFactory;
-
-	private final Message<HttpResponse, Publisher<ByteBuffer>> message;
-
-	private final HttpHeaders headers;
-
-	private final HttpClientContext context;
-
-	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
+class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 
 
 	public HttpComponentsClientHttpResponse(DataBufferFactory dataBufferFactory,
 			Message<HttpResponse, Publisher<ByteBuffer>> message, HttpClientContext context) {
 
-		this.dataBufferFactory = dataBufferFactory;
-		this.message = message;
-		this.context = context;
-
-		MultiValueMap<String, String> adapter = new HttpComponentsHeadersAdapter(message.getHead());
-		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
+		super(HttpStatusCode.valueOf(message.getHead().getCode()),
+				HttpHeaders.readOnlyHttpHeaders(new HttpComponentsHeadersAdapter(message.getHead())),
+				adaptCookies(message.getHead(), context),
+				Flux.from(message.getBody()).map(dataBufferFactory::wrap)
+		);
 	}
 
+	private static MultiValueMap<String, ResponseCookie> adaptCookies(
+			HttpResponse response, HttpClientContext context) {
 
-	@Override
-	public HttpStatusCode getStatusCode() {
-		return HttpStatusCode.valueOf(this.message.getHead().getCode());
-	}
-
-	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
 		LinkedMultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		this.context.getCookieStore().getCookies().forEach(cookie ->
-				result.add(cookie.getName(),
-						ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
-								.domain(cookie.getDomain())
-								.path(cookie.getPath())
-								.maxAge(getMaxAgeSeconds(cookie))
-								.secure(cookie.isSecure())
-								.httpOnly(cookie.containsAttribute("httponly"))
-								.sameSite(cookie.getAttribute("samesite"))
-								.build()));
+
+		CookieSpec cookieSpec = context.getCookieSpec();
+		CookieOrigin cookieOrigin = context.getCookieOrigin();
+
+		Iterator<Header> itr = response.headerIterator(HttpHeaders.SET_COOKIE);
+		while (itr.hasNext()) {
+			Header header = itr.next();
+			try {
+				List<Cookie> cookies = cookieSpec.parse(header, cookieOrigin);
+				for (Cookie cookie : cookies) {
+					try {
+						cookieSpec.validate(cookie, cookieOrigin);
+						result.add(cookie.getName(),
+								ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
+										.domain(cookie.getDomain())
+										.path(cookie.getPath())
+										.maxAge(getMaxAgeSeconds(cookie))
+										.secure(cookie.isSecure())
+										.httpOnly(cookie.containsAttribute("httponly"))
+										.sameSite(cookie.getAttribute("samesite"))
+										.build());
+					}
+					catch (final MalformedCookieException ex) {
+						// ignore invalid cookie
+					}
+				}
+			}
+			catch (final MalformedCookieException ex) {
+				// ignore invalid cookie
+			}
+		}
+
 		return result;
 	}
 
-	private long getMaxAgeSeconds(Cookie cookie) {
+	private static long getMaxAgeSeconds(Cookie cookie) {
+		String expiresAttribute = cookie.getAttribute(Cookie.EXPIRES_ATTR);
 		String maxAgeAttribute = cookie.getAttribute(Cookie.MAX_AGE_ATTR);
-		return (maxAgeAttribute != null ? Long.parseLong(maxAgeAttribute) : -1);
-	}
-
-	@Override
-	public Flux<DataBuffer> getBody() {
-		return Flux.from(this.message.getBody())
-				.doOnSubscribe(s -> {
-					if (!this.rejectSubscribers.compareAndSet(false, true)) {
-						throw new IllegalStateException("The client response body can only be consumed once.");
-					}
-				})
-				.map(this.dataBufferFactory::wrap);
-	}
-
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.headers;
+		if (maxAgeAttribute != null) {
+			return Long.parseLong(maxAgeAttribute);
+		}
+		// only consider expires if max-age is not present
+		else if (expiresAttribute != null) {
+			try {
+				ZonedDateTime expiresDate = ZonedDateTime.parse(expiresAttribute, DateTimeFormatter.RFC_1123_DATE_TIME);
+				return Duration.between(ZonedDateTime.now(expiresDate.getZone()), expiresDate).toSeconds();
+			}
+			catch (DateTimeParseException ex) {
+				// ignore
+			}
+		}
+		return -1;
 	}
 
 }

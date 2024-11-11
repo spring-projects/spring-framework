@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class PersistenceInjectionIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
+class PersistenceInjectionIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@Autowired
 	private DefaultPublicPersistenceContextSetter defaultSetterInjected;
@@ -40,12 +40,12 @@ public class PersistenceInjectionIntegrationTests extends AbstractEntityManagerF
 
 
 	@Test
-	public void testDefaultPersistenceContextSetterInjection() {
+	void testDefaultPersistenceContextSetterInjection() {
 		assertThat(defaultSetterInjected.getEntityManager()).isNotNull();
 	}
 
 	@Test
-	public void testSetterInjectionOfNamedPersistenceContext() {
+	void testSetterInjectionOfNamedPersistenceContext() {
 		assertThat(namedSetterInjected.getEntityManagerFactory()).isNotNull();
 	}
 

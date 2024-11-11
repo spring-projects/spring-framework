@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,14 @@ import static org.mockito.Mockito.never;
  * Tests for {@link StreamUtils}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 class StreamUtilsTests {
 
 	private byte[] bytes = new byte[StreamUtils.BUFFER_SIZE + 10];
 
 	private String string = "";
+
 
 	@BeforeEach
 	void setup() {
@@ -52,6 +54,7 @@ class StreamUtilsTests {
 			string += UUID.randomUUID().toString();
 		}
 	}
+
 
 	@Test
 	void copyToByteArray() throws Exception {
@@ -91,11 +94,30 @@ class StreamUtilsTests {
 	}
 
 	@Test
-	void copyRange() throws Exception {
+	void copyRangeWithinBuffer() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		StreamUtils.copyRange(new ByteArrayInputStream(bytes), out, 0, 100);
-		byte[] range = Arrays.copyOfRange(bytes, 0, 101);
-		assertThat(out.toByteArray()).isEqualTo(range);
+		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+		StreamUtils.copyRange(in, out, 0, 100);
+		assertThat(in.available()).isEqualTo(bytes.length - 101);
+		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 0, 101));
+	}
+
+	@Test
+	void copyRangeBeyondBuffer() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+		StreamUtils.copyRange(in, out, 0, 8200);
+		assertThat(in.available()).isEqualTo(1);
+		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 0, 8201));
+	}
+
+	@Test
+	void copyRangeBeyondAvailable() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+		StreamUtils.copyRange(in, out, 0, 8300);
+		assertThat(in.available()).isEqualTo(0);
+		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 0, 8202));
 	}
 
 	@Test
@@ -127,4 +149,5 @@ class StreamUtilsTests {
 		ordered.verify(source).write(bytes, 1, 2);
 		ordered.verify(source, never()).close();
 	}
+
 }

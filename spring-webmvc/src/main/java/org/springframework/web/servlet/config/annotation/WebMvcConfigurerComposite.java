@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -160,6 +161,14 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void addErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.addErrorResponseInterceptors(interceptors);
+		}
+	}
+
+	@Override
+	@Nullable
 	public Validator getValidator() {
 		Validator selected = null;
 		for (WebMvcConfigurer configurer : this.delegates) {

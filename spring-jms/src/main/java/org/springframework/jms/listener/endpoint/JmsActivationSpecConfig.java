@@ -230,8 +230,8 @@ public class JmsActivationSpecConfig {
 	}
 
 	/**
-	 * Specify concurrency limits via a "lower-upper" String, e.g. "5-10", or a simple
-	 * upper limit String, e.g. "10".
+	 * Specify concurrency limits via a "lower-upper" String, for example, "5-10", or a simple
+	 * upper limit String, for example, "10".
 	 * <p>JCA listener containers will always scale from zero to the given upper limit.
 	 * A specified lower limit will effectively be ignored.
 	 * <p>This property is primarily supported for configuration compatibility with
@@ -250,7 +250,7 @@ public class JmsActivationSpecConfig {
 		}
 		catch (NumberFormatException ex) {
 			throw new IllegalArgumentException("Invalid concurrency value [" + concurrency + "]: only " +
-					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported. " +
+					"single maximum integer (for example, \"5\") and minimum-maximum combo (for example, \"3-5\") supported. " +
 					"Note that JmsActivationSpecConfig will effectively ignore the minimum value and " +
 					"scale from zero up to the number of consumers according to the maximum value.");
 		}

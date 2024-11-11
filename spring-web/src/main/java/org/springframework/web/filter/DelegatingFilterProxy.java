@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -97,7 +99,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	@Nullable
 	private volatile Filter delegate;
 
-	private final Object delegateMonitor = new Object();
+	private final Lock delegateLock = new ReentrantLock();
 
 
 	/**
@@ -226,7 +228,8 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 
 	@Override
 	protected void initFilterBean() throws ServletException {
-		synchronized (this.delegateMonitor) {
+		this.delegateLock.lock();
+		try {
 			if (this.delegate == null) {
 				// If no target bean name specified, use filter name.
 				if (this.targetBeanName == null) {
@@ -241,6 +244,9 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 				}
 			}
 		}
+		finally {
+			this.delegateLock.unlock();
+		}
 	}
 
 	@Override
@@ -250,7 +256,8 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 		// Lazily initialize the delegate if necessary.
 		Filter delegateToUse = this.delegate;
 		if (delegateToUse == null) {
-			synchronized (this.delegateMonitor) {
+			this.delegateLock.lock();
+			try {
 				delegateToUse = this.delegate;
 				if (delegateToUse == null) {
 					WebApplicationContext wac = findWebApplicationContext();
@@ -261,6 +268,9 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 					delegateToUse = initDelegate(wac);
 				}
 				this.delegate = delegateToUse;
+			}
+			finally {
+				this.delegateLock.unlock();
 			}
 		}
 

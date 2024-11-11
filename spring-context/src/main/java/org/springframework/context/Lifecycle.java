@@ -25,7 +25,7 @@ package org.springframework.context;
  * <p>Can be implemented by both components (typically a Spring bean defined in a
  * Spring context) and containers  (typically a Spring {@link ApplicationContext}
  * itself). Containers will propagate start/stop signals to all components that
- * apply within each container, e.g. for a stop/restart scenario at runtime.
+ * apply within each container, for example, for a stop/restart scenario at runtime.
  *
  * <p>Can be used for direct invocations or for management operations via JMX.
  * In the latter case, the {@link org.springframework.jmx.export.MBeanExporter}

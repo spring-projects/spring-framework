@@ -19,11 +19,12 @@ package org.springframework.web.reactive.resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@link VersionStrategy} implementations that insert
- * a prefix into the URL path, e.g. "version/static/myresource.js".
+ * a prefix into the URL path, for example, "version/static/myresource.js".
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -44,6 +45,7 @@ public abstract class AbstractPrefixVersionStrategy implements VersionStrategy {
 
 
 	@Override
+	@Nullable
 	public String extractVersion(String requestPath) {
 		return (requestPath.startsWith(this.prefix) ? this.prefix : null);
 	}

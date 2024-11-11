@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -554,11 +554,11 @@ class ExtendedBeanInfoTests {
 	 * IntrospectionException regarding a "type mismatch between indexed and non-indexed
 	 * methods" intermittently (approximately one out of every four times) under JDK 7
 	 * due to non-deterministic results from {@link Class#getDeclaredMethods()}.
-	 * See https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7023180
+	 * @see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7023180">JDK-7023180</a>
 	 * @see #cornerSpr9702()
 	 */
 	@Test
-	void cornerSpr10111() throws Exception {
+	void cornerSpr10111() {
 		assertThatNoException().isThrownBy(() -> new ExtendedBeanInfo(Introspector.getBeanInfo(BigDecimal.class)));
 	}
 

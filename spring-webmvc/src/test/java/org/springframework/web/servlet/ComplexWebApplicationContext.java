@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,8 +114,11 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		pvs = new MutablePropertyValues();
 		pvs.add(
-				"mappings", "/head.do=headController\n" +
-				"body.do=bodyController\n/noview*=noviewController\n/noview/simple*=noviewController");
+				"mappings", """
+						/head.do=headController
+						body.do=bodyController
+						/noview*=noviewController
+						/noview/simple*=noviewController""");
 		pvs.add("order", "1");
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
@@ -271,8 +274,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			return null;
 		}
 
+		@Deprecated
 		@Override
-		@SuppressWarnings("deprecation")
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return ((MyHandler) delegate).lastModified();
 		}
@@ -292,8 +295,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			throw new ServletException("dummy");
 		}
 
+		@Deprecated
 		@Override
-		@SuppressWarnings("deprecation")
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return -1;
 		}
@@ -404,12 +407,12 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		@Override
-		public void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception {
+		public void postHandle(WebRequest request, @Nullable ModelMap model) {
 			request.setAttribute("test3x", "test3x", WebRequest.SCOPE_REQUEST);
 		}
 
 		@Override
-		public void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception {
+		public void afterCompletion(WebRequest request, @Nullable Exception ex) {
 			request.setAttribute("test3y", "test3y", WebRequest.SCOPE_REQUEST);
 		}
 	}

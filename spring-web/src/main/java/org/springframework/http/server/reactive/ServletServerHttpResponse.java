@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Servlet {@link HttpServletResponse}.
@@ -48,6 +49,8 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
+
+	private static final boolean IS_SERVLET61 = ReflectionUtils.findField(HttpServletResponse.class, "SC_PERMANENT_REDIRECT") != null;
 
 	private final HttpServletResponse response;
 
@@ -109,6 +112,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	@Override
 	@Deprecated
+	@SuppressWarnings("removal")
 	public Integer getRawStatusCode() {
 		Integer status = super.getRawStatusCode();
 		return (status != null ? status : this.response.getStatus());
@@ -164,18 +168,32 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	@Override
 	protected void applyCookies() {
-		// Servlet Cookie doesn't support same site:
-		// https://github.com/eclipse-ee4j/servlet-api/issues/175
-
-		// For Jetty, starting 9.4.21+ we could adapt to HttpCookie:
-		// https://github.com/eclipse/jetty.project/issues/3040
-
-		// For Tomcat, it seems to be a global option only:
-		// https://tomcat.apache.org/tomcat-8.5-doc/config/cookie-processor.html
-
-		for (List<ResponseCookie> cookies : getCookies().values()) {
-			for (ResponseCookie cookie : cookies) {
-				this.response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+		for (String name : getCookies().keySet()) {
+			for (ResponseCookie httpCookie : getCookies().get(name)) {
+				Cookie cookie = new Cookie(name, httpCookie.getValue());
+				if (!httpCookie.getMaxAge().isNegative()) {
+					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
+				}
+				if (httpCookie.getDomain() != null) {
+					cookie.setDomain(httpCookie.getDomain());
+				}
+				if (httpCookie.getPath() != null) {
+					cookie.setPath(httpCookie.getPath());
+				}
+				if (httpCookie.getSameSite() != null) {
+					cookie.setAttribute("SameSite", httpCookie.getSameSite());
+				}
+				cookie.setSecure(httpCookie.isSecure());
+				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				if (httpCookie.isPartitioned()) {
+					if (IS_SERVLET61) {
+						cookie.setAttribute("Partitioned", "");
+					}
+					else {
+						cookie.setAttribute("Partitioned", "true");
+					}
+				}
+				this.response.addCookie(cookie);
 			}
 		}
 	}

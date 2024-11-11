@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,9 +73,9 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 
 		/**
 		 * Since this method does not reside in a true {@code @Configuration class},
-		 * it acts as a factory method when invoked directly (e.g., from
+		 * it acts as a factory method when invoked directly (for example, from
 		 * {@link #transactionManager()}) and as a singleton bean when retrieved
-		 * through the application context (e.g., when injected into the test
+		 * through the application context (for example, when injected into the test
 		 * instance). The result is that this method will be called twice:
 		 *
 		 * <ol>
@@ -104,7 +104,7 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 
 
 	@Before
-	public void compareDataSources() throws Exception {
+	public void compareDataSources() {
 		// NOTE: the two DataSource instances are NOT the same!
 		assertThat(dataSourceViaInjection).isNotSameAs(dataSourceFromTxManager);
 	}

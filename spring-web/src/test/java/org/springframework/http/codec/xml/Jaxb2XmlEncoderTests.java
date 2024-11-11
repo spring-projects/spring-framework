@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.xml;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,10 +44,11 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
+ * Tests for {@link Jaxb2XmlEncoder}.
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
+class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
 
 	public Jaxb2XmlEncoderTests() {
 		super(new Jaxb2XmlEncoder());
@@ -54,7 +56,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.TEXT_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), new MediaType("application", "foo+xml"))).isTrue();
@@ -63,13 +65,16 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		assertThat(this.encoder.canEncode(forClass(TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(getClass()), MediaType.APPLICATION_XML)).isFalse();
 
+		assertThat(this.encoder.canEncode(forClass(JAXBElement.class), MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(JAXBElementSubclass.class), MediaType.APPLICATION_XML)).isTrue();
+
 		// SPR-15464
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
 	@Override
 	@Test
-	public void encode() {
+	protected void encode() {
 		Mono<Pojo> input = Mono.just(new Pojo("foofoo", "barbar"));
 
 		testEncode(input, Pojo.class, step -> step
@@ -80,7 +85,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 	}
 
 	@Test
-	public void encodeJaxbElement() {
+	void encodeJaxbElement() {
 		Mono<JAXBElement<Pojo>> input = Mono.just(new JAXBElement<>(new QName("baz"), Pojo.class,
 				new Pojo("foofoo", "barbar")));
 
@@ -92,13 +97,13 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 	}
 
 	@Test
-	public void encodeError() {
+	void encodeError() {
 		Flux<Pojo> input = Flux.error(RuntimeException::new);
 		testEncode(input, Pojo.class, step -> step.expectError(RuntimeException.class).verify());
 	}
 
 	@Test
-	public void encodeElementsWithCommonType() {
+	void encodeElementsWithCommonType() {
 		Mono<Container> input = Mono.just(new Container());
 
 		testEncode(input, Pojo.class, step -> step
@@ -118,6 +123,17 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 			String actual = new String(resultBytes, UTF_8);
 			assertThat(XmlContent.from(actual)).isSimilarTo(expected);
 		};
+	}
+
+	public static class JAXBElementSubclass extends JAXBElement<Pojo> {
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		protected static final QName NAME = new QName("http://foo/schema/common/1.0", "Pojo");
+
+		public JAXBElementSubclass() {
+			super(NAME, Pojo.class, null, null);
+		}
 	}
 
 	public static class Model {}

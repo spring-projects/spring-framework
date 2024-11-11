@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import org.springframework.core.MethodParameter
 import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.format.support.DefaultFormattingConversionService
-import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
-import org.springframework.web.testfixture.server.MockServerWebExchange
-import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.server.ServerWebInputException
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.test.StepVerifier
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Kotlin test fixture for [RequestParamMethodArgumentResolver].
@@ -53,6 +53,9 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	lateinit var defaultValueStringParamRequired: MethodParameter
 	lateinit var defaultValueStringParamNotRequired: MethodParameter
 
+	lateinit var nonNullableValueClassParam: MethodParameter
+	lateinit var nullableValueClassParam: MethodParameter
+
 
 	@BeforeEach
 	fun setup() {
@@ -61,10 +64,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		initializer.conversionService = DefaultFormattingConversionService()
 		bindingContext = BindingContext(initializer)
 
-		val method = ReflectionUtils.findMethod(javaClass, "handle",
-			String::class.java, String::class.java, String::class.java, String::class.java,
-			Boolean::class.java, Boolean::class.java, Int::class.java, Int::class.java,
-			String::class.java, String::class.java)!!
+		val method = RequestParamMethodArgumentResolverKotlinTests::handle.javaMethod!!
+		val valueClassMethod = RequestParamMethodArgumentResolverKotlinTests::handleValueClass.javaMethod!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)
@@ -77,6 +78,9 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		defaultValueIntParamNotRequired = SynthesizingMethodParameter(method, 7)
 		defaultValueStringParamRequired = SynthesizingMethodParameter(method, 8)
 		defaultValueStringParamNotRequired = SynthesizingMethodParameter(method, 9)
+
+		nonNullableValueClassParam = SynthesizingMethodParameter(valueClassMethod, 0)
+		nullableValueClassParam = SynthesizingMethodParameter(valueClassMethod, 1)
 	}
 
 	@Test
@@ -219,6 +223,20 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		StepVerifier.create(result).expectComplete().verify()
 	}
 
+	@Test
+	fun resolveNonNullableValueClass() {
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?value=123"))
+		var result = resolver.resolveArgument(nonNullableValueClassParam, bindingContext, exchange)
+		StepVerifier.create(result).expectNext(123).expectComplete().verify()
+	}
+
+	@Test
+	fun resolveNullableValueClass() {
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?value=123"))
+		var result = resolver.resolveArgument(nullableValueClassParam, bindingContext, exchange)
+		StepVerifier.create(result).expectNext(123).expectComplete().verify()
+	}
+
 
 	@Suppress("unused_parameter")
 	fun handle(
@@ -234,6 +252,14 @@ class RequestParamMethodArgumentResolverKotlinTests {
 			@RequestParam("value") withDefaultValueStringParamRequired: String = "default",
 			@RequestParam("value", required = false) withDefaultValueStringParamNotRequired: String = "default") {
 	}
+
+	@Suppress("unused_parameter")
+	fun handleValueClass(
+		@RequestParam("value") nonNullable: ValueClass,
+		@RequestParam("value") nullable: ValueClass?) {
+	}
+
+	@JvmInline value class ValueClass(val value: Int)
 
 }
 

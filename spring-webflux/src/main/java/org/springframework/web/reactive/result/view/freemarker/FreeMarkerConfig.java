@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,11 @@ import freemarker.template.Configuration;
 
 /**
  * Interface to be implemented by objects that configure and manage a
- * FreeMarker Configuration object in a web environment. Detected and
- * used by {@link FreeMarkerView}.
+ * FreeMarker {@link Configuration} object in a web environment.
+ *
+ * <p>Detected and used by {@link FreeMarkerView}.
+ *
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -29,11 +32,11 @@ import freemarker.template.Configuration;
 public interface FreeMarkerConfig {
 
 	/**
-	 * Return the FreeMarker Configuration object for the current
+	 * Return the FreeMarker {@link Configuration} object for the current
 	 * web application context.
-	 * <p>A FreeMarker Configuration object may be used to set FreeMarker
+	 * <p>A FreeMarker {@code Configuration} object may be used to set FreeMarker
 	 * properties and shared objects, and allows to retrieve templates.
-	 * @return the FreeMarker Configuration
+	 * @return the FreeMarker {@code Configuration}
 	 */
 	Configuration getConfiguration();
 

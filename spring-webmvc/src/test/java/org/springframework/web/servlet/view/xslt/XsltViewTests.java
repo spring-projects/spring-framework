@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class XsltViewTests {
+class XsltViewTests {
 
 	private static final String HTML_OUTPUT = "/org/springframework/web/servlet/view/xslt/products.xsl";
 
@@ -61,54 +61,54 @@ public class XsltViewTests {
 
 
 	@Test
-	public void withNoSource() throws Exception {
+	void withNoSource() {
 		final XsltView view = getXsltView(HTML_OUTPUT);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				view.render(emptyMap(), request, response));
 	}
 
 	@Test
-	public void withoutUrl() throws Exception {
+	void withoutUrl() {
 		final XsltView view = new XsltView();
 		assertThatIllegalArgumentException().isThrownBy(
 				view::afterPropertiesSet);
 	}
 
 	@Test
-	public void simpleTransformWithSource() throws Exception {
+	void simpleTransformWithSource() throws Exception {
 		Source source = new StreamSource(getProductDataResource().getInputStream());
 		doTestWithModel(singletonMap("someKey", source));
 	}
 
 	@Test
-	public void testSimpleTransformWithDocument() throws Exception {
+	void testSimpleTransformWithDocument() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
 		doTestWithModel(singletonMap("someKey", document));
 	}
 
 	@Test
-	public void testSimpleTransformWithNode() throws Exception {
+	void testSimpleTransformWithNode() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
 		doTestWithModel(singletonMap("someKey", document.getDocumentElement()));
 	}
 
 	@Test
-	public void testSimpleTransformWithInputStream() throws Exception {
+	void testSimpleTransformWithInputStream() throws Exception {
 		doTestWithModel(singletonMap("someKey", getProductDataResource().getInputStream()));
 	}
 
 	@Test
-	public void testSimpleTransformWithReader() throws Exception {
+	void testSimpleTransformWithReader() throws Exception {
 		doTestWithModel(singletonMap("someKey", new InputStreamReader(getProductDataResource().getInputStream())));
 	}
 
 	@Test
-	public void testSimpleTransformWithResource() throws Exception {
+	void testSimpleTransformWithResource() throws Exception {
 		doTestWithModel(singletonMap("someKey", getProductDataResource()));
 	}
 
 	@Test
-	public void testWithSourceKey() throws Exception {
+	void testWithSourceKey() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
 
@@ -121,7 +121,7 @@ public class XsltViewTests {
 	}
 
 	@Test
-	public void testContentTypeCarriedFromTemplate() throws Exception {
+	void testContentTypeCarriedFromTemplate() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 
 		Source source = new StreamSource(getProductDataResource().getInputStream());
@@ -131,7 +131,7 @@ public class XsltViewTests {
 	}
 
 	@Test
-	public void testModelParametersCarriedAcross() throws Exception {
+	void testModelParametersCarriedAcross() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("someKey", getProductDataResource());
 		model.put("title", "Product List");
@@ -140,7 +140,7 @@ public class XsltViewTests {
 	}
 
 	@Test
-	public void testStaticAttributesCarriedAcross() throws Exception {
+	void testStaticAttributesCarriedAcross() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
 		view.addStaticAttribute("title", "Product List");
@@ -158,8 +158,7 @@ public class XsltViewTests {
 	private org.w3c.dom.Document getDomDocument() throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = dbf.newDocumentBuilder();
-		org.w3c.dom.Document document = builder.parse(getProductDataResource().getInputStream());
-		return document;
+		return builder.parse(getProductDataResource().getInputStream());
 	}
 
 	private void doTestWithModel(Map<String, Object> model) throws Exception {

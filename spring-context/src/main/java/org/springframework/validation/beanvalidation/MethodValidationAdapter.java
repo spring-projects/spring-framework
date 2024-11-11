@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -49,7 +51,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -193,7 +195,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * <li>{@link Conventions#getVariableNameForReturnType(Method, Class, Object)}
 	 * for a return type
 	 * </ul>
-	 * If a name cannot be determined, e.g. a return value with insufficient
+	 * If a name cannot be determined, for example, a return value with insufficient
 	 * type information, then it defaults to one of:
 	 * <ul>
 	 * <li>{@code "{methodName}.arg{index}"} for input parameters
@@ -206,7 +208,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 
 	/**
-	 * {@inheritDoc}.
+	 * {@inheritDoc}
 	 * <p>Default are the validation groups as specified in the {@link Validated}
 	 * annotation on the method, or on the containing target class of the method,
 	 * or for an AOP proxy without a target (with all behavior in advisors), also
@@ -233,8 +235,8 @@ public class MethodValidationAdapter implements MethodValidator {
 
 	@Override
 	public final MethodValidationResult validateArguments(
-			Object target, Method method, @Nullable MethodParameter[] parameters, Object[] arguments,
-			Class<?>[] groups) {
+			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object[] arguments, Class<?>[] groups) {
 
 		Set<ConstraintViolation<Object>> violations =
 				invokeValidatorForArguments(target, method, arguments, groups);
@@ -255,24 +257,21 @@ public class MethodValidationAdapter implements MethodValidator {
 			Object target, Method method, Object[] arguments, Class<?>[] groups) {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
-		Set<ConstraintViolation<Object>> violations;
 		try {
-			violations = execVal.validateParameters(target, method, arguments, groups);
+			return execVal.validateParameters(target, method, arguments, groups);
 		}
 		catch (IllegalArgumentException ex) {
 			// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
 			// Let's try to find the bridged method on the implementation class...
-			Method mostSpecificMethod = ClassUtils.getMostSpecificMethod(method, target.getClass());
-			Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(mostSpecificMethod);
-			violations = execVal.validateParameters(target, bridgedMethod, arguments, groups);
+			Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(method, target.getClass());
+			return execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
-		return violations;
 	}
 
 	@Override
 	public final MethodValidationResult validateReturnValue(
-			Object target, Method method, @Nullable MethodParameter returnType, @Nullable Object returnValue,
-			Class<?>[] groups) {
+			Object target, Method method, @Nullable MethodParameter returnType,
+			@Nullable Object returnValue, Class<?>[] groups) {
 
 		Set<ConstraintViolation<Object>> violations =
 				invokeValidatorForReturnValue(target, method, returnValue, groups);
@@ -301,13 +300,14 @@ public class MethodValidationAdapter implements MethodValidator {
 			Function<Integer, MethodParameter> parameterFunction,
 			Function<Integer, Object> argumentFunction) {
 
-		Map<MethodParameter, ParamResultBuilder> paramViolations = new LinkedHashMap<>();
-		Map<BeanResultKey, BeanResultBuilder> beanViolations = new LinkedHashMap<>();
+		Map<Path.Node, ParamValidationResultBuilder> paramViolations = new LinkedHashMap<>();
+		Map<Path.Node, ParamErrorsBuilder> nestedViolations = new LinkedHashMap<>();
+		List<MessageSourceResolvable> crossParamErrors = null;
 
 		for (ConstraintViolation<Object> violation : violations) {
-			Iterator<Path.Node> itr = violation.getPropertyPath().iterator();
-			while (itr.hasNext()) {
-				Path.Node node = itr.next();
+			Iterator<Path.Node> nodes = violation.getPropertyPath().iterator();
+			while (nodes.hasNext()) {
+				Path.Node node = nodes.next();
 
 				MethodParameter parameter;
 				if (node.getKind().equals(ElementKind.PARAMETER)) {
@@ -317,33 +317,80 @@ public class MethodValidationAdapter implements MethodValidator {
 				else if (node.getKind().equals(ElementKind.RETURN_VALUE)) {
 					parameter = parameterFunction.apply(-1);
 				}
+				else if (node.getKind().equals(ElementKind.CROSS_PARAMETER)) {
+					crossParamErrors = (crossParamErrors != null ? crossParamErrors : new ArrayList<>());
+					crossParamErrors.add(createCrossParamError(target, method, violation));
+					break;
+				}
 				else {
 					continue;
 				}
 
 				Object arg = argumentFunction.apply(parameter.getParameterIndex());
-				if (!itr.hasNext()) {
-					paramViolations
-							.computeIfAbsent(parameter, p -> new ParamResultBuilder(target, parameter, arg))
+
+				// If the arg is a container, we need the element, but the only way to extract it
+				// is to check for and use a container index or key on the next node:
+				// https://github.com/jakartaee/validation/issues/194
+
+				Path.Node parameterNode = node;
+				if (nodes.hasNext()) {
+					node = nodes.next();
+				}
+
+				Object value;
+				Object container;
+				Integer index = node.getIndex();
+				Object key = node.getKey();
+				if (index != null && arg instanceof List<?> list) {
+					value = list.get(index);
+					container = list;
+				}
+				else if (index != null && arg instanceof Object[] array) {
+					value = array[index];
+					container = array;
+				}
+				else if (key != null && arg instanceof Map<?, ?> map) {
+					value = map.get(key);
+					container = map;
+				}
+				else if (arg instanceof Iterable<?>) {
+					// No index or key, cannot access the specific value
+					value = arg;
+					container = arg;
+				}
+				else if (arg instanceof Optional<?> optional) {
+					value = optional.orElse(null);
+					container = optional;
+				}
+				else {
+					value = arg;
+					container = null;
+				}
+
+				if (node.getKind().equals(ElementKind.PROPERTY)) {
+					nestedViolations
+							.computeIfAbsent(parameterNode, k ->
+									new ParamErrorsBuilder(parameter, value, container, index, key))
 							.addViolation(violation);
 				}
 				else {
-					Object leafBean = violation.getLeafBean();
-					BeanResultKey key = new BeanResultKey(node, leafBean);
-					beanViolations
-							.computeIfAbsent(key, k -> new BeanResultBuilder(parameter, arg, itr.next(), leafBean))
+					paramViolations
+							.computeIfAbsent(parameterNode, p ->
+									new ParamValidationResultBuilder(target, parameter, value, container, index, key))
 							.addViolation(violation);
 				}
+
 				break;
 			}
 		}
 
 		List<ParameterValidationResult> resultList = new ArrayList<>();
 		paramViolations.forEach((param, builder) -> resultList.add(builder.build()));
-		beanViolations.forEach((key, builder) -> resultList.add(builder.build()));
+		nestedViolations.forEach((key, builder) -> resultList.add(builder.build()));
 		resultList.sort(resultComparator);
 
-		return MethodValidationResult.create(target, method, resultList);
+		return MethodValidationResult.create(target, method, resultList,
+				(crossParamErrors != null ? crossParamErrors : Collections.emptyList()));
 	}
 
 	private MethodParameter initMethodParameter(Method method, int index) {
@@ -364,7 +411,7 @@ public class MethodValidationAdapter implements MethodValidator {
 		String[] codes = this.messageCodesResolver.resolveMessageCodes(code, objectName, paramName, parameterType);
 		Object[] arguments = this.validatorAdapter.get().getArgumentsForConstraint(objectName, paramName, descriptor);
 
-		return new DefaultMessageSourceResolvable(codes, arguments, violation.getMessage());
+		return new ViolationMessageSourceResolvable(codes, arguments, violation.getMessage(), violation);
 	}
 
 	private BindingResult createBindingResult(MethodParameter parameter, @Nullable Object argument) {
@@ -372,6 +419,19 @@ public class MethodValidationAdapter implements MethodValidator {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(argument, objectName);
 		result.setMessageCodesResolver(this.messageCodesResolver);
 		return result;
+	}
+
+	private MessageSourceResolvable createCrossParamError(
+			Object target, Method method, ConstraintViolation<Object> violation) {
+
+		String objectName = Conventions.getVariableName(target) + "#" + method.getName();
+
+		ConstraintDescriptor<?> descriptor = violation.getConstraintDescriptor();
+		String code = descriptor.getAnnotation().annotationType().getSimpleName();
+		String[] codes = this.messageCodesResolver.resolveMessageCodes(code, objectName);
+		Object[] arguments = this.validatorAdapter.get().getArgumentsForConstraint(objectName, "", descriptor);
+
+		return new ViolationMessageSourceResolvable(codes, arguments, violation.getMessage(), violation);
 	}
 
 
@@ -388,7 +448,6 @@ public class MethodValidationAdapter implements MethodValidator {
 		 * @return the name to use
 		 */
 		String resolveName(MethodParameter parameter, @Nullable Object value);
-
 	}
 
 
@@ -396,21 +455,36 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * Builds a validation result for a value method parameter with constraints
 	 * declared directly on it.
 	 */
-	private final class ParamResultBuilder {
+	private final class ParamValidationResultBuilder {
 
 		private final Object target;
 
 		private final MethodParameter parameter;
 
 		@Nullable
-		private final Object argument;
+		private final Object value;
+
+		@Nullable
+		private final Object container;
+
+		@Nullable
+		private final Integer containerIndex;
+
+		@Nullable
+		private final Object containerKey;
 
 		private final List<MessageSourceResolvable> resolvableErrors = new ArrayList<>();
 
-		public ParamResultBuilder(Object target, MethodParameter parameter, @Nullable Object argument) {
+		public ParamValidationResultBuilder(
+				Object target, MethodParameter parameter, @Nullable Object value, @Nullable Object container,
+				@Nullable Integer containerIndex, @Nullable Object containerKey) {
+
 			this.target = target;
 			this.parameter = parameter;
-			this.argument = argument;
+			this.value = value;
+			this.container = container;
+			this.containerIndex = containerIndex;
+			this.containerKey = containerKey;
 		}
 
 		public void addViolation(ConstraintViolation<Object> violation) {
@@ -418,9 +492,14 @@ public class MethodValidationAdapter implements MethodValidator {
 		}
 
 		public ParameterValidationResult build() {
-			return new ParameterValidationResult(this.parameter, this.argument, this.resolvableErrors);
+			return new ParameterValidationResult(
+					this.parameter, this.value, this.resolvableErrors, this.container,
+					this.containerIndex, this.containerKey,
+					(error, sourceType) -> {
+						Assert.isTrue(sourceType.equals(ConstraintViolation.class), "Unexpected source type");
+						return ((ViolationMessageSourceResolvable) error).getViolation();
+					});
 		}
-
 	}
 
 
@@ -428,7 +507,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * Builds a validation result for an {@link jakarta.validation.Valid @Valid}
 	 * annotated bean method parameter with cascaded constraints.
 	 */
-	private final class BeanResultBuilder {
+	private final class ParamErrorsBuilder {
 
 		private final MethodParameter parameter;
 
@@ -448,13 +527,16 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		private final Set<ConstraintViolation<Object>> violations = new LinkedHashSet<>();
 
-		public BeanResultBuilder(MethodParameter param, @Nullable Object arg, Path.Node node, @Nullable Object leafBean) {
+		public ParamErrorsBuilder(
+				MethodParameter param, @Nullable Object bean, @Nullable Object container,
+				@Nullable Integer containerIndex, @Nullable Object containerKey) {
+
 			this.parameter = param;
-			this.bean = leafBean;
-			this.container = (arg != null && !arg.equals(leafBean) ? arg : null);
-			this.containerIndex = node.getIndex();
-			this.containerKey = node.getKey();
-			this.errors = createBindingResult(param, leafBean);
+			this.bean = bean;
+			this.container = container;
+			this.containerIndex = containerIndex;
+			this.containerKey = containerKey;
+			this.errors = createBindingResult(param, this.bean);
 		}
 
 		public void addViolation(ConstraintViolation<Object> violation) {
@@ -470,25 +552,26 @@ public class MethodValidationAdapter implements MethodValidator {
 	}
 
 
-	/**
-	 * Unique key for cascaded violations associated with a bean.
-	 * <p>The bean may be an element within a container such as a List, Set, array,
-	 * Map, Optional, and others. In that case the {@link Path.Node} represents
-	 * the container element with its index or key, if applicable, while the
-	 * {@link ConstraintViolation#getLeafBean() leafBean} is the actual
-	 * element instance. The pair should be unique. For example in a Set, the
-	 * node is the same but element instances are unique. In a List or Map the
-	 * node is further qualified by an index or key while element instances
-	 * may be the same.
-	 * @param node the path to the bean associated with the violation
-	 * @param leafBean the bean instance
-	 */
-	record BeanResultKey(Path.Node node, Object leafBean) { }
+	@SuppressWarnings("serial")
+	private static class ViolationMessageSourceResolvable extends DefaultMessageSourceResolvable {
+
+		private final transient ConstraintViolation<Object> violation;
+
+		public ViolationMessageSourceResolvable(
+				String[] codes, Object[] arguments, String defaultMessage, ConstraintViolation<Object> violation) {
+
+			super(codes, arguments, defaultMessage);
+			this.violation = violation;
+		}
+
+		public ConstraintViolation<Object> getViolation() {
+			return this.violation;
+		}
+	}
 
 
 	/**
-	 * Default algorithm to select an object name, as described in
-	 * {@link #setObjectNameResolver(ObjectNameResolver)}.
+	 * Default algorithm to select an object name, as described in {@link #setObjectNameResolver}.
 	 */
 	private static class DefaultObjectNameResolver implements ObjectNameResolver {
 

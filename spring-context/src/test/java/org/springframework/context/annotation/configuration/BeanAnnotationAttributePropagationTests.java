@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class BeanAnnotationAttributePropagationTests {
+class BeanAnnotationAttributePropagationTests {
 
 	@Test
-	public void autowireCandidateMetadataIsPropagated() {
+	void autowireCandidateMetadataIsPropagated() {
 		@Configuration class Config {
 			@Bean(autowireCandidate=false) Object foo() { return null; }
 		}
@@ -55,7 +55,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void initMethodMetadataIsPropagated() {
+	void initMethodMetadataIsPropagated() {
 		@Configuration class Config {
 			@Bean(initMethod="start") Object foo() { return null; }
 		}
@@ -64,7 +64,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void destroyMethodMetadataIsPropagated() {
+	void destroyMethodMetadataIsPropagated() {
 		@Configuration class Config {
 			@Bean(destroyMethod="destroy") Object foo() { return null; }
 		}
@@ -73,7 +73,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void dependsOnMetadataIsPropagated() {
+	void dependsOnMetadataIsPropagated() {
 		@Configuration class Config {
 			@Bean() @DependsOn({"bar", "baz"}) Object foo() { return null; }
 		}
@@ -82,7 +82,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void primaryMetadataIsPropagated() {
+	void primaryMetadataIsPropagated() {
 		@Configuration class Config {
 			@Primary @Bean
 			Object foo() { return null; }
@@ -92,7 +92,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void primaryMetadataIsFalseByDefault() {
+	void primaryMetadataIsFalseByDefault() {
 		@Configuration class Config {
 			@Bean Object foo() { return null; }
 		}
@@ -101,7 +101,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void lazyMetadataIsPropagated() {
+	void lazyMetadataIsPropagated() {
 		@Configuration class Config {
 			@Lazy @Bean
 			Object foo() { return null; }
@@ -111,7 +111,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void lazyMetadataIsFalseByDefault() {
+	void lazyMetadataIsFalseByDefault() {
 		@Configuration class Config {
 			@Bean Object foo() { return null; }
 		}
@@ -120,7 +120,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void defaultLazyConfigurationPropagatesToIndividualBeans() {
+	void defaultLazyConfigurationPropagatesToIndividualBeans() {
 		@Lazy @Configuration class Config {
 			@Bean Object foo() { return null; }
 		}
@@ -129,7 +129,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void eagerBeanOverridesDefaultLazyConfiguration() {
+	void eagerBeanOverridesDefaultLazyConfiguration() {
 		@Lazy @Configuration class Config {
 			@Lazy(false) @Bean Object foo() { return null; }
 		}
@@ -138,7 +138,7 @@ public class BeanAnnotationAttributePropagationTests {
 	}
 
 	@Test
-	public void eagerConfigurationProducesEagerBeanDefinitions() {
+	void eagerConfigurationProducesEagerBeanDefinitions() {
 		@Lazy(false) @Configuration class Config {  // will probably never happen, doesn't make much sense
 			@Bean Object foo() { return null; }
 		}

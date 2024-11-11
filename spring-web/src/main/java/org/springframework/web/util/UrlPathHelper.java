@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -284,11 +285,11 @@ public class UrlPathHelper {
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
 	 * or "" if the whole URL has been used to identify the servlet.
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
-	 * <p>E.g.: servlet mapping = "/*"; request URI = "/test/a" &rarr; "/test/a".
-	 * <p>E.g.: servlet mapping = "/"; request URI = "/test/a" &rarr; "/test/a".
-	 * <p>E.g.: servlet mapping = "/test/*"; request URI = "/test/a" &rarr; "/a".
-	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" &rarr; "".
-	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" &rarr; "".
+	 * <p>For example: servlet mapping = "/*"; request URI = "/test/a" &rarr; "/test/a".
+	 * <p>For example: servlet mapping = "/"; request URI = "/test/a" &rarr; "/test/a".
+	 * <p>For example: servlet mapping = "/test/*"; request URI = "/test/a" &rarr; "/a".
+	 * <p>For example: servlet mapping = "/test"; request URI = "/test" &rarr; "".
+	 * <p>For example: servlet mapping = "/*.test"; request URI = "/a.test" &rarr; "".
 	 * @param request current HTTP request
 	 * @param pathWithinApp a precomputed path within the application
 	 * @return the path within the servlet mapping, or ""
@@ -317,7 +318,7 @@ public class UrlPathHelper {
 			String pathInfo = request.getPathInfo();
 			if (pathInfo != null) {
 				// Use path info if available. Indicates index page within a servlet mapping?
-				// e.g. with index page: URI="/", servletPath="/index.html"
+				// for example, with index page: URI="/", servletPath="/index.html"
 				return pathInfo;
 			}
 			if (!this.urlDecode) {
@@ -629,7 +630,7 @@ public class UrlPathHelper {
 
 	private String removeJsessionid(String requestUri) {
 		String key = ";jsessionid=";
-		int index = requestUri.toLowerCase().indexOf(key);
+		int index = requestUri.toLowerCase(Locale.ROOT).indexOf(key);
 		if (index == -1) {
 			return requestUri;
 		}

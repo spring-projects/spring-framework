@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,9 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
+import org.springframework.test.json.JsonComparator;
+import org.springframework.test.json.JsonCompareMode;
+import org.springframework.test.json.JsonComparison;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -77,14 +80,6 @@ import org.springframework.web.util.UriBuilderFactory;
  * <li>...
  * </ul>
  *
- * <p><strong>Warning</strong>: {@code WebTestClient} is not usable yet in
- * Kotlin due to a <a href="https://youtrack.jetbrains.com/issue/KT-5464">type inference issue</a>
- * which is expected to be fixed as of Kotlin 1.3. You can watch
- * <a href="https://github.com/spring-projects/spring-framework/issues/20606">gh-20606</a>
- * for up-to-date information. Meanwhile, the proposed alternative is to use
- * directly {@link WebClient} with its Reactor and Spring Kotlin extensions to
- * perform integration tests on an embedded WebFlux server.
- *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sam Brannen
@@ -99,7 +94,7 @@ public interface WebTestClient {
 	/**
 	 * The name of a request header used to assign a unique id to every request
 	 * performed through the {@code WebTestClient}. This can be useful for
-	 * storing contextual information at all phases of request processing (e.g.
+	 * storing contextual information at all phases of request processing (for example,
 	 * from a server-side component) under that id and later to look up
 	 * that information once an {@link ExchangeResult} is available.
 	 */
@@ -558,7 +553,7 @@ public interface WebTestClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
@@ -566,7 +561,7 @@ public interface WebTestClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
@@ -880,13 +875,13 @@ public interface WebTestClient {
 
 		/**
 		 * Consume and decode the response body to {@code byte[]} and then apply
-		 * assertions on the raw content (e.g. isEmpty, JSONPath, etc.)
+		 * assertions on the raw content (for example, isEmpty, JSONPath, etc.).
 		 */
 		BodyContentSpec expectBody();
 
 		/**
 		 * Exit the chained flow in order to consume the response body
-		 * externally, e.g. via {@link reactor.test.StepVerifier}.
+		 * externally, for example, via {@link reactor.test.StepVerifier}.
 		 * <p>Note that when {@code Void.class} is passed in, the response body
 		 * is consumed and released. If no content is expected, then consider
 		 * using {@code .expectBody().isEmpty()} instead which asserts that
@@ -932,7 +927,7 @@ public interface WebTestClient {
 		<T extends S> T value(Matcher<? super B> matcher);
 
 		/**
-		 * Transform the extracted the body with a function, e.g. extracting a
+		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
 		 */
@@ -1005,10 +1000,10 @@ public interface WebTestClient {
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content
-		 * @see #json(String, boolean)
+		 * @see #json(String, JsonCompareMode)
 		 */
 		default BodyContentSpec json(String expectedJson) {
-			return json(expectedJson, false);
+			return json(expectedJson, JsonCompareMode.LENIENT);
 		}
 
 		/**
@@ -1027,8 +1022,36 @@ public interface WebTestClient {
 		 * @param strict enables strict checking if {@code true}
 		 * @since 5.3.16
 		 * @see #json(String)
+		 * @deprecated in favor of {@link #json(String, JsonCompareMode)}
 		 */
+		@Deprecated(since = "6.2")
 		BodyContentSpec json(String expectedJson, boolean strict);
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison using the given {@linkplain JsonCompareMode mode}. If the
+		 * comparison failed, throws an {@link AssertionError} with the message
+		 * of the {@link JsonComparison}.
+		 * <p>Use of this method requires the
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
+		 * to be on the classpath.
+		 * @param expectedJson the expected JSON content
+		 * @param compareMode the compare mode
+		 * @since 6.2
+		 * @see #json(String)
+		 */
+		BodyContentSpec json(String expectedJson, JsonCompareMode compareMode);
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison using the given {@link JsonComparator}. If the comparison
+		 * failed, throws an {@link AssertionError} with the message  of the
+		 * {@link JsonComparison}.
+		 * @param expectedJson the expected JSON content
+		 * @param comparator the comparator to use
+		 * @since 6.2
+		 */
+		BodyContentSpec json(String expectedJson, JsonComparator comparator);
 
 		/**
 		 * Parse expected and actual response content as XML and assert that
@@ -1037,7 +1060,7 @@ public interface WebTestClient {
 		 * <p>Use of this method requires the
 		 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit</a> library on
 		 * the classpath.
-		 * @param expectedXml the expected JSON content.
+		 * @param expectedXml the expected XML content.
 		 * @since 5.1
 		 * @see org.springframework.test.util.XmlExpectationsHelper#assertXmlEqual(String, String)
 		 */
@@ -1047,11 +1070,22 @@ public interface WebTestClient {
 		 * Access to response body assertions using a
 		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
 		 * to inspect a specific subset of the body.
+		 * @param expression the JsonPath expression
+		 * @since 6.2
+		 */
+		JsonPathAssertions jsonPath(String expression);
+
+		/**
+		 * Access to response body assertions using a
+		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
+		 * to inspect a specific subset of the body.
 		 * <p>The JSON path expression can be a parameterized string using
 		 * formatting specifiers as defined in {@link String#format}.
 		 * @param expression the JsonPath expression
 		 * @param args arguments to parameterize the expression
+		 * @deprecated in favor of calling {@link String#formatted(Object...)} upfront
 		 */
+		@Deprecated(since = "6.2", forRemoval = true)
 		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**

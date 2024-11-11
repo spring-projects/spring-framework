@@ -30,13 +30,19 @@ arguably, most controller methods should be mapped to a specific HTTP method ver
 using `@RequestMapping`, which, by default, matches to all HTTP methods.
 A `@RequestMapping` is still needed at the class level to express shared mappings.
 
+NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
+annotations that are declared on the same element (class, interface, or method). If
+multiple `@RequestMapping` annotations are detected on the same element, a warning will
+be logged, and only the first mapping will be used. This also applies to composed
+`@RequestMapping` annotations such as `@GetMapping`, `@PostMapping`, etc.
+
 The following example has type and method level mappings:
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -57,7 +63,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -99,7 +105,7 @@ default from version 6.0. See xref:web/webmvc/mvc-config/path-matching.adoc[MVC 
 customizations of path matching options.
 
 `PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
-supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
+supports the capturing pattern, for example, `+{*spring}+`, for matching 0 or more path segments
 at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
 path segments such that it's only allowed at the end of a pattern. This eliminates many
 cases of ambiguity when choosing the best matching pattern for a given request.
@@ -113,7 +119,7 @@ Some example patterns:
 * `+"/resources/*.png"+` - match zero or more characters in a path segment
 * `+"/resources/**"+` - match multiple path segments
 * `+"/projects/{project}/versions"+` - match a path segment and capture it as a variable
-* `+"/projects/{project:[a-z]+}/versions"+` - match and capture a variable with a regex
+* `++"/projects/{project:[a-z]+}/versions"++` - match and capture a variable with a regex
 
 Captured URI variables can be accessed with `@PathVariable`. For example:
 
@@ -121,7 +127,7 @@ Captured URI variables can be accessed with `@PathVariable`. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
@@ -131,7 +137,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
@@ -147,7 +153,7 @@ You can declare URI variables at the class and method levels, as the following e
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	@RequestMapping("/owners/{ownerId}")
@@ -162,7 +168,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	@RequestMapping("/owners/{ownerId}")
@@ -193,7 +199,7 @@ extracts the name, version, and file extension:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	public void handle(@PathVariable String name, @PathVariable String version, @PathVariable String ext) {
@@ -203,7 +209,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	fun handle(@PathVariable name: String, @PathVariable version: String, @PathVariable ext: String) {
@@ -266,7 +272,7 @@ To completely disable the use of path extensions in versions prior to 5.3, set t
 * `favorPathExtension(false)`, see xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer]
 
 Having a way to request content types other than through the `"Accept"` header can still
-be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
+be useful, for example, when typing a URL in a browser. A safe alternative to path extensions is
 to use the query parameter strategy. If you must use file extensions, consider restricting
 them to a list of explicitly registered extensions through the `mediaTypes` property of
 xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer].
@@ -311,7 +317,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping(path = "/pets", consumes = "application/json") // <1>
 	public void addPet(@RequestBody Pet pet) {
@@ -322,7 +328,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/pets", consumes = ["application/json"]) // <1>
 	fun addPet(@RequestBody pet: Pet) {
@@ -354,7 +360,7 @@ content types that a controller method produces, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path = "/pets/{petId}", produces = "application/json") // <1>
 	@ResponseBody
@@ -366,7 +372,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/pets/{petId}", produces = ["application/json"]) // <1>
 	@ResponseBody
@@ -400,7 +406,7 @@ specific value (`myParam=myValue`). The following example shows how to test for 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path = "/pets/{petId}", params = "myParam=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
@@ -411,7 +417,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/pets/{petId}", params = ["myParam=myValue"]) // <1>
 	fun findPet(@PathVariable petId: String) {
@@ -427,7 +433,7 @@ You can also use the same with request header conditions, as the following examp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path = "/pets/{petId}", headers = "myHeader=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
@@ -438,7 +444,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/pets/{petId}", headers = ["myHeader=myValue"]) // <1>
 	fun findPet(@PathVariable petId: String) {
@@ -461,11 +467,6 @@ instead.
 transparently for request mapping. Controller methods do not need to change.
 A response wrapper, applied in `jakarta.servlet.http.HttpServlet`, ensures a `Content-Length`
 header is set to the number of bytes written (without actually writing to the response).
-
-`@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) are implicitly mapped to
-and support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
-that, instead of writing the body, the number of bytes are counted and the `Content-Length`
-header is set.
 
 By default, HTTP OPTIONS is handled by setting the `Allow` response header to the list of HTTP
 methods listed in all `@RequestMapping` methods that have matching URL patterns.
@@ -491,8 +492,14 @@ attributes with a narrower, more specific purpose.
 `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping` are
 examples of composed annotations. They are provided because, arguably, most
 controller methods should be mapped to a specific HTTP method versus using `@RequestMapping`,
-which, by default, matches to all HTTP methods. If you need an example of composed
-annotations, look at how those are declared.
+which, by default, matches to all HTTP methods. If you need an example of how to implement
+a composed annotation, look at how those are declared.
+
+NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
+annotations that are declared on the same element (class, interface, or method). If
+multiple `@RequestMapping` annotations are detected on the same element, a warning will
+be logged, and only the first mapping will be used. This also applies to composed
+`@RequestMapping` annotations such as `@GetMapping`, `@PostMapping`, etc.
 
 Spring MVC also supports custom request-mapping attributes with custom request-matching
 logic. This is a more advanced option that requires subclassing
@@ -512,7 +519,7 @@ under different URLs. The following example registers a handler method:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	public class MyConfig {
@@ -537,7 +544,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	class MyConfig {
@@ -562,10 +569,17 @@ Kotlin::
 == `@HttpExchange`
 [.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
 
-As an alternative to  `@RequestMapping`, you can also handle requests with `@HttpExchange`
-methods. Such methods are declared on an
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] and can be used as
-a client via `HttpServiceProxyFactory` or implemented by a server `@Controller`.
+While the main purpose of `@HttpExchange` is to abstract HTTP client code with a
+generated proxy, the
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] on which
+such annotations are placed is a contract neutral to client vs server use.
+In addition to simplifying client code, there are also cases where an HTTP Interface
+may be a convenient way for servers to expose their API for client access. This leads
+to increased coupling between client and server and is often not a good choice,
+especially for public API's, but may be exactly the goal for an internal API.
+It is an approach commonly used in Spring Cloud, and it is why `@HttpExchange` is
+supported as an alternative to `@RequestMapping` for server side handling in
+controller classes.
 
 For example:
 
@@ -573,18 +587,25 @@ For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@RestController
 	@HttpExchange("/persons")
-	class PersonController {
+	interface PersonService {
 
 		@GetExchange("/{id}")
+		Person getPerson(@PathVariable Long id);
+
+		@PostExchange
+		void add(@RequestBody Person person);
+	}
+
+	@RestController
+	class PersonController implements PersonService {
+
 		public Person getPerson(@PathVariable Long id) {
 			// ...
 		}
 
-		@PostExchange
 		@ResponseStatus(HttpStatus.CREATED)
 		public void add(@RequestBody Person person) {
 			// ...
@@ -594,32 +615,45 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	@RestController
 	@HttpExchange("/persons")
-	class PersonController {
+	interface PersonService {
 
 		@GetExchange("/{id}")
-		fun getPerson(@PathVariable id: Long): Person {
+		fun getPerson(@PathVariable id: Long): Person
+
+		@PostExchange
+		fun add(@RequestBody person: Person)
+	}
+
+	@RestController
+	class PersonController : PersonService {
+
+		override fun getPerson(@PathVariable id: Long): Person {
 			// ...
 		}
 
-		@PostExchange
 		@ResponseStatus(HttpStatus.CREATED)
-		fun add(@RequestBody person: Person) {
+		override fun add(@RequestBody person: Person) {
 			// ...
 		}
 	}
 ----
 ======
 
-There some differences between `@HttpExchange` and `@RequestMapping` since the
-former needs to remain suitable for client and server use. For example, while
-`@RequestMapping` can be declared to handle any number of paths and each path can
-be a pattern, `@HttpExchange` must be declared with a single, concrete path. There are
-also differences in the supported method parameters. Generally, `@HttpExchange` supports
-a subset of method parameters that `@RequestMapping` does, excluding any parameters that
-are server side only. For details see the list of supported method parameters for
-xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[HTTP interface] and for
+`@HttpExchange` and `@RequestMapping` have differences.
+`@RequestMapping` can map to any number of requests by path patterns, HTTP methods,
+and more, while `@HttpExchange` declares a single endpoint with a concrete HTTP method,
+path, and content types.
+
+For method parameters and returns values, generally, `@HttpExchange` supports a
+subset of the method parameters that `@RequestMapping` does. Notably, it excludes any
+server-side specific parameter types. For details, see the list for
+xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
 xref:web/webmvc/mvc-controller/ann-methods/arguments.adoc[@RequestMapping].
+
+`@HttpExchange` also supports a `headers()` parameter which accepts `"name=value"`-like
+pairs like in `@RequestMapping(headers={})` on the client side. On the server side,
+this extends to the full syntax that
+xref:#mvc-ann-requestmapping-params-and-headers[`@RequestMapping`] supports.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,16 +39,17 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link FilteringWebHandler}.
+ * Tests for {@link FilteringWebHandler}.
+ *
  * @author Rossen Stoyanchev
  */
-public class FilteringWebHandlerTests {
+class FilteringWebHandlerTests {
 
-	private static Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
+	private static final Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
 
 
 	@Test
-	public void multipleFilters() throws Exception {
+	void multipleFilters() {
 
 		TestFilter filter1 = new TestFilter();
 		TestFilter filter2 = new TestFilter();
@@ -66,7 +67,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void zeroFilters() throws Exception {
+	void zeroFilters() {
 
 		StubWebHandler targetHandler = new StubWebHandler();
 
@@ -78,7 +79,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void shortcircuitFilter() throws Exception {
+	void shortcircuitFilter() {
 
 		TestFilter filter1 = new TestFilter();
 		ShortcircuitingFilter filter2 = new ShortcircuitingFilter();
@@ -96,7 +97,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void asyncFilter() throws Exception {
+	void asyncFilter() {
 
 		AsyncFilter filter = new AsyncFilter();
 		StubWebHandler targetHandler = new StubWebHandler();
@@ -110,7 +111,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	@Test
-	public void handleErrorFromFilter() throws Exception {
+	void handleErrorFromFilter() {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();

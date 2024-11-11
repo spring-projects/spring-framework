@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Test(suiteName = "Rollback for REQUIRED")
 @Rollback
-public class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjbTxDaoTestNGTests {
+class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjbTxDaoTestNGTests {
 
 	/**
 	 * Overrides parent implementation in order to change expectations to align with
@@ -46,7 +46,7 @@ public class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjb
 	 */
 	@Test(dependsOnMethods = "test2IncrementCount1")
 	@Override
-	public void test3IncrementCount2() {
+	void test3IncrementCount2() {
 		int count = dao.getCount(TEST_NAME);
 		// Expecting count=0 after test2IncrementCount1() since REQUIRED transactions
 		// participate in the existing transaction (if present), which in this case is the

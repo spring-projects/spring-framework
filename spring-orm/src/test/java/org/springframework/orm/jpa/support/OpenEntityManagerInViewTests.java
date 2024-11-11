@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Phillip Webb
  */
-public class OpenEntityManagerInViewTests {
+class OpenEntityManagerInViewTests {
 
 	private final TestTaskExecutor taskExecutor = new TestTaskExecutor();
 
@@ -76,21 +76,21 @@ public class OpenEntityManagerInViewTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		given(factory.createEntityManager()).willReturn(manager);
 		this.request.setAsyncSupported(true);
 	}
 
 	@AfterEach
-	public void tearDown() {
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+	void tearDown() {
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
 		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewInterceptor() {
+	void testOpenEntityManagerInViewInterceptor() {
 		OpenEntityManagerInViewInterceptor interceptor = new OpenEntityManagerInViewInterceptor();
 		interceptor.setEntityManagerFactory(this.factory);
 
@@ -126,7 +126,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewInterceptorAsyncScenario() throws Exception {
+	void testOpenEntityManagerInViewInterceptorAsyncScenario() throws Exception {
 
 		// Initial request thread
 
@@ -183,7 +183,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewInterceptorAsyncTimeoutScenario() throws Exception {
+	void testOpenEntityManagerInViewInterceptorAsyncTimeoutScenario() throws Exception {
 
 		// Initial request thread
 
@@ -223,7 +223,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewInterceptorAsyncErrorScenario() throws Exception {
+	void testOpenEntityManagerInViewInterceptorAsyncErrorScenario() throws Exception {
 
 		// Initial request thread
 
@@ -263,7 +263,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewFilter() throws Exception {
+	void testOpenEntityManagerInViewFilter() throws Exception {
 		given(manager.isOpen()).willReturn(true);
 
 		final EntityManagerFactory factory2 = mock();
@@ -317,7 +317,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewFilterAsyncScenario() throws Exception {
+	void testOpenEntityManagerInViewFilterAsyncScenario() throws Exception {
 		given(manager.isOpen()).willReturn(true);
 
 		final EntityManagerFactory factory2 = mock();

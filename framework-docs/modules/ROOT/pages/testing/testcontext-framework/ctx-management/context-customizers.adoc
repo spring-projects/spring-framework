@@ -42,13 +42,15 @@ become cumbersome if a custom factory needs to be used across an entire test sui
 issue is addressed through support for automatic discovery of default
 `ContextCustomizerFactory` implementations through the `SpringFactoriesLoader` mechanism.
 
-Specifically, the modules that make up the testing support in Spring Framework and Spring
+For example, the modules that make up the testing support in Spring Framework and Spring
 Boot declare all core default `ContextCustomizerFactory` implementations under the
 `org.springframework.test.context.ContextCustomizerFactory` key in their
-`META-INF/spring.factories` properties files. Third-party frameworks and developers can
-contribute their own `ContextCustomizerFactory` implementations to the list of default
-factories in the same manner through their own `META-INF/spring.factories` properties
-files.
+`META-INF/spring.factories` properties files. The `spring.factories` file for the
+`spring-test` module can be viewed
+{spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[here].
+Third-party frameworks and developers can contribute their own `ContextCustomizerFactory`
+implementations to the list of default factories in the same manner through their own
+`spring.factories` files.
 
 
 [[testcontext-context-customizers-merging]]

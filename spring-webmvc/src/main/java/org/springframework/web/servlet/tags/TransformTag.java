@@ -135,10 +135,10 @@ public class TransformTag extends HtmlEscapingAwareTag {
 	@Override
 	protected final int doStartTagInternal() throws JspException {
 		if (this.value != null) {
-			// Find the containing EditorAwareTag (e.g. BindTag), if applicable.
+			// Find the containing EditorAwareTag (for example, BindTag), if applicable.
 			EditorAwareTag tag = (EditorAwareTag) TagSupport.findAncestorWithClass(this, EditorAwareTag.class);
 			if (tag == null) {
-				throw new JspException("TransformTag can only be used within EditorAwareTag (e.g. BindTag)");
+				throw new JspException("TransformTag can only be used within EditorAwareTag (for example, BindTag)");
 			}
 
 			// OK, let's obtain the editor...

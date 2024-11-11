@@ -73,7 +73,7 @@ class ReflectionUtilsTests {
 		assertThat(testBean.getName()).isEqualTo("FooBar");
 
 		ReflectionUtils.setField(field, testBean, null);
-		assertThat((Object) testBean.getName()).isNull();
+		assertThat(testBean.getName()).isNull();
 	}
 
 	@Test
@@ -334,7 +334,7 @@ class ReflectionUtilsTests {
 		private List<Method> methods = new ArrayList<>();
 
 		@Override
-		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
+		public void doWith(Method m) throws IllegalArgumentException {
 			this.methodNames.add(m.getName());
 			this.methods.add(m);
 		}
@@ -378,7 +378,7 @@ class ReflectionUtilsTests {
 
 	private static class A {
 
-		@SuppressWarnings("unused")
+		@SuppressWarnings({ "unused", "RedundantThrows" })
 		private void foo(Integer i) throws RemoteException {
 		}
 	}

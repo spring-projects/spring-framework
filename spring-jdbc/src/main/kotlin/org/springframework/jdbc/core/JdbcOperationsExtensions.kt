@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2021 the original author or authors
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 	https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String): T =
  * @since 5.0
  */
 inline fun <reified T> JdbcOperations.queryForObject(sql: String, vararg args: Any, crossinline function: (ResultSet, Int) -> T): T =
-		queryForObject(sql, RowMapper { resultSet, i -> function(resultSet, i) }, *args) as T
+		queryForObject(sql, { resultSet, i -> function(resultSet, i) }, *args) as T
 
 /**
  * Extension for [JdbcOperations.queryForObject] providing a
@@ -113,7 +113,7 @@ inline fun <reified T> JdbcOperations.query(sql: String, vararg args: Any,
  * @since 5.0
  */
 fun JdbcOperations.query(sql: String, vararg args: Any, function: (ResultSet) -> Unit): Unit =
-		query(sql, RowCallbackHandler { function(it) }, *args)
+		query(sql, { function(it) }, *args)
 
 /**
  * Extensions for [JdbcOperations.query] providing a RowMapper-like function variant:
@@ -123,4 +123,4 @@ fun JdbcOperations.query(sql: String, vararg args: Any, function: (ResultSet) ->
  * @since 5.0
  */
 fun <T> JdbcOperations.query(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): List<T> =
-		query(sql, RowMapper { rs, i -> function(rs, i) }, *args)
+		query(sql, { rs, i -> function(rs, i) }, *args)

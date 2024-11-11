@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	}
 
 	/**
-	 * Construct a new {@code ModelMap} containing the supplied attribute
+	 * Construct a new {@code ConcurrentModel} containing the supplied attribute
 	 * under the supplied name.
 	 * @see #addAttribute(String, Object)
 	 */
@@ -55,8 +55,8 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	}
 
 	/**
-	 * Construct a new {@code ModelMap} containing the supplied attribute.
-	 * Uses attribute name generation to generate the key for the supplied model
+	 * Construct a new {@code ConcurrentModel} containing the supplied attribute.
+	 * <p>Uses attribute name generation to generate the key for the supplied model
 	 * object.
 	 * @see #addAttribute(Object)
 	 */

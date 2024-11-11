@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,13 +46,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class ViewResolverRegistryTests {
+class ViewResolverRegistryTests {
 
 	private ViewResolverRegistry registry;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
 		context.registerSingleton("groovyMarkupConfigurer", GroovyMarkupConfigurer.class);
@@ -63,63 +63,63 @@ public class ViewResolverRegistryTests {
 
 
 	@Test
-	public void order() {
+	void order() {
 		assertThat(this.registry.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 		this.registry.enableContentNegotiation();
 		assertThat(this.registry.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 	@Test
-	public void hasRegistrations() {
+	void hasRegistrations() {
 		assertThat(this.registry.hasRegistrations()).isFalse();
 		this.registry.freeMarker();
 		assertThat(this.registry.hasRegistrations()).isTrue();
 	}
 
 	@Test
-	public void hasRegistrationsWhenContentNegotiationEnabled() {
+	void hasRegistrationsWhenContentNegotiationEnabled() {
 		assertThat(this.registry.hasRegistrations()).isFalse();
 		this.registry.enableContentNegotiation();
 		assertThat(this.registry.hasRegistrations()).isTrue();
 	}
 
 	@Test
-	public void noResolvers() {
+	void noResolvers() {
 		assertThat(this.registry.getViewResolvers()).isNotNull();
 		assertThat(this.registry.getViewResolvers()).isEmpty();
 		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 
 	@Test
-	public void customViewResolver() {
+	void customViewResolver() {
 		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/", ".jsp");
 		this.registry.viewResolver(viewResolver);
-		assertThat(this.registry.getViewResolvers().get(0)).isSameAs(viewResolver);
+		assertThat(this.registry.getViewResolvers()).element(0).isSameAs(viewResolver);
 	}
 
 	@Test
-	public void beanName() {
+	void beanName() {
 		this.registry.beanName();
 		assertThat(this.registry.getViewResolvers()).hasSize(1);
 		assertThat(registry.getViewResolvers().get(0).getClass()).isEqualTo(BeanNameViewResolver.class);
 	}
 
 	@Test
-	public void jspDefaultValues() {
+	void jspDefaultValues() {
 		this.registry.jsp();
 		InternalResourceViewResolver resolver = checkAndGetResolver(InternalResourceViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "/WEB-INF/", "suffix", ".jsp");
 	}
 
 	@Test
-	public void jsp() {
+	void jsp() {
 		this.registry.jsp("/", ".jsp");
 		InternalResourceViewResolver resolver = checkAndGetResolver(InternalResourceViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "/", "suffix", ".jsp");
 	}
 
 	@Test
-	public void jspMultipleResolvers() {
+	void jspMultipleResolvers() {
 		this.registry.jsp().viewNames("view1", "view2");
 		this.registry.jsp().viewNames("view3", "view4");
 		assertThat(this.registry.getViewResolvers()).isNotNull();
@@ -129,63 +129,63 @@ public class ViewResolverRegistryTests {
 	}
 
 	@Test
-	public void freeMarker() {
+	void freeMarker() {
 		this.registry.freeMarker().prefix("/").suffix(".fmt").cache(false);
 		FreeMarkerViewResolver resolver = checkAndGetResolver(FreeMarkerViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "/", "suffix", ".fmt", "cacheLimit", 0);
 	}
 
 	@Test
-	public void freeMarkerDefaultValues() {
+	void freeMarkerDefaultValues() {
 		this.registry.freeMarker();
 		FreeMarkerViewResolver resolver = checkAndGetResolver(FreeMarkerViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "", "suffix", ".ftl");
 	}
 
 	@Test
-	public void groovyMarkup() {
+	void groovyMarkup() {
 		this.registry.groovy().prefix("/").suffix(".groovy").cache(true);
 		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "/", "suffix", ".groovy", "cacheLimit", 1024);
 	}
 
 	@Test
-	public void groovyMarkupDefaultValues() {
+	void groovyMarkupDefaultValues() {
 		this.registry.groovy();
 		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "", "suffix", ".tpl");
 	}
 
 	@Test
-	public void scriptTemplate() {
+	void scriptTemplate() {
 		this.registry.scriptTemplate().prefix("/").suffix(".html").cache(true);
 		ScriptTemplateViewResolver resolver = checkAndGetResolver(ScriptTemplateViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "/", "suffix", ".html", "cacheLimit", 1024);
 	}
 
 	@Test
-	public void scriptTemplateDefaultValues() {
+	void scriptTemplateDefaultValues() {
 		this.registry.scriptTemplate();
 		ScriptTemplateViewResolver resolver = checkAndGetResolver(ScriptTemplateViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "", "suffix", "");
 	}
 
 	@Test
-	public void contentNegotiation() {
+	void contentNegotiation() {
 		MappingJackson2JsonView view = new MappingJackson2JsonView();
 		this.registry.enableContentNegotiation(view);
 		ContentNegotiatingViewResolver resolver = checkAndGetResolver(ContentNegotiatingViewResolver.class);
-		assertThat(resolver.getDefaultViews()).isEqualTo(Arrays.asList(view));
+		assertThat(resolver.getDefaultViews()).containsExactly(view);
 		assertThat(this.registry.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 	@Test
-	public void contentNegotiationAddsDefaultViewRegistrations() {
+	void contentNegotiationAddsDefaultViewRegistrations() {
 		MappingJackson2JsonView view1 = new MappingJackson2JsonView();
 		this.registry.enableContentNegotiation(view1);
 
 		ContentNegotiatingViewResolver resolver1 = checkAndGetResolver(ContentNegotiatingViewResolver.class);
-		assertThat(resolver1.getDefaultViews()).isEqualTo(Arrays.asList(view1));
+		assertThat(resolver1.getDefaultViews()).containsExactly(view1);
 
 		MarshallingView view2 = new MarshallingView();
 		this.registry.enableContentNegotiation(view2);

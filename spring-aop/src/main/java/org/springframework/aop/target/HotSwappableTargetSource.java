@@ -67,18 +67,8 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	}
 
 	@Override
-	public final boolean isStatic() {
-		return false;
-	}
-
-	@Override
 	public synchronized Object getTarget() {
 		return this.target;
-	}
-
-	@Override
-	public void releaseTarget(Object target) {
-		// nothing to do
 	}
 
 

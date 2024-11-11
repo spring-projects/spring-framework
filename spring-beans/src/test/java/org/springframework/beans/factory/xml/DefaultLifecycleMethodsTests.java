@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class DefaultLifecycleMethodsTests {
+class DefaultLifecycleMethodsTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource("defaultLifecycleMethods.xml", getClass()));
 	}
 
 
 	@Test
-	public void lifecycleMethodsInvoked() {
+	void lifecycleMethodsInvoked() {
 		LifecycleAwareBean bean = (LifecycleAwareBean) this.beanFactory.getBean("lifecycleAware");
 		assertThat(bean.isInitCalled()).as("Bean not initialized").isTrue();
 		assertThat(bean.isCustomInitCalled()).as("Custom init method called incorrectly").isFalse();
@@ -52,7 +52,7 @@ public class DefaultLifecycleMethodsTests {
 	}
 
 	@Test
-	public void lifecycleMethodsDisabled() throws Exception {
+	void lifecycleMethodsDisabled() {
 		LifecycleAwareBean bean = (LifecycleAwareBean) this.beanFactory.getBean("lifecycleMethodsDisabled");
 		assertThat(bean.isInitCalled()).as("Bean init method called incorrectly").isFalse();
 		assertThat(bean.isCustomInitCalled()).as("Custom init method called incorrectly").isFalse();
@@ -62,7 +62,7 @@ public class DefaultLifecycleMethodsTests {
 	}
 
 	@Test
-	public void ignoreDefaultLifecycleMethods() throws Exception {
+	void ignoreDefaultLifecycleMethods() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(
 				"ignoreDefaultLifecycleMethods.xml", getClass()));
@@ -71,7 +71,7 @@ public class DefaultLifecycleMethodsTests {
 	}
 
 	@Test
-	public void overrideDefaultLifecycleMethods() throws Exception {
+	void overrideDefaultLifecycleMethods() {
 		LifecycleAwareBean bean = (LifecycleAwareBean) this.beanFactory.getBean("overrideLifecycleMethods");
 		assertThat(bean.isInitCalled()).as("Default init method called incorrectly").isFalse();
 		assertThat(bean.isCustomInitCalled()).as("Custom init method not called").isTrue();
@@ -81,7 +81,7 @@ public class DefaultLifecycleMethodsTests {
 	}
 
 	@Test
-	public void childWithDefaultLifecycleMethods() throws Exception {
+	void childWithDefaultLifecycleMethods() {
 		LifecycleAwareBean bean = (LifecycleAwareBean) this.beanFactory.getBean("childWithDefaultLifecycleMethods");
 		assertThat(bean.isInitCalled()).as("Bean not initialized").isTrue();
 		assertThat(bean.isCustomInitCalled()).as("Custom init method called incorrectly").isFalse();
@@ -92,7 +92,7 @@ public class DefaultLifecycleMethodsTests {
 	}
 
 	@Test
-	public void childWithLifecycleMethodsDisabled() throws Exception {
+	void childWithLifecycleMethodsDisabled() {
 		LifecycleAwareBean bean = (LifecycleAwareBean) this.beanFactory.getBean("childWithLifecycleMethodsDisabled");
 		assertThat(bean.isInitCalled()).as("Bean init method called incorrectly").isFalse();
 		assertThat(bean.isCustomInitCalled()).as("Custom init method called incorrectly").isFalse();

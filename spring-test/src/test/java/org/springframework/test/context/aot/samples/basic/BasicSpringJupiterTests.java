@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot.samples.basic;
 
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Nested;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,11 +58,15 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
 })
 public class BasicSpringJupiterTests {
 
+	@Resource
+	Integer magicNumber;
+
 	@org.junit.jupiter.api.Test
 	void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
 			@Value("${test.engine}") String testEngine) {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		assertThat(testEngine).isEqualTo("jupiter");
+		assertThat(magicNumber).isEqualTo(42);
 		assertEnvProperties(context);
 	}
 

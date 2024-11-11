@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW
 /**
  * @author Sebastien Deleuze
  */
-public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder> {
+class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder> {
 
 	public Jackson2JsonEncoderTests() {
 		super(new Jackson2JsonEncoder());
@@ -111,7 +111,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void encodableMimeTypesIsImmutable() {
+	void encodableMimeTypesIsImmutable() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
 
@@ -120,7 +120,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void canNotEncode() {
+	void canNotEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class), APPLICATION_XML)).isFalse();
 
@@ -129,7 +129,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void encodeNonStream() {
+	void encodeNonStream() {
 		Flux<Pojo> input = Flux.just(
 				new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
@@ -145,14 +145,14 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void encodeNonStreamEmpty() {
+	void encodeNonStreamEmpty() {
 		testEncode(Flux.empty(), Pojo.class, step -> step
 				.consumeNextWith(expectString("["))
 				.consumeNextWith(expectString("]"))
 				.verifyComplete());
 	}
 
-	@Test // gh-29038
+	@Test  // gh-29038
 	void encodeNonStreamWithErrorAsFirstSignal() {
 		String message = "I'm a teapot";
 		Flux<Object> input = Flux.error(new IllegalStateException(message));
@@ -164,7 +164,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void encodeWithType() {
+	void encodeWithType() {
 		Flux<ParentClass> input = Flux.just(new Foo(), new Bar());
 
 		testEncode(input, ParentClass.class, step -> step
@@ -195,7 +195,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void fieldLevelJsonView() {
+	void fieldLevelJsonView() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
@@ -212,7 +212,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void classLevelJsonView() {
+	void classLevelJsonView() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
@@ -229,7 +229,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void jacksonValue() {
+	void jacksonValue() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
@@ -262,10 +262,11 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
 		this.encoder.registerObjectMappersForType(JacksonViewBean.class, map -> map.put(halMediaType, mapper));
 
-		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		testEncode(Mono.just(jacksonValue), type, halMediaType, Collections.emptyMap(), step -> step
-				.consumeNextWith(expectString("{" + ls + "  \"withView1\" : \"with\"" + ls + "}")
-						)
+				.consumeNextWith(expectString("""
+					{
+					\s "withView1" : "with"
+					}"""))
 				.verifyComplete()
 		);
 	}
@@ -287,7 +288,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 	}
 
 	@Test
-	public void encodeAscii() {
+	void encodeAscii() {
 		Mono<Object> input = Mono.just(new Pojo("foo", "bar"));
 		MimeType mimeType = new MimeType("application", "json", StandardCharsets.US_ASCII);
 

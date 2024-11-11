@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketHandlerRegistrationTests {
+class WebSocketHandlerRegistrationTests {
 
 	private TestWebSocketHandlerRegistration registration = new TestWebSocketHandlerRegistration();
 
@@ -50,7 +50,7 @@ public class WebSocketHandlerRegistrationTests {
 
 
 	@Test
-	public void minimal() {
+	void minimal() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		this.registration.addHandler(handler, "/foo", "/bar");
 
@@ -73,7 +73,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 	@Test
-	public void interceptors() {
+	void interceptors() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
@@ -92,7 +92,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 	@Test
-	public void emptyAllowedOrigin() {
+	void emptyAllowedOrigin() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
@@ -111,7 +111,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 	@Test
-	public void interceptorsWithAllowedOrigins() {
+	void interceptorsWithAllowedOrigins() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
@@ -136,7 +136,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 	@Test
-	public void interceptorsPassedToSockJsRegistration() {
+	void interceptorsPassedToSockJsRegistration() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
@@ -155,7 +155,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(mapping.webSocketHandler).isEqualTo(handler);
 		assertThat(mapping.path).isEqualTo("/foo/**");
 		assertThat(mapping.sockJsService).isNotNull();
-		assertThat(mapping.sockJsService.getAllowedOrigins().contains("https://mydomain1.example")).isTrue();
+		assertThat(mapping.sockJsService.getAllowedOrigins()).contains("https://mydomain1.example");
 		List<HandshakeInterceptor> interceptors = mapping.sockJsService.getHandshakeInterceptors();
 		assertThat(interceptors.get(0)).isEqualTo(interceptor);
 
@@ -165,7 +165,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 	@Test
-	public void handshakeHandler() {
+	void handshakeHandler() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
@@ -181,7 +181,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 	@Test
-	public void handshakeHandlerPassedToSockJsRegistration() {
+	void handshakeHandlerPassedToSockJsRegistration() {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 

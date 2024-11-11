@@ -50,7 +50,7 @@ import org.springframework.web.multipart.MultipartResolver;
  * taking into consideration the 'Content-Type' header of the request part.
  * {@link RequestParam} is likely to be used with name-value form fields while
  * {@link RequestPart} is likely to be used with parts containing more complex content
- * e.g. JSON, XML).
+ * for example, JSON, XML).
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma

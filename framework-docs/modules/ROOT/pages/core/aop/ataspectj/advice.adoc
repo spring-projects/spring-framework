@@ -17,7 +17,7 @@ The following example uses an inline pointcut expression.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -34,7 +34,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Before
@@ -57,7 +57,7 @@ as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -74,7 +74,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Before
@@ -101,7 +101,7 @@ You can declare it by using the `@AfterReturning` annotation.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterReturning;
@@ -118,7 +118,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterReturning
@@ -146,7 +146,7 @@ access, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterReturning;
@@ -165,7 +165,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterReturning
@@ -204,7 +204,7 @@ following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterThrowing;
@@ -221,7 +221,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterThrowing
@@ -247,7 +247,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterThrowing;
@@ -266,7 +266,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterThrowing
@@ -311,7 +311,7 @@ purposes. The following example shows how to use after finally advice:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.After;
@@ -328,7 +328,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.After
@@ -417,7 +417,7 @@ The following example shows how to use around advice:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Around;
@@ -438,7 +438,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Around
@@ -500,7 +500,7 @@ You could write the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	public void validateAccount(Account account) {
@@ -510,7 +510,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	fun validateAccount(account: Account) {
@@ -533,7 +533,7 @@ from the advice. This would look as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Pointcut("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	private void accountDataAccessOperation(Account account) {}
@@ -546,7 +546,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Pointcut("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	private fun accountDataAccessOperation(account: Account) {
@@ -572,7 +572,7 @@ The following shows the definition of the `@Auditable` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -583,7 +583,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Retention(AnnotationRetention.RUNTIME)
 	@Target(AnnotationTarget.FUNCTION)
@@ -597,7 +597,7 @@ The following shows the advice that matches the execution of `@Auditable` method
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before("com.xyz.Pointcuts.publicMethod() && @annotation(auditable)") // <1>
 	public void audit(Auditable auditable) {
@@ -609,7 +609,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before("com.xyz.Pointcuts.publicMethod() && @annotation(auditable)") // <1>
 	fun audit(auditable: Auditable) {
@@ -630,7 +630,7 @@ you have a generic type like the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	public interface Sample<T> {
 		void sampleGenericMethod(T param);
@@ -640,7 +640,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	interface Sample<T> {
 		fun sampleGenericMethod(param: T)
@@ -656,7 +656,7 @@ tying the advice parameter to the parameter type for which you want to intercept
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	public void beforeSampleMethod(MyType param) {
@@ -666,7 +666,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	fun beforeSampleMethod(param: MyType) {
@@ -682,7 +682,7 @@ pointcut as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	public void beforeSampleMethod(Collection<MyType> param) {
@@ -692,7 +692,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	fun beforeSampleMethod(param: Collection<MyType>) {
@@ -756,7 +756,7 @@ The following example shows how to use the `argNames` attribute:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
@@ -771,7 +771,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
@@ -794,7 +794,7 @@ point object, the `argNames` attribute does not need to include it:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
@@ -809,7 +809,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
@@ -833,7 +833,7 @@ the `argNames` attribute:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Before("com.xyz.Pointcuts.publicMethod()") // <1>
 	public void audit(JoinPoint jp) {
@@ -844,7 +844,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Before("com.xyz.Pointcuts.publicMethod()") // <1>
 	fun audit(jp: JoinPoint) {
@@ -867,7 +867,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Around("execution(List<Account> find*(..)) && " +
 			"com.xyz.CommonPointcuts.inDataAccessLayer() && " +
@@ -882,7 +882,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Around("execution(List<Account> find*(..)) && " +
 			"com.xyz.CommonPointcuts.inDataAccessLayer() && " +
@@ -923,7 +923,7 @@ Each of the distinct advice types of a particular aspect is conceptually meant t
 to the join point directly. As a consequence, an `@AfterThrowing` advice method is not
 supposed to receive an exception from an accompanying `@After`/`@AfterReturning` method.
 
-As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
+Advice methods defined in the same `@Aspect` class that
 need to run at the same join point are assigned precedence based on their advice type in
 the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
 `@AfterReturning`, `@AfterThrowing`. Note, however, that an `@After` advice method will

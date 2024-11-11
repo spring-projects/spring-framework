@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 3.1
  */
-public class ProfileXmlBeanDefinitionTests {
+class ProfileXmlBeanDefinitionTests {
 
 	private static final String PROD_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-prodProfile.xml";
 	private static final String DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-devProfile.xml";
@@ -61,13 +61,13 @@ public class ProfileXmlBeanDefinitionTests {
 	private static final String TARGET_BEAN = "foo";
 
 	@Test
-	public void testProfileValidation() {
+	void testProfileValidation() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE));
 	}
 
 	@Test
-	public void testProfilePermutations() {
+	void testProfilePermutations() {
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, NONE_ACTIVE)).isNot(containingTarget());
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, DEV_ACTIVE)).isNot(containingTarget());
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
@@ -116,7 +116,7 @@ public class ProfileXmlBeanDefinitionTests {
 	}
 
 	@Test
-	public void testDefaultProfile() {
+	void testDefaultProfile() {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
@@ -140,7 +140,7 @@ public class ProfileXmlBeanDefinitionTests {
 	}
 
 	@Test
-	public void testDefaultAndNonDefaultProfile() {
+	void testDefaultAndNonDefaultProfile() {
 		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE)).is(containingTarget());
 		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other")).isNot(containingTarget());
 

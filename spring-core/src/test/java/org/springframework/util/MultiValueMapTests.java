@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Tests for {@link MultiValueMap}.
@@ -184,18 +183,18 @@ class MultiValueMapTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("mapsUnderTest")
 	@interface ParameterizedMultiValueMapTest {
 	}
 
 	static Stream<Arguments> mapsUnderTest() {
 		return Stream.of(
-				arguments(named("new LinkedMultiValueMap<>()", new LinkedMultiValueMap<>())),
-				arguments(named("new LinkedMultiValueMap<>(new HashMap<>())", new LinkedMultiValueMap<>(new HashMap<>()))),
-				arguments(named("new LinkedMultiValueMap<>(new LinkedHashMap<>())", new LinkedMultiValueMap<>(new LinkedHashMap<>()))),
-				arguments(named("new LinkedMultiValueMap<>(Map.of(...))", new LinkedMultiValueMap<>(Map.of("existingkey", List.of("existingvalue1", "existingvalue2"))))),
-				arguments(named("CollectionUtils.toMultiValueMap", CollectionUtils.toMultiValueMap(new HashMap<>())))
+				argumentSet("new LinkedMultiValueMap<>()", new LinkedMultiValueMap<>()),
+				argumentSet("new LinkedMultiValueMap<>(new HashMap<>())", new LinkedMultiValueMap<>(new HashMap<>())),
+				argumentSet("new LinkedMultiValueMap<>(new LinkedHashMap<>())", new LinkedMultiValueMap<>(new LinkedHashMap<>())),
+				argumentSet("new LinkedMultiValueMap<>(Map.of(...))", new LinkedMultiValueMap<>(Map.of("existingkey", List.of("existingvalue1", "existingvalue2")))),
+				argumentSet("CollectionUtils.toMultiValueMap", CollectionUtils.toMultiValueMap(new HashMap<>()))
 			);
 	}
 

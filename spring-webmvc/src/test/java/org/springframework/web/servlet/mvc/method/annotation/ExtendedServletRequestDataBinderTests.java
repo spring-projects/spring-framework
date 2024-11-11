@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
@@ -35,52 +33,56 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class ExtendedServletRequestDataBinderTests {
+class ExtendedServletRequestDataBinderTests {
 
 	private MockHttpServletRequest request;
 
+
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.request = new MockHttpServletRequest();
 	}
 
+
 	@Test
-	public void createBinder() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<>();
-		uriTemplateVars.put("name", "nameValue");
-		uriTemplateVars.put("age", "25");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+	void createBinder() {
+		request.setAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "John", "age", "25"));
+
+		request.addHeader("Some-Int-Array", "1");
+		request.addHeader("Some-Int-Array", "2");
 
 		TestBean target = new TestBean();
-		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
-		((ServletRequestDataBinder) binder).bind(request);
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
+		binder.bind(request);
 
-		assertThat(target.getName()).isEqualTo("nameValue");
+		assertThat(target.getName()).isEqualTo("John");
+		assertThat(target.getAge()).isEqualTo(25);
+		assertThat(target.getSomeIntArray()).containsExactly(1, 2);
+	}
+
+	@Test
+	void uriVarsAndHeadersAddedConditionally() {
+		request.addParameter("name", "John");
+		request.addParameter("age", "25");
+
+		request.addHeader("name", "Johnny");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("age", "26"));
+
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
+		binder.bind(request);
+
+		assertThat(target.getName()).isEqualTo("John");
 		assertThat(target.getAge()).isEqualTo(25);
 	}
 
 	@Test
-	public void uriTemplateVarAndRequestParam() throws Exception {
-		request.addParameter("age", "35");
-
-		Map<String, String> uriTemplateVars = new HashMap<>();
-		uriTemplateVars.put("name", "nameValue");
-		uriTemplateVars.put("age", "25");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
-
+	void noUriTemplateVars() {
 		TestBean target = new TestBean();
-		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
-		((ServletRequestDataBinder) binder).bind(request);
-
-		assertThat(target.getName()).isEqualTo("nameValue");
-		assertThat(target.getAge()).isEqualTo(35);
-	}
-
-	@Test
-	public void noUriTemplateVars() throws Exception {
-		TestBean target = new TestBean();
-		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
-		((ServletRequestDataBinder) binder).bind(request);
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
+		binder.bind(request);
 
 		assertThat(target.getName()).isNull();
 		assertThat(target.getAge()).isEqualTo(0);

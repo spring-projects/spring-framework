@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	private final boolean delegateApplicationEvents;
 
-	/* Cross-server session lookup (e.g. same user connected to multiple servers) */
+	/* Cross-server session lookup (for example, same user connected to multiple servers) */
 	private final SessionLookup sessionLookup = new SessionLookup();
 
 
@@ -278,7 +278,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		// User sessions from "this" registry only (i.e. one server)
 		private final Set<TransferSimpSession> sessions;
 
-		// Cross-server session lookup (e.g. user connected to multiple servers)
+		// Cross-server session lookup (for example, user connected to multiple servers)
 		@Nullable
 		private SessionLookup sessionLookup;
 
@@ -414,7 +414,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			this.id = session.getId();
 			this.user = new TransferSimpUser();
 			Set<SimpSubscription> subscriptions = session.getSubscriptions();
-			this.subscriptions = new HashSet<>(subscriptions.size());
+			this.subscriptions = CollectionUtils.newHashSet(subscriptions.size());
 			for (SimpSubscription subscription : subscriptions) {
 				this.subscriptions.add(new TransferSimpSubscription(subscription));
 			}

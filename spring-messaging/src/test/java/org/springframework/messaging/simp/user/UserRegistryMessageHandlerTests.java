@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ class UserRegistryMessageHandlerTests {
 
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp() {
 		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.brokerChannel);
 		brokerTemplate.setMessageConverter(this.converter);
 
@@ -74,14 +74,14 @@ class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
-	void brokerAvailableEvent() throws Exception {
+	void brokerAvailableEvent() {
 		Runnable runnable = getUserRegistryTask();
 		assertThat(runnable).isNotNull();
 	}
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void brokerUnavailableEvent() throws Exception {
+	void brokerUnavailableEvent() {
 		ScheduledFuture future = mock();
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), any(Duration.class))).willReturn(future);
 
@@ -96,7 +96,7 @@ class UserRegistryMessageHandlerTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	void broadcastRegistry() throws Exception {
+	void broadcastRegistry() {
 		given(this.brokerChannel.send(any())).willReturn(true);
 
 		TestSimpUser simpUser1 = new TestSimpUser("joe");
@@ -126,7 +126,7 @@ class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
-	void handleMessage() throws Exception {
+	void handleMessage() {
 		TestSimpUser simpUser1 = new TestSimpUser("joe");
 		TestSimpUser simpUser2 = new TestSimpUser("jane");
 
@@ -149,7 +149,7 @@ class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
-	void handleMessageFromOwnBroadcast() throws Exception {
+	void handleMessageFromOwnBroadcast() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
 		given(this.localRegistry.getUserCount()).willReturn(1);

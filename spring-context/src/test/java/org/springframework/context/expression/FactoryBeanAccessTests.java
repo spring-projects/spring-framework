@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.expression.FactoryBeanAccessTests.SimpleBeanResolver.CarFactoryBean;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -33,14 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for expressions accessing beans and factory beans.
+ * Tests for expressions accessing beans and factory beans.
  *
  * @author Andy Clement
  */
-public class FactoryBeanAccessTests {
+class FactoryBeanAccessTests {
 
 	@Test
-	public void factoryBeanAccess() { // SPR9511
+	void factoryBeanAccess() { // SPR9511
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setBeanResolver(new SimpleBeanResolver());
 		Expression expr = new SpelExpressionParser().parseRaw("@car.colour");
@@ -110,8 +109,7 @@ public class FactoryBeanAccessTests {
 		}
 
 		@Override
-		public Object resolve(EvaluationContext context, String beanName)
-				throws AccessException {
+		public Object resolve(EvaluationContext context, String beanName) {
 			return ac.getBean(beanName);
 		}
 	}

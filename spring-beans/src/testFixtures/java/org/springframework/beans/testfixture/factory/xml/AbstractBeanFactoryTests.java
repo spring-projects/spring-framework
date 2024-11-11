@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.beans.testfixture.factory.xml;
-
-import java.beans.PropertyEditorSupport;
-import java.util.StringTokenizer;
 
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +50,7 @@ public abstract class AbstractBeanFactoryTests {
 	 * Roderick bean inherits from rod, overriding name only.
 	 */
 	@Test
-	public void inheritance() {
+	protected void inheritance() {
 		assertThat(getBeanFactory().containsBean("rod")).isTrue();
 		assertThat(getBeanFactory().containsBean("roderick")).isTrue();
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
@@ -66,7 +63,7 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	@Test
-	public void getBeanWithNullArg() {
+	protected void getBeanWithNullArg() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				getBeanFactory().getBean((String) null));
 	}
@@ -75,7 +72,7 @@ public abstract class AbstractBeanFactoryTests {
 	 * Test that InitializingBean objects receive the afterPropertiesSet() callback
 	 */
 	@Test
-	public void initializingBeanCallback() {
+	protected void initializingBeanCallback() {
 		MustBeInitialized mbi = (MustBeInitialized) getBeanFactory().getBean("mustBeInitialized");
 		// The dummy business method will throw an exception if the
 		// afterPropertiesSet() callback wasn't invoked
@@ -87,7 +84,7 @@ public abstract class AbstractBeanFactoryTests {
 	 * afterPropertiesSet() callback before BeanFactoryAware callbacks
 	 */
 	@Test
-	public void lifecycleCallbacks() {
+	protected void lifecycleCallbacks() {
 		LifecycleBean lb = (LifecycleBean) getBeanFactory().getBean("lifecycle");
 		assertThat(lb.getBeanName()).isEqualTo("lifecycle");
 		// The dummy business method will throw an exception if the
@@ -98,24 +95,22 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	@Test
-	public void findsValidInstance() {
+	protected void findsValidInstance() {
 		Object o = getBeanFactory().getBean("rod");
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).as("Rod bean is a TestBean").isTrue();
-		TestBean rod = (TestBean) o;
-		assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
-		assertThat(rod.getAge()).as("rod.age is 31").isEqualTo(31);
+		assertThat(o).isInstanceOfSatisfying(TestBean.class, rod -> {
+			assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
+			assertThat(rod.getAge()).as("rod.age is 31").isEqualTo(31);
+		});
 	}
 
 	@Test
-	public void getInstanceByMatchingClass() {
+	protected void getInstanceByMatchingClass() {
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).as("Rod bean is a TestBean").isTrue();
+		assertThat(o).isInstanceOf(TestBean.class);
 	}
 
 	@Test
-	public void getInstanceByNonmatchingClass() {
+	protected void getInstanceByNonmatchingClass() {
 		assertThatExceptionOfType(BeanNotOfRequiredTypeException.class).isThrownBy(() ->
 				getBeanFactory().getBean("rod", BeanFactory.class))
 			.satisfies(ex -> {
@@ -126,21 +121,19 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	@Test
-	public void getSharedInstanceByMatchingClass() {
+	protected void getSharedInstanceByMatchingClass() {
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).as("Rod bean is a TestBean").isTrue();
+		assertThat(o).isInstanceOf(TestBean.class);
 	}
 
 	@Test
-	public void getSharedInstanceByMatchingClassNoCatch() {
+	protected void getSharedInstanceByMatchingClassNoCatch() {
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).as("Rod bean is a TestBean").isTrue();
+		assertThat(o).isInstanceOf(TestBean.class);
 	}
 
 	@Test
-	public void getSharedInstanceByNonmatchingClass() {
+	protected void getSharedInstanceByNonmatchingClass() {
 		assertThatExceptionOfType(BeanNotOfRequiredTypeException.class).isThrownBy(() ->
 				getBeanFactory().getBean("rod", BeanFactory.class))
 			.satisfies(ex -> {
@@ -151,18 +144,15 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	@Test
-	public void sharedInstancesAreEqual() {
+	protected void sharedInstancesAreEqual() {
 		Object o = getBeanFactory().getBean("rod");
-		boolean condition1 = o instanceof TestBean;
-		assertThat(condition1).as("Rod bean1 is a TestBean").isTrue();
+		assertThat(o).isInstanceOf(TestBean.class);
 		Object o1 = getBeanFactory().getBean("rod");
-		boolean condition = o1 instanceof TestBean;
-		assertThat(condition).as("Rod bean2 is a TestBean").isTrue();
-		assertThat(o).as("Object equals applies").isSameAs(o1);
+		assertThat(o1).isInstanceOf(TestBean.class).isSameAs(o);
 	}
 
 	@Test
-	public void prototypeInstancesAreIndependent() {
+	protected void prototypeInstancesAreIndependent() {
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("kathy");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("kathy");
 		assertThat(tb1).as("ref equal DOES NOT apply").isNotSameAs(tb2);
@@ -176,36 +166,37 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	@Test
-	public void notThere() {
+	protected void notThere() {
 		assertThat(getBeanFactory().containsBean("Mr Squiggle")).isFalse();
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 				getBeanFactory().getBean("Mr Squiggle"));
 	}
 
 	@Test
-	public void validEmpty() {
+	protected void validEmpty() {
 		Object o = getBeanFactory().getBean("validEmpty");
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).as("validEmpty bean is a TestBean").isTrue();
-		TestBean ve = (TestBean) o;
-		assertThat(ve.getName() == null && ve.getAge() == 0 && ve.getSpouse() == null).as("Valid empty has defaults").isTrue();
+		assertThat(o).isInstanceOfSatisfying(TestBean.class, ve -> {
+			assertThat(ve.getName()).isNull();
+			assertThat(ve.getAge()).isEqualTo(0);
+			assertThat(ve.getSpouse()).isNull();
+		});
 	}
 
 	@Test
-	public void typeMismatch() {
+	protected void typeMismatch() {
 		assertThatExceptionOfType(BeanCreationException.class)
 			.isThrownBy(() -> getBeanFactory().getBean("typeMismatch"))
 			.withCauseInstanceOf(TypeMismatchException.class);
 	}
 
 	@Test
-	public void grandparentDefinitionFoundInBeanFactory() throws Exception {
+	protected void grandparentDefinitionFoundInBeanFactory() {
 		TestBean dad = (TestBean) getBeanFactory().getBean("father");
 		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
 	}
 
 	@Test
-	public void factorySingleton() throws Exception {
+	protected void factorySingleton() {
 		assertThat(getBeanFactory().isSingleton("&singletonFactory")).isTrue();
 		assertThat(getBeanFactory().isSingleton("singletonFactory")).isTrue();
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
@@ -217,12 +208,11 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	@Test
-	public void factoryPrototype() throws Exception {
+	protected void factoryPrototype() {
 		assertThat(getBeanFactory().isSingleton("&prototypeFactory")).isTrue();
 		assertThat(getBeanFactory().isSingleton("prototypeFactory")).isFalse();
 		TestBean tb = (TestBean) getBeanFactory().getBean("prototypeFactory");
-		boolean condition = !tb.getName().equals(DummyFactory.SINGLETON_NAME);
-		assertThat(condition).isTrue();
+		assertThat(tb.getName()).isNotEqualTo(DummyFactory.SINGLETON_NAME);
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("prototypeFactory");
 		assertThat(tb).as("Prototype references !=").isNotSameAs(tb2);
 	}
@@ -232,7 +222,7 @@ public abstract class AbstractBeanFactoryTests {
 	 * This is only possible if we're dealing with a factory
 	 */
 	@Test
-	public void getFactoryItself() throws Exception {
+	protected void getFactoryItself() {
 		assertThat(getBeanFactory().getBean("&singletonFactory")).isNotNull();
 	}
 
@@ -240,7 +230,7 @@ public abstract class AbstractBeanFactoryTests {
 	 * Check that afterPropertiesSet gets called on factory
 	 */
 	@Test
-	public void factoryIsInitialized() throws Exception {
+	protected void factoryIsInitialized() {
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
 		assertThat(tb).isNotNull();
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
@@ -251,7 +241,7 @@ public abstract class AbstractBeanFactoryTests {
 	 * It should be illegal to dereference a normal bean as a factory.
 	 */
 	@Test
-	public void rejectsFactoryGetOnNormalBean() {
+	protected void rejectsFactoryGetOnNormalBean() {
 		assertThatExceptionOfType(BeanIsNotAFactoryException.class).isThrownBy(() ->
 				getBeanFactory().getBean("&rod"));
 	}
@@ -259,7 +249,7 @@ public abstract class AbstractBeanFactoryTests {
 	// TODO: refactor in AbstractBeanFactory (tests for AbstractBeanFactory)
 	// and rename this class
 	@Test
-	public void aliasing() {
+	protected void aliasing() {
 		BeanFactory bf = getBeanFactory();
 		if (!(bf instanceof ConfigurableBeanFactory cbf)) {
 			return;
@@ -275,19 +265,6 @@ public abstract class AbstractBeanFactoryTests {
 		Object rod = getBeanFactory().getBean("rod");
 		Object aliasRod = getBeanFactory().getBean(alias);
 		assertThat(rod).isSameAs(aliasRod);
-	}
-
-
-	public static class TestBeanEditor extends PropertyEditorSupport {
-
-		@Override
-		public void setAsText(String text) {
-			TestBean tb = new TestBean();
-			StringTokenizer st = new StringTokenizer(text, "_");
-			tb.setName(st.nextToken());
-			tb.setAge(Integer.parseInt(st.nextToken()));
-			setValue(tb);
-		}
 	}
 
 }

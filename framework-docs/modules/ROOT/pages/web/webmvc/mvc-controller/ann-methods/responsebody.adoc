@@ -12,7 +12,7 @@ The following listing shows an example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
@@ -23,7 +23,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
@@ -36,6 +36,13 @@ Kotlin::
 `@ResponseBody` is also supported at the class level, in which case it is inherited by
 all controller methods. This is the effect of `@RestController`, which is nothing more
 than a meta-annotation marked with `@Controller` and `@ResponseBody`.
+
+A `Resource` object can be returned for file content, copying the `InputStream`
+content of the provided resource to the response `OutputStream`. Note that the
+`InputStream` should be lazily retrieved by the `Resource` handle in order to reliably
+close it after it has been copied to the response. If you are using `InputStreamResource`
+for such a purpose, make sure to construct it with an on-demand `InputStreamSource`
+(for example, through a lambda expression that retrieves the actual `InputStream`).
 
 You can use `@ResponseBody` with reactive types.
 See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] for more details.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link ExecutorSubscribableChannel}.
+ * Tests for {@link ExecutorSubscribableChannel}.
  *
  * @author Phillip Webb
  */
@@ -63,14 +63,14 @@ public class ExecutorSubscribableChannelTests {
 
 
 	@Test
-	public void messageMustNotBeNull() {
+	void messageMustNotBeNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.channel.send(null))
 			.withMessageContaining("Message must not be null");
 	}
 
 	@Test
-	public void sendWithoutExecutor() {
+	void sendWithoutExecutor() {
 		BeforeHandleInterceptor interceptor = new BeforeHandleInterceptor();
 		this.channel.addInterceptor(interceptor);
 		this.channel.subscribe(this.handler);
@@ -81,7 +81,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void sendWithExecutor() {
+	void sendWithExecutor() {
 		BeforeHandleInterceptor interceptor = new BeforeHandleInterceptor();
 		TaskExecutor executor = mock();
 		ExecutorSubscribableChannel testChannel = new ExecutorSubscribableChannel(executor);
@@ -97,7 +97,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void subscribeTwice() {
+	void subscribeTwice() {
 		assertThat(this.channel.subscribe(this.handler)).isTrue();
 		assertThat(this.channel.subscribe(this.handler)).isFalse();
 		this.channel.send(this.message);
@@ -105,7 +105,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void unsubscribeTwice() {
+	void unsubscribeTwice() {
 		this.channel.subscribe(this.handler);
 		assertThat(this.channel.unsubscribe(this.handler)).isTrue();
 		assertThat(this.channel.unsubscribe(this.handler)).isFalse();
@@ -114,7 +114,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void failurePropagates() {
+	void failurePropagates() {
 		RuntimeException ex = new RuntimeException();
 		willThrow(ex).given(this.handler).handleMessage(this.message);
 		MessageHandler secondHandler = mock();
@@ -130,7 +130,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void concurrentModification() {
+	void concurrentModification() {
 		this.channel.subscribe(message1 -> channel.unsubscribe(handler));
 		this.channel.subscribe(this.handler);
 		this.channel.send(this.message);
@@ -138,7 +138,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void interceptorWithModifiedMessage() {
+	void interceptorWithModifiedMessage() {
 		Message<?> expected = mock();
 		BeforeHandleInterceptor interceptor = new BeforeHandleInterceptor();
 		interceptor.setMessageToReturn(expected);
@@ -151,7 +151,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void interceptorWithNull() {
+	void interceptorWithNull() {
 		BeforeHandleInterceptor interceptor1 = new BeforeHandleInterceptor();
 		NullReturningBeforeHandleInterceptor interceptor2 = new NullReturningBeforeHandleInterceptor();
 		this.channel.addInterceptor(interceptor1);
@@ -165,7 +165,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void interceptorWithException() {
+	void interceptorWithException() {
 		IllegalStateException expected = new IllegalStateException("Fake exception");
 		willThrow(expected).given(this.handler).handleMessage(this.message);
 		BeforeHandleInterceptor interceptor = new BeforeHandleInterceptor();

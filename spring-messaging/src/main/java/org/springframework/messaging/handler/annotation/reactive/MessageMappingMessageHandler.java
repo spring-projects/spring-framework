@@ -170,7 +170,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	/**
 	 * Configure a {@link ConversionService} to use for type conversion of
-	 * String based values, e.g. in destination variables or headers.
+	 * String based values, for example, in destination variables or headers.
 	 * <p>By default {@link DefaultFormattingConversionService} is used.
 	 * @param conversionService the conversion service to use
 	 */
@@ -272,6 +272,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	@Override
+	@Nullable
 	protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {
 		CompositeMessageCondition methodCondition = getCondition(method);
 		if (methodCondition != null) {
@@ -325,12 +326,14 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	@Override
+	@Nullable
 	protected RouteMatcher.Route getDestination(Message<?> message) {
 		return (RouteMatcher.Route) message.getHeaders()
 				.get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
 	}
 
 	@Override
+	@Nullable
 	protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {
 		return mapping.getMatchingCondition(message);
 	}

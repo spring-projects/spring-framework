@@ -26,12 +26,12 @@ package org.springframework.context;
 public interface LifecycleProcessor extends Lifecycle {
 
 	/**
-	 * Notification of context refresh, e.g. for auto-starting components.
+	 * Notification of context refresh, for example, for auto-starting components.
 	 */
 	void onRefresh();
 
 	/**
-	 * Notification of context close phase, e.g. for auto-stopping components.
+	 * Notification of context close phase, for example, for auto-stopping components.
 	 */
 	void onClose();
 

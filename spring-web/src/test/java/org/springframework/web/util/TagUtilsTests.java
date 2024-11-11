@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Unit tests for the {@link TagUtils} class.
+ * Tests for the {@link TagUtils} class.
  *
  * @author Alef Arendsen
  * @author Rick Evans
  */
-public class TagUtilsTests {
+class TagUtilsTests {
 
 	@Test
-	public void getScopeSunnyDay() {
+	void getScopeSunnyDay() {
 		assertThat(TagUtils.SCOPE_PAGE).isEqualTo("page");
 		assertThat(TagUtils.SCOPE_APPLICATION).isEqualTo("application");
 		assertThat(TagUtils.SCOPE_SESSION).isEqualTo("session");
@@ -51,31 +51,31 @@ public class TagUtilsTests {
 	}
 
 	@Test
-	public void getScopeWithNullScopeArgument() {
+	void getScopeWithNullScopeArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TagUtils.getScope(null));
 	}
 
 	@Test
-	public void hasAncestorOfTypeWhereAncestorTagIsNotATagType() throws Exception {
+	void hasAncestorOfTypeWhereAncestorTagIsNotATagType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TagUtils.hasAncestorOfType(new TagSupport(), String.class));
 	}
 
 	@Test
-	public void hasAncestorOfTypeWithNullTagArgument() throws Exception {
+	void hasAncestorOfTypeWithNullTagArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TagUtils.hasAncestorOfType(null, TagSupport.class));
 	}
 
 	@Test
-	public void hasAncestorOfTypeWithNullAncestorTagClassArgument() throws Exception {
+	void hasAncestorOfTypeWithNullAncestorTagClassArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TagUtils.hasAncestorOfType(new TagSupport(), null));
 	}
 
 	@Test
-	public void hasAncestorOfTypeTrueScenario() throws Exception {
+	void hasAncestorOfTypeTrueScenario() {
 		Tag a = new TagA();
 		Tag b = new TagB();
 		Tag c = new TagC();
@@ -87,7 +87,7 @@ public class TagUtilsTests {
 	}
 
 	@Test
-	public void hasAncestorOfTypeFalseScenario() throws Exception {
+	void hasAncestorOfTypeFalseScenario() {
 		Tag a = new TagA();
 		Tag b = new TagB();
 		Tag anotherB = new TagB();
@@ -99,24 +99,24 @@ public class TagUtilsTests {
 	}
 
 	@Test
-	public void hasAncestorOfTypeWhenTagHasNoParent() throws Exception {
+	void hasAncestorOfTypeWhenTagHasNoParent() {
 		assertThat(TagUtils.hasAncestorOfType(new TagA(), TagC.class)).isFalse();
 	}
 
 	@Test
-	public void assertHasAncestorOfTypeWithNullTagName() throws Exception {
+	void assertHasAncestorOfTypeWithNullTagName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TagUtils.assertHasAncestorOfType(new TagA(), TagC.class, null, "c"));
 	}
 
 	@Test
-	public void assertHasAncestorOfTypeWithNullAncestorTagName() throws Exception {
+	void assertHasAncestorOfTypeWithNullAncestorTagName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TagUtils.assertHasAncestorOfType(new TagA(), TagC.class, "a", null));
 	}
 
 	@Test
-	public void assertHasAncestorOfTypeThrowsExceptionOnFail() throws Exception {
+	void assertHasAncestorOfTypeThrowsExceptionOnFail() {
 		Tag a = new TagA();
 		Tag b = new TagB();
 		Tag anotherB = new TagB();
@@ -129,7 +129,7 @@ public class TagUtilsTests {
 	}
 
 	@Test
-	public void testAssertHasAncestorOfTypeDoesNotThrowExceptionOnPass() throws Exception {
+	void testAssertHasAncestorOfTypeDoesNotThrowExceptionOnPass() {
 		Tag a = new TagA();
 		Tag b = new TagB();
 		Tag c = new TagC();

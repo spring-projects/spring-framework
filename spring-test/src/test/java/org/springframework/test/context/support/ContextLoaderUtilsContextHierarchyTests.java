@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.springframework.test.context.support.ContextLoaderUtils.buildC
 import static org.springframework.test.context.support.ContextLoaderUtils.resolveContextHierarchyAttributes;
 
 /**
- * Unit tests for {@link ContextLoaderUtils} involving context hierarchies.
+ * Tests for {@link ContextLoaderUtils} involving context hierarchies.
  *
  * @author Sam Brannen
  * @since 3.2.2
@@ -327,10 +327,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig.class);
 	}
 
-	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
-	 */
-	@Test
+	@Test // SPR-10997
 	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers.class);
 
@@ -504,32 +501,24 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	private static class SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig {
 	}
 
-	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
-	 */
 	@ContextHierarchy({//
 	//
 		@ContextConfiguration(name = "alpha", locations = "1-A.xml"),//
 		@ContextConfiguration(name = "beta", locations = "1-B.xml") //
-	})
+	}) // SPR-10997
 	private static class TestClass1WithMultiLevelContextHierarchyWithUniqueContextConfig {
 	}
 
-	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
-	 */
 	@ContextHierarchy({//
 	//
 		@ContextConfiguration(name = "alpha", initializers = DummyApplicationContextInitializer.class),//
 		@ContextConfiguration(name = "beta", initializers = DummyApplicationContextInitializer.class) //
-	})
+	}) // SPR-10997
 	private static class TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers extends
 			TestClass1WithMultiLevelContextHierarchyWithUniqueContextConfig {
 	}
 
-	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
-	 */
+	// SPR-10997
 	private static class DummyApplicationContextInitializer implements
 			ApplicationContextInitializer<ConfigurableApplicationContext> {
 

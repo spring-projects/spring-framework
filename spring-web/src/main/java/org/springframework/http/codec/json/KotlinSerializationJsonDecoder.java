@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ public class KotlinSerializationJsonDecoder extends KotlinSerializationStringDec
 	}
 
 	public KotlinSerializationJsonDecoder(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"),
+				MediaType.APPLICATION_NDJSON);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Unit tests for {@link BeanNameViewResolver}, {@link UrlBasedViewResolver},
+ * Tests for {@link BeanNameViewResolver}, {@link UrlBasedViewResolver},
  * {@link InternalResourceViewResolver}, {@link org.springframework.web.servlet.view.XmlViewResolver},
  * and {@link AbstractCachingViewResolver}.
  *
@@ -168,12 +168,12 @@ class ViewResolverTests {
 		View view = vr.resolveViewName("example1", Locale.getDefault());
 		assertThat(view).isInstanceOf(JstlView.class);
 		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("example1");
-		assertThat(((InternalResourceView) view).getContentType()).as("Correct textContentType").isEqualTo("myContentType");
+		assertThat(view.getContentType()).as("Correct textContentType").isEqualTo("myContentType");
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
 		assertThat(view).isInstanceOf(JstlView.class);
 		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("example2");
-		assertThat(((InternalResourceView) view).getContentType()).as("Correct textContentType").isEqualTo("myContentType");
+		assertThat(view.getContentType()).as("Correct textContentType").isEqualTo("myContentType");
 
 		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		this.request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
@@ -291,7 +291,7 @@ class ViewResolverTests {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		view.render(new HashMap<String, Object>(), request, this.response);
+		view.render(new HashMap<>(), request, this.response);
 	}
 
 	@Test
@@ -306,7 +306,7 @@ class ViewResolverTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("key2", 2);
 		vr.setAttributesMap(map);
-		vr.setExposedContextBeanNames(new String[] {"myBean2"});
+		vr.setExposedContextBeanNames("myBean2");
 		vr.setApplicationContext(this.wac);
 
 		HttpServletRequest request = new MockHttpServletRequest(this.sc) {
@@ -327,7 +327,7 @@ class ViewResolverTests {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		view.render(new HashMap<String, Object>(), request, this.response);
+		view.render(new HashMap<>(), request, this.response);
 	}
 
 	@Test
@@ -457,7 +457,7 @@ class ViewResolverTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void xmlViewResolverWithoutCache() throws Exception {
+	void xmlViewResolverWithoutCache() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {

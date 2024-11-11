@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,18 @@ package org.springframework.core.task;
 
 import java.util.concurrent.Callable;
 
-import org.springframework.util.concurrent.ListenableFuture;
-
 /**
  * Extension of the {@link AsyncTaskExecutor} interface, adding the capability to submit
- * tasks for {@link ListenableFuture ListenableFutures}.
+ * tasks for {@code ListenableFutures}.
  *
  * @author Arjen Poutsma
  * @since 4.0
- * @see ListenableFuture
  * @deprecated as of 6.0, in favor of
  * {@link AsyncTaskExecutor#submitCompletable(Runnable)} and
  * {@link AsyncTaskExecutor#submitCompletable(Callable)}
  */
-@Deprecated(since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
+@SuppressWarnings("removal")
 public interface AsyncListenableTaskExecutor extends AsyncTaskExecutor {
 
 	/**
@@ -42,8 +40,8 @@ public interface AsyncListenableTaskExecutor extends AsyncTaskExecutor {
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @deprecated in favor of {@link AsyncTaskExecutor#submitCompletable(Runnable)}
 	 */
-	@Deprecated
-	ListenableFuture<?> submitListenable(Runnable task);
+	@Deprecated(since = "6.0", forRemoval = true)
+	org.springframework.util.concurrent.ListenableFuture<?> submitListenable(Runnable task);
 
 	/**
 	 * Submit a {@code Callable} task for execution, receiving a {@code ListenableFuture}
@@ -54,7 +52,7 @@ public interface AsyncListenableTaskExecutor extends AsyncTaskExecutor {
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @deprecated in favor of {@link AsyncTaskExecutor#submitCompletable(Callable)}
 	 */
-	@Deprecated
-	<T> ListenableFuture<T> submitListenable(Callable<T> task);
+	@Deprecated(since = "6.0", forRemoval = true)
+	<T> org.springframework.util.concurrent.ListenableFuture<T> submitListenable(Callable<T> task);
 
 }

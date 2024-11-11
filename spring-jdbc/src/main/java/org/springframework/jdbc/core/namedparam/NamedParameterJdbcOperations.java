@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramSource container of arguments to bind to the query
 	 * @param rowMapper object that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
@@ -257,7 +257,7 @@ public interface NamedParameterJdbcOperations {
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
@@ -449,9 +449,8 @@ public interface NamedParameterJdbcOperations {
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
-	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
-	 * class is used, which is part of JDK 1.5+ and also available separately as part of
-	 * Sun's JDBC RowSet Implementations download (rowset.jar).
+	 * be available at runtime: by default, a standard JDBC {@code CachedRowSet}
+	 * is used.
 	 * @param sql the SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @return an SqlRowSet representation (possibly a wrapper around a
@@ -469,9 +468,8 @@ public interface NamedParameterJdbcOperations {
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
-	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
-	 * class is used, which is part of JDK 1.5+ and also available separately as part of
-	 * Sun's JDBC RowSet Implementations download (rowset.jar).
+	 * be available at runtime: by default, a standard JDBC {@code CachedRowSet}
+	 * is used.
 	 * @param sql the SQL query to execute
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
@@ -506,6 +504,7 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments,
 	 * returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL containing named parameters
 	 * @param paramSource container of arguments and SQL types to bind to the query
 	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
@@ -513,6 +512,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @see MapSqlParameterSource
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)
 			throws DataAccessException;
@@ -520,6 +520,7 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments,
 	 * returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL containing named parameters
 	 * @param paramSource container of arguments and SQL types to bind to the query
 	 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
@@ -528,6 +529,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @see MapSqlParameterSource
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
 			throws DataAccessException;
@@ -558,6 +560,7 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied
 	 * arguments, returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
 	 * arguments for the query
@@ -568,12 +571,14 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder);
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments,
 	 * returning generated keys.
+	 * <p>This method requires support for generated keys in the JDBC driver.
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
 	 * arguments for the query
@@ -585,7 +590,9 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 6.1
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
 			String[] keyColumnNames);
+
 }

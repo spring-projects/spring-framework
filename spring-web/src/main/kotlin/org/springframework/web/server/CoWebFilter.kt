@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Kotlin-specific implementation of the [WebFilter] interface that allows for
- * using coroutines.
+ * using coroutines, including [kotlin.coroutines.CoroutineContext] propagation.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -34,7 +35,8 @@ import reactor.core.publisher.Mono
 abstract class CoWebFilter : WebFilter {
 
 	final override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-		return mono(Dispatchers.Unconfined) {
+		val context = exchange.attributes[COROUTINE_CONTEXT_ATTRIBUTE] as CoroutineContext?
+		return mono(context ?: Dispatchers.Unconfined) {
 			filter(exchange, object : CoWebFilterChain {
 				override suspend fun filter(exchange: ServerWebExchange) {
 					exchange.attributes[COROUTINE_CONTEXT_ATTRIBUTE] = currentCoroutineContext().minusKey(Job.Key)

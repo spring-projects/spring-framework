@@ -38,7 +38,7 @@ package org.apache.commons.logging;
  * <p><b>Note that this Commons Logging variant is only meant to be used for
  * infrastructure logging purposes in the core framework and in extensions.</b>
  * It also serves as a common bridge for third-party libraries using the
- * Commons Logging API, e.g. Apache HttpClient, and HtmlUnit, bringing
+ * Commons Logging API, for example, Apache HttpClient, and HtmlUnit, bringing
  * them into the same consistent arrangement without any extra bridge jars.
  *
  * <p><b>For logging need in application code, prefer direct use of Log4j 2.x
@@ -70,7 +70,7 @@ public abstract class LogFactory {
 
 	/**
 	 * This method only exists for compatibility with unusual Commons Logging API
-	 * usage like e.g. {@code LogFactory.getFactory().getInstance(Class/String)}.
+	 * usage like, for example, {@code LogFactory.getFactory().getInstance(Class/String)}.
 	 * @see #getInstance(Class)
 	 * @see #getInstance(String)
 	 * @deprecated in favor of {@link #getLog(Class)}/{@link #getLog(String)}

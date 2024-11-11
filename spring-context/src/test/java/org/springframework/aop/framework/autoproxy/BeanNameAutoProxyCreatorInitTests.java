@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.Nullable;
 
@@ -38,17 +38,16 @@ class BeanNameAutoProxyCreatorInitTests {
 
 	@Test
 	void ignoreAdvisorThatIsCurrentlyInCreation() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
-
-		TestBean bean = ctx.getBean(TestBean.class);
-		bean.setName("foo");
-		assertThat(bean.getName()).isEqualTo("foo");
-		assertThatIllegalArgumentException()
-			.isThrownBy(() -> bean.setName(null))
-			.withMessage("Null argument at position 0");
-
-		ctx.close();
+		String path = getClass().getSimpleName() + "-context.xml";
+		try (ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(path, getClass())) {
+			Pet pet = ctx.getBean(Pet.class);
+			assertThat(pet.getName()).isEqualTo("Simba");
+			pet.setName("Tiger");
+			assertThat(pet.getName()).isEqualTo("Tiger");
+			assertThatIllegalArgumentException()
+				.isThrownBy(() -> pet.setName(null))
+				.withMessage("Null argument at position 0");
+		}
 	}
 
 }
@@ -57,7 +56,7 @@ class BeanNameAutoProxyCreatorInitTests {
 class NullChecker implements MethodBeforeAdvice {
 
 	@Override
-	public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
+	public void before(Method method, Object[] args, @Nullable Object target) {
 		check(args);
 	}
 

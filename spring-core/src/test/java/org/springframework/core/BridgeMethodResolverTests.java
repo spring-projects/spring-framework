@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.concurrent.Delayed;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
  */
 @SuppressWarnings("rawtypes")
 class BridgeMethodResolverTests {
@@ -87,10 +89,47 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
+	void findBridgedMethodFromOriginalMethodInHierarchy() throws Exception {
+		Method originalMethod = Adder.class.getMethod("add", Object.class);
+		assertThat(originalMethod.isBridge()).isFalse();
+		Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, DateAdder.class);
+		assertThat(bridgedMethod.isBridge()).isFalse();
+		assertThat(bridgedMethod.getName()).isEqualTo("add");
+		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);
+		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(Date.class);
+	}
+
+	@Test
+	void findBridgedMethodFromOriginalMethodNotInHierarchy() throws Exception {
+		Method originalMethod = Adder.class.getMethod("add", Object.class);
+		Method mostSpecificMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, FakeAdder.class);
+		assertThat(mostSpecificMethod).isSameAs(originalMethod);
+	}
+
+	@Test
+	void findBridgedMethodInHierarchyWithBoundedGenerics() throws Exception {
+		Method originalMethod = Bar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		assertThat(originalMethod.isBridge()).isFalse();
+		Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, SubBar.class);
+		assertThat(bridgedMethod.isBridge()).isFalse();
+		assertThat(bridgedMethod.getName()).isEqualTo("someMethod");
+		assertThat(bridgedMethod.getParameterCount()).isEqualTo(2);
+		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(CharSequence.class);
+	}
+
+	@Test
 	void isBridgeMethodFor() throws Exception {
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
-		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		Method bridge;
+
+		if (IdeUtils.runningInEclipse()) {
+			bridge = InterBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		}
+		else {
+			bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		}
+		assertThat(bridge.isBridge()).isTrue();
 
 		assertThat(BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class)).as("Should be bridge method").isTrue();
 		assertThat(BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class)).as("Should not be bridge method").isFalse();
@@ -152,7 +191,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void withGenericParameter() throws Exception {
+	void withGenericParameter() {
 		Method[] methods = StringGenericParameter.class.getMethods();
 		Method bridgeMethod = null;
 		Method bridgedMethod = null;
@@ -173,7 +212,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void onAllMethods() throws Exception {
+	void onAllMethods() {
 		Method[] methods = StringList.class.getMethods();
 		for (Method method : methods) {
 			assertThat(BridgeMethodResolver.findBridgedMethod(method)).isNotNull();
@@ -206,7 +245,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void spr2648() throws Exception {
+	void spr2648() {
 		Method bridgeMethod = ReflectionUtils.findMethod(GenericSqlMapIntegerDao.class, "saveOrUpdate", Object.class);
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
@@ -296,7 +335,7 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
-	void spr3534() throws Exception {
+	void spr3534() {
 		Method bridgeMethod = ReflectionUtils.findMethod(TestEmailProvider.class, "findBy", Object.class);
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
@@ -358,8 +397,15 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public abstract static class InterBar<T> extends Bar<T> {
+	public abstract static class InterBar<T extends CharSequence> extends Bar<T> {
 
+		@Override
+		void someMethod(T theArg, Object otherArg) {
+		}
+	}
+
+
+	public abstract static class SubBar<T extends StringBuffer> extends InterBar<T> {
 	}
 
 
@@ -390,6 +436,13 @@ class BridgeMethodResolverTests {
 	public static class DateAdder extends AbstractDateAdder {
 
 		@Override
+		public void add(Date date) {
+		}
+	}
+
+
+	public static class FakeAdder {
+
 		public void add(Date date) {
 		}
 	}
@@ -843,7 +896,7 @@ class BridgeMethodResolverTests {
 
 	public interface SimpleGenericRepository<T> {
 
-		public Class<T> getPersistentClass();
+		Class<T> getPersistentClass();
 
 		List<T> findByQuery();
 
@@ -884,7 +937,7 @@ class BridgeMethodResolverTests {
 			return null;
 		}
 
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 		}
 	}
 

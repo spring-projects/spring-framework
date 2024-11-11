@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ import static org.assertj.core.api.Assertions.within;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class MappingJackson2MessageConverterTests {
+class MappingJackson2MessageConverterTests {
 
 	@Test
-	public void defaultConstructor() {
+	void defaultConstructor() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		assertThat(converter.getSupportedMimeTypes()).contains(new MimeType("application", "json"));
 		assertThat(converter.getObjectMapper().getDeserializationConfig()
@@ -73,7 +73,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessage() {
+	void fromMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
@@ -89,7 +89,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessageUntyped() {
+	void fromMessageUntyped() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
@@ -114,7 +114,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessageInvalidJson() {
+	void fromMessageInvalidJson() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "FooBar";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -123,7 +123,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void fromMessageValidJsonWithUnknownProperty() {
+	void fromMessageValidJsonWithUnknownProperty() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -160,7 +160,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void toMessage() {
+	void toMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		MyBean payload = new MyBean();
 		payload.setString("Foo");
@@ -183,7 +183,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void toMessageUtf16() {
+	void toMessageUtf16() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		MimeType contentType = new MimeType("application", "json", StandardCharsets.UTF_16BE);
 		Map<String, Object> map = new HashMap<>();
@@ -197,7 +197,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void toMessageUtf16String() {
+	void toMessageUtf16String() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		converter.setSerializedPayloadClass(String.class);
 
@@ -213,7 +213,7 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void toMessageJsonView() throws Exception {
+	void toMessageJsonView() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 
 		Map<String, Object> map = new HashMap<>();

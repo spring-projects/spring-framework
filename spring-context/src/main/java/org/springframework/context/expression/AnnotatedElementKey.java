@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represent an {@link AnnotatedElement} on a particular {@link Class}
- * and is suitable as a key.
+ * Represents an {@link AnnotatedElement} in a particular {@link Class}
+ * and is suitable for use as a cache key.
  *
  * @author Costin Leau
  * @author Stephane Nicoll

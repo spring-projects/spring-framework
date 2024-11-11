@@ -80,7 +80,7 @@ class MethodInvokerTests {
 	}
 
 	@Test
-	void stringWithMethodInvoker() throws Exception {
+	void stringWithMethodInvoker() {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");

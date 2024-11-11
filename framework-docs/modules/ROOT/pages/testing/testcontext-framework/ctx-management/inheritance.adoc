@@ -17,8 +17,8 @@ is set to `false`, the resource locations or component classes and the context
 initializers, respectively, for the test class shadow and effectively replace the
 configuration defined by superclasses.
 
-NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
-classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
+NOTE: Test configuration may also be inherited from enclosing classes. See
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
 
 In the next example, which uses XML resource locations, the `ApplicationContext` for
 `ExtendedTest` is loaded from `base-config.xml` and `extended-config.xml`, in that order.
@@ -30,7 +30,7 @@ another and use both its own configuration file and the superclass's configurati
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/base-config.xml"
@@ -52,7 +52,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from "/base-config.xml"
@@ -84,7 +84,7 @@ another and use both its own configuration class and the superclass's configurat
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// ApplicationContext will be loaded from BaseConfig
 	@SpringJUnitConfig(BaseConfig.class) // <1>
@@ -103,7 +103,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// ApplicationContext will be loaded from BaseConfig
 	@SpringJUnitConfig(BaseConfig::class) // <1>
@@ -133,7 +133,7 @@ extend another and use both its own initializer and the superclass's initializer
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// ApplicationContext will be initialized by BaseInitializer
 	@SpringJUnitConfig(initializers = BaseInitializer.class) // <1>
@@ -153,7 +153,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// ApplicationContext will be initialized by BaseInitializer
 	@SpringJUnitConfig(initializers = [BaseInitializer::class]) // <1>

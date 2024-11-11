@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,23 +36,23 @@ import static org.assertj.core.api.Assertions.fail;
 class TestContextManagerSuppressedExceptionsTests {
 
 	@Test
-	void afterTestExecution() throws Exception {
+	void afterTestExecution() {
 		test("afterTestExecution", FailingAfterTestExecutionTestCase.class,
 			(tcm, c, m) -> tcm.afterTestExecution(this, m, null));
 	}
 
 	@Test
-	void afterTestMethod() throws Exception {
+	void afterTestMethod() {
 		test("afterTestMethod", FailingAfterTestMethodTestCase.class,
 			(tcm, c, m) -> tcm.afterTestMethod(this, m, null));
 	}
 
 	@Test
-	void afterTestClass() throws Exception {
+	void afterTestClass() {
 		test("afterTestClass", FailingAfterTestClassTestCase.class, (tcm, c, m) -> tcm.afterTestClass());
 	}
 
-	private void test(String useCase, Class<?> testClass, Callback callback) throws Exception {
+	private void test(String useCase, Class<?> testClass, Callback callback) {
 		TestContextManager testContextManager = new TestContextManager(testClass);
 		assertThat(testContextManager.getTestExecutionListeners().size()).as("Registered TestExecutionListeners").isEqualTo(2);
 

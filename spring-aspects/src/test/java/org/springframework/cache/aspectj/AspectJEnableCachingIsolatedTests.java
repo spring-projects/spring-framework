@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -47,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Stephane Nicoll
  */
-public class AspectJEnableCachingIsolatedTests {
+class AspectJEnableCachingIsolatedTests {
 
 	private ConfigurableApplicationContext ctx;
 
@@ -65,14 +67,14 @@ public class AspectJEnableCachingIsolatedTests {
 
 
 	@Test
-	public void testKeyStrategy() {
+	void testKeyStrategy() {
 		load(EnableCachingConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
 		assertThat(aspect.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator", KeyGenerator.class));
 	}
 
 	@Test
-	public void testCacheErrorHandler() {
+	void testCacheErrorHandler() {
 		load(EnableCachingConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
 		assertThat(aspect.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));
@@ -82,27 +84,30 @@ public class AspectJEnableCachingIsolatedTests {
 	// --- local tests -------
 
 	@Test
-	public void singleCacheManagerBean() {
+	void singleCacheManagerBean() {
 		load(SingleCacheManagerConfig.class);
 	}
 
 	@Test
-	public void multipleCacheManagerBeans() {
+	void multipleCacheManagerBeans() {
 		try {
 			load(MultiCacheManagerConfig.class);
 		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage()).contains("bean of type CacheManager");
+		catch (NoUniqueBeanDefinitionException ex) {
+			assertThat(ex.getMessage()).contains(
+					"no CacheResolver specified and expected single matching CacheManager but found 2: cm1,cm2");
+			assertThat(ex.getNumberOfBeansFound()).isEqualTo(2);
+			assertThat(ex.getBeanNamesFound()).containsExactly("cm1", "cm2");
 		}
 	}
 
 	@Test
-	public void multipleCacheManagerBeans_implementsCachingConfigurer() {
+	void multipleCacheManagerBeans_implementsCachingConfigurer() {
 		load(MultiCacheManagerConfigurer.class); // does not throw
 	}
 
 	@Test
-	public void multipleCachingConfigurers() {
+	void multipleCachingConfigurers() {
 		try {
 			load(MultiCacheManagerConfigurer.class, EnableCachingConfig.class);
 		}
@@ -112,12 +117,12 @@ public class AspectJEnableCachingIsolatedTests {
 	}
 
 	@Test
-	public void noCacheManagerBeans() {
+	void noCacheManagerBeans() {
 		try {
 			load(EmptyConfig.class);
 		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage()).contains("no bean of type CacheManager");
+		catch (NoSuchBeanDefinitionException ex) {
+			assertThat(ex.getMessage()).contains("no CacheResolver specified");
 		}
 	}
 
@@ -132,7 +137,7 @@ public class AspectJEnableCachingIsolatedTests {
 	}
 
 	@Test
-	public void bothSetOnlyResolverIsUsed() {
+	void bothSetOnlyResolverIsUsed() {
 		load(FullCachingConfig.class);
 
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);

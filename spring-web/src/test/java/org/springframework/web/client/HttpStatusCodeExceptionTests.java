@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import org.springframework.http.HttpStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link HttpStatusCodeException} and subclasses.
+ * Tests for {@link HttpStatusCodeException}.
  *
  * @author Chris Beams
  */
-public class HttpStatusCodeExceptionTests {
+class HttpStatusCodeExceptionTests {
 
 	/**
 	 * Corners bug SPR-9273, which reported the fact that following the changes made in
@@ -42,7 +42,7 @@ public class HttpStatusCodeExceptionTests {
 	 * serializable due to the addition of a non-serializable {@code Charset} field.
 	 */
 	@Test
-	public void testSerializability() throws IOException, ClassNotFoundException {
+	void testSerializability() throws IOException, ClassNotFoundException {
 		HttpStatusCodeException ex1 = new HttpClientErrorException(
 				HttpStatus.BAD_REQUEST, null, null, StandardCharsets.US_ASCII);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -54,7 +54,7 @@ public class HttpStatusCodeExceptionTests {
 	}
 
 	@Test
-	public void emptyStatusText() {
+	void emptyStatusText() {
 		HttpStatusCodeException ex = new HttpClientErrorException(HttpStatus.NOT_FOUND, "");
 
 		assertThat(ex.getMessage()).isEqualTo("404 Not Found");

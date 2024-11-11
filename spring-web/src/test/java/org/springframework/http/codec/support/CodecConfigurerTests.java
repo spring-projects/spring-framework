@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link BaseDefaultCodecs}.
+ * Tests for {@link BaseDefaultCodecs}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -385,12 +385,12 @@ class CodecConfigurerTests {
 		// Clone has the customized the customizations
 
 		List<Decoder<?>> decoders = clone.getReaders().stream()
-				.filter(reader -> reader instanceof DecoderHttpMessageReader)
+				.filter(DecoderHttpMessageReader.class::isInstance)
 				.map(reader -> ((DecoderHttpMessageReader<?>) reader).getDecoder())
 				.collect(Collectors.toList());
 
 		List<Encoder<?>> encoders = clone.getWriters().stream()
-				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
+				.filter(EncoderHttpMessageWriter.class::isInstance)
 				.map(reader -> ((EncoderHttpMessageWriter<?>) reader).getEncoder())
 				.collect(Collectors.toList());
 
@@ -400,12 +400,12 @@ class CodecConfigurerTests {
 		// Original does not have the customizations
 
 		decoders = this.configurer.getReaders().stream()
-				.filter(reader -> reader instanceof DecoderHttpMessageReader)
+				.filter(DecoderHttpMessageReader.class::isInstance)
 				.map(reader -> ((DecoderHttpMessageReader<?>) reader).getDecoder())
 				.collect(Collectors.toList());
 
 		encoders = this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
+				.filter(EncoderHttpMessageWriter.class::isInstance)
 				.map(reader -> ((EncoderHttpMessageWriter<?>) reader).getEncoder())
 				.collect(Collectors.toList());
 
@@ -454,7 +454,7 @@ class CodecConfigurerTests {
 
 	private void assertDecoderInstance(Decoder<?> decoder) {
 		assertThat(this.configurer.getReaders().stream()
-				.filter(writer -> writer instanceof DecoderHttpMessageReader)
+				.filter(DecoderHttpMessageReader.class::isInstance)
 				.map(writer -> ((DecoderHttpMessageReader<?>) writer).getDecoder())
 				.filter(e -> decoder.getClass().equals(e.getClass()))
 				.findFirst()
@@ -463,7 +463,7 @@ class CodecConfigurerTests {
 
 	private void assertEncoderInstance(Encoder<?> encoder) {
 		assertThat(this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
+				.filter(EncoderHttpMessageWriter.class::isInstance)
 				.map(writer -> ((EncoderHttpMessageWriter<?>) writer).getEncoder())
 				.filter(e -> encoder.getClass().equals(e.getClass()))
 				.findFirst()

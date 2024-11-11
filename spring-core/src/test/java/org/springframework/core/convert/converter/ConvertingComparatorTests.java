@@ -45,45 +45,45 @@ class ConvertingComparatorTests {
 	private final TestComparator comparator = new TestComparator();
 
 	@Test
-	void shouldThrowOnNullComparator() throws Exception {
+	void shouldThrowOnNullComparator() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<>(null, this.converter));
 	}
 
 	@Test
-	void shouldThrowOnNullConverter() throws Exception {
+	void shouldThrowOnNullConverter() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<String, Integer>(this.comparator, null));
 	}
 
 	@Test
-	void shouldThrowOnNullConversionService() throws Exception {
+	void shouldThrowOnNullConversionService() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class));
 	}
 
 	@Test
-	void shouldThrowOnNullType() throws Exception {
+	void shouldThrowOnNullType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<String, Integer>(this.comparator, this.conversionService, null));
 	}
 
 	@Test
-	void shouldUseConverterOnCompare() throws Exception {
+	void shouldUseConverterOnCompare() {
 		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<>(
 				this.comparator, this.converter);
 		testConversion(convertingComparator);
 	}
 
 	@Test
-	void shouldUseConversionServiceOnCompare() throws Exception {
+	void shouldUseConversionServiceOnCompare() {
 		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<>(
 				comparator, conversionService, Integer.class);
 		testConversion(convertingComparator);
 	}
 
 	@Test
-	void shouldGetForConverter() throws Exception {
+	void shouldGetForConverter() {
 		testConversion(new ConvertingComparator<>(comparator, converter));
 	}
 

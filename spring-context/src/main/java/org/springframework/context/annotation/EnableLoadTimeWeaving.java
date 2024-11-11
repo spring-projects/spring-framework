@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * </pre>
  *
  * <p>The code example differs from the XML example in that it actually instantiates the
- * {@code MyLoadTimeWeaver} type, meaning that it can also configure the instance, e.g.
+ * {@code MyLoadTimeWeaver} type, meaning that it can also configure the instance, for example,
  * calling the {@code #addClassTransformer} method. This demonstrates how the code-based
  * configuration approach is more flexible through direct programmatic access.
  *
@@ -165,7 +165,7 @@ public @interface EnableLoadTimeWeaving {
 		 * is present in the classpath. If there is no such resource, then AspectJ
 		 * load-time weaving will be switched off.
 		 */
-		AUTODETECT;
+		AUTODETECT
 	}
 
 }

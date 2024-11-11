@@ -148,6 +148,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");

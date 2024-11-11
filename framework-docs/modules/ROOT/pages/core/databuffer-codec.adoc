@@ -29,7 +29,7 @@ a `DataBuffer` implementation and that does not involve allocation.
 
 Note that WebFlux applications do not create a `DataBufferFactory` directly but instead
 access it through the `ServerHttpResponse` or the `ClientHttpRequest` on the client side.
-The type of factory depends on the underlying client or server, e.g.
+The type of factory depends on the underlying client or server, for example,
 `NettyDataBufferFactory` for Reactor Netty, `DefaultDataBufferFactory` for others.
 
 
@@ -82,7 +82,7 @@ to use the convenience methods in `DataBufferUtils` that apply release or retain
 
 `DataBufferUtils` offers a number of utility methods to operate on data buffers:
 
-* Join a stream of data buffers into a single buffer possibly with zero copy, e.g. via
+* Join a stream of data buffers into a single buffer possibly with zero copy, for example, via
 composite buffers, if that's supported by the underlying byte buffer API.
 * Turn `InputStream` or NIO `Channel` into `Flux<DataBuffer>`, and vice versa a
 `Publisher<DataBuffer>` into `OutputStream` or NIO `Channel`.
@@ -144,7 +144,7 @@ a serialization error occurs while populating the buffer with data. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	DataBuffer buffer = factory.allocateBuffer();
 	boolean release = true;
@@ -162,7 +162,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val buffer = factory.allocateBuffer()
 	var release = true

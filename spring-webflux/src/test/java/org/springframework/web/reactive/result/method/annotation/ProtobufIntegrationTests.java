@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,8 +113,8 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 				.uri("/message-stream")
 				.exchangeToFlux(response -> {
 					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
-					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
-					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
+					assertThat(response.headers().header("X-Protobuf-Schema")).containsExactly("sample.proto");
+					assertThat(response.headers().header("X-Protobuf-Message")).containsExactly("Msg");
 					return response.bodyToFlux(Msg.class);
 				});
 
@@ -168,7 +168,7 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 		@GetMapping(value = "/message-stream", produces = "application/x-protobuf;delimited=true")
 		Flux<Msg> messageStream() {
-			return testInterval(Duration.ofMillis(50), 5).map(l ->
+			return testInterval(Duration.ofMillis(1), 5).map(l ->
 					Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(l.intValue()).build()).build());
 		}
 

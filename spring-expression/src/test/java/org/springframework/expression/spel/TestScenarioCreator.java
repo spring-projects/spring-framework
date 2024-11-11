@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
  * Builds an evaluation context for test expressions.
- * Features of the test evaluation context are:
+ *
+ * <p>Features of the test evaluation context are:
  * <ul>
  * <li>The root context object is an Inventor instance {@link Inventor}
  * </ul>
@@ -56,15 +57,17 @@ class TestScenarioCreator {
 	private static void populateFunctions(StandardEvaluationContext testContext) {
 		try {
 			testContext.registerFunction("isEven",
-					TestScenarioCreator.class.getDeclaredMethod("isEven", Integer.TYPE));
+					TestScenarioCreator.class.getDeclaredMethod("isEven", int.class));
 			testContext.registerFunction("reverseInt",
-					TestScenarioCreator.class.getDeclaredMethod("reverseInt", Integer.TYPE, Integer.TYPE, Integer.TYPE));
+					TestScenarioCreator.class.getDeclaredMethod("reverseInt", int.class, int.class, int.class));
 			testContext.registerFunction("reverseString",
 					TestScenarioCreator.class.getDeclaredMethod("reverseString", String.class));
 			testContext.registerFunction("varargsFunction",
 					TestScenarioCreator.class.getDeclaredMethod("varargsFunction", String[].class));
 			testContext.registerFunction("varargsFunction2",
-					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", Integer.TYPE, String[].class));
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", int.class, String[].class));
+			testContext.registerFunction("varargsObjectFunction",
+					TestScenarioCreator.class.getDeclaredMethod("varargsObjectFunction", Object[].class));
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
@@ -99,6 +102,21 @@ class TestScenarioCreator {
 		MethodHandle messageStaticFullyBound = messageStaticPartiallyBound
 				.bindTo(new String[] { "prerecorded", "3", "Oh Hello World", "ignored"});
 		testContext.registerFunction("messageStaticBound", messageStaticFullyBound);
+
+		// #formatObjectVarargs(format, args...)
+		MethodHandle formatObjectVarargs = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"formatObjectVarargs", MethodType.methodType(String.class, String.class, Object[].class));
+		testContext.registerFunction("formatObjectVarargs", formatObjectVarargs);
+
+		// #formatObjectVarargs(format, args...)
+		MethodHandle formatPrimitiveVarargs = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"formatPrimitiveVarargs", MethodType.methodType(String.class, String.class, int[].class));
+		testContext.registerFunction("formatPrimitiveVarargs", formatPrimitiveVarargs);
+
+		// #add(int, int)
+		MethodHandle add = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"add", MethodType.methodType(int.class, int.class, int.class));
+		testContext.registerFunction("add", add);
 	}
 
 	/**
@@ -112,17 +130,17 @@ class TestScenarioCreator {
 	/**
 	 * Create the root context object, an Inventor instance. Non-qualified property
 	 * and method references will be resolved against this context object.
-	 * @param testContext the evaluation context in which to set the root object
+	 * @param context the evaluation context in which to set the root object
 	 */
-	private static void setupRootContextObject(StandardEvaluationContext testContext) {
+	private static void setupRootContextObject(StandardEvaluationContext context) {
 		GregorianCalendar c = new GregorianCalendar();
 		c.set(1856, 7, 9);
 		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
-		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
-		tesla.setInventions(new String[] { "Telephone repeater", "Rotating magnetic field principle",
+		tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
+		tesla.setInventions("Telephone repeater", "Rotating magnetic field principle",
 				"Polyphase alternating-current system", "Induction motor", "Alternating-current power transmission",
-				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights" });
-		testContext.setRootObject(tesla);
+				"Tesla coil transformer", "Wireless communication", "Radio", "Fluorescent lights");
+		context.setRootObject(tesla);
 	}
 
 
@@ -130,10 +148,7 @@ class TestScenarioCreator {
 	// in test expressions
 
 	public static String isEven(int i) {
-		if ((i % 2) == 0) {
-			return "y";
-		}
-		return "n";
+		return ((i % 2) == 0 ? "y" : "n");
 	}
 
 	public static int[] reverseInt(int i, int j, int k) {
@@ -141,11 +156,7 @@ class TestScenarioCreator {
 	}
 
 	public static String reverseString(String input) {
-		StringBuilder backwards = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			backwards.append(input.charAt(input.length() - 1 - i));
-		}
-		return backwards.toString();
+		return new StringBuilder(input).reverse().toString();
 	}
 
 	public static String varargsFunction(String... strings) {
@@ -153,11 +164,31 @@ class TestScenarioCreator {
 	}
 
 	public static String varargsFunction2(int i, String... strings) {
-		return String.valueOf(i) + "-" + Arrays.toString(strings);
+		return i + "-" + Arrays.toString(strings);
+	}
+
+	public static String varargsObjectFunction(Object... args) {
+		return Arrays.toString(args);
 	}
 
 	public static String message(String template, String... args) {
 		return template.formatted((Object[]) args);
+	}
+
+	public static String formatObjectVarargs(String format, Object... args) {
+		return String.format(format, args);
+	}
+
+	public static String formatPrimitiveVarargs(String format, int... nums) {
+		Object[] args = new Object[nums.length];
+		for (int i = 0; i < nums.length; i++) {
+			args[i] = nums[i];
+		}
+		return String.format(format, args);
+	}
+
+	public static int add(int x, int y) {
+		return x + y;
 	}
 
 }

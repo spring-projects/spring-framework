@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.util.Arrays;
 import java.util.List;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
@@ -40,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ThemeTagTests extends AbstractTagTests {
 
 	@Test
-	@SuppressWarnings("serial")
 	void themeTag() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuilder message = new StringBuilder();
@@ -59,7 +56,7 @@ class ThemeTagTests extends AbstractTagTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	void requestContext() throws ServletException {
+	void requestContext() {
 		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
 		assertThat(rc.getThemeMessage("themetest")).isEqualTo("theme test message");
@@ -67,7 +64,7 @@ class ThemeTagTests extends AbstractTagTests {
 		assertThat(rc.getThemeMessage("themetest", "default")).isEqualTo("theme test message");
 		assertThat(rc.getThemeMessage("themetest", (Object[]) null, "default")).isEqualTo("theme test message");
 		assertThat(rc.getThemeMessage("themetestArgs", new String[]{"arg1"})).isEqualTo("theme test message arg1");
-		assertThat(rc.getThemeMessage("themetestArgs", Arrays.asList(new String[]{"arg1"}))).isEqualTo("theme test message arg1");
+		assertThat(rc.getThemeMessage("themetestArgs", List.of("arg1"))).isEqualTo("theme test message arg1");
 		assertThat(rc.getThemeMessage("themetesta", "default")).isEqualTo("default");
 		assertThat(rc.getThemeMessage("themetesta", (List) null, "default")).isEqualTo("default");
 		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"themetest"});

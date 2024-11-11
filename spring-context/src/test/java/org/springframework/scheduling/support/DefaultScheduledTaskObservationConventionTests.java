@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ class DefaultScheduledTaskObservationConventionTests {
 
 	private final Method taskMethod = ClassUtils.getMethod(BeanWithScheduledMethods.class, "process");
 
+	private final Method runMethod = ClassUtils.getMethod(Runnable.class, "run");
+
 	private final ScheduledTaskObservationConvention convention = new DefaultScheduledTaskObservationConvention();
 
 
@@ -67,6 +69,21 @@ class DefaultScheduledTaskObservationConventionTests {
 	void observationShouldHaveMethodName() {
 		ScheduledTaskObservationContext context = new ScheduledTaskObservationContext(new BeanWithScheduledMethods(), taskMethod);
 		assertThat(convention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("code.function", "process"));
+	}
+
+	@Test
+	void observationShouldHaveTargetTypeForAnonymousClass() {
+		Runnable runnable = () -> { };
+		ScheduledTaskObservationContext context = new ScheduledTaskObservationContext(runnable, runMethod);
+		assertThat(convention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("code.namespace", "ANONYMOUS"));
+	}
+
+	@Test
+	void observationShouldHaveMethodNameForAnonymousClass() {
+		Runnable runnable = () -> { };
+		ScheduledTaskObservationContext context = new ScheduledTaskObservationContext(runnable, runMethod);
+		assertThat(convention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("code.function", "run"));
 	}
 
 	@Test

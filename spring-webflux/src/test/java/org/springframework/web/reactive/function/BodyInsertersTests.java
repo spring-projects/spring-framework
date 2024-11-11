@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
-public class BodyInsertersTests {
+class BodyInsertersTests {
 
 	private BodyInserter.Context context;
 
@@ -83,7 +83,7 @@ public class BodyInsertersTests {
 
 
 	@BeforeEach
-	public void createContext() {
+	void createContext() {
 		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
@@ -115,7 +115,7 @@ public class BodyInsertersTests {
 
 
 	@Test
-	public void ofString() {
+	void ofString() {
 		String body = "foo";
 		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 
@@ -132,7 +132,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofObject() {
+	void ofObject() {
 		User body = new User("foo", "bar");
 		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -146,7 +146,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofObjectWithHints() {
+	void ofObjectWithHints() {
 		User body = new User("foo", "bar");
 		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromValue(body);
 		this.hints.put(JSON_VIEW_HINT, SafeToSerialize.class);
@@ -161,7 +161,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofProducerWithMono() {
+	void ofProducerWithMono() {
 		Mono<User> body = Mono.just(new User("foo", "bar"));
 		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, User.class);
 
@@ -175,7 +175,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofProducerWithFlux() {
+	void ofProducerWithFlux() {
 		Flux<String> body = Flux.just("foo");
 		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, String.class);
 
@@ -192,7 +192,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofProducerWithSingle() {
+	void ofProducerWithSingle() {
 		Single<User> body = Single.just(new User("foo", "bar"));
 		BodyInserter<?, ReactiveHttpOutputMessage> inserter = BodyInserters.fromProducer(body, User.class);
 
@@ -206,7 +206,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofPublisher() {
+	void ofPublisher() {
 		Flux<String> body = Flux.just("foo");
 		BodyInserter<Flux<String>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromPublisher(body, String.class);
 
@@ -223,7 +223,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofResource() throws IOException {
+	void ofResource() throws IOException {
 		Resource resource = new ClassPathResource("response.txt", getClass());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -267,7 +267,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofResourceRange() throws IOException {
+	void ofResourceRange() throws IOException {
 		final int rangeStart = 10;
 		Resource body = new ClassPathResource("response.txt", getClass());
 		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
@@ -310,7 +310,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void ofServerSentEventFlux() {
+	void ofServerSentEventFlux() {
 		ServerSentEvent<String> event = ServerSentEvent.builder("foo").build();
 		Flux<ServerSentEvent<String>> body = Flux.just(event);
 		BodyInserter<Flux<ServerSentEvent<String>>, ServerHttpResponse> inserter =
@@ -322,7 +322,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void fromFormDataMap() {
+	void fromFormDataMap() {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -349,7 +349,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void fromFormDataWith() {
+	void fromFormDataWith() {
 		BodyInserter<MultiValueMap<String, String>, ClientHttpRequest>
 				inserter = BodyInserters.fromFormData("name 1", "value 1")
 				.with("name 2", "value 2+1")
@@ -373,7 +373,7 @@ public class BodyInsertersTests {
 	}
 
 	@Test
-	public void fromMultipartData() {
+	void fromMultipartData() {
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.set("name 3", "value 3");
 
@@ -404,23 +404,25 @@ public class BodyInsertersTests {
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
 					String content = new String(resultBytes, StandardCharsets.UTF_8);
-					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
-							"Content-Type: text/plain;charset=UTF-8\r\n" +
-							"Content-Length: 6\r\n" +
-							"\r\n" +
-							"value1");
-					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
-							"Content-Type: text/plain;charset=UTF-8\r\n" +
-							"Content-Length: 6\r\n" +
-							"\r\n" +
-							"value2");
+					assertThat(content).contains("""
+							Content-Disposition: form-data; name="name"\r
+							Content-Type: text/plain;charset=UTF-8\r
+							Content-Length: 6\r
+							\r
+							value1""");
+					assertThat(content).contains("""
+							Content-Disposition: form-data; name="name"\r
+							Content-Type: text/plain;charset=UTF-8\r
+							Content-Length: 6\r
+							\r
+							value2""");
 				})
 				.expectComplete()
 				.verify();
 	}
 
 	@Test
-	public void ofDataBuffers() {
+	void ofDataBuffers() {
 		byte[] bytes = "foo".getBytes(UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);

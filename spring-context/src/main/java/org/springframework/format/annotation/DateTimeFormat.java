@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.lang.annotation.Target;
 /**
  * Declares that a field or method parameter should be formatted as a date or time.
  *
+ * <p>Formatting applies to parsing a date/time object from a string as well as printing a
+ * date/time object to a string.
+ *
  * <p>Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
  * Can be applied to {@link java.util.Date}, {@link java.util.Calendar}, {@link Long} (for
  * millisecond timestamps) as well as JSR-310 {@code java.time} value types.
@@ -33,7 +36,8 @@ import java.lang.annotation.Target;
  * The first character of the code is the date style, and the second character is the time style.
  * Specify a character of 'S' for short style, 'M' for medium, 'L' for long, and 'F' for full.
  * The date or time may be omitted by specifying the style character '-' &mdash; for example,
- * 'M-' specifies a medium format for the date with no time.
+ * 'M-' specifies a medium format for the date with no time. The supported style pattern codes
+ * correlate to the enum constants defined in {@link java.time.format.FormatStyle}.
  *
  * <p>For ISO-based formatting, set the {@link #iso} attribute to the desired {@link ISO} format,
  * such as {@link ISO#DATE}.
@@ -65,6 +69,8 @@ import java.lang.annotation.Target;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
+ * @see java.text.DateFormat
+ * @see java.text.SimpleDateFormat
  * @see java.time.format.DateTimeFormatter
  */
 @Documented
@@ -77,6 +83,8 @@ public @interface DateTimeFormat {
 	 * <p>Defaults to 'SS' for short date, short time. Set this attribute when you
 	 * wish to format your field or method parameter in accordance with a common
 	 * style other than the default style.
+	 * <p>See the {@linkplain DateTimeFormat class-level documentation} for further
+	 * details.
 	 * @see #fallbackPatterns
 	 */
 	String style() default "SS";
@@ -99,7 +107,7 @@ public @interface DateTimeFormat {
 	 * a style or ISO format.
 	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat} style,
 	 * as also supported by Joda-Time, with strict parsing semantics towards overflows
-	 * (e.g. rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
+	 * (for example, rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
 	 * characters indicate a year in the traditional style, not a "year-of-era" as in the
 	 * {@link java.time.format.DateTimeFormatter} specification (i.e. 'yy' turns into 'uu'
 	 * when going through a {@code DateTimeFormatter} with strict resolution mode).

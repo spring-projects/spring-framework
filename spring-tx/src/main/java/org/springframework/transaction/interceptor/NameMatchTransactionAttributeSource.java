@@ -62,7 +62,7 @@ public class NameMatchTransactionAttributeSource
 
 	/**
 	 * Set a name/attribute map, consisting of method names
-	 * (e.g. "myMethod") and {@link TransactionAttribute} instances.
+	 * (for example, "myMethod") and {@link TransactionAttribute} instances.
 	 * @see #setProperties
 	 * @see TransactionAttribute
 	 */

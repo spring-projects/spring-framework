@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import org.springframework.scheduling.annotation.Async;
  * <p>This aspect routes methods marked with the {@link Async} annotation as well as methods
  * in classes marked with the same. Any method expected to be routed asynchronously must
  * return either {@code void}, {@link Future}, or a subtype of {@link Future} (in particular,
- * Spring's {@link org.springframework.util.concurrent.ListenableFuture}). This aspect,
- * therefore, will produce a compile-time error for methods that violate this constraint
- * on the return type. If, however, a class marked with {@code @Async} contains a method
- * that violates this constraint, it produces only a warning.
+ * {@link java.util.concurrent.CompletableFuture}). This aspect, therefore, will produce a
+ * compile-time error for methods that violate this constraint on the return type. If,
+ * however, a class marked with {@code @Async} contains a method that violates this
+ * constraint, it produces only a warning.
  *
  * <p>This aspect needs to be injected with an implementation of a task-oriented
  * {@link java.util.concurrent.Executor} to activate it for a specific thread pool,

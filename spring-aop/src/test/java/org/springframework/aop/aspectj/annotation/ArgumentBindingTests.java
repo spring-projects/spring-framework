@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,25 +43,37 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class ArgumentBindingTests {
 
 	@Test
-	void bindingInPointcutUsedByAdvice() {
-		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
-		proxyFactory.addAspect(NamedPointcutWithArgs.class);
-
-		ITestBean proxiedTestBean = proxyFactory.getProxy();
-		assertThatIllegalArgumentException()
-			.isThrownBy(() -> proxiedTestBean.setName("enigma"))
-			.withMessage("enigma");
-	}
-
-	@Test
 	void annotationArgumentNameBinding() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TransactionalBean());
 		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
-
 		ITransactionalBean proxiedTestBean = proxyFactory.getProxy();
+
 		assertThatIllegalStateException()
-			.isThrownBy(proxiedTestBean::doInTransaction)
-			.withMessage("Invoked with @Transactional");
+				.isThrownBy(proxiedTestBean::doInTransaction)
+				.withMessage("Invoked with @Transactional");
+	}
+
+	@Test
+	void bindingInPointcutUsedByAdvice() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(NamedPointcutWithArgs.class);
+		ITestBean proxiedTestBean = proxyFactory.getProxy();
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> proxiedTestBean.setName("enigma"))
+				.withMessage("enigma");
+	}
+
+	@Test
+	void bindingWithDynamicAdvice() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(DynamicPointcutWithArgs.class);
+		ITestBean proxiedTestBean = proxyFactory.getProxy();
+
+		proxiedTestBean.applyName(1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> proxiedTestBean.applyName("enigma"))
+				.withMessage("enigma");
 	}
 
 	@Test
@@ -94,6 +106,7 @@ class ArgumentBindingTests {
 		}
 	}
 
+
 	/**
 	 * Mimics Spring's @Transactional annotation without actually introducing the dependency.
 	 */
@@ -101,15 +114,16 @@ class ArgumentBindingTests {
 	@interface Transactional {
 	}
 
+
 	@Aspect
 	static class PointcutWithAnnotationArgument {
 
-		@Around(value = "execution(* org.springframework..*.*(..)) && @annotation(transactional)")
-		public Object around(ProceedingJoinPoint pjp, Transactional transactional) throws Throwable {
+		@Around("execution(* org.springframework..*.*(..)) && @annotation(transactional)")
+		public Object around(ProceedingJoinPoint pjp, Transactional transactional) {
 			throw new IllegalStateException("Invoked with @Transactional");
 		}
-
 	}
+
 
 	@Aspect
 	static class NamedPointcutWithArgs {
@@ -118,10 +132,19 @@ class ArgumentBindingTests {
 		public void pointcutWithArgs(String s) {}
 
 		@Around("pointcutWithArgs(aString)")
-		public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
+		public Object doAround(ProceedingJoinPoint pjp, String aString) {
 			throw new IllegalArgumentException(aString);
 		}
+	}
 
+
+	@Aspect("pertarget(execution(* *(..)))")
+	static class DynamicPointcutWithArgs {
+
+		@Around("execution(* *(..)) && args(java.lang.String)")
+		public Object doAround(ProceedingJoinPoint pjp) {
+			throw new IllegalArgumentException(String.valueOf(pjp.getArgs()[0]));
+		}
 	}
 
 }

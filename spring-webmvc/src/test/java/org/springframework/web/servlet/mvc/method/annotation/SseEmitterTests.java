@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.e
 
 
 /**
- * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter}.
+ * Tests for {@link SseEmitter}.
+ *
  * @author Rossen Stoyanchev
  */
-public class SseEmitterTests {
+class SseEmitterTests {
 
 	private static final MediaType TEXT_PLAIN_UTF8 = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
@@ -48,7 +49,7 @@ public class SseEmitterTests {
 
 
 	@BeforeEach
-	public void setup() throws IOException {
+	void setup() throws IOException {
 		this.handler = new TestHandler();
 		this.emitter = new SseEmitter();
 		this.emitter.initialize(this.handler);
@@ -56,7 +57,7 @@ public class SseEmitterTests {
 
 
 	@Test
-	public void send() throws Exception {
+	void send() throws Exception {
 		this.emitter.send("foo");
 		this.handler.assertSentObjectCount(3);
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
@@ -66,7 +67,7 @@ public class SseEmitterTests {
 	}
 
 	@Test
-	public void sendWithMediaType() throws Exception {
+	void sendWithMediaType() throws Exception {
 		this.emitter.send("foo", MediaType.TEXT_PLAIN);
 		this.handler.assertSentObjectCount(3);
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
@@ -76,14 +77,14 @@ public class SseEmitterTests {
 	}
 
 	@Test
-	public void sendEventEmpty() throws Exception {
+	void sendEventEmpty() throws Exception {
 		this.emitter.send(event());
 		this.handler.assertSentObjectCount(0);
 		this.handler.assertWriteCount(0);
 	}
 
 	@Test
-	public void sendEventWithDataLine() throws Exception {
+	void sendEventWithDataLine() throws Exception {
 		this.emitter.send(event().data("foo"));
 		this.handler.assertSentObjectCount(3);
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
@@ -93,7 +94,7 @@ public class SseEmitterTests {
 	}
 
 	@Test
-	public void sendEventWithTwoDataLines() throws Exception {
+	void sendEventWithTwoDataLines() throws Exception {
 		this.emitter.send(event().data("foo").data("bar"));
 		this.handler.assertSentObjectCount(5);
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
@@ -105,7 +106,7 @@ public class SseEmitterTests {
 	}
 
 	@Test
-	public void sendEventWithMultiline() throws Exception {
+	void sendEventWithMultiline() throws Exception {
 		this.emitter.send(event().data("foo\nbar\nbaz"));
 		this.handler.assertSentObjectCount(3);
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
@@ -115,7 +116,7 @@ public class SseEmitterTests {
 	}
 
 	@Test
-	public void sendEventFull() throws Exception {
+	void sendEventFull() throws Exception {
 		this.emitter.send(event().comment("blah").name("test").reconnectTime(5000L).id("1").data("foo"));
 		this.handler.assertSentObjectCount(3);
 		this.handler.assertObject(0, ":blah\nevent:test\nretry:5000\nid:1\ndata:", TEXT_PLAIN_UTF8);
@@ -125,7 +126,7 @@ public class SseEmitterTests {
 	}
 
 	@Test
-	public void sendEventFullWithTwoDataLinesInTheMiddle() throws Exception {
+	void sendEventFullWithTwoDataLinesInTheMiddle() throws Exception {
 		this.emitter.send(event().comment("blah").data("foo").data("bar").name("test").reconnectTime(5000L).id("1"));
 		this.handler.assertSentObjectCount(5);
 		this.handler.assertObject(0, ":blah\ndata:", TEXT_PLAIN_UTF8);
@@ -165,14 +166,14 @@ public class SseEmitterTests {
 		}
 
 		@Override
-		public void send(Object data, @Nullable MediaType mediaType) throws IOException {
+		public void send(Object data, @Nullable MediaType mediaType) {
 			this.objects.add(data);
 			this.mediaTypes.add(mediaType);
 			this.writeCount++;
 		}
 
 		@Override
-		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) throws IOException {
+		public void send(Set<ResponseBodyEmitter.DataWithMediaType> items) {
 			for (ResponseBodyEmitter.DataWithMediaType item : items) {
 				this.objects.add(item.getData());
 				this.mediaTypes.add(item.getMediaType());

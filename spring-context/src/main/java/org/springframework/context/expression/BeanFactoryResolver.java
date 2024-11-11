@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
 
 /**
- * EL bean resolver that operates against a Spring
- * {@link org.springframework.beans.factory.BeanFactory}.
+ * SpEL {@link BeanResolver} that operates against a Spring {@link BeanFactory}.
  *
  * @author Juergen Hoeller
  * @since 3.0.4
@@ -36,8 +35,8 @@ public class BeanFactoryResolver implements BeanResolver {
 
 
 	/**
-	 * Create a new {@link BeanFactoryResolver} for the given factory.
-	 * @param beanFactory the {@link BeanFactory} to resolve bean names against
+	 * Create a new {@code BeanFactoryResolver} for the given factory.
+	 * @param beanFactory the {@code BeanFactory} to resolve bean names against
 	 */
 	public BeanFactoryResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");

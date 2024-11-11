@@ -58,7 +58,7 @@ The following example shows a simple `MethodInterceptor` implementation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DebugInterceptor implements MethodInterceptor {
 
@@ -73,7 +73,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DebugInterceptor : MethodInterceptor {
 
@@ -139,7 +139,7 @@ The following example shows a before advice in Spring, which counts all method i
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class CountingBeforeAdvice implements MethodBeforeAdvice {
 
@@ -157,7 +157,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class CountingBeforeAdvice : MethodBeforeAdvice {
 
@@ -197,7 +197,7 @@ The following advice is invoked if a `RemoteException` is thrown (including from
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class RemoteThrowsAdvice implements ThrowsAdvice {
 
@@ -209,7 +209,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class RemoteThrowsAdvice : ThrowsAdvice {
 
@@ -228,7 +228,7 @@ arguments, and target object. The following advice is invoked if a `ServletExcep
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
@@ -240,7 +240,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ServletThrowsAdviceWithArguments : ThrowsAdvice {
 
@@ -259,7 +259,7 @@ methods can be combined in a single class. The following listing shows the final
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public static class CombinedThrowsAdvice implements ThrowsAdvice {
 
@@ -275,7 +275,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class CombinedThrowsAdvice : ThrowsAdvice {
 
@@ -326,7 +326,7 @@ not thrown exceptions:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class CountingAfterReturningAdvice implements AfterReturningAdvice {
 
@@ -345,7 +345,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class CountingAfterReturningAdvice : AfterReturningAdvice {
 
@@ -420,7 +420,7 @@ introduce the following interface to one or more objects:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Lockable {
 		void lock();
@@ -431,7 +431,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	interface Lockable {
 		fun lock()
@@ -480,7 +480,7 @@ The following example shows the example `LockMixin` class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
 
@@ -510,7 +510,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class LockMixin : DelegatingIntroductionInterceptor(), Lockable {
 
@@ -556,7 +556,7 @@ The following example shows our `LockMixinAdvisor` class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
@@ -568,7 +568,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class LockMixinAdvisor : DefaultIntroductionAdvisor(LockMixin(), Lockable::class.java)
 ----

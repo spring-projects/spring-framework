@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,11 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
@@ -78,7 +80,7 @@ public class DispatcherHandlerErrorTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(TestConfig.class);
 		context.refresh();
@@ -88,7 +90,7 @@ public class DispatcherHandlerErrorTests {
 
 
 	@Test
-	public void noHandler() {
+	void noHandler() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/does-not-exist"));
 		Mono<Void> mono = this.dispatcherHandler.handle(exchange);
 
@@ -106,7 +108,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void noStaticResource() {
+	void noStaticResource() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(StaticResourceConfig.class);
 		context.refresh();
@@ -128,7 +130,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void controllerReturnsMonoError() {
+	void controllerReturnsMonoError() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/error-signal"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -138,7 +140,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void controllerThrowsException() {
+	void controllerThrowsException() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/raise-exception"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -148,7 +150,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void unknownReturnType() {
+	void unknownReturnType() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-return-type"));
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
@@ -161,7 +163,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void responseBodyMessageConversionError() {
+	void responseBodyMessageConversionError() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.post("/request-body").accept(APPLICATION_JSON).body("body"));
 
@@ -173,7 +175,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void requestBodyError() {
+	void requestBodyError() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.post("/request-body").body(Mono.error(EXCEPTION)));
 
@@ -185,7 +187,7 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void webExceptionHandler() {
+	void webExceptionHandler() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/unknown-argument-type"));
 
 		List<WebExceptionHandler> handlers = Collections.singletonList(new ServerError500ExceptionHandler());
@@ -193,6 +195,14 @@ public class DispatcherHandlerErrorTests {
 		webHandler.handle(exchange).block(Duration.ofSeconds(5));
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@Test
+	void asyncRequestNotUsableFromExceptionHandler() {
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.post("/request-not-usable-on-exception-handling"));
+
+		StepVerifier.create(this.dispatcherHandler.handle(exchange)).verifyComplete();
 	}
 
 
@@ -248,6 +258,16 @@ public class DispatcherHandlerErrorTests {
 		@ResponseBody
 		public Publisher<String> requestBody(@RequestBody Publisher<String> body) {
 			return Mono.from(body).map(s -> "hello " + s);
+		}
+
+		@RequestMapping("/request-not-usable-on-exception-handling")
+		public void handle() throws Exception {
+			throw new IllegalAccessException();
+		}
+
+		@ExceptionHandler
+		public void handleException(IllegalAccessException ex) throws AsyncRequestNotUsableException {
+			throw new AsyncRequestNotUsableException("Simulated response failure");
 		}
 	}
 

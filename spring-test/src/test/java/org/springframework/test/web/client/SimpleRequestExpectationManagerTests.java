@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
- * Unit tests for {@link SimpleRequestExpectationManager}.
+ * Tests for {@link SimpleRequestExpectationManager}.
  *
  * @author Rossen Stoyanchev
  */
@@ -48,7 +48,7 @@ class SimpleRequestExpectationManagerTests {
 
 
 	@Test
-	void unexpectedRequest() throws Exception {
+	void unexpectedRequest() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> this.manager.validateRequest(createRequest(GET, "/foo")))
 			.withMessage("""
@@ -58,7 +58,7 @@ class SimpleRequestExpectationManagerTests {
 	}
 
 	@Test
-	void zeroExpectedRequests() throws Exception {
+	void zeroExpectedRequests() {
 		this.manager.verify();
 	}
 
@@ -94,7 +94,7 @@ class SimpleRequestExpectationManagerTests {
 		this.manager.expectRequest(min(1), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> this.manager.verify())
+			.isThrownBy(this.manager::verify)
 			.withMessage("""
 					Further request(s) expected leaving 1 unsatisfied expectation(s).
 					1 request(s) executed:
@@ -144,7 +144,7 @@ class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> this.manager.verify())
+			.isThrownBy(this.manager::verify)
 			.withMessageContaining("""
 					3 request(s) executed:
 					GET /foo
@@ -154,7 +154,7 @@ class SimpleRequestExpectationManagerTests {
 	}
 
 	@Test
-	void repeatedRequestsNotInOrder() throws Exception {
+	void repeatedRequestsNotInOrder() {
 		this.manager.expectRequest(twice(), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.expectRequest(twice(), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.expectRequest(twice(), requestTo("/baz")).andExpect(method(GET)).andRespond(withSuccess());

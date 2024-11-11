@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 /**
- * Unit tests for {@link MockRestRequestMatchers}.
+ * Tests for {@link MockRestRequestMatchers}.
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
@@ -210,7 +210,7 @@ class MockRestRequestMatchersTests {
 	}
 
 	@Test
-	void headerListDoesntHideHeaderWithSingleMatcher() throws IOException {
+	void headerListDoesNotHideHeaderWithSingleMatcher() throws IOException {
 		this.request.getHeaders().put("foo", List.of("bar", "baz"));
 
 		MockRestRequestMatchers.header("foo", equalTo("bar")).match(this.request);
@@ -340,7 +340,7 @@ class MockRestRequestMatchersTests {
 	}
 
 	@Test
-	void queryParamListDoesntHideQueryParamWithSingleMatcher() throws IOException {
+	void queryParamListDoesNotHideQueryParamWithSingleMatcher() throws IOException {
 		this.request.setURI(URI.create("http://www.foo.example/a?foo=bar&foo=baz"));
 
 		MockRestRequestMatchers.queryParam("foo", equalTo("bar")).match(this.request);

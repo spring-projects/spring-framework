@@ -83,7 +83,7 @@ public class DefaultConversionService extends GenericConversionService {
 	/**
 	 * Add converters appropriate for most environments.
 	 * @param converterRegistry the registry of converters to add to
-	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
+	 * (must also be castable to ConversionService, for example, being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 */
 	public static void addDefaultConverters(ConverterRegistry converterRegistry) {
@@ -104,7 +104,7 @@ public class DefaultConversionService extends GenericConversionService {
 	/**
 	 * Add common collection converters.
 	 * @param converterRegistry the registry of converters to add to
-	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
+	 * (must also be castable to ConversionService, for example, being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 * @since 4.2.3
 	 */

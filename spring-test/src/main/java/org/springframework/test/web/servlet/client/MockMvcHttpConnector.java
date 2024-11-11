@@ -54,6 +54,7 @@ import org.springframework.test.web.reactive.server.MockServerClientHttpResponse
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -134,7 +135,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 		// Initialize the client request
 		requestCallback.apply(httpRequest).block(TIMEOUT);
 
-		MockHttpServletRequestBuilder requestBuilder =
+		AbstractMockHttpServletRequestBuilder<?> requestBuilder =
 				initRequestBuilder(httpMethod, uri, httpRequest, contentRef.get());
 
 		requestBuilder.headers(httpRequest.getHeaders());
@@ -149,7 +150,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 		return requestBuilder;
 	}
 
-	private MockHttpServletRequestBuilder initRequestBuilder(
+	private AbstractMockHttpServletRequestBuilder<?> initRequestBuilder(
 			HttpMethod httpMethod, URI uri, MockClientHttpRequest httpRequest, @Nullable byte[] bytes) {
 
 		String contentType = httpRequest.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
@@ -208,6 +209,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 							.path(cookie.getPath())
 							.secure(cookie.getSecure())
 							.httpOnly(cookie.isHttpOnly())
+							.partitioned(cookie.getAttribute("Partitioned") != null)
 							.sameSite(cookie.getAttribute("samesite"))
 							.build();
 			clientResponse.getCookies().add(httpCookie.getName(), httpCookie);

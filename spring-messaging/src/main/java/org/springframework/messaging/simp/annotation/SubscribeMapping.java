@@ -28,7 +28,7 @@ import org.springframework.messaging.handler.annotation.MessageMappingReflective
 /**
  * Annotation for mapping subscription messages onto specific handler methods based
  * on the destination of a subscription. Supported with STOMP over WebSocket only
- * (e.g. STOMP SUBSCRIBE frame).
+ * (for example, STOMP SUBSCRIBE frame).
  *
  * <p>This is a method-level annotation that can be combined with a type-level
  * {@link org.springframework.messaging.handler.annotation.MessageMapping @MessageMapping}.
@@ -43,7 +43,7 @@ import org.springframework.messaging.handler.annotation.MessageMappingReflective
  * user and does not pass through the message broker. This is useful for
  * implementing a request-reply pattern.
  *
- * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * <p><b>NOTE:</b> When using controller interfaces (for example, for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
  * {@code @MessageMapping} and {@code @SubscribeMapping} - on
  * the controller <i>interface</i> rather than on the implementation class.
@@ -62,9 +62,9 @@ public @interface SubscribeMapping {
 
 	/**
 	 * Destination-based mapping expressed by this annotation.
-	 * <p>This is the destination of the STOMP message (e.g. {@code "/positions"}).
-	 * Ant-style path patterns (e.g. {@code "/price.stock.*"}) and path template
-	 * variables (e.g. <code>"/price.stock.{ticker}"</code>) are also supported.
+	 * <p>This is the destination of the STOMP message (for example, {@code "/positions"}).
+	 * Ant-style path patterns (for example, {@code "/price.stock.*"}) and path template
+	 * variables (for example, <code>"/price.stock.{ticker}"</code>) are also supported.
 	 */
 	String[] value() default {};
 

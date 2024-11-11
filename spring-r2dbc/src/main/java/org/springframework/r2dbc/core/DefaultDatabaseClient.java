@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -309,6 +310,18 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@Override
+		public GenericExecuteSpec bindValues(List<?> source) {
+			assertNotPreparedOperation();
+			Assert.notNull(source, "Source list must not be null");
+			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
+			ListIterator<?> listIterator = source.listIterator();
+			while (listIterator.hasNext()) {
+				byIndex.put(listIterator.nextIndex(), resolveParameter(listIterator.next()));
+			}
+			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
+		}
+
+		@Override
 		public GenericExecuteSpec bindValues(Map<String, ?> source) {
 			assertNotPreparedOperation();
 			Assert.notNull(source, "Parameter source must not be null");
@@ -519,27 +532,24 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			switch (method.getName()) {
-				case "equals":
-					// Only consider equal when proxies are identical.
-					return proxy == args[0];
-				case "hashCode":
-					// Use hashCode of PersistenceManager proxy.
-					return System.identityHashCode(proxy);
-				case "unwrap":
-					return this.target;
-				case "close":
-					// Handle close method: suppress, not valid.
-					return Mono.error(new UnsupportedOperationException("Close is not supported!"));
-			}
-
-			// Invoke method on target Connection.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			return switch (method.getName()) {
+				// Only consider equal when proxies are identical.
+				case "equals" -> proxy == args[0];
+				// Use hashCode of Connection proxy.
+				case "hashCode" -> System.identityHashCode(proxy);
+				case "unwrap" -> this.target;
+				// Handle close method: suppress, not valid.
+				case "close" -> Mono.error(new UnsupportedOperationException("Close is not supported!"));
+				default -> {
+					try {
+						// Invoke method on target Connection.
+						yield method.invoke(this.target, args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
+				}
+			};
 		}
 	}
 

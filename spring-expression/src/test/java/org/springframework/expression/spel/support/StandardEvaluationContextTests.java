@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,12 @@
 package org.springframework.expression.spel.support;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.MethodResolver;
-import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.TypeConverter;
-import org.springframework.expression.TypeLocator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -51,21 +45,18 @@ class StandardEvaluationContextTests {
 		assertThat(target.getTypeLocator()).isSameAs(this.evaluationContext.getTypeLocator());
 		assertThat(target.getTypeConverter()).isSameAs(this.evaluationContext.getTypeConverter());
 		assertThat(target.getOperatorOverloader()).isSameAs(this.evaluationContext.getOperatorOverloader());
-		assertThat(target.getPropertyAccessors()).satisfies(hasSameElements(
-				this.evaluationContext.getPropertyAccessors()));
-		assertThat(target.getConstructorResolvers()).satisfies(hasSameElements(
-				this.evaluationContext.getConstructorResolvers()));
-		assertThat(target.getMethodResolvers()).satisfies(hasSameElements(
-				this.evaluationContext.getMethodResolvers()));
+		assertThat(target.getPropertyAccessors()).hasSameElementsAs(this.evaluationContext.getPropertyAccessors());
+		assertThat(target.getConstructorResolvers()).hasSameElementsAs(this.evaluationContext.getConstructorResolvers());
+		assertThat(target.getMethodResolvers()).hasSameElementsAs(this.evaluationContext.getMethodResolvers());
 	}
 
 	@Test
 	void applyDelegatesToSetOverrideDelegatesInTarget() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
-		target.setBeanResolver(mock(BeanResolver.class));
-		target.setTypeLocator(mock(TypeLocator.class));
-		target.setTypeConverter(mock(TypeConverter.class));
-		target.setOperatorOverloader(mock(OperatorOverloader.class));
+		target.setBeanResolver(mock());
+		target.setTypeLocator(mock());
+		target.setTypeConverter(mock());
+		target.setOperatorOverloader(mock());
 		target.setPropertyAccessors(new ArrayList<>());
 		target.setConstructorResolvers(new ArrayList<>());
 		target.setMethodResolvers(new ArrayList<>());
@@ -75,19 +66,16 @@ class StandardEvaluationContextTests {
 		assertThat(target.getTypeLocator()).isSameAs(this.evaluationContext.getTypeLocator());
 		assertThat(target.getTypeConverter()).isSameAs(this.evaluationContext.getTypeConverter());
 		assertThat(target.getOperatorOverloader()).isSameAs(this.evaluationContext.getOperatorOverloader());
-		assertThat(target.getPropertyAccessors()).satisfies(hasSameElements(
-				this.evaluationContext.getPropertyAccessors()));
-		assertThat(target.getConstructorResolvers()).satisfies(hasSameElements(
-				this.evaluationContext.getConstructorResolvers()));
-		assertThat(target.getMethodResolvers()).satisfies(hasSameElements(
-				this.evaluationContext.getMethodResolvers()));
+		assertThat(target.getPropertyAccessors()).hasSameElementsAs(this.evaluationContext.getPropertyAccessors());
+		assertThat(target.getConstructorResolvers()).hasSameElementsAs(this.evaluationContext.getConstructorResolvers());
+		assertThat(target.getMethodResolvers()).hasSameElementsAs(this.evaluationContext.getMethodResolvers());
 	}
 
 	@Test
 	void applyDelegatesToMakesACopyOfPropertyAccessors() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
 		this.evaluationContext.applyDelegatesTo(target);
-		PropertyAccessor propertyAccessor = mock(PropertyAccessor.class);
+		PropertyAccessor propertyAccessor = mock();
 		this.evaluationContext.getPropertyAccessors().add(propertyAccessor);
 		assertThat(target.getPropertyAccessors()).doesNotContain(propertyAccessor);
 	}
@@ -96,7 +84,7 @@ class StandardEvaluationContextTests {
 	void applyDelegatesToMakesACopyOfConstructorResolvers() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
 		this.evaluationContext.applyDelegatesTo(target);
-		ConstructorResolver methodResolver = mock(ConstructorResolver.class);
+		ConstructorResolver methodResolver = mock();
 		this.evaluationContext.getConstructorResolvers().add(methodResolver);
 		assertThat(target.getConstructorResolvers()).doesNotContain(methodResolver);
 	}
@@ -105,18 +93,9 @@ class StandardEvaluationContextTests {
 	void applyDelegatesToMakesACopyOfMethodResolvers() {
 		StandardEvaluationContext target = new StandardEvaluationContext();
 		this.evaluationContext.applyDelegatesTo(target);
-		MethodResolver methodResolver = mock(MethodResolver.class);
+		MethodResolver methodResolver = mock();
 		this.evaluationContext.getMethodResolvers().add(methodResolver);
 		assertThat(target.getMethodResolvers()).doesNotContain(methodResolver);
-	}
-
-	private Consumer<List<?>> hasSameElements(List<?> candidates) {
-		return actual -> {
-			assertThat(actual.size()).isEqualTo(candidates.size());
-			for (int i = 0; i < candidates.size(); i++) {
-				assertThat(candidates.get(i)).isSameAs(actual.get(i));
-			}
-		};
 	}
 
 }

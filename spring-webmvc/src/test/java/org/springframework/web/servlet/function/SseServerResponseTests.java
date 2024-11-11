@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,10 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link ServerResponse.SseBuilder}.
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
 class SseServerResponseTests {
 
@@ -109,11 +111,13 @@ class SseServerResponseTests {
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 
-		String expected = "data:{\n" +
-				"data:  \"name\" : \"John Doe\",\n" +
-				"data:  \"age\" : 42\n" +
-				"data:}\n" +
-				"\n";
+		String expected = """
+				data:{
+				data:  "name" : "John Doe",
+				data:  "age" : 42
+				data:}
+
+				""";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 
@@ -146,6 +150,26 @@ class SseServerResponseTests {
 				data:data
 
 				""";
+		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
+	}
+
+	@Test
+	void sendWithoutData() throws Exception {
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.event("custom").send();
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		ServerResponse.Context context = Collections::emptyList;
+
+		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(mav).isNull();
+
+		String expected = "event:custom\n\n";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 

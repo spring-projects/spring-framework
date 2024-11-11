@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,25 +33,25 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Stephane Nicoll
  */
-public class GenericMessageConverterTests {
+class GenericMessageConverterTests {
 
 	private final ConversionService conversionService = new DefaultConversionService();
 	private final GenericMessageConverter converter = new GenericMessageConverter(conversionService);
 
 	@Test
-	public void fromMessageWithConversion() {
+	void fromMessageWithConversion() {
 		Message<String> content = MessageBuilder.withPayload("33").build();
 		assertThat(converter.fromMessage(content, Integer.class)).isEqualTo(33);
 	}
 
 	@Test
-	public void fromMessageNoConverter() {
+	void fromMessageNoConverter() {
 		Message<Integer> content = MessageBuilder.withPayload(1234).build();
 		assertThat(converter.fromMessage(content, Locale.class)).as("No converter from integer to locale").isNull();
 	}
 
 	@Test
-	public void fromMessageWithFailedConversion() {
+	void fromMessageWithFailedConversion() {
 		Message<String> content = MessageBuilder.withPayload("test not a number").build();
 		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
 				converter.fromMessage(content, Integer.class))

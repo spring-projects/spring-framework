@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class MethodMatchersTests {
+class MethodMatchersTests {
 
 	private static final Method TEST_METHOD = mock(Method.class);
 
@@ -56,19 +56,19 @@ public class MethodMatchersTests {
 
 
 	@Test
-	public void testDefaultMatchesAll() throws Exception {
+	void testDefaultMatchesAll() {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertThat(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class)).isTrue();
 		assertThat(defaultMm.matches(ITESTBEAN_SETAGE, TestBean.class)).isTrue();
 	}
 
 	@Test
-	public void testMethodMatcherTrueSerializable() throws Exception {
+	void testMethodMatcherTrueSerializable() throws Exception {
 		assertThat(MethodMatcher.TRUE).isSameAs(SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE));
 	}
 
 	@Test
-	public void testSingle() throws Exception {
+	void testSingle() {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertThat(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class)).isTrue();
 		assertThat(defaultMm.matches(ITESTBEAN_SETAGE, TestBean.class)).isTrue();
@@ -80,7 +80,7 @@ public class MethodMatchersTests {
 
 
 	@Test
-	public void testDynamicAndStaticMethodMatcherIntersection() throws Exception {
+	void testDynamicAndStaticMethodMatcherIntersection() {
 		MethodMatcher mm1 = MethodMatcher.TRUE;
 		MethodMatcher mm2 = new TestDynamicMethodMatcherWhichMatches();
 		MethodMatcher intersection = MethodMatchers.intersection(mm1, mm2);
@@ -95,7 +95,7 @@ public class MethodMatchersTests {
 	}
 
 	@Test
-	public void testStaticMethodMatcherUnion() throws Exception {
+	void testStaticMethodMatcherUnion() {
 		MethodMatcher getterMatcher = new StartsWithMatcher("get");
 		MethodMatcher setterMatcher = new StartsWithMatcher("set");
 		MethodMatcher union = MethodMatchers.union(getterMatcher, setterMatcher);
@@ -107,11 +107,11 @@ public class MethodMatchersTests {
 	}
 
 	@Test
-	public void testUnionEquals() {
+	void testUnionEquals() {
 		MethodMatcher first = MethodMatchers.union(MethodMatcher.TRUE, MethodMatcher.TRUE);
 		MethodMatcher second = new ComposablePointcut(MethodMatcher.TRUE).union(new ComposablePointcut(MethodMatcher.TRUE)).getMethodMatcher();
-		assertThat(first.equals(second)).isTrue();
-		assertThat(second.equals(first)).isTrue();
+		assertThat(first).isEqualTo(second);
+		assertThat(second).isEqualTo(first);
 	}
 
 	@Test

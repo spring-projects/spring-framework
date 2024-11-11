@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for {@link DefaultStompSession}.
+ * Tests for {@link DefaultStompSession}.
  *
  * @author Rossen Stoyanchev
  */
@@ -83,7 +83,7 @@ public class DefaultStompSessionTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.connectHeaders = new StompHeaders();
 		this.session = new DefaultStompSession(this.sessionHandler, this.connectHeaders);
 		this.session.setMessageConverter(
@@ -97,7 +97,7 @@ public class DefaultStompSessionTests {
 
 
 	@Test
-	public void afterConnected() {
+	void afterConnected() {
 		assertThat(this.session.isConnected()).isFalse();
 		this.connectHeaders.setHost("my-host");
 		this.connectHeaders.setHeartbeat(new long[] {11, 12});
@@ -127,7 +127,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void afterConnectFailure() {
+	void afterConnectFailure() {
 		IllegalStateException exception = new IllegalStateException("simulated exception");
 		this.session.afterConnectFailure(exception);
 		verify(this.sessionHandler).handleTransportError(this.session, exception);
@@ -135,7 +135,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void handleConnectedFrame() {
+	void handleConnectedFrame() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -153,7 +153,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void heartbeatValues() {
+	void heartbeatValues() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -175,7 +175,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void heartbeatNotSupportedByServer() {
+	void heartbeatNotSupportedByServer() {
 		this.session.afterConnected(this.connection);
 		verify(this.connection).sendAsync(any());
 
@@ -191,7 +191,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void heartbeatTasks() {
+	void heartbeatTasks() {
 		this.session.afterConnected(this.connection);
 		verify(this.connection).sendAsync(any());
 
@@ -221,12 +221,12 @@ public class DefaultStompSessionTests {
 
 		reset(this.sessionHandler);
 		readTask.run();
-		verify(this.sessionHandler).handleTransportError(same(this.session), any(IllegalStateException.class));
+		verify(this.sessionHandler).handleTransportError(same(this.session), any(ConnectionLostException.class));
 		verifyNoMoreInteractions(this.sessionHandler);
 	}
 
 	@Test
-	public void handleErrorFrame() {
+	void handleErrorFrame() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
 		accessor.addNativeHeader("foo", "bar");
@@ -245,7 +245,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void handleErrorFrameWithEmptyPayload() {
+	void handleErrorFrameWithEmptyPayload() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.addNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
@@ -257,7 +257,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void handleErrorFrameWithConversionException() {
+	void handleErrorFrameWithConversionException() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setContentType(MimeTypeUtils.APPLICATION_JSON);
 		accessor.addNativeHeader("foo", "bar");
@@ -276,7 +276,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void handleMessageFrame() {
+	void handleMessageFrame() {
 		this.session.afterConnected(this.connection);
 
 		StompFrameHandler frameHandler = mock();
@@ -303,7 +303,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void handleMessageFrameWithConversionException() {
+	void handleMessageFrameWithConversionException() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -333,7 +333,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void handleFailure() {
+	void handleFailure() {
 		IllegalStateException exception = new IllegalStateException("simulated exception");
 		this.session.handleFailure(exception);
 
@@ -342,7 +342,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void afterConnectionClosed() {
+	void afterConnectionClosed() {
 		this.session.afterConnectionClosed();
 
 		verify(this.sessionHandler).handleTransportError(same(this.session), any(ConnectionLostException.class));
@@ -350,7 +350,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void send() {
+	void send() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -373,7 +373,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void sendWithReceipt() {
+	void sendWithReceipt() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -416,7 +416,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void sendWithConversionException() {
+	void sendWithConversionException() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -430,7 +430,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void sendWithExecutionException() {
+	void sendWithExecutionException() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -444,7 +444,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void subscribe() {
+	void subscribe() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -463,7 +463,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void subscribeWithHeaders() {
+	void subscribeWithHeaders() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -489,7 +489,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void unsubscribe() {
+	void unsubscribe() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -536,7 +536,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void ack() {
+	void ack() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -553,7 +553,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void nack() {
+	void nack() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -570,7 +570,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void receiptReceived() {
+	void receiptReceived() {
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(mock());
 
@@ -586,7 +586,7 @@ public class DefaultStompSessionTests {
 			receivedHeaders.set(receiptHeaders);
 		});
 
-		assertThat((Object) received.get()).isNull();
+		assertThat(received.get()).isNull();
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
 		accessor.setReceiptId("my-receipt");
@@ -597,12 +597,11 @@ public class DefaultStompSessionTests {
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
 		assertThat(receivedHeaders.get()).isNotNull();
-		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
-		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
+		assertThat(receivedHeaders.get().get("foo")).containsExactly("bar");
 	}
 
 	@Test
-	public void receiptReceivedBeforeTaskAdded() {
+	void receiptReceivedBeforeTaskAdded() {
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(mock());
 
@@ -628,8 +627,7 @@ public class DefaultStompSessionTests {
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
 		assertThat(receivedHeaders.get()).isNotNull();
-		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
-		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
+		assertThat(receivedHeaders.get().get("foo")).containsExactly("bar");
 	}
 
 	@Test
@@ -656,7 +654,7 @@ public class DefaultStompSessionTests {
 		Runnable scheduledTask = taskCaptor.getValue();
 		assertThat(scheduledTask).isNotNull();
 
-		assertThat((Object) notReceived.get()).isNull();
+		assertThat(notReceived.get()).isNull();
 
 		scheduledTask.run();
 		assertThat(notReceived.get()).isTrue();
@@ -665,7 +663,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void disconnect() {
+	void disconnect() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -675,7 +673,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void disconnectWithHeaders() {
+	void disconnectWithHeaders() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -688,8 +686,7 @@ public class DefaultStompSessionTests {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		headers = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		assertThat(headers).as(headers.toString()).hasSize(1);
-		assertThat(headers.get("foo")).hasSize(1);
-		assertThat(headers.get("foo").get(0)).isEqualTo("bar");
+		assertThat(headers.get("foo")).containsExactly("bar");
 
 		assertThat(this.session.isConnected()).isFalse();
 		verifyNoMoreInteractions(this.sessionHandler);

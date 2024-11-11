@@ -96,21 +96,25 @@ public class WebSocketSessionDecorator implements WebSocketSession {
 	}
 
 	@Override
+	@Nullable
 	public Principal getPrincipal() {
 		return this.delegate.getPrincipal();
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return this.delegate.getLocalAddress();
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.delegate.getRemoteAddress();
 	}
 
 	@Override
+	@Nullable
 	public String getAcceptedProtocol() {
 		return this.delegate.getAcceptedProtocol();
 	}

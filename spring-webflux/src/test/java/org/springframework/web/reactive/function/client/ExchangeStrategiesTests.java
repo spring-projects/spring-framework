@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,32 +23,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ExchangeStrategiesTests {
+class ExchangeStrategiesTests {
 
 	@Test
-	public void empty() {
+	void empty() {
 		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
-		assertThat(strategies.messageReaders().isEmpty()).isTrue();
-		assertThat(strategies.messageWriters().isEmpty()).isTrue();
+		assertThat(strategies.messageReaders()).isEmpty();
+		assertThat(strategies.messageWriters()).isEmpty();
 	}
 
 	@Test
-	public void withDefaults() {
+	void withDefaults() {
 		ExchangeStrategies strategies = ExchangeStrategies.withDefaults();
-		assertThat(strategies.messageReaders().isEmpty()).isFalse();
-		assertThat(strategies.messageWriters().isEmpty()).isFalse();
+		assertThat(strategies.messageReaders()).isNotEmpty();
+		assertThat(strategies.messageWriters()).isNotEmpty();
 	}
 
 	@Test
 	@SuppressWarnings("deprecation")
 	public void mutate() {
 		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
-		assertThat(strategies.messageReaders().isEmpty()).isTrue();
-		assertThat(strategies.messageWriters().isEmpty()).isTrue();
+		assertThat(strategies.messageReaders()).isEmpty();
+		assertThat(strategies.messageWriters()).isEmpty();
 
 		ExchangeStrategies mutated = strategies.mutate().codecs(codecs -> codecs.registerDefaults(true)).build();
-		assertThat(mutated.messageReaders().isEmpty()).isFalse();
-		assertThat(mutated.messageWriters().isEmpty()).isFalse();
+		assertThat(mutated.messageReaders()).isNotEmpty();
+		assertThat(mutated.messageWriters()).isNotEmpty();
 	}
 
 }

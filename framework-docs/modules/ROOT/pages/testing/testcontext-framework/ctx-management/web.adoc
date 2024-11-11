@@ -29,11 +29,12 @@ The remaining examples in this section show some of the various configuration op
 loading a `WebApplicationContext`. The following example shows the TestContext
 framework's support for convention over configuration:
 
+.Conventions
 [tabs]
 ======
-Conventions::
+Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 
@@ -50,7 +51,7 @@ Conventions::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 
@@ -76,11 +77,12 @@ as the `WacTests` class or static nested `@Configuration` classes).
 The following example shows how to explicitly declare a resource base path with
 `@WebAppConfiguration` and an XML resource location with `@ContextConfiguration`:
 
+.Default resource semantics
 [tabs]
 ======
-Default resource semantics::
+Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 
@@ -96,7 +98,7 @@ Default resource semantics::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 
@@ -118,11 +120,12 @@ whereas `@ContextConfiguration` resource locations are classpath based.
 The following example shows that we can override the default resource semantics for both
 annotations by specifying a Spring resource prefix:
 
+.Explicit resource semantics
 [tabs]
 ======
-Explicit resource semantics::
+Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 
@@ -138,7 +141,7 @@ Explicit resource semantics::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 

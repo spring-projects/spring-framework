@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.util.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -133,7 +134,7 @@ abstract class AbstractStaxXMLReaderTests {
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 
 		AbstractStaxXMLReader staxXmlReader = createStaxXmlReader(
-				new ByteArrayInputStream(xml.getBytes("UTF-8")));
+				new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
 
 		SAXSource source = new SAXSource(staxXmlReader, new InputSource());
 		DOMResult result = new DOMResult();
@@ -243,7 +244,7 @@ abstract class AbstractStaxXMLReaderTests {
 	private static class CopyCharsAnswer implements Answer<Object> {
 
 		@Override
-		public Object answer(InvocationOnMock invocation) throws Throwable {
+		public Object answer(InvocationOnMock invocation) {
 			char[] chars = (char[]) invocation.getArguments()[0];
 			char[] copy = new char[chars.length];
 			System.arraycopy(chars, 0, copy, 0, chars.length);

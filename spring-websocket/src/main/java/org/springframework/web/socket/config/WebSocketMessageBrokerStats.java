@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -47,11 +48,12 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * The frequency of logging can be changed via {@link #setLoggingPeriod(long)}.
  *
  * <p>This class is declared as a Spring bean by the above configuration with the
- * name "webSocketMessageBrokerStats" and can be easily exported to JMX, e.g. with
+ * name "webSocketMessageBrokerStats" and can be easily exported to JMX, for example, with
  * the {@link org.springframework.jmx.export.MBeanExporter MBeanExporter}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 4.1
  */
 public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
@@ -160,23 +162,61 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 
 	/**
 	 * Get stats about WebSocket sessions.
+	 * @deprecated as of 6.2 in favor of {@link #getWebSocketSessionStats()}.
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public String getWebSocketSessionStatsInfo() {
 		return (this.webSocketHandler != null ? this.webSocketHandler.getStatsInfo() : "null");
 	}
 
 	/**
-	 * Get stats about STOMP-related WebSocket message processing.
+	 * Get stats about WebSocket sessions.
+	 * Can return {@code null} if no {@link #setSubProtocolWebSocketHandler(SubProtocolWebSocketHandler) WebSocket handler}
+	 * is configured.
+	 * @since 6.2
 	 */
+	@Nullable
+	public SubProtocolWebSocketHandler.Stats getWebSocketSessionStats() {
+		return (this.webSocketHandler != null ? this.webSocketHandler.getStats() : null);
+	}
+
+	/**
+	 * Get stats about STOMP-related WebSocket message processing.
+	 * @deprecated as of 6.2 in favor of {@link #getStompSubProtocolStats()}.
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public String getStompSubProtocolStatsInfo() {
 		return (this.stompSubProtocolHandler != null ? this.stompSubProtocolHandler.getStatsInfo() : "null");
 	}
 
 	/**
-	 * Get stats about STOMP broker relay (when using a full-featured STOMP broker).
+	 * Get stats about STOMP-related WebSocket message processing.
+	 * Can return {@code null} if no {@link SubProtocolHandler} was found.
+	 * @since 6.2
 	 */
+	@Nullable
+	public StompSubProtocolHandler.Stats getStompSubProtocolStats() {
+		return (this.stompSubProtocolHandler != null ? this.stompSubProtocolHandler.getStats() : null);
+	}
+
+	/**
+	 * Get stats about STOMP broker relay (when using a full-featured STOMP broker).
+	 * @deprecated as of 6.2 in favor of {@link #getStompBrokerRelayStats()}.
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public String getStompBrokerRelayStatsInfo() {
 		return (this.stompBrokerRelay != null ? this.stompBrokerRelay.getStatsInfo() : "null");
+	}
+
+	/**
+	 * Get stats about STOMP broker relay (when using a full-featured STOMP broker).
+	 * Can return {@code null} if no {@link #setStompBrokerRelay(StompBrokerRelayMessageHandler) STOMP broker relay}
+	 * is configured.
+	 * @since 6.2
+	 */
+	@Nullable
+	public StompBrokerRelayMessageHandler.Stats getStompBrokerRelayStats() {
+		return (this.stompBrokerRelay != null ? this.stompBrokerRelay.getStats() : null);
 	}
 
 	/**
@@ -200,9 +240,15 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 		if (this.sockJsTaskScheduler == null) {
 			return "null";
 		}
-		if (this.sockJsTaskScheduler instanceof ThreadPoolTaskScheduler threadPoolTaskScheduler) {
-			return getExecutorStatsInfo(threadPoolTaskScheduler.getScheduledThreadPoolExecutor());
+
+		if (!(this.sockJsTaskScheduler instanceof SchedulingTaskExecutor)) {
+			return "thread-per-task";
 		}
+
+		if (this.sockJsTaskScheduler instanceof ThreadPoolTaskScheduler tpts) {
+			return getExecutorStatsInfo(tpts.getScheduledThreadPoolExecutor());
+		}
+
 		return "unknown";
 	}
 
@@ -211,8 +257,12 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 			return "null";
 		}
 
-		if (executor instanceof ThreadPoolTaskExecutor threadPoolTaskScheduler) {
-			executor = threadPoolTaskScheduler.getThreadPoolExecutor();
+		if (!(executor instanceof SchedulingTaskExecutor) && (executor instanceof TaskExecutor)) {
+			return "thread-per-task";
+		}
+
+		if (executor instanceof ThreadPoolTaskExecutor tpte) {
+			executor = tpte.getThreadPoolExecutor();
 		}
 
 		if (executor instanceof ThreadPoolExecutor) {
@@ -231,6 +281,7 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public String toString() {
 		return "WebSocketSession[" + getWebSocketSessionStatsInfo() + "]" +
 				", stompSubProtocol[" + getStompSubProtocolStatsInfo() + "]" +

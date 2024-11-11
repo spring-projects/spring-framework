@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -309,8 +308,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		Method testMethod = (methodLevel ? testContext.getTestMethod() : null);
 
 		String[] scripts = getScripts(sql, testContext.getTestClass(), testMethod, classLevel);
+		ApplicationContext applicationContext = testContext.getApplicationContext();
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
-				testContext.getApplicationContext(), scripts);
+				applicationContext, applicationContext.getEnvironment(), scripts);
 		for (String stmt : sql.statements()) {
 			if (StringUtils.hasText(stmt)) {
 				stmt = stmt.trim();
@@ -363,7 +363,6 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		}
 	}
 
-	@NonNull
 	private ResourceDatabasePopulator createDatabasePopulator(MergedSqlConfig mergedSqlConfig) {
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
@@ -414,6 +413,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Detect a default SQL script by implementing the algorithm defined in
 	 * {@link Sql#scripts}.
 	 */
+	@SuppressWarnings("NullAway")
 	private String detectDefaultScript(Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
 		Assert.state(classLevel || testMethod != null, "Method-level @Sql requires a testMethod");
 

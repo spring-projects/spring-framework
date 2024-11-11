@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -61,11 +63,13 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.list;
 
 /**
  * Reproduction tests cornering various reported SpEL issues.
@@ -840,16 +844,10 @@ class SpelReproTests extends AbstractExpressionTests {
 	void customStaticFunctions_SPR9038() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		List<MethodResolver> methodResolvers = new ArrayList<>();
-		methodResolvers.add(new ReflectiveMethodResolver() {
+		List<MethodResolver> methodResolvers = List.of(new ReflectiveMethodResolver() {
 			@Override
 			protected Method[] getMethods(Class<?> type) {
-				try {
-					return new Method[] {Integer.class.getDeclaredMethod("parseInt", String.class, Integer.TYPE)};
-				}
-				catch (NoSuchMethodException ex) {
-					return new Method[0];
-				}
+				return new Method[] {ReflectionUtils.findMethod(Integer.class, "parseInt", String.class, int.class)};
 			}
 		});
 
@@ -1328,7 +1326,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		assertThat(Array.get(result, 2)).isEqualTo(XYZ.Z);
 	}
 
-	@Test
+	@Test  // https://github.com/spring-projects/spring-framework/issues/15119
 	void SPR10486() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1373,11 +1371,8 @@ class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("new java.util.ArrayList(#root)");
 		Object value = expr.getValue(coll);
-		assertThat(value).isInstanceOf(ArrayList.class);
-		@SuppressWarnings("rawtypes")
-		ArrayList list = (ArrayList) value;
-		assertThat(list.get(0)).isEqualTo("one");
-		assertThat(list.get(1)).isEqualTo("two");
+		assertThat(value).isInstanceOf(ArrayList.class)
+				.asInstanceOf(InstanceOfAssertFactories.list(String.class)).containsExactly("one", "two");
 	}
 
 	@Test
@@ -1442,14 +1437,20 @@ class SpelReproTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(new NamedUser())).isEqualTo(NamedUser.class.getName());
 	}
 
-	@Test
-	@SuppressWarnings("rawtypes")
-	void SPR12522() {
+	@Test  // gh-17127, SPR-12522
+	void arraysAsListWithNoArguments() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(java.util.Arrays).asList()");
+		List<?> value = expression.getValue(List.class);
+		assertThat(value).isEmpty();
+	}
+
+	@Test  // gh-33013
+	void arraysAsListWithSingleEmptyStringArgument() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
-		Object value = expression.getValue();
-		assertThat(value).isInstanceOf(List.class);
-		assertThat(((List) value).isEmpty()).isTrue();
+		List<?> value = expression.getValue(List.class);
+		assertThat(value).asInstanceOf(list(String.class)).containsExactly("");
 	}
 
 	@Test
@@ -1681,12 +1682,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		public String tryToInvokeWithNull3(Integer value, String... strings) {
 			StringBuilder sb = new StringBuilder();
 			for (String string : strings) {
-				if (string == null) {
-					sb.append("null");
-				}
-				else {
-					sb.append(string);
-				}
+				sb.append(Objects.requireNonNullElse(string, "null"));
 			}
 			return sb.toString();
 		}
@@ -1721,23 +1717,23 @@ class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return true;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			((Map<String, Object>) target).put(name, newValue);
 		}
 	}
@@ -1779,19 +1775,13 @@ class SpelReproTests extends AbstractExpressionTests {
 
 		@Override
 		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-			if (beanName.equals("foo")) {
-				return "custard";
-			}
-			else if (beanName.equals("foo.bar")) {
-				return "trouble";
-			}
-			else if (beanName.equals("&foo")) {
-				return "foo factory";
-			}
-			else if (beanName.equals("goo")) {
-				throw new AccessException("DONT ASK ME ABOUT GOO");
-			}
-			return null;
+			return switch (beanName) {
+				case "foo" -> "custard";
+				case "foo.bar" -> "trouble";
+				case "&foo" -> "foo factory";
+				case "goo" -> throw new AccessException("DONT ASK ME ABOUT GOO");
+				default -> null;
+			};
 		}
 	}
 
@@ -2023,12 +2013,12 @@ class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, Object target, String name) {
 			return getMap(target).containsKey(name);
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return getMap(target).containsKey(name);
 		}
 
@@ -2038,12 +2028,12 @@ class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) {
 			return new TypedValue(getMap(target).get(name));
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			getMap(target).put(name, (String) newValue);
 		}
 	}
@@ -2261,7 +2251,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
+		public Object resolve(EvaluationContext context, String beanName) {
 			return (beanName.equals("bean") ? this : null);
 		}
 	}
@@ -2432,15 +2422,15 @@ class SpelReproTests extends AbstractExpressionTests {
 	public static class DistanceEnforcer {
 
 		public static String from(Number no) {
-			return "Number:" + no.toString();
+			return "Number:" + no;
 		}
 
 		public static String from(Integer no) {
-			return "Integer:" + no.toString();
+			return "Integer:" + no;
 		}
 
 		public static String from(Object no) {
-			return "Object:" + no.toString();
+			return "Object:" + no;
 		}
 	}
 

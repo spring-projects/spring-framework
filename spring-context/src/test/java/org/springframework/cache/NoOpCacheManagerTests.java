@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Costin Leau
  * @author Stephane Nicoll
  */
-public class NoOpCacheManagerTests {
+class NoOpCacheManagerTests {
 
 	private final CacheManager manager = new NoOpCacheManager();
 
 	@Test
-	public void testGetCache() throws Exception {
+	void testGetCache() {
 		Cache cache = this.manager.getCache("bucket");
 		assertThat(cache).isNotNull();
 		assertThat(this.manager.getCache("bucket")).isSameAs(cache);
 	}
 
 	@Test
-	public void testNoOpCache() throws Exception {
+	void testNoOpCache() {
 		String name = createRandomKey();
 		Cache cache = this.manager.getCache(name);
 		assertThat(cache.getName()).isEqualTo(name);
@@ -54,15 +54,15 @@ public class NoOpCacheManagerTests {
 	}
 
 	@Test
-	public void testCacheName() throws Exception {
+	void testCacheName() {
 		String name = "bucket";
-		assertThat(this.manager.getCacheNames().contains(name)).isFalse();
+		assertThat(this.manager.getCacheNames()).doesNotContain(name);
 		this.manager.getCache(name);
-		assertThat(this.manager.getCacheNames().contains(name)).isTrue();
+		assertThat(this.manager.getCacheNames()).contains(name);
 	}
 
 	@Test
-	public void testCacheCallable() throws Exception {
+	void testCacheCallable() {
 		String name = createRandomKey();
 		Cache cache = this.manager.getCache(name);
 		Object returnValue = new Object();
@@ -71,7 +71,7 @@ public class NoOpCacheManagerTests {
 	}
 
 	@Test
-	public void testCacheGetCallableFail() {
+	void testCacheGetCallableFail() {
 		Cache cache = this.manager.getCache(createRandomKey());
 		String key = createRandomKey();
 		try {

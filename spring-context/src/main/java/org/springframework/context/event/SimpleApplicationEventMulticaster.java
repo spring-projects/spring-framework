@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context.event;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,7 +86,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * unless the TaskExecutor explicitly supports this.
 	 * <p>{@link ApplicationListener} instances which declare no support for asynchronous
 	 * execution ({@link ApplicationListener#supportsAsyncExecution()} always run within
-	 * the original thread which published the event, e.g. the transaction-synchronized
+	 * the original thread which published the event, for example, the transaction-synchronized
 	 * {@link org.springframework.transaction.event.TransactionalApplicationListener}.
 	 * @since 2.0
 	 * @see org.springframework.core.task.SyncTaskExecutor
@@ -116,7 +117,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * and logs exceptions (a la
 	 * {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_SUPPRESS_ERROR_HANDLER})
 	 * or an implementation that logs exceptions while nevertheless propagating them
-	 * (e.g. {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
+	 * (for example, {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
 	 * @since 4.1
 	 */
 	public void setErrorHandler(@Nullable ErrorHandler errorHandler) {
@@ -143,7 +144,13 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		Executor executor = getTaskExecutor();
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			if (executor != null && listener.supportsAsyncExecution()) {
-				executor.execute(() -> invokeListener(listener, event));
+				try {
+					executor.execute(() -> invokeListener(listener, event));
+				}
+				catch (RejectedExecutionException ex) {
+					// Probably on shutdown -> invoke listener locally instead
+					invokeListener(listener, event);
+				}
 			}
 			else {
 				invokeListener(listener, event);

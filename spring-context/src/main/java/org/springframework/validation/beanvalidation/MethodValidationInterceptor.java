@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.springframework.validation.method.ParameterValidationResult;
  * their parameters and/or on their return value (in the latter case specified at
  * the method level, typically as inline annotation).
  *
- * <p>E.g.: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
+ * <p>For example: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
  *
  * <p>In case of validation errors, the interceptor can raise
  * {@link ConstraintViolationException}, or adapt the violations to
@@ -69,7 +69,7 @@ import org.springframework.validation.method.ParameterValidationResult;
  * at the type level of the containing target class, applying to all public service methods
  * of that class. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1+ provider.
+ * <p>This functionality requires a Bean Validation 1.1+ provider.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -79,8 +79,8 @@ import org.springframework.validation.method.ParameterValidationResult;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private static final boolean REACTOR_PRESENT =
-			ClassUtils.isPresent("reactor.core.publisher.Mono", MethodValidationInterceptor.class.getClassLoader());
+	private static final boolean reactorPresent = ClassUtils.isPresent(
+			"reactor.core.publisher.Mono", MethodValidationInterceptor.class.getClassLoader());
 
 
 	private final MethodValidationAdapter validationAdapter;
@@ -153,7 +153,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Object[] arguments = invocation.getArguments();
 		Class<?>[] groups = determineValidationGroups(invocation);
 
-		if (REACTOR_PRESENT) {
+		if (reactorPresent) {
 			arguments = ReactorValidationHelper.insertAsyncValidation(
 					this.validationAdapter.getSpringValidatorAdapter(), this.adaptViolations,
 					target, method, arguments);
@@ -174,7 +174,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Object returnValue = invocation.proceed();
 
 		if (this.adaptViolations) {
-			this.validationAdapter.applyReturnValueValidation(target, method, null, arguments, groups);
+			this.validationAdapter.applyReturnValueValidation(target, method, null, returnValue, groups);
 		}
 		else {
 			violations = this.validationAdapter.invokeValidatorForReturnValue(target, method, returnValue, groups);

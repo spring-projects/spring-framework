@@ -105,6 +105,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	}
 
 
+	@SuppressWarnings("deprecation")  // as of Jackson 2.18: can(De)Serialize
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (!supportsMimeType(mimeType)) {
@@ -426,6 +427,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	// Jackson2CodecSupport
 
 	@Override
+	@Nullable
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
 		return parameter.getMethodAnnotation(annotType);
 	}

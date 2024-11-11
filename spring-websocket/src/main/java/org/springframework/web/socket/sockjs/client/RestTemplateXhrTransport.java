@@ -207,6 +207,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 		}
 
 		@Override
+		@Nullable
 		public Object extractData(ClientHttpResponse response) throws IOException {
 			HttpStatusCode httpStatus = response.getStatusCode();
 			if (httpStatus != HttpStatus.OK) {

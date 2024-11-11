@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,12 @@ import java.io.InputStream;
  * @see InputStreamResource
  * @see ByteArrayResource
  */
+@FunctionalInterface
 public interface InputStreamSource {
 
 	/**
 	 * Return an {@link InputStream} for the content of an underlying resource.
-	 * <p>It is expected that each call creates a <i>fresh</i> stream.
+	 * <p>It is usually expected that every such call creates a <i>fresh</i> stream.
 	 * <p>This requirement is particularly important when you consider an API such
 	 * as JavaMail, which needs to be able to read the stream multiple times when
 	 * creating mail attachments. For such a use case, it is <i>required</i>
@@ -51,6 +52,7 @@ public interface InputStreamSource {
 	 * @throws java.io.FileNotFoundException if the underlying resource does not exist
 	 * @throws IOException if the content stream could not be opened
 	 * @see Resource#isReadable()
+	 * @see Resource#isOpen()
 	 */
 	InputStream getInputStream() throws IOException;
 

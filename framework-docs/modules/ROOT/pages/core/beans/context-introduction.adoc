@@ -1,7 +1,7 @@
 [[context-introduction]]
 = Additional Capabilities of the `ApplicationContext`
 
-As discussed in the xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[chapter introduction], the `org.springframework.beans.factory`
+As discussed in the xref:core/beans/introduction.adoc[chapter introduction], the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
 programmatic way. The `org.springframework.context` package adds the
 {spring-framework-api}/context/ApplicationContext.html[`ApplicationContext`]
@@ -102,7 +102,7 @@ implementations and so can be cast to the `MessageSource` interface.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public static void main(String[] args) {
 		MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
@@ -113,7 +113,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun main() {
 		val resources = ClassPathXmlApplicationContext("beans.xml")
@@ -161,7 +161,7 @@ converted into `String` objects and inserted into placeholders in the lookup mes
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Example {
 
@@ -181,7 +181,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Example {
 
@@ -224,7 +224,7 @@ argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public static void main(final String[] args) {
 		MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
@@ -236,7 +236,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun main() {
 		val resources = ClassPathXmlApplicationContext("beans.xml")
@@ -344,7 +344,7 @@ simple class that extends Spring's `ApplicationEvent` base class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class BlockedListEvent extends ApplicationEvent {
 
@@ -363,7 +363,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class BlockedListEvent(source: Any,
 						val address: String,
@@ -380,7 +380,7 @@ example shows such a class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class EmailService implements ApplicationEventPublisherAware {
 
@@ -407,7 +407,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class EmailService : ApplicationEventPublisherAware {
 
@@ -447,7 +447,7 @@ shows such a class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class BlockedListNotifier implements ApplicationListener<BlockedListEvent> {
 
@@ -465,7 +465,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class BlockedListNotifier : ApplicationListener<BlockedListEvent> {
 
@@ -484,7 +484,7 @@ You can register as many event listeners as you wish, but note that, by default,
 This means that the `publishEvent()` method blocks until all listeners have finished processing the event.
 One advantage of this synchronous and single-threaded approach is that, when a listener receives an event,
 it operates inside the transaction context of the publisher if a transaction context is available.
-If another strategy for event publication becomes necessary, e.g. asynchronous event processing by default,
+If another strategy for event publication becomes necessary, for example, asynchronous event processing by default,
 see the javadoc for Spring's {spring-framework-api}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
 and {spring-framework-api}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`] implementation
 for configuration options which can be applied to a custom "applicationEventMulticaster" bean definition.
@@ -545,7 +545,7 @@ You can register an event listener on any method of a managed bean by using the
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class BlockedListNotifier {
 
@@ -564,7 +564,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class BlockedListNotifier {
 
@@ -591,7 +591,7 @@ following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
 	public void handleContextStart() {
@@ -601,7 +601,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener(ContextStartedEvent::class, ContextRefreshedEvent::class)
 	fun handleContextStart() {
@@ -621,7 +621,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
 	public void processBlockedListEvent(BlockedListEvent blEvent) {
@@ -631,7 +631,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
 	fun processBlockedListEvent(blEvent: BlockedListEvent) {
@@ -644,7 +644,7 @@ Each `SpEL` expression evaluates against a dedicated context. The following tabl
 items made available to the context so that you can use them for conditional event processing:
 
 [[context-functionality-events-annotation-tbl]]
-.Event SpEL available metadata
+.Event metadata available in SpEL expressions
 |===
 | Name| Location| Description| Example
 
@@ -660,8 +660,8 @@ items made available to the context so that you can use them for conditional eve
 
 | __Argument name__
 | evaluation context
-| The name of any of the method arguments. If, for some reason, the names are not available
-  (for example, because there is no debug information in the compiled byte code), individual
+| The name of a particular method argument. If the names are not available
+  (for example, because the code was compiled without the `-parameters` flag), individual
   arguments are also available using the `#a<#arg>` syntax where `<#arg>` stands for the
   argument index (starting from 0).
 | `#blEvent` or `#a0` (you can also use `#p0` or `#p<#arg>` parameter notation as an alias)
@@ -677,7 +677,7 @@ method signature to return the event that should be published, as the following 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
@@ -688,7 +688,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	fun handleBlockedListEvent(event: BlockedListEvent): ListUpdateEvent {
@@ -717,7 +717,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	@Async
@@ -728,7 +728,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	@Async
@@ -763,7 +763,7 @@ annotation to the method declaration, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	@Order(42)
@@ -774,7 +774,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	@Order(42)
@@ -797,7 +797,7 @@ can create the following listener definition to receive only `EntityCreatedEvent
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	public void onPersonCreated(EntityCreatedEvent<Person> event) {
@@ -807,7 +807,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@EventListener
 	fun onPersonCreated(event: EntityCreatedEvent<Person>) {
@@ -829,7 +829,7 @@ environment provides. The following event shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class EntityCreatedEvent<T> extends ApplicationEvent implements ResolvableTypeProvider {
 
@@ -846,7 +846,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class EntityCreatedEvent<T>(entity: T) : ApplicationEvent(entity), ResolvableTypeProvider {
 
@@ -864,7 +864,7 @@ Finally, as with classic `ApplicationListener` implementations, the actual multi
 happens via a context-wide `ApplicationEventMulticaster` at runtime. By default, this is a
 `SimpleApplicationEventMulticaster` with synchronous event publication in the caller thread.
 This can be replaced/customized through an "applicationEventMulticaster" bean definition,
-e.g. for processing all events asynchronously and/or for handling listener exceptions:
+for example, for processing all events asynchronously and/or for handling listener exceptions:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -935,7 +935,7 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
 	StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan");
@@ -949,7 +949,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
 	val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")

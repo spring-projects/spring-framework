@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
@@ -39,6 +38,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse
 import org.springframework.web.testfixture.servlet.MockMultipartFile
 import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Kotlin test fixture for [RequestParamMethodArgumentResolver].
@@ -70,6 +70,9 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	lateinit var nonNullableMultipartParamRequired: MethodParameter
 	lateinit var nonNullableMultipartParamNotRequired: MethodParameter
 
+	lateinit var nonNullableValueClassParam: MethodParameter
+	lateinit var nullableValueClassParam: MethodParameter
+
 
 	@BeforeEach
 	fun setup() {
@@ -80,10 +83,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		binderFactory = DefaultDataBinderFactory(initializer)
 		webRequest = ServletWebRequest(request, MockHttpServletResponse())
 
-		val method = ReflectionUtils.findMethod(javaClass, "handle",
-			String::class.java, String::class.java, String::class.java, String::class.java,
-			Boolean::class.java, Boolean::class.java, Int::class.java, Int::class.java, String::class.java, String::class.java,
-			MultipartFile::class.java, MultipartFile::class.java, MultipartFile::class.java, MultipartFile::class.java)!!
+		val method = RequestParamMethodArgumentResolverKotlinTests::handle.javaMethod!!
+		val valueClassMethod = RequestParamMethodArgumentResolverKotlinTests::handleValueClass.javaMethod!!
 
 		nullableParamRequired = SynthesizingMethodParameter(method, 0)
 		nullableParamNotRequired = SynthesizingMethodParameter(method, 1)
@@ -101,6 +102,9 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		nullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 11)
 		nonNullableMultipartParamRequired = SynthesizingMethodParameter(method, 12)
 		nonNullableMultipartParamNotRequired = SynthesizingMethodParameter(method, 13)
+
+		nonNullableValueClassParam = SynthesizingMethodParameter(valueClassMethod, 0)
+		nullableValueClassParam = SynthesizingMethodParameter(valueClassMethod, 1)
 	}
 
 	@Test
@@ -317,6 +321,20 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		}
 	}
 
+	@Test
+	fun resolveNonNullableValueClass() {
+		request.addParameter("value", "123")
+		var result = resolver.resolveArgument(nonNullableValueClassParam, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(123)
+	}
+
+	@Test
+	fun resolveNullableValueClass() {
+		request.addParameter("value", "123")
+		var result = resolver.resolveArgument(nullableValueClassParam, null, webRequest, binderFactory)
+		assertThat(result).isEqualTo(123)
+	}
+
 
 	@Suppress("unused_parameter")
 	fun handle(
@@ -337,6 +355,14 @@ class RequestParamMethodArgumentResolverKotlinTests {
 			@RequestParam("mfile") nonNullableMultipartParamRequired: MultipartFile,
 			@RequestParam("mfile", required = false) nonNullableMultipartParamNotRequired: MultipartFile) {
 	}
+
+	@Suppress("unused_parameter")
+	fun handleValueClass(
+		@RequestParam("value") nonNullable: ValueClass,
+		@RequestParam("value") nullable: ValueClass?) {
+	}
+
+	@JvmInline value class ValueClass(val value: Int)
 
 }
 

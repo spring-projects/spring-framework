@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
- * {@link BeanPostProcessor} implementation that supplies the {@code ApplicationContext},
- * {@link org.springframework.core.env.Environment Environment}, or
- * {@link StringValueResolver} for the {@code ApplicationContext} to beans that
- * implement the {@link EnvironmentAware}, {@link EmbeddedValueResolverAware},
- * {@link ResourceLoaderAware}, {@link ApplicationEventPublisherAware},
- * {@link MessageSourceAware}, and/or {@link ApplicationContextAware} interfaces.
+ * {@link BeanPostProcessor} implementation that supplies the
+ * {@link org.springframework.context.ApplicationContext ApplicationContext},
+ * {@link org.springframework.core.env.Environment Environment},
+ * {@link StringValueResolver}, or
+ * {@link org.springframework.core.metrics.ApplicationStartup ApplicationStartup}
+ * for the {@code ApplicationContext} to beans that implement the {@link EnvironmentAware},
+ * {@link EmbeddedValueResolverAware}, {@link ResourceLoaderAware},
+ * {@link ApplicationEventPublisherAware}, {@link MessageSourceAware},
+ * {@link ApplicationStartupAware}, and/or {@link ApplicationContextAware} interfaces.
  *
  * <p>Implemented interfaces are satisfied in the order in which they are
  * mentioned above.
@@ -55,6 +58,7 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.context.ResourceLoaderAware
  * @see org.springframework.context.ApplicationEventPublisherAware
  * @see org.springframework.context.MessageSourceAware
+ * @see org.springframework.context.ApplicationStartupAware
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
@@ -77,40 +81,33 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	@Override
 	@Nullable
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (!(bean instanceof EnvironmentAware || bean instanceof EmbeddedValueResolverAware ||
-				bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
-				bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware ||
-				bean instanceof ApplicationStartupAware)) {
-			return bean;
+		if (bean instanceof Aware) {
+			invokeAwareInterfaces(bean);
 		}
-
-		invokeAwareInterfaces(bean);
 		return bean;
 	}
 
 	private void invokeAwareInterfaces(Object bean) {
-		if (bean instanceof Aware) {
-			if (bean instanceof EnvironmentAware environmentAware) {
-				environmentAware.setEnvironment(this.applicationContext.getEnvironment());
-			}
-			if (bean instanceof EmbeddedValueResolverAware embeddedValueResolverAware) {
-				embeddedValueResolverAware.setEmbeddedValueResolver(this.embeddedValueResolver);
-			}
-			if (bean instanceof ResourceLoaderAware resourceLoaderAware) {
-				resourceLoaderAware.setResourceLoader(this.applicationContext);
-			}
-			if (bean instanceof ApplicationEventPublisherAware applicationEventPublisherAware) {
-				applicationEventPublisherAware.setApplicationEventPublisher(this.applicationContext);
-			}
-			if (bean instanceof MessageSourceAware messageSourceAware) {
-				messageSourceAware.setMessageSource(this.applicationContext);
-			}
-			if (bean instanceof ApplicationStartupAware applicationStartupAware) {
-				applicationStartupAware.setApplicationStartup(this.applicationContext.getApplicationStartup());
-			}
-			if (bean instanceof ApplicationContextAware applicationContextAware) {
-				applicationContextAware.setApplicationContext(this.applicationContext);
-			}
+		if (bean instanceof EnvironmentAware environmentAware) {
+			environmentAware.setEnvironment(this.applicationContext.getEnvironment());
+		}
+		if (bean instanceof EmbeddedValueResolverAware embeddedValueResolverAware) {
+			embeddedValueResolverAware.setEmbeddedValueResolver(this.embeddedValueResolver);
+		}
+		if (bean instanceof ResourceLoaderAware resourceLoaderAware) {
+			resourceLoaderAware.setResourceLoader(this.applicationContext);
+		}
+		if (bean instanceof ApplicationEventPublisherAware applicationEventPublisherAware) {
+			applicationEventPublisherAware.setApplicationEventPublisher(this.applicationContext);
+		}
+		if (bean instanceof MessageSourceAware messageSourceAware) {
+			messageSourceAware.setMessageSource(this.applicationContext);
+		}
+		if (bean instanceof ApplicationStartupAware applicationStartupAware) {
+			applicationStartupAware.setApplicationStartup(this.applicationContext.getApplicationStartup());
+		}
+		if (bean instanceof ApplicationContextAware applicationContextAware) {
+			applicationContextAware.setApplicationContext(this.applicationContext);
 		}
 	}
 

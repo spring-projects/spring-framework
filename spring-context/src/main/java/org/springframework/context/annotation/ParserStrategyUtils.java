@@ -34,8 +34,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Common delegate code for the handling of parser strategies, e.g.
- * {@code TypeFilter}, {@code ImportSelector}, {@code ImportBeanDefinitionRegistrar}
+ * Common delegate code for the handling of parser strategies, for example,
+ * {@code TypeFilter}, {@code ImportSelector}, {@code ImportBeanDefinitionRegistrar}.
  *
  * @author Juergen Hoeller
  * @author Phillip Webb

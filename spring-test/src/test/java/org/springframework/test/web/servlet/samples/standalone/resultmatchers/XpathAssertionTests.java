@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,8 @@ public class XpathAssertionTests {
 	private static class MusicController {
 
 		@RequestMapping(value="/music/people")
-		public @ResponseBody PeopleWrapper getPeople() {
+		@ResponseBody
+		public PeopleWrapper getPeople() {
 
 			List<Person> composers = Arrays.asList(
 					new Person("Johann Sebastian Bach").setSomeDouble(21),
@@ -219,7 +220,7 @@ public class XpathAssertionTests {
 
 
 	@Controller
-	public class BlogFeedController {
+	public static class BlogFeedController {
 
 		@RequestMapping(value="/blog.atom", method = { GET, HEAD })
 		@ResponseBody

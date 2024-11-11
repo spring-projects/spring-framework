@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 400 (bad request) for use in
- * Spring Web applications. The exception provides additional fields (e.g.
+ * Spring Web applications. The exception provides additional fields (for example,
  * an optional {@link MethodParameter} if related to the error).
  *
  * @author Rossen Stoyanchev

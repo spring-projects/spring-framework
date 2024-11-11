@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class ScriptingDefaultsTests {
 
 
 	@Test
-	public void defaultRefreshCheckDelay() throws Exception {
+	void defaultRefreshCheckDelay() throws Exception {
 		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		Advised advised = (Advised) context.getBean("testBean");
 		AbstractRefreshableTargetSource targetSource =
@@ -55,21 +55,21 @@ public class ScriptingDefaultsTests {
 	}
 
 	@Test
-	public void defaultInitMethod() {
+	void defaultInitMethod() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		ITestBean testBean = (ITestBean) context.getBean("testBean");
 		assertThat(testBean.isInitialized()).isTrue();
 	}
 
 	@Test
-	public void nameAsAlias() {
+	void nameAsAlias() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		ITestBean testBean = (ITestBean) context.getBean("/url");
 		assertThat(testBean.isInitialized()).isTrue();
 	}
 
 	@Test
-	public void defaultDestroyMethod() {
+	void defaultDestroyMethod() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		ITestBean testBean = (ITestBean) context.getBean("nonRefreshableTestBean");
 		assertThat(testBean.isDestroyed()).isFalse();
@@ -78,7 +78,7 @@ public class ScriptingDefaultsTests {
 	}
 
 	@Test
-	public void defaultAutowire() {
+	void defaultAutowire() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		ITestBean testBean = (ITestBean) context.getBean("testBean");
 		ITestBean otherBean = (ITestBean) context.getBean("otherBean");
@@ -86,7 +86,7 @@ public class ScriptingDefaultsTests {
 	}
 
 	@Test
-	public void defaultProxyTargetClass() {
+	void defaultProxyTargetClass() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(PROXY_CONFIG);
 		Object testBean = context.getBean("testBean");
 		assertThat(AopUtils.isCglibProxy(testBean)).isTrue();

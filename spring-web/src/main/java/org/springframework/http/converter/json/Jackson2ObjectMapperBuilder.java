@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -87,12 +88,15 @@ import org.springframework.util.xml.StaxUtils;
  * support for Java 8 Date &amp; Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
  * support for Kotlin classes and data classes</li>
+ * <li><a href="https://github.com/FasterXML/jackson-modules-java8/tree/2.18/parameter-names">jackson-modules-java8/parameter-names</a>:
+ * support for accessing parameter names</li>
  * </ul>
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Tadaya Tsuyukubo
  * @author Eddú Meléndez
+ * @author Hyoungjune Kim
  * @since 4.1.1
  * @see #build()
  * @see #configure(ObjectMapper)
@@ -263,7 +267,7 @@ public class Jackson2ObjectMapperBuilder {
 	/**
 	 * Alternative to {@link #annotationIntrospector(AnnotationIntrospector)}
 	 * that allows combining with rather than replacing the currently set
-	 * introspector, e.g. via
+	 * introspector, for example, via
 	 * {@link AnnotationIntrospectorPair#pair(AnnotationIntrospector, AnnotationIntrospector)}.
 	 * @param pairingFunction a function to apply to the currently set
 	 * introspector (possibly {@code null}); the result of the function becomes
@@ -934,6 +938,15 @@ public class Jackson2ObjectMapperBuilder {
 		return new Jackson2ObjectMapperBuilder().factory(new CborFactoryInitializer().create());
 	}
 
+	/**
+	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
+	 * build a YAML data format {@link ObjectMapper} instance.
+	 * @since 6.2
+	 */
+	public static Jackson2ObjectMapperBuilder yaml() {
+		return new Jackson2ObjectMapperBuilder().factory(new YamlFactoryInitializer().create());
+	}
+
 
 	private static class XmlObjectMapperInitializer {
 
@@ -971,6 +984,13 @@ public class Jackson2ObjectMapperBuilder {
 
 		public JsonFactory create() {
 			return new CBORFactory();
+		}
+	}
+
+	private static class YamlFactoryInitializer {
+
+		public JsonFactory create() {
+			return new YAMLFactory();
 		}
 	}
 

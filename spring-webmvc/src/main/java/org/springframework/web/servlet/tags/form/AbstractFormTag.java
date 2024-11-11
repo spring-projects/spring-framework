@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,8 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 */
 	protected String getDisplayString(@Nullable Object value) {
-		return ValueFormatter.getDisplayString(value, isHtmlEscape());
+		String displayString = ValueFormatter.getDisplayString(value, false);
+		return isHtmlEscape() ? htmlEscape(displayString) : displayString;
 	}
 
 	/**
@@ -102,7 +103,8 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * to obtain the display value.
 	 */
 	protected String getDisplayString(@Nullable Object value, @Nullable PropertyEditor propertyEditor) {
-		return ValueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
+		String displayString = ValueFormatter.getDisplayString(value, propertyEditor, false);
+		return isHtmlEscape() ? htmlEscape(displayString) : displayString;
 	}
 
 	/**
@@ -111,7 +113,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	@Override
 	protected boolean isDefaultHtmlEscape() {
 		Boolean defaultHtmlEscape = getRequestContext().getDefaultHtmlEscape();
-		return (defaultHtmlEscape == null || defaultHtmlEscape.booleanValue());
+		return (defaultHtmlEscape == null || defaultHtmlEscape);
 	}
 
 

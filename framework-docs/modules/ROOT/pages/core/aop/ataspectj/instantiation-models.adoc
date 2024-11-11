@@ -17,7 +17,7 @@ annotation. Consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Aspect("perthis(execution(* com.xyz..service.*.*(..)))")
 	public class MyAspect {
@@ -33,7 +33,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Aspect("perthis(execution(* com.xyz..service.*.*(..)))")
 	class MyAspect {

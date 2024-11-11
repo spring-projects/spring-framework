@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,21 +27,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for the {@link ReaderEditor} class.
+ * Tests for {@link ReaderEditor}.
  *
  * @author Juergen Hoeller
  * @since 4.2
  */
-public class ReaderEditorTests {
+class ReaderEditorTests {
 
 	@Test
-	public void testCtorWithNullResourceEditor() {
+	void testCtorWithNullResourceEditor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ReaderEditor(null));
 	}
 
 	@Test
-	public void testSunnyDay() throws IOException {
+	void testSunnyDay() throws IOException {
 		Reader reader = null;
 		try {
 			String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
@@ -50,7 +50,7 @@ public class ReaderEditorTests {
 			editor.setAsText(resource);
 			Object value = editor.getValue();
 			assertThat(value).isNotNull();
-			assertThat(value instanceof Reader).isTrue();
+			assertThat(value).isInstanceOf(Reader.class);
 			reader = (Reader) value;
 			assertThat(reader.ready()).isTrue();
 		}
@@ -62,7 +62,7 @@ public class ReaderEditorTests {
 	}
 
 	@Test
-	public void testWhenResourceDoesNotExist() {
+	void testWhenResourceDoesNotExist() {
 		String resource = "classpath:bingo!";
 		ReaderEditor editor = new ReaderEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -70,7 +70,7 @@ public class ReaderEditorTests {
 	}
 
 	@Test
-	public void testGetAsTextReturnsNullByDefault() {
+	void testGetAsTextReturnsNullByDefault() {
 		assertThat(new ReaderEditor().getAsText()).isNull();
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public class MethodExclusionMBeanInfoAssemblerComboTests extends AbstractJmxAssemblerTests {
+class MethodExclusionMBeanInfoAssemblerComboTests extends AbstractJmxAssemblerTests {
 
 	protected static final String OBJECT_NAME = "bean:name=testBean4";
 
 	@Test
-	public void testGetAgeIsReadOnly() throws Exception {
+	void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 		assertThat(attr.isReadable()).as("Age is not readable").isTrue();
@@ -44,7 +44,7 @@ public class MethodExclusionMBeanInfoAssemblerComboTests extends AbstractJmxAsse
 	}
 
 	@Test
-	public void testNickNameIsExposed() throws Exception {
+	void testNickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 		assertThat(attr).as("Nick Name should not be null").isNotNull();
@@ -73,7 +73,7 @@ public class MethodExclusionMBeanInfoAssemblerComboTests extends AbstractJmxAsse
 	}
 
 	@Override
-	protected MBeanInfoAssembler getAssembler() throws Exception {
+	protected MBeanInfoAssembler getAssembler() {
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		Properties props = new Properties();
 		props.setProperty(OBJECT_NAME, "setAge,isSuperman,setSuperman,dontExposeMe");

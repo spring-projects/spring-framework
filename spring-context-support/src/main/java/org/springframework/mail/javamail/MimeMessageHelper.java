@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Helper class for populating a {@link jakarta.mail.internet.MimeMessage}.
@@ -896,7 +897,7 @@ public class MimeMessageHelper {
 	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@link #setText};
 	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" &rarr; "&lt;myId&gt;".
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param dataSource the {@code jakarta.activation.DataSource} to take
 	 * the content from, determining the InputStream and the content type
@@ -905,12 +906,47 @@ public class MimeMessageHelper {
 	 * @see #addInline(String, org.springframework.core.io.Resource)
 	 */
 	public void addInline(String contentId, DataSource dataSource) throws MessagingException {
+		addInline(contentId, null, dataSource);
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from a
+	 * {@code jakarta.activation.DataSource} and assigning the provided
+	 * {@code inlineFileName} to the element.
+	 * <p>Note that the InputStream returned by the DataSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * {@code getInputStream()} multiple times.
+	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@link #setText};
+	 * else, mail readers might not be able to resolve inline references correctly.
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param inlineFilename the fileName to use for the inline element's part
+	 * @param dataSource the {@code jakarta.activation.DataSource} to take
+	 * the content from, determining the InputStream and the content type
+	 * @throws MessagingException in case of errors
+	 * @since 6.2
+	 * @see #addInline(String, java.io.File)
+	 * @see #addInline(String, org.springframework.core.io.Resource)
+	 */
+	public void addInline(String contentId, @Nullable String inlineFilename, DataSource dataSource)
+			throws MessagingException {
+
 		Assert.notNull(contentId, "Content ID must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
 		mimeBodyPart.setDisposition(Part.INLINE);
 		mimeBodyPart.setContentID("<" + contentId + ">");
 		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
+		if (inlineFilename != null) {
+			try {
+			mimeBodyPart.setFileName(isEncodeFilenames() ?
+					MimeUtility.encodeText(inlineFilename) : inlineFilename);
+			}
+			catch (UnsupportedEncodingException ex) {
+				throw new MessagingException("Failed to encode inline filename", ex);
+			}
+		}
 		getMimeMultipart().addBodyPart(mimeBodyPart);
 	}
 
@@ -923,7 +959,7 @@ public class MimeMessageHelper {
 	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@link #setText};
 	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" &rarr; "&lt;myId&gt;".
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param file the File resource to take the content from
 	 * @throws MessagingException in case of errors
@@ -950,7 +986,7 @@ public class MimeMessageHelper {
 	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@link #setText};
 	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" &rarr; "&lt;myId&gt;".
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param resource the resource to take the content from
 	 * @throws MessagingException in case of errors
@@ -960,7 +996,8 @@ public class MimeMessageHelper {
 	 */
 	public void addInline(String contentId, Resource resource) throws MessagingException {
 		Assert.notNull(resource, "Resource must not be null");
-		String contentType = getFileTypeMap().getContentType(resource.getFilename());
+		String contentType = (resource.getFilename() != null ?
+				getFileTypeMap().getContentType(resource.getFilename()) : MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE);
 		addInline(contentId, resource, contentType);
 	}
 
@@ -976,7 +1013,7 @@ public class MimeMessageHelper {
 	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@code setText};
 	 * else, mail readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" &rarr; "&lt;myId&gt;".
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param inputStreamSource the resource to take the content from
 	 * @param contentType the content type to use for the element
@@ -989,14 +1026,75 @@ public class MimeMessageHelper {
 	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
 			throws MessagingException {
 
+		addInline(contentId, "inline", inputStreamSource, contentType);
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from an
+	 * {@code org.springframework.core.InputStreamResource}, and
+	 * specifying the inline fileName explicitly.
+	 * <p>The content type will be determined by the name of the given
+	 * content file. Do not use this for temporary files with arbitrary
+	 * filenames (possibly ending in ".tmp" or the like)!
+	 * <p>Note that the InputStream returned by the InputStreamSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * {@code getInputStream()} multiple times.
+	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@code setText};
+	 * else, mail readers might not be able to resolve inline references correctly.
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param inlineFilename the file name to use for the inline element
+	 * @param inputStreamSource the resource to take the content from
+	 * @throws MessagingException in case of errors
+	 * @since 6.2
+	 * @see #setText(String)
+	 * @see #getFileTypeMap
+	 * @see #addInline(String, org.springframework.core.io.Resource)
+	 * @see #addInline(String, String, jakarta.activation.DataSource)
+	 */
+	public void addInline(String contentId, String inlineFilename, InputStreamSource inputStreamSource)
+			throws MessagingException {
+
+		String contentType = getFileTypeMap().getContentType(inlineFilename);
+		addInline(contentId, inlineFilename, inputStreamSource, contentType);
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from an
+	 * {@code org.springframework.core.InputStreamResource}, and
+	 * specifying the inline fileName and content type explicitly.
+	 * <p>You can determine the content type for any given filename via a Java
+	 * Activation Framework's FileTypeMap, for example the one held by this helper.
+	 * <p>Note that the InputStream returned by the InputStreamSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * {@code getInputStream()} multiple times.
+	 * <p><b>NOTE:</b> Invoke {@code addInline} <i>after</i> {@code setText};
+	 * else, mail readers might not be able to resolve inline references correctly.
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: for example, "myId" &rarr; "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param inlineFilename the fileName to use for the inline element's part
+	 * @param inputStreamSource the resource to take the content from
+	 * @param contentType the content type to use for the element
+	 * @throws MessagingException in case of errors
+	 * @since 6.2
+	 * @see #setText
+	 * @see #getFileTypeMap
+	 * @see #addInline(String, org.springframework.core.io.Resource)
+	 * @see #addInline(String, String, jakarta.activation.DataSource)
+	 */
+	public void addInline(String contentId, String inlineFilename, InputStreamSource inputStreamSource, String contentType)
+			throws MessagingException {
+
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource resource && resource.isOpen()) {
 			throw new IllegalArgumentException(
 					"Passed-in Resource contains an open stream: invalid argument. " +
 					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
 		}
-		DataSource dataSource = createDataSource(inputStreamSource, contentType, "inline");
-		addInline(contentId, dataSource);
+		DataSource dataSource = createDataSource(inputStreamSource, contentType, inlineFilename);
+		addInline(contentId, inlineFilename, dataSource);
 	}
 
 	/**

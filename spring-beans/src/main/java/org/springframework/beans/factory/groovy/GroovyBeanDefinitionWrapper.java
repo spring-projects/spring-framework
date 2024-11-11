@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		this(beanName, clazz, null);
 	}
 
-	GroovyBeanDefinitionWrapper(@Nullable String beanName, Class<?> clazz, @Nullable Collection<?> constructorArgs) {
+	GroovyBeanDefinitionWrapper(@Nullable String beanName, @Nullable Class<?> clazz, @Nullable Collection<?> constructorArgs) {
 		this.beanName = beanName;
 		this.clazz = clazz;
 		this.constructorArgs = constructorArgs;
@@ -130,11 +130,12 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 	BeanDefinitionHolder getBeanDefinitionHolder() {
-		return new BeanDefinitionHolder(getBeanDefinition(), getBeanName());
+		Assert.state(this.beanName != null, "Bean name must be set");
+		return new BeanDefinitionHolder(getBeanDefinition(), this.beanName);
 	}
 
-	void setParent(Object obj) {
-		Assert.notNull(obj, "Parent bean cannot be set to a null runtime bean reference.");
+	void setParent(@Nullable Object obj) {
+		Assert.notNull(obj, "Parent bean cannot be set to a null runtime bean reference");
 		if (obj instanceof String name) {
 			this.parentName = name;
 		}
@@ -148,7 +149,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		getBeanDefinition().setAbstract(false);
 	}
 
-	GroovyBeanDefinitionWrapper addProperty(String propertyName, Object propertyValue) {
+	GroovyBeanDefinitionWrapper addProperty(String propertyName, @Nullable Object propertyValue) {
 		if (propertyValue instanceof GroovyBeanDefinitionWrapper wrapper) {
 			propertyValue = wrapper.getBeanDefinition();
 		}
@@ -158,6 +159,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 
 
 	@Override
+	@Nullable
 	public Object getProperty(String property) {
 		Assert.state(this.definitionWrapper != null, "BeanDefinition wrapper not initialized");
 		if (this.definitionWrapper.isReadableProperty(property)) {
@@ -170,7 +172,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 	@Override
-	public void setProperty(String property, Object newValue) {
+	public void setProperty(String property, @Nullable Object newValue) {
 		if (PARENT.equals(property)) {
 			setParent(newValue);
 		}

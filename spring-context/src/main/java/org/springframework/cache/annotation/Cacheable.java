@@ -78,9 +78,9 @@ public @interface Cacheable {
 	 * will all receive a put/evict request for the same newly cached value.
 	 * <p>Note that asynchronous/reactive cache access may not fully consult all
 	 * specified caches, depending on the target cache. In the case of late-determined
-	 * cache misses (e.g. with Redis), further caches will not get consulted anymore.
+	 * cache misses (for example, with Redis), further caches will not get consulted anymore.
 	 * As a consequence, specifying multiple cache names in an async cache mode setup
-	 * only makes sense with early-determined cache misses (e.g. with Caffeine).
+	 * only makes sense with early-determined cache misses (for example, with Caffeine).
 	 * @since 4.2
 	 * @see #value
 	 * @see CacheConfig#cacheNames

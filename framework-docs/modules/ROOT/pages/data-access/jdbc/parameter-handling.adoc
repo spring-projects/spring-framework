@@ -67,7 +67,7 @@ The following example shows how to create and insert a BLOB:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	final File blobIn = new File("spring2004.jpg");
 	final InputStream blobIs = new FileInputStream(blobIn);
@@ -95,7 +95,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val blobIn = File("spring2004.jpg")
 	val blobIs = FileInputStream(blobIn)
@@ -142,7 +142,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
 		new RowMapper<Map<String, Object>>() {
@@ -161,7 +161,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table") { rs, _ ->
 		val clobText = lobHandler.getClobAsString(rs, "a_clob")  // <1>
@@ -209,141 +209,26 @@ are passed in as a parameter to the stored procedure.
 
 The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
 implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
-The following example shows returning the value of an Oracle `STRUCT` object of the user
+The following example shows returning the value of a `java.sql.Struct` object of the user
 declared type `ITEM_TYPE`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	public class TestItemStoredProcedure extends StoredProcedure {
-
-		public TestItemStoredProcedure(DataSource dataSource) {
-			// ...
-			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
-				(CallableStatement cs, int colIndx, int sqlType, String typeName) -> {
-					STRUCT struct = (STRUCT) cs.getObject(colIndx);
-					Object[] attr = struct.getAttributes();
-					TestItem item = new TestItem();
-					item.setId(((Number) attr[0]).longValue());
-					item.setDescription((String) attr[1]);
-					item.setExpirationDate((java.util.Date) attr[2]);
-					return item;
-				}));
-			// ...
-		}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
-
-		init {
-			// ...
-			declareParameter(SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE") { cs, colIndx, sqlType, typeName ->
-				val struct = cs.getObject(colIndx) as STRUCT
-				val attr = struct.getAttributes()
-				TestItem((attr[0] as Long, attr[1] as String, attr[2] as Date)
-			})
-			// ...
-		}
-	}
-----
-======
+include-code::./TestItemStoredProcedure[]
 
 You can use `SqlTypeValue` to pass the value of a Java object (such as `TestItem`) to a
 stored procedure. The `SqlTypeValue` interface has a single method (named
 `createTypeValue`) that you must implement. The active connection is passed in, and you
-can use it to create database-specific objects, such as `StructDescriptor` instances
-or `ArrayDescriptor` instances. The following example creates a `StructDescriptor` instance:
+can use it to create database-specific objects, such as `java.sql.Struct` instances
+or `java.sql.Array` instances. The following example creates a `java.sql.Struct` instance:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	final TestItem testItem = new TestItem(123L, "A test item",
-			new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
-
-	SqlTypeValue value = new AbstractSqlTypeValue() {
-		protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
-			StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
-			Struct item = new STRUCT(itemDescriptor, conn,
-			new Object[] {
-				testItem.getId(),
-				testItem.getDescription(),
-				new java.sql.Date(testItem.getExpirationDate().getTime())
-			});
-			return item;
-		}
-	};
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	val (id, description, expirationDate) = TestItem(123L, "A test item",
-			SimpleDateFormat("yyyy-M-d").parse("2010-12-31"))
-
-	val value = object : AbstractSqlTypeValue() {
-		override fun createTypeValue(conn: Connection, sqlType: Int, typeName: String?): Any {
-			val itemDescriptor = StructDescriptor(typeName, conn)
-			return STRUCT(itemDescriptor, conn,
-					arrayOf(id, description, java.sql.Date(expirationDate.time)))
-		}
-	}
-----
-======
+include-code::./SqlTypeValueFactory[tag=struct,indent=0]
 
 You can now add this `SqlTypeValue` to the `Map` that contains the input parameters for the
 `execute` call of the stored procedure.
 
 Another use for the `SqlTypeValue` is passing in an array of values to an Oracle stored
-procedure. Oracle has its own internal `ARRAY` class that must be used in this case, and
-you can use the `SqlTypeValue` to create an instance of the Oracle `ARRAY` and populate
-it with values from the Java `ARRAY`, as the following example shows:
+procedure. Oracle has an `createOracleArray` method on `OracleConnection` that you can
+access by unwrapping it. You can use the `SqlTypeValue` to create an array and populate
+it with values from the Java `java.sql.Array`, as the following example shows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	final Long[] ids = new Long[] {1L, 2L};
-
-	SqlTypeValue value = new AbstractSqlTypeValue() {
-		protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
-			ArrayDescriptor arrayDescriptor = new ArrayDescriptor(typeName, conn);
-			ARRAY idArray = new ARRAY(arrayDescriptor, conn, ids);
-			return idArray;
-		}
-	};
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
-
-		init {
-			val ids = arrayOf(1L, 2L)
-			val value = object : AbstractSqlTypeValue() {
-				override fun createTypeValue(conn: Connection, sqlType: Int, typeName: String?): Any {
-					val arrayDescriptor = ArrayDescriptor(typeName, conn)
-					return ARRAY(arrayDescriptor, conn, ids)
-				}
-			}
-		}
-	}
-----
-======
-
-
+include-code::./SqlTypeValueFactory[tag=oracle-array,indent=0]
 

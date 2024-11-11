@@ -45,7 +45,7 @@ input is ignored. This is in contrast to property binding which by default binds
 request parameter for which there is a matching property.
 
 If neither a dedicated model object nor constructor binding is sufficient, and you must
-use property binding, we strongy recommend registering `allowedFields` patterns (case
+use property binding, we strongly recommend registering `allowedFields` patterns (case
 sensitive) on `WebDataBinder` in order to prevent unexpected properties from being set.
 For example:
 

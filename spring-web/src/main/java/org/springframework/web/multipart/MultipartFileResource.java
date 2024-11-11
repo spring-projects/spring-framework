@@ -65,6 +65,7 @@ class MultipartFileResource extends AbstractResource {
 	}
 
 	@Override
+	@Nullable
 	public String getFilename() {
 		return this.multipartFile.getOriginalFilename();
 	}

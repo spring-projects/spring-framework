@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * Unit tests for
- * {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBodyReturnValueHandler}.
+ * Tests for {@link StreamingResponseBodyReturnValueHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class StreamingResponseBodyReturnValueHandlerTests {
+class StreamingResponseBodyReturnValueHandlerTests {
 
 	private StreamingResponseBodyReturnValueHandler handler;
 
@@ -60,7 +59,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.handler = new StreamingResponseBodyReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 
@@ -75,7 +74,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 
 
 	@Test
-	public void supportsReturnType() throws Exception {
+	void supportsReturnType() throws Exception {
 		assertThat(this.handler.supportsReturnType(returnType(TestController.class, "handle"))).isTrue();
 		assertThat(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntity"))).isTrue();
 		assertThat(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntityString"))).isFalse();
@@ -83,7 +82,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 	}
 
 	@Test
-	public void streamingResponseBody() throws Exception {
+	void streamingResponseBody() throws Exception {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		MethodParameter returnType = returnType(TestController.class, "handle");
@@ -100,7 +99,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 
 
 	@Test
-	public void responseEntity() throws Exception {
+	void responseEntity() throws Exception {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		MethodParameter returnType = returnType(TestController.class, "handleResponseEntity");
@@ -121,7 +120,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseEntityNoContent() throws Exception {
+	void responseEntityNoContent() throws Exception {
 		MethodParameter returnType = returnType(TestController.class, "handleResponseEntity");
 		ResponseEntity<?> emitter = ResponseEntity.noContent().build();
 		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
@@ -131,7 +130,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseEntityWithHeadersAndNoContent() throws Exception {
+	void responseEntityWithHeadersAndNoContent() throws Exception {
 		ResponseEntity<?> emitter = ResponseEntity.noContent().header("foo", "bar").build();
 		MethodParameter returnType = returnType(TestController.class, "handleResponseEntity");
 		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);

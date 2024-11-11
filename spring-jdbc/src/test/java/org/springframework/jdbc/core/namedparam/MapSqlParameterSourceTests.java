@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,22 +31,22 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class MapSqlParameterSourceTests {
+class MapSqlParameterSourceTests {
 
 	@Test
-	public void nullParameterValuesPassedToCtorIsOk() {
+	void nullParameterValuesPassedToCtorIsOk() {
 		new MapSqlParameterSource(null);
 	}
 
 	@Test
-	public void getValueChokesIfParameterIsNotPresent() {
+	void getValueChokesIfParameterIsNotPresent() {
 		MapSqlParameterSource source = new MapSqlParameterSource();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				source.getValue("pechorin was right!"));
 	}
 
 	@Test
-	public void sqlParameterValueRegistersSqlType() {
+	void sqlParameterValueRegistersSqlType() {
 		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(Types.NUMERIC, "Foo"));
 		assertThat(msps.getSqlType("FOO")).as("Correct SQL Type not registered").isEqualTo(2);
 		MapSqlParameterSource msps2 = new MapSqlParameterSource();
@@ -55,19 +55,19 @@ public class MapSqlParameterSourceTests {
 	}
 
 	@Test
-	public void toStringShowsParameterDetails() {
+	void toStringShowsParameterDetails() {
 		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(Types.NUMERIC, "Foo"));
 		assertThat(source.toString()).isEqualTo("MapSqlParameterSource {FOO=Foo (type:NUMERIC)}");
 	}
 
 	@Test
-	public void toStringShowsCustomSqlType() {
+	void toStringShowsCustomSqlType() {
 		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(Integer.MAX_VALUE, "Foo"));
 		assertThat(source.toString()).isEqualTo(("MapSqlParameterSource {FOO=Foo (type:" + Integer.MAX_VALUE + ")}"));
 	}
 
 	@Test
-	public void toStringDoesNotShowTypeUnknown() {
+	void toStringDoesNotShowTypeUnknown() {
 		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(JdbcUtils.TYPE_UNKNOWN, "Foo"));
 		assertThat(source.toString()).isEqualTo("MapSqlParameterSource {FOO=Foo}");
 	}

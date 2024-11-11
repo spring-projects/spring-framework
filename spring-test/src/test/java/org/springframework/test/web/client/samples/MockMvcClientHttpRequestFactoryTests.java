@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client.samples;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,13 +34,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests that use a {@link RestTemplate} configured with a
@@ -48,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * the TestContext framework.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
@@ -57,35 +60,61 @@ public class MockMvcClientHttpRequestFactoryTests {
 	@Autowired
 	private WebApplicationContext wac;
 
-	private MockMvc mockMvc;
+	private RestTemplate template;
 
 
 	@BeforeEach
 	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).alwaysExpect(status().isOk()).build();
+		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		this.template = new RestTemplate(new MockMvcClientHttpRequestFactory(mockMvc));
 	}
 
 	@Test
-	public void test() {
-		RestTemplate template = new RestTemplate(new MockMvcClientHttpRequestFactory(this.mockMvc));
-		String result = template.getForObject("/foo", String.class);
-		assertThat(result).isEqualTo("bar");
+	public void withResult() {
+		assertThat(template.getForObject("/foo", String.class)).isEqualTo("bar");
+	}
+
+	@Test
+	public void withError() {
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> template.getForEntity("/error", String.class))
+				.withMessageContaining("400")
+				.withMessageContaining("some bad request");
+	}
+
+	@Test
+	public void withErrorAndBody() {
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> template.getForEntity("/errorbody", String.class))
+				.withMessageContaining("400")
+				.withMessageContaining("some really bad request");
 	}
 
 
 	@EnableWebMvc
 	@Configuration
-	@ComponentScan(basePackageClasses=MockMvcClientHttpRequestFactoryTests.class)
+	@ComponentScan(basePackageClasses = MockMvcClientHttpRequestFactoryTests.class)
 	static class MyWebConfig implements WebMvcConfigurer {
 	}
 
 	@Controller
 	static class MyController {
 
-		@RequestMapping(value="/foo", method=RequestMethod.GET)
+		@RequestMapping(value = "/foo", method = RequestMethod.GET)
 		@ResponseBody
 		public String handle() {
 			return "bar";
+		}
+
+		@RequestMapping(value = "/error", method = RequestMethod.GET)
+		public void handleError(HttpServletResponse response) throws Exception {
+			response.sendError(400, "some bad request");
+		}
+
+		@RequestMapping(value = "/errorbody", method = RequestMethod.GET)
+		public void handleErrorWithBody(HttpServletResponse response) throws Exception {
+			response.sendError(400, "some bad request");
+			response.getWriter().write("some really bad request");
 		}
 	}
 

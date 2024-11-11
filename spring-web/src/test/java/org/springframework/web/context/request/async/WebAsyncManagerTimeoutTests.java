@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.springframework.web.context.request.async.CallableProcessingIn
  *
  * @author Rossen Stoyanchev
  */
-public class WebAsyncManagerTimeoutTests {
+class WebAsyncManagerTimeoutTests {
 
 	private static final AsyncEvent ASYNC_EVENT = null;
 
@@ -57,7 +57,7 @@ public class WebAsyncManagerTimeoutTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.servletRequest = new MockHttpServletRequest("GET", "/test");
 		this.servletRequest.setAsyncSupported(true);
 		this.servletResponse = new MockHttpServletResponse();
@@ -72,7 +72,7 @@ public class WebAsyncManagerTimeoutTests {
 
 
 	@Test
-	public void startCallableProcessingTimeoutAndComplete() throws Exception {
+	void startCallableProcessingTimeoutAndComplete() throws Exception {
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = mock();
@@ -92,7 +92,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startCallableProcessingTimeoutAndResumeThroughCallback() throws Exception {
+	void startCallableProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
 		StubCallable callable = new StubCallable();
 		WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<>(callable);
@@ -108,7 +108,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startCallableProcessingTimeoutAndResumeThroughInterceptor() throws Exception {
+	void startCallableProcessingTimeoutAndResumeThroughInterceptor() throws Exception {
 
 		StubCallable callable = new StubCallable();
 
@@ -128,7 +128,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startCallableProcessingAfterTimeoutException() throws Exception {
+	void startCallableProcessingAfterTimeoutException() throws Exception {
 
 		StubCallable callable = new StubCallable();
 		Exception exception = new Exception();
@@ -170,7 +170,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startDeferredResultProcessingTimeoutAndComplete() throws Exception {
+	void startDeferredResultProcessingTimeoutAndComplete() throws Exception {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
@@ -192,7 +192,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startDeferredResultProcessingTimeoutAndResumeWithDefaultResult() throws Exception {
+	void startDeferredResultProcessingTimeoutAndResumeWithDefaultResult() throws Exception {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>(null, 23);
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
@@ -206,7 +206,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startDeferredResultProcessingTimeoutAndResumeThroughCallback() throws Exception {
+	void startDeferredResultProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
 		final DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		deferredResult.onTimeout(() -> deferredResult.setResult(23));
@@ -222,7 +222,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startDeferredResultProcessingTimeoutAndResumeThroughInterceptor() throws Exception {
+	void startDeferredResultProcessingTimeoutAndResumeThroughInterceptor() throws Exception {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
@@ -246,7 +246,7 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 	@Test
-	public void startDeferredResultProcessingAfterTimeoutException() throws Exception {
+	void startDeferredResultProcessingAfterTimeoutException() throws Exception {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		final Exception exception = new Exception();
@@ -270,9 +270,9 @@ public class WebAsyncManagerTimeoutTests {
 	}
 
 
-	private final class StubCallable implements Callable<Object> {
+	private static final class StubCallable implements Callable<Object> {
 		@Override
-		public Object call() throws Exception {
+		public Object call() {
 			return 21;
 		}
 	}

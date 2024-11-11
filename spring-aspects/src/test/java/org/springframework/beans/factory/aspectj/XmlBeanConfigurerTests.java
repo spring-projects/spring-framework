@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Chris Beams
  */
-public class XmlBeanConfigurerTests {
+class XmlBeanConfigurerTests {
 
 	@Test
-	public void injection() {
+	void injection() {
 		try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/beans/factory/aspectj/beanConfigurerTests.xml")) {
 

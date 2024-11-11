@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link ContextPathCompositeHandler}.
+ * Tests for {@link ContextPathCompositeHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class ContextPathCompositeHandlerTests {
+class ContextPathCompositeHandlerTests {
 
 	@Test
-	public void invalidContextPath() {
+	void invalidContextPath() {
 		testInvalid("  ", "Context path must not be empty");
 		testInvalid("path", "Context path must begin with '/'");
 		testInvalid("/path/", "Context path must not end with '/'");
@@ -54,7 +54,7 @@ public class ContextPathCompositeHandlerTests {
 	}
 
 	@Test
-	public void match() {
+	void match() {
 		TestHttpHandler handler1 = new TestHttpHandler();
 		TestHttpHandler handler2 = new TestHttpHandler();
 		TestHttpHandler handler3 = new TestHttpHandler();
@@ -71,7 +71,7 @@ public class ContextPathCompositeHandlerTests {
 	}
 
 	@Test
-	public void matchWithContextPathEqualToPath() {
+	void matchWithContextPathEqualToPath() {
 		TestHttpHandler handler1 = new TestHttpHandler();
 		TestHttpHandler handler2 = new TestHttpHandler();
 		TestHttpHandler handler3 = new TestHttpHandler();
@@ -88,7 +88,7 @@ public class ContextPathCompositeHandlerTests {
 	}
 
 	@Test
-	public void matchWithNativeContextPath() {
+	void matchWithNativeContextPath() {
 		MockServerHttpRequest request = MockServerHttpRequest
 				.get("/yet/another/path")
 				.contextPath("/yet")  // contextPath in underlying request
@@ -104,7 +104,7 @@ public class ContextPathCompositeHandlerTests {
 	}
 
 	@Test
-	public void notFound() {
+	void notFound() {
 		TestHttpHandler handler1 = new TestHttpHandler();
 		TestHttpHandler handler2 = new TestHttpHandler();
 

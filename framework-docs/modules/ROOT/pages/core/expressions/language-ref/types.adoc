@@ -13,7 +13,7 @@ following example shows how to use the `T` operator:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Class dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class.class);
 
@@ -26,7 +26,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val dateClass = parser.parseExpression("T(java.util.Date)").getValue(Class::class.java)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.ast.Operator;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.expression.spel.SpelMessage.MAX_CONCATENATED_STRING_LENGTH_EXCEEDED;
@@ -668,6 +671,18 @@ class OperatorTests extends AbstractExpressionTests {
 		evaluate("5 % new java.math.BigInteger('3')", new BigInteger("2"), BigInteger.class);
 		evaluate("new java.math.BigInteger('5') % 3", new BigInteger("2"), BigInteger.class);
 		evaluate("new java.math.BigInteger('5') ^ 3", new BigInteger("125"), BigInteger.class);
+	}
+
+	@Test
+	void bigIntFunction() throws Exception {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Method method = BigInteger.class.getMethod("valueOf", long.class);
+		context.registerFunction("bigInt", method);
+
+		Expression expression = parser.parseExpression("3 + #bigInt(5)");
+		BigInteger result = expression.getValue(context, BigInteger.class);
+		assertThat(result).isEqualTo(BigInteger.valueOf(8));
 	}
 
 
