@@ -56,6 +56,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
 /**
@@ -568,21 +569,22 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private static String normalizePath(String path) {
 		String result = path;
+		result = decode(result);
 		if (result.contains("%")) {
 			result = decode(result);
-			if (result.contains("%")) {
-				result = decode(result);
-			}
-			if (result.contains("../")) {
-				return StringUtils.cleanPath(result);
-			}
+		}
+		if (!StringUtils.hasText(result)) {
+			return result;
+		}
+		if (result.contains("../")) {
+			return StringUtils.cleanPath(result);
 		}
 		return path;
 	}
 
 	private static String decode(String path) {
 		try {
-			return URLDecoder.decode(path, StandardCharsets.UTF_8);
+			return UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 		catch (Exception ex) {
 			return "";
