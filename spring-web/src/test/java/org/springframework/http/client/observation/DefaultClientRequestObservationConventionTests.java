@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,16 @@ class DefaultClientRequestObservationConventionTests {
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("http.url", "https://example.org/resource/42"));
 	}
 
+	@Test
+	void addsKeyValuesForRequestWithUriTemplateWithoutPath() {
+		ClientRequestObservationContext context = createContext(
+				new MockClientHttpRequest(HttpMethod.GET, "https://example.org"), response);
+		context.setUriTemplate("https://example.org");
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/"),
+						KeyValue.of("status", "200"), KeyValue.of("client.name", "example.org"), KeyValue.of("outcome", "SUCCESS"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("http.url", "https://example.org"));
+	}
 
 	@Test
 	void addsKeyValuesForRequestWithoutUriTemplate() {
