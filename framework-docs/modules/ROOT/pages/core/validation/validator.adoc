@@ -198,7 +198,7 @@ methods it offers can be found in the {spring-framework-api}/validation/Errors.h
 Validators may also get locally invoked for the immediate validation of a given object,
 not involving a binding process. As of 6.1, this has been simplified through a new
 `Validator.validateObject(Object)` method which is available by default now, returning
-a simple ´Errors` representation which can be inspected: typically calling `hasErrors()`
+a simple `Errors` representation which can be inspected: typically calling `hasErrors()`
 or the new `failOnError` method for turning the error summary message into an exception
 (for example, `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
 
