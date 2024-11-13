@@ -287,47 +287,17 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 		@Override
 		public ByteBufferIterator readableByteBuffers() {
-			ByteBufferIterator delegateIterator = this.delegate.readableByteBuffers();
-			return new JettyByteBufferIterator(delegateIterator);
+			return this.delegate.readableByteBuffers();
 		}
 
 		@Override
 		public ByteBufferIterator writableByteBuffers() {
-			ByteBufferIterator delegateIterator = this.delegate.writableByteBuffers();
-			return new JettyByteBufferIterator(delegateIterator);
+			return this.delegate.writableByteBuffers();
 		}
 
 		@Override
 		public String toString(int index, int length, Charset charset) {
 			return this.delegate.toString(index, length, charset);
-		}
-
-
-		private static class JettyByteBufferIterator implements ByteBufferIterator {
-
-			private final ByteBufferIterator delegate;
-
-
-			JettyByteBufferIterator(ByteBufferIterator delegate) {
-				Assert.notNull(delegate, "Delegate must not be null");
-
-				this.delegate = delegate;
-			}
-
-			@Override
-			public void close() {
-				this.delegate.close();
-			}
-
-			@Override
-			public boolean hasNext() {
-				return this.delegate.hasNext();
-			}
-
-			@Override
-			public ByteBuffer next() {
-				return this.delegate.next();
-			}
 		}
 	}
 
