@@ -281,7 +281,7 @@ Kotlin::
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
-`Long`, `@DurationFormat` to format `Duration` fields in ISO8601 and simplified styles,
+`Long`, `@DurationFormat` to format `Duration` fields in ISO-8601 and simplified styles,
 and `@DateTimeFormat` to format fields such as `java.util.Date`, `java.util.Calendar`,
 and `Long` (for millisecond timestamps) as well as JSR-310 `java.time` types.
 
@@ -312,7 +312,8 @@ Kotlin::
 ======
 
 For further details, see the javadoc for
-{spring-framework-api}/format/annotation/DateTimeFormat.html[`@DateTimeFormat`] and
+{spring-framework-api}/format/annotation/DateTimeFormat.html[`@DateTimeFormat`],
+{spring-framework-api}/format/annotation/DurationFormat.html[`@DurationFormat`], and
 {spring-framework-api}/format/annotation/NumberFormat.html[`@NumberFormat`].
 
 [WARNING]

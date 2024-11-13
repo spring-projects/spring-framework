@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Declares that a field or method parameter should be formatted as a
- * {@link java.time.Duration}, according to the specified {@code style}.
+ * {@link java.time.Duration}, according to the specified {@link #style style}.
  *
  * @author Simon Baslé
  * @since 6.2
@@ -40,15 +40,15 @@ import org.springframework.lang.Nullable;
 public @interface DurationFormat {
 
 	/**
-	 * Which {@code Style} to use for parsing and printing a {@code Duration}.
-	 * Defaults to the JDK style ({@link Style#ISO8601}).
+	 * The {@code Style} to use for parsing and printing a {@code Duration}.
+	 * <p>Defaults to the JDK style ({@link Style#ISO8601}).
 	 */
 	Style style() default Style.ISO8601;
 
 	/**
-	 * Define which {@link Unit} to fall back to in case the {@code style()}
-	 * needs a unit for either parsing or printing, and none is explicitly
-	 * provided in the input ({@code Unit.MILLIS} if unspecified).
+	 * The {@link Unit} to fall back to in case the {@code style()} needs a unit
+	 * for either parsing or printing, and none is explicitly provided in the input.
+	 * <p>Defaults to {@link Unit#MILLIS} if unspecified.
 	 */
 	Unit defaultUnit() default Unit.MILLIS;
 
@@ -59,14 +59,15 @@ public @interface DurationFormat {
 
 		/**
 		 * Simple formatting based on a short suffix, for example '1s'.
-		 * Supported unit suffixes are: {@code ns, us, ms, s, m, h, d}.
-		 * This corresponds to nanoseconds, microseconds, milliseconds, seconds,
-		 * minutes, hours and days respectively.
+		 * <p>Supported unit suffixes include: {@code ns, us, ms, s, m, h, d}.
+		 * Those correspond to nanoseconds, microseconds, milliseconds, seconds,
+		 * minutes, hours, and days, respectively.
 		 * <p>Note that when printing a {@code Duration}, this style can be
 		 * lossy if the selected unit is bigger than the resolution of the
-		 * duration. For example, * {@code Duration.ofMillis(5).plusNanos(1234)}
+		 * duration. For example, {@code Duration.ofMillis(5).plusNanos(1234)}
 		 * would get truncated to {@code "5ms"} when printing using
-		 * {@code ChronoUnit.MILLIS}. Fractional durations are not supported.
+		 * {@code ChronoUnit.MILLIS}.
+		 * <p>Fractional durations are not supported.
 		 */
 		SIMPLE,
 
@@ -80,22 +81,24 @@ public @interface DurationFormat {
 		/**
 		 * Like {@link #SIMPLE}, but allows multiple segments ordered from
 		 * largest-to-smallest units of time, like {@code 1h12m27s}.
-		 * <p>
-		 * A single minus sign ({@code -}) is allowed to indicate the whole
+		 * <p>A single minus sign ({@code -}) is allowed to indicate the whole
 		 * duration is negative. Spaces are allowed between segments, and a
 		 * negative duration with spaced segments can optionally be surrounded
-		 * by parenthesis after the minus sign, like so: {@code -(34m 57s)}.
+		 * by parentheses after the minus sign, like so: {@code -(34m 57s)}.
 		 */
 		COMPOSITE
 	}
 
 	/**
 	 * Duration format unit, which mirrors a subset of {@link ChronoUnit} and
-	 * allows conversion to and from supported {@code ChronoUnit} as well as
-	 * converting durations to longs. The enum includes its corresponding suffix
-	 * in the {@link Style#SIMPLE simple} Duration format style.
+	 * allows conversion to and from a supported {@code ChronoUnit} as well as
+	 * conversion from durations to longs.
+	 *
+	 * <p>The enum includes its corresponding suffix in the {@link Style#SIMPLE simple}
+	 * {@code Duration} format style.
 	 */
 	enum Unit {
+
 		/**
 		 * Nanoseconds ({@code "ns"}).
 		 */
@@ -153,7 +156,7 @@ public @interface DurationFormat {
 
 		/**
 		 * Convert this {@code DurationFormat.Unit} to a simple {@code String}
-		 * suffix, suitable for the {@link Style#SIMPLE} style.
+		 * suffix, suitable for the {@link Style#SIMPLE SIMPLE} style.
 		 */
 		public String asSuffix() {
 			return this.suffix;
@@ -173,9 +176,9 @@ public @interface DurationFormat {
 		 * Print a {@code Duration} as a {@code String}, converting it to a long
 		 * value using this unit's precision via {@link #longValue(Duration)}
 		 * and appending this unit's simple {@link #asSuffix() suffix}.
-		 * @param value the {@code Duration} to convert to String
+		 * @param value the {@code Duration} to convert to a String
 		 * @return the String representation of the {@code Duration} in the
-		 * {@link Style#SIMPLE SIMPLE style}
+		 * {@link Style#SIMPLE SIMPLE} style
 		 */
 		public String print(Duration value) {
 			return longValue(value) + asSuffix();
@@ -187,8 +190,8 @@ public @interface DurationFormat {
 		 * bigger than the actual resolution of the duration.
 		 * <p>For example, {@code Duration.ofMillis(5).plusNanos(1234)} would
 		 * get truncated to {@code 5} for unit {@code MILLIS}.
-		 * @param value the {@code Duration} to convert to long
-		 * @return the long value for the Duration in this Unit
+		 * @param value the {@code Duration} to convert to a long
+		 * @return the long value for the {@code Duration} in this {@code Unit}
 		 */
 		public long longValue(Duration value) {
 			return this.longValue.apply(value);
@@ -196,8 +199,8 @@ public @interface DurationFormat {
 
 		/**
 		 * Get the {@code Unit} corresponding to the given {@code ChronoUnit}.
-		 * @throws IllegalArgumentException if that particular ChronoUnit isn't
-		 * supported
+		 * @throws IllegalArgumentException if the given {@code ChronoUnit} is
+		 * not supported
 		 */
 		public static Unit fromChronoUnit(@Nullable ChronoUnit chronoUnit) {
 			if (chronoUnit == null) {
@@ -208,12 +211,12 @@ public @interface DurationFormat {
 					return candidate;
 				}
 			}
-			throw new IllegalArgumentException("No matching Unit for ChronoUnit." + chronoUnit.name());
+			throw new IllegalArgumentException("No matching Unit for ChronoUnit: " + chronoUnit.name());
 		}
 
 		/**
 		 * Get the {@code Unit} corresponding to the given {@code String} suffix.
-		 * @throws IllegalArgumentException if that particular suffix is unknown
+		 * @throws IllegalArgumentException if the given suffix is not supported
 		 */
 		public static Unit fromSuffix(String suffix) {
 			for (Unit candidate : values()) {
