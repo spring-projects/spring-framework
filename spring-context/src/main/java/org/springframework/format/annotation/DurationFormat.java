@@ -211,7 +211,7 @@ public @interface DurationFormat {
 					return candidate;
 				}
 			}
-			throw new IllegalArgumentException("No matching Unit for ChronoUnit: " + chronoUnit.name());
+			throw new IllegalArgumentException("No matching Unit for ChronoUnit." + chronoUnit.name());
 		}
 
 		/**
