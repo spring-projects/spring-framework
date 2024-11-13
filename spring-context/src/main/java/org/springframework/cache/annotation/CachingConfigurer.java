@@ -32,6 +32,10 @@ import org.springframework.lang.Nullable;
  * {@link #cacheManager()}, {@link #cacheResolver()}, {@link #keyGenerator()}, and
  * {@link #errorHandler()} for detailed instructions.
  *
+ * <p><b>NOTE: A {@code CachingConfigurer} will get initialized early.</b>
+ * Do not inject common dependencies into autowired fields directly; instead, consider
+ * declaring a lazy {@link org.springframework.beans.factory.ObjectProvider} for those.
+ *
  * @author Chris Beams
  * @author Stephane Nicoll
  * @since 3.1
