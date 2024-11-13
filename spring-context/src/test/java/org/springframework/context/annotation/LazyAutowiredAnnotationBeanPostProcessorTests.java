@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
@@ -67,7 +69,7 @@ class LazyAutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	void lazyResourceInjectionWithField() {
+	void lazyResourceInjectionWithField() throws Exception {
 		doTestLazyResourceInjection(FieldResourceInjectionBean.class);
 
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
@@ -84,9 +86,36 @@ class LazyAutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBeans()).isNotEmpty();
 		assertThat(bean.getTestBeans().get(0).getName()).isNull();
 		assertThat(ac.getBeanFactory().containsSingleton("testBean")).isTrue();
+
 		TestBean tb = (TestBean) ac.getBean("testBean");
 		tb.setName("tb");
 		assertThat(bean.getTestBean().getName()).isSameAs("tb");
+
+		assertThat(bean.getTestBeans() instanceof Advised).isTrue();
+		TargetSource targetSource = ((Advised) bean.getTestBeans()).getTargetSource();
+		assertThat(targetSource.getTarget()).isSameAs(targetSource.getTarget());
+
+		ac.close();
+	}
+
+	@Test
+	void lazyResourceInjectionWithFieldForPrototype() {
+		doTestLazyResourceInjection(FieldResourceInjectionBean.class);
+
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
+		RootBeanDefinition abd = new RootBeanDefinition(FieldResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		ac.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		tbd.setLazyInit(true);
+		ac.registerBeanDefinition("testBean", tbd);
+		ac.refresh();
+
+		FieldResourceInjectionBean bean = ac.getBean("annotatedBean", FieldResourceInjectionBean.class);
+		assertThat(bean.getTestBeans()).isNotEmpty();
+		TestBean tb = bean.getTestBeans().get(0);
+		assertThat(bean.getTestBeans().get(0)).isNotSameAs(tb);
 		ac.close();
 	}
 
