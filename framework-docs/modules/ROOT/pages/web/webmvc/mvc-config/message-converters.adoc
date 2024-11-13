@@ -35,7 +35,6 @@ This builder customizes Jackson's default properties as follows:
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* {jackson-github-org}/jackson-datatype-joda[jackson-datatype-joda]: Support for Joda-Time types.
 * {jackson-github-org}/jackson-datatype-jsr310[jackson-datatype-jsr310]: Support for Java 8 Date and Time API types.
 * {jackson-github-org}/jackson-datatype-jdk8[jackson-datatype-jdk8]: Support for other Java 8 types, such as `Optional`.
 * {jackson-github-org}/jackson-module-kotlin[jackson-module-kotlin]: Support for Kotlin classes and data classes.

@@ -216,7 +216,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Override the default {@link Locale} to use for formatting.
-	 * Default value used is {@link Locale#getDefault()}.
+	 * <p>Default value used is {@link Locale#getDefault()}.
 	 * @since 4.1.5
 	 */
 	public Jackson2ObjectMapperBuilder locale(Locale locale) {
@@ -226,7 +226,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Override the default {@link Locale} to use for formatting.
-	 * Default value used is {@link Locale#getDefault()}.
+	 * <p>Default value used is {@link Locale#getDefault()}.
 	 * @param localeString the locale ID as a String representation
 	 * @since 4.1.5
 	 */
@@ -237,7 +237,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Override the default {@link TimeZone} to use for formatting.
-	 * Default value used is UTC (NOT local timezone).
+	 * <p>Default value used is UTC (NOT local timezone).
 	 * @since 4.1.5
 	 */
 	public Jackson2ObjectMapperBuilder timeZone(TimeZone timeZone) {
@@ -247,7 +247,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Override the default {@link TimeZone} to use for formatting.
-	 * Default value used is UTC (NOT local timezone).
+	 * <p>Default value used is UTC (NOT local timezone).
 	 * @param timeZoneString the zone ID as a String representation
 	 * @since 4.1.5
 	 */
@@ -527,10 +527,10 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify the modules to be registered with the {@link ObjectMapper}.
-	 * <p>Multiple invocations are not additive, the last one defines the modules to
+	 * <p>Multiple invocations are not additive; the last one defines the modules to
 	 * register.
-	 * <p>Note: If this is set, no finding of modules is going to happen - not by
-	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
+	 * <p>Note: If this is set, autodetection of modules will not occur &mdash; not
+	 * by Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
 	 * As a consequence, specifying an empty list here will suppress any kind of
 	 * module detection.
 	 * <p>Specify either this or {@link #modulesToInstall}, not both.
@@ -573,11 +573,10 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
-	 * <p>Multiple invocations are not additive, the last one defines the modules
+	 * <p>Multiple invocations are not additive; the last one defines the modules
 	 * to register.
-	 * <p>Modules specified here will be registered after
-	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #findModulesViaServiceLoader}),
+	 * <p>Modules specified here will be registered after Spring's autodetection of
+	 * JSR-310, or Jackson's finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @since 4.1.5
@@ -607,13 +606,11 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
-	 * Specify one or more modules by class to be registered with
-	 * the {@link ObjectMapper}.
-	 * <p>Multiple invocations are not additive, the last one defines the modules
+	 * Specify one or more modules by class to be registered with the {@link ObjectMapper}.
+	 * <p>Multiple invocations are not additive; the last one defines the modules
 	 * to register.
-	 * <p>Modules specified here will be registered after
-	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #findModulesViaServiceLoader}),
+	 * <p>Modules specified here will be registered after Spring's autodetection of
+	 * JSR-310, or Jackson's finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @see #modulesToInstall(Module...)
@@ -632,8 +629,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * Set whether to let Jackson find available modules via the JDK ServiceLoader,
 	 * based on META-INF metadata in the classpath.
 	 * <p>If this mode is not set, Spring's Jackson2ObjectMapperBuilder itself
-	 * will try to find the JSR-310 and Joda-Time support modules on the classpath -
-	 * provided that Java 8 and Joda-Time themselves are available, respectively.
+	 * will try to find the JSR-310 support module on the classpath.
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#findModules()
 	 */
 	public Jackson2ObjectMapperBuilder findModulesViaServiceLoader(boolean findModules) {
