@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,7 +322,16 @@ public class JettyWebSocketHandlerAdapter {
 		}
 
 
-		private record JettyByteBufferIterator(ByteBufferIterator delegate) implements ByteBufferIterator {
+		private static class JettyByteBufferIterator implements ByteBufferIterator {
+
+			private final ByteBufferIterator delegate;
+
+
+			JettyByteBufferIterator(ByteBufferIterator delegate) {
+				Assert.notNull(delegate, "Delegate must not be null");
+
+				this.delegate = delegate;
+			}
 
 			@Override
 			public void close() {
