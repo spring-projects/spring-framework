@@ -25,9 +25,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * A data size, such as '12MB'.
- *
- * <p>This class models data size in terms of bytes and is immutable and thread-safe.
+ * A data size, such as '12MB'. This class models data size in terms of
+ * bytes and is immutable and thread-safe.
  *
  * <p>The terms and units used in this class are based on
  * <a href="https://en.wikipedia.org/wiki/Binary_prefix">binary prefixes</a>
