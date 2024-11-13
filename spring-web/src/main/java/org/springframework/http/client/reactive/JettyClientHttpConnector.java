@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,6 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		private final Content.Chunk chunk;
 
 		private final AtomicInteger refCount = new AtomicInteger(1);
-
 
 		public JettyDataBuffer(DataBuffer delegate, Content.Chunk chunk) {
 			Assert.notNull(delegate, "Delegate must not be null");
@@ -390,7 +389,6 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 			private final Content.Chunk chunk;
 
-
 			public JettyByteBufferIterator(ByteBufferIterator delegate, Content.Chunk chunk) {
 				Assert.notNull(delegate, "Delegate must not be null");
 				Assert.notNull(chunk, "Chunk must not be null");
@@ -399,7 +397,6 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 				this.chunk = chunk;
 				this.chunk.retain();
 			}
-
 
 			@Override
 			public void close() {
