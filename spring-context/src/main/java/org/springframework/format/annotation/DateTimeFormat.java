@@ -101,13 +101,13 @@ public @interface DateTimeFormat {
 
 	/**
 	 * The custom pattern to use to format the field or method parameter.
-	 * <p>Defaults to empty String, indicating no custom pattern String has been
+	 * <p>Defaults to an empty String, indicating no custom pattern String has been
 	 * specified. Set this attribute when you wish to format your field or method
 	 * parameter in accordance with a custom date time pattern not represented by
 	 * a style or ISO format.
-	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat} style,
-	 * as also supported by Joda-Time, with strict parsing semantics towards overflows
-	 * (e.g. rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
+	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat}
+	 * style, with strict parsing semantics towards overflows (for example, rejecting
+	 * a {@code Feb 29} value for a non-leap-year). As a consequence, 'yy'
 	 * characters indicate a year in the traditional style, not a "year-of-era" as in the
 	 * {@link java.time.format.DateTimeFormatter} specification (i.e. 'yy' turns into 'uu'
 	 * when going through a {@code DateTimeFormatter} with strict resolution mode).
@@ -129,7 +129,6 @@ public @interface DateTimeFormat {
 	 * or {@link #style} attribute is always used for printing. For details on
 	 * which time zone is used for fallback patterns, see the
 	 * {@linkplain DateTimeFormat class-level documentation}.
-	 * <p>Fallback patterns are not supported for Joda-Time value types.
 	 * @since 5.3.5
 	 */
 	String[] fallbackPatterns() default {};

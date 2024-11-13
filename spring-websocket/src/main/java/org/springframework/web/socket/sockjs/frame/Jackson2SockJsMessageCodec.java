@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,6 @@ import org.springframework.util.Assert;
  * <li>{@link MapperFeature#DEFAULT_VIEW_INCLUSION} is disabled</li>
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
- *
- * <p>Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
- * when available (and when Java 8 and Joda-Time themselves are available, respectively).
  *
  * @author Rossen Stoyanchev
  * @since 4.0

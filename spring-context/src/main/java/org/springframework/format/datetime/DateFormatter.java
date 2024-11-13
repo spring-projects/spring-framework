@@ -181,7 +181,6 @@ public class DateFormatter implements Formatter<Date> {
 	 * <li>'F' = Full</li>
 	 * <li>'-' = Omitted</li>
 	 * </ul>
-	 * This method mimics the styles supported by Joda-Time.
 	 * @param stylePattern two characters from the set {"S", "M", "L", "F", "-"}
 	 * @since 3.2
 	 */
