@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * A data size, such as '12MB'.
- *
- * <p>This class models data size in terms of bytes and is immutable and thread-safe.
+ * A data size, such as '12MB'. This class models data size in terms of
+ * bytes and is immutable and thread-safe.
  *
  * <p>The terms and units used in this class are based on
  * <a href="https://en.wikipedia.org/wiki/Binary_prefix">binary prefixes</a>
@@ -247,14 +246,14 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj == null || getClass() != obj.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		DataSize that = (DataSize) obj;
+		DataSize that = (DataSize) other;
 		return (this.bytes == that.bytes);
 	}
 
@@ -279,7 +278,6 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 			DataUnit defaultUnitToUse = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
 			return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix) : defaultUnitToUse);
 		}
-
 	}
 
 }
