@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link RegisterReflectionReflectiveProcessor}.
  *
  * @author Stephane Nicoll
+ * @since 6.2
  */
 class RegisterReflectionReflectiveProcessorTests {
 
@@ -46,6 +47,7 @@ class RegisterReflectionReflectiveProcessorTests {
 	private final RegisterReflectionReflectiveProcessor processor = new RegisterReflectionReflectiveProcessor();
 
 	private final RuntimeHints hints = new RuntimeHints();
+
 
 	@Nested
 	class AnnotatedTypeTests {
@@ -73,6 +75,7 @@ class RegisterReflectionReflectiveProcessorTests {
 		}
 	}
 
+
 	@Nested
 	class AnnotatedMethodTests {
 
@@ -88,10 +91,11 @@ class RegisterReflectionReflectiveProcessorTests {
 			Method method = RegistrationMethodWithoutTarget.class.getDeclaredMethod("doReflection");
 			assertThatIllegalStateException()
 					.isThrownBy(() -> registerReflectionHints(method))
-					.withMessageContaining("At least one class must be specified, could not detect target from '")
+					.withMessageContaining("At least one class must be specified")
 					.withMessageContaining(method.toString());
 		}
 	}
+
 
 	private void assertBasicTypeHint(Class<?> type, List<String> methodNames, List<MemberCategory> memberCategories) {
 		TypeHint typeHint = getTypeHint(type);
@@ -120,14 +124,17 @@ class RegisterReflectionReflectiveProcessorTests {
 		this.processor.registerReflectionHints(this.hints.reflection(), annotatedElement);
 	}
 
+
 	@RegisterReflection(classes = SimplePojo.class, memberCategories = MemberCategory.INVOKE_PUBLIC_METHODS)
-	static class RegistrationSimple {}
+	static class RegistrationSimple {
+	}
+
 
 	@RegisterReflection(classes = { Number.class, Double.class },
 			classNames = { "java.lang.Integer", "java.lang.Float" }, memberCategories = MemberCategory.INVOKE_PUBLIC_METHODS)
 	static class RegistrationMultipleTargets {
-
 	}
+
 
 	static class RegistrationMethod {
 
@@ -135,16 +142,14 @@ class RegisterReflectionReflectiveProcessorTests {
 		private void doReflection() {
 
 		}
-
 	}
+
 
 	static class RegistrationMethodWithoutTarget {
 
 		@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
 		private void doReflection() {
-
 		}
-
 	}
 
 
@@ -171,6 +176,7 @@ class RegisterReflectionReflectiveProcessorTests {
 		}
 	}
 
+
 	@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
 	static class AnnotatedSimplePojo {
 
@@ -179,8 +185,6 @@ class RegisterReflectionReflectiveProcessorTests {
 		AnnotatedSimplePojo(String test) {
 			this.test = test;
 		}
-
 	}
 
 }
-

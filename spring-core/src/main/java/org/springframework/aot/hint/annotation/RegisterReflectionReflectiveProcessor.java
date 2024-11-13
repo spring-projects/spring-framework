@@ -45,12 +45,11 @@ public class RegisterReflectionReflectiveProcessor implements ReflectiveProcesso
 
 	private static final Log logger = LogFactory.getLog(RegisterReflectionReflectiveProcessor.class);
 
+
 	@Override
 	public final void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
-		RegisterReflection annotation = AnnotatedElementUtils.getMergedAnnotation(
-				element, RegisterReflection.class);
-		Assert.notNull(annotation, "Element must be annotated with @" + RegisterReflection.class.getSimpleName()
-				+ ": " + element);
+		RegisterReflection annotation = AnnotatedElementUtils.getMergedAnnotation(element, RegisterReflection.class);
+		Assert.notNull(annotation, () -> "Element must be annotated with @RegisterReflection: " + element);
 		ReflectionRegistration registration = parse(element, annotation);
 		registerReflectionHints(hints, registration);
 	}
@@ -65,12 +64,10 @@ public class RegisterReflectionReflectiveProcessor implements ReflectiveProcesso
 				allClassNames.add(clazz);
 			}
 			else {
-				throw new IllegalStateException("At least one class must be specified, "
-						+ "could not detect target from '" + element + "'");
+				throw new IllegalStateException("At least one class must be specified: " + element);
 			}
 		}
-		return new ReflectionRegistration(allClassNames.toArray(new Class<?>[0]),
-				annotation.memberCategories());
+		return new ReflectionRegistration(allClassNames.toArray(new Class<?>[0]), annotation.memberCategories());
 	}
 
 	protected void registerReflectionHints(ReflectionHints hints, ReflectionRegistration registration) {
@@ -89,11 +86,15 @@ public class RegisterReflectionReflectiveProcessor implements ReflectiveProcesso
 			return ClassUtils.forName(className, getClass().getClassLoader());
 		}
 		catch (Exception ex) {
-			logger.warn("Ignoring '" + className + "': " + ex.getMessage());
+			if (logger.isWarnEnabled()) {
+				logger.warn("Ignoring '" + className + "': " + ex);
+			}
 			return null;
 		}
 	}
 
-	protected record ReflectionRegistration(Class<?>[] classes, MemberCategory[] memberCategories) {}
+
+	protected record ReflectionRegistration(Class<?>[] classes, MemberCategory[] memberCategories) {
+	}
 
 }

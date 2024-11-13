@@ -39,6 +39,7 @@ public class PlaceholderResolutionException extends IllegalArgumentException {
 
 	private final List<String> values;
 
+
 	/**
 	 * Create an exception using the specified reason for its message.
 	 * @param reason the reason for the exception, should contain the placeholder
@@ -66,6 +67,7 @@ public class PlaceholderResolutionException extends IllegalArgumentException {
 		}
 		return sb.toString();
 	}
+
 
 	/**
 	 * Return a {@link PlaceholderResolutionException} that provides

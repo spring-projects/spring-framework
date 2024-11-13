@@ -67,6 +67,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 		this.chunk = null;
 	}
 
+
 	@Override
 	public boolean isAllocated() {
 		return this.refCount.get() > 0;
@@ -74,14 +75,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public PooledDataBuffer retain() {
-		int result = this.refCount.updateAndGet(c -> {
-			if (c != 0) {
-				return c + 1;
-			}
-			else {
-				return 0;
-			}
-		});
+		int result = this.refCount.updateAndGet(c -> (c != 0 ? c + 1 : 0));
 		if (result != 0 && this.chunk != null) {
 			this.chunk.retain();
 		}
@@ -107,7 +101,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 			return this.chunk.release();
 		}
 		else {
-			return result == 0;
+			return (result == 0);
 		}
 	}
 
@@ -115,6 +109,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 	public DataBufferFactory factory() {
 		return this.bufferFactory;
 	}
+
 
 	// delegation
 
@@ -305,15 +300,16 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 		return this.delegate.toString(index, length, charset);
 	}
 
+
 	@Override
-	public int hashCode() {
-		return this.delegate.hashCode();
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof JettyDataBuffer otherBuffer &&
+				this.delegate.equals(otherBuffer.delegate)));
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		return this == o || (o instanceof JettyDataBuffer other &&
-				this.delegate.equals(other.delegate));
+	public int hashCode() {
+		return this.delegate.hashCode();
 	}
 
 	@Override
@@ -322,12 +318,12 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 				readPosition(), writePosition(), capacity());
 	}
 
+
 	private static final class JettyByteBufferIterator implements ByteBufferIterator {
 
 		private final ByteBufferIterator delegate;
 
 		private final Content.Chunk chunk;
-
 
 		public JettyByteBufferIterator(ByteBufferIterator delegate, Content.Chunk chunk) {
 			Assert.notNull(delegate, "Delegate must not be null");
@@ -337,7 +333,6 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 			this.chunk = chunk;
 			this.chunk.retain();
 		}
-
 
 		@Override
 		public void close() {

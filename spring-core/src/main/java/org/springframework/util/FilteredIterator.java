@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 /**
  * Iterator that filters out values that do not match a predicate.
  * This type is used by {@link CompositeMap}.
+ *
  * @author Arjen Poutsma
  * @since 6.2
  * @param <E> the type of elements returned by this iterator
@@ -44,7 +45,6 @@ final class FilteredIterator<E> implements Iterator<E> {
 	public FilteredIterator(Iterator<E> delegate, Predicate<E> filter) {
 		Assert.notNull(delegate, "Delegate must not be null");
 		Assert.notNull(filter, "Filter must not be null");
-
 		this.delegate = delegate;
 		this.filter = filter;
 	}
@@ -83,4 +83,5 @@ final class FilteredIterator<E> implements Iterator<E> {
 		}
 		return false;
 	}
+
 }

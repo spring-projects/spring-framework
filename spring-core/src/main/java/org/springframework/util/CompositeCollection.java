@@ -43,6 +43,7 @@ class CompositeCollection<E> implements Collection<E> {
 		this.second = second;
 	}
 
+
 	@Override
 	public int size() {
 		return this.first.size() + this.second.size();
@@ -160,4 +161,5 @@ class CompositeCollection<E> implements Collection<E> {
 		this.first.clear();
 		this.second.clear();
 	}
+
 }

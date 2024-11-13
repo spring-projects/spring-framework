@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
 /**
  * Map that filters out values that do not match a predicate.
  * This type is used by {@link CompositeMap}.
+ *
  * @author Arjen Poutsma
  * @since 6.2
  * @param <K> the type of keys maintained by this map
@@ -41,10 +42,10 @@ final class FilteredMap<K, V> extends AbstractMap<K, V> {
 	public FilteredMap(Map<K, V> delegate, Predicate<K> filter) {
 		Assert.notNull(delegate, "Delegate must not be null");
 		Assert.notNull(filter, "Filter must not be null");
-
 		this.delegate = delegate;
 		this.filter = filter;
 	}
+
 
 	@Override
 	public Set<Entry<K, V>> entrySet() {

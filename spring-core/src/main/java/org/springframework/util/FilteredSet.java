@@ -19,9 +19,12 @@ package org.springframework.util;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Set that filters out values that do not match a predicate.
  * This type is used by {@link CompositeMap}.
+ *
  * @author Arjen Poutsma
  * @since 6.2
  * @param <E> the type of elements maintained by this set
@@ -32,25 +35,21 @@ final class FilteredSet<E> extends FilteredCollection<E> implements Set<E> {
 		super(delegate, filter);
 	}
 
+
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		else if (obj instanceof Set<?> set) {
-			if (set.size() != size()) {
-				return false;
-			}
+		if (other instanceof Set<?> otherSet && size() == otherSet.size()) {
 			try {
-				return containsAll(set);
+				return containsAll(otherSet);
 			}
 			catch (ClassCastException | NullPointerException ignored) {
-				return false;
+				// fall through
 			}
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	@Override
@@ -63,4 +62,5 @@ final class FilteredSet<E> extends FilteredCollection<E> implements Set<E> {
 		}
 		return hashCode;
 	}
+
 }
