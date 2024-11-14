@@ -94,7 +94,7 @@ public @interface DurationFormat {
 	 * allows conversion to and from a supported {@code ChronoUnit} as well as
 	 * conversion from durations to longs.
 	 *
-	 * <p>The enum includes its corresponding suffix in the {@link Style#SIMPLE simple}
+	 * <p>The enum includes its corresponding suffix in the {@link Style#SIMPLE SIMPLE}
 	 * {@code Duration} format style.
 	 */
 	enum Unit {
