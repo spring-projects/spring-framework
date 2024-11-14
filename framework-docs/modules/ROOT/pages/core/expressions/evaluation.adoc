@@ -444,18 +444,27 @@ component. This section discusses both of these options.
 The compiler can operate in one of three modes, which are captured in the
 `org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows.
 
-* `OFF` (default): The compiler is switched off.
-* `IMMEDIATE`: In immediate mode, the expressions are compiled as soon as possible. This
-  is typically after the first interpreted evaluation. If the compiled expression fails
-  (typically due to a type changing, as described earlier), the caller of the expression
-  evaluation receives an exception.
-* `MIXED`: In mixed mode, the expressions silently switch between interpreted and
-  compiled mode over time. After some number of interpreted runs, they switch to compiled
-  form and, if something goes wrong with the compiled form (such as a type changing, as
-  described earlier), the expression automatically switches back to interpreted form
-  again. Sometime later, it may generate another compiled form and switch to it.
-  Basically, the exception that the user gets in `IMMEDIATE` mode is instead handled
-  internally.
+`OFF` ::
+  The compiler is switched off, and all expressions will be evaluated in _interpreted_
+  mode. This is the default mode.
+`IMMEDIATE` ::
+  In immediate mode, expressions are compiled as soon as possible, typically after the
+  first interpreted evaluation. If evaluation of the compiled expression fails (for
+  example, due to a type changing, as described earlier), the caller of the expression
+  evaluation receives an exception. If the types of various expression elements change
+  over time, consider switching to `MIXED` mode or turning off the compiler.
+`MIXED` ::
+  In mixed mode, expression evaluation silently switches between _interpreted_ and
+  _compiled_ over time. After some number of successful interpreted runs, the expression
+  gets compiled. If evaluation of the compiled expression fails (for example, due to a
+  type changing), that failure will be caught internally, and the system will switch back
+  to interpreted mode for the given expression. Basically, the exception that the caller
+  receives in `IMMEDIATE` mode is instead handled internally. Sometime later, the
+  compiler may generate another compiled form and switch to it. This cycle of switching
+  between interpreted and compiled mode will continue until the system determines that it
+  does not make sense to continue trying — for example, when a certain failure threshold
+  has been reached — at which point the system will permanently switch to interpreted
+  mode for the given expression.
 
 `IMMEDIATE` mode exists because `MIXED` mode could cause issues for expressions that
 have side effects. If a compiled expression blows up after partially succeeding, it
