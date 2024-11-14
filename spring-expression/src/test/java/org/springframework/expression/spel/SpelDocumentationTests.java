@@ -658,7 +658,8 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			MethodHandle methodHandle = MethodHandles.lookup().findVirtual(String.class, "formatted",
 				MethodType.methodType(String.class, Object[].class))
 					.bindTo(template)
-					.bindTo(varargs); // here we have to provide arguments in a single array binding
+					// Here we have to provide the arguments in a single array binding:
+					.bindTo(varargs);
 			context.registerFunction("message", methodHandle);
 
 			String message = parser.parseExpression("#message()").getValue(context, String.class);

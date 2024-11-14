@@ -32,6 +32,8 @@ import static org.springframework.expression.spel.SpelMessage.INCORRECT_NUMBER_O
  *
  * @author Andy Clement
  * @author Sam Brannen
+ * @see ConstructorInvocationTests
+ * @see MethodInvocationTests
  */
 class VariableAndFunctionTests extends AbstractExpressionTests {
 
