@@ -3,8 +3,10 @@
 
 You can invoke constructors by using the `new` operator. You should use the fully
 qualified class name for all types except those located in the `java.lang` package
-(`Integer`, `Float`, `String`, and so on). The following example shows how to use the
-`new` operator to invoke constructors:
+(`Integer`, `Float`, `String`, and so on).
+xref:core/expressions/language-ref/varargs.adoc[Varargs] are also supported.
+
+The following example shows how to use the `new` operator to invoke constructors.
 
 [tabs]
 ======
@@ -36,6 +38,5 @@ Kotlin::
 			.getValue(societyContext)
 ----
 ======
-
 
 
