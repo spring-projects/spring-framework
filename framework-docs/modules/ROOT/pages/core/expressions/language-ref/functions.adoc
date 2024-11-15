@@ -110,8 +110,8 @@ potentially more efficient use cases if the `MethodHandle` target and parameters
 been fully bound prior to registration; however, partially bound handles are also
 supported.
 
-Consider the `String#formatted(String, Object...)` instance method, which produces a
-message according to a template and a variable number of arguments.
+Consider the `String#formatted(Object...)` instance method, which produces a message
+according to a template and a variable number of arguments.
 
 You can register and use the `formatted` method as a `MethodHandle`, as the following
 example shows:

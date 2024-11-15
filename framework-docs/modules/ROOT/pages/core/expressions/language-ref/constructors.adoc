@@ -18,8 +18,8 @@ Java::
 
 	// create new Inventor instance within the add() method of List
 	p.parseExpression(
-			"Members.add(new org.spring.samples.spel.inventor.Inventor(
-				'Albert Einstein', 'German'))").getValue(societyContext);
+		"Members.add(new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German'))")
+			.getValue(societyContext);
 ----
 
 Kotlin::
