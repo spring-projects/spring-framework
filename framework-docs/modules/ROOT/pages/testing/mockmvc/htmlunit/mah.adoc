@@ -8,7 +8,7 @@ to use the raw HtmlUnit libraries.
 == MockMvc and HtmlUnit Setup
 
 First, make sure that you have included a test dependency on
-`org.htmlunit:htmlunit`.
+`net.sourceforge.htmlunit:htmlunit`.
 
 We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by using the
 `MockMvcWebClientBuilder`, as follows:
