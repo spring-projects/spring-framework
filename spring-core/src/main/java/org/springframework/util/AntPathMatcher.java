@@ -660,7 +660,7 @@ public class AntPathMatcher implements PathMatcher {
 			this.uriTemplateVariables = uriTemplateVariables;
 		}
 	}
-	
+
 	/**
 	 * Tests whether a string matches against a pattern via a {@link Pattern}.
 	 * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and
