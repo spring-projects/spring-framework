@@ -33,11 +33,11 @@ arbitrary advice types. This section describes the basic concepts and standard a
 [[aop-api-advice-around]]
 === Interception Around Advice
 
-The most fundamental advice type in Spring is interception around advice.
+The most fundamental advice type in Spring is _interception around advice_.
 
-Spring is compliant with the AOP `Alliance` interface for around advice that uses method
-interception. Classes that implement `MethodInterceptor` and that implement around advice should also implement the
-following interface:
+Spring is compliant with the AOP Alliance interface for around advice that uses method
+interception. Classes that implement around advice should therefore implement the
+following `MethodInterceptor` interface from the `org.aopalliance.intercept` package:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -49,8 +49,8 @@ following interface:
 
 The `MethodInvocation` argument to the `invoke()` method exposes the method being
 invoked, the target join point, the AOP proxy, and the arguments to the method. The
-`invoke()` method should return the invocation's result: the return value of the join
-point.
+`invoke()` method should return the invocation's result: typically the return value of
+the join point.
 
 The following example shows a simple `MethodInterceptor` implementation:
 
@@ -64,9 +64,9 @@ Java::
 
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			System.out.println("Before: invocation=[" + invocation + "]");
-			Object rval = invocation.proceed();
+			Object result = invocation.proceed();
 			System.out.println("Invocation returned");
-			return rval;
+			return result;
 		}
 	}
 ----
@@ -79,9 +79,9 @@ Kotlin::
 
 		override fun invoke(invocation: MethodInvocation): Any {
 			println("Before: invocation=[$invocation]")
-			val rval = invocation.proceed()
+			val result = invocation.proceed()
 			println("Invocation returned")
-			return rval
+			return result
 		}
 	}
 ----
@@ -105,7 +105,7 @@ currently define pointcut interfaces.
 [[aop-api-advice-before]]
 === Before Advice
 
-A simpler advice type is a before advice. This does not need a `MethodInvocation`
+A simpler advice type is a _before advice_. This does not need a `MethodInvocation`
 object, since it is called only before entering the method.
 
 The main advantage of a before advice is that there is no need to invoke the `proceed()`
@@ -121,10 +121,6 @@ The following listing shows the `MethodBeforeAdvice` interface:
 		void before(Method m, Object[] args, Object target) throws Throwable;
 	}
 ----
-
-(Spring's API design would allow for
-field before advice, although the usual objects apply to field interception and it is
-unlikely for Spring to ever implement it.)
 
 Note that the return type is `void`. Before advice can insert custom behavior before the join
 point runs but cannot change the return value. If a before advice throws an
@@ -176,10 +172,10 @@ TIP: Before advice can be used with any pointcut.
 [[aop-api-advice-throws]]
 === Throws Advice
 
-Throws advice is invoked after the return of the join point if the join point threw
+_Throws advice_ is invoked after the return of the join point if the join point threw
 an exception. Spring offers typed throws advice. Note that this means that the
 `org.springframework.aop.ThrowsAdvice` interface does not contain any methods. It is a
-tag interface identifying that the given object implements one or more typed throws
+marker interface identifying that the given object implements one or more typed throws
 advice methods. These should be in the following form:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -189,9 +185,10 @@ advice methods. These should be in the following form:
 
 Only the last argument is required. The method signatures may have either one or four
 arguments, depending on whether the advice method is interested in the method and
-arguments. The next two listing show classes that are examples of throws advice.
+arguments. The next two listings show classes that are examples of throws advice.
 
-The following advice is invoked if a `RemoteException` is thrown (including from subclasses):
+The following advice is invoked if a `RemoteException` is thrown (including subclasses of
+`RemoteException`):
 
 [tabs]
 ======
@@ -220,9 +217,9 @@ Kotlin::
 ----
 ======
 
-Unlike the preceding
-advice, the next example declares four arguments, so that it has access to the invoked method, method
-arguments, and target object. The following advice is invoked if a `ServletException` is thrown:
+Unlike the preceding advice, the next example declares four arguments, so that it has
+access to the invoked method, method arguments, and target object. The following advice
+is invoked if a `ServletException` is thrown:
 
 [tabs]
 ======
@@ -304,7 +301,7 @@ TIP: Throws advice can be used with any pointcut.
 [[aop-api-advice-after-returning]]
 === After Returning Advice
 
-An after returning advice in Spring must implement the
+An _after returning advice_ in Spring must implement the
 `org.springframework.aop.AfterReturningAdvice` interface, which the following listing shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -368,7 +365,7 @@ TIP: After returning advice can be used with any pointcut.
 [[aop-api-advice-introduction]]
 === Introduction Advice
 
-Spring treats introduction advice as a special kind of interception advice.
+Spring treats _introduction advice_ as a special kind of interception advice.
 
 Introduction requires an `IntroductionAdvisor` and an `IntroductionInterceptor` that
 implement the following interface:
