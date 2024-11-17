@@ -504,7 +504,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 				// This stream doesn't have any data in it...
 				return;
 			}
-			else if (len < 0) {
+			else if (len == 0) {
 				return;
 			}
 			else if (len < 0) {
