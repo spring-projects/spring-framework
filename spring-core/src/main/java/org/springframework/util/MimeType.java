@@ -244,7 +244,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			return false;
 		}
 		return ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")));
-	
 	}
 
 	protected String unquote(String s) {
@@ -582,7 +581,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 				}
 			}
 		}
-
 		return 0;
 	}
 
