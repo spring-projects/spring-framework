@@ -505,8 +505,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 				return;
 			}else if(len == 0){
 				return;
-			}
-			else if (len < 0) {
+			}else if (len < 0) {
 				throw new IllegalArgumentException("len must be 0 or greater: " + len);
 			}
 			else {

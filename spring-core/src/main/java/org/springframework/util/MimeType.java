@@ -583,7 +583,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 		return 0;
 	}
-
+	
 	/**
 	 * Indicates whether this {@code MimeType} is more specific than the given
 	 * type.
