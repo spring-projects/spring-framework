@@ -98,13 +98,11 @@ public class FastByteArrayOutputStream extends OutputStream {
 		if (this.closed) {
 			throw new IOException("Stream closed");
 		}
-		else {
-			if (this.buffers.peekLast() == null || this.buffers.getLast().length == this.index) {
-				addBuffer(1);
-			}
-			// store the byte
-			this.buffers.getLast()[this.index++] = (byte) datum;
+		if (this.buffers.peekLast() == null || this.buffers.getLast().length == this.index) {
+			addBuffer(1);
 		}
+		// store the byte
+		this.buffers.getLast()[this.index++] = (byte) datum;
 	}
 
 	@Override
@@ -384,22 +382,20 @@ public class FastByteArrayOutputStream extends OutputStream {
 				// This stream doesn't have any data in it...
 				return -1;
 			}
+			if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
+				this.totalBytesRead++;
+				return this.currentBuffer[this.nextIndexInCurrentBuffer++] & 0xFF;
+			}
 			else {
-				if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
-					this.totalBytesRead++;
-					return this.currentBuffer[this.nextIndexInCurrentBuffer++] & 0xFF;
+				if (this.buffersIterator.hasNext()) {
+					this.currentBuffer = this.buffersIterator.next();
+					updateCurrentBufferLength();
+					this.nextIndexInCurrentBuffer = 0;
 				}
 				else {
-					if (this.buffersIterator.hasNext()) {
-						this.currentBuffer = this.buffersIterator.next();
-						updateCurrentBufferLength();
-						this.nextIndexInCurrentBuffer = 0;
-					}
-					else {
-						this.currentBuffer = null;
-					}
-					return read();
+					this.currentBuffer = null;
 				}
+				return read();
 			}
 		}
 
@@ -504,11 +500,8 @@ public class FastByteArrayOutputStream extends OutputStream {
 		 */
 		@Override
 		public void updateMessageDigest(MessageDigest messageDigest, int len) {
-			if (this.currentBuffer == null) {
+			if (this.currentBuffer == null || len == 0) {
 				// This stream doesn't have any data in it...
-				return;
-			}
-			else if (len == 0) {
 				return;
 			}
 			else if (len < 0) {

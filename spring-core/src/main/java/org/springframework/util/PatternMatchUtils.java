@@ -84,14 +84,14 @@ public abstract class PatternMatchUtils {
 	 * @return whether the String matches any of the given patterns
 	 */
 	public static boolean simpleMatch(@Nullable String[] patterns, @Nullable String str) {
-		if (patterns != null) {
-			for (String pattern : patterns) {
-				if (simpleMatch(pattern, str)) {
-					return true;
-				}
+		if (patterns == null) {		
+			return false;
+		}
+		for (String pattern : patterns) {
+			if (simpleMatch(pattern, str)) {
+				return true;
 			}
 		}
-		return false;
 	}
 
 }

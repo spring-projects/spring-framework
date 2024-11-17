@@ -119,11 +119,10 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			}
 			@Override
 			protected boolean removeEldestEntry(Map.Entry<String, V> eldest) {
-				boolean doRemove = LinkedCaseInsensitiveMap.this.removeEldestEntry(eldest);
-				if (doRemove) {
+				if (LinkedCaseInsensitiveMap.this.removeEldestEntry(eldest)) {
 					removeCaseInsensitiveKey(eldest.getKey());
 				}
-				return doRemove;
+				return false;
 			}
 		};
 		this.caseInsensitiveKeys = CollectionUtils.newHashMap(expectedSize);
