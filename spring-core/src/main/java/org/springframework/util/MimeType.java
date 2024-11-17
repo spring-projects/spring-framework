@@ -581,7 +581,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 				}
 			}
 		}
-		
+
 		return 0;
 	}
 
