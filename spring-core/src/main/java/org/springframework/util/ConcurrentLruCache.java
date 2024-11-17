@@ -50,6 +50,10 @@ public final class ConcurrentLruCache<K, V> {
 
 	private final int capacity;
 
+	private final int DEFAULT_CAPACITY = 16;
+
+	private final float DEFAULT_LOAD_FACTOR = 0.75f;
+
 	private final AtomicInteger currentSize = new AtomicInteger();
 
 	private final ConcurrentMap<K, Node<K, V>> cache;
@@ -61,6 +65,7 @@ public final class ConcurrentLruCache<K, V> {
 	private final WriteOperations writeOperations;
 
 	private final Lock evictionLock = new ReentrantLock();
+
 
 	/*
 	 * Queue that contains all ACTIVE cache entries, ordered with least recently used entries first.
@@ -83,7 +88,7 @@ public final class ConcurrentLruCache<K, V> {
 	private ConcurrentLruCache(int capacity, Function<K, V> generator, int concurrencyLevel) {
 		Assert.isTrue(capacity >= 0, "Capacity must be >= 0");
 		this.capacity = capacity;
-		this.cache = new ConcurrentHashMap<>(16, 0.75f, concurrencyLevel);
+		this.cache = new ConcurrentHashMap<>(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR, concurrencyLevel);
 		this.generator = generator;
 		this.readOperations = new ReadOperations<>(this.evictionQueue);
 		this.writeOperations = new WriteOperations();
@@ -274,11 +279,10 @@ public final class ConcurrentLruCache<K, V> {
 		private void evictEntries() {
 			while (currentSize.get() > capacity) {
 				final Node<K, V> node = evictionQueue.poll();
-				if (node == null) {
-					return;
+				if (node != null) {
+					cache.remove(node.key, node);
+					markAsRemoved(node);
 				}
-				cache.remove(node.key, node);
-				markAsRemoved(node);
 			}
 		}
 
