@@ -35,9 +35,9 @@ arbitrary advice types. This section describes the basic concepts and standard a
 
 The most fundamental advice type in Spring is _interception around advice_.
 
-Spring is compliant with the AOP `Alliance` interface for around advice that uses method
-interception. Classes that implement `MethodInterceptor` and that implement around advice should also implement the
-following interface:
+Spring is compliant with the AOP Alliance interface for around advice that uses method
+interception. Classes that implement around advice should therefore implement the
+following `MethodInterceptor` interface from the `org.aopalliance.intercept` package:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
