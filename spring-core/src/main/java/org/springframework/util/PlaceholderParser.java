@@ -104,7 +104,9 @@ final class PlaceholderParser {
 		if (simplePrefixForSuffix != null && this.prefix.endsWith(simplePrefixForSuffix)) {
 			this.simplePrefix = simplePrefixForSuffix;
 		}
-		this.simplePrefix = this.prefix;
+		else {
+			this.simplePrefix = this.prefix;
+		}
 		this.separator = separator;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 		this.escape = escape;
