@@ -99,13 +99,14 @@ public final class ConcurrentLruCache<K, V> {
 			return this.generator.apply(key);
 		}
 		final Node<K, V> node = this.cache.get(key);
-		if (node == null) {
-			V value = this.generator.apply(key);
-			put(key, value);
-			return value;
+		if(node != null) {
+			processRead(node);
+			return node.getValue();
 		}
-		processRead(node);
-		return node.getValue();
+
+		V value = this.generator.apply(key);
+		put(key, value);
+		return value;
 	}
 
 	private void put(K key, V value) {
