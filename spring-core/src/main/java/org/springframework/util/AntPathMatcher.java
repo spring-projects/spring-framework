@@ -311,17 +311,12 @@ public class AntPathMatcher implements PathMatcher {
 			int strLength = (pathIdxEnd - pathIdxStart + 1);
 			int foundIdx = -1;
 
-			strLoop:
 			for (int i = 0; i <= strLength - patLength; i++) {
-				for (int j = 0; j < patLength; j++) {
-					String subPat = pattDirs[pattIdxStart + j + 1];
-					String subStr = pathDirs[pathIdxStart + i + j];
-					if (!matchStrings(subPat, subStr, uriTemplateVariables)) {
-						continue strLoop;
-					}
+				MatchContext context = new MatchContext(pattDirs, pathDirs, pattIdxStart, pathIdxStart, uriTemplateVariables );
+				if(checkSubPatternMatch(context, i, patLength)){
+					foundIdx = pathIdxStart + i;
+					break;
 				}
-				foundIdx = pathIdxStart + i;
-				break;
 			}
 
 			if (foundIdx == -1) {
@@ -338,6 +333,32 @@ public class AntPathMatcher implements PathMatcher {
 			}
 		}
 
+		return true;
+	}
+	private static class MatchContext{
+		String[] pattDirs;
+		String[] pathDirs;
+		int pattIdxStart;
+		int pathIdxStart;
+		Map<String, String> uriTemplateVariables;
+
+		MatchContext(String[] pattDirs, String[] pathDirs, int pattIdxStart, int pathIdxStart, Map<String, String> uriTemplateVariables) {
+			this.pattDirs = pattDirs;
+			this.pathDirs = pathDirs;
+			this.pattIdxStart = pattIdxStart;
+			this.pathIdxStart = pathIdxStart;
+			this.uriTemplateVariables = uriTemplateVariables;
+		}
+	}
+
+	private boolean checkSubPatternMatch(MatchContext context, int i, int patLength) {
+		for (int j = 0; j < patLength; j++) {
+			String subPat = context.pattDirs[context.pattIdxStart + j + 1];
+			String subStr = context.pathDirs[context.pathIdxStart + i + j];
+			if (!matchStrings(subPat, subStr, context.uriTemplateVariables)) {
+				return false;
+			}
+		}
 		return true;
 	}
 
