@@ -500,8 +500,10 @@ public class FastByteArrayOutputStream extends OutputStream {
 		 */
 		@Override
 		public void updateMessageDigest(MessageDigest messageDigest, int len) {
-			if (this.currentBuffer == null || len == 0) {
+			if (this.currentBuffer == null) {
 				// This stream doesn't have any data in it...
+				return;
+			}else if(len == 0){
 				return;
 			}
 			else if (len < 0) {
