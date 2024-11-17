@@ -26,7 +26,9 @@ import java.util.function.Consumer;
 import org.springframework.lang.Nullable;
 
 /**
- * Composite map that combines two other maps. This type is created via
+ * Composite map that combines two other maps.
+ *
+ * <p>This type is created via
  * {@link CollectionUtils#compositeMap(Map, Map, BiFunction, Consumer)}.
  *
  * @author Arjen Poutsma

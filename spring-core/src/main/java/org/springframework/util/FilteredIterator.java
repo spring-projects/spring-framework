@@ -23,8 +23,9 @@ import java.util.function.Predicate;
 import org.springframework.lang.Nullable;
 
 /**
- * Iterator that filters out values that do not match a predicate.
- * This type is used by {@link CompositeMap}.
+ * {@link Iterator} that filters out values that do not match a predicate.
+ *
+ * <p>This type is used by {@link CompositeMap}.
  *
  * @author Arjen Poutsma
  * @since 6.2
@@ -39,7 +40,7 @@ final class FilteredIterator<E> implements Iterator<E> {
 	@Nullable
 	private E next;
 
-	private boolean nextSet;
+	private boolean hasNext;
 
 
 	public FilteredIterator(Iterator<E> delegate, Predicate<E> filter) {
@@ -52,22 +53,15 @@ final class FilteredIterator<E> implements Iterator<E> {
 
 	@Override
 	public boolean hasNext() {
-		if (this.nextSet) {
-			return true;
-		}
-		else {
-			return setNext();
-		}
+		return (this.hasNext || setNext());
 	}
 
 	@Override
 	public E next() {
-		if (!this.nextSet) {
-			if (!setNext()) {
-				throw new NoSuchElementException();
-			}
+		if (!this.hasNext && !setNext()) {
+			throw new NoSuchElementException();
 		}
-		this.nextSet = false;
+		this.hasNext = false;
 		Assert.state(this.next != null, "Next should not be null");
 		return this.next;
 	}
@@ -77,7 +71,7 @@ final class FilteredIterator<E> implements Iterator<E> {
 			E next = this.delegate.next();
 			if (this.filter.test(next)) {
 				this.next = next;
-				this.nextSet = true;
+				this.hasNext = true;
 				return true;
 			}
 		}
