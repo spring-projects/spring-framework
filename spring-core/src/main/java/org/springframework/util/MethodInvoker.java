@@ -226,14 +226,12 @@ public class MethodInvoker {
 		Method matchingMethod = null;
 
 		for (Method candidate : candidates) {
-			if (candidate.getName().equals(targetMethod)) {
-				if (candidate.getParameterCount() == argCount) {
-					Class<?>[] paramTypes = candidate.getParameterTypes();
-					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
-					if (typeDiffWeight < minTypeDiffWeight) {
-						minTypeDiffWeight = typeDiffWeight;
-						matchingMethod = candidate;
-					}
+			if (candidate.getName().equals(targetMethod) && candidate.getParameterCount() == argCount) {
+				Class<?>[] paramTypes = candidate.getParameterTypes();
+				int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
+				if (typeDiffWeight < minTypeDiffWeight) {
+					minTypeDiffWeight = typeDiffWeight;
+					matchingMethod = candidate;
 				}
 			}
 		}
