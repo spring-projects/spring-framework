@@ -343,13 +343,12 @@ public abstract class CollectionUtils {
 		boolean hasCandidate = false;
 		Object candidate = null;
 		for (Object elem : collection) {
-			if (!hasCandidate) {
-				hasCandidate = true;
-				candidate = elem;
-			}
-			else if (candidate != elem) {
+			if (hasCandidate && candidate != elem) {
 				return false;
 			}
+
+			hasCandidate = true;
+			candidate = elem;
 		}
 		return true;
 	}
