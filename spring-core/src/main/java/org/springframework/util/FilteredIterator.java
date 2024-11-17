@@ -55,17 +55,13 @@ final class FilteredIterator<E> implements Iterator<E> {
 		if (this.nextSet) {
 			return true;
 		}
-		else {
-			return setNext();
-		}
+		return setNext();
 	}
 
 	@Override
 	public E next() {
-		if (!this.nextSet) {
-			if (!setNext()) {
+		if (!this.nextSet && !setNext()) {
 				throw new NoSuchElementException();
-			}
 		}
 		this.nextSet = false;
 		Assert.state(this.next != null, "Next should not be null");
