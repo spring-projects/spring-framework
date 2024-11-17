@@ -335,22 +335,6 @@ public class AntPathMatcher implements PathMatcher {
 
 		return true;
 	}
-	private static class MatchContext{
-		String[] pattDirs;
-		String[] pathDirs;
-		int pattIdxStart;
-		int pathIdxStart;
-		@Nullable
-		Map<String, String> uriTemplateVariables;
-
-		MatchContext(String[] pattDirs, String[] pathDirs, int pattIdxStart, int pathIdxStart, @Nullable Map<String, String> uriTemplateVariables) {
-			this.pattDirs = pattDirs;
-			this.pathDirs = pathDirs;
-			this.pattIdxStart = pattIdxStart;
-			this.pathIdxStart = pathIdxStart;
-			this.uriTemplateVariables = uriTemplateVariables;
-		}
-	}
 
 	private boolean checkSubPatternMatch(MatchContext context, int i, int patLength) {
 		for (int j = 0; j < patLength; j++) {
@@ -660,7 +644,23 @@ public class AntPathMatcher implements PathMatcher {
 		return new AntPatternComparator(path, this.pathSeparator);
 	}
 
+	private static class MatchContext{
+		String[] pattDirs;
+		String[] pathDirs;
+		int pattIdxStart;
+		int pathIdxStart;
+		@Nullable
+		Map<String, String> uriTemplateVariables;
 
+		MatchContext(String[] pattDirs, String[] pathDirs, int pattIdxStart, int pathIdxStart, @Nullable Map<String, String> uriTemplateVariables) {
+			this.pattDirs = pattDirs;
+			this.pathDirs = pathDirs;
+			this.pattIdxStart = pattIdxStart;
+			this.pathIdxStart = pathIdxStart;
+			this.uriTemplateVariables = uriTemplateVariables;
+		}
+	}
+	
 	/**
 	 * Tests whether a string matches against a pattern via a {@link Pattern}.
 	 * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and
