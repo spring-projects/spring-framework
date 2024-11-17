@@ -340,9 +340,10 @@ public class AntPathMatcher implements PathMatcher {
 		String[] pathDirs;
 		int pattIdxStart;
 		int pathIdxStart;
+		@Nullable
 		Map<String, String> uriTemplateVariables;
 
-		MatchContext(String[] pattDirs, String[] pathDirs, int pattIdxStart, int pathIdxStart, Map<String, String> uriTemplateVariables) {
+		MatchContext(String[] pattDirs, String[] pathDirs, int pattIdxStart, int pathIdxStart, @Nullable Map<String, String> uriTemplateVariables) {
 			this.pattDirs = pattDirs;
 			this.pathDirs = pathDirs;
 			this.pattIdxStart = pattIdxStart;
