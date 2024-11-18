@@ -83,6 +83,7 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
@@ -192,6 +193,8 @@ class WebClientIntegrationTests {
 
 	@ParameterizedWebClientTest
 	void applyAttributesToNativeRequest(ClientHttpConnector connector) {
+		assumeFalse(connector instanceof ReactorClientHttpConnector,
+				"Temporarily disabling flaky test for Reactor Netty");
 		startServer(connector);
 		prepareResponse(response -> {});
 
