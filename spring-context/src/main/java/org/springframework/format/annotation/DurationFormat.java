@@ -29,7 +29,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Declares that a field or method parameter should be formatted as a
- * {@link java.time.Duration}, according to the specified {@link #style style}.
+ * {@link java.time.Duration}, according to the specified {@link #style Style}
+ * and {@link #defaultUnit Unit}.
  *
  * @author Simon Baslé
  * @since 6.2
@@ -40,20 +41,20 @@ import org.springframework.lang.Nullable;
 public @interface DurationFormat {
 
 	/**
-	 * The {@code Style} to use for parsing and printing a {@code Duration}.
+	 * The {@link Style} to use for parsing and printing a {@link Duration}.
 	 * <p>Defaults to the JDK style ({@link Style#ISO8601}).
 	 */
 	Style style() default Style.ISO8601;
 
 	/**
-	 * The {@link Unit} to fall back to in case the {@code style()} needs a unit
+	 * The {@link Unit} to fall back to in case the {@link #style Style} needs a unit
 	 * for either parsing or printing, and none is explicitly provided in the input.
 	 * <p>Defaults to {@link Unit#MILLIS} if unspecified.
 	 */
 	Unit defaultUnit() default Unit.MILLIS;
 
 	/**
-	 * Duration format styles.
+	 * {@link Duration} format styles.
 	 */
 	enum Style {
 
@@ -62,7 +63,7 @@ public @interface DurationFormat {
 		 * <p>Supported unit suffixes include: {@code ns, us, ms, s, m, h, d}.
 		 * Those correspond to nanoseconds, microseconds, milliseconds, seconds,
 		 * minutes, hours, and days, respectively.
-		 * <p>Note that when printing a {@code Duration}, this style can be
+		 * <p>Note that when printing a {@link Duration}, this style can be
 		 * lossy if the selected unit is bigger than the resolution of the
 		 * duration. For example, {@code Duration.ofMillis(5).plusNanos(1234)}
 		 * would get truncated to {@code "5ms"} when printing using
@@ -73,7 +74,7 @@ public @interface DurationFormat {
 
 		/**
 		 * ISO-8601 formatting.
-		 * <p>This is what the JDK uses in {@link java.time.Duration#parse(CharSequence)}
+		 * <p>This is what the JDK uses in {@link Duration#parse(CharSequence)}
 		 * and {@link Duration#toString()}.
 		 */
 		ISO8601,
@@ -90,11 +91,11 @@ public @interface DurationFormat {
 	}
 
 	/**
-	 * Duration format unit, which mirrors a subset of {@link ChronoUnit} and
+	 * {@link Duration} format unit, which mirrors a subset of {@link ChronoUnit} and
 	 * allows conversion to and from a supported {@code ChronoUnit} as well as
 	 * conversion from durations to longs.
 	 *
-	 * <p>The enum includes its corresponding suffix in the {@link Style#SIMPLE simple}
+	 * <p>The enum includes its corresponding suffix in the {@link Style#SIMPLE SIMPLE}
 	 * {@code Duration} format style.
 	 */
 	enum Unit {
@@ -147,25 +148,24 @@ public @interface DurationFormat {
 		}
 
 		/**
-		 * Convert this {@code DurationFormat.Unit} to its {@link ChronoUnit}
-		 * equivalent.
+		 * Convert this {@code Unit} to its {@link ChronoUnit} equivalent.
 		 */
 		public ChronoUnit asChronoUnit() {
 			return this.chronoUnit;
 		}
 
 		/**
-		 * Convert this {@code DurationFormat.Unit} to a simple {@code String}
-		 * suffix, suitable for the {@link Style#SIMPLE SIMPLE} style.
+		 * Convert this {@code Unit} to a simple {@code String} suffix, suitable
+		 * for the {@link Style#SIMPLE SIMPLE} style.
 		 */
 		public String asSuffix() {
 			return this.suffix;
 		}
 
 		/**
-		 * Parse a {@code long} from a {@code String} and interpret it to be a
-		 * {@code Duration} in the current unit.
-		 * @param value the String representation of the long
+		 * Parse a {@code long} from the given {@link String} and interpret it to be a
+		 * {@link Duration} in the current unit.
+		 * @param value the {@code String} representation of the long
 		 * @return the corresponding {@code Duration}
 		 */
 		public Duration parse(String value) {
@@ -173,11 +173,11 @@ public @interface DurationFormat {
 		}
 
 		/**
-		 * Print a {@code Duration} as a {@code String}, converting it to a long
+		 * Print the given {@link Duration} as a {@link String}, converting it to a long
 		 * value using this unit's precision via {@link #longValue(Duration)}
 		 * and appending this unit's simple {@link #asSuffix() suffix}.
-		 * @param value the {@code Duration} to convert to a String
-		 * @return the String representation of the {@code Duration} in the
+		 * @param value the {@code Duration} to convert to a {@code String}
+		 * @return the {@code String} representation of the {@code Duration} in the
 		 * {@link Style#SIMPLE SIMPLE} style
 		 */
 		public String print(Duration value) {
@@ -185,11 +185,12 @@ public @interface DurationFormat {
 		}
 
 		/**
-		 * Convert the given {@code Duration} to a long value in the resolution
-		 * of this unit. Note that this can be lossy if the current unit is
-		 * bigger than the actual resolution of the duration.
-		 * <p>For example, {@code Duration.ofMillis(5).plusNanos(1234)} would
-		 * get truncated to {@code 5} for unit {@code MILLIS}.
+		 * Convert the given {@link Duration} to a long value in the resolution
+		 * of this unit.
+		 * <p>Note that this can be lossy if the current unit is bigger than the
+		 * actual resolution of the duration. For example,
+		 * {@code Duration.ofMillis(5).plusNanos(1234)} would get truncated to
+		 * {@code 5} for unit {@code MILLIS}.
 		 * @param value the {@code Duration} to convert to a long
 		 * @return the long value for the {@code Duration} in this {@code Unit}
 		 */
@@ -198,7 +199,7 @@ public @interface DurationFormat {
 		}
 
 		/**
-		 * Get the {@code Unit} corresponding to the given {@code ChronoUnit}.
+		 * Get the {@link Unit} corresponding to the given {@link ChronoUnit}.
 		 * @throws IllegalArgumentException if the given {@code ChronoUnit} is
 		 * not supported
 		 */
@@ -215,7 +216,7 @@ public @interface DurationFormat {
 		}
 
 		/**
-		 * Get the {@code Unit} corresponding to the given {@code String} suffix.
+		 * Get the {@link Unit} corresponding to the given {@link String} suffix.
 		 * @throws IllegalArgumentException if the given suffix is not supported
 		 */
 		public static Unit fromSuffix(String suffix) {
