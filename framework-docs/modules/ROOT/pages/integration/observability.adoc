@@ -238,7 +238,7 @@ include-code::./HttpHandlerConfiguration[]
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 This will only record an observation as an error if the `Exception` has not been handled by an application Controller.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc#webflux-ann-rest-exceptions[`ProblemDetail` support] will not be recorded with the observation.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include-code::./UserController[]
