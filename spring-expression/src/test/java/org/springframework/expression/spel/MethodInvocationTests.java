@@ -48,6 +48,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Andy Clement
  * @author Phillip Webb
  * @author Sam Brannen
+ * @see ConstructorInvocationTests
+ * @see VariableAndFunctionTests
  */
 class MethodInvocationTests extends AbstractExpressionTests {
 
