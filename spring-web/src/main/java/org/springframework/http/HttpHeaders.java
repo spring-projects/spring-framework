@@ -83,6 +83,10 @@ import org.springframework.util.StringUtils;
  * over the old instance's {@code entrySet()} and using
  * {@link #addAll(String, List)} rather than {@link #put(String, List)}.
  *
+ * <p>This class is meant to reference "well-known" headers supported by Spring
+ * Framework. If your application or library relies on other headers defined in RFCs,
+ * please use methods that accept the header name as a parameter.
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
