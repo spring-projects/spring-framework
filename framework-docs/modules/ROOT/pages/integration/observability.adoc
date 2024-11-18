@@ -126,7 +126,7 @@ This instrumentation will create 2 types of observations:
 * `"jms.message.publish"` when a JMS message is sent to the broker, typically with `JmsTemplate`.
 * `"jms.message.process"` when a JMS message is processed by the application, typically with a `MessageListener` or a `@JmsListener` annotated method.
 
-NOTE: currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the reception of a message.
+NOTE: Currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the reception of a message.
 Such an integration would typically instrument `MessageConsumer#receive` method calls. But once those return, the processing time is not measured and the trace scope cannot be propagated to the application.
 
 By default, both observations share the same set of possible `KeyValues`:
@@ -238,7 +238,7 @@ include-code::./HttpHandlerConfiguration[]
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 This will only record an observation as an error if the `Exception` has not been handled by an application Controller.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc#webflux-ann-rest-exceptions[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include-code::./UserController[]
@@ -332,7 +332,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 [[observability.http-client.webclient]]
 === WebClient
 
-Applications must configure an `ObservationRegistry` on the `WebClient` builder to enable the instrumentation; without that, observations are "no-ops".
+Applications must configure an `ObservationRegistry` on the `WebClient.Builder` to enable the instrumentation; without that, observations are "no-ops".
 Spring Boot will auto-configure `WebClient.Builder` beans with the observation registry already set.
 
 Instrumentation uses the `org.springframework.web.reactive.function.client.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
