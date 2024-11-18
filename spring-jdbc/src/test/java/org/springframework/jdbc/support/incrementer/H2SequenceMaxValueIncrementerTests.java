@@ -67,7 +67,7 @@ class H2SequenceMaxValueIncrementerTests {
 	 * Tests that the incrementer works when using all supported H2 <em>compatibility modes</em>.
 	 */
 	@ParameterizedTest
-	@EnumSource(ModeEnum.class)
+	@EnumSource
 	void incrementsSequenceWithExplicitH2CompatibilityMode(ModeEnum mode) {
 		String connectionUrl = String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=%s", UUID.randomUUID(), mode);
 		DataSource dataSource = new SimpleDriverDataSource(new org.h2.Driver(), connectionUrl, "sa", "");
