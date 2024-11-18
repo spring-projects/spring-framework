@@ -42,7 +42,7 @@ import static org.springframework.format.annotation.DurationFormat.Style.SIMPLE;
 class DurationFormatterUtilsTests {
 
 	@ParameterizedTest
-	@EnumSource(DurationFormat.Style.class)
+	@EnumSource
 	void parseEmptyStringFailsWithDedicatedException(DurationFormat.Style style) {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> DurationFormatterUtils.parse("", style))
@@ -50,7 +50,7 @@ class DurationFormatterUtilsTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(DurationFormat.Style.class)
+	@EnumSource
 	void parseNullStringFailsWithDedicatedException(DurationFormat.Style style) {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> DurationFormatterUtils.parse(null, style))
@@ -113,29 +113,30 @@ class DurationFormatterUtilsTests {
 
 	@Test
 	void parseIsoNoChronoUnit() {
-		//these are based on the examples given in Duration.parse
-//		"PT20.345S" -- parses as "20.345 seconds"
+		// These are based on the examples given in Duration.parse.
+
+		// "PT20.345S" -- parses as "20.345 seconds"
 		assertThat(DurationFormatterUtils.parse("PT20.345S", ISO8601))
 				.hasMillis(20345);
-//     "PT15M"     -- parses as "15 minutes" (where a minute is 60 seconds)
+		// "PT15M"     -- parses as "15 minutes" (where a minute is 60 seconds)
 		assertThat(DurationFormatterUtils.parse("PT15M", ISO8601))
 				.hasSeconds(15*60);
-//     "PT10H"     -- parses as "10 hours" (where an hour is 3600 seconds)
+		// "PT10H"     -- parses as "10 hours" (where an hour is 3600 seconds)
 		assertThat(DurationFormatterUtils.parse("PT10H", ISO8601))
 				.hasHours(10);
-//     "P2D"       -- parses as "2 days" (where a day is 24 hours or 86400 seconds)
+		// "P2D"       -- parses as "2 days" (where a day is 24 hours or 86400 seconds)
 		assertThat(DurationFormatterUtils.parse("P2D", ISO8601))
 				.hasDays(2);
-//     "P2DT3H4M"  -- parses as "2 days, 3 hours and 4 minutes"
+		// "P2DT3H4M"  -- parses as "2 days, 3 hours and 4 minutes"
 		assertThat(DurationFormatterUtils.parse("P2DT3H4M", ISO8601))
 				.isEqualTo(Duration.ofDays(2).plusHours(3).plusMinutes(4));
-//     "PT-6H3M"    -- parses as "-6 hours and +3 minutes"
+		// "PT-6H3M"   -- parses as "-6 hours and +3 minutes"
 		assertThat(DurationFormatterUtils.parse("PT-6H3M", ISO8601))
 				.isEqualTo(Duration.ofHours(-6).plusMinutes(3));
-//     "-PT6H3M"    -- parses as "-6 hours and -3 minutes"
+		// "-PT6H3M"   -- parses as "-6 hours and -3 minutes"
 		assertThat(DurationFormatterUtils.parse("-PT6H3M", ISO8601))
 				.isEqualTo(Duration.ofHours(-6).plusMinutes(-3));
-//     "-PT-6H+3M"  -- parses as "+6 hours and -3 minutes"
+		// "-PT-6H+3M" -- parses as "+6 hours and -3 minutes"
 		assertThat(DurationFormatterUtils.parse("-PT-6H+3M", ISO8601))
 				.isEqualTo(Duration.ofHours(6).plusMinutes(-3));
 	}
@@ -189,7 +190,7 @@ class DurationFormatterUtilsTests {
 				.isEqualTo(Duration.ofMinutes(34).plusSeconds(57));
 	}
 
-	@Test //Kotlin style compatibility
+	@Test // Kotlin style compatibility
 	void parseCompositeNegativeWithSpacesAndParenthesis() {
 		assertThat(DurationFormatterUtils.parse("-(34m 57s)", COMPOSITE))
 				.isEqualTo(Duration.ofMinutes(-34).plusSeconds(-57));
@@ -315,7 +316,7 @@ class DurationFormatterUtilsTests {
 
 		assertThat(DurationFormatterUtils.detect("-(1d 2h 34m 2ns)"))
 				.as("COMPOSITE")
-						.isEqualTo(COMPOSITE);
+				.isEqualTo(COMPOSITE);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.detect("WPT2H-4M"))
 				.withMessage("'WPT2H-4M' is not a valid duration, cannot detect any known style")
