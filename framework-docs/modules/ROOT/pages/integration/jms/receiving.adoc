@@ -5,7 +5,7 @@ This describes how to receive messages with JMS in Spring.
 
 
 [[jms-receiving-sync]]
-== Synchronous Reception
+== Synchronous Receipt
 
 While JMS is typically associated with asynchronous processing, you can
 consume messages synchronously. The overloaded `receive(..)` methods provide this
@@ -16,11 +16,11 @@ the receiver should wait before giving up waiting for a message.
 
 
 [[jms-receiving-async]]
-== Asynchronous reception: Message-Driven POJOs
+== Asynchronous Receipt: Message-Driven POJOs
 
 NOTE: Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
-annotation and provides an open infrastructure to register endpoints programmatically.
-This is, by far, the most convenient way to setup an asynchronous receiver.
+annotation and provides open infrastructure to register endpoints programmatically.
+This is, by far, the most convenient way to set up an asynchronous receiver.
 See xref:integration/jms/annotated.adoc#jms-annotated-support[Enable Listener Endpoint Annotations] for more details.
 
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
@@ -154,7 +154,7 @@ listener container.
 
 You can activate local resource transactions through the `sessionTransacted` flag
 on the listener container definition. Each message listener invocation then operates
-within an active JMS transaction, with message reception rolled back in case of listener
+within an active JMS transaction, with message receipt rolled back in case of listener
 execution failure. Sending a response message (through `SessionAwareMessageListener`) is
 part of the same local transaction, but any other resource operations (such as
 database access) operate independently. This usually requires duplicate message
@@ -173,7 +173,7 @@ To configure a message listener container for XA transaction participation, you 
 to configure a `JtaTransactionManager` (which, by default, delegates to the Jakarta EE
 server's transaction subsystem). Note that the underlying JMS `ConnectionFactory` needs to
 be XA-capable and properly registered with your JTA transaction coordinator. (Check your
-Jakarta EE server's configuration of JNDI resources.) This lets message reception as well
+Jakarta EE server's configuration of JNDI resources.) This lets message receipt as well
 as (for example) database access be part of the same transaction (with unified commit
 semantics, at the expense of XA transaction log overhead).
 

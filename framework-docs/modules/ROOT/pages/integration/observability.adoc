@@ -37,7 +37,7 @@ As outlined xref:integration/observability.adoc[at the beginning of this section
 |Processing time for an execution of a `@Scheduled` task
 |===
 
-NOTE: Observations are using Micrometer's official naming convention, but Metrics names will be automatically converted
+NOTE: Observations use Micrometer's official naming convention, but Metrics names will be automatically converted
 {micrometer-docs}/concepts/naming.html[to the format preferred by the monitoring system backend]
 (Prometheus, Atlas, Graphite, InfluxDB...).
 
@@ -97,7 +97,7 @@ This can be done by declaring a `SchedulingConfigurer` bean that sets the observ
 
 include-code::./ObservationSchedulingConfigurer[]
 
-It is using the `org.springframework.scheduling.support.DefaultScheduledTaskObservationConvention` by default, backed by the `ScheduledTaskObservationContext`.
+It uses the `org.springframework.scheduling.support.DefaultScheduledTaskObservationConvention` by default, backed by the `ScheduledTaskObservationContext`.
 You can configure a custom implementation on the `ObservationRegistry` directly.
 During the execution of the scheduled method, the current observation is restored in the `ThreadLocal` context or the Reactor context (if the scheduled method returns a `Mono` or `Flux` type).
 
@@ -107,7 +107,7 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
-|`code.function` _(required)_|Name of Java `Method` that is scheduled for execution.
+|`code.function` _(required)_|Name of the Java `Method` that is scheduled for execution.
 |`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method, or `"ANONYMOUS"` for anonymous classes.
 |`error` _(required)_|Class name of the exception thrown during the execution, or `"none"` if no exception happened.
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
@@ -126,7 +126,7 @@ This instrumentation will create 2 types of observations:
 * `"jms.message.publish"` when a JMS message is sent to the broker, typically with `JmsTemplate`.
 * `"jms.message.process"` when a JMS message is processed by the application, typically with a `MessageListener` or a `@JmsListener` annotated method.
 
-NOTE: currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the reception of a message.
+NOTE: Currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the receipt of a message.
 Such an integration would typically instrument `MessageConsumer#receive` method calls. But once those return, the processing time is not measured and the trace scope cannot be propagated to the application.
 
 By default, both observations share the same set of possible `KeyValues`:
@@ -138,7 +138,7 @@ By default, both observations share the same set of possible `KeyValues`:
 |`error` |Class name of the exception thrown during the messaging operation (or "none").
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
 |`messaging.destination.temporary` _(required)_|Whether the destination is a `TemporaryQueue` or `TemporaryTopic` (values: `"true"` or `"false"`).
-|`messaging.operation` _(required)_|Name of JMS operation being performed (values: `"publish"` or `"process"`).
+|`messaging.operation` _(required)_|Name of the JMS operation being performed (values: `"publish"` or `"process"`).
 |===
 
 .High cardinality Keys
@@ -146,7 +146,7 @@ By default, both observations share the same set of possible `KeyValues`:
 |===
 |Name | Description
 |`messaging.message.conversation_id` |The correlation ID of the JMS message.
-|`messaging.destination.name` |The name of destination the current message was sent to.
+|`messaging.destination.name` |The name of the destination the current message was sent to.
 |`messaging.message.id` |Value used by the messaging system as an identifier for the message.
 |===
 
@@ -213,7 +213,7 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
-|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
+|`method` _(required)_|Name of the HTTP request method or `"none"` if not a well-known method.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
 |`uri` _(required)_|URI pattern for the matching handler if available, falling back to `REDIRECTION` for 3xx responses, `NOT_FOUND` for 404 responses, `root` for requests with no path info, and `UNKNOWN` for all other requests.
@@ -235,10 +235,10 @@ This can be done on the `WebHttpHandlerBuilder`, as follows:
 
 include-code::./HttpHandlerConfiguration[]
 
-It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
+It uses the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 This will only record an observation as an error if the `Exception` has not been handled by an application Controller.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include-code::./UserController[]
@@ -251,7 +251,7 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`error` _(required)_|Class name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`exception` _(deprecated)_|Duplicates the `error` key and might be removed in the future.
-|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
+|`method` _(required)_|Name of the HTTP request method or `"none"` if not a well-known method.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
 |`uri` _(required)_|URI pattern for the matching handler if available, falling back to `REDIRECTION` for 3xx responses, `NOT_FOUND` for 404 responses, `root` for requests with no path info, and `UNKNOWN` for all other requests.
@@ -284,7 +284,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 [cols="a,a"]
 |===
 |Name | Description
-|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
+|`method` _(required)_|Name of the HTTP request method or `"none"` if not a well-known method.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
@@ -312,7 +312,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 [cols="a,a"]
 |===
 |Name | Description
-|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
+|`method` _(required)_|Name of the HTTP request method or `"none"` if the request could not be created.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
@@ -332,7 +332,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 [[observability.http-client.webclient]]
 === WebClient
 
-Applications must configure an `ObservationRegistry` on the `WebClient` builder to enable the instrumentation; without that, observations are "no-ops".
+Applications must configure an `ObservationRegistry` on the `WebClient.Builder` to enable the instrumentation; without that, observations are "no-ops".
 Spring Boot will auto-configure `WebClient.Builder` beans with the observation registry already set.
 
 Instrumentation uses the `org.springframework.web.reactive.function.client.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
@@ -341,7 +341,7 @@ Instrumentation uses the `org.springframework.web.reactive.function.client.Clien
 [cols="a,a"]
 |===
 |Name | Description
-|`method` _(required)_|Name of HTTP request method or `"none"` if not a well-known method.
+|`method` _(required)_|Name of the HTTP request method or `"none"` if not a well-known method.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
