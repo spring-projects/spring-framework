@@ -167,13 +167,15 @@ operations that do not refer to a specific destination.
 
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
-that does not tie a user to an EJB container. (See xref:integration/jms/receiving.adoc#jms-receiving-async[Asynchronous reception: Message-Driven POJOs] for detailed
-coverage of Spring's MDP support.) Since Spring Framework 4.1, endpoint methods can be
-annotated with `@JmsListener` -- see xref:integration/jms/annotated.adoc[Annotation-driven Listener Endpoints] for more details.
+that does not tie a user to an EJB container. (See
+xref:integration/jms/receiving.adoc#jms-receiving-async[Asynchronous Receipt: Message-Driven POJOs]
+for detailed coverage of Spring's MDP support.) Endpoint methods can be annotated with
+`@JmsListener` -- see xref:integration/jms/annotated.adoc[Annotation-driven Listener Endpoints]
+for more details.
 
 A message listener container is used to receive messages from a JMS message queue and
 drive the `MessageListener` that is injected into it. The listener container is
-responsible for all threading of message reception and dispatches into the listener for
+responsible for all threading of message receipt and dispatches into the listener for
 processing. A message listener container is the intermediary between an MDP and a
 messaging provider and takes care of registering to receive messages, participating in
 transactions, resource acquisition and release, exception conversion, and so on. This
@@ -227,7 +229,7 @@ the JMS provider, advanced functionality (such as participation in externally ma
 transactions), and compatibility with Jakarta EE environments.
 
 You can customize the cache level of the container. Note that, when no caching is enabled,
-a new connection and a new session is created for each message reception. Combining this
+a new connection and a new session is created for each message receipt. Combining this
 with a non-durable subscription with high loads may lead to message loss. Make sure to
 use a proper cache level in such a case.
 
@@ -246,7 +248,7 @@ in the form of a business entity existence check or a protocol table check.
 Any such arrangements are significantly more efficient than the alternative:
 wrapping your entire processing with an XA transaction (through configuring your
 `DefaultMessageListenerContainer` with an `JtaTransactionManager`) to cover the
-reception of the JMS message as well as the execution of the business logic in your
+receipt of the JMS message as well as the execution of the business logic in your
 message listener (including database operations, etc.).
 
 IMPORTANT: The default `AUTO_ACKNOWLEDGE` mode does not provide proper reliability guarantees.

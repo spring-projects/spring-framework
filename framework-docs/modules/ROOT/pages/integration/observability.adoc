@@ -126,7 +126,7 @@ This instrumentation will create 2 types of observations:
 * `"jms.message.publish"` when a JMS message is sent to the broker, typically with `JmsTemplate`.
 * `"jms.message.process"` when a JMS message is processed by the application, typically with a `MessageListener` or a `@JmsListener` annotated method.
 
-NOTE: Currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the reception of a message.
+NOTE: Currently there is no instrumentation for `"jms.message.receive"` observations as there is little value in measuring the time spent waiting for the receipt of a message.
 Such an integration would typically instrument `MessageConsumer#receive` method calls. But once those return, the processing time is not measured and the trace scope cannot be propagated to the application.
 
 By default, both observations share the same set of possible `KeyValues`:

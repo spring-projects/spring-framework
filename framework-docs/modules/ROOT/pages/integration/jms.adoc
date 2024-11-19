@@ -6,7 +6,7 @@ the same way as Spring's integration does for the JDBC API.
 
 JMS can be roughly divided into two areas of functionality, namely the production and
 consumption of messages. The `JmsTemplate` class is used for message production and
-synchronous message reception. For asynchronous reception similar to Jakarta EE's
+synchronous message receipt. For asynchronous receipt similar to Jakarta EE's
 message-driven bean style, Spring provides a number of message-listener containers that
 you can use to create Message-Driven POJOs (MDPs). Spring also provides a declarative way
 to create message listeners.
