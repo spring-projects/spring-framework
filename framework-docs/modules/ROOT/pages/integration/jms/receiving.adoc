@@ -19,8 +19,8 @@ the receiver should wait before giving up waiting for a message.
 == Asynchronous reception: Message-Driven POJOs
 
 NOTE: Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
-annotation and provides an open infrastructure to register endpoints programmatically.
-This is, by far, the most convenient way to setup an asynchronous receiver.
+annotation and provides open infrastructure to register endpoints programmatically.
+This is, by far, the most convenient way to set up an asynchronous receiver.
 See xref:integration/jms/annotated.adoc#jms-annotated-support[Enable Listener Endpoint Annotations] for more details.
 
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
