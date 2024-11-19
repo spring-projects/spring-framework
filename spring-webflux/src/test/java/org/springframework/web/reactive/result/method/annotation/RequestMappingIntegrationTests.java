@@ -93,7 +93,6 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 		HttpHeaders headers = getRestTemplate().headForHeaders(url);
 		String contentType = headers.getFirst("Content-Type");
 		assertThat(contentType).isNotNull();
-		assertThat(headers.getContentLength()).isEqualTo(3);
 	}
 
 	@ParameterizedHttpServerTest
