@@ -331,6 +331,12 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		return beanNames;
 	}
 
+	/**
+	 * Determine the primary candidate in the given set of bean names.
+	 * <p>Honors both <em>primary</em> and <em>fallback</em> semantics.
+	 * @return the name of the primary candidate, or {@code null} if none found
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#determinePrimaryCandidate(Map, Class)
+	 */
 	@Nullable
 	private static String determinePrimaryCandidate(
 			ConfigurableListableBeanFactory beanFactory, Set<String> candidateBeanNames, Class<?> beanType) {
@@ -340,6 +346,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 
 		String primaryBeanName = null;
+		// First pass: identify unique primary candidate
 		for (String candidateBeanName : candidateBeanNames) {
 			if (beanFactory.containsBeanDefinition(candidateBeanName)) {
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(candidateBeanName);
@@ -349,6 +356,21 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 							"more than one 'primary' bean found among candidates: " + candidateBeanNames);
 					}
 					primaryBeanName = candidateBeanName;
+				}
+			}
+		}
+		// Second pass: identify unique non-fallback candidate
+		if (primaryBeanName == null) {
+			for (String candidateBeanName : candidateBeanNames) {
+				if (beanFactory.containsBeanDefinition(candidateBeanName)) {
+					BeanDefinition beanDefinition = beanFactory.getBeanDefinition(candidateBeanName);
+					if (!beanDefinition.isFallback()) {
+						if (primaryBeanName != null) {
+							// More than one non-fallback bean found among candidates.
+							return null;
+						}
+						primaryBeanName = candidateBeanName;
+					}
 				}
 			}
 		}
