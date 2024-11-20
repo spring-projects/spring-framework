@@ -58,6 +58,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton mock
  * of the type of object created by the {@code FactoryBean}.
  *
+ * <p>There are no restrictions on the visibility of a {@code @MockitoBean} field.
+ * Such fields can therefore be {@code public}, {@code protected}, package-private
+ * (default visibility), or {@code private} depending on the needs or coding
+ * practices of the project.
+ *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
