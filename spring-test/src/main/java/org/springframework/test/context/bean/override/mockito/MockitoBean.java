@@ -29,8 +29,8 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * {@code @MockitoBean} is an annotation that can be applied to a field in a test
- * class to override a bean in the test's
+ * {@code @MockitoBean} is an annotation that can be applied to a non-static field
+ * in a test class to override a bean in the test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * using a Mockito mock.
  *
