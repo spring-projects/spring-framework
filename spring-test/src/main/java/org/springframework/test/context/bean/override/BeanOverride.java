@@ -30,7 +30,7 @@ import org.springframework.aot.hint.annotation.Reflective;
  * <p>Specifying this annotation registers the configured {@link BeanOverrideProcessor}
  * which must be capable of handling the composed annotation and its attributes.
  *
- * <p>Since the composed annotation should only be applied to fields, it is
+ * <p>Since the composed annotation should only be applied to non-static fields, it is
  * expected that it is meta-annotated with {@link Target @Target(ElementType.FIELD)}.
  *
  * <p>For concrete examples, see

@@ -86,6 +86,14 @@ class BeanOverrideHandlerTests {
 				.withMessageContaining(faultyField.toString());
 	}
 
+	@Test  // gh-33922
+	void forTestClassWithStaticBeanOverrideField() {
+		Field staticField = field(StaticBeanOverrideField.class, "message");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> BeanOverrideHandler.forTestClass(StaticBeanOverrideField.class))
+				.withMessage("@BeanOverride field must not be static: " + staticField);
+	}
+
 	@Test
 	void getBeanNameIsNullByDefault() {
 		BeanOverrideHandler handler = createBeanOverrideHandler(field(ConfigA.class, "noQualifier"));
@@ -244,6 +252,12 @@ class BeanOverrideHandlerTests {
 		static String foo() {
 			return "foo";
 		}
+	}
+
+	static class StaticBeanOverrideField {
+
+		@DummyBean
+		static String message;
 	}
 
 	static class ConfigA {
