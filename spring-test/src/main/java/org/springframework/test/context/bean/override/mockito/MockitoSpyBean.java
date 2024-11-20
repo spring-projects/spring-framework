@@ -51,6 +51,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * a spy will be created for the object created by the {@code FactoryBean}, not
  * for the {@code FactoryBean} itself.
  *
+ * <p>There are no restrictions on the visibility of a {@code @MockitoSpyBean} field.
+ * Such fields can therefore be {@code public}, {@code protected}, package-private
+ * (default visibility), or {@code private} depending on the needs or coding
+ * practices of the project.
+ *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2

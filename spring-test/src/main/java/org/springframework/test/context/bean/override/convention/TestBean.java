@@ -105,6 +105,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton bean
  * corresponding to the value returned from the {@code @TestBean} factory method.
  *
+ * <p>There are no restrictions on the visibility of {@code @TestBean} fields or
+ * factory methods. Such fields and methods can therefore be {@code public},
+ * {@code protected}, package-private (default visibility), or {@code private}
+ * depending on the needs or coding practices of the project.
+ *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
