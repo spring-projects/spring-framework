@@ -41,8 +41,8 @@ class MockitoBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to override bean: there is no bean \
-						to replace with name [beanToOverride] and type [java.lang.String].""");
+						Unable to replace bean: there is no bean with name 'beanToOverride' \
+						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
 	}
 
 	@Test
@@ -53,8 +53,8 @@ class MockitoBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to override bean: there is no bean \
-						to replace with name [beanToOverride] and type [java.lang.String].""");
+						Unable to replace bean: there is no bean with name 'beanToOverride' \
+						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
 	}
 
 	@Test
@@ -64,9 +64,8 @@ class MockitoBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to override bean: no beans of \
-						type %s (as required by annotated field '%s.example')""".formatted(
-						String.class.getName(), FailureByTypeLookup.class.getSimpleName()));
+						Unable to override bean: there are no beans of \
+						type java.lang.String (as required by field 'FailureByTypeLookup.example').""");
 	}
 
 	@Test
@@ -78,9 +77,9 @@ class MockitoBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to select a bean to override: found 2 beans \
-						of type %s (as required by annotated field '%s.example'): %s""".formatted(
-						String.class.getName(), FailureByTypeLookup.class.getSimpleName(), List.of("bean1", "bean2")));
+						Unable to select a bean to override: found 2 beans of type java.lang.String \
+						(as required by field 'FailureByTypeLookup.example'): %s""",
+						List.of("bean1", "bean2"));
 	}
 
 
