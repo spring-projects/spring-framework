@@ -313,19 +313,22 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			UriBuilder uriBuilder = uriBuilderFactory.uriString(uriTemplate);
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriBuilder.toUriString());
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			UriBuilder uriBuilder = uriBuilderFactory.uriString(uriTemplate);
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriBuilder.toUriString());
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Function<UriBuilder, URI> uriFunction) {
-			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			UriBuilder uriBuilder = uriBuilderFactory.uriString(uriTemplate);
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriBuilder.toUriString());
 			return uri(uriFunction.apply(DefaultRestClient.this.uriBuilderFactory.uriString(uriTemplate)));
 		}
 
