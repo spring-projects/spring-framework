@@ -175,8 +175,7 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatTaskObservation() {
-		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("tasks.scheduled.execution").that();
+		return assertThat(this.observationRegistry).hasObservationWithNameEqualTo("tasks.scheduled.execution").that();
 	}
 
 

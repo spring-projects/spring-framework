@@ -190,8 +190,7 @@ class RestClientObservationTests {
 
 		restClient.get().uri("https://example.org").retrieve().toBodilessEntity();
 
-		TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("custom.requests");
+		assertThat(this.observationRegistry).hasObservationWithNameEqualTo("custom.requests");
 	}
 
 	@Test
@@ -301,9 +300,8 @@ class RestClientObservationTests {
 
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
-		TestObservationRegistryAssert.assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.client.requests",1);
-		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("http.client.requests").that();
+		assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.client.requests",1);
+		return assertThat(this.observationRegistry).hasObservationWithNameEqualTo("http.client.requests").that();
 	}
 
 	static class ContextAssertionObservationHandler implements ObservationHandler<ClientRequestObservationContext> {
