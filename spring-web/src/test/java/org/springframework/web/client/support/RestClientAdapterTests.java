@@ -27,7 +27,6 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import io.micrometer.observation.tck.TestObservationRegistry;
-import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -131,9 +130,8 @@ class RestClientAdapterTests {
 		assertThat(response).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getPath()).isEqualTo("/greeting");
-		TestObservationRegistryAssert.assertThat(observationRegistry)
-				.hasObservationWithNameEqualTo("http.client.requests")
-				.that().hasLowCardinalityKeyValue("uri", "/greeting");
+		assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests").that()
+				.hasLowCardinalityKeyValue("uri", "/greeting");
 	}
 
 	@ParameterizedAdapterTest
@@ -147,9 +145,8 @@ class RestClientAdapterTests {
 		assertThat(response.getBody()).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getPath()).isEqualTo("/greeting/456");
-		TestObservationRegistryAssert.assertThat(observationRegistry)
-				.hasObservationWithNameEqualTo("http.client.requests")
-				.that().hasLowCardinalityKeyValue("uri", "/greeting/{id}");
+		assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests").that()
+				.hasLowCardinalityKeyValue("uri", "/greeting/{id}");
 	}
 
 	@ParameterizedAdapterTest
@@ -163,9 +160,8 @@ class RestClientAdapterTests {
 		assertThat(response.orElse("empty")).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
 		assertThat(request.getRequestUrl().uri()).isEqualTo(dynamicUri);
-		TestObservationRegistryAssert.assertThat(observationRegistry)
-				.hasObservationWithNameEqualTo("http.client.requests")
-				.that().hasLowCardinalityKeyValue("uri", "none");
+		assertThat(observationRegistry).hasObservationWithNameEqualTo("http.client.requests").that()
+				.hasLowCardinalityKeyValue("uri", "none");
 	}
 
 	@ParameterizedAdapterTest
