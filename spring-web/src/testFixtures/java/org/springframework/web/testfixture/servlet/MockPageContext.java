@@ -268,22 +268,8 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	@Deprecated
-	@Nullable
-	public jakarta.servlet.jsp.el.ExpressionEvaluator getExpressionEvaluator() {
-		return null;
-	}
-
-	@Override
 	@Nullable
 	public ELContext getELContext() {
-		return null;
-	}
-
-	@Override
-	@Deprecated
-	@Nullable
-	public jakarta.servlet.jsp.el.VariableResolver getVariableResolver() {
 		return null;
 	}
 

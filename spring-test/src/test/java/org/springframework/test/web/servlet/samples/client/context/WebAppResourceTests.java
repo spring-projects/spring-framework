@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 	@ContextConfiguration("../../context/root-context.xml"),
 	@ContextConfiguration("../../context/servlet-context.xml")
 })
-@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
+@DisabledInAotMode("@ContextHierarchy is not supported in AOT")
 public class WebAppResourceTests {
 
 	@Autowired

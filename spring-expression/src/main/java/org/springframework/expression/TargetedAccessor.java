@@ -31,9 +31,11 @@ import org.springframework.lang.Nullable;
  *
  * <p>Targeted accessors are considered to be ordered, and each will be called
  * in turn. The only rule that affects the call order is that any accessor which
- * specifies explicit support for a given target class via
+ * specifies explicit support for a given target type via
  * {@link #getSpecificTargetClasses()} will be called first, before other generic
- * accessors that do not specify explicit support for the given target class.
+ * accessors that do not specify support for explicit target types. In addition,
+ * accessors that support the exact target type will be called before accessors
+ * that support a supertype of the target type.
  *
  * @author Sam Brannen
  * @since 6.2

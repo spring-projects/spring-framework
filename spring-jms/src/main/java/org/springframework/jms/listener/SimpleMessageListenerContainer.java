@@ -56,7 +56,7 @@ import org.springframework.util.Assert;
  *
  * <p>For a different style of MessageListener handling, through looped
  * {@code MessageConsumer.receive()} calls that also allow for
- * transactional reception of messages (registering them with XA transactions),
+ * transactional receipt of messages (registering them with XA transactions),
  * see {@link DefaultMessageListenerContainer}.
  *
  * @author Juergen Hoeller

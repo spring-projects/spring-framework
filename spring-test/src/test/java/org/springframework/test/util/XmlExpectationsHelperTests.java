@@ -27,51 +27,56 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class XmlExpectationsHelperTests {
 
+	private static final String CONTROL = "<root><field1>f1</field1><field2>f2</field2></root>";
+
+	private final XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
+
+
 	@Test
 	void assertXmlEqualForEqual() throws Exception {
-		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field1>f1</field1><field2>f2</field2></root>";
-		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
-		xmlHelper.assertXmlEqual(control, test);
+		xmlHelper.assertXmlEqual(CONTROL, test);
 	}
 
 	@Test
 	void assertXmlEqualExceptionForIncorrectValue() {
-		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field1>notf1</field1><field2>f2</field2></root>";
-		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				xmlHelper.assertXmlEqual(control, test))
-			.withMessageStartingWith("Body content Expected child 'field1'");
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> xmlHelper.assertXmlEqual(CONTROL, test))
+				.withMessageStartingWith("Body content Expected child 'field1'");
 	}
 
 	@Test
 	void assertXmlEqualForOutOfOrder() throws Exception {
-		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field2>f2</field2><field1>f1</field1></root>";
-		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
-		xmlHelper.assertXmlEqual(control, test);
+		xmlHelper.assertXmlEqual(CONTROL, test);
 	}
 
 	@Test
 	void assertXmlEqualExceptionForMoreEntries() {
-		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
 		String test = "<root><field1>f1</field1><field2>f2</field2><field3>f3</field3></root>";
-		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				xmlHelper.assertXmlEqual(control, test))
-			.withMessageContaining("Expected child nodelist length '2' but was '3'");
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> xmlHelper.assertXmlEqual(CONTROL, test))
+				.withMessageContaining("Expected child nodelist length '2' but was '3'");
 
 	}
 
 	@Test
-	void assertXmlEqualExceptionForLessEntries() {
+	void assertXmlEqualExceptionForFewerEntries() {
 		String control = "<root><field1>f1</field1><field2>f2</field2><field3>f3</field3></root>";
 		String test = "<root><field1>f1</field1><field2>f2</field2></root>";
-		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				xmlHelper.assertXmlEqual(control, test))
-			.withMessageContaining("Expected child nodelist length '3' but was '2'");
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> xmlHelper.assertXmlEqual(control, test))
+				.withMessageContaining("Expected child nodelist length '3' but was '2'");
+	}
+
+	@Test
+	void assertXmlEqualExceptionWithFullDescription() {
+		String test = "<root><field2>f2</field2><field3>f3</field3></root>";
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> xmlHelper.assertXmlEqual(CONTROL, test))
+				.withMessageContaining("Expected child 'field1' but was 'null'")
+				.withMessageContaining("Expected child 'null' but was 'field3'");
 	}
 
 }

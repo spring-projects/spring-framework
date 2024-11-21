@@ -293,6 +293,7 @@ final class PlaceholderParser {
 		return (this.escape != null && index > 0 && value.charAt(index - 1) == this.escape);
 	}
 
+
 	/**
 	 * Provide the necessary context to handle and resolve underlying placeholders.
 	 */
@@ -397,8 +398,8 @@ final class PlaceholderParser {
 			}
 			return sb.toString();
 		}
-
 	}
+
 
 	/**
 	 * A representation of the parsing of an input string.
@@ -415,8 +416,8 @@ final class PlaceholderParser {
 				throw ex.withValue(this.text);
 			}
 		}
-
 	}
+
 
 	/**
 	 * A {@link Part} implementation that does not contain a valid placeholder.
@@ -428,8 +429,8 @@ final class PlaceholderParser {
 		public String resolve(PartResolutionContext resolutionContext) {
 			return this.text;
 		}
-
 	}
+
 
 	/**
 	 * A {@link Part} implementation that represents a single placeholder with
@@ -479,8 +480,8 @@ final class PlaceholderParser {
 			parts.forEach(part -> sb.append(part.text()));
 			return sb.toString();
 		}
-
 	}
+
 
 	/**
 	 * A {@link Part} implementation that represents a single placeholder
@@ -503,7 +504,6 @@ final class PlaceholderParser {
 			}
 			return resolutionContext.handleUnresolvablePlaceholder(resolvedKey, this.text);
 		}
-
 	}
 
 }

@@ -26,8 +26,10 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * Mark a field to trigger a bean override using a Mockito spy, which will wrap
- * the original bean instance.
+ * {@code @MockitoSpyBean} is an annotation that can be applied to a non-static
+ * field in a test class to override a bean in the test's
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * with a Mockito spy that wraps the original bean instance.
  *
  * <p>By default, the bean to spy is inferred from the type of the annotated
  * field. If multiple candidates exist, a {@code @Qualifier} annotation can be
@@ -48,6 +50,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * creating a spy for a {@link org.springframework.beans.factory.FactoryBean FactoryBean},
  * a spy will be created for the object created by the {@code FactoryBean}, not
  * for the {@code FactoryBean} itself.
+ *
+ * <p>There are no restrictions on the visibility of a {@code @MockitoSpyBean} field.
+ * Such fields can therefore be {@code public}, {@code protected}, package-private
+ * (default visibility), or {@code private} depending on the needs or coding
+ * practices of the project.
  *
  * @author Simon Baslé
  * @author Sam Brannen

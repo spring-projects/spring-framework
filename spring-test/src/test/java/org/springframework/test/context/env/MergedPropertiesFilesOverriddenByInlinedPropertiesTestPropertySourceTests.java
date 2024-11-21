@@ -32,8 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.1
  */
 @TestPropertySource(properties = { "explicit = inlined", "extended = inlined1", "extended = inlined2" })
-// Since ExplicitPropertiesFileTestPropertySourceTests is disabled in AOT mode, this class must be also.
-@DisabledInAotMode
+@DisabledInAotMode("Because ExplicitPropertiesFileTestPropertySourceTests is disabled in AOT mode")
 class MergedPropertiesFilesOverriddenByInlinedPropertiesTestPropertySourceTests extends
 		MergedPropertiesFilesTestPropertySourceTests {
 

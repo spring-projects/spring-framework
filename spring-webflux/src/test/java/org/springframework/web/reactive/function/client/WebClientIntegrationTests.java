@@ -107,6 +107,7 @@ class WebClientIntegrationTests {
 	static Stream<Arguments> arguments() {
 		return Stream.of(
 				argumentSet("Reactor Netty", new ReactorClientHttpConnector()),
+				argumentSet("Reactor Netty 2", new ReactorNetty2ClientHttpConnector()),
 				argumentSet("JDK", new JdkClientHttpConnector()),
 				argumentSet("Jetty", new JettyClientHttpConnector()),
 				argumentSet("HttpComponents", new HttpComponentsClientHttpConnector())
@@ -199,20 +200,32 @@ class WebClientIntegrationTests {
 		Mono<Void> result = this.webClient.get()
 				.uri("/pojo")
 				.attribute("foo","bar")
-				.httpRequest(clientHttpRequest -> nativeRequest.set(clientHttpRequest.getNativeRequest()))
+				.httpRequest(clientHttpRequest -> {
+					if (clientHttpRequest instanceof ChannelOperations<?,?> nettyReq) {
+						nativeRequest.set(nettyReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY));
+					}
+					else if (clientHttpRequest instanceof reactor.netty5.channel.ChannelOperations<?,?> nettyReq) {
+						nativeRequest.set(nettyReq.channel().attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY));
+					}
+					else {
+						nativeRequest.set(clientHttpRequest.getNativeRequest());
+					}
+				})
 				.retrieve()
 				.bodyToMono(Void.class);
 
 		StepVerifier.create(result).expectComplete().verify();
 
-		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
-			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY);
+		if (nativeRequest.get() instanceof Attribute<?>) {
+			@SuppressWarnings("unchecked")
+			Attribute<Map<String, Object>> attributes = (Attribute<Map<String, Object>>) nativeRequest.get();
 			assertThat(attributes.get()).isNotNull();
 			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
-		else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
+		else if (nativeRequest.get() instanceof io.netty5.util.Attribute<?>) {
+			@SuppressWarnings("unchecked")
 			io.netty5.util.Attribute<Map<String, Object>> attributes =
-					nativeReq.channel().attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY);
+					(io.netty5.util.Attribute<Map<String, Object>>) nativeRequest.get();
 			assertThat(attributes.get()).isNotNull();
 			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}

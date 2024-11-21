@@ -32,6 +32,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ValueConstants;
 
 /**
@@ -191,11 +192,15 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		}
 
 		if (this.conversionService != null && !(value instanceof String)) {
+			Object beforeValue = value;
 			parameter = parameter.nestedIfOptional();
 			Class<?> type = parameter.getNestedParameterType();
 			value = (type != Object.class && !type.isArray() ?
 					this.conversionService.convert(value, new TypeDescriptor(parameter), STRING_TARGET_TYPE) :
 					this.conversionService.convert(value, String.class));
+			if (!StringUtils.hasText((String) value) && !required && beforeValue == null) {
+				value = null;
+			}
 		}
 
 		if (value == null) {

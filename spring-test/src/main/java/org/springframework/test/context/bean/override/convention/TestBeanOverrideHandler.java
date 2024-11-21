@@ -29,19 +29,19 @@ import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link BeanOverrideHandler} implementation for {@link TestBean}.
+ * {@link BeanOverrideHandler} implementation for {@link TestBean @TestBean}.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.2
  */
-final class TestBeanBeanOverrideHandler extends BeanOverrideHandler {
+final class TestBeanOverrideHandler extends BeanOverrideHandler {
 
 	private final Method factoryMethod;
 
 
-	TestBeanBeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
+	TestBeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy, Method factoryMethod) {
 
 		super(field, beanType, beanName, strategy);
@@ -74,7 +74,7 @@ final class TestBeanBeanOverrideHandler extends BeanOverrideHandler {
 		if (!super.equals(other)) {
 			return false;
 		}
-		TestBeanBeanOverrideHandler that = (TestBeanBeanOverrideHandler) other;
+		TestBeanOverrideHandler that = (TestBeanOverrideHandler) other;
 		return Objects.equals(this.factoryMethod, that.factoryMethod);
 	}
 

@@ -18,6 +18,8 @@ package org.springframework.util;
 
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Composite set that combines two other sets. This type is only exposed through
  * {@link CompositeMap#keySet()} and {@link CompositeMap#entrySet()}.
@@ -34,24 +36,19 @@ final class CompositeSet<E> extends CompositeCollection<E> implements Set<E> {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		else if (obj instanceof Set<?> set) {
-			if (set.size() != size()) {
-				return false;
-			}
+		if (other instanceof Set<?> otherSet && size() == otherSet.size()) {
 			try {
-				return containsAll(set);
+				return containsAll(otherSet);
 			}
 			catch (ClassCastException | NullPointerException ignored) {
-				return false;
+				// fall through
 			}
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	@Override
@@ -64,4 +61,5 @@ final class CompositeSet<E> extends CompositeCollection<E> implements Set<E> {
 		}
 		return hashCode;
 	}
+
 }

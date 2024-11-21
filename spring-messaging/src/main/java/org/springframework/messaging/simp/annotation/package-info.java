@@ -1,5 +1,5 @@
 /**
- * Annotations and for handling messages from SImple Messaging Protocols such as STOMP.
+ * Annotations and for handling messages from Simple Messaging Protocols such as STOMP.
  */
 @NonNullApi
 @NonNullFields

@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Resource handling utility methods to share common logic between
@@ -65,7 +66,8 @@ public abstract class ResourceHandlerUtils {
 			else {
 				path = location.getURL().getPath();
 			}
-			assertLocationPath(path);
+			Assert.isTrue(path.endsWith(FOLDER_SEPARATOR) || path.endsWith(WINDOWS_FOLDER_SEPARATOR),
+					"Resource location does not end with slash: " + path);
 		}
 		catch (IOException ex) {
 			// ignore
@@ -73,12 +75,18 @@ public abstract class ResourceHandlerUtils {
 	}
 
 	/**
-	 * Assert the given location path is a directory and ends on slash.
+	 * Check if the given static resource location path ends with a trailing
+	 * slash, and append it if necessary.
+	 * @param path the location path
+	 * @return the resulting path to use
 	 */
-	public static void assertLocationPath(@Nullable String path) {
-		Assert.notNull(path, "Resource location path must not be null");
-		Assert.isTrue(path.endsWith(FOLDER_SEPARATOR) || path.endsWith(WINDOWS_FOLDER_SEPARATOR),
-				"Resource location does not end with slash: " + path);
+	public static String initLocationPath(String path) {
+		String separator = (path.contains(FOLDER_SEPARATOR) ? FOLDER_SEPARATOR : WINDOWS_FOLDER_SEPARATOR);
+		if (!path.endsWith(separator)) {
+			path = path.concat(separator);
+			logger.warn("Appended trailing slash to static resource location: " + path);
+		}
+		return path;
 	}
 
 	/**
@@ -194,23 +202,23 @@ public abstract class ResourceHandlerUtils {
 	 * @return {@code true} if the path is invalid, {@code false} otherwise
 	 */
 	private static boolean isInvalidEncodedPath(String path) {
-		if (path.contains("%")) {
-			String decodedPath = decode(path);
-			if (decodedPath.contains("%")) {
-				decodedPath = decode(decodedPath);
-			}
-			if (isInvalidPath(decodedPath)) {
-				return true;
-			}
-			decodedPath = normalizeInputPath(decodedPath);
-			return isInvalidPath(decodedPath);
+		String decodedPath = decode(path);
+		if (decodedPath.contains("%")) {
+			decodedPath = decode(decodedPath);
 		}
-		return false;
+		if (!StringUtils.hasText(decodedPath)) {
+			return true;
+		}
+		if (isInvalidPath(decodedPath)) {
+			return true;
+		}
+		decodedPath = normalizeInputPath(decodedPath);
+		return isInvalidPath(decodedPath);
 	}
 
 	private static String decode(String path) {
 		try {
-			return URLDecoder.decode(path, StandardCharsets.UTF_8);
+			return UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 		catch (Exception ex) {
 			return "";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class DateTimeFormatterFactory {
 	}
 
 	/**
-	 * Set the two characters to use to format date values, in Joda-Time style.
+	 * Set the two characters to use to format date values.
 	 * <p>The first character is used for the date style; the second is for
 	 * the time style. Supported characters are:
 	 * <ul>
@@ -126,9 +126,9 @@ public class DateTimeFormatterFactory {
 	 * <li>'F' = Full</li>
 	 * <li>'-' = Omitted</li>
 	 * </ul>
-	 * <p>This method mimics the styles supported by Joda-Time. Note that
-	 * JSR-310 natively favors {@link java.time.format.FormatStyle} as used for
-	 * {@link #setDateStyle}, {@link #setTimeStyle} and {@link #setDateTimeStyle}.
+	 * <p>Note that JSR-310 natively favors {@link java.time.format.FormatStyle}
+	 * as used for {@link #setDateStyle}, {@link #setTimeStyle}, and
+	 * {@link #setDateTimeStyle}.
 	 * @param style two characters from the set {"S", "M", "L", "F", "-"}
 	 */
 	public void setStylePattern(String style) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -391,11 +391,10 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Specify one or more modules by class (or class name in XML)
-	 * to be registered with the {@link ObjectMapper}.
-	 * <p>Modules specified here will be registered after
-	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
-	 * finding of modules (see {@link #setFindModulesViaServiceLoader}),
+	 * Specify one or more modules by class (or class name in XML) to be registered
+	 * with the {@link ObjectMapper}.
+	 * <p>Modules specified here will be registered after Spring's autodetection of
+	 * JSR-310, or Jackson's finding of modules (see {@link #setFindModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #setModules}, not both.
 	 * @since 4.0.1
@@ -410,8 +409,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * Set whether to let Jackson find available modules via the JDK ServiceLoader,
 	 * based on META-INF metadata in the classpath.
 	 * <p>If this mode is not set, Spring's Jackson2ObjectMapperFactoryBean itself
-	 * will try to find the JSR-310 and Joda-Time support modules on the classpath -
-	 * provided that Java 8 and Joda-Time themselves are available, respectively.
+	 * will try to find the JSR-310 support module on the classpath.
 	 * @since 4.0.1
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#findModules()
 	 */

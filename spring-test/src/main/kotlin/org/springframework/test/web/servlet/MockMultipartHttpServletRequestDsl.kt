@@ -27,7 +27,7 @@ import jakarta.servlet.http.Part
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class MockMultipartHttpServletRequestDsl internal constructor (private val builder: MockMultipartHttpServletRequestBuilder) : MockHttpServletRequestDsl(builder) {
+class MockMultipartHttpServletRequestDsl(private val builder: MockMultipartHttpServletRequestBuilder) : MockHttpServletRequestDsl(builder) {
 
 	/**
 	 * @see [MockMultipartHttpServletRequestBuilder.file]

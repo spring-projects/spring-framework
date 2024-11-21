@@ -196,7 +196,7 @@ Kotlin::
 
 When used as `org.springframework.validation.Validator`, `LocalValidatorFactoryBean`
 invokes the underlying `jakarta.validation.Validator`, and then adapts
-``ContraintViolation``s to ``FieldError``s, and registers them with the `Errors` object
+``ConstraintViolation``s to ``FieldError``s, and registers them with the `Errors` object
 passed into the `validate` method.
 
 

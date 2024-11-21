@@ -22,12 +22,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * {@code @TestBean} is an annotation that can be applied to a field in a test
- * class to override a bean in the test's
+ * {@code @TestBean} is an annotation that can be applied to a non-static field
+ * in a test class to override a bean in the test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * using a static factory method.
  *
@@ -50,7 +51,8 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * interfaces, the entire type hierarchy is searched. Alternatively, a factory
  * method in an external class can be referenced via its fully-qualified method
  * name following the syntax {@code <fully-qualified class name>#<method name>}
- * &mdash; for example, {@code "org.example.TestUtils#createCustomerRepository"}.
+ * &mdash; for example,
+ * {@code @TestBean(methodName = "org.example.TestUtils#createCustomerRepository")}.
  *
  * <p>The factory method is deduced as follows.
  *
@@ -103,6 +105,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton bean
  * corresponding to the value returned from the {@code @TestBean} factory method.
  *
+ * <p>There are no restrictions on the visibility of {@code @TestBean} fields or
+ * factory methods. Such fields and methods can therefore be {@code public},
+ * {@code protected}, package-private (default visibility), or {@code private}
+ * depending on the needs or coding practices of the project.
+ *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -114,6 +121,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @BeanOverride(TestBeanOverrideProcessor.class)
+@Reflective(TestBeanReflectiveProcessor.class)
 public @interface TestBean {
 
 	/**
@@ -144,7 +152,7 @@ public @interface TestBean {
 	 * <p>Alternatively, a factory method in an external class can be referenced
 	 * via its fully-qualified method name following the syntax
 	 * {@code <fully-qualified class name>#<method name>} &mdash; for example,
-	 * {@code "org.example.TestUtils#createCustomerRepository"}.
+	 * {@code @TestBean(methodName = "org.example.TestUtils#createCustomerRepository")}.
 	 * <p>If left unspecified, the name of the factory method will be detected
 	 * based either on the name of the annotated field or the name of the bean.
 	 */

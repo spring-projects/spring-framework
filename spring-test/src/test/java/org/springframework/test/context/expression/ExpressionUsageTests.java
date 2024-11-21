@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dave Syer
  */
 @SpringJUnitConfig
-@DisabledInAotMode // SpEL is not supported in AOT
+@DisabledInAotMode("SpEL is not supported in AOT")
 class ExpressionUsageTests {
 
 	@Autowired

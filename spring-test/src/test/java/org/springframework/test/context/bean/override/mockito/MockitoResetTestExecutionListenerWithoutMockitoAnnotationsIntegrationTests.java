@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -76,7 +75,6 @@ class MockitoResetTestExecutionListenerWithoutMockitoAnnotationsIntegrationTests
 		assertThat(context.getBean(NonSingletonFactoryBean.class).getObjectInvocations).isEqualTo(2);
 	}
 
-	@Disabled("MockReset is currently only honored if @MockitoBean or @MockitoSpyBean is used")
 	@Test
 	void test002() {
 		// Should not have been reset.

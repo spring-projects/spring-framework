@@ -86,7 +86,7 @@ class CacheOperationExpressionEvaluatorTests {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(
 				AnnotatedClass.class, "multipleCaching", Object.class, Object.class);
-		Object[] args = new Object[] {new Object(), new Object()};
+		Object[] args = {"arg1", "arg2"};
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 
 		EvaluationContext evalCtx = this.eval.createEvaluationContext(caches, method, args,
@@ -155,7 +155,7 @@ class CacheOperationExpressionEvaluatorTests {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(
 				AnnotatedClass.class, "multipleCaching", Object.class, Object.class);
-		Object[] args = new Object[] {new Object(), new Object()};
+		Object[] args = new Object[] {"arg1", "arg2"};
 		Collection<ConcurrentMapCache> caches = Collections.singleton(new ConcurrentMapCache("test"));
 		return this.eval.createEvaluationContext(
 				caches, method, args, target, target.getClass(), method, result);

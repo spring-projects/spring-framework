@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
 @ExtendWith(SpringExtension.class)
 @TestExecutionListeners(FooTestExecutionListener.class)
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-// Since this test class does not load an ApplicationContext,
-// this test class simply is not supported for AOT processing.
-@DisabledInAotMode
+@DisabledInAotMode("Does not load an ApplicationContext and thus not supported for AOT processing")
 class TestExecutionListenersNestedTests {
 
 	private static final String FOO = "foo";
@@ -83,7 +81,7 @@ class TestExecutionListenersNestedTests {
 
 	@Nested
 	@TestExecutionListeners(BarTestExecutionListener.class)
-	@DisabledInAotMode
+	@DisabledInAotMode("Does not load an ApplicationContext and thus not supported for AOT processing")
 	class ConfigOverriddenByDefaultTests {
 
 		@Test
@@ -106,7 +104,7 @@ class TestExecutionListenersNestedTests {
 		@Nested
 		@NestedTestConfiguration(OVERRIDE)
 		@TestExecutionListeners(BazTestExecutionListener.class)
-		@DisabledInAotMode
+		@DisabledInAotMode("Does not load an ApplicationContext and thus not supported for AOT processing")
 		class DoubleNestedWithOverriddenConfigTests {
 
 			@Test

@@ -1,9 +1,10 @@
 [[spring-testing-annotation-beanoverriding-mockitobean]]
 = `@MockitoBean` and `@MockitoSpyBean`
 
-`@MockitoBean` and `@MockitoSpyBean` are used on fields in test classes to override beans
-in the test's `ApplicationContext` with a Mockito _mock_ or _spy_, respectively. In the
-latter case, an early instance of the original bean is captured and wrapped by the spy.
+`@MockitoBean` and `@MockitoSpyBean` are used on non-static fields in test classes to
+override beans in the test's `ApplicationContext` with a Mockito _mock_ or _spy_,
+respectively. In the latter case, an early instance of the original bean is captured and
+wrapped by the spy.
 
 By default, the annotated field's type is used to search for candidate beans to override.
 If multiple candidates match, `@Qualifier` can be provided to narrow the candidate to
@@ -51,6 +52,15 @@ When using `@MockitoSpyBean` to create a spy for a `FactoryBean`, a spy will be 
 for the object created by the `FactoryBean`, not for the `FactoryBean` itself.
 ====
 
+[NOTE]
+====
+There are no restrictions on the visibility of `@MockitoBean` and `@MockitoSpyBean`
+fields.
+
+Such fields can therefore be `public`, `protected`, package-private (default visibility),
+or `private` depending on the needs or coding practices of the project.
+====
+
 The following example shows how to use the default behavior of the `@MockitoBean` annotation:
 
 [tabs]
@@ -61,7 +71,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoBean // <1>
-		private CustomService customService;
+		CustomService customService;
 
 		// test case body...
 	}
@@ -85,7 +95,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoBean("service") // <1>
-		private CustomService customService;
+		CustomService customService;
 
 		// test case body...
 
@@ -106,7 +116,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoSpyBean // <1>
-		private CustomService customService;
+		CustomService customService;
 
 		// test case body...
 	}
@@ -129,7 +139,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoSpyBean("service") // <1>
-		private CustomService customService;
+		CustomService customService;
 
 		// test case body...
 

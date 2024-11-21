@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.test.context.bean.override.mockito;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
 /**
  * Integration tests for {@link MockitoResetTestExecutionListener} with a
  * {@link MockitoBean @MockitoBean} field.
@@ -29,15 +32,24 @@ import org.junit.jupiter.api.Test;
 class MockitoResetTestExecutionListenerWithMockitoBeanIntegrationTests
 		extends MockitoResetTestExecutionListenerWithoutMockitoAnnotationsIntegrationTests {
 
-	// The following mock is not used but is currently required to trigger support for MockReset.
+	// We declare the following to ensure that MockReset is also supported with
+	// @MockitoBean or @MockitoSpyBean fields present in the test class.
 	@MockitoBean
-	StringBuilder unusedVariable;
+	PuzzleService puzzleService;
 
+
+	// test001() and test002() are in the superclass.
 
 	@Test
-	@Override
-	void test002() {
-		super.test002();
+	void test003() {
+		given(puzzleService.getAnswer()).willReturn("enigma");
+		assertThat(puzzleService.getAnswer()).isEqualTo("enigma");
+	}
+
+
+	interface PuzzleService {
+
+		String getAnswer();
 	}
 
 }

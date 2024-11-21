@@ -43,36 +43,36 @@ import javax.lang.model.element.Modifier
  */
 class InstanceSupplierCodeGeneratorKotlinTests {
 
-    private val generationContext = TestGenerationContext()
+	private val generationContext = TestGenerationContext()
 
 	private val beanFactory = DefaultListableBeanFactory()
 
-    @Test
-    fun generateWhenHasDefaultConstructor() {
-        val beanDefinition: BeanDefinition = RootBeanDefinition(KotlinTestBean::class.java)
-        val beanFactory = DefaultListableBeanFactory()
-        compile(beanFactory, beanDefinition) { instanceSupplier, compiled ->
-            val bean = getBean<KotlinTestBean>(beanFactory, beanDefinition, instanceSupplier)
-            Assertions.assertThat(bean).isInstanceOf(KotlinTestBean::class.java)
-            Assertions.assertThat(compiled.sourceFile).contains("InstanceSupplier.using(KotlinTestBean::new)")
-        }
-        Assertions.assertThat(getReflectionHints().getTypeHint(KotlinTestBean::class.java))
-            .satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT))
-    }
+	@Test
+	fun generateWhenHasDefaultConstructor() {
+		val beanDefinition: BeanDefinition = RootBeanDefinition(KotlinTestBean::class.java)
+		val beanFactory = DefaultListableBeanFactory()
+		compile(beanFactory, beanDefinition) { instanceSupplier, compiled ->
+			val bean = getBean<KotlinTestBean>(beanFactory, beanDefinition, instanceSupplier)
+			Assertions.assertThat(bean).isInstanceOf(KotlinTestBean::class.java)
+			Assertions.assertThat(compiled.sourceFile).contains("InstanceSupplier.using(KotlinTestBean::new)")
+		}
+		Assertions.assertThat(getReflectionHints().getTypeHint(KotlinTestBean::class.java))
+			.satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT))
+	}
 
-    @Test
-    fun generateWhenConstructorHasOptionalParameter() {
-        val beanDefinition: BeanDefinition = RootBeanDefinition(KotlinTestBeanWithOptionalParameter::class.java)
-        val beanFactory = DefaultListableBeanFactory()
-        compile(beanFactory, beanDefinition) { instanceSupplier, compiled ->
-                val bean: KotlinTestBeanWithOptionalParameter = getBean(beanFactory, beanDefinition, instanceSupplier)
-                Assertions.assertThat(bean).isInstanceOf(KotlinTestBeanWithOptionalParameter::class.java)
-                Assertions.assertThat(compiled.sourceFile)
-                    .contains("return BeanInstanceSupplier.<KotlinTestBeanWithOptionalParameter>forConstructor();")
-            }
-        Assertions.assertThat<TypeHint>(getReflectionHints().getTypeHint(KotlinTestBeanWithOptionalParameter::class.java))
-            .satisfies(hasMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
-    }
+	@Test
+	fun generateWhenConstructorHasOptionalParameter() {
+		val beanDefinition: BeanDefinition = RootBeanDefinition(KotlinTestBeanWithOptionalParameter::class.java)
+		val beanFactory = DefaultListableBeanFactory()
+		compile(beanFactory, beanDefinition) { instanceSupplier, compiled ->
+				val bean: KotlinTestBeanWithOptionalParameter = getBean(beanFactory, beanDefinition, instanceSupplier)
+				Assertions.assertThat(bean).isInstanceOf(KotlinTestBeanWithOptionalParameter::class.java)
+				Assertions.assertThat(compiled.sourceFile)
+					.contains("return BeanInstanceSupplier.<KotlinTestBeanWithOptionalParameter>forConstructor();")
+			}
+		Assertions.assertThat<TypeHint>(getReflectionHints().getTypeHint(KotlinTestBeanWithOptionalParameter::class.java))
+			.satisfies(hasMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+	}
 
 	@Test
 	fun generateWhenHasFactoryMethodWithNoArg() {
@@ -107,27 +107,27 @@ class InstanceSupplierCodeGeneratorKotlinTests {
 		}
 	}
 
-    private fun getReflectionHints(): ReflectionHints {
-        return generationContext.runtimeHints.reflection()
-    }
+	private fun getReflectionHints(): ReflectionHints {
+		return generationContext.runtimeHints.reflection()
+	}
 
-    private fun hasConstructorWithMode(mode: ExecutableMode): ThrowingConsumer<TypeHint> {
-        return ThrowingConsumer {
-            Assertions.assertThat(it.constructors()).anySatisfy(hasMode(mode))
-        }
-    }
+	private fun hasConstructorWithMode(mode: ExecutableMode): ThrowingConsumer<TypeHint> {
+		return ThrowingConsumer {
+			Assertions.assertThat(it.constructors()).anySatisfy(hasMode(mode))
+		}
+	}
 
-    private fun hasMemberCategory(category: MemberCategory): ThrowingConsumer<TypeHint> {
-        return ThrowingConsumer {
-            Assertions.assertThat(it.memberCategories).contains(category)
-        }
-    }
+	private fun hasMemberCategory(category: MemberCategory): ThrowingConsumer<TypeHint> {
+		return ThrowingConsumer {
+			Assertions.assertThat(it.memberCategories).contains(category)
+		}
+	}
 
-    private fun hasMode(mode: ExecutableMode): ThrowingConsumer<ExecutableHint> {
-        return ThrowingConsumer {
-            Assertions.assertThat(it.mode).isEqualTo(mode)
-        }
-    }
+	private fun hasMode(mode: ExecutableMode): ThrowingConsumer<ExecutableHint> {
+		return ThrowingConsumer {
+			Assertions.assertThat(it.mode).isEqualTo(mode)
+		}
+	}
 
 	private fun hasMethodWithMode(mode: ExecutableMode): ThrowingConsumer<TypeHint> {
 		return ThrowingConsumer { hint: TypeHint ->
@@ -135,48 +135,48 @@ class InstanceSupplierCodeGeneratorKotlinTests {
 		}
 	}
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <T> getBean(beanFactory: DefaultListableBeanFactory, beanDefinition: BeanDefinition,
-                            instanceSupplier: InstanceSupplier<*>): T {
-        (beanDefinition as RootBeanDefinition).instanceSupplier = instanceSupplier
-        beanFactory.registerBeanDefinition("testBean", beanDefinition)
-        return beanFactory.getBean("testBean") as T
-    }
+	@Suppress("UNCHECKED_CAST")
+	private fun <T> getBean(beanFactory: DefaultListableBeanFactory, beanDefinition: BeanDefinition,
+							instanceSupplier: InstanceSupplier<*>): T {
+		(beanDefinition as RootBeanDefinition).instanceSupplier = instanceSupplier
+		beanFactory.registerBeanDefinition("testBean", beanDefinition)
+		return beanFactory.getBean("testBean") as T
+	}
 
-    private fun compile(beanFactory: DefaultListableBeanFactory, beanDefinition: BeanDefinition,
-                        result: BiConsumer<InstanceSupplier<*>, Compiled>) {
+	private fun compile(beanFactory: DefaultListableBeanFactory, beanDefinition: BeanDefinition,
+						result: BiConsumer<InstanceSupplier<*>, Compiled>) {
 
-        val freshBeanFactory = DefaultListableBeanFactory(beanFactory)
-        freshBeanFactory.registerBeanDefinition("testBean", beanDefinition)
-        val registeredBean = RegisteredBean.of(freshBeanFactory, "testBean")
-        val typeBuilder = DeferredTypeBuilder()
-        val generateClass = generationContext.generatedClasses.addForFeature("TestCode", typeBuilder)
-        val generator = InstanceSupplierCodeGenerator(
-            generationContext, generateClass.name,
-            generateClass.methods, false
-        )
-        val instantiationDescriptor = registeredBean.resolveInstantiationDescriptor()
-        Assertions.assertThat(instantiationDescriptor).isNotNull()
-        val generatedCode = generator.generateCode(registeredBean, instantiationDescriptor)
-        typeBuilder.set { type: TypeSpec.Builder ->
-            type.addModifiers(Modifier.PUBLIC)
-            type.addSuperinterface(
-                ParameterizedTypeName.get(
-                    Supplier::class.java,
-                    InstanceSupplier::class.java
-                )
-            )
-            type.addMethod(
-                MethodSpec.methodBuilder("get")
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(InstanceSupplier::class.java)
-                    .addStatement("return \$L", generatedCode).build()
-            )
-        }
-        generationContext.writeGeneratedContent()
-        TestCompiler.forSystem().with(generationContext).compile {
-            result.accept(it.getInstance(Supplier::class.java).get() as InstanceSupplier<*>, it)
-        }
-    }
+		val freshBeanFactory = DefaultListableBeanFactory(beanFactory)
+		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition)
+		val registeredBean = RegisteredBean.of(freshBeanFactory, "testBean")
+		val typeBuilder = DeferredTypeBuilder()
+		val generateClass = generationContext.generatedClasses.addForFeature("TestCode", typeBuilder)
+		val generator = InstanceSupplierCodeGenerator(
+			generationContext, generateClass.name,
+			generateClass.methods, false
+		)
+		val instantiationDescriptor = registeredBean.resolveInstantiationDescriptor()
+		Assertions.assertThat(instantiationDescriptor).isNotNull()
+		val generatedCode = generator.generateCode(registeredBean, instantiationDescriptor)
+		typeBuilder.set { type: TypeSpec.Builder ->
+			type.addModifiers(Modifier.PUBLIC)
+			type.addSuperinterface(
+				ParameterizedTypeName.get(
+					Supplier::class.java,
+					InstanceSupplier::class.java
+				)
+			)
+			type.addMethod(
+				MethodSpec.methodBuilder("get")
+					.addModifiers(Modifier.PUBLIC)
+					.returns(InstanceSupplier::class.java)
+					.addStatement("return \$L", generatedCode).build()
+			)
+		}
+		generationContext.writeGeneratedContent()
+		TestCompiler.forSystem().with(generationContext).compile {
+			result.accept(it.getInstance(Supplier::class.java).get() as InstanceSupplier<*>, it)
+		}
+	}
 
 }

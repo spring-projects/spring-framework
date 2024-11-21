@@ -28,16 +28,26 @@ import java.lang.annotation.Target;
  * <p>Formatting applies to parsing a date/time object from a string as well as printing a
  * date/time object to a string.
  *
- * <p>Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
+ * <p>Supports formatting by style pattern, ISO date/time pattern, or custom format pattern string.
  * Can be applied to {@link java.util.Date}, {@link java.util.Calendar}, {@link Long} (for
  * millisecond timestamps) as well as JSR-310 {@code java.time} value types.
  *
  * <p>For style-based formatting, set the {@link #style} attribute to the desired style pattern code.
  * The first character of the code is the date style, and the second character is the time style.
  * Specify a character of 'S' for short style, 'M' for medium, 'L' for long, and 'F' for full.
- * The date or time may be omitted by specifying the style character '-' &mdash; for example,
+ * The date or time may be omitted by specifying the style character '-'. For example,
  * 'M-' specifies a medium format for the date with no time. The supported style pattern codes
  * correlate to the enum constants defined in {@link java.time.format.FormatStyle}.
+ *
+ * <p><strong>WARNING</strong>: Style-based formatting and parsing rely on locale-sensitive
+ * patterns which may change depending on the Java runtime. Specifically, applications that
+ * rely on date/time parsing and formatting may encounter incompatible changes in behavior
+ * when running on JDK 20 or higher. Using an ISO standardized format or a concrete pattern
+ * that you control allows for reliable system-independent and locale-independent parsing and
+ * formatting of date/time values. The use of {@linkplain #fallbackPatterns() fallback patterns}
+ * can also help to address compatibility issues. For further details, see the
+ * <a href="https://github.com/spring-projects/spring-framework/wiki/Date-and-Time-Formatting-with-JDK-20-and-higher">
+ * Date and Time Formatting with JDK 20 and higher</a> page in the Spring Framework wiki.
  *
  * <p>For ISO-based formatting, set the {@link #iso} attribute to the desired {@link ISO} format,
  * such as {@link ISO#DATE}.
@@ -101,13 +111,13 @@ public @interface DateTimeFormat {
 
 	/**
 	 * The custom pattern to use to format the field or method parameter.
-	 * <p>Defaults to empty String, indicating no custom pattern String has been
+	 * <p>Defaults to an empty String, indicating no custom pattern String has been
 	 * specified. Set this attribute when you wish to format your field or method
 	 * parameter in accordance with a custom date time pattern not represented by
 	 * a style or ISO format.
-	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat} style,
-	 * as also supported by Joda-Time, with strict parsing semantics towards overflows
-	 * (for example, rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
+	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat}
+	 * style, with strict parsing semantics towards overflows (for example, rejecting
+	 * a {@code Feb 29} value for a non-leap-year). As a consequence, 'yy'
 	 * characters indicate a year in the traditional style, not a "year-of-era" as in the
 	 * {@link java.time.format.DateTimeFormatter} specification (i.e. 'yy' turns into 'uu'
 	 * when going through a {@code DateTimeFormatter} with strict resolution mode).
@@ -129,7 +139,6 @@ public @interface DateTimeFormat {
 	 * or {@link #style} attribute is always used for printing. For details on
 	 * which time zone is used for fallback patterns, see the
 	 * {@linkplain DateTimeFormat class-level documentation}.
-	 * <p>Fallback patterns are not supported for Joda-Time value types.
 	 * @since 5.3.5
 	 */
 	String[] fallbackPatterns() default {};

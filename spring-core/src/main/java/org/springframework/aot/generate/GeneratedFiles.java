@@ -181,6 +181,7 @@ public interface GeneratedFiles {
 	 */
 	void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler);
 
+
 	private static String getClassNamePath(String className) {
 		Assert.hasLength(className, "'className' must not be empty");
 		validatePackage(ClassUtils.getPackageName(className), className);
@@ -232,13 +233,12 @@ public interface GeneratedFiles {
 		 * generated using CGLIB.
 		 */
 		CLASS
-
 	}
+
 
 	/**
 	 * Provide access to a particular file and offer convenient methods to retrieve,
 	 * save, or override its content.
-	 *
 	 * @since 6.2
 	 */
 	abstract class FileHandler {
@@ -292,7 +292,6 @@ public interface GeneratedFiles {
 		}
 
 		protected abstract void copy(InputStreamSource content, boolean override);
-
 	}
 
 }

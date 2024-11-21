@@ -51,142 +51,142 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
 
 	lateinit var testController: TestController
 
-    val channel = mockk<SubscribableChannel>(relaxed = true)
+	val channel = mockk<SubscribableChannel>(relaxed = true)
 
-    val converter = mockk<MessageConverter>(relaxed = true)
+	val converter = mockk<MessageConverter>(relaxed = true)
 
-    @BeforeEach
-    fun setup() {
-        val brokerTemplate = SimpMessagingTemplate(channel)
-        brokerTemplate.messageConverter = converter
-        messageHandler = TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel)
-        messageHandler.applicationContext = StaticApplicationContext()
-        messageHandler.afterPropertiesSet()
-        testController = TestController()
-    }
+	@BeforeEach
+	fun setup() {
+		val brokerTemplate = SimpMessagingTemplate(channel)
+		brokerTemplate.messageConverter = converter
+		messageHandler = TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel)
+		messageHandler.applicationContext = StaticApplicationContext()
+		messageHandler.afterPropertiesSet()
+		testController = TestController()
+	}
 
-    @Test
-    fun nullableHeaderWithHeader() {
-        val message = createMessage("/nullableHeader", Collections.singletonMap("foo", "bar"))
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
-        assertThat(testController.exception).isNull()
+	@Test
+	fun nullableHeaderWithHeader() {
+		val message = createMessage("/nullableHeader", Collections.singletonMap("foo", "bar"))
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
+		assertThat(testController.exception).isNull()
 		assertThat(testController.header).isEqualTo("bar")
-    }
+	}
 
-    @Test
-    fun nullableHeaderWithoutHeader() {
-        val message = createMessage("/nullableHeader", Collections.emptyMap())
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
+	@Test
+	fun nullableHeaderWithoutHeader() {
+		val message = createMessage("/nullableHeader", Collections.emptyMap())
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
 		assertThat(testController.exception).isNull()
 		assertThat(testController.header).isNull()
-    }
+	}
 
-    @Test
-    fun nonNullableHeaderWithHeader() {
-        val message = createMessage("/nonNullableHeader", Collections.singletonMap("foo", "bar"))
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
+	@Test
+	fun nonNullableHeaderWithHeader() {
+		val message = createMessage("/nonNullableHeader", Collections.singletonMap("foo", "bar"))
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
 		assertThat(testController.header).isEqualTo("bar")
-    }
+	}
 
-    @Test
-    fun nonNullableHeaderWithoutHeader() {
-        val message = createMessage("/nonNullableHeader", Collections.emptyMap())
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
-        assertThat(testController.exception).isNotNull()
-        assertThat(testController.exception).isInstanceOf(MessageHandlingException::class.java)
-    }
+	@Test
+	fun nonNullableHeaderWithoutHeader() {
+		val message = createMessage("/nonNullableHeader", Collections.emptyMap())
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
+		assertThat(testController.exception).isNotNull()
+		assertThat(testController.exception).isInstanceOf(MessageHandlingException::class.java)
+	}
 
-    @Test
-    fun nullableHeaderNotRequiredWithHeader() {
-        val message = createMessage("/nullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
+	@Test
+	fun nullableHeaderNotRequiredWithHeader() {
+		val message = createMessage("/nullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
 		assertThat(testController.exception).isNull()
 		assertThat(testController.header).isEqualTo("bar")
-    }
+	}
 
-    @Test
-    fun nullableHeaderNotRequiredWithoutHeader() {
-        val message = createMessage("/nullableHeaderNotRequired", Collections.emptyMap())
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
+	@Test
+	fun nullableHeaderNotRequiredWithoutHeader() {
+		val message = createMessage("/nullableHeaderNotRequired", Collections.emptyMap())
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
 		assertThat(testController.exception).isNull()
 		assertThat(testController.header).isNull()
-    }
+	}
 
-    @Test
-    fun nonNullableHeaderNotRequiredWithHeader() {
-        val message = createMessage("/nonNullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
+	@Test
+	fun nonNullableHeaderNotRequiredWithHeader() {
+		val message = createMessage("/nonNullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
 		assertThat(testController.header).isEqualTo("bar")
-    }
+	}
 
-    @Test
-    fun nonNullableHeaderNotRequiredWithoutHeader() {
-        val message = createMessage("/nonNullableHeaderNotRequired", Collections.emptyMap())
-        messageHandler.registerHandler(testController)
-        messageHandler.handleMessage(message)
-        assertThat(testController.exception).isNotNull()
+	@Test
+	fun nonNullableHeaderNotRequiredWithoutHeader() {
+		val message = createMessage("/nonNullableHeaderNotRequired", Collections.emptyMap())
+		messageHandler.registerHandler(testController)
+		messageHandler.handleMessage(message)
+		assertThat(testController.exception).isNotNull()
 		assertThat(testController.exception).isInstanceOf(NullPointerException::class.java)
-    }
+	}
 
-    private fun createMessage(destination: String, headers: Map<String, String?>): Message<ByteArray> {
-        val accessor = SimpMessageHeaderAccessor.create()
-        accessor.sessionId = "session1"
-        accessor.sessionAttributes = HashMap()
-        accessor.destination = destination
-        for (entry in headers.entries) accessor.setHeader(entry.key, entry.value)
+	private fun createMessage(destination: String, headers: Map<String, String?>): Message<ByteArray> {
+		val accessor = SimpMessageHeaderAccessor.create()
+		accessor.sessionId = "session1"
+		accessor.sessionAttributes = HashMap()
+		accessor.destination = destination
+		for (entry in headers.entries) accessor.setHeader(entry.key, entry.value)
 
-        return MessageBuilder.withPayload(ByteArray(0)).setHeaders(accessor).build()
-    }
+		return MessageBuilder.withPayload(ByteArray(0)).setHeaders(accessor).build()
+	}
 
-    class TestSimpAnnotationMethodMessageHandler(brokerTemplate: SimpMessageSendingOperations,
-                                                         clientInboundChannel: SubscribableChannel,
-                                                         clientOutboundChannel: MessageChannel) :
-            SimpAnnotationMethodMessageHandler(clientInboundChannel, clientOutboundChannel, brokerTemplate) {
+	class TestSimpAnnotationMethodMessageHandler(brokerTemplate: SimpMessageSendingOperations,
+														 clientInboundChannel: SubscribableChannel,
+														 clientOutboundChannel: MessageChannel) :
+			SimpAnnotationMethodMessageHandler(clientInboundChannel, clientOutboundChannel, brokerTemplate) {
 
-        fun registerHandler(handler: Any) {
-            super.detectHandlerMethods(handler)
-        }
-    }
+		fun registerHandler(handler: Any) {
+			super.detectHandlerMethods(handler)
+		}
+	}
 
-    @Suppress("unused")
-    @Controller
-    @MessageMapping
-    class TestController {
+	@Suppress("unused")
+	@Controller
+	@MessageMapping
+	class TestController {
 
-        var header: String? = null
-        var exception: Throwable? = null
+		var header: String? = null
+		var exception: Throwable? = null
 
-        @MessageMapping("/nullableHeader")
-        fun nullableHeader(@Header("foo") foo: String?) {
-            header = foo
-        }
+		@MessageMapping("/nullableHeader")
+		fun nullableHeader(@Header("foo") foo: String?) {
+			header = foo
+		}
 
-        @MessageMapping("/nonNullableHeader")
-        fun nonNullableHeader(@Header("foo") foo: String) {
-            header = foo
-        }
+		@MessageMapping("/nonNullableHeader")
+		fun nonNullableHeader(@Header("foo") foo: String) {
+			header = foo
+		}
 
-        @MessageMapping("/nullableHeaderNotRequired")
-        fun nullableHeaderNotRequired(@Header("foo", required = false) foo: String?) {
-            header = foo
-        }
+		@MessageMapping("/nullableHeaderNotRequired")
+		fun nullableHeaderNotRequired(@Header("foo", required = false) foo: String?) {
+			header = foo
+		}
 
-        @MessageMapping("/nonNullableHeaderNotRequired")
-        fun nonNullableHeaderNotRequired(@Header("foo", required = false) foo: String) {
-            header = foo
-        }
+		@MessageMapping("/nonNullableHeaderNotRequired")
+		fun nonNullableHeaderNotRequired(@Header("foo", required = false) foo: String) {
+			header = foo
+		}
 
-        @MessageExceptionHandler
-        fun handleIllegalArgumentException(exception: Throwable) {
-            this.exception = exception
-        }
-    }
+		@MessageExceptionHandler
+		fun handleIllegalArgumentException(exception: Throwable) {
+			this.exception = exception
+		}
+	}
 
 }

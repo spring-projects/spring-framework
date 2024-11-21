@@ -59,4 +59,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Documented
 @ExtendWith(DisabledInAotModeCondition.class)
 public @interface DisabledInAotMode {
+
+	/**
+	 * Custom reason to document why the test class or test method is disabled in
+	 * AOT mode.
+	 * <p>If a custom reason is not supplied, the default reason will be used:
+	 * {@code "Disabled in Spring AOT mode"}.
+	 * <p>If a custom reason is supplied, it will be combined with the default
+	 * reason. For example,
+	 * {@code @DisabledInAotMode("@ContextHierarchy is not supported")} will result
+	 * in a combined reason like the following:
+	 * {@code "Disabled in Spring AOT mode ==> @ContextHierarchy is not supported"}.
+	 * @since 6.2
+	 */
+	String value() default "";
+
 }

@@ -38,7 +38,7 @@ class PropertyPlaceholderSqlScriptsTests {
 	@ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
 	@TestPropertySource(properties = "vendor = db1")
 	@DirtiesContext
-	@DisabledInAotMode // ${vendor} does not get resolved during AOT processing
+	@DisabledInAotMode("${vendor} does not get resolved during AOT processing")
 	class DatabaseOneTests extends AbstractTransactionalTests {
 
 		@Test
@@ -52,7 +52,7 @@ class PropertyPlaceholderSqlScriptsTests {
 	@ContextConfiguration(classes = PopulatedSchemaDatabaseConfig.class)
 	@TestPropertySource(properties = "vendor = db2")
 	@DirtiesContext
-	@DisabledInAotMode // ${vendor} does not get resolved during AOT processing
+	@DisabledInAotMode("${vendor} does not get resolved during AOT processing")
 	class DatabaseTwoTests extends AbstractTransactionalTests {
 
 		@Test

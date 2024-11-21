@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,14 +226,12 @@ public class MethodInvoker {
 		Method matchingMethod = null;
 
 		for (Method candidate : candidates) {
-			if (candidate.getName().equals(targetMethod)) {
-				if (candidate.getParameterCount() == argCount) {
-					Class<?>[] paramTypes = candidate.getParameterTypes();
-					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
-					if (typeDiffWeight < minTypeDiffWeight) {
-						minTypeDiffWeight = typeDiffWeight;
-						matchingMethod = candidate;
-					}
+			if (candidate.getName().equals(targetMethod) && candidate.getParameterCount() == argCount) {
+				Class<?>[] paramTypes = candidate.getParameterTypes();
+				int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
+				if (typeDiffWeight < minTypeDiffWeight) {
+					minTypeDiffWeight = typeDiffWeight;
+					matchingMethod = candidate;
 				}
 			}
 		}

@@ -1,8 +1,8 @@
 [[spring-testing-annotation-beanoverriding-testbean]]
 = `@TestBean`
 
-`@TestBean` is used on a field in a test class to override a specific bean in the test's
-`ApplicationContext` with an instance provided by a factory method.
+`@TestBean` is used on a non-static field in a test class to override a specific bean in
+the test's `ApplicationContext` with an instance provided by a factory method.
 
 The associated factory method name is derived from the annotated field's name, or the
 bean name if specified. The factory method must be `static`, accept no arguments, and
@@ -30,6 +30,14 @@ same bean in several tests, make sure to name the field consistently to avoid cr
 unnecessary contexts.
 ====
 
+[NOTE]
+====
+There are no restrictions on the visibility of `@TestBean` fields or factory methods.
+
+Such fields and methods can therefore be `public`, `protected`, package-private (default
+visibility), or `private` depending on the needs or coding practices of the project.
+====
+
 The following example shows how to use the default behavior of the `@TestBean` annotation:
 
 [tabs]
@@ -40,11 +48,11 @@ Java::
 ----
 	class OverrideBeanTests {
 		@TestBean // <1>
-		private CustomService customService;
+		CustomService customService;
 
 		// test case body...
 
-		private static CustomService customService() { // <2>
+		static CustomService customService() { // <2>
 			return new MyFakeCustomService();
 		}
 	}
@@ -68,11 +76,11 @@ Java::
 ----
 	class OverrideBeanTests {
 		@TestBean(name = "service", methodName = "createCustomService") // <1>
-		private CustomService customService;
+		CustomService customService;
 
 		// test case body...
 
-		private static CustomService createCustomService() { // <2>
+		static CustomService createCustomService() { // <2>
 			return new MyFakeCustomService();
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ public interface PollableChannel extends MessageChannel {
 	/**
 	 * Receive a message from this channel, blocking until either a message is available
 	 * or the specified timeout period elapses.
-	 * @param timeout the timeout in milliseconds or {@link MessageChannel#INDEFINITE_TIMEOUT}.
+	 * @param timeout the timeout in milliseconds or {@link MessageChannel#INDEFINITE_TIMEOUT}
 	 * @return the next available {@link Message} or {@code null} if the specified timeout
-	 * period elapses or the message reception is interrupted
+	 * period elapses or the message receipt is interrupted
 	 */
 	@Nullable
 	Message<?> receive(long timeout);

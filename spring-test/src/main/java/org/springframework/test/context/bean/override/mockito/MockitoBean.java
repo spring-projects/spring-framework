@@ -29,8 +29,8 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * {@code @MockitoBean} is an annotation that can be applied to a field in a test
- * class to override a bean in the test's
+ * {@code @MockitoBean} is an annotation that can be applied to a non-static field
+ * in a test class to override a bean in the test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * using a Mockito mock.
  *
@@ -57,6 +57,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * mocking a bean created by a {@link org.springframework.beans.factory.FactoryBean
  * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton mock
  * of the type of object created by the {@code FactoryBean}.
+ *
+ * <p>There are no restrictions on the visibility of a {@code @MockitoBean} field.
+ * Such fields can therefore be {@code public}, {@code protected}, package-private
+ * (default visibility), or {@code private} depending on the needs or coding
+ * practices of the project.
  *
  * @author Simon Baslé
  * @author Sam Brannen

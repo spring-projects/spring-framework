@@ -53,7 +53,9 @@ import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTest
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
 import org.springframework.test.context.aot.samples.bean.override.EasyMockBeanJupiterTests;
+import org.springframework.test.context.aot.samples.bean.override.GreetingServiceFactory;
 import org.springframework.test.context.aot.samples.bean.override.MockitoBeanJupiterTests;
+import org.springframework.test.context.aot.samples.bean.override.TestBeanJupiterTests;
 import org.springframework.test.context.aot.samples.common.GreetingService;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.aot.samples.jdbc.SqlScriptsSpringJupiterTests;
@@ -108,6 +110,7 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 				BasicSpringVintageTests.class,
 				EasyMockBeanJupiterTests.class,
 				MockitoBeanJupiterTests.class,
+				TestBeanJupiterTests.class,
 				SqlScriptsSpringJupiterTests.class,
 				XmlSpringJupiterTests.class,
 				WebSpringJupiterTests.class);
@@ -162,6 +165,9 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 					else if (testClass.getPackageName().contains("jdbc")) {
 						assertContextForJdbcTests(context);
 					}
+					else if (testClass.equals(TestBeanJupiterTests.class)) {
+						assertContextForTestBeanOverrideTests(context);
+					}
 					else if (testClass.equals(EasyMockBeanJupiterTests.class)) {
 						assertContextForEasyMockBeanOverrideTests(context);
 					}
@@ -212,9 +218,11 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 		Stream.of(
 			// @TestExecutionListeners
 			org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyTestExecutionListener.class,
+			// Auto-registered
 			org.springframework.test.context.event.ApplicationEventsTestExecutionListener.class,
 			org.springframework.test.context.event.EventPublishingTestExecutionListener.class,
 			org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener.class,
+			org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener.class,
 			org.springframework.test.context.support.DependencyInjectionTestExecutionListener.class,
 			org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener.class,
 			org.springframework.test.context.support.DirtiesContextTestExecutionListener.class,
@@ -224,6 +232,7 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 
 		// ContextCustomizerFactory
 		Stream.of(
+			"org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactory",
 			"org.springframework.test.context.support.DynamicPropertiesContextCustomizerFactory",
 			"org.springframework.test.context.web.socket.MockServerContainerContextCustomizerFactory",
 			"org.springframework.test.context.aot.samples.basic.ImportsContextCustomizerFactory"
@@ -271,8 +280,18 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 			.accepts(runtimeHints);
 
 		// @BeanOverride(value = ...)
-		assertReflectionRegistered(runtimeHints, "org.springframework.test.context.bean.override.mockito.MockitoBeanOverrideProcessor",
-				INVOKE_DECLARED_CONSTRUCTORS);
+		Stream.of(
+			// @TestBean
+			"org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor",
+			// @MockitoBean
+			"org.springframework.test.context.bean.override.mockito.MockitoBeanOverrideProcessor",
+			// @EasyMockBean
+			"org.springframework.test.context.bean.override.easymock.EasyMockBeanOverrideProcessor"
+		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
+
+		// @TestBean(methodName = <fully-qualified method name>)
+		assertThat(reflection().onMethod(GreetingServiceFactory.class, "createEnigmaGreetingService"))
+			.accepts(runtimeHints);
 
 		// GenericApplicationContext.preDetermineBeanTypes() should have registered proxy
 		// hints for the EasyMock interface-based mocks.
@@ -337,6 +356,11 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 	private void assertContextForJdbcTests(ApplicationContext context) {
 		assertThat(context.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
 		assertThat(context.getBean(DataSource.class)).as("DataSource").isNotNull();
+	}
+
+	private void assertContextForTestBeanOverrideTests(ApplicationContext context) {
+		GreetingService greetingService = context.getBean(GreetingService.class);
+		assertThat(greetingService.greeting()).isEqualTo("enigma");
 	}
 
 	private void assertContextForEasyMockBeanOverrideTests(ApplicationContext context) {
@@ -505,29 +529,39 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 			"org/springframework/test/context/aot/samples/bean/override/MockitoBeanJupiterTests__TestContext006_BeanDefinitions.java",
 			"org/springframework/test/context/aot/samples/bean/override/MockitoBeanJupiterTests__TestContext006_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext006_BeanDefinitions.java",
-			// SqlScriptsSpringJupiterTests
+
+			// TestBeanJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext007_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext007_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests__TestContext007_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests__TestContext007_BeanFactoryRegistrations.java",
-			"org/springframework/test/context/jdbc/EmptyDatabaseConfig__TestContext007_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/bean/override/TestBeanJupiterTests__TestContext007_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/bean/override/TestBeanJupiterTests__TestContext007_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext007_BeanDefinitions.java",
-			// WebSpringJupiterTests
+
+			// SqlScriptsSpringJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext008_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext008_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext008_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext008_BeanFactoryRegistrations.java",
-			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext008_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests__TestContext008_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests__TestContext008_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/jdbc/EmptyDatabaseConfig__TestContext008_BeanDefinitions.java",
 			"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext008_BeanDefinitions.java",
-			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext008_Autowiring.java",
-			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext008_BeanDefinitions.java",
-			// XmlSpringJupiterTests
+
+			// WebSpringJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext009_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext009_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/common/DefaultMessageService__TestContext009_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext009_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext009_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext009_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext009_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext009_BeanDefinitions.java",
 			"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext009_BeanDefinitions.java",
+			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext009_Autowiring.java",
+			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext009_BeanDefinitions.java",
+
+			// XmlSpringJupiterTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext010_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext010_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/common/DefaultMessageService__TestContext010_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext010_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext010_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext010_BeanDefinitions.java"
 		};
 
 }

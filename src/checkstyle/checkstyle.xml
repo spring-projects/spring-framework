@@ -246,11 +246,11 @@
 			<property name="ignoreComments" value="true"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
-			<property name="id" value="systemOutPrintln"/>
-			<property name="format" value="System\.out\.println"/>
+			<property name="id" value="systemOutErrPrint"/>
+			<property name="format" value="System\.(out|err)\.print"/>
 			<property name="maximum" value="0"/>
 			<property name="message"
-					  value="System.out.println calls are forbidden in the main codebase"/>
+					  value="Printing to System.out and System.err is forbidden in the main codebase"/>
 			<property name="ignoreComments" value="true"/>
 		</module>
 		<module

@@ -38,7 +38,7 @@ import static org.mockito.BDDMockito.then;
  * @see MockitoSpyBeanAndCircularDependenciesWithLazyResolutionProxyIntegrationTests
  */
 @SpringJUnitConfig
-@DisabledInAotMode // Circular dependencies cannot be resolved in AOT mode unless a @Lazy resolution proxy is used.
+@DisabledInAotMode("Circular dependencies cannot be resolved in AOT mode unless a @Lazy resolution proxy is used")
 class MockitoSpyBeanAndCircularDependenciesWithAutowiredSettersIntegrationTests {
 
 	@MockitoSpyBean

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -33,12 +32,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.ClassUtils;
 
@@ -54,13 +49,28 @@ import org.springframework.util.ClassUtils;
  */
 public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
 
+	private static final Log logger = LogFactory.getLog(MockitoResetTestExecutionListener.class);
+
+	/**
+	 * Boolean flag which tracks whether Mockito is present in the classpath.
+	 * @see #mockitoInitialized
+	 * @see #isEnabled()
+	 */
 	private static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
 			MockitoResetTestExecutionListener.class.getClassLoader());
 
-	private static final String SPRING_MOCKITO_PACKAGE = "org.springframework.test.context.bean.override.mockito";
-
-	private static final Predicate<MergedAnnotation<?>> isSpringMockitoAnnotation = mergedAnnotation ->
-			mergedAnnotation.getType().getPackageName().equals(SPRING_MOCKITO_PACKAGE);
+	/**
+	 * Boolean flag which tracks whether Mockito has been successfully initialized
+	 * in the current environment.
+	 * <p>Even if {@link #mockitoPresent} evaluates to {@code true}, this flag
+	 * may eventually evaluate to {@code false} &mdash; for example, in a GraalVM
+	 * native image if the necessary reachability metadata has not been registered
+	 * for the {@link org.mockito.plugins.MockMaker} in use.
+	 * @see #mockitoPresent
+	 * @see #isEnabled()
+	 */
+	@Nullable
+	private static volatile Boolean mockitoInitialized;
 
 
 	/**
@@ -73,26 +83,26 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	@Override
 	public void beforeTestMethod(TestContext testContext) {
-		if (mockitoPresent && hasMockitoAnnotations(testContext)) {
+		if (isEnabled()) {
 			resetMocks(testContext.getApplicationContext(), MockReset.BEFORE);
 		}
 	}
 
 	@Override
 	public void afterTestMethod(TestContext testContext) {
-		if (mockitoPresent && hasMockitoAnnotations(testContext)) {
+		if (isEnabled()) {
 			resetMocks(testContext.getApplicationContext(), MockReset.AFTER);
 		}
 	}
 
 
-	private void resetMocks(ApplicationContext applicationContext, MockReset reset) {
+	private static void resetMocks(ApplicationContext applicationContext, MockReset reset) {
 		if (applicationContext instanceof ConfigurableApplicationContext configurableContext) {
 			resetMocks(configurableContext, reset);
 		}
 	}
 
-	private void resetMocks(ConfigurableApplicationContext applicationContext, MockReset reset) {
+	private static void resetMocks(ConfigurableApplicationContext applicationContext, MockReset reset) {
 		ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
 		String[] beanNames = beanFactory.getBeanDefinitionNames();
 		Set<String> instantiatedSingletons = new HashSet<>(Arrays.asList(beanFactory.getSingletonNames()));
@@ -139,59 +149,36 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	}
 
 	/**
-	 * Determine if the test class for the supplied {@linkplain TestContext
-	 * test context} uses any of the annotations in this package (such as
-	 * {@link MockitoBean @MockitoBean}).
+	 * Determine if this listener is enabled in the current environment.
+	 * @see #mockitoPresent
+	 * @see #mockitoInitialized
 	 */
-	static boolean hasMockitoAnnotations(TestContext testContext) {
-		return hasMockitoAnnotations(testContext.getTestClass());
-	}
-
-	/**
-	 * Determine if Mockito annotations are declared on the supplied class, on an
-	 * interface it implements, on a superclass, or on an enclosing class or
-	 * whether a field in any such class is annotated with a Mockito annotation.
-	 */
-	private static boolean hasMockitoAnnotations(Class<?> clazz) {
-		// Declared on the class?
-		if (isAnnotated(clazz)) {
-			return true;
+	private static boolean isEnabled() {
+		if (!mockitoPresent) {
+			return false;
 		}
+		Boolean enabled = mockitoInitialized;
+		if (enabled == null) {
+			try {
+				// Invoke isMock() on a non-null object to initialize core Mockito classes
+				// in order to reliably determine if this listener is "enabled" both on the
+				// JVM as well as within a GraalVM native image.
+				Mockito.mockingDetails("a string is not a mock").isMock();
 
-		// Declared on a field?
-		for (Field field : clazz.getDeclaredFields()) {
-			if (isAnnotated(field)) {
-				return true;
+				// If we got this far, we assume Mockito is usable in the current environment.
+				enabled = true;
 			}
-		}
-
-		// Declared on an interface?
-		for (Class<?> ifc : clazz.getInterfaces()) {
-			if (hasMockitoAnnotations(ifc)) {
-				return true;
+			catch (Throwable ex) {
+				enabled = false;
+				if (logger.isDebugEnabled()) {
+					logger.debug("""
+							MockitoResetTestExecutionListener is disabled in the current environment. \
+							See exception for details.""", ex);
+				}
 			}
+			mockitoInitialized = enabled;
 		}
-
-		// Declared on a superclass?
-		Class<?> superclass = clazz.getSuperclass();
-		if (superclass != null & superclass != Object.class) {
-			if (hasMockitoAnnotations(superclass)) {
-				return true;
-			}
-		}
-
-		// Declared on an enclosing class?
-		if (TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			if (hasMockitoAnnotations(clazz.getEnclosingClass())) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private static boolean isAnnotated(AnnotatedElement element) {
-		return MergedAnnotations.from(element, SearchStrategy.DIRECT).stream().anyMatch(isSpringMockitoAnnotation);
+		return enabled;
 	}
 
 }

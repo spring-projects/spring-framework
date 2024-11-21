@@ -2,7 +2,8 @@
 = Bean Overriding in Tests
 
 Bean overriding in tests refers to the ability to override specific beans in the
-`ApplicationContext` for a test class, by annotating one or more fields in the test class.
+`ApplicationContext` for a test class, by annotating one or more non-static fields in the
+test class.
 
 NOTE: This feature is intended as a less risky alternative to the practice of registering
 a bean via `@Bean` with the `DefaultListableBeanFactory`
@@ -41,9 +42,10 @@ The `spring-test` module registers implementations of the latter two
 {spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[`META-INF/spring.factories`
 properties file].
 
-The bean overriding infrastructure searches in test classes for any field meta-annotated
-with `@BeanOverride` and instantiates the corresponding `BeanOverrideProcessor` which is
-responsible for creating an appropriate `BeanOverrideHandler`.
+The bean overriding infrastructure searches in test classes for any non-static field that
+is meta-annotated with `@BeanOverride` and instantiates the corresponding
+`BeanOverrideProcessor` which is responsible for creating an appropriate
+`BeanOverrideHandler`.
 
 The internal `BeanOverrideBeanFactoryPostProcessor` then uses bean override handlers to
 alter the test's `ApplicationContext` by creating, replacing, or wrapping beans as
