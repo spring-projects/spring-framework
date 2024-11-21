@@ -137,7 +137,6 @@ class ServerHttpObservationFilterTests {
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
-		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("http.server.requests").that();
+		return assertThat(this.observationRegistry).hasObservationWithNameEqualTo("http.server.requests").that();
 	}
 }

@@ -187,18 +187,14 @@ class ServerHttpObservationFilterTests {
 		this.mockFilterChain = new MockFilterChain(new ScopeCheckingServlet(this.observationRegistry));
 		this.request.setDispatcherType(DispatcherType.ASYNC);
 		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
-		TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("http.server.requests")
-				.that().isNotStopped();
+		assertThat(this.observationRegistry).hasObservationWithNameEqualTo("http.server.requests").that()
+				.isNotStopped();
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
-		TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasNumberOfObservationsWithNameEqualTo("http.server.requests", 1);
+		assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.server.requests", 1);
 
-		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("http.server.requests")
-				.that()
+		return assertThat(this.observationRegistry).hasObservationWithNameEqualTo("http.server.requests").that()
 				.hasBeenStopped();
 	}
 
