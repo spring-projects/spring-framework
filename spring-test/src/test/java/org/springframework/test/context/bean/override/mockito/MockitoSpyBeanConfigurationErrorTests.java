@@ -40,10 +40,9 @@ class MockitoSpyBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to override bean by wrapping: \
-						there is no existing bean with name [beanToSpy] and type [%s].""",
-						String.class.getName());
-	}
+						Unable to wrap bean: there is no bean with name 'beanToSpy' and \
+						type java.lang.String (as required by field 'ByNameSingleLookup.example').""");
+		}
 
 	@Test
 	void contextCustomizerCannotBeCreatedWithNoSuchBeanType() {
@@ -52,9 +51,8 @@ class MockitoSpyBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to select a bean to override by wrapping: found 0 bean instances of \
-						type %s (as required by annotated field '%s.example')""",
-						String.class.getName(), ByTypeSingleLookup.class.getSimpleName());
+						Unable to select a bean to wrap: there are no beans of type java.lang.String \
+						(as required by field 'ByTypeSingleLookup.example').""");
 	}
 
 	@Test
@@ -66,9 +64,9 @@ class MockitoSpyBeanConfigurationErrorTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to select a bean to override by wrapping: found 2 bean instances \
-						of type %s (as required by annotated field '%s.example'): %s""",
-						String.class.getName(), ByTypeSingleLookup.class.getSimpleName(), List.of("bean1", "bean2"));
+						Unable to select a bean to wrap: found 2 beans of type java.lang.String \
+						(as required by field 'ByTypeSingleLookup.example'): %s""",
+						List.of("bean1", "bean2"));
 	}
 
 
