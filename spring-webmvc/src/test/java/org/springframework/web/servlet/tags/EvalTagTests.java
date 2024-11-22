@@ -21,11 +21,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
 import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.mockito.ArgumentMatchers;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
@@ -37,6 +40,12 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Keith Donald
@@ -52,7 +61,13 @@ class EvalTagTests extends AbstractTagTests {
 	void setup() {
 		LocaleContextHolder.setDefaultLocale(Locale.UK);
 
-		context = createPageContext();
+		context = spy(createPageContext());
+		final ELContext elContext = mock(ELContext.class);
+		final ELResolver elResolver = when(mock(ELResolver.class).getValue(same(elContext), isNull(), eq("pageContext")))
+				.thenReturn(context)
+				.getMock();
+		when(elContext.getELResolver()).thenReturn(elResolver);
+		when(context.getELContext()).thenReturn(elContext);
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		context.getRequest().setAttribute("org.springframework.core.convert.ConversionService", factory.getObject());
@@ -181,7 +196,15 @@ class EvalTagTests extends AbstractTagTests {
 		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("value");
 	}
 
-
+	@Test
+	void resolveImplicitVariable() throws Exception {
+		tag.setExpression("pageContext.getClass().getSimpleName()");
+		int action = tag.doStartTag();
+		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		action = tag.doEndTag();
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("MockPageContext");
+	}
 
 	public static class Bean {
 
