@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -38,6 +39,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -58,6 +60,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.0
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
@@ -75,7 +78,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final DataBufferFactory bufferFactory;
 
-	private final byte[] buffer;
+	private final int bufferSize;
 
 	private final AsyncListener asyncListener;
 
@@ -99,7 +102,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 		this.request = request;
 		this.bufferFactory = bufferFactory;
-		this.buffer = new byte[bufferSize];
+		this.bufferSize = bufferSize;
 
 		this.asyncListener = new RequestAsyncListener();
 
@@ -275,20 +278,31 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * or {@link #EOF_BUFFER} if the input stream returned -1.
 	 */
 	DataBuffer readFromInputStream() throws IOException {
-		int read = this.inputStream.read(this.buffer);
-		logBytesRead(read);
-
-		if (read > 0) {
-			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
-			dataBuffer.write(this.buffer, 0, read);
-			return dataBuffer;
+		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(this.bufferSize);
+		int read = -1;
+		try {
+			try (DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers()) {
+				Assert.state(iterator.hasNext(), "No ByteBuffer available");
+				ByteBuffer byteBuffer = iterator.next();
+				read = this.inputStream.read(byteBuffer);
+			}
+			logBytesRead(read);
+			if (read > 0) {
+				dataBuffer.writePosition(read);
+				return dataBuffer;
+			}
+			else if (read == -1) {
+				return EOF_BUFFER;
+			}
+			else {
+				return AbstractListenerReadPublisher.EMPTY_BUFFER;
+			}
 		}
-
-		if (read == -1) {
-			return EOF_BUFFER;
+		finally {
+			if (read <= 0) {
+				DataBufferUtils.release(dataBuffer);
+			}
 		}
-
-		return AbstractListenerReadPublisher.EMPTY_BUFFER;
 	}
 
 	protected final void logBytesRead(int read) {

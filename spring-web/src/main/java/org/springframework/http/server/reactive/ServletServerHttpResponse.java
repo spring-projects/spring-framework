@@ -17,7 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.0
  */
 class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
@@ -222,15 +223,15 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 	 */
 	protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 		ServletOutputStream outputStream = this.outputStream;
-		InputStream input = dataBuffer.asInputStream();
-		int bytesWritten = 0;
-		byte[] buffer = new byte[this.bufferSize];
-		int bytesRead;
-		while (outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
-			outputStream.write(buffer, 0, bytesRead);
-			bytesWritten += bytesRead;
+		int len = 0;
+		try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+			while (iterator.hasNext() && outputStream.isReady()) {
+				ByteBuffer byteBuffer = iterator.next();
+				len += byteBuffer.remaining();
+				outputStream.write(byteBuffer);
+			}
 		}
-		return bytesWritten;
+		return len;
 	}
 
 	private void flush() throws IOException {
