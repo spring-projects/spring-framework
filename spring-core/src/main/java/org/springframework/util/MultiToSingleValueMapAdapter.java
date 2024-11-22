@@ -62,6 +62,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		this.targetMap = targetMap;
 	}
 
+
 	@Override
 	public int size() {
 		return this.targetMap.size();
@@ -166,8 +167,6 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		return values;
 	}
 
-
-
 	@Override
 	public Set<Entry<K, V>> entrySet() {
 		Set<Entry<K, V>> entries = this.entries;
@@ -206,51 +205,6 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		this.targetMap.forEach((k, vs) -> action.accept(k, vs.get(0)));
 	}
 
-	@Override
-	public boolean equals(@Nullable Object o) {
-		if (o == this) {
-			return true;
-		}
-		else if (o instanceof Map<?,?> other) {
-			if (this.size() != other.size()) {
-				return false;
-			}
-			try {
-				for (Entry<K, V> e : entrySet()) {
-					K key = e.getKey();
-					V value = e.getValue();
-					if (value == null) {
-						if (other.get(key) != null || !other.containsKey(key)) {
-							return false;
-						}
-					}
-					else {
-						if (!value.equals(other.get(key))) {
-							return false;
-						}
-					}
-				}
-			}
-			catch (ClassCastException | NullPointerException ignore) {
-				return false;
-			}
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		return this.targetMap.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.targetMap.toString();
-	}
-
 	@Nullable
 	private V adaptValue(@Nullable List<V> values) {
 		if (!CollectionUtils.isEmpty(values)) {
@@ -269,6 +223,47 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		else {
 			return null;
 		}
+	}
+
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other instanceof Map<?,?> otherMap && size() == otherMap.size()) {
+			try {
+				for (Entry<K, V> e : entrySet()) {
+					K key = e.getKey();
+					V value = e.getValue();
+					if (value == null) {
+						if (otherMap.get(key) != null || !otherMap.containsKey(key)) {
+							return false;
+						}
+					}
+					else {
+						if (!value.equals(otherMap.get(key))) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			catch (ClassCastException | NullPointerException ignored) {
+				// fall through
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.targetMap.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.targetMap.toString();
 	}
 
 }

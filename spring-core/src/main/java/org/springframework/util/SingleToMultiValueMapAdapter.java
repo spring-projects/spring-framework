@@ -271,39 +271,35 @@ final class SingleToMultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, S
 		this.targetMap.forEach((k, v) -> action.accept(k, Collections.singletonList(v)));
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (o == this) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		else if (o instanceof Map<?,?> other) {
-			if (this.size() != other.size()) {
-				return false;
-			}
+		if (other instanceof Map<?,?> otherMap && size() == otherMap.size()) {
 			try {
 				for (Entry<K, List<V>> e : entrySet()) {
 					K key = e.getKey();
 					List<V> values = e.getValue();
 					if (values == null) {
-						if (other.get(key) != null || !other.containsKey(key)) {
+						if (otherMap.get(key) != null || !otherMap.containsKey(key)) {
 							return false;
 						}
 					}
 					else {
-						if (!values .equals(other.get(key))) {
+						if (!values.equals(otherMap.get(key))) {
 							return false;
 						}
 					}
 				}
+				return true;
 			}
-			catch (ClassCastException | NullPointerException ignore) {
-				return false;
+			catch (ClassCastException | NullPointerException ignored) {
+				// fall through
 			}
-			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	@Override

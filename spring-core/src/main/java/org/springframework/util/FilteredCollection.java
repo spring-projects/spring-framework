@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 /**
  * Collection that filters out values that do not match a predicate.
  * This type is used by {@link CompositeMap}.
+ *
  * @author Arjen Poutsma
  * @since 6.2
  * @param <E> the type of elements maintained by this collection
@@ -38,10 +39,10 @@ class FilteredCollection<E> extends AbstractCollection<E> {
 	public FilteredCollection(Collection<E> delegate, Predicate<E> filter) {
 		Assert.notNull(delegate, "Delegate must not be null");
 		Assert.notNull(filter, "Filter must not be null");
-
 		this.delegate = delegate;
 		this.filter = filter;
 	}
+
 
 	@Override
 	public int size() {
@@ -87,4 +88,5 @@ class FilteredCollection<E> extends AbstractCollection<E> {
 	public void clear() {
 		this.delegate.clear();
 	}
+
 }

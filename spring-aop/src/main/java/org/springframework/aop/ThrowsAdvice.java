@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ package org.springframework.aop;
  * <p>Some examples of valid methods would be:
  *
  * <pre class="code">public void afterThrowing(Exception ex)</pre>
- * <pre class="code">public void afterThrowing(RemoteException)</pre>
+ * <pre class="code">public void afterThrowing(RemoteException ex)</pre>
  * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, Exception ex)</pre>
  * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, ServletException ex)</pre>
  *
- * The first three arguments are optional, and only useful if we want further
+ * <p>The first three arguments are optional, and only useful if we want further
  * information about the joinpoint, as in AspectJ <b>after-throwing</b> advice.
  *
  * <p><b>Note:</b> If a throws-advice method throws an exception itself, it will

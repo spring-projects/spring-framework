@@ -83,6 +83,7 @@ class RestClientObservationTests {
 
 	RestClient.Builder createBuilder() {
 		return RestClient.builder()
+				.baseUrl("https://example.com/base")
 				.messageConverters(converters -> converters.add(0, this.converter))
 				.requestFactory(this.requestFactory)
 				.observationRegistry(this.observationRegistry);
@@ -90,26 +91,37 @@ class RestClientObservationTests {
 
 	@Test
 	void shouldContributeTemplateWhenUriVariables() throws Exception {
-		mockSentRequest(GET, "https://example.com/hotels/42/bookings/21");
+		mockSentRequest(GET, "https://example.com/base/hotels/42/bookings/21");
 		mockResponseStatus(HttpStatus.OK);
 
-		client.get().uri("https://example.com/hotels/{hotel}/bookings/{booking}", "42", "21")
+		client.get().uri("/hotels/{hotel}/bookings/{booking}", "42", "21")
 				.retrieve().toBodilessEntity();
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/base/hotels/{hotel}/bookings/{booking}");
 	}
 
 	@Test
 	void shouldContributeTemplateWhenMap() throws Exception {
-		mockSentRequest(GET, "https://example.com/hotels/42/bookings/21");
+		mockSentRequest(GET, "https://example.com/base/hotels/42/bookings/21");
 		mockResponseStatus(HttpStatus.OK);
 
 		Map<String, String> vars = Map.of("hotel", "42", "booking", "21");
 
-		client.get().uri("https://example.com/hotels/{hotel}/bookings/{booking}", vars)
+		client.get().uri("/hotels/{hotel}/bookings/{booking}", vars)
 				.retrieve().toBodilessEntity();
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/base/hotels/{hotel}/bookings/{booking}");
+	}
+
+	@Test
+	void shouldContributeTemplateWhenFunction() throws Exception {
+		mockSentRequest(GET, "https://example.com/base/hotels/42/bookings/21");
+		mockResponseStatus(HttpStatus.OK);
+
+		client.get().uri("/hotels/{hotel}/bookings/{booking}", builder -> builder.build("42", "21"))
+				.retrieve().toBodilessEntity();
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/base/hotels/{hotel}/bookings/{booking}");
 	}
 
 	@Test
@@ -178,8 +190,7 @@ class RestClientObservationTests {
 
 		restClient.get().uri("https://example.org").retrieve().toBodilessEntity();
 
-		TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("custom.requests");
+		assertThat(this.observationRegistry).hasObservationWithNameEqualTo("custom.requests");
 	}
 
 	@Test
@@ -289,9 +300,8 @@ class RestClientObservationTests {
 
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
-		TestObservationRegistryAssert.assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.client.requests",1);
-		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
-				.hasObservationWithNameEqualTo("http.client.requests").that();
+		assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.client.requests",1);
+		return assertThat(this.observationRegistry).hasObservationWithNameEqualTo("http.client.requests").that();
 	}
 
 	static class ContextAssertionObservationHandler implements ObservationHandler<ClientRequestObservationContext> {

@@ -48,7 +48,8 @@ import org.springframework.aot.hint.MemberCategory;
  * packages can use this annotation as well.
  *
  * <p>To register reflection hints for the type itself, only member categories
- * should be specified:<pre><code class="java">
+ * should be specified:
+ * <pre><code class="java">
  * &#064;Component
  * &#064;RegisterReflection(memberCategories = INVOKE_PUBLIC_METHODS)
  * class MyComponent {
@@ -56,7 +57,8 @@ import org.springframework.aot.hint.MemberCategory;
  * }</code></pre>
  *
  * <p>Reflection hints can be registered from a method. In this case, at least
- * one target class should be specified:<pre><code class="java">
+ * one target class should be specified:
+ * <pre><code class="java">
  * class MyProcessor {
  *
  *     &#064;RegisterReflection(classes = CustomerEntry.class, memberCategories = PUBLIC_FIELDS)
@@ -81,11 +83,10 @@ public @interface RegisterReflection {
 
 	/**
 	 * Classes for which reflection hints should be registered. Consider using
-	 * {@link #classNames()} for classes that are not public in the current
-	 * scope. If both {@code classes} and {@code classNames} are specified, they
-	 * are merged in a single set.
-	 * <p>
-	 * By default, the annotated type is the target of the registration. When
+	 * {@link #classNames()} for classes that are not public in the current scope.
+	 * If both {@code classes} and {@code classNames} are specified, they are
+	 * merged into a single set.
+	 * <p>By default, the annotated type is the target of the registration. When
 	 * placed on a method, at least one class must be specified.
 	 * @see #classNames()
 	 */

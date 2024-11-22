@@ -1502,8 +1502,7 @@ public abstract class ClassUtils {
 	 * (if there is one). For {@code toString()}, it may traverse as far as {@link Object}.
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @param targetClass the target class to invoke the method on, or {@code null} if unknown
-	 * @return the corresponding publicly accessible method, or the original method if none
-	 * found
+	 * @return the corresponding publicly accessible method, or the original method if none found
 	 * @since 6.2
 	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 * @see #getMostSpecificMethod(Method, Class)

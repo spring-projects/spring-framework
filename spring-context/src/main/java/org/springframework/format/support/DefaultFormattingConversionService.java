@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 	/**
 	 * Add formatters appropriate for most environments: including number formatters,
-	 * JSR-354 Money &amp; Currency formatters, JSR-310 Date-Time and/or Joda-Time formatters,
+	 * JSR-354 Money &amp; Currency formatters, and JSR-310 Date-Time formatters,
 	 * depending on the presence of the corresponding API on the classpath.
 	 * @param formatterRegistry the service to register default formatters with
 	 */

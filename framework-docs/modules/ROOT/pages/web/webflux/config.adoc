@@ -94,7 +94,8 @@ class WebConfig : WebFluxConfigurer {
 [.small]#xref:web/webmvc/mvc-config/conversion.adoc[See equivalent in the Servlet stack]#
 
 By default, formatters for various number and date types are installed, along with support
-for customization via `@NumberFormat`, `@DurationFormat` and `@DateTimeFormat` on fields.
+for customization via `@NumberFormat`, `@DurationFormat`, and `@DateTimeFormat` on fields
+and parameters.
 
 To register custom formatters and converters in Java config, use the following:
 
@@ -349,7 +350,6 @@ which customizes Jackson's default properties with the following ones:
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
-* {jackson-github-org}/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
 * {jackson-github-org}/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
 * {jackson-github-org}/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
 * {jackson-github-org}/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.

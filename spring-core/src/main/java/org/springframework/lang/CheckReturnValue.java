@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
 /**
  * Specifies that the method return value must be used.
  *
- * <p>Inspired from {@code org.jetbrains.annotations.CheckReturnValue}, this variant
- * has been introduce in the {@code org.springframework.lang} package to avoid
+ * <p>Inspired by {@code org.jetbrains.annotations.CheckReturnValue}, this variant
+ * has been introduced in the {@code org.springframework.lang} package to avoid
  * requiring an extra dependency, while still following similar semantics.
  *
  * <p>This annotation should not be used if the return value of the method

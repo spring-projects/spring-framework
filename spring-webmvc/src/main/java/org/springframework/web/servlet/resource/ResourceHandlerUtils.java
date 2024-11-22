@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Resource handling utility methods to share common logic between
@@ -201,23 +202,23 @@ public abstract class ResourceHandlerUtils {
 	 * @return {@code true} if the path is invalid, {@code false} otherwise
 	 */
 	private static boolean isInvalidEncodedPath(String path) {
-		if (path.contains("%")) {
-			String decodedPath = decode(path);
-			if (decodedPath.contains("%")) {
-				decodedPath = decode(decodedPath);
-			}
-			if (isInvalidPath(decodedPath)) {
-				return true;
-			}
-			decodedPath = normalizeInputPath(decodedPath);
-			return isInvalidPath(decodedPath);
+		String decodedPath = decode(path);
+		if (decodedPath.contains("%")) {
+			decodedPath = decode(decodedPath);
 		}
-		return false;
+		if (!StringUtils.hasText(decodedPath)) {
+			return true;
+		}
+		if (isInvalidPath(decodedPath)) {
+			return true;
+		}
+		decodedPath = normalizeInputPath(decodedPath);
+		return isInvalidPath(decodedPath);
 	}
 
 	private static String decode(String path) {
 		try {
-			return URLDecoder.decode(path, StandardCharsets.UTF_8);
+			return UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 		catch (Exception ex) {
 			return "";

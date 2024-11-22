@@ -32,6 +32,8 @@ import org.springframework.lang.Nullable;
  * <p>In a {@link BeanFactory} environment, every {@code ObjectProvider} obtained
  * from the factory will be bound to its {@code BeanFactory} for a specific bean
  * type, matching all provider calls against factory-registered bean definitions.
+ * Note that all such calls dynamically operate on the underlying factory state,
+ * freshly resolving the requested target object on every call.
  *
  * <p>As of 5.1, this interface extends {@link Iterable} and provides {@link Stream}
  * support. It can be therefore be used in {@code for} loops, provides {@link #forEach}

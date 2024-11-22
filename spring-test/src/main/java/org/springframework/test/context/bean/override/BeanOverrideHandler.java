@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -105,6 +106,8 @@ public abstract class BeanOverrideHandler {
 	private static void processField(Field field, Class<?> testClass, List<BeanOverrideHandler> handlers) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
+			Assert.state(!Modifier.isStatic(field.getModifiers()),
+					() -> "@BeanOverride field must not be static: " + field);
 			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
 			Assert.state(metaSource != null, "@BeanOverride annotation must be meta-present");
 

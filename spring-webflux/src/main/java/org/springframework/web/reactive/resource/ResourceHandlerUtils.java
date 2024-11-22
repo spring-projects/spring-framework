@@ -196,23 +196,23 @@ public abstract class ResourceHandlerUtils {
 	}
 
 	private static boolean isInvalidEncodedPath(String path) {
-		if (path.contains("%")) {
-			String decodedPath = decode(path);
-			if (decodedPath.contains("%")) {
-				decodedPath = decode(decodedPath);
-			}
-			if (isInvalidPath(decodedPath)) {
-				return true;
-			}
-			decodedPath = normalizeInputPath(decodedPath);
-			return isInvalidPath(decodedPath);
+		String decodedPath = decode(path);
+		if (decodedPath.contains("%")) {
+			decodedPath = decode(decodedPath);
 		}
-		return false;
+		if (!StringUtils.hasText(decodedPath)) {
+			return true;
+		}
+		if (isInvalidPath(decodedPath)) {
+			return true;
+		}
+		decodedPath = normalizeInputPath(decodedPath);
+		return isInvalidPath(decodedPath);
 	}
 
 	private static String decode(String path) {
 		try {
-			return URLDecoder.decode(path, StandardCharsets.UTF_8);
+			return UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 		catch (Exception ex) {
 			return "";

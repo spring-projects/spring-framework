@@ -161,10 +161,11 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 		map.forEach(this::put);
 	}
 
-	@SuppressWarnings("deprecation")  // on Tomcat 10.1.16+
 	@Override
 	public void clear() {
-		this.headers.clear();
+		for (int i = 0 ; i < this.headers.size(); i++) {
+			this.headers.removeHeader(i);
+		}
 	}
 
 	@Override

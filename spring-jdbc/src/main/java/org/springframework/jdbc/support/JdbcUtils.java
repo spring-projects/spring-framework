@@ -239,8 +239,8 @@ public abstract class JdbcUtils {
 				}
 			}
 
-			// Corresponding SQL types for JSR-310 / Joda-Time types, left up
-			// to the caller to convert them (for example, through a ConversionService).
+			// Corresponding SQL types for JSR-310, left up to the caller to convert
+			// them (for example, through a ConversionService).
 			String typeName = requiredType.getSimpleName();
 			return switch (typeName) {
 				case "LocalDate" -> rs.getDate(index);

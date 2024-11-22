@@ -39,6 +39,10 @@ import org.springframework.util.StringUtils;
  * A subclass of {@link MimeType} that adds support for quality parameters
  * as defined in the HTTP specification.
  *
+ * <p>This class is meant to reference media types supported by Spring Framework.
+ * If your application or library relies on other media types defined in RFCs,
+ * please use {@link #parseMediaType(String)} or a custom utility class.
+ *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev

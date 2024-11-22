@@ -27,7 +27,7 @@ jobs:
             /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false
             /**/framework-api-*-docs.zip::zip.type=docs
             /**/framework-api-*-schema.zip::zip.type=schema
-          build-name: 'spring-framework-6.2.x'
+          build-name: 'spring-framework-7.0.x'
           folder: 'deployment-repository'
           password: ${{ secrets.ARTIFACTORY_PASSWORD }}
           repository: 'libs-snapshot-local'

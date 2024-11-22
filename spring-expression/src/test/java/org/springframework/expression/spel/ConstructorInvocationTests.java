@@ -36,6 +36,8 @@ import static org.assertj.core.api.Assertions.assertThatException;
  * Tests invocation of constructors.
  *
  * @author Andy Clement
+ * @see MethodInvocationTests
+ * @see VariableAndFunctionTests
  */
 class ConstructorInvocationTests extends AbstractExpressionTests {
 

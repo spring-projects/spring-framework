@@ -195,6 +195,11 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * The default of -1 indicates no concurrency limit at all.
 	 * <p>This is the equivalent of a maximum pool size in a thread pool,
 	 * preventing temporary overload of the thread management system.
+	 * However, in contrast to a thread pool with a managed task queue,
+	 * this executor will block the submitter until the task can be
+	 * accepted when the configured concurrency limit has been reached.
+	 * If you prefer queue-based task hand-offs without such blocking,
+	 * consider using a {@code ThreadPoolTaskExecutor} instead.
 	 * @see #UNBOUNDED_CONCURRENCY
 	 * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor#setMaxPoolSize
 	 */

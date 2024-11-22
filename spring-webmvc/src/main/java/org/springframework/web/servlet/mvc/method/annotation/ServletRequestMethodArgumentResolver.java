@@ -70,6 +70,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return (WebRequest.class.isAssignableFrom(paramType) ||
@@ -121,6 +122,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	}
 
 	@Nullable
+	@SuppressWarnings("deprecation")
 	private Object resolveArgument(Class<?> paramType, HttpServletRequest request) throws IOException {
 		if (HttpSession.class.isAssignableFrom(paramType)) {
 			HttpSession session = request.getSession();

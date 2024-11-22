@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,38 +287,17 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 		@Override
 		public ByteBufferIterator readableByteBuffers() {
-			ByteBufferIterator delegateIterator = this.delegate.readableByteBuffers();
-			return new JettyByteBufferIterator(delegateIterator);
+			return this.delegate.readableByteBuffers();
 		}
 
 		@Override
 		public ByteBufferIterator writableByteBuffers() {
-			ByteBufferIterator delegateIterator = this.delegate.writableByteBuffers();
-			return new JettyByteBufferIterator(delegateIterator);
+			return this.delegate.writableByteBuffers();
 		}
 
 		@Override
 		public String toString(int index, int length, Charset charset) {
 			return this.delegate.toString(index, length, charset);
-		}
-
-
-		private record JettyByteBufferIterator(ByteBufferIterator delegate) implements ByteBufferIterator {
-
-			@Override
-			public void close() {
-				this.delegate.close();
-			}
-
-			@Override
-			public boolean hasNext() {
-				return this.delegate.hasNext();
-			}
-
-			@Override
-			public ByteBuffer next() {
-				return this.delegate.next();
-			}
 		}
 	}
 

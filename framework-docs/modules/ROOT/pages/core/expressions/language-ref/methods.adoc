@@ -1,9 +1,11 @@
 [[expressions-methods]]
 = Methods
 
-You can invoke methods by using typical Java programming syntax. You can also invoke methods
-on literals. Variable arguments are also supported. The following examples show how to
-invoke methods:
+You can invoke methods by using the typical Java programming syntax. You can also invoke
+methods directly on literals such as strings or numbers.
+xref:core/expressions/language-ref/varargs.adoc[Varargs] are supported as well.
+
+The following examples show how to invoke methods.
 
 [tabs]
 ======

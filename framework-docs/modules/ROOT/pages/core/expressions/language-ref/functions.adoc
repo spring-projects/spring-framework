@@ -2,8 +2,12 @@
 = Functions
 
 You can extend SpEL by registering user-defined functions that can be called within
-expressions by using the `#functionName(...)` syntax. Functions can be registered as
-variables in `EvaluationContext` implementations via the `setVariable()` method.
+expressions by using the `#functionName(...)` syntax, and like with standard method
+invocations, xref:core/expressions/language-ref/varargs.adoc[varargs] are also supported
+for function invocations.
+
+Functions can be registered as _variables_ in `EvaluationContext` implementations via the
+`setVariable()` method.
 
 [TIP]
 ====
@@ -110,8 +114,9 @@ potentially more efficient use cases if the `MethodHandle` target and parameters
 been fully bound prior to registration; however, partially bound handles are also
 supported.
 
-Consider the `String#formatted(String, Object...)` instance method, which produces a
-message according to a template and a variable number of arguments.
+Consider the `String#formatted(Object...)` instance method, which produces a message
+according to a template and a variable number of arguments
+(xref:core/expressions/language-ref/varargs.adoc[varargs]).
 
 You can register and use the `formatted` method as a `MethodHandle`, as the following
 example shows:
@@ -151,10 +156,10 @@ Kotlin::
 ----
 ======
 
-As hinted above, binding a `MethodHandle` and registering the bound `MethodHandle` is also
-supported. This is likely to be more performant if both the target and all the arguments
-are bound. In that case no arguments are necessary in the SpEL expression, as the
-following example shows:
+As mentioned above, binding a `MethodHandle` and registering the bound `MethodHandle` is
+also supported. This is likely to be more performant if both the target and all the
+arguments are bound. In that case no arguments are necessary in the SpEL expression, as
+the following example shows:
 
 [tabs]
 ======
@@ -168,9 +173,10 @@ Java::
 	String template = "This is a %s message with %s words: <%s>";
 	Object varargs = new Object[] { "prerecorded", 3, "Oh Hello World!", "ignored" };
 	MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
-			MethodType.methodType(String.class, Object[].class))
+		MethodType.methodType(String.class, Object[].class))
 			.bindTo(template)
-			.bindTo(varargs); //here we have to provide arguments in a single array binding
+			// Here we have to provide the arguments in a single array binding:
+			.bindTo(varargs);
 	context.setVariable("message", mh);
 
 	// evaluates to "This is a prerecorded message with 3 words: <Oh Hello World!>"
@@ -189,9 +195,10 @@ Kotlin::
 	val varargs = arrayOf("prerecorded", 3, "Oh Hello World!", "ignored")
 
 	val mh = MethodHandles.lookup().findVirtual(String::class.java, "formatted",
-			MethodType.methodType(String::class.java, Array<Any>::class.java))
+		MethodType.methodType(String::class.java, Array<Any>::class.java))
 			.bindTo(template)
-			.bindTo(varargs) //here we have to provide arguments in a single array binding
+			// Here we have to provide the arguments in a single array binding:
+			.bindTo(varargs)
 	context.setVariable("message", mh)
 
 	// evaluates to "This is a prerecorded message with 3 words: <Oh Hello World!>"
@@ -199,6 +206,5 @@ Kotlin::
 			.getValue(context, String::class.java)
 ----
 ======
-
 
 

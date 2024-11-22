@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.concurrent.CancellationException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
@@ -107,12 +106,10 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
 		HttpClientContext context = this.contextProvider.apply(method, uri);
-		if (context.getCookieStore() == null) {
-			context.setCookieStore(new BasicCookieStore());
-		}
 
 		HttpComponentsClientHttpRequest request =
 				new HttpComponentsClientHttpRequest(method, uri, context, this.dataBufferFactory);
+
 		return requestCallback.apply(request).then(Mono.defer(() -> execute(request, context)));
 	}
 

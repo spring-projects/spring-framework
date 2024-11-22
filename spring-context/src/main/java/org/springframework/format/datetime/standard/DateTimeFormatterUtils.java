@@ -38,7 +38,7 @@ abstract class DateTimeFormatterUtils {
 	 * @see ResolverStyle#STRICT
 	 */
 	static DateTimeFormatter createStrictDateTimeFormatter(String pattern) {
-		// Using strict resolution to align with Joda-Time and standard DateFormat behavior:
+		// Using strict resolution to align with standard DateFormat behavior:
 		// otherwise, an overflow like, for example, Feb 29 for a non-leap-year wouldn't get rejected.
 		// However, with strict resolution, a year digit needs to be specified as 'u'...
 		String patternToUse = StringUtils.replace(pattern, "yy", "uu");

@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class UriComponentsBuilderTests {
 
 	@ParameterizedTest // see gh-26453
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void examplesInReferenceManual(ParserType parserType) {
 		final String expected = "/hotel%20list/New%20York?q=foo%2Bbar";
 
@@ -156,7 +156,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see gh-9317
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriEncodedQuery(ParserType parserType) {
 		URI uri = URI.create("https://www.example.org/?param=aGVsbG9Xb3JsZA%3D%3D");
 		String fromUri = UriComponentsBuilder.fromUri(uri).build().getQueryParams().get("param").get(0);
@@ -167,7 +167,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriString(ParserType parserType) {
 		UriComponents result = UriComponentsBuilder.fromUriString("https://www.ietf.org/rfc/rfc3986.txt", parserType).build();
 		assertThat(result.getScheme()).isEqualTo("https");
@@ -224,7 +224,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see SPR-9832
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriStringQueryParamWithReservedCharInValue(ParserType parserType) {
 		String uri = "https://www.google.com/ig/calculator?q=1USD=?EUR";
 		UriComponents result = UriComponentsBuilder.fromUriString(uri, parserType).build();
@@ -234,7 +234,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see SPR-14828
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriStringQueryParamEncodedAndContainingPlus(ParserType parserType) {
 		String httpUrl = "http://localhost:8080/test/print?value=%EA%B0%80+%EB%82%98";
 		URI uri = UriComponentsBuilder.fromUriString(httpUrl, parserType).build(true).toUri();
@@ -243,7 +243,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see SPR-10539
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriStringIPv6Host(ParserType parserType) {
 		UriComponents result = UriComponentsBuilder
 				.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc]:8080/resource", parserType).build().encode();
@@ -251,14 +251,14 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriStringInvalidIPv6Host(ParserType parserType) {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				UriComponentsBuilder.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
 	}
 
 	@ParameterizedTest // see SPR-11970
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromUriStringNoPathWithReservedCharInQuery(ParserType parserType) {
 		UriComponents result = UriComponentsBuilder.fromUriString("https://example.com?foo=bar@baz", parserType).build();
 		assertThat(result.getUserInfo()).isNull();
@@ -268,7 +268,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see SPR-1428
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromHttpUrlQueryParamEncodedAndContainingPlus(ParserType parserType) {
 		String httpUrl = "http://localhost:8080/test/print?value=%EA%B0%80+%EB%82%98";
 		URI uri = UriComponentsBuilder.fromUriString(httpUrl, parserType).build(true).toUri();
@@ -277,7 +277,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see SPR-10779
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromHttpUrlCaseInsensitiveScheme(ParserType parserType) {
 		assertThat(UriComponentsBuilder.fromUriString("HTTP://www.google.com", parserType).build().getScheme())
 				.isEqualTo("http");
@@ -286,14 +286,14 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see SPR-10539
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromHttpUrlInvalidIPv6Host(ParserType parserType) {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				UriComponentsBuilder.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromHttpUrlWithoutFragment(ParserType parserType) {
 		String httpUrl = "http://localhost:8080/test/print";
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(httpUrl, parserType).build();
@@ -333,7 +333,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // see gh-25300
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void fromHttpUrlWithFragment(ParserType parserType) {
 		String httpUrl = "https://example.com/#baz";
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(httpUrl, parserType).build();
@@ -449,7 +449,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void replacePath(ParserType parserType) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://www.ietf.org/rfc/rfc2396.txt", parserType);
 		builder.replacePath("/rfc/rfc3986.txt");
@@ -465,7 +465,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void replaceQuery(ParserType parserType) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.com/foo?foo=bar&baz=qux", parserType);
 		builder.replaceQuery("baz=42");
@@ -605,7 +605,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void parseBuildAndExpandHierarchical(ParserType parserType) {
 		URI uri = UriComponentsBuilder
 				.fromUriString("{scheme}://{host}:{port}/{segment}?{query}#{fragment}", parserType)
@@ -617,7 +617,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void buildAndExpandOpaque(ParserType parserType) {
 		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}", parserType)
 				.buildAndExpand("foo", "example.com");
@@ -631,7 +631,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // gh-33699
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void schemeVariableMixedCase(ParserType parserType) {
 
 		BiConsumer<String, String> tester = (scheme, value) -> {
@@ -647,7 +647,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void queryParamWithValueWithEquals(ParserType parserType) {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=baz", parserType).build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=baz");
@@ -655,7 +655,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void queryParamWithoutValueWithEquals(ParserType parserType) {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=", parserType).build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=");
@@ -663,7 +663,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void queryParamWithoutValueWithoutEquals(ParserType parserType) {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar", parserType).build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar");
@@ -688,7 +688,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void relativeUrls(ParserType parserType) {
 		String baseUrl = "https://example.com";
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar", parserType).build().toString())
@@ -706,7 +706,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void emptySegments(ParserType parserType) {
 		String baseUrl = "https://example.com/abc/";
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl, parserType).path("/x/y/z").build().toString())
@@ -720,7 +720,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void parsesEmptyFragment(ParserType parserType) {
 		UriComponents components = UriComponentsBuilder.fromUriString("/example#", parserType).build();
 		assertThat(components.getFragment()).isNull();
@@ -728,7 +728,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // SPR-13257
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void parsesEmptyUri(ParserType parserType) {
 		UriComponents components = UriComponentsBuilder.fromUriString("", parserType).build();
 		assertThat(components.toString()).isEmpty();
@@ -791,7 +791,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // gh-26466
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void encodeTemplateWithInvalidPlaceholderSyntax(ParserType parserType) {
 
 		BiConsumer<String, String> tester = (in, out) ->
@@ -821,7 +821,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // SPR-16364
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void uriComponentsNotEqualAfterNormalization(ParserType parserType) {
 		UriComponents uri1 = UriComponentsBuilder.fromUriString("http://test.com", parserType).build().normalize();
 		UriComponents uri2 = UriComponentsBuilder.fromUriString("http://test.com/", parserType).build();
@@ -832,7 +832,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // SPR-17256
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void uriComponentsWithMergedQueryParams(ParserType parserType) {
 		String uri = UriComponentsBuilder.fromUriString("http://localhost:8081", parserType)
 				.uriComponents(UriComponentsBuilder.fromUriString("/{path}?sort={sort}", parserType).build())
@@ -842,7 +842,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // SPR-17630
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void toUriStringWithCurlyBraces(ParserType parserType) {
 		assertThat(UriComponentsBuilder.fromUriString("/path?q={asa}asa", parserType).toUriString())
 				.isEqualTo("/path?q=%7Basa%7Dasa");
@@ -855,7 +855,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void validPort(ParserType parserType) {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://localhost:52567/path", parserType).build();
 		assertThat(uriComponents.getPort()).isEqualTo(52567);
@@ -871,7 +871,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void verifyInvalidPort(ParserType parserType) {
 		String url = "http://localhost:XXX/path";
 		assertThatIllegalArgumentException()
@@ -881,7 +881,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@ParameterizedTest // gh-27039
-	@EnumSource(value = ParserType.class)
+	@EnumSource
 	void expandPortAndPathWithoutSeparator(ParserType parserType) {
 		URI uri = UriComponentsBuilder
 				.fromUriString("ws://localhost:{port}/{path}", parserType)

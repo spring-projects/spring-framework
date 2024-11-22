@@ -60,6 +60,7 @@
 **** xref:core/expressions/language-ref/constructors.adoc[]
 **** xref:core/expressions/language-ref/variables.adoc[]
 **** xref:core/expressions/language-ref/functions.adoc[]
+**** xref:core/expressions/language-ref/varargs.adoc[]
 **** xref:core/expressions/language-ref/bean-references.adoc[]
 **** xref:core/expressions/language-ref/operator-ternary.adoc[]
 **** xref:core/expressions/language-ref/operator-elvis.adoc[]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public interface JmsHeaders {
 
 	/**
 	 * Specify if the message was resent. This occurs when a message
-	 * consumer fails to acknowledge the message reception.
+	 * consumer fails to acknowledge receipt of the message.
 	 * <p>Read-only value.
 	 * @see jakarta.jms.Message#getJMSRedelivered()
 	 */

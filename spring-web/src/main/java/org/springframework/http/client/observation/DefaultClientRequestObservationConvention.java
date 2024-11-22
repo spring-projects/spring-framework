@@ -43,7 +43,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final String DEFAULT_NAME = "http.client.requests";
 
-	private static final Pattern PATTERN_BEFORE_PATH = Pattern.compile("^https?://[^/]+/");
+	private static final Pattern PATTERN_BEFORE_PATH = Pattern.compile("^https?://[^/]+");
 
 	private static final KeyValue URI_NONE = KeyValue.of(LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 

@@ -281,11 +281,11 @@ Kotlin::
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
-`Long`, `@DurationFormat` to format `Duration` fields in ISO8601 and simplified styles,
-and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
-(for millisecond timestamps) as well as JSR-310 `java.time`.
+`Long`, `@DurationFormat` to format `Duration` fields in ISO-8601 and simplified styles,
+and `@DateTimeFormat` to format fields such as `java.util.Date`, `java.util.Calendar`,
+and `Long` (for millisecond timestamps) as well as JSR-310 `java.time` types.
 
-The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
+The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO date
 (yyyy-MM-dd):
 
 [tabs]
@@ -311,6 +311,29 @@ Kotlin::
 ----
 ======
 
+For further details, see the javadoc for
+{spring-framework-api}/format/annotation/DateTimeFormat.html[`@DateTimeFormat`],
+{spring-framework-api}/format/annotation/DurationFormat.html[`@DurationFormat`], and
+{spring-framework-api}/format/annotation/NumberFormat.html[`@NumberFormat`].
+
+[WARNING]
+====
+Style-based formatting and parsing rely on locale-sensitive patterns which may change
+depending on the Java runtime. Specifically, applications that rely on date, time, or
+number parsing and formatting may encounter incompatible changes in behavior when running
+on JDK 20 or higher.
+
+Using an ISO standardized format or a concrete pattern that you control allows for
+reliable system-independent and locale-independent parsing and formatting of date, time,
+and number values.
+
+For `@DateTimeFormat`, the use of fallback patterns can also help to address
+compatibility issues.
+
+For further details, see the
+https://github.com/spring-projects/spring-framework/wiki/Date-and-Time-Formatting-with-JDK-20-and-higher[Date and Time Formatting with JDK 20 and higher]
+page in the Spring Framework wiki.
+====
 
 [[format-FormatterRegistry-SPI]]
 == The `FormatterRegistry` SPI
