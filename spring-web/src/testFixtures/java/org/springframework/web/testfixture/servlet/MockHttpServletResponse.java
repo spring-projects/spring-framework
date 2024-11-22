@@ -319,8 +319,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentLength(int contentLength) {
-		this.contentLength = contentLength;
-		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		if (!this.committed) {
+			this.contentLength = contentLength;
+			doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		}
 	}
 
 	/**
@@ -334,8 +336,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentLengthLong(long contentLength) {
-		this.contentLength = contentLength;
-		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		if (!this.committed) {
+			this.contentLength = contentLength;
+			doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		}
 	}
 
 	public long getContentLengthLong() {
@@ -636,7 +640,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		sendRedirect(url, HttpServletResponse.SC_MOVED_TEMPORARILY, true);
 	}
 
-	// @Override - on Servlet 6.1
+	@Override
 	public void sendRedirect(String url, int sc, boolean clearBuffer) throws IOException {
 		Assert.state(!isCommitted(), "Cannot send redirect - response is already committed");
 		Assert.notNull(url, "Redirect URL must not be null");

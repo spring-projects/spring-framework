@@ -45,7 +45,6 @@ import org.springframework.util.Assert;
  * @author Vedran Pavic
  * @since 1.0.2
  */
-@SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
 	/**
@@ -237,6 +236,11 @@ public class MockHttpSession implements HttpSession {
 	public boolean isNew() {
 		assertIsValid();
 		return this.isNew;
+	}
+
+	@Override
+	public Accessor getAccessor() {
+		return sessionConsumer -> sessionConsumer.accept(MockHttpSession.this);
 	}
 
 	/**
