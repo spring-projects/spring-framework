@@ -22,6 +22,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -31,6 +34,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.internal.constraintvalidators.bv.PatternValidator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
@@ -119,6 +124,15 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@ParameterizedTest  // gh-33936
+	@ValueSource(classes = {BeanWithIterable.class, BeanWithMap.class, BeanWithOptional.class})
+	void shouldProcessRecursiveGenericsWithoutInfiniteRecursion(Class<?> beanClass) {
+		process(beanClass);
+		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(1);
+		assertThat(RuntimeHintsPredicates.reflection().onType(beanClass)
+				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	private void process(Class<?> beanClass) {
@@ -242,6 +256,18 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		public void setExclude(List<Exclude> exclude) {
 			this.exclude = exclude;
 		}
+	}
+
+	static class BeanWithIterable {
+		private final Iterable<BeanWithIterable> beans = Set.of();
+	}
+
+	static class BeanWithMap {
+		private final Map<String, BeanWithMap> beans = Map.of();
+	}
+
+	static class BeanWithOptional {
+		private final Optional<BeanWithOptional> beans = Optional.empty();
 	}
 
 }
