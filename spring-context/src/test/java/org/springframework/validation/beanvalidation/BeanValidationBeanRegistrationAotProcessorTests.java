@@ -44,6 +44,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.lang.Nullable;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
@@ -132,6 +133,14 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(1);
 		assertThat(RuntimeHintsPredicates.reflection().onType(beanClass)
 				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@Test  // gh-33940
+	void shouldSkipConstraintWithMissingDependency() throws Exception {
+		FilteringClassLoader classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		Class<?> beanClass = classLoader.loadClass(ConstraintWithMissingDependency.class.getName());
+		process(beanClass);
+		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
 	}
 
 	private void process(Class<?> beanClass) {
@@ -267,6 +276,33 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 	static class BeanWithRecursiveOptional {
 		Optional<BeanWithRecursiveOptional> optional;
+	}
+
+	static class ConstraintWithMissingDependency {
+
+		private final Filtered filtered = new Filtered();
+	}
+
+	static class Filtered {}
+
+	static class FilteringClassLoader extends OverridingClassLoader {
+
+		FilteringClassLoader(ClassLoader parent) {
+			super(parent);
+		}
+
+		@Override
+		protected boolean isEligibleForOverriding(String className) {
+			return className.startsWith(BeanValidationBeanRegistrationAotProcessorTests.class.getName());
+		}
+
+		@Override
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+			if (name.contains("Filtered")) {
+				throw new NoClassDefFoundError(name);
+			}
+			return super.loadClassForOverriding(name);
+		}
 	}
 
 }
