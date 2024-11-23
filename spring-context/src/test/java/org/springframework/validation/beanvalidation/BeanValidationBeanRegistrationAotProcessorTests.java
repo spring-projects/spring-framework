@@ -41,9 +41,9 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.lang.Nullable;
 
@@ -56,6 +56,9 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.springframework.beans.factory.config.BeanDefinition.ROLE_APPLICATION;
+import static org.springframework.beans.factory.config.BeanDefinition.ROLE_INFRASTRUCTURE;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 /**
  * Tests for {@link BeanValidationBeanRegistrationAotProcessor}.
@@ -143,17 +146,28 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
 	}
 
+	@Test  // gh-33940
+	void shouldSkipInfrastructureBean() {
+		process(EmptyClass.class, ROLE_INFRASTRUCTURE);
+		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
+	}
+
 	private void process(Class<?> beanClass) {
-		BeanRegistrationAotContribution contribution = createContribution(beanClass);
+		process(beanClass, ROLE_APPLICATION);
+	}
+
+	private void process(Class<?> beanClass, int role) {
+		BeanRegistrationAotContribution contribution = createContribution(beanClass, role);
 		if (contribution != null) {
 			contribution.applyTo(this.generationContext, mock());
 		}
 	}
 
 	@Nullable
-	private BeanRegistrationAotContribution createContribution(Class<?> beanClass) {
+	private BeanRegistrationAotContribution createContribution(Class<?> beanClass, int role) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition(beanClass.getName(), new RootBeanDefinition(beanClass));
+		BeanDefinition beanDefinition = rootBeanDefinition(beanClass).setRole(role).getBeanDefinition();
+		beanFactory.registerBeanDefinition(beanClass.getName(), beanDefinition);
 		return this.processor.processAheadOfTime(RegisteredBean.of(beanFactory, beanClass.getName()));
 	}
 

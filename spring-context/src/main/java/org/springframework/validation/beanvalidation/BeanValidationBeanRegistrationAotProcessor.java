@@ -43,6 +43,7 @@ import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
@@ -98,7 +99,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 		@Nullable
 		public static BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-			if (validator == null) {
+			if (validator == null || BeanDefinition.ROLE_INFRASTRUCTURE == registeredBean.getMergedBeanDefinition().getRole()) {
 				return null;
 			}
 
