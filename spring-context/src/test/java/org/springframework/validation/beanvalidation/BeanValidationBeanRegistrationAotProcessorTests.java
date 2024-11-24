@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -31,6 +33,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.internal.constraintvalidators.bv.PatternValidator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
@@ -119,6 +123,15 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@ParameterizedTest  // gh-33936
+	@ValueSource(classes = {BeanWithRecursiveIterable.class, BeanWithRecursiveMap.class, BeanWithRecursiveOptional.class})
+	void shouldProcessRecursiveGenericsWithoutInfiniteRecursion(Class<?> beanClass) {
+		process(beanClass);
+		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(1);
+		assertThat(RuntimeHintsPredicates.reflection().onType(beanClass)
+				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	private void process(Class<?> beanClass) {
@@ -242,6 +255,18 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		public void setExclude(List<Exclude> exclude) {
 			this.exclude = exclude;
 		}
+	}
+
+	static class BeanWithRecursiveIterable {
+		Iterable<BeanWithRecursiveIterable> iterable;
+	}
+
+	static class BeanWithRecursiveMap {
+		Map<BeanWithRecursiveMap, BeanWithRecursiveMap> map;
+	}
+
+	static class BeanWithRecursiveOptional {
+		Optional<BeanWithRecursiveOptional> optional;
 	}
 
 }
