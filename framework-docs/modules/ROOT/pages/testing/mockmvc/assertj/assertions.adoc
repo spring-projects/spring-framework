@@ -43,7 +43,20 @@ https://jsonassert.skyscreamer.org[JSONAssert] is also supported. The body of th
 response can be matched against a `Resource` or a content. If the content ends with
 `.json ` we look for a file matching that name on the classpath:
 
-include-code::./FamilyControllerTests[tag=assert-file,indent=0]
+include-code::./c[tag=assert-file,indent=0]
 
 If you prefer to use another library, you can provide an implementation of
 {spring-framework-api}/test/json/JsonComparator.html[`JsonComparator`].
+
+Alternatively, you can use AssertJ https://github.com/assertj/assertj/blob/3.x/assertj-core/src/main/java/org/assertj/core/api/AssertFactory.java[AssertFactory].
+For example, if you want to use https://github.com/lukas-krecan/JsonUnit[JsonUnit] you can
+do this
+
+```
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.jsonUnitJson;
+...
+assertThat(mockMvc.get().uri("/family")).bodyJson()
+  .convertTo(jsonUnitJson())
+  .when(IGNORING_ARRAY_ORDER) // This is JsonUnit
+  .isEqualTo(expectedJson)
+```
