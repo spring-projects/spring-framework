@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -127,7 +126,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 	}
 
 	@ParameterizedTest  // gh-33936
-	@ValueSource(classes = {BeanWithIterable.class, BeanWithMap.class, BeanWithOptional.class})
+	@ValueSource(classes = {BeanWithRecursiveIterable.class, BeanWithRecursiveMap.class, BeanWithRecursiveOptional.class})
 	void shouldProcessRecursiveGenericsWithoutInfiniteRecursion(Class<?> beanClass) {
 		process(beanClass);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(1);
@@ -258,16 +257,16 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		}
 	}
 
-	static class BeanWithIterable {
-		private final Iterable<BeanWithIterable> beans = Set.of();
+	static class BeanWithRecursiveIterable {
+		Iterable<BeanWithRecursiveIterable> iterable;
 	}
 
-	static class BeanWithMap {
-		private final Map<String, BeanWithMap> beans = Map.of();
+	static class BeanWithRecursiveMap {
+		Map<BeanWithRecursiveMap, BeanWithRecursiveMap> map;
 	}
 
-	static class BeanWithOptional {
-		private final Optional<BeanWithOptional> beans = Optional.empty();
+	static class BeanWithRecursiveOptional {
+		Optional<BeanWithRecursiveOptional> optional;
 	}
 
 }

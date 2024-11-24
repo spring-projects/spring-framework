@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,11 +103,10 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			}
 
 			Class<?> beanClass = registeredBean.getBeanClass();
-			Set<Class<?>> visitedClasses = new HashSet<>();
 			Set<Class<?>> validatedClasses = new HashSet<>();
 			Set<Class<? extends ConstraintValidator<?, ?>>> constraintValidatorClasses = new HashSet<>();
 
-			processAheadOfTime(beanClass, visitedClasses, validatedClasses, constraintValidatorClasses);
+			processAheadOfTime(beanClass, new HashSet<>(), validatedClasses, constraintValidatorClasses);
 
 			if (!validatedClasses.isEmpty() || !constraintValidatorClasses.isEmpty()) {
 				return new AotContribution(validatedClasses, constraintValidatorClasses);
@@ -118,10 +117,11 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 		private static void processAheadOfTime(Class<?> clazz, Set<Class<?>> visitedClasses, Set<Class<?>> validatedClasses,
 				Set<Class<? extends ConstraintValidator<?, ?>>> constraintValidatorClasses) {
 
+			Assert.notNull(validator, "Validator cannot be null");
+
 			if (!visitedClasses.add(clazz)) {
 				return;
 			}
-			Assert.notNull(validator, "Validator can't be null");
 
 			BeanDescriptor descriptor;
 			try {
