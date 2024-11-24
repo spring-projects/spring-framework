@@ -43,7 +43,7 @@ https://jsonassert.skyscreamer.org[JSONAssert] is also supported. The body of th
 response can be matched against a `Resource` or a content. If the content ends with
 `.json ` we look for a file matching that name on the classpath:
 
-include-code::./c[tag=assert-file,indent=0]
+include-code::./FamilyControllerTests[tag=assert-file,indent=0]
 
 If you prefer to use another library, you can provide an implementation of
 {spring-framework-api}/test/json/JsonComparator.html[`JsonComparator`].
