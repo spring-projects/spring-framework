@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import io.micrometer.observation.ObservationRegistry;
 
@@ -416,6 +417,23 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		Builder requestFactory(ClientHttpRequestFactory requestFactory);
+		
+		/**
+		 * Configure the {@link Supplier<ClientHttpRequestFactory>} to use. This is useful
+		 * for plugging in and/or customizing options of the underlying HTTP
+		 * client library (for example, SSL).
+		 * <p>If no request factory is specified, {@code RestClient} uses
+		 * {@linkplain org.springframework.http.client.HttpComponentsClientHttpRequestFactory Apache Http Client},
+		 * {@linkplain org.springframework.http.client.JettyClientHttpRequestFactory Jetty Http Client}
+		 * if available on the classpath, and defaults to the
+		 * {@linkplain org.springframework.http.client.JdkClientHttpRequestFactory JDK HttpClient}
+		 * if the {@code java.net.http} module is loaded, or to a
+		 * {@linkplain org.springframework.http.client.SimpleClientHttpRequestFactory simple default}
+		 * otherwise.
+		 * @param requestFactorySupplier the supplier for the request factory to use
+		 * @return this builder
+		 */
+		Builder requestFactory(Supplier<ClientHttpRequestFactory> requestFactorySupplier);
 
 		/**
 		 * Configure the message converters for the {@code RestClient} to use.

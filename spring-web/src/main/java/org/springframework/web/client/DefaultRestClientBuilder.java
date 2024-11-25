@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import io.micrometer.observation.ObservationRegistry;
 
@@ -384,6 +385,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	@Override
 	public RestClient.Builder requestFactory(ClientHttpRequestFactory requestFactory) {
 		this.requestFactory = requestFactory;
+		return this;
+	}
+	
+	@Override
+	public RestClient.Builder requestFactory(Supplier<ClientHttpRequestFactory> requestFactorySupplier) {
+		this.requestFactory = requestFactorySupplier.get();
 		return this;
 	}
 

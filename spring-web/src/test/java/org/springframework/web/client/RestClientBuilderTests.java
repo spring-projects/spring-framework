@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -283,4 +284,13 @@ public class RestClientBuilderTests {
 			return null;
 		}
 	}
+	
+	@Test
+	void requestFactorySupplier() {
+		RestClient.Builder builder = RestClient.builder(new RestTemplate());
+		builder.requestFactory(() -> new JdkClientHttpRequestFactory());
+		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
+		assertThat(fieldValue("requestFactory", defaultBuilder)).isInstanceOf(JdkClientHttpRequestFactory.class);
+	}
+
 }
