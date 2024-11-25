@@ -17,6 +17,7 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -125,7 +126,16 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			return null;
 		};
 
-		return doSubmit(task, executor, invocation.getMethod().getReturnType());
+		return doSubmit( task, executor, determineReturnType( invocation, userMethod ) );
+	}
+
+	private static Class<?> determineReturnType(MethodInvocation invocation, Method userMethod) {
+		Method originalMethod = invocation.getMethod();
+		if( Modifier.isAbstract( originalMethod.getModifiers() ) ) {
+			return userMethod.getReturnType();
+		}
+
+		return originalMethod.getReturnType();
 	}
 
 	/**
