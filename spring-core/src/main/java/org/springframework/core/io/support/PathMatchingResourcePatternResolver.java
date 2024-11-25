@@ -978,8 +978,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		if (!Files.exists(rootPath)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Skipping search for files matching pattern [%s]: directory [%s] does not exist"
+			if (logger.isDebugEnabled()) {
+				logger.debug("Skipping search for files matching pattern [%s]: directory [%s] does not exist"
 						.formatted(subPattern, rootPath.toAbsolutePath()));
 			}
 			return result;
