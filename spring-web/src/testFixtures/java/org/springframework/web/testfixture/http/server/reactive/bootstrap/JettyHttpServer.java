@@ -22,7 +22,6 @@ import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletConta
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
-import org.springframework.http.server.reactive.JettyHttpHandlerAdapter;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 
 /**
@@ -41,7 +40,7 @@ public class JettyHttpServer extends AbstractHttpServer {
 
 		this.jettyServer = new Server();
 
-		ServletHttpHandlerAdapter servlet = createServletAdapter();
+		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(resolveHttpHandler());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		servletHolder.setAsyncSupported(true);
 
@@ -54,10 +53,6 @@ public class JettyHttpServer extends AbstractHttpServer {
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
 		this.jettyServer.setHandler(this.contextHandler);
-	}
-
-	private ServletHttpHandlerAdapter createServletAdapter() {
-		return new JettyHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 	@Override

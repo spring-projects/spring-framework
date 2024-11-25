@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.validation.beanvalidation;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -107,7 +106,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			Set<Class<?>> validatedClasses = new HashSet<>();
 			Set<Class<? extends ConstraintValidator<?, ?>>> constraintValidatorClasses = new HashSet<>();
 
-			processAheadOfTime(beanClass, validatedClasses, constraintValidatorClasses);
+			processAheadOfTime(beanClass, new HashSet<>(), validatedClasses, constraintValidatorClasses);
 
 			if (!validatedClasses.isEmpty() || !constraintValidatorClasses.isEmpty()) {
 				return new AotContribution(validatedClasses, constraintValidatorClasses);
@@ -115,10 +114,14 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			return null;
 		}
 
-		private static void processAheadOfTime(Class<?> clazz, Collection<Class<?>> validatedClasses,
-				Collection<Class<? extends ConstraintValidator<?, ?>>> constraintValidatorClasses) {
+		private static void processAheadOfTime(Class<?> clazz, Set<Class<?>> visitedClasses, Set<Class<?>> validatedClasses,
+				Set<Class<? extends ConstraintValidator<?, ?>>> constraintValidatorClasses) {
 
-			Assert.notNull(validator, "Validator can't be null");
+			Assert.notNull(validator, "Validator cannot be null");
+
+			if (!visitedClasses.add(clazz)) {
+				return;
+			}
 
 			BeanDescriptor descriptor;
 			try {
@@ -149,12 +152,12 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 			ReflectionUtils.doWithFields(clazz, field -> {
 				Class<?> type = field.getType();
-				if (Iterable.class.isAssignableFrom(type) || List.class.isAssignableFrom(type) || Optional.class.isAssignableFrom(type)) {
+				if (Iterable.class.isAssignableFrom(type) || Optional.class.isAssignableFrom(type)) {
 					ResolvableType resolvableType = ResolvableType.forField(field);
 					Class<?> genericType = resolvableType.getGeneric(0).toClass();
 					if (shouldProcess(genericType)) {
 						validatedClasses.add(clazz);
-						processAheadOfTime(genericType, validatedClasses, constraintValidatorClasses);
+						processAheadOfTime(genericType, visitedClasses, validatedClasses, constraintValidatorClasses);
 					}
 				}
 				if (Map.class.isAssignableFrom(type)) {
@@ -163,11 +166,11 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 					Class<?> valueGenericType = resolvableType.getGeneric(1).toClass();
 					if (shouldProcess(keyGenericType)) {
 						validatedClasses.add(clazz);
-						processAheadOfTime(keyGenericType, validatedClasses, constraintValidatorClasses);
+						processAheadOfTime(keyGenericType, visitedClasses, validatedClasses, constraintValidatorClasses);
 					}
 					if (shouldProcess(valueGenericType)) {
 						validatedClasses.add(clazz);
-						processAheadOfTime(valueGenericType, validatedClasses, constraintValidatorClasses);
+						processAheadOfTime(valueGenericType, visitedClasses, validatedClasses, constraintValidatorClasses);
 					}
 				}
 			});

@@ -319,8 +319,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentLength(int contentLength) {
-		this.contentLength = contentLength;
-		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		if (!this.committed) {
+			this.contentLength = contentLength;
+			doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		}
 	}
 
 	/**
@@ -334,8 +336,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setContentLengthLong(long contentLength) {
-		this.contentLength = contentLength;
-		doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		if (!this.committed) {
+			this.contentLength = contentLength;
+			doAddHeaderValue(HttpHeaders.CONTENT_LENGTH, contentLength, true);
+		}
 	}
 
 	public long getContentLengthLong() {
