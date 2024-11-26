@@ -28,6 +28,7 @@ import static org.mockito.BDDMockito.given;
  * @author Sam Brannen
  * @since 6.2
  * @see MockitoResetTestExecutionListenerWithoutMockitoAnnotationsIntegrationTests
+ * @see MockResetStrategiesIntegrationTests
  */
 class MockitoResetTestExecutionListenerWithMockitoBeanIntegrationTests
 		extends MockitoResetTestExecutionListenerWithoutMockitoAnnotationsIntegrationTests {
