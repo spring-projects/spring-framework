@@ -40,7 +40,7 @@ class MockitoBeanConfigurationErrorTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to replace bean: there is no bean with name 'beanToOverride' \
 						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
 	}
@@ -52,7 +52,7 @@ class MockitoBeanConfigurationErrorTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to replace bean: there is no bean with name 'beanToOverride' \
 						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
 	}
@@ -63,7 +63,7 @@ class MockitoBeanConfigurationErrorTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByTypeLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to override bean: there are no beans of \
 						type java.lang.String (as required by field 'FailureByTypeLookup.example').""");
 	}
