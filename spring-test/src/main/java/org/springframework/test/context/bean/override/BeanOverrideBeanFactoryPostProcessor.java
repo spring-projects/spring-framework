@@ -59,6 +59,7 @@ import org.springframework.util.Assert;
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 6.2
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
@@ -66,6 +67,9 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private static final String PSEUDO_BEAN_NAME_PLACEHOLDER = "<<< PSEUDO BEAN NAME PLACEHOLDER >>>";
 
 	private static final BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
+
+	private static final String unableToOverrideByTypeDiagnosticsMessage = " If the bean is defined from a @Bean method,"
+			+ " please make sure the return type is the most specific type (recommended) or type can be assigned to %s";
 
 	private final Set<BeanOverrideHandler> beanOverrideHandlers;
 
@@ -170,7 +174,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				Field field = handler.getField();
 				throw new IllegalStateException(
 						"Unable to replace bean: there is no bean with name '%s' and type %s%s."
-							.formatted(beanName, handler.getBeanType(), requiredByField(field)));
+							.formatted(beanName, handler.getBeanType(), requiredByField(field, handler.getBeanType())));
 			}
 			// 4) We are creating a bean by-name with the provided beanName.
 		}
@@ -257,7 +261,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				String message = "Unable to select a bean to wrap: ";
 				int candidateCount = candidateNames.size();
 				if (candidateCount == 0) {
-					message += "there are no beans of type %s%s.".formatted(beanType, requiredByField(field));
+					message += "there are no beans of type %s%s.".formatted(beanType, requiredByField(field, beanType));
 				}
 				else {
 					message += "found %d beans of type %s%s: %s"
@@ -299,7 +303,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			if (requireExistingBean) {
 				throw new IllegalStateException(
 						"Unable to override bean: there are no beans of type %s%s."
-							.formatted(beanType, requiredByField(field)));
+							.formatted(beanType, requiredByField(field, beanType)));
 			}
 			return null;
 		}
@@ -481,6 +485,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 		return " (as required by field '%s.%s')".formatted(
 				field.getDeclaringClass().getSimpleName(), field.getName());
+	}
+
+	private static String requiredByField(@Nullable Field field, ResolvableType requiredBeanType) {
+		return requiredByField(field) + '.' + unableToOverrideByTypeDiagnosticsMessage.formatted(requiredBeanType);
 	}
 
 }
