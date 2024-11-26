@@ -387,7 +387,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.requestFactory = requestFactory;
 		return this;
 	}
-	
+
 	@Override
 	public RestClient.Builder requestFactory(Supplier<ClientHttpRequestFactory> requestFactorySupplier) {
 		this.requestFactory = requestFactorySupplier.get();

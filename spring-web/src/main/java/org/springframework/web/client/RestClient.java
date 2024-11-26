@@ -417,9 +417,9 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		Builder requestFactory(ClientHttpRequestFactory requestFactory);
-		
+
 		/**
-		 * Configure the {@link Supplier<ClientHttpRequestFactory>} to use. This is useful
+		 * Configure the {@link ClientHttpRequestFactory} to use. This is useful
 		 * for plugging in and/or customizing options of the underlying HTTP
 		 * client library (for example, SSL).
 		 * <p>If no request factory is specified, {@code RestClient} uses
