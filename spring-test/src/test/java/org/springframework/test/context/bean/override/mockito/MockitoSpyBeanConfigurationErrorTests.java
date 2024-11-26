@@ -50,7 +50,7 @@ class MockitoSpyBeanConfigurationErrorTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to select a bean to wrap: there are no beans of type java.lang.String \
 						(as required by field 'ByTypeSingleLookup.example').""");
 	}

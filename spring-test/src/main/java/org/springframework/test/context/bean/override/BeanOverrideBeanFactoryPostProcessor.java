@@ -242,6 +242,9 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 					if (candidateCount == 0) {
 						message += "there are no beans of type %s (as required by field '%s.%s')."
 								.formatted(beanType, field.getDeclaringClass().getSimpleName(), field.getName());
+						message += " If the bean is defined from a @Bean method,"
+								+ " please make sure the return type is the most specific type (recommended) or type can be assigned to %s."
+								.formatted(beanType);
 					}
 					else {
 						message += "found %d beans of type %s (as required by field '%s.%s'): %s"
