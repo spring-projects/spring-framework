@@ -37,8 +37,18 @@ class MockitoBeans {
 		this.beans.add(bean);
 	}
 
-	void resetAll() {
-		this.beans.forEach(Mockito::reset);
+	/**
+	 * Reset all Mockito beans configured with the supplied {@link MockReset} strategy.
+	 * <p>No mocks will be reset if the supplied strategy is {@link MockReset#NONE}.
+	 */
+	void resetAll(MockReset reset) {
+		if (reset != MockReset.NONE) {
+			for (Object bean : this.beans) {
+				if (reset == MockReset.get(bean)) {
+					Mockito.reset(bean);
+				}
+			}
+		}
 	}
 
 }

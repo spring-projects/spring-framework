@@ -42,6 +42,7 @@ import static org.mockito.Mockito.mock;
  * @author Sam Brannen
  * @since 6.2
  * @see MockitoResetTestExecutionListenerWithMockitoBeanIntegrationTests
+ * @see MockResetStrategiesIntegrationTests
  */
 @SpringJUnitConfig
 @TestMethodOrder(MethodOrderer.MethodName.class)
