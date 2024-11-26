@@ -27,11 +27,15 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.SmartView;
 
 /**
- * Public API for HTML rendering of a collection of fragments each with a view
- * and independent model. For use with frontends technologies such as
+ * Public API to render HTML fragments. A fragment is a portion of an HTML page.
+ * Normally HTML is rendered with a single model and view. This API allows
+ * using multiple model and view pairs, one for each HTML fragment.
+ *
+ * <p>For use with frontends technologies such as
  * <a href="https://htmx.org/">htmx</a> where multiple page fragments may be
- * rendered in one response. Supported as a return value from Spring MVC
- * controller methods.
+ * rendered in one response.
+ *
+ * <p>Supported as a return value from controller methods.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -51,10 +55,10 @@ public interface FragmentsRendering extends SmartView {
 
 
 	/**
-	 * Create a builder and add a fragment with a view name and a model.
-	 * @param viewName the name of the view for the fragment
-	 * @param model attributes for the fragment in addition to model
-	 * attributes inherited from the shared model for the request
+	 * Create a builder with one HTML fragment.
+	 * @param viewName the view name for the fragment
+	 * @param model attributes for the fragment, in addition to attributes from the
+	 * shared model for the request
 	 * @return the created builder
 	 */
 	static Builder with(String viewName, Map<String, Object> model) {
@@ -62,8 +66,8 @@ public interface FragmentsRendering extends SmartView {
 	}
 
 	/**
-	 * Variant of {@link #with(String, Map)} with a view name only, but also
-	 * inheriting model attributes from the shared model for the request.
+	 * Create a builder with one HTML fragment, also inheriting attributes from
+	 * the shared model for the request.
 	 * @param viewName the name of the view for the fragment
 	 * @return the created builder
 	 */
@@ -72,8 +76,8 @@ public interface FragmentsRendering extends SmartView {
 	}
 
 	/**
-	 * Variant of {@link #with(String, Map)} with a collection of fragments.
-	 * @param fragments the fragments to add; each fragment also inherits model
+	 * Create a builder with multiple HTML fragments.
+	 * @param fragments the fragments to add; each fragment also inherits
 	 * attributes from the shared model for the request
 	 * @return the created builder
 	 */
@@ -111,32 +115,32 @@ public interface FragmentsRendering extends SmartView {
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add a fragment with a view name and a model.
+		 * Add an HTML fragment.
 		 * @param viewName the name of the view for the fragment
-		 * @param model attributes for the fragment in addition to model
-		 * attributes inherited from the shared model for the request
+		 * @param model fragment attributes in addition to attributes from the
+		 * shared model for the request
 		 * @return this builder
 		 */
 		Builder fragment(String viewName, Map<String, Object> model);
 
 		/**
-		 * Variant of {@link #fragment(String, Map)} with a view name only, but
-		 * also inheriting model attributes from the shared model for the request.
+		 * Add an HTML fragment. The fragment will use attributes from the shared
+		 * model for the request.
 		 * @param viewName the name of the view for the fragment
 		 * @return this builder
 		 */
 		Builder fragment(String viewName);
 
 		/**
-		 * Variant of {@link #fragment(String, Map)} with a {@link ModelAndView}.
-		 * @param fragment the fragment to add; the fragment also inherits model
+		 * Add an HTML fragment.
+		 * @param fragment the fragment to add; the fragment also inherits
 		 * attributes from the shared model for the request
 		 * @return this builder
 		 */
 		Builder fragment(ModelAndView fragment);
 
 		/**
-		 * Variant of {@link #fragment(String, Map)} with a collection of {@link ModelAndView}s.
+		 * Add multiple HTML fragments.
 		 * @param fragments the fragments to add; each fragment also inherits model
 		 * attributes from the shared model for the request
 		 * @return this builder

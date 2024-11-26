@@ -32,13 +32,16 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Public API for HTML rendering of a collection of fragments each with a view
- * and independent model. For use with frontends technologies such as
- * <a href="https://htmx.org/">htmx</a> where multiple page fragments may be
- * rendered in one response. Supported as a return value from Spring WebFlux
- * controller methods.
+ * Public API to render HTML fragments. A fragment is a portion of an HTML page.
+ * Normally HTML is rendered with a single model and view. This API allows
+ * using multiple model and view pairs, one for each HTML fragment.
  *
- * <p>For full page rendering with a single model and view, use {@link Rendering}.
+ * <p>For use with frontends technologies such as
+ * <a href="https://htmx.org/">htmx</a> where multiple page fragments may be
+ * rendered in one response.
+ *
+ * <p>Supported as a return value from annotated controller methods.
+ * For full page rendering with a single model and view, use {@link Rendering}.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -63,10 +66,10 @@ public interface FragmentsRendering {
 
 
 	/**
-	 * Create a builder and add a fragment with a view name and a model.
-	 * @param viewName the name of the view for the fragment
-	 * @param model attributes for the fragment in addition to model
-	 * attributes inherited from the model for the request
+	 * Create a builder with one HTML fragment.
+	 * @param viewName the view name for the fragment
+	 * @param model attributes for the fragment, in addition to attributes from the
+	 * shared model for the request
 	 * @return this builder
 	 */
 	static Builder with(String viewName, Map<String, Object> model) {
@@ -74,8 +77,8 @@ public interface FragmentsRendering {
 	}
 
 	/**
-	 * Variant of {@link #with(String, Map)} with a view name only, but also
-	 * inheriting model attributes from the shared model for the request.
+	 * Create a builder with one HTML fragment, also inheriting attributes from
+	 * the shared model for the request.
 	 * @param viewName the name of the view for the fragment
 	 * @return this builder
 	 */
@@ -84,8 +87,8 @@ public interface FragmentsRendering {
 	}
 
 	/**
-	 * Variant of {@link #with(String, Map)} with a collection of fragments.
-	 * @param fragments the fragments to add; each fragment also inherits model
+	 * Create a builder with multiple HTML fragments.
+	 * @param fragments the fragments to add; each fragment also inherits
 	 * attributes from the shared model for the request
 	 * @return the created builder
 	 */
@@ -94,7 +97,7 @@ public interface FragmentsRendering {
 	}
 
 	/**
-	 * Variant of {@link #with(String, Map)} with a {@link Publisher} of fragments.
+	 * Create a builder with a {@link Publisher} of fragments.
 	 * @param fragmentsPublisher the fragments to add; each fragment also
 	 * inherits model attributes from the shared model for the request
 	 * @return the created builder
@@ -148,25 +151,24 @@ public interface FragmentsRendering {
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add a fragment with a view name and a model.
-		 * @param viewName the name of the view for the fragment
-		 * @param model attributes for the fragment in addition to model
-		 * attributes inherited from the model for the request
+		 * Add an HTML fragment.
+		 * @param viewName the view name for the fragment
+		 * @param model fragment attributes in addition to attributes from the
+		 * shared model for the request
 		 * @return this builder
 		 */
 		Builder fragment(String viewName, Map<String, Object> model);
 
 		/**
-		 * Variant of {@link #fragment(String, Map)} with a view name only, where
-		 * the fragment model also inherits model attributes from the shared
+		 * Add an HTML fragment. The fragment will use attributes from the shared
 		 * model for the request.
-		 * @param viewName the name of the view for the fragment
+		 * @param viewName the view name for the fragment
 		 * @return this builder
 		 */
 		Builder fragment(String viewName);
 
 		/**
-		 * Variant of {@link #fragment(String, Map)} with a {@link Fragment}.
+		 * Add an HTML fragment.
 		 * @param fragment the fragment to add
 		 * @return this builder
 		 */

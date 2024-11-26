@@ -26,9 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Container for a model and a view for use with {@link FragmentsRendering} and
- * multi-view rendering. For full page rendering with a single model and view,
- * use {@link Rendering}.
+ * Container for a model and a view pair. For use with {@link FragmentsRendering}.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
