@@ -30,7 +30,7 @@ available through the `ServletRequest.getParameter{asterisk}()` family of method
 
 
 
-[[forwarded-headers]]
+[[filters-forwarded-headers]]
 == Forwarded Headers
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-forwarded-headers[See equivalent in the Reactive stack]#
 
