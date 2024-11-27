@@ -36,6 +36,7 @@ import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
 import org.springframework.core.CoroutinesUtils;
@@ -323,18 +324,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		private static final String COROUTINE_CONTEXT_ATTRIBUTE = "org.springframework.web.server.CoWebFilter.context";
 
 		@Nullable
-		@SuppressWarnings({"deprecation", "DataFlowIssue"})
+		@SuppressWarnings("DataFlowIssue")
 		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
 				ServerWebExchange exchange) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 
 			if (isSuspendingFunction) {
 				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
-				if (coroutineContext == null) {
-					return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
-				}
-				else {
-					return CoroutinesUtils.invokeSuspendingFunction((CoroutineContext) coroutineContext, method, target, args);
-				}
+				Object result = (coroutineContext == null ? CoroutinesUtils.invokeSuspendingFunction(method, target, args) :
+						CoroutinesUtils.invokeSuspendingFunction((CoroutineContext) coroutineContext, method, target, args));
+				return (result instanceof Mono<?> mono ? mono.handle(KotlinDelegate::handleResult) : result);
 			}
 			else {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
@@ -370,11 +368,35 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 				Object result = function.callBy(argMap);
 				if (result != null && KotlinDetector.isInlineClass(result.getClass())) {
-					return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+					result = unbox(result);
 				}
 				return (result == Unit.INSTANCE ? null : result);
 			}
 		}
+
+		private static void handleResult(Object result, SynchronousSink<Object> sink) {
+			if (KotlinDetector.isInlineClass(result.getClass())) {
+				try {
+					Object unboxed = unbox(result);
+					if (unboxed != Unit.INSTANCE) {
+						sink.next(unboxed);
+					}
+					sink.complete();
+				}
+				catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+					sink.error(ex);
+				}
+			}
+			else {
+				sink.next(result);
+				sink.complete();
+			}
+		}
+
+		private static Object unbox(Object result) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+			return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+		}
+
 	}
 
 }
