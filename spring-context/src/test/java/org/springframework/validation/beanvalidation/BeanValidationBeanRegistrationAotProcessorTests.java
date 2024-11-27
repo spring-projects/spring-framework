@@ -137,7 +137,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 	@Test  // gh-33940
 	void shouldSkipConstraintWithMissingDependency() throws Exception {
-		FilteringClassLoader classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		MissingDependencyClassLoader classLoader = new MissingDependencyClassLoader(getClass().getClassLoader());
 		Class<?> beanClass = classLoader.loadClass(ConstraintWithMissingDependency.class.getName());
 		process(beanClass);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
@@ -280,14 +280,14 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 	static class ConstraintWithMissingDependency {
 
-		private final Filtered filtered = new Filtered();
+		MissingType missingType;
 	}
 
-	static class Filtered {}
+	static class MissingType {}
 
-	static class FilteringClassLoader extends OverridingClassLoader {
+	static class MissingDependencyClassLoader extends OverridingClassLoader {
 
-		FilteringClassLoader(ClassLoader parent) {
+		MissingDependencyClassLoader(ClassLoader parent) {
 			super(parent);
 		}
 
@@ -298,7 +298,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 		@Override
 		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
-			if (name.contains("Filtered")) {
+			if (name.contains("MissingType")) {
 				throw new NoClassDefFoundError(name);
 			}
 			return super.loadClassForOverriding(name);
