@@ -192,7 +192,7 @@ class CoroutinesUtilsTests {
 
 	@Test
 	fun invokeSuspendingFunctionWithValueClassParameter() {
-		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClass") }
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassParameter") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
 		runBlocking {
 			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
@@ -204,7 +204,16 @@ class CoroutinesUtilsTests {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassReturnValue") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
 		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo(ValueClass("foo"))
+		}
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithResultOfUnitReturnValue() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithResultOfUnitReturnValue") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo(Result.success(Unit))
 		}
 	}
 
@@ -314,7 +323,7 @@ class CoroutinesUtilsTests {
 		return null
 	}
 
-	suspend fun suspendingFunctionWithValueClass(value: ValueClass): String {
+	suspend fun suspendingFunctionWithValueClassParameter(value: ValueClass): String {
 		delay(1)
 		return value.value
 	}
@@ -322,6 +331,11 @@ class CoroutinesUtilsTests {
 	suspend fun suspendingFunctionWithValueClassReturnValue(): ValueClass {
 		delay(1)
 		return ValueClass("foo")
+	}
+
+	suspend fun suspendingFunctionWithResultOfUnitReturnValue(): Result<Unit> {
+		delay(1)
+		return Result.success(Unit)
 	}
 
 	suspend fun suspendingFunctionWithValueClassWithInit(value: ValueClassWithInit): String {
