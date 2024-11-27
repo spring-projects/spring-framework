@@ -61,6 +61,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Bao Ngo
  * @since 3.0
  * @see org.springframework.scheduling.annotation.Async
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
