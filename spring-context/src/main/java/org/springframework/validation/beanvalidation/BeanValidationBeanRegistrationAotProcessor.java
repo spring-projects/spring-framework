@@ -127,18 +127,25 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			try {
 				descriptor = validator.getConstraintsForClass(clazz);
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | LinkageError ex) {
+				String className = clazz.getName();
 				if (KotlinDetector.isKotlinType(clazz) && ex instanceof ArrayIndexOutOfBoundsException) {
 					// See https://hibernate.atlassian.net/browse/HV-1796 and https://youtrack.jetbrains.com/issue/KT-40857
-					logger.warn("Skipping validation constraint hint inference for class " + clazz +
-							" due to an ArrayIndexOutOfBoundsException at validator level");
+					if (logger.isWarnEnabled()) {
+						logger.warn("Skipping validation constraint hint inference for class " + className +
+								" due to an ArrayIndexOutOfBoundsException at validator level");
+					}
 				}
-				else if (ex instanceof TypeNotPresentException) {
-					logger.debug("Skipping validation constraint hint inference for class " +
-							clazz + " due to a TypeNotPresentException at validator level: " + ex.getMessage());
+				else if (ex instanceof TypeNotPresentException || ex instanceof NoClassDefFoundError) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipping validation constraint hint inference for class %s due to a %s for %s"
+								.formatted(className, ex.getClass().getSimpleName(), ex.getMessage()));
+					}
 				}
 				else {
-					logger.warn("Skipping validation constraint hint inference for class " + clazz, ex);
+					if (logger.isWarnEnabled()) {
+						logger.warn("Skipping validation constraint hint inference for class " + className, ex);
+					}
 				}
 				return;
 			}
