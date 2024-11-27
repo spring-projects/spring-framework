@@ -393,7 +393,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 				FragmentHttpServletResponse fragmentResponse =
 						new FragmentHttpServletResponse(this.response, this.charset);
 
-				FragmentsRendering render = FragmentsRendering.with(List.of(modelAndView)).build();
+				FragmentsRendering render = FragmentsRendering.fragments(List.of(modelAndView)).build();
 				render.resolveNestedViews(this::resolveViewName, this.locale);
 				render.render(modelAndView.getModel(), this.request, fragmentResponse);
 

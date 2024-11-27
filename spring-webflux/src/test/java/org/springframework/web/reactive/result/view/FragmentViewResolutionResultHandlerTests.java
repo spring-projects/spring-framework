@@ -64,9 +64,9 @@ public class FragmentViewResolutionResultHandlerTests {
 	static Stream<Arguments> arguments() {
 		Flux<Fragment> fragmentFlux = Flux.just(fragment1, fragment2).subscribeOn(Schedulers.boundedElastic());
 		return Stream.of(
-				Arguments.of(FragmentsRendering.withPublisher(fragmentFlux).build(),
+				Arguments.of(FragmentsRendering.fragmentsPublisher(fragmentFlux).build(),
 						on(Handler.class).resolveReturnType(FragmentsRendering.class)),
-				Arguments.of(FragmentsRendering.withCollection(List.of(fragment1, fragment2)).build(),
+				Arguments.of(FragmentsRendering.fragments(List.of(fragment1, fragment2)).build(),
 						on(Handler.class).resolveReturnType(FragmentsRendering.class)),
 				Arguments.of(fragmentFlux,
 						on(Handler.class).resolveReturnType(Flux.class, Fragment.class)),

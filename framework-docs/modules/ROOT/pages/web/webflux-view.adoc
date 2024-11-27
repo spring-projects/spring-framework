@@ -466,7 +466,7 @@ Java::
 ----
 	@GetMapping
 	FragmentsRendering handle() {
-		return FragmentsRendering.with("posts").fragment("comments").build();
+		return FragmentsRendering.fragment("posts").fragment("comments").build();
 	}
 ----
 
@@ -476,7 +476,7 @@ Kotlin::
 ----
 	@GetMapping
 	fun handle(): FragmentsRendering {
-		return FragmentsRendering.with("posts").fragment("comments").build()
+		return FragmentsRendering.fragment("posts").fragment("comments").build()
 	}
 ----
 ======
