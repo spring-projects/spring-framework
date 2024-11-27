@@ -908,16 +908,20 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		private static String getSanitizedPath(final StringBuilder path) {
-			int index = path.indexOf("//");
-			if (index >= 0) {
-				StringBuilder sanitized = new StringBuilder(path);
-				while (index != -1) {
-					sanitized.deleteCharAt(index);
-					index = sanitized.indexOf("//", index);
-				}
-				return sanitized.toString();
+			String pathString = path.toString();
+			int protocolIndex = pathString.indexOf("://");
+			boolean hasProtocol = protocolIndex != -1;
+
+			if (hasProtocol) {
+				String protocol = path.substring(0, protocolIndex + 3);
+				String restOfPath = path.substring(protocolIndex + 3);
+
+				String sanitizedRestPath = restOfPath.replaceAll("/{2,}", "/");
+
+				return protocol + sanitizedRestPath;
 			}
-			return path.toString();
+
+			return pathString.replaceAll("/{2,}", "/");
 		}
 
 		public void removeTrailingSlash() {
