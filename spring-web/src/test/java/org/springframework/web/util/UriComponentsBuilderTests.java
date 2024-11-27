@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -917,7 +918,7 @@ class UriComponentsBuilderTests {
 					.findFirst()
 					.orElseThrow(() -> new ClassNotFoundException("FullPathComponentBuilder not found"));
 
-			var method = innerClass.getDeclaredMethod("getSanitizedPath", StringBuilder.class);
+			Method method = innerClass.getDeclaredMethod("getSanitizedPath", StringBuilder.class);
 			method.setAccessible(true);
 			return (String) method.invoke(null, path);
 		} catch (Exception e) {
