@@ -38,7 +38,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -135,8 +134,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatusCode statusCode = response.getStatusCode();
-		handleError(response, statusCode, null, null);
+		handleError(response, response.getStatusCode(), null, null);
 	}
 
 	/**
@@ -159,17 +157,78 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
-		HttpStatusCode statusCode = response.getStatusCode();
-		handleError(response, statusCode, url, method);
+		handleError(response, response.getStatusCode(), url, method);
 	}
 
 	/**
-	 * Return error message with details from the response body. For example:
+	 * Handle the error based on the resolved status code.
+	 * <p>The default implementation delegates to
+	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
+	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
+	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
+	 * @since 6.2
+	 * @see HttpClientErrorException#create
+	 * @see HttpServerErrorException#create
+	 */
+	protected void handleError(
+			ClientHttpResponse response, HttpStatusCode statusCode,
+			@Nullable URI url, @Nullable HttpMethod method) throws IOException {
+
+		String statusText = response.getStatusText();
+		HttpHeaders headers = response.getHeaders();
+		byte[] body = getResponseBody(response);
+		Charset charset = getCharset(response);
+		String message = getErrorMessage(statusCode.value(), statusText, body, charset, url, method);
+
+		RestClientResponseException ex;
+		if (statusCode.is4xxClientError()) {
+			ex = HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
+		}
+		else if (statusCode.is5xxServerError()) {
+			ex = HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
+		}
+		else {
+			ex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
+		}
+
+		if (!CollectionUtils.isEmpty(this.messageConverters)) {
+			ex.setBodyConvertFunction(initBodyConvertFunction(response, body));
+		}
+
+		throw ex;
+	}
+
+	/**
+	 * Read the body of the given response (for inclusion in a status exception).
+	 * @param response the response to inspect
+	 * @return the response body as a byte array,
+	 * or an empty byte array if the body could not be read
+	 * @since 4.3.8
+	 */
+	protected byte[] getResponseBody(ClientHttpResponse response) {
+		return RestClientUtils.getBody(response);
+	}
+
+	/**
+	 * Determine the charset of the response (for inclusion in a status exception).
+	 * @param response the response to inspect
+	 * @return the associated charset, or {@code null} if none
+	 * @since 4.3.8
+	 */
+	@Nullable
+	protected Charset getCharset(ClientHttpResponse response) {
+		MediaType contentType = response.getHeaders().getContentType();
+		return (contentType != null ? contentType.getCharset() : null);
+	}
+
+	/**
+	 * Return an error message with details from the response body. For example:
 	 * <pre>
 	 * 404 Not Found on GET request for "https://example.com": [{'id': 123, 'message': 'my message'}]
 	 * </pre>
 	 */
-	private String getErrorMessage(int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset,
+	private String getErrorMessage(
+			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset,
 			@Nullable URI url, @Nullable HttpMethod method) {
 
 		StringBuilder msg = new StringBuilder(rawStatusCode + " " + statusText);
@@ -202,43 +261,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Handle the error based on the resolved status code.
-	 * <p>The default implementation delegates to
-	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
-	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
-	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
-	 * @since 6.2
-	 * @see HttpClientErrorException#create
-	 * @see HttpServerErrorException#create
-	 */
-	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode,
-			@Nullable URI url, @Nullable HttpMethod method) throws IOException {
-
-		String statusText = response.getStatusText();
-		HttpHeaders headers = response.getHeaders();
-		byte[] body = getResponseBody(response);
-		Charset charset = getCharset(response);
-		String message = getErrorMessage(statusCode.value(), statusText, body, charset, url, method);
-
-		RestClientResponseException ex;
-		if (statusCode.is4xxClientError()) {
-			ex = HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
-		}
-		else if (statusCode.is5xxServerError()) {
-			ex = HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
-		}
-		else {
-			ex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
-		}
-
-		if (!CollectionUtils.isEmpty(this.messageConverters)) {
-			ex.setBodyConvertFunction(initBodyConvertFunction(response, body));
-		}
-
-		throw ex;
-	}
-
-	/**
 	 * Return a function for decoding the error content. This can be passed to
 	 * {@link RestClientResponseException#setBodyConvertFunction(Function)}.
 	 * @since 6.0
@@ -263,36 +285,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 						"Error while extracting response for type [" + resolvableType + "]", ex);
 			}
 		};
-	}
-
-	/**
-	 * Read the body of the given response (for inclusion in a status exception).
-	 * @param response the response to inspect
-	 * @return the response body as a byte array,
-	 * or an empty byte array if the body could not be read
-	 * @since 4.3.8
-	 */
-	protected byte[] getResponseBody(ClientHttpResponse response) {
-		try {
-			return FileCopyUtils.copyToByteArray(response.getBody());
-		}
-		catch (IOException ex) {
-			// ignore
-		}
-		return new byte[0];
-	}
-
-	/**
-	 * Determine the charset of the response (for inclusion in a status exception).
-	 * @param response the response to inspect
-	 * @return the associated charset, or {@code null} if none
-	 * @since 4.3.8
-	 */
-	@Nullable
-	protected Charset getCharset(ClientHttpResponse response) {
-		HttpHeaders headers = response.getHeaders();
-		MediaType contentType = headers.getContentType();
-		return (contentType != null ? contentType.getCharset() : null);
 	}
 
 }
