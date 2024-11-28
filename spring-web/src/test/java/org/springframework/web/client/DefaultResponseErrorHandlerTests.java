@@ -75,8 +75,8 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(UTF_8)));
 
 		assertThatExceptionOfType(HttpClientErrorException.class)
-				.isThrownBy(() -> handler.handleError(response))
-				.withMessage("404 Not Found: \"Hello World\"")
+				.isThrownBy(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response))
+				.withMessage("404 Not Found on GET request for \"/\": \"Hello World\"")
 				.satisfies(ex -> assertThat(ex.getResponseHeaders()).isEqualTo(headers));
 	}
 
@@ -127,7 +127,8 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willThrow(new IOException());
 
-		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() -> handler.handleError(response));
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response));
 	}
 
 	@Test
@@ -140,7 +141,7 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 
 		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
-				handler.handleError(response));
+				handler.handleError(URI.create("/"), HttpMethod.GET, response));
 	}
 
 	@Test  // SPR-16108
@@ -165,7 +166,7 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 
 		assertThatExceptionOfType(UnknownHttpStatusCodeException.class).isThrownBy(() ->
-				handler.handleError(response));
+				handler.handleError(URI.create("/"), HttpMethod.GET, response));
 	}
 
 	@Test  // SPR-17461
@@ -196,7 +197,7 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
 
-		Throwable throwable = catchThrowable(() -> handler.handleError(response));
+		Throwable throwable = catchThrowable(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response));
 
 		// validate exception
 		assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
@@ -236,7 +237,7 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
 
-		Throwable throwable = catchThrowable(() -> handler.handleError(response));
+		Throwable throwable = catchThrowable(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response));
 
 		// validate exception
 		assertThat(throwable).isInstanceOf(HttpServerErrorException.class);

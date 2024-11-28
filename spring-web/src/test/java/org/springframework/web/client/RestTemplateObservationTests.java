@@ -242,12 +242,12 @@ class RestTemplateObservationTests {
 		}
 
 		@Override
-		public boolean hasError(ClientHttpResponse response) throws IOException {
+		public boolean hasError(ClientHttpResponse response) {
 			return true;
 		}
 
 		@Override
-		public void handleError(ClientHttpResponse response) throws IOException {
+		public void handleError(URI uri, HttpMethod httpMethod, ClientHttpResponse response) {
 			currentObservation = this.observationRegistry.getCurrentObservation();
 		}
 	}

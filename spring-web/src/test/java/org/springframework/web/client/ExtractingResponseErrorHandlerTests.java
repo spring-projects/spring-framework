@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -98,7 +100,7 @@ class ExtractingResponseErrorHandlerTests {
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
 		assertThatExceptionOfType(MyRestClientException.class)
-				.isThrownBy(() -> this.errorHandler.handleError(this.response))
+				.isThrownBy(() -> this.errorHandler.handleError(URI.create("/"), HttpMethod.GET, this.response))
 				.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
 	}
 
@@ -114,7 +116,7 @@ class ExtractingResponseErrorHandlerTests {
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
 		assertThatExceptionOfType(MyRestClientException.class)
-				.isThrownBy(() -> this.errorHandler.handleError(this.response))
+				.isThrownBy(() -> this.errorHandler.handleError(URI.create("/"), HttpMethod.GET, this.response))
 				.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
 	}
 
@@ -130,7 +132,7 @@ class ExtractingResponseErrorHandlerTests {
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
 		assertThatExceptionOfType(HttpClientErrorException.class)
-				.isThrownBy(() -> this.errorHandler.handleError(this.response))
+				.isThrownBy(() -> this.errorHandler.handleError(URI.create("/"), HttpMethod.GET, this.response))
 				.satisfies(ex -> {
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 					assertThat(ex.getResponseBodyAsByteArray()).isEqualTo(body);
@@ -150,7 +152,7 @@ class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		this.errorHandler.handleError(this.response);
+		this.errorHandler.handleError(URI.create("/"), HttpMethod.GET, this.response);
 	}
 
 
