@@ -146,8 +146,8 @@ public abstract class AbstractAnnotationMetadataTests {
 	@Test
 	void getSuperClassNameWhenHasNoSuperClassReturnsNull() {
 		assertThat(get(Object.class).getSuperClassName()).isNull();
-		assertThat(get(TestInterface.class).getSuperClassName()).isNull();
-		assertThat(get(TestSubInterface.class).getSuperClassName()).isNull();
+		assertThat(get(TestInterface.class).getSuperClassName()).isIn(null, "java.lang.Object");
+		assertThat(get(TestSubInterface.class).getSuperClassName()).isIn(null, "java.lang.Object");
 	}
 
 	@Test
@@ -208,6 +208,17 @@ public abstract class AbstractAnnotationMetadataTests {
 		assertThat(attributes).containsOnlyKeys("name", "size");
 		assertThat(attributes.get("name")).containsExactlyInAnyOrder("m1", "m2");
 		assertThat(attributes.get("size")).containsExactlyInAnyOrder(1, 2);
+	}
+
+	@Test
+	void getComplexAttributeTypesReturnsAll() {
+		MultiValueMap<String, Object> attributes =
+				get(WithComplexAttributeTypes.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
+		assertThat(attributes).containsOnlyKeys("names", "count", "type");
+		assertThat(attributes.get("names")).hasSize(1);
+		assertThat(attributes.get("names").get(0)).isEqualTo(new String[]{"first", "second"});
+		assertThat(attributes.get("count")).containsExactlyInAnyOrder(TestEnum.ONE);
+		assertThat(attributes.get("type")).containsExactlyInAnyOrder(TestEnum.class);
 	}
 
 	@Test
@@ -405,6 +416,24 @@ public abstract class AbstractAnnotationMetadataTests {
 
 		int size();
 
+	}
+
+	@ComplexAttributes(names = {"first", "second"}, count = TestEnum.ONE, type = TestEnum.class)
+	public static class WithComplexAttributeTypes {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ComplexAttributes {
+
+		String[] names();
+
+		TestEnum count();
+
+		Class<?> type();
+	}
+
+	public enum TestEnum {
+		ONE, TWO, THREE
 	}
 
 }
