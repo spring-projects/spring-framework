@@ -138,6 +138,7 @@ public abstract class ObjectUtils {
 	 * @see CollectionUtils#isEmpty(java.util.Collection)
 	 * @see CollectionUtils#isEmpty(java.util.Map)
 	 */
+	@Contract("null -> true")
 	public static boolean isEmpty(@Nullable Object obj) {
 		if (obj == null) {
 			return true;
