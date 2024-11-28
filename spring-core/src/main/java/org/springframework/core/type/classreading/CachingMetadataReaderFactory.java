@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,10 @@ import org.springframework.lang.Nullable;
  * @author Costin Leau
  * @since 2.5
  */
-public class CachingMetadataReaderFactory implements MetadataReaderFactory {
+public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 	/** Default maximum number of entries for a local MetadataReader cache: 256. */
 	public static final int DEFAULT_CACHE_LIMIT = 256;
-
-	private final MetadataReaderFactory delegate;
 
 	/** MetadataReader cache: either local or shared at the ResourceLoader level. */
 	@Nullable
@@ -52,7 +50,7 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 	 * using a local resource cache.
 	 */
 	public CachingMetadataReaderFactory() {
-		this.delegate = MetadataReaderFactory.create((ClassLoader) null);
+		super();
 		setCacheLimit(DEFAULT_CACHE_LIMIT);
 	}
 
@@ -62,7 +60,7 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 	 * @param classLoader the ClassLoader to use
 	 */
 	public CachingMetadataReaderFactory(@Nullable ClassLoader classLoader) {
-		this.delegate = MetadataReaderFactory.create(classLoader);
+		super(classLoader);
 		setCacheLimit(DEFAULT_CACHE_LIMIT);
 	}
 
@@ -74,7 +72,7 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 	 * @see DefaultResourceLoader#getResourceCache
 	 */
 	public CachingMetadataReaderFactory(@Nullable ResourceLoader resourceLoader) {
-		this.delegate = MetadataReaderFactory.create(resourceLoader);
+		super(resourceLoader);
 		if (resourceLoader instanceof DefaultResourceLoader defaultResourceLoader) {
 			this.metadataReaderCache = defaultResourceLoader.getResourceCache(MetadataReader.class);
 		}
@@ -82,6 +80,7 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 			setCacheLimit(DEFAULT_CACHE_LIMIT);
 		}
 	}
+
 
 	/**
 	 * Specify the maximum number of entries for the MetadataReader cache.
@@ -113,10 +112,6 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 		}
 	}
 
-	@Override
-	public MetadataReader getMetadataReader(String className) throws IOException {
-		return this.delegate.getMetadataReader(className);
-	}
 
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
@@ -124,7 +119,7 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 			// No synchronization necessary...
 			MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 			if (metadataReader == null) {
-				metadataReader = this.delegate.getMetadataReader(resource);
+				metadataReader = super.getMetadataReader(resource);
 				this.metadataReaderCache.put(resource, metadataReader);
 			}
 			return metadataReader;
@@ -133,14 +128,14 @@ public class CachingMetadataReaderFactory implements MetadataReaderFactory {
 			synchronized (this.metadataReaderCache) {
 				MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 				if (metadataReader == null) {
-					metadataReader = this.delegate.getMetadataReader(resource);
+					metadataReader = super.getMetadataReader(resource);
 					this.metadataReaderCache.put(resource, metadataReader);
 				}
 				return metadataReader;
 			}
 		}
 		else {
-			return this.delegate.getMetadataReader(resource);
+			return super.getMetadataReader(resource);
 		}
 	}
 
