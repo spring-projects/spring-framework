@@ -49,8 +49,8 @@ import org.springframework.util.ObjectUtils;
  * {@link #hasError(HttpStatusCode)}. Unknown status codes will be ignored by
  * {@link #hasError(ClientHttpResponse)}.
  *
- * <p>See {@link #handleError(ClientHttpResponse)} for more details on specific
- * exception types.
+ * <p>See {@link #handleError(URI, HttpMethod, ClientHttpResponse)}  for more
+ * details on specific exception types.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -117,27 +117,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Handle the error in the given response with the given resolved status code.
-	 * <p>The default implementation throws:
-	 * <ul>
-	 * <li>{@link HttpClientErrorException} if the status code is in the 4xx
-	 * series, or one of its sub-classes such as
-	 * {@link HttpClientErrorException.BadRequest} and others.
-	 * <li>{@link HttpServerErrorException} if the status code is in the 5xx
-	 * series, or one of its sub-classes such as
-	 * {@link HttpServerErrorException.InternalServerError} and others.
-	 * <li>{@link UnknownHttpStatusCodeException} for error status codes not in the
-	 * {@link HttpStatus} enum range.
-	 * </ul>
-	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
-	 * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)
-	 */
-	@Override
-	public void handleError(ClientHttpResponse response) throws IOException {
-		handleError(response, response.getStatusCode(), null, null);
-	}
-
-	/**
 	 * Handle the error in the given response with the given resolved status code
 	 * and extra information providing access to the request URL and HTTP method.
 	 * <p>The default implementation throws:
@@ -157,7 +136,18 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		handleError(response);
 		handleError(response, response.getStatusCode(), url, method);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>As of 6.2.1 this method is a no-op unless overridden.
+	 */
+	@SuppressWarnings("removal")
+	@Override
+	public void handleError(ClientHttpResponse response) throws IOException {
+		// no-op, but here for backwards compatibility
 	}
 
 	/**

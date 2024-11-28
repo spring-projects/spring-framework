@@ -43,9 +43,4 @@ public final class NoOpResponseErrorHandler implements ResponseErrorHandler {
 		return false;
 	}
 
-	@Override
-	public void handleError(ClientHttpResponse response) throws IOException {
-		// never actually called
-	}
-
 }

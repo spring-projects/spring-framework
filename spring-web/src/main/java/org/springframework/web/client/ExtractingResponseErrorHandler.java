@@ -42,11 +42,12 @@ import org.springframework.util.CollectionUtils;
  * mappings has a match for the {@linkplain ClientHttpResponse#getStatusCode()
  * status code} of a given {@code ClientHttpResponse},
  * {@link #hasError(ClientHttpResponse)} will return {@code true}, and
- * {@link #handleError(ClientHttpResponse)} will attempt to use the
- * {@linkplain #setMessageConverters(List) configured message converters} to
- * convert the response into the mapped subclass of {@link RestClientException}.
- * Note that the {@linkplain #setStatusMapping(Map) status mapping} takes
- * precedence over {@linkplain #setSeriesMapping(Map) series mapping}.
+ * {@link #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)}
+ * will attempt to use the {@linkplain #setMessageConverters(List) configured
+ * message converters} to convert the response into the mapped subclass of
+ * {@link RestClientException}. Note that the
+ * {@linkplain #setStatusMapping(Map) status mapping} takes precedence over
+ * {@linkplain #setSeriesMapping(Map) series mapping}.
  *
  * <p>If there is no match, this error handler will default to the behavior of
  * {@link DefaultResponseErrorHandler}. Note that you can override this default
@@ -98,9 +99,10 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	 * If this mapping has a match
 	 * for the {@linkplain ClientHttpResponse#getStatusCode() status code} of a given
 	 * {@code ClientHttpResponse}, {@link #hasError(ClientHttpResponse)} will return
-	 * {@code true} and {@link #handleError(ClientHttpResponse)} will attempt to use the
-	 * {@linkplain #setMessageConverters(List) configured message converters} to convert the
-	 * response into the mapped subclass of {@link RestClientException}.
+	 * {@code true} and {@link #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)}
+	 * will attempt to use the {@linkplain #setMessageConverters(List) configured
+	 * message converters} to convert the response into the mapped subclass of
+	 * {@link RestClientException}.
 	 */
 	public void setStatusMapping(Map<HttpStatusCode, Class<? extends RestClientException>> statusMapping) {
 		if (!CollectionUtils.isEmpty(statusMapping)) {
@@ -113,9 +115,10 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	 * If this mapping has a match
 	 * for the {@linkplain ClientHttpResponse#getStatusCode() status code} of a given
 	 * {@code ClientHttpResponse}, {@link #hasError(ClientHttpResponse)} will return
-	 * {@code true} and {@link #handleError(ClientHttpResponse)} will attempt to use the
-	 * {@linkplain #setMessageConverters(List) configured message converters} to convert the
-	 * response into the mapped subclass of {@link RestClientException}.
+	 * {@code true} and {@link #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)}
+	 * will attempt to use the {@linkplain #setMessageConverters(List) configured
+	 * message converters} to convert the response into the mapped subclass of
+	 * {@link RestClientException}.
 	 */
 	public void setSeriesMapping(Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping) {
 		if (!CollectionUtils.isEmpty(seriesMapping)) {
