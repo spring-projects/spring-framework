@@ -36,6 +36,7 @@ public class ConventionsPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		project.getExtensions().create("springFramework", SpringFrameworkExtension.class);
 		new CheckstyleConventions().apply(project);
 		new JavaConventions().apply(project);
 		new KotlinConventions().apply(project);

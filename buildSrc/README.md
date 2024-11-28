@@ -11,6 +11,16 @@ The `org.springframework.build.conventions` plugin applies all conventions to th
 * Configuring the Kotlin compiler, see `KotlinConventions`
 * Configuring testing in the build with `TestConventions` 
 
+This plugin also provides a DSL extension to optionally enable Java preview features for
+compiling and testing sources in a module. This can be applied with the following in a
+module build file:
+
+```groovy
+springFramework {
+	enableJavaPreviewFeatures = true
+}
+```
+
 
 ## Build Plugins
 

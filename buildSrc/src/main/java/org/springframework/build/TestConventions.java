@@ -67,6 +67,8 @@ class TestConventions {
 				"--add-opens=java.base/java.util=ALL-UNNAMED",
 				"-Xshare:off"
 		);
+		test.getJvmArgumentProviders().add(project.getExtensions()
+				.getByType(SpringFrameworkExtension.class).asArgumentProvider());
 	}
 
 	private void configureTestRetryPlugin(Project project, Test test) {
