@@ -19,6 +19,8 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +38,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Unit tests for {@link ExtractingResponseErrorHandler}.
+ *
  * @author Arjen Poutsma
  */
+@SuppressWarnings("ALL")
 class ExtractingResponseErrorHandlerTests {
 
 	private ExtractingResponseErrorHandler errorHandler;
@@ -48,13 +53,10 @@ class ExtractingResponseErrorHandlerTests {
 	@BeforeEach
 	void setup() {
 		HttpMessageConverter<Object> converter = new MappingJackson2HttpMessageConverter();
-		this.errorHandler = new ExtractingResponseErrorHandler(
-				Collections.singletonList(converter));
+		this.errorHandler = new ExtractingResponseErrorHandler(List.of(converter));
 
-		this.errorHandler.setStatusMapping(
-				Collections.singletonMap(HttpStatus.I_AM_A_TEAPOT, MyRestClientException.class));
-		this.errorHandler.setSeriesMapping(Collections
-				.singletonMap(HttpStatus.Series.SERVER_ERROR, MyRestClientException.class));
+		this.errorHandler.setStatusMapping(Map.of(HttpStatus.I_AM_A_TEAPOT, MyRestClientException.class));
+		this.errorHandler.setSeriesMapping(Map.of(HttpStatus.Series.SERVER_ERROR, MyRestClientException.class));
 	}
 
 
@@ -72,8 +74,7 @@ class ExtractingResponseErrorHandlerTests {
 
 	@Test
 	void hasErrorOverride() throws Exception {
-		this.errorHandler.setSeriesMapping(Collections
-				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
+		this.errorHandler.setSeriesMapping(Collections.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
 		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
@@ -96,9 +97,9 @@ class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		assertThatExceptionOfType(MyRestClientException.class).isThrownBy(() ->
-				this.errorHandler.handleError(this.response))
-			.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
+		assertThatExceptionOfType(MyRestClientException.class)
+				.isThrownBy(() -> this.errorHandler.handleError(this.response))
+				.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
 	}
 
 	@Test
@@ -112,9 +113,9 @@ class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		assertThatExceptionOfType(MyRestClientException.class).isThrownBy(() ->
-				this.errorHandler.handleError(this.response))
-			.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
+		assertThatExceptionOfType(MyRestClientException.class)
+				.isThrownBy(() -> this.errorHandler.handleError(this.response))
+				.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
 	}
 
 	@Test
@@ -128,18 +129,17 @@ class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
-				this.errorHandler.handleError(this.response))
-			.satisfies(ex -> {
-				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-				assertThat(ex.getResponseBodyAsByteArray()).isEqualTo(body);
-			});
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> this.errorHandler.handleError(this.response))
+				.satisfies(ex -> {
+					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(ex.getResponseBodyAsByteArray()).isEqualTo(body);
+				});
 	}
 
 	@Test
 	void handleNoMatchOverride() throws Exception {
-		this.errorHandler.setSeriesMapping(Collections
-				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
+		this.errorHandler.setSeriesMapping(Collections.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
 		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		HttpHeaders responseHeaders = new HttpHeaders();

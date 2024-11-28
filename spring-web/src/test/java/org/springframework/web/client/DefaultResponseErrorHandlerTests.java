@@ -19,7 +19,6 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +31,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -72,7 +72,7 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
-		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8)));
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(UTF_8)));
 
 		assertThatExceptionOfType(HttpClientErrorException.class)
 				.isThrownBy(() -> handler.handleError(response))
@@ -90,18 +90,20 @@ class DefaultResponseErrorHandlerTests {
 
 	@Test
 	void handleErrorWithUrlAndQueryParameters() throws Exception {
+		String url = "https://example.com/resource";
 		setupClientHttpResponse(HttpStatus.NOT_FOUND, "Hello World");
 		assertThatExceptionOfType(HttpClientErrorException.class)
-				.isThrownBy(() -> handler.handleError(URI.create("https://example.com/resource?access_token=123"), HttpMethod.GET, response))
-				.withMessage("404 Not Found on GET request for \"https://example.com/resource\": \"Hello World\"");
+				.isThrownBy(() -> handler.handleError(URI.create(url + "?access_token=123"), HttpMethod.GET, response))
+				.withMessage("404 Not Found on GET request for \"" + url + "\": \"Hello World\"");
 	}
 
 	@Test
 	void handleErrorWithUrlAndNoBody() throws Exception {
+		String url = "https://example.com";
 		setupClientHttpResponse(HttpStatus.NOT_FOUND, null);
 		assertThatExceptionOfType(HttpClientErrorException.class)
-				.isThrownBy(() -> handler.handleError(URI.create("https://example.com"), HttpMethod.GET, response))
-				.withMessage("404 Not Found on GET request for \"https://example.com\": [no body]");
+				.isThrownBy(() -> handler.handleError(URI.create(url), HttpMethod.GET, response))
+				.withMessage("404 Not Found on GET request for \"" + url + "\": [no body]");
 	}
 
 	private void setupClientHttpResponse(HttpStatus status, @Nullable String textBody) throws Exception {
@@ -110,7 +112,7 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 		if (textBody != null) {
 			headers.setContentType(MediaType.TEXT_PLAIN);
-			given(response.getBody()).willReturn(new ByteArrayInputStream(textBody.getBytes(StandardCharsets.UTF_8)));
+			given(response.getBody()).willReturn(new ByteArrayInputStream(textBody.getBytes(UTF_8)));
 		}
 		given(response.getHeaders()).willReturn(headers);
 	}
@@ -187,7 +189,7 @@ class DefaultResponseErrorHandlerTests {
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
 		String responseBody = "Hello World";
-		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8));
+		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(UTF_8));
 
 		given(response.getStatusCode()).willReturn(statusCode);
 		given(response.getStatusText()).willReturn(statusText);
@@ -227,7 +229,7 @@ class DefaultResponseErrorHandlerTests {
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
 		String responseBody = "Hello World";
-		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8));
+		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(UTF_8));
 
 		given(response.getStatusCode()).willReturn(statusCode);
 		given(response.getStatusText()).willReturn(statusText);
@@ -250,7 +252,7 @@ class DefaultResponseErrorHandlerTests {
 	public void bodyAvailableAfterHasErrorForUnknownStatusCode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
-		TestByteArrayInputStream body = new TestByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8));
+		TestByteArrayInputStream body = new TestByteArrayInputStream("Hello World".getBytes(UTF_8));
 
 		given(response.getStatusCode()).willReturn(HttpStatusCode.valueOf(999));
 		given(response.getStatusText()).willReturn("Custom status code");
@@ -259,7 +261,7 @@ class DefaultResponseErrorHandlerTests {
 
 		assertThat(handler.hasError(response)).isFalse();
 		assertThat(body.isClosed()).isFalse();
-		assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8)).isEqualTo("Hello World");
+		assertThat(StreamUtils.copyToString(response.getBody(), UTF_8)).isEqualTo("Hello World");
 	}
 
 
