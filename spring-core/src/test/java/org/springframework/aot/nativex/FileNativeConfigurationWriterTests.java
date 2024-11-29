@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -40,7 +38,6 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.SerializationHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.util.MimeType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,10 +71,13 @@ class FileNativeConfigurationWriterTests {
 		serializationHints.registerType(Long.class);
 		generator.write(hints);
 		assertEquals("""
-				[
-					{ "name": "java.lang.Integer" },
-					{ "name": "java.lang.Long" }
-				]""", "serialization-config.json");
+				{
+					"serialization": [
+						{ "type": "java.lang.Integer" },
+						{ "type": "java.lang.Long" }
+					]
+				}
+				""");
 	}
 
 	@Test
@@ -89,10 +89,13 @@ class FileNativeConfigurationWriterTests {
 		proxyHints.registerJdkProxy(Function.class, Consumer.class);
 		generator.write(hints);
 		assertEquals("""
-				[
-					{ "interfaces": [ "java.util.function.Function" ] },
-					{ "interfaces": [ "java.util.function.Function", "java.util.function.Consumer" ] }
-				]""", "proxy-config.json");
+				{
+					"reflection": [
+						{ type: {"proxy": [ "java.util.function.Function" ] } },
+						{ type: {"proxy": [ "java.util.function.Function", "java.util.function.Consumer" ] } }
+					]
+				}
+				""");
 	}
 
 	@Test
@@ -102,48 +105,36 @@ class FileNativeConfigurationWriterTests {
 		ReflectionHints reflectionHints = hints.reflection();
 		reflectionHints.registerType(StringDecoder.class, builder -> builder
 				.onReachableType(String.class)
-				.withMembers(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS,
-						MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+				.withMembers(MemberCategory.INVOKE_PUBLIC_FIELDS, MemberCategory.INVOKE_DECLARED_FIELDS,
 						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
-						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
-						MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
+						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS)
 				.withField("DEFAULT_CHARSET")
 				.withField("defaultCharset")
-				.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
-				.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class), ExecutableMode.INVOKE)
-				.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT));
+				.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class), ExecutableMode.INVOKE));
 		generator.write(hints);
 		assertEquals("""
-				[
-					{
-						"name": "org.springframework.core.codec.StringDecoder",
-						"condition": { "typeReachable": "java.lang.String" },
-						"allPublicFields": true,
-						"allDeclaredFields": true,
-						"queryAllPublicConstructors": true,
-						"queryAllDeclaredConstructors": true,
-						"allPublicConstructors": true,
-						"allDeclaredConstructors": true,
-						"queryAllPublicMethods": true,
-						"queryAllDeclaredMethods": true,
-						"allPublicMethods": true,
-						"allDeclaredMethods": true,
-						"allPublicClasses": true,
-						"allDeclaredClasses": true,
-						"fields": [
-							{ "name": "DEFAULT_CHARSET" },
-							{ "name": "defaultCharset" }
-						],
-						"methods": [
-							{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
-						],
-						"queriedMethods":  [
-							{ "name": "<init>", "parameterTypes": [ "java.util.List", "boolean", "org.springframework.util.MimeType" ] },
-							{ "name": "getDefaultCharset", "parameterTypes": [ ] }
-						]
-					}
-				]""", "reflect-config.json");
+				{
+					"reflection": [
+						{
+							"type": "org.springframework.core.codec.StringDecoder",
+							"condition": { "typeReached": "java.lang.String" },
+							"allPublicFields": true,
+							"allDeclaredFields": true,
+							"allPublicConstructors": true,
+							"allDeclaredConstructors": true,
+							"allPublicMethods": true,
+							"allDeclaredMethods": true,
+							"fields": [
+								{ "name": "DEFAULT_CHARSET" },
+								{ "name": "defaultCharset" }
+							],
+							"methods": [
+								{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
+							]
+						}
+					]
+				}
+				""");
 	}
 
 	@Test
@@ -155,12 +146,14 @@ class FileNativeConfigurationWriterTests {
 		jniHints.registerType(StringDecoder.class, builder -> builder.onReachableType(String.class));
 		generator.write(hints);
 		assertEquals("""
-				[
-					{
-						"name": "org.springframework.core.codec.StringDecoder",
-						"condition": { "typeReachable": "java.lang.String" }
-					}
-				]""", "jni-config.json");
+				{
+					"jni": [
+						{
+							"type": "org.springframework.core.codec.StringDecoder",
+							"condition": { "typeReached": "java.lang.String" }
+						}
+					]
+				}""");
 	}
 
 	@Test
@@ -173,23 +166,21 @@ class FileNativeConfigurationWriterTests {
 		generator.write(hints);
 		assertEquals("""
 				{
-					"resources": {
-						"includes": [
-							{"pattern": "\\\\Qcom/example/test.properties\\\\E"},
-							{"pattern": "\\\\Q/\\\\E"},
-							{"pattern": "\\\\Qcom\\\\E"},
-							{"pattern": "\\\\Qcom/example\\\\E"},
-							{"pattern": "\\\\Qcom/example/another.properties\\\\E"}
-						]
-					}
-				}""", "resource-config.json");
+					"resources": [
+							{"glob": "com/example/test.properties"},
+							{"glob": "/"},
+							{"glob": "com"},
+							{"glob": "com/example"},
+							{"glob": "com/example/another.properties"}
+					]
+				}""");
 	}
 
 	@Test
 	void namespace() {
 		String groupId = "foo.bar";
 		String artifactId = "baz";
-		String filename = "resource-config.json";
+		String filename = "reachability-metadata.json";
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir, groupId, artifactId);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
@@ -199,8 +190,8 @@ class FileNativeConfigurationWriterTests {
 		assertThat(jsonFile.toFile()).exists();
 	}
 
-	private void assertEquals(String expectedString, String filename) throws IOException, JSONException {
-		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(filename);
+	private void assertEquals(String expectedString) throws IOException, JSONException {
+		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve("reachability-metadata.json");
 		String content = Files.readString(jsonFile);
 		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.NON_EXTENSIBLE);
 	}

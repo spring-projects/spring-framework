@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ConditionalHint;
 import org.springframework.aot.hint.ResourceBundleHint;
@@ -31,8 +30,8 @@ import org.springframework.aot.hint.ResourcePatternHints;
 import org.springframework.lang.Nullable;
 
 /**
- * Write a {@link ResourceHints} to the JSON output expected by the GraalVM
- * {@code native-image} compiler, typically named {@code resource-config.json}.
+ * Collect {@link ResourceHints} as map attributes ready for JSON serialization for the GraalVM
+ * {@code native-image} compiler.
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
@@ -41,9 +40,7 @@ import org.springframework.lang.Nullable;
  * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/Resources/">Accessing Resources in Native Images</a>
  * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class ResourceHintsWriter {
-
-	public static final ResourceHintsWriter INSTANCE = new ResourceHintsWriter();
+class ResourceHintsAttributes {
 
 	private static final Comparator<ResourcePatternHint> RESOURCE_PATTERN_HINT_COMPARATOR =
 			Comparator.comparing(ResourcePatternHint::getPattern);
@@ -52,30 +49,17 @@ class ResourceHintsWriter {
 			Comparator.comparing(ResourceBundleHint::getBaseName);
 
 
-	public void write(BasicJsonWriter writer, ResourceHints hints) {
-		Map<String, Object> attributes = new LinkedHashMap<>();
-		addIfNotEmpty(attributes, "resources", toAttributes(hints));
-		handleResourceBundles(attributes, hints.resourceBundleHints());
-		writer.writeObject(attributes);
-	}
-
-	private Map<String, Object> toAttributes(ResourceHints hint) {
-		Map<String, Object> attributes = new LinkedHashMap<>();
-		addIfNotEmpty(attributes, "includes", hint.resourcePatternHints()
+	public List<Map<String, Object>> resources(ResourceHints hint) {
+		return hint.resourcePatternHints()
 				.map(ResourcePatternHints::getIncludes).flatMap(List::stream).distinct()
 				.sorted(RESOURCE_PATTERN_HINT_COMPARATOR)
-				.map(this::toAttributes).toList());
-		addIfNotEmpty(attributes, "excludes", hint.resourcePatternHints()
-				.map(ResourcePatternHints::getExcludes).flatMap(List::stream).distinct()
-				.sorted(RESOURCE_PATTERN_HINT_COMPARATOR)
-				.map(this::toAttributes).toList());
-		return attributes;
+				.map(this::toAttributes).toList();
 	}
 
-	private void handleResourceBundles(Map<String, Object> attributes, Stream<ResourceBundleHint> resourceBundles) {
-		addIfNotEmpty(attributes, "bundles", resourceBundles
+	public List<Map<String, Object>> resourceBundles(ResourceHints hint) {
+		return hint.resourceBundleHints()
 				.sorted(RESOURCE_BUNDLE_HINT_COMPARATOR)
-				.map(this::toAttributes).toList());
+				.map(this::toAttributes).toList();
 	}
 
 	private Map<String, Object> toAttributes(ResourceBundleHint hint) {
@@ -88,7 +72,7 @@ class ResourceHintsWriter {
 	private Map<String, Object> toAttributes(ResourcePatternHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		handleCondition(attributes, hint);
-		attributes.put("pattern", hint.toRegex().toString());
+		attributes.put("glob", hint.getPattern());
 		return attributes;
 	}
 
@@ -111,7 +95,7 @@ class ResourceHintsWriter {
 	private void handleCondition(Map<String, Object> attributes, ConditionalHint hint) {
 		if (hint.getReachableType() != null) {
 			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
-			conditionAttributes.put("typeReachable", hint.getReachableType());
+			conditionAttributes.put("typeReached", hint.getReachableType());
 			attributes.put("condition", conditionAttributes);
 		}
 	}

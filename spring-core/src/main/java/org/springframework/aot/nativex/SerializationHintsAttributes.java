@@ -18,6 +18,7 @@ package org.springframework.aot.nativex;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.aot.hint.ConditionalHint;
@@ -25,40 +26,36 @@ import org.springframework.aot.hint.JavaSerializationHint;
 import org.springframework.aot.hint.SerializationHints;
 
 /**
- * Write a {@link SerializationHints} to the JSON output expected by the
- * GraalVM {@code native-image} compiler, typically named
- * {@code serialization-config.json}.
+ * Collect {@link SerializationHints} as map attributes ready for JSON serialization for the GraalVM
+ * {@code native-image} compiler.
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
  * @author Brian Clozel
- * @since 6.0
- * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
+ * @see <a href="https://www.graalvm.org/jdk23/reference-manual/native-image/overview/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class SerializationHintsWriter {
-
-	public static final SerializationHintsWriter INSTANCE = new SerializationHintsWriter();
+class SerializationHintsAttributes {
 
 	private static final Comparator<JavaSerializationHint> JAVA_SERIALIZATION_HINT_COMPARATOR =
 			Comparator.comparing(JavaSerializationHint::getType);
 
-	public void write(BasicJsonWriter writer, SerializationHints hints) {
-		writer.writeArray(hints.javaSerializationHints()
+	public List<Map<String, Object>> toAttributes(SerializationHints hints) {
+		return hints.javaSerializationHints()
 				.sorted(JAVA_SERIALIZATION_HINT_COMPARATOR)
-				.map(this::toAttributes).toList());
+				.map(this::toAttributes).toList();
 	}
 
 	private Map<String, Object> toAttributes(JavaSerializationHint serializationHint) {
 		LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
 		handleCondition(attributes, serializationHint);
-		attributes.put("name", serializationHint.getType());
+		attributes.put("type", serializationHint.getType());
 		return attributes;
 	}
 
 	private void handleCondition(Map<String, Object> attributes, ConditionalHint hint) {
 		if (hint.getReachableType() != null) {
 			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
-			conditionAttributes.put("typeReachable", hint.getReachableType());
+			conditionAttributes.put("typeReached", hint.getReachableType());
 			attributes.put("condition", conditionAttributes);
 		}
 	}

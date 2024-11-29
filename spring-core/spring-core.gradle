@@ -104,6 +104,7 @@ dependencies {
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testImplementation("org.mockito:mockito-core")
+	testImplementation("com.networknt:json-schema-validator");
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
