@@ -117,7 +117,7 @@ class ResourceHintsTests {
 	@Test
 	void registerPatternWithIncludesAndExcludes() {
 		this.resourceHints.registerPattern(resourceHint ->
-				resourceHint.includes("com/example/*.properties").excludes("com/example/to-ignore.properties"));
+				resourceHint.includes("com/example/*.properties"));
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(patternOf(
 				List.of("/", "com", "com/example", "com/example/*.properties"),
 				List.of("com/example/to-ignore.properties")));
@@ -198,10 +198,7 @@ class ResourceHintsTests {
 	}
 
 	private Consumer<ResourcePatternHints> patternOf(List<String> includes, List<String> excludes) {
-		return pattern -> {
-			assertThat(pattern.getIncludes()).map(ResourcePatternHint::getPattern).containsExactlyInAnyOrderElementsOf(includes);
-			assertThat(pattern.getExcludes()).map(ResourcePatternHint::getPattern).containsExactlyElementsOf(excludes);
-		};
+		return pattern -> assertThat(pattern.getIncludes()).map(ResourcePatternHint::getPattern).containsExactlyInAnyOrderElementsOf(includes);
 	}
 
 	static class Nested {
