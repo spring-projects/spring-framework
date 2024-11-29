@@ -16,12 +16,10 @@
 
 package org.springframework.aot.hint;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
 /**
@@ -31,16 +29,18 @@ import org.springframework.util.Assert;
  * resource on the classpath, or alternatively may contain the special
  * {@code *} character to indicate a wildcard match. For example:
  * <ul>
- *     <li>{@code file.properties}: matches just the {@code file.properties}
+ *     <li>"file.properties": matches just the {@code file.properties}
  *         file at the root of the classpath.</li>
- *     <li>{@code com/example/file.properties}: matches just the
+ *     <li>"com/example/file.properties": matches just the
  *         {@code file.properties} file in {@code com/example/}.</li>
- *     <li>{@code *.properties}: matches all the files with a {@code .properties}
- *         extension anywhere in the classpath.</li>
- *     <li>{@code com/example/*.properties}: matches all the files with a {@code .properties}
- *         extension in {@code com/example/} and its child directories at any depth.</li>
- *     <li>{@code com/example/*}: matches all the files in {@code com/example/}
+ *     <li>"*.properties": matches all the files with a {@code .properties}
+ *         extension at the root of the classpath.</li>
+ *     <li>"com/example/*.properties": matches all the files with a {@code .properties}
+ *         extension in {@code com/example/}.</li>
+ *     <li>"com/example/{@literal **}": matches all the files in {@code com/example/}
  *         and its child directories at any depth.</li>
+ *     <li>"com/example/{@literal **}/*.properties": matches all the files with a {@code .properties}
+ *         extension in {@code com/example/} and its child directories at any depth.</li>
  * </ul>
  *
  * <p>A resource pattern must not start with a slash ({@code /}) unless it is the
@@ -53,6 +53,8 @@ import org.springframework.util.Assert;
  * @since 6.0
  */
 public final class ResourcePatternHint implements ConditionalHint {
+
+	private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
 	private final String pattern;
 
@@ -77,16 +79,11 @@ public final class ResourcePatternHint implements ConditionalHint {
 	}
 
 	/**
-	 * Return the regex {@link Pattern} to use for identifying the resources to match.
+	 * Whether the given path matches the current glob pattern.
+	 * @param path the path to match against
 	 */
-	public Pattern toRegex() {
-		String prefix = (this.pattern.startsWith("*") ? ".*" : "");
-		String suffix = (this.pattern.endsWith("*") ? ".*" : "");
-		String regex = Arrays.stream(this.pattern.split("\\*"))
-				.filter(s -> !s.isEmpty())
-				.map(Pattern::quote)
-				.collect(Collectors.joining(".*", prefix, suffix));
-		return Pattern.compile(regex);
+	public boolean matches(String path) {
+		return PATH_MATCHER.match(this.pattern, path);
 	}
 
 	@Nullable
