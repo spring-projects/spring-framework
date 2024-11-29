@@ -22,17 +22,20 @@ import java.util.Deque;
 import org.springframework.aot.agent.RecordedInvocation;
 import org.springframework.aot.agent.RecordedInvocationsListener;
 import org.springframework.aot.agent.RecordedInvocationsPublisher;
-import org.springframework.aot.agent.RuntimeHintsAgent;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.util.Assert;
 
 /**
  * Invocations relevant to {@link RuntimeHints} recorded during the execution of a block
- * of code instrumented by the {@link RuntimeHintsAgent}.
+ * of code instrumented by the {@link org.springframework.aot.agent.RuntimeHintsAgent}.
  *
  * @author Brian Clozel
  * @since 6.0
+ * @deprecated as of 7.0 in favor of the {@code -XX:MissingRegistrationReportingMode=Warn} and
+ * {@code -XX:MissingRegistrationReportingMode=Exit} JVM flags with GraalVM.
  */
+@Deprecated(forRemoval = true)
+@SuppressWarnings("removal")
 public final class RuntimeHintsRecorder {
 
 	private final RuntimeHintsInvocationsListener listener;
@@ -49,7 +52,7 @@ public final class RuntimeHintsRecorder {
 	 */
 	public static synchronized RuntimeHintsInvocations record(Runnable action) {
 		Assert.notNull(action, "Runnable action must not be null");
-		Assert.state(RuntimeHintsAgent.isLoaded(), "RuntimeHintsAgent must be loaded in the current JVM");
+		Assert.state(org.springframework.aot.agent.RuntimeHintsAgent.isLoaded(), "RuntimeHintsAgent must be loaded in the current JVM");
 		RuntimeHintsRecorder recorder = new RuntimeHintsRecorder();
 		RecordedInvocationsPublisher.addListener(recorder.listener);
 		try {

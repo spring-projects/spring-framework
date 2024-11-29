@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -67,8 +65,7 @@ enum InstrumentedMethod {
 	CLASS_GETCLASSES(Class.class, "getClasses", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass))
-						.withAnyMemberCategory(MemberCategory.DECLARED_CLASSES, MemberCategory.PUBLIC_CLASSES);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
@@ -81,7 +78,7 @@ enum InstrumentedMethod {
 				if (constructor == null) {
 					return runtimeHints -> false;
 				}
-				return reflection().onConstructor(constructor).introspect();
+				return reflection().onType(constructor.getDeclaringClass());
 			}
 	),
 
@@ -91,9 +88,7 @@ enum InstrumentedMethod {
 	CLASS_GETCONSTRUCTORS(Class.class, "getConstructors", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass)).withAnyMemberCategory(
-						MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
@@ -103,7 +98,7 @@ enum InstrumentedMethod {
 	CLASS_GETDECLAREDCLASSES(Class.class, "getDeclaredClasses", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass)).withMemberCategory(MemberCategory.DECLARED_CLASSES);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
@@ -116,9 +111,7 @@ enum InstrumentedMethod {
 				if (constructor == null) {
 					return runtimeHints -> false;
 				}
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return reflection().onType(thisType).withMemberCategory(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS)
-						.or(reflection().onConstructor(constructor).introspect());
+				return reflection().onType(constructor.getDeclaringClass());
 			}
 	),
 
@@ -128,8 +121,7 @@ enum InstrumentedMethod {
 	CLASS_GETDECLAREDCONSTRUCTORS(Class.class, "getDeclaredConstructors", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass))
-						.withAnyMemberCategory(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				return reflection().onType(TypeReference.of(thisClass));
 			}),
 
 	/**
@@ -141,9 +133,7 @@ enum InstrumentedMethod {
 				if (field == null) {
 					return runtimeHints -> false;
 				}
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return reflection().onType(thisType).withMemberCategory(MemberCategory.DECLARED_FIELDS)
-						.or(reflection().onField(field));
+				return reflection().onType(field.getDeclaringClass());
 			}
 	),
 
@@ -153,7 +143,7 @@ enum InstrumentedMethod {
 	CLASS_GETDECLAREDFIELDS(Class.class, "getDeclaredFields", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass)).withMemberCategory(MemberCategory.DECLARED_FIELDS);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
@@ -166,10 +156,7 @@ enum InstrumentedMethod {
 				if (method == null) {
 					return runtimeHints -> false;
 				}
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return reflection().onType(thisType)
-						.withAnyMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS)
-						.or(reflection().onMethod(method).introspect());
+				return reflection().onType(method.getDeclaringClass());
 			}
 	),
 
@@ -179,8 +166,7 @@ enum InstrumentedMethod {
 	CLASS_GETDECLAREDMETHODS(Class.class, "getDeclaredMethods", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass))
-						.withAnyMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
@@ -194,10 +180,7 @@ enum InstrumentedMethod {
 				if (field == null) {
 					return runtimeHints -> false;
 				}
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return reflection().onType(thisType).withMemberCategory(MemberCategory.PUBLIC_FIELDS)
-						.and(runtimeHints -> Modifier.isPublic(field.getModifiers()))
-						.or(reflection().onType(thisType).withMemberCategory(MemberCategory.DECLARED_FIELDS))
+				return reflection().onType(field.getDeclaringClass())
 						.or(reflection().onField(invocation.getReturnValue()));
 			}),
 
@@ -207,8 +190,7 @@ enum InstrumentedMethod {
 	CLASS_GETFIELDS(Class.class, "getFields", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass))
-						.withAnyMemberCategory(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
@@ -221,12 +203,7 @@ enum InstrumentedMethod {
 				if (method == null) {
 					return runtimeHints -> false;
 				}
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return reflection().onType(thisType).withAnyMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS)
-						.and(runtimeHints -> Modifier.isPublic(method.getModifiers()))
-						.or(reflection().onType(thisType).withAnyMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
-						.or(reflection().onMethod(method).introspect())
-						.or(reflection().onMethod(method).invoke());
+				return reflection().onType(method.getDeclaringClass());
 			}
 	),
 
@@ -236,9 +213,7 @@ enum InstrumentedMethod {
 	CLASS_GETMETHODS(Class.class, "getMethods", HintType.REFLECTION,
 			invocation -> {
 				Class<?> thisClass = invocation.getInstance();
-				return reflection().onType(TypeReference.of(thisClass)).withAnyMemberCategory(
-						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
-						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS);
+				return reflection().onType(TypeReference.of(thisClass));
 			}
 	),
 
