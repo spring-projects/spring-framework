@@ -65,7 +65,6 @@ public interface ResponseErrorHandler {
 	 */
 	@Deprecated(since = "6.2.1", forRemoval = true)
 	default void handleError(ClientHttpResponse response) throws IOException {
-		// no-op unless overridden
 	}
 
 }
