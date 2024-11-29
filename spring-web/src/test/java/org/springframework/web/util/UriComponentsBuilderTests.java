@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-
 import org.junit.jupiter.params.provider.MethodSource;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder.ParserType;
@@ -921,7 +921,8 @@ class UriComponentsBuilderTests {
 			Method method = innerClass.getDeclaredMethod("getSanitizedPath", StringBuilder.class);
 			method.setAccessible(true);
 			return (String) method.invoke(null, path);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException("Failed to invoke getSanitizedPath", e);
 		}
 	}
