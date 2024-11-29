@@ -902,7 +902,7 @@ class UriComponentsBuilderTests {
 
 	private static Stream<Arguments> providePathsForSanitization() {
 		return Stream.of(
-				Arguments.of(new StringBuilder("http://example.com//path/to//resource"), "http://example.com/path/to/resource"),
+				Arguments.of(new StringBuilder("https://example.com//path/to//resource"), "https://example.com/path/to/resource"),
 				Arguments.of(new StringBuilder("https://example.com//path"), "https://example.com/path"),
 				Arguments.of(new StringBuilder("example.com//path"), "example.com/path"),
 				Arguments.of(new StringBuilder("example.com//////////////path//to"), "example.com/path/to")
