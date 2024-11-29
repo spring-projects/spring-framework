@@ -960,7 +960,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
 						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
 			}
-			hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
+			hints.reflection().registerType(method.getDeclaringClass());
 			return CodeBlock.of("$L.$L($L.resolve($L))", INSTANCE_PARAMETER,
 					method.getName(), resolver, REGISTERED_BEAN_PARAMETER);
 

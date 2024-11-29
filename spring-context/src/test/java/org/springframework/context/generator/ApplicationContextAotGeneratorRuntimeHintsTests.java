@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.agent.EnabledIfRuntimeHintsAgent;
 import org.springframework.aot.test.agent.RuntimeHintsInvocations;
-import org.springframework.aot.test.agent.RuntimeHintsRecorder;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -46,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  */
 @EnabledIfRuntimeHintsAgent
+@SuppressWarnings("removal")
 class ApplicationContextAotGeneratorRuntimeHintsTests {
 
 	@Test
@@ -100,7 +100,7 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 		TestCompiler.forSystem().with(generationContext).compile(compiled -> {
 			ApplicationContextInitializer instance = compiled.getInstance(ApplicationContextInitializer.class);
 			GenericApplicationContext freshContext = new GenericApplicationContext();
-			RuntimeHintsInvocations recordedInvocations = RuntimeHintsRecorder.record(() -> {
+			RuntimeHintsInvocations recordedInvocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
 				instance.initialize(freshContext);
 				freshContext.refresh();
 				freshContext.close();

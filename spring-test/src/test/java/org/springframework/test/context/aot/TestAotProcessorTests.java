@@ -79,8 +79,7 @@ class TestAotProcessorTests extends AbstractAotTests {
 		assertThat(findFiles(sourceOutput)).containsExactlyInAnyOrderElementsOf(expectedSourceFiles());
 
 		assertThat(findFiles(resourceOutput.resolve("META-INF/native-image"))).contains(
-				Path.of(groupId, artifactId, "reflect-config.json"),
-				Path.of(groupId, artifactId, "resource-config.json"));
+				Path.of(groupId, artifactId, "reachability-metadata.json"));
 	}
 
 	private void copy(Class<?> testClass, Path destination) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,23 @@ package org.springframework.aot.test;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.agent.EnabledIfRuntimeHintsAgent;
 import org.springframework.aot.test.agent.RuntimeHintsInvocations;
-import org.springframework.aot.test.agent.RuntimeHintsRecorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 @EnabledIfRuntimeHintsAgent
+@SuppressWarnings("removal")
 class ReflectionInvocationsTests {
 
 	@Test
 	void sampleTest() {
 		RuntimeHints hints = new RuntimeHints();
-		hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
+		hints.reflection().registerType(String.class);
 
-		RuntimeHintsInvocations invocations = RuntimeHintsRecorder.record(() -> {
+		RuntimeHintsInvocations invocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
 			SampleReflection sample = new SampleReflection();
 			sample.sample(); // does Method[] methods = String.class.getMethods();
 		});
@@ -45,9 +44,9 @@ class ReflectionInvocationsTests {
 	@Test
 	void multipleCallsTest() {
 		RuntimeHints hints = new RuntimeHints();
-		hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
-		hints.reflection().registerType(Integer.class,MemberCategory.INTROSPECT_PUBLIC_METHODS);
-		RuntimeHintsInvocations invocations = RuntimeHintsRecorder.record(() -> {
+		hints.reflection().registerType(String.class);
+		hints.reflection().registerType(Integer.class);
+		RuntimeHintsInvocations invocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
 			SampleReflection sample = new SampleReflection();
 			sample.multipleCalls(); // does Method[] methods = String.class.getMethods(); methods = Integer.class.getMethods();
 		});

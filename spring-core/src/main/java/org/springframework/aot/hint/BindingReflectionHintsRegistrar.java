@@ -100,7 +100,7 @@ public class BindingReflectionHintsRegistrar {
 						typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
 								MemberCategory.INVOKE_PUBLIC_METHODS);
 					}
-					typeHint.withMembers(MemberCategory.DECLARED_FIELDS,
+					typeHint.withMembers(MemberCategory.INVOKE_DECLARED_FIELDS,
 							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 					for (Method method : clazz.getMethods()) {
 						String methodName = method.getName();
@@ -120,8 +120,6 @@ public class BindingReflectionHintsRegistrar {
 				if (KotlinDetector.isKotlinType(clazz)) {
 					KotlinDelegate.registerComponentHints(hints, clazz);
 					registerKotlinSerializationHints(hints, clazz);
-					// For Kotlin reflection
-					typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS);
 				}
 			});
 		}

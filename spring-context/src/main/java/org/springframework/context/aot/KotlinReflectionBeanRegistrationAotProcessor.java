@@ -17,7 +17,6 @@
 package org.springframework.context.aot;
 
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
@@ -61,7 +60,7 @@ class KotlinReflectionBeanRegistrationAotProcessor implements BeanRegistrationAo
 
 		private void registerHints(Class<?> type, RuntimeHints runtimeHints) {
 			if (KotlinDetector.isKotlinType(type)) {
-				runtimeHints.reflection().registerType(type, MemberCategory.INTROSPECT_DECLARED_METHODS);
+				runtimeHints.reflection().registerType(type);
 			}
 			Class<?> superClass = type.getSuperclass();
 			if (superClass != null) {

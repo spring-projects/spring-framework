@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -812,7 +811,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			Executable userExecutable = instantiationDescriptor.executable();
 			if (userExecutable instanceof Constructor<?> userConstructor) {
 				try {
-					runtimeHints.reflection().registerConstructor(userConstructor, ExecutableMode.INTROSPECT);
+					runtimeHints.reflection().registerType(userConstructor.getDeclaringClass());
 					Constructor<?> constructor = this.proxyClass.getConstructor(userExecutable.getParameterTypes());
 					return new InstantiationDescriptor(constructor);
 				}

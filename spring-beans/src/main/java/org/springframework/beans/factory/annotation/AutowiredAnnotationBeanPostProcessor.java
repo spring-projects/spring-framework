@@ -1065,7 +1065,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 			else {
 				codeWarnings.detectDeprecation(method);
-				hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
+				hints.reflection().registerType(method.getDeclaringClass());
 				CodeBlock arguments = new AutowiredArgumentsCodeGenerator(this.target,
 						method).generateCode(method.getParameterTypes());
 				CodeBlock injectionCode = CodeBlock.of("args -> $L.$L($L)",

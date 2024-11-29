@@ -172,8 +172,7 @@ public class InstanceSupplierCodeGenerator {
 	}
 
 	private CodeBlock generateCodeForAccessibleConstructor(String beanName, Constructor<?> constructor) {
-		this.generationContext.getRuntimeHints().reflection().registerConstructor(
-				constructor, ExecutableMode.INTROSPECT);
+		this.generationContext.getRuntimeHints().reflection().registerType(constructor.getDeclaringClass());
 
 		if (constructor.getParameterCount() == 0) {
 			if (!this.allowDirectSupplierShortcut) {
@@ -265,7 +264,7 @@ public class InstanceSupplierCodeGenerator {
 	private CodeBlock generateCodeForAccessibleFactoryMethod(String beanName,
 			Method factoryMethod, Class<?> targetClass, @Nullable String factoryBeanName) {
 
-		this.generationContext.getRuntimeHints().reflection().registerMethod(factoryMethod, ExecutableMode.INTROSPECT);
+		this.generationContext.getRuntimeHints().reflection().registerType(factoryMethod.getDeclaringClass());
 
 		if (factoryBeanName == null && factoryMethod.getParameterCount() == 0) {
 			Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());

@@ -48,7 +48,7 @@ class AspectJAdvisorBeanRegistrationAotProcessorTests {
 	@Test
 	void shouldProcessAspectJClass() {
 		process(AspectJClass.class);
-		assertThat(reflection().onType(AspectJClass.class).withMemberCategory(MemberCategory.DECLARED_FIELDS))
+		assertThat(reflection().onType(AspectJClass.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS))
 				.accepts(this.runtimeHints);
 	}
 
