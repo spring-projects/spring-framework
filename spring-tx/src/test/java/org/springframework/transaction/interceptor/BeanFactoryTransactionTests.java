@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -52,6 +53,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 23.04.2003
  */
 class BeanFactoryTransactionTests {
@@ -145,30 +147,25 @@ class BeanFactoryTransactionTests {
 		assertThat(postInterceptor.counter).as("postInterceptor").isEqualTo(3);
 	}
 
-	private void assertGetsAreNotTransactional(final ITestBean testBean) {
+	private void assertGetsAreNotTransactional(ITestBean testBean) {
 		// Install facade
 		PlatformTransactionManager ptm = mock();
 		PlatformTransactionManagerFacade.delegate = ptm;
 
 		assertThat(testBean.getAge()).as("Age").isEqualTo(666);
 
-		// Expect no methods
+		// Expect no interactions with the transaction manager.
 		verifyNoInteractions(ptm);
 
 		// Install facade expecting a call
-		final TransactionStatus ts = mock();
+		AtomicBoolean invoked = new AtomicBoolean();
+		TransactionStatus ts = mock();
 		ptm = new PlatformTransactionManager() {
-			private boolean invoked;
 			@Override
 			public TransactionStatus getTransaction(@Nullable TransactionDefinition def) throws TransactionException {
-				if (invoked) {
-					throw new IllegalStateException("getTransaction should not get invoked more than once");
-				}
-				invoked = true;
-				if (!(def.getName().contains(DerivedTestBean.class.getName()) && def.getName().contains("setAge"))) {
-					throw new IllegalStateException(
-							"transaction name should contain class and method name: " + def.getName());
-				}
+				assertThat(invoked.compareAndSet(false, true))
+						.as("getTransaction() should not get invoked more than once").isTrue();
+				assertThat(def.getName()).as("transaction name").contains(DerivedTestBean.class.getName(), "setAge");
 				return ts;
 			}
 			@Override
@@ -182,10 +179,10 @@ class BeanFactoryTransactionTests {
 		};
 		PlatformTransactionManagerFacade.delegate = ptm;
 
-		// same as old age to avoid ordering effect for now
-		int age = 666;
-		testBean.setAge(age);
-		assertThat(testBean.getAge()).isEqualTo(age);
+		assertThat(invoked).as("getTransaction() invoked before setAge()").isFalse();
+		testBean.setAge(42);
+		assertThat(invoked).as("getTransaction() invoked after setAge()").isTrue();
+		assertThat(testBean.getAge()).as("Age").isEqualTo(42);
 	}
 
 	@Test
