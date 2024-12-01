@@ -50,13 +50,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		if (this.readOnlyHeaders != null) {
 			return this.readOnlyHeaders;
 		}
-		else if (this.executed) {
+		if (this.executed) {
 			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
 			return this.readOnlyHeaders;
 		}
-		else {
-			return this.headers;
-		}
+		return this.headers;
 	}
 
 	@Override
