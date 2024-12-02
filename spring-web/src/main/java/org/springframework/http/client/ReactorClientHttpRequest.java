@@ -145,7 +145,9 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 		headers.forEach((key, value) -> request.requestHeaders().set(key, value));
 
 		if (body == null) {
-			return outbound;
+			// NettyOutbound#subscribe calls then() and that expects a body
+			// Use empty Mono instead for a more optimal send
+			return Mono.empty();
 		}
 
 		AtomicReference<Executor> executorRef = new AtomicReference<>();
