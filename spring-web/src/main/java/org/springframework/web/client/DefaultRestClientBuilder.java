@@ -51,6 +51,8 @@ import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessag
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -84,6 +86,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	// message factories
 
+	private static final boolean jaxb2Present;
+
 	private static final boolean jackson2Present;
 
 	private static final boolean gsonPresent;
@@ -91,6 +95,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	private static final boolean jsonbPresent;
 
 	private static final boolean kotlinSerializationJsonPresent;
+
+	private static final boolean jackson2XmlPresent;
 
 	private static final boolean jackson2SmilePresent;
 
@@ -107,11 +113,13 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
 		jdkClientPresent = ClassUtils.isPresent("java.net.http.HttpClient", loader);
 
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", loader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", loader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", loader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", loader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", loader);
+		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", loader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", loader);
 		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
@@ -439,6 +447,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			}
 			else if (jsonbPresent) {
 				this.messageConverters.add(new JsonbHttpMessageConverter());
+			}
+			if (jackson2XmlPresent) {
+				this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+			}
+			 else if (jaxb2Present) {
+				this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 			}
 			if (jackson2SmilePresent) {
 				this.messageConverters.add(new MappingJackson2SmileHttpMessageConverter());
