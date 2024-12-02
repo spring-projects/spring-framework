@@ -17,17 +17,18 @@
 package org.springframework.http;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -84,8 +85,8 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public @Nullable List<String> get(Object key) {
-		List<String> values = this.headers.get(key);
+	public @Nullable List<String> get(String headerName) {
+		List<String> values = this.headers.get(headerName);
 		return (values != null ? Collections.unmodifiableList(values) : null);
 	}
 
@@ -95,12 +96,12 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public void addAll(String key, List<? extends String> values) {
+	public void addAll(String key, List<? extends String> headerValues) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addAll(MultiValueMap<String, String> values) {
+	public void addAll(HttpHeaders values) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -120,14 +121,22 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
+	@Deprecated
 	public Map<String, String> asSingleValueMap() {
 		return Collections.unmodifiableMap(this.headers.asSingleValueMap());
 	}
 
 	@Override
-	public Set<String> keySet() {
-		return Collections.unmodifiableSet(this.headers.keySet());
+	@Deprecated
+	public MultiValueMap<String, String> asMultiValueMap() {
+		return CollectionUtils.unmodifiableMultiValueMap(this.headers);
 	}
+
+	@Override
+	public Set<String> headerNames() {
+		return Collections.unmodifiableSet(super.headerNames());
+	}
+
 
 	@Override
 	public List<String> put(String key, List<String> value) {
@@ -135,12 +144,22 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public List<String> remove(Object key) {
+	public @Nullable List<String> putIfAbsent(String headerName, List<String> headerValues) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> map) {
+	public void putAll(@Nullable HttpHeaders values) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends List<String>> headers) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<String> remove(String key) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -150,13 +169,8 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public Collection<List<String>> values() {
-		return Collections.unmodifiableCollection(this.headers.values());
-	}
-
-	@Override
-	public Set<Entry<String, List<String>>> entrySet() {
-		return this.headers.entrySet().stream().map(SimpleImmutableEntry::new)
+	public Set<Entry<String, List<String>>> headerSet() {
+		return super.headerSet().stream().map(SimpleImmutableEntry::new)
 				.collect(Collectors.collectingAndThen(
 						Collectors.toCollection(LinkedHashSet::new), // Retain original ordering of entries
 						Collections::unmodifiableSet));

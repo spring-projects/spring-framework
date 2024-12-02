@@ -373,10 +373,10 @@ class DefaultWebTestClient implements WebTestClient {
 		private ClientRequest.Builder initRequestBuilder() {
 			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headersToUse -> {
-						if (!CollectionUtils.isEmpty(DefaultWebTestClient.this.defaultHeaders)) {
+						if (!(DefaultWebTestClient.this.defaultHeaders == null || DefaultWebTestClient.this.defaultHeaders.isEmpty())) {
 							headersToUse.putAll(DefaultWebTestClient.this.defaultHeaders);
 						}
-						if (!CollectionUtils.isEmpty(this.headers)) {
+						if (!this.headers.isEmpty()) {
 							headersToUse.putAll(this.headers);
 						}
 					})

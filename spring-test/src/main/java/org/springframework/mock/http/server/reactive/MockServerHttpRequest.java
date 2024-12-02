@@ -298,8 +298,16 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add the given header values.
 		 * @param headers the header values
+		 * @deprecated Use {@link #headers(HttpHeaders)}
 		 */
+		@Deprecated
 		B headers(MultiValueMap<String, String> headers);
+
+		/**
+		 * Add the given header values.
+		 * @param headers the header values
+		 */
+		B headers(HttpHeaders headers);
 
 		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
@@ -484,7 +492,14 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		@Deprecated
 		public BodyBuilder headers(MultiValueMap<String, String> headers) {
+			this.headers.putAll(headers);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(HttpHeaders headers) {
 			this.headers.putAll(headers);
 			return this;
 		}

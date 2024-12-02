@@ -366,7 +366,7 @@ public final class MultipartBodyBuilder {
 		private final ResolvableType resolvableType;
 
 		PublisherEntity(
-				@Nullable MultiValueMap<String, String> headers, P publisher, ResolvableType resolvableType) {
+				@Nullable HttpHeaders headers, P publisher, ResolvableType resolvableType) {
 
 			super(publisher, headers);
 			Assert.notNull(publisher, "'publisher' must not be null");

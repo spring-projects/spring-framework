@@ -35,6 +35,7 @@ import reactor.netty.http.server.HttpServerRequest;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.support.Netty4HeadersAdapter;
@@ -67,7 +68,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 		super(HttpMethod.valueOf(request.method().name()),
 				ReactorUriHelper.createUri(request), request.forwardedPrefix(),
-				new Netty4HeadersAdapter(request.requestHeaders()));
+				new HttpHeaders(new Netty4HeadersAdapter(request.requestHeaders())));
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;

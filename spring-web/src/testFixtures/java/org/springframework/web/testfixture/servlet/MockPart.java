@@ -129,7 +129,7 @@ public class MockPart implements Part {
 
 	@Override
 	public Collection<String> getHeaderNames() {
-		return this.headers.keySet();
+		return this.headers.headerNames();
 	}
 
 	/**

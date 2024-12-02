@@ -291,7 +291,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		writer.flush();
 
 		byte[] bytes = bos.toByteArray();
-		if (bytes.length > 0 && getHeaders().containsKey(HttpHeaders.CONTENT_LENGTH)) {
+		if (bytes.length > 0 && getHeaders().containsHeader(HttpHeaders.CONTENT_LENGTH)) {
 			getHeaders().setContentLength(bytes.length);
 		}
 

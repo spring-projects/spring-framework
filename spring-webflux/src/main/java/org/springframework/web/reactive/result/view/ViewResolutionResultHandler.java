@@ -473,7 +473,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		@Override
 		public HttpHeaders getHeaders() {
-			if (!super.getHeaders().containsKey(HttpHeaders.CONTENT_TYPE)) {
+			if (!super.getHeaders().containsHeader(HttpHeaders.CONTENT_TYPE)) {
 				return super.getHeaders();
 			}
 			// Content-type is set, ignore further updates

@@ -150,7 +150,7 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		return Mono.fromCallable(() -> {
 			@SuppressWarnings("resource")
 			FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
-			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			for (Map.Entry<String, List<String>> entry : headers.headerSet()) {
 				byte[] headerName = entry.getKey().getBytes(getCharset());
 				for (String headerValueString : entry.getValue()) {
 					byte[] headerValue = headerValueString.getBytes(getCharset());

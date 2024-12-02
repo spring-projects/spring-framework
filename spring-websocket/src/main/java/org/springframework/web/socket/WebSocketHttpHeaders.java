@@ -17,7 +17,6 @@
 package org.springframework.web.socket;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -244,28 +243,28 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
-		return this.headers.containsKey(key);
+	public boolean containsHeader(String key) {
+		return this.headers.containsHeader(key);
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
-		return this.headers.containsValue(value);
+	public @Nullable List<String> get(String headerName) {
+		return this.headers.get(headerName);
 	}
 
 	@Override
-	public @Nullable List<String> get(Object key) {
-		return this.headers.get(key);
-	}
-
-	@Override
-	public List<String> put(String key, List<String> value) {
+	public @Nullable List<String> put(String key, List<String> value) {
 		return this.headers.put(key, value);
 	}
 
 	@Override
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(String key) {
 		return this.headers.remove(key);
+	}
+
+	@Override
+	public void putAll(HttpHeaders headers) {
+		this.headers.putAll(headers);
 	}
 
 	@Override
@@ -279,18 +278,13 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public Set<String> keySet() {
-		return this.headers.keySet();
+	public Set<String> headerNames() {
+		return this.headers.headerNames();
 	}
 
 	@Override
-	public Collection<List<String>> values() {
-		return this.headers.values();
-	}
-
-	@Override
-	public Set<Entry<String, List<String>>> entrySet() {
-		return this.headers.entrySet();
+	public Set<Map.Entry<String, List<String>>> headerSet() {
+		return this.headers.headerSet();
 	}
 
 	@Override
@@ -299,8 +293,8 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public List<String> putIfAbsent(String key, List<String> value) {
-		return this.headers.putIfAbsent(key, value);
+	public @Nullable List<String> putIfAbsent(String headerName, List<String> headerValues) {
+		return this.headers.putIfAbsent(headerName, headerValues);
 	}
 
 

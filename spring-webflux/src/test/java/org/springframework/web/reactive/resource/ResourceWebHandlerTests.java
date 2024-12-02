@@ -417,7 +417,7 @@ class ResourceWebHandlerTests {
 			this.handler.handle(exchange).block(TIMEOUT);
 
 			HttpHeaders headers = exchange.getResponse().getHeaders();
-			assertThat(headers.containsKey("Last-Modified")).isTrue();
+			assertThat(headers.containsHeader("Last-Modified")).isTrue();
 			assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		}
 
@@ -448,7 +448,7 @@ class ResourceWebHandlerTests {
 
 			MockServerHttpResponse response = exchange.getResponse();
 			assertThat(response.getHeaders().getCacheControl()).isEqualTo("no-store");
-			assertThat(response.getHeaders().containsKey("Last-Modified")).isTrue();
+			assertThat(response.getHeaders().containsHeader("Last-Modified")).isTrue();
 			assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(response.getHeaders().getLastModified() / 1000);
 		}
 
@@ -561,7 +561,7 @@ class ResourceWebHandlerTests {
 			HttpHeaders headers = exchange.getResponse().getHeaders();
 			assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
 			assertThat(headers.getContentLength()).isEqualTo(17);
-			assertThat(headers.containsKey("Last-Modified")).isFalse();
+			assertThat(headers.containsHeader("Last-Modified")).isFalse();
 			assertResponseBody(exchange, "h1 { color:red; }");
 		}
 

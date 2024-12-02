@@ -495,10 +495,10 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		private void initHeaders(HttpHeaders out) {
-			if (!CollectionUtils.isEmpty(defaultHeaders)) {
+			if (defaultHeaders != null && !defaultHeaders.isEmpty()) {
 				out.putAll(defaultHeaders);
 			}
-			if (!CollectionUtils.isEmpty(this.headers)) {
+			if (this.headers != null && !this.headers.isEmpty()) {
 				out.putAll(this.headers);
 			}
 		}

@@ -623,10 +623,10 @@ final class DefaultRestClient implements RestClient {
 
 		private @Nullable HttpHeaders initHeaders() {
 			HttpHeaders defaultHeaders = DefaultRestClient.this.defaultHeaders;
-			if (CollectionUtils.isEmpty(this.headers)) {
+			if (this.headers == null || this.headers.isEmpty()) {
 				return defaultHeaders;
 			}
-			else if (CollectionUtils.isEmpty(defaultHeaders)) {
+			else if (defaultHeaders == null || defaultHeaders.isEmpty()) {
 				return this.headers;
 			}
 			else {

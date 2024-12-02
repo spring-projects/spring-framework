@@ -24,7 +24,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-import java.util.Locale;
 import java.util.Map;
 
 import jakarta.servlet.AsyncContext;
@@ -47,7 +46,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -89,7 +87,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this(createDefaultHttpHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
 	}
 
-	public ServletServerHttpRequest(MultiValueMap<String, String> headers, HttpServletRequest request,
+	public ServletServerHttpRequest(HttpHeaders headers, HttpServletRequest request,
 			AsyncContext asyncContext, String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
 
@@ -112,9 +110,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	private static MultiValueMap<String, String> createDefaultHttpHeaders(HttpServletRequest request) {
-		MultiValueMap<String, String> headers =
-				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
+	private static HttpHeaders createDefaultHttpHeaders(HttpServletRequest request) {
+		HttpHeaders headers = new HttpHeaders();
 		for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
 			for (Enumeration<?> values = request.getHeaders(name); values.hasMoreElements(); ) {
@@ -163,8 +160,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@SuppressWarnings("NullAway")
-	private static MultiValueMap<String, String> initHeaders(
-			MultiValueMap<String, String> headerValues, HttpServletRequest request) {
+	private static HttpHeaders initHeaders(HttpHeaders headerValues, HttpServletRequest request) {
 
 		HttpHeaders headers = null;
 		MediaType contentType = null;

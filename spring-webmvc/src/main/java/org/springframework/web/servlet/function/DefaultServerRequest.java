@@ -606,7 +606,7 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public boolean containsHeader(String name) {
-			return this.headers.containsKey(name);
+			return this.headers.containsHeader(name);
 		}
 
 		@Override
@@ -647,7 +647,7 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public Collection<String> getHeaderNames() {
-			return this.headers.keySet();
+			return this.headers.headerNames();
 		}
 
 

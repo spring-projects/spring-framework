@@ -35,7 +35,7 @@ class HttpEntityTests {
 		String body = "foo";
 		HttpEntity<String> entity = new HttpEntity<>(body);
 		assertThat(entity.getBody()).isSameAs(body);
-		assertThat(entity.getHeaders()).isEmpty();
+		assertThat(entity.getHeaders().isEmpty()).as("isEmpty").isTrue();
 	}
 
 	@Test
@@ -62,25 +62,25 @@ class HttpEntityTests {
 
 	@Test
 	void testEquals() {
-		MultiValueMap<String, String> map1 = new LinkedMultiValueMap<>();
-		map1.set("Content-Type", "text/plain");
+		HttpHeaders headers1 = new HttpHeaders();
+		headers1.set("Content-Type", "text/plain");
 
-		MultiValueMap<String, String> map2 = new LinkedMultiValueMap<>();
-		map2.set("Content-Type", "application/json");
+		HttpHeaders headers2 = new HttpHeaders();
+		headers2.set("Content-Type", "application/json");
 
 		assertThat(new HttpEntity<>().equals(new HttpEntity<>())).isTrue();
-		assertThat(new HttpEntity<>(map1).equals(new HttpEntity<>())).isFalse();
-		assertThat(new HttpEntity<>().equals(new HttpEntity<>(map2))).isFalse();
+		assertThat(new HttpEntity<>(headers1).equals(new HttpEntity<>())).isFalse();
+		assertThat(new HttpEntity<>().equals(new HttpEntity<>(headers2))).isFalse();
 
-		assertThat(new HttpEntity<>(map1).equals(new HttpEntity<>(map1))).isTrue();
-		assertThat(new HttpEntity<>(map1).equals(new HttpEntity<>(map2))).isFalse();
+		assertThat(new HttpEntity<>(headers1).equals(new HttpEntity<>(headers1))).isTrue();
+		assertThat(new HttpEntity<>(headers1).equals(new HttpEntity<>(headers2))).isFalse();
 
-		assertThat(new HttpEntity<String>(null, null).equals(new HttpEntity<>(null, null))).isTrue();
-		assertThat(new HttpEntity<>("foo", null).equals(new HttpEntity<>(null, null))).isFalse();
-		assertThat(new HttpEntity<String>(null, null).equals(new HttpEntity<>("bar", null))).isFalse();
+		assertThat(new HttpEntity<String>(null, (HttpHeaders) null).equals(new HttpEntity<>(null, (HttpHeaders) null))).isTrue();
+		assertThat(new HttpEntity<>("foo", (HttpHeaders) null).equals(new HttpEntity<>(null, (HttpHeaders) null))).isFalse();
+		assertThat(new HttpEntity<String>(null, (HttpHeaders) null).equals(new HttpEntity<>("bar", (HttpHeaders) null))).isFalse();
 
-		assertThat(new HttpEntity<>("foo", map1).equals(new HttpEntity<>("foo", map1))).isTrue();
-		assertThat(new HttpEntity<>("foo", map1).equals(new HttpEntity<>("bar", map1))).isFalse();
+		assertThat(new HttpEntity<>("foo", headers1).equals(new HttpEntity<>("foo", headers1))).isTrue();
+		assertThat(new HttpEntity<>("foo", headers1).equals(new HttpEntity<>("bar", headers1))).isFalse();
 	}
 
 	@Test

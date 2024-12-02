@@ -489,7 +489,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	private void addContentDispositionHeader(ServletServerHttpRequest request, ServletServerHttpResponse response) {
 		HttpHeaders headers = response.getHeaders();
-		if (headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
+		if (headers.containsHeader(HttpHeaders.CONTENT_DISPOSITION)) {
 			return;
 		}
 

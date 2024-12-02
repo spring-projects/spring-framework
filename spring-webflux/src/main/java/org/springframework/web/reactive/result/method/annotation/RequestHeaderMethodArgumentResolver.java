@@ -25,6 +25,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.MissingRequestValueException;
@@ -68,7 +69,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	}
 
 	private boolean singleParam(RequestHeader annotation, Class<?> type) {
-		return !Map.class.isAssignableFrom(type);
+		return !Map.class.isAssignableFrom(type) && !HttpHeaders.class.isAssignableFrom(type);
 	}
 
 	@Override

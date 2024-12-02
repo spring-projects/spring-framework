@@ -88,7 +88,7 @@ class DefaultClientResponseBuilderTests {
 
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		assertThat(result.headers().asHttpHeaders()).hasSize(3);
+		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(3);
 		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
 		assertThat(result.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
 		assertThat(result.cookies()).hasSize(1);

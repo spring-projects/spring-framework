@@ -36,7 +36,7 @@ class ErrorResponseTests {
 	void createWithHttpHeader() {
 		ErrorResponse response = ErrorResponse.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
 				.header("header", "value").build();
-		assertThat(response.getHeaders()).containsOnly(entry("header", List.of("value")));
+		assertThat(response.getHeaders().asMultiValueMap()).containsOnly(entry("header", List.of("value")));
 	}
 
 	@Test
@@ -47,7 +47,7 @@ class ErrorResponseTests {
 					headers.add("header", "value2");
 					headers.add("another", "value3");
 				}).build();
-		assertThat(response.getHeaders()).containsOnly(entry("header", List.of("value", "value2")),
+		assertThat(response.getHeaders().asMultiValueMap()).containsOnly(entry("header", List.of("value", "value2")),
 				entry("another", List.of("value3")));
 	}
 

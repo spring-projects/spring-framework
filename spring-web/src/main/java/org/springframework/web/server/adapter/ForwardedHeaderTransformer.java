@@ -144,7 +144,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	protected boolean hasForwardedHeaders(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		for (String headerName : FORWARDED_HEADER_NAMES) {
-			if (headers.containsKey(headerName)) {
+			if (headers.containsHeader(headerName)) {
 				return true;
 			}
 		}

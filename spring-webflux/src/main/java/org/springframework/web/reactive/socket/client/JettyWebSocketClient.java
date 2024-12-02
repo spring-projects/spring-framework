@@ -92,7 +92,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 		upgradeRequest.setSubProtocols(handler.getSubProtocols());
 		if (headers != null) {
-			headers.keySet().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
+			headers.headerNames().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
 		}
 
 		final AtomicReference<HandshakeInfo> handshakeInfo = new AtomicReference<>();

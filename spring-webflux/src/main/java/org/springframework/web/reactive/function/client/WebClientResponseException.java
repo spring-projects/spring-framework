@@ -150,7 +150,7 @@ public class WebClientResponseException extends WebClientException {
 		}
 		else {
 			HttpHeaders result = new HttpHeaders();
-			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			for (Map.Entry<String, List<String>> entry : headers.headerSet()) {
 				for (String value : entry.getValue()) {
 					result.add(entry.getKey(), value);
 				}

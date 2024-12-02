@@ -88,7 +88,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 */
 	public ResponseEntity(HttpStatusCode status) {
-		this(null, null, status);
+		this(null, (HttpHeaders) null, status);
 	}
 
 	/**
@@ -97,14 +97,51 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 */
 	public ResponseEntity(@Nullable T body, HttpStatusCode status) {
-		this(body, null, status);
+		this(body, (HttpHeaders) null, status);
 	}
 
 	/**
 	 * Create a {@code ResponseEntity} with headers and a status code.
 	 * @param headers the entity headers
 	 * @param status the status code
+	 * @since 7.0
 	 */
+	public ResponseEntity(HttpHeaders headers, HttpStatusCode status) {
+		this(null, headers, status);
+	}
+
+	/**
+	 * Create a {@code ResponseEntity} with a body, headers, and a raw status code.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param rawStatus the status code value
+	 * @since 7.0
+	 */
+	public ResponseEntity(@Nullable T body, @Nullable HttpHeaders headers, int rawStatus) {
+		this(body, headers, HttpStatusCode.valueOf(rawStatus));
+	}
+
+	/**
+	 * Create a {@code ResponseEntity} with a body, headers, and a status code.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param statusCode the status code
+	 * @since 7.0
+	 */
+	public ResponseEntity(@Nullable T body, @Nullable HttpHeaders headers, HttpStatusCode statusCode) {
+		super(body, headers);
+		Assert.notNull(statusCode, "HttpStatusCode must not be null");
+
+		this.status = statusCode;
+	}
+
+	/**
+	 * Create a {@code ResponseEntity} with headers and a status code.
+	 * @param headers the entity headers
+	 * @param status the status code
+	 * @deprecated Use {@link #ResponseEntity(HttpHeaders, HttpStatusCode)}
+	 */
+	@Deprecated
 	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatusCode status) {
 		this(null, headers, status);
 	}
@@ -115,7 +152,9 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @param rawStatus the status code value
 	 * @since 5.3.2
+	 * @deprecated Use {@link #ResponseEntity(Object, HttpHeaders, int)}
 	 */
+	@Deprecated
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
 		this(body, headers, HttpStatusCode.valueOf(rawStatus));
 	}
@@ -125,7 +164,9 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param body the entity body
 	 * @param headers the entity headers
 	 * @param statusCode the status code
+	 * @deprecated Use {@link #ResponseEntity(Object, HttpHeaders, HttpStatusCode)}
 	 */
+	@Deprecated
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode statusCode) {
 		super(body, headers);
 		Assert.notNull(statusCode, "HttpStatusCode must not be null");

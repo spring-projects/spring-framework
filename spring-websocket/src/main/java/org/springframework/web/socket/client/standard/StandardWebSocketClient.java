@@ -216,7 +216,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> requestHeaders) {
-			requestHeaders.putAll(this.headers);
+			this.headers.forEach(requestHeaders::put);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Handshake request headers: " + requestHeaders);
 			}

@@ -125,7 +125,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
 
-		headers.entrySet()
+		headers.headerSet()
 				.stream()
 				.filter(entry -> !HttpHeaders.CONTENT_LENGTH.equals(entry.getKey()))
 				.forEach(entry -> entry.getValue().forEach(v -> this.httpRequest.addHeader(entry.getKey(), v)));

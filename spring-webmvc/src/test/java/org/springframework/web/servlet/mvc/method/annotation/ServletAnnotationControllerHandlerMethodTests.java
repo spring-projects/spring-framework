@@ -3576,7 +3576,21 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		@RequestMapping("/httpHeaders")
 		public void httpHeaders(@RequestHeader HttpHeaders headers, Writer writer) throws IOException {
 			assertThat(headers.getContentType()).as("Invalid Content-Type").isEqualTo(new MediaType("text", "html"));
-			multiValueMap(headers, writer);
+			for (Iterator<Map.Entry<String, List<String>>> it1 = headers.headerSet().iterator(); it1.hasNext();) {
+				Map.Entry<String, List<String>> entry = it1.next();
+				writer.write(entry.getKey() + "=[");
+				for (Iterator<String> it2 = entry.getValue().iterator(); it2.hasNext();) {
+					String value = it2.next();
+					writer.write(value);
+					if (it2.hasNext()) {
+						writer.write(',');
+					}
+				}
+				writer.write(']');
+				if (it1.hasNext()) {
+					writer.write(',');
+				}
+			}
 		}
 	}
 

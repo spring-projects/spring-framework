@@ -79,9 +79,24 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * @param contextPath the context path for the request
 	 * @param headers the headers for the request (as {@link MultiValueMap})
 	 * @since 6.0.8
+	 * @deprecated Use {@link #AbstractServerHttpRequest(HttpMethod, URI, String, HttpHeaders)}
 	 */
+	@Deprecated
 	public AbstractServerHttpRequest(HttpMethod method, URI uri, @Nullable String contextPath,
 			MultiValueMap<String, String> headers) {
+		this(method, uri, contextPath, new HttpHeaders(headers));
+	}
+
+	/**
+	 * Constructor with the method, URI and headers for the request.
+	 * @param method the HTTP method for the request
+	 * @param uri the URI for the request
+	 * @param contextPath the context path for the request
+	 * @param headers the headers for the request (as {@link MultiValueMap})
+	 * @since 7.0
+	 */
+	public AbstractServerHttpRequest(HttpMethod method, URI uri, @Nullable String contextPath,
+			HttpHeaders headers) {
 
 		Assert.notNull(method, "Method must not be null");
 		Assert.notNull(uri, "Uri must not be null");

@@ -104,7 +104,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Could not parse Content-Type.");
 		assertDetailMessageCode(ex, "parseError", null);
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -117,7 +117,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Acceptable representations: [application/json, application/cbor].");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getSupportedMediaTypes()});
 
-		assertThat(ex.getHeaders()).hasSize(1);
+		assertThat(ex.getHeaders().size()).isOne();
 		assertThat(ex.getHeaders().getAccept()).isEqualTo(mediaTypes);
 	}
 
@@ -131,7 +131,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Could not parse Accept header.");
 		assertDetailMessageCode(ex, "parseError", null);
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -143,7 +143,7 @@ class ErrorResponseExceptionTests {
 		assertStatus(ex, HttpStatus.SERVICE_UNAVAILABLE);
 		assertDetail(ex, null);
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -156,7 +156,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Method 'PUT' is not supported.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getMethod(), ex.getSupportedHttpMethods()});
 
-		assertThat(ex.getHeaders()).hasSize(1);
+		assertThat(ex.getHeaders().size()).isOne();
 		assertThat(ex.getHeaders().getAllow()).containsExactly(HttpMethod.GET, HttpMethod.POST);
 	}
 
@@ -169,7 +169,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required header 'Authorization' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getHeaderName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -181,7 +181,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required parameter 'query' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getParameterName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -194,7 +194,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required path parameter 'region' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getVariableName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -206,7 +206,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required path variable 'id' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getVariableName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -218,7 +218,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required cookie 'oreo' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getCookieName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -231,7 +231,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Invalid request parameters.");
 		assertDetailMessageCode(ex, null, new Object[] {List.of("\"foo=bar, bar=baz\"")});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -243,7 +243,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required part 'file' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getRequestPartName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -258,7 +258,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Invalid request content.");
 		testHelper.assertMessages(ex, ex.getAllErrors());
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -306,7 +306,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Could not parse Content-Type.");
 		assertDetailMessageCode(ex, "parseError", null);
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -319,7 +319,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Acceptable representations: [application/json, application/cbor].");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getSupportedMediaTypes()});
 
-		assertThat(ex.getHeaders()).hasSize(1);
+		assertThat(ex.getHeaders().size()).isOne();
 		assertThat(ex.getHeaders().getAccept()).isEqualTo(mediaTypes);
 	}
 
@@ -333,7 +333,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Could not parse Accept header.");
 		assertDetailMessageCode(ex, "parseError", null);
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -345,7 +345,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Failure");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getReason()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -358,7 +358,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Required header 'foo' is not present.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getLabel(), ex.getName()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -373,7 +373,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Invalid request parameters.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getConditions()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -388,7 +388,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Invalid request content.");
 		testHelper.assertMessages(ex, ex.getAllErrors());
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -401,7 +401,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Supported methods: [GET, POST]");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getHttpMethod(), supportedMethods});
 
-		assertThat(ex.getHeaders()).hasSize(1);
+		assertThat(ex.getHeaders().size()).isOne();
 		assertThat(ex.getHeaders().getAllow()).containsExactly(HttpMethod.GET, HttpMethod.POST);
 	}
 
@@ -414,7 +414,7 @@ class ErrorResponseExceptionTests {
 		assertDetail(ex, "Request method 'PUT' is not supported.");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getHttpMethod(), Collections.emptyList()});
 
-		assertThat(ex.getHeaders()).isEmpty();
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
 	@Test // gh-30300

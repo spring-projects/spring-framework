@@ -240,7 +240,7 @@ class ForwardedHeaderTransformerTests {
 
 	private void assertForwardedHeadersRemoved(ServerHttpRequest request) {
 		ForwardedHeaderTransformer.FORWARDED_HEADER_NAMES
-				.forEach(name -> assertThat(request.getHeaders().containsKey(name)).isFalse());
+				.forEach(name -> assertThat(request.getHeaders().containsHeader(name)).isFalse());
 	}
 
 }

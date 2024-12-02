@@ -213,7 +213,7 @@ public class HeaderAssertions {
 	 * @since 5.0.3
 	 */
 	public WebTestClient.ResponseSpec exists(String name) {
-		if (!getHeaders().containsKey(name)) {
+		if (!getHeaders().containsHeader(name)) {
 			String message = getMessage(name) + " does not exist";
 			this.exchangeResult.assertWithDiagnostics(() -> fail(message));
 		}
@@ -224,7 +224,7 @@ public class HeaderAssertions {
 	 * Expect that the header with the given name is not present.
 	 */
 	public WebTestClient.ResponseSpec doesNotExist(String name) {
-		if (getHeaders().containsKey(name)) {
+		if (getHeaders().containsHeader(name)) {
 			String message = getMessage(name) + " exists with value=[" + getHeaders().getFirst(name) + "]";
 			this.exchangeResult.assertWithDiagnostics(() -> fail(message));
 		}

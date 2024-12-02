@@ -130,7 +130,7 @@ public class FrameworkExtensionTests {
 
 		@Override
 		public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-			for (String headerName : this.headers.keySet()) {
+			for (String headerName : this.headers.headerNames()) {
 				request.addHeader(headerName, this.headers.get(headerName));
 			}
 			return request;

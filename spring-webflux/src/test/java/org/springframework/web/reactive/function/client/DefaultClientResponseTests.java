@@ -338,7 +338,7 @@ class DefaultClientResponseTests {
 		WebClientResponseException exception = resultMono.block();
 		assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 		assertThat(exception.getMessage()).isEqualTo("404 Not Found from UNKNOWN https://example.org:9999/app/path");
-		assertThat(exception.getHeaders()).containsExactly(entry("Content-Type", List.of("text/plain")));
+		assertThat(exception.getHeaders().asMultiValueMap()).containsExactly(entry("Content-Type", List.of("text/plain")));
 		assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
 	}
 
@@ -397,7 +397,7 @@ class DefaultClientResponseTests {
 					WebClientResponseException exception = (WebClientResponseException) t;
 					assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 					assertThat(exception.getMessage()).isEqualTo("404 Not Found");
-					assertThat(exception.getHeaders()).containsExactly(entry("Content-Type",List.of("text/plain")));
+					assertThat(exception.getHeaders().asMultiValueMap()).containsExactly(entry("Content-Type",List.of("text/plain")));
 					assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
 				})
 				.verify();

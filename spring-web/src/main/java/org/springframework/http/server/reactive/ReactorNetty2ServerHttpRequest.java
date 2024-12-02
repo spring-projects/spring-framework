@@ -37,6 +37,7 @@ import reactor.netty5.http.server.HttpServerRequest;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.Netty5DataBufferFactory;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.support.Netty5HeadersAdapter;
@@ -70,7 +71,7 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(HttpMethod.valueOf(request.method().name()), initUri(request), "",
-				new Netty5HeadersAdapter(request.requestHeaders()));
+				new HttpHeaders(new Netty5HeadersAdapter(request.requestHeaders())));
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;

@@ -186,7 +186,8 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/x-protobuf"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -197,7 +198,8 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/x-protobuf"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -207,7 +209,8 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(serializableBeanArray, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/x-protobuf"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -218,7 +221,8 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(listOf(serializableBean), ResolvableType.forType(typeOf<List<SerializableBean>>().javaType), null, outputMessage, null)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/x-protobuf"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 

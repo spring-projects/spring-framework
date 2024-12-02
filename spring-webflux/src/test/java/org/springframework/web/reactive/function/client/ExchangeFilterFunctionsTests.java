@@ -103,13 +103,13 @@ class ExchangeFilterFunctionsTests {
 		ClientResponse response = mock();
 
 		ExchangeFunction exchange = r -> {
-			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isTrue();
+			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isTrue();
 			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).startsWith("Basic ");
 			return Mono.just(response);
 		};
 
 		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication("foo", "bar");
-		assertThat(request.headers().containsKey(HttpHeaders.AUTHORIZATION)).isFalse();
+		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
 		ClientResponse result = auth.filter(request, exchange).block();
 		assertThat(result).isEqualTo(response);
 	}
@@ -133,13 +133,13 @@ class ExchangeFilterFunctionsTests {
 		ClientResponse response = mock();
 
 		ExchangeFunction exchange = r -> {
-			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isTrue();
+			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isTrue();
 			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).startsWith("Basic ");
 			return Mono.just(response);
 		};
 
 		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication();
-		assertThat(request.headers().containsKey(HttpHeaders.AUTHORIZATION)).isFalse();
+		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
 		ClientResponse result = auth.filter(request, exchange).block();
 		assertThat(result).isEqualTo(response);
 	}
@@ -151,12 +151,12 @@ class ExchangeFilterFunctionsTests {
 		ClientResponse response = mock();
 
 		ExchangeFunction exchange = r -> {
-			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isFalse();
+			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
 			return Mono.just(response);
 		};
 
 		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication();
-		assertThat(request.headers().containsKey(HttpHeaders.AUTHORIZATION)).isFalse();
+		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
 		ClientResponse result = auth.filter(request, exchange).block();
 		assertThat(result).isEqualTo(response);
 	}

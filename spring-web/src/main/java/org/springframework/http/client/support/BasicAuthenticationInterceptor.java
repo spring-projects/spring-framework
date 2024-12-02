@@ -74,7 +74,7 @@ public class BasicAuthenticationInterceptor implements ClientHttpRequestIntercep
 			HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
 		HttpHeaders headers = request.getHeaders();
-		if (!headers.containsKey(HttpHeaders.AUTHORIZATION)) {
+		if (!headers.containsHeader(HttpHeaders.AUTHORIZATION)) {
 			headers.setBasicAuth(this.encodedCredentials);
 		}
 		return execution.execute(request, body);

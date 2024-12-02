@@ -151,8 +151,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		private static final long serialVersionUID = 3410708522401046302L;
 
 		@Override
-		public boolean containsKey(Object key) {
-			return (super.containsKey(key) || (get(key) != null));
+		public boolean containsHeader(String key) {
+			return (super.containsHeader(key) || (get(key) != null));
 		}
 
 		@Override
@@ -169,10 +169,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		}
 
 		@Override
-		public @Nullable List<String> get(Object key) {
-			Assert.isInstanceOf(String.class, key, "Key must be a String-based header name");
-
-			String headerName = (String) key;
+		public @Nullable List<String> get(String headerName) {
 			if (headerName.equalsIgnoreCase(CONTENT_TYPE)) {
 				// Content-Type is written as an override so don't merge
 				String value = getFirst(headerName);
@@ -185,7 +182,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			}
 			boolean isEmpty1 = CollectionUtils.isEmpty(values1);
 
-			List<String> values2 = super.get(key);
+			List<String> values2 = super.get(headerName);
 			boolean isEmpty2 = CollectionUtils.isEmpty(values2);
 
 			if (isEmpty1 && isEmpty2) {

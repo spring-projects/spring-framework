@@ -357,6 +357,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				dst.putAll(src);
 			}
 		}
+
+		private static void copy(HttpHeaders src, HttpHeaders dst) {
+			if (!src.isEmpty()) {
+				dst.putAll(src);
+			}
+		}
 	}
 
 

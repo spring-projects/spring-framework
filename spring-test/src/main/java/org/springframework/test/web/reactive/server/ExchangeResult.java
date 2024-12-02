@@ -249,7 +249,7 @@ public class ExchangeResult {
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {
-		return headers.entrySet().stream()
+		return headers.headerSet().stream()
 				.map(entry -> entry.getKey() + ": " + entry.getValue())
 				.collect(Collectors.joining(delimiter));
 	}

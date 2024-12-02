@@ -79,7 +79,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(HttpMethod method, URI url) {
-		this(null, null, method, url, null);
+		this(null, (HttpHeaders) null, method, url, null);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(@Nullable T body, HttpMethod method, URI url) {
-		this(body, null, method, url, null);
+		this(body, (HttpHeaders) null, method, url, null);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 */
 	public RequestEntity(@Nullable T body, HttpMethod method, URI url, Type type) {
-		this(body, null, method, url, type);
+		this(body, (HttpHeaders) null, method, url, type);
 	}
 
 	/**
@@ -109,7 +109,52 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
+	 * @since 7.0
 	 */
+	public RequestEntity(HttpHeaders headers, HttpMethod method, URI url) {
+		this(null, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers and body.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @since 7.0
+	 */
+	public RequestEntity(@Nullable T body, @Nullable HttpHeaders headers,
+			@Nullable HttpMethod method, URI url) {
+
+		this(body, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers, body and type.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 7.0
+	 */
+	public RequestEntity(@Nullable T body, @Nullable HttpHeaders headers,
+			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
+
+		super(body, headers);
+		this.method = method;
+		this.url = url;
+		this.type = type;
+	}
+
+	/**
+	 * Constructor with method, URL and headers but without body.
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @deprecated Use {@link #RequestEntity(HttpHeaders, HttpMethod, URI)}
+	 */
+	@Deprecated
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		this(null, headers, method, url, null);
 	}
@@ -120,7 +165,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
+	 * @deprecated Use {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI)}
 	 */
+	@Deprecated
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, URI url) {
 
@@ -135,7 +182,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @param type the type used for generic type resolution
 	 * @since 4.3
+	 * @deprecated Use {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI, Type)}
 	 */
+	@Deprecated
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
 
@@ -694,7 +743,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		private final @Nullable Map<String, ?> uriVarsMap;
 
 		UriTemplateRequestEntity(
-				@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+				@Nullable T body, @Nullable HttpHeaders headers,
 				@Nullable HttpMethod method, @Nullable Type type, String uriTemplate,
 				Object @Nullable [] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
 

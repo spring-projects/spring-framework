@@ -242,7 +242,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> headers) {
-			headers.putAll(this.requestHeaders);
+			this.requestHeaders.forEach(headers::put);
 			if (this.delegate != null) {
 				this.delegate.beforeRequest(headers);
 			}
