@@ -120,7 +120,9 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit(this.outbound::then);
+		// NettyOutbound#then() expects a body
+		// Use null as the write action for a more optimal send
+		return doCommit(null);
 	}
 
 	@Override
