@@ -210,7 +210,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	protected ServletServerHttpResponse createResponse(HttpServletResponse response,
 			AsyncContext context, ServletServerHttpRequest request) throws IOException {
 
-		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize(), request);
+		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), request);
 	}
 
 	@Override

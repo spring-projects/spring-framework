@@ -54,8 +54,6 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private final ServletOutputStream outputStream;
 
-	private final int bufferSize;
-
 	@Nullable
 	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
 
@@ -70,23 +68,21 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
-			DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request) throws IOException {
+			DataBufferFactory bufferFactory, ServletServerHttpRequest request) throws IOException {
 
-		this(new HttpHeaders(), response, asyncContext, bufferFactory, bufferSize, request);
+		this(new HttpHeaders(), response, asyncContext, bufferFactory, request);
 	}
 
 	public ServletServerHttpResponse(HttpHeaders headers, HttpServletResponse response, AsyncContext asyncContext,
-			DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request) throws IOException {
+			DataBufferFactory bufferFactory, ServletServerHttpRequest request) throws IOException {
 
 		super(bufferFactory, headers);
 
 		Assert.notNull(response, "HttpServletResponse must not be null");
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
-		Assert.isTrue(bufferSize > 0, "Buffer size must be greater than 0");
 
 		this.response = response;
 		this.outputStream = response.getOutputStream();
-		this.bufferSize = bufferSize;
 		this.request = request;
 
 		this.asyncListener = new ResponseAsyncListener();
