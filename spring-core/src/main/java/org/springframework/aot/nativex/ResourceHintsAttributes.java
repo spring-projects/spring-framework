@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aot.nativex;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,7 +26,6 @@ import org.springframework.aot.hint.ResourceBundleHint;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.hint.ResourcePatternHints;
-import org.springframework.lang.Nullable;
 
 /**
  * Collect {@link ResourceHints} as map attributes ready for JSON serialization for the GraalVM
@@ -74,22 +72,6 @@ class ResourceHintsAttributes {
 		handleCondition(attributes, hint);
 		attributes.put("glob", hint.getPattern());
 		return attributes;
-	}
-
-	private void addIfNotEmpty(Map<String, Object> attributes, String name, @Nullable Object value) {
-		if (value instanceof Collection<?> collection) {
-			if (!collection.isEmpty()) {
-				attributes.put(name, value);
-			}
-		}
-		else if (value instanceof Map<?, ?> map) {
-			if (!map.isEmpty()) {
-				attributes.put(name, value);
-			}
-		}
-		else if (value != null) {
-			attributes.put(name, value);
-		}
 	}
 
 	private void handleCondition(Map<String, Object> attributes, ConditionalHint hint) {
