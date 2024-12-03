@@ -207,7 +207,7 @@ class DataBinderConstructTests {
 	}
 
 
-	private static class NestedDataClass {
+	static class NestedDataClass {
 
 		private final String param1;
 

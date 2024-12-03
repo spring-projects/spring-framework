@@ -53,11 +53,11 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 
-	@Override
 	@Test
+	@Override
 	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		boolean condition = entityManagerFactory instanceof EntityManagerFactoryInfo;
-		assertThat(condition).as("Must not have introduced config interface").isFalse();
+		assertThat(entityManagerFactory).as("Must not have introduced config interface")
+				.isNotInstanceOf(EntityManagerFactoryInfo.class);
 	}
 
 	@Test
@@ -66,23 +66,21 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 		String firstName = "Tony";
 		insertPerson(firstName);
 
-		List<Person> people = sharedEntityManager.createQuery("select p from Person as p").getResultList();
+		List<Person> people = sharedEntityManager.createQuery("select p from Person as p", Person.class).getResultList();
 		assertThat(people).hasSize(1);
 		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
 		assertThat(people.get(0).postLoaded).isSameAs(applicationContext);
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCurrentSession() {
 		String firstName = "Tony";
 		insertPerson(firstName);
 
-		Query q = sessionFactory.getCurrentSession().createQuery("select p from Person as p");
-		List<Person> people = q.getResultList();
-		assertThat(people).hasSize(1);
-		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
-		assertThat(people.get(0).postLoaded).isSameAs(applicationContext);
+		Query<Person> q = sessionFactory.getCurrentSession().createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).hasSize(1);
+		assertThat(q.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+		assertThat(q.getResultList().get(0).postLoaded).isSameAs(applicationContext);
 	}
 
 	@Test  // SPR-16956
