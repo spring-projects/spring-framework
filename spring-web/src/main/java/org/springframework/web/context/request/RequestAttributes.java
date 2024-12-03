@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.request;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstraction for accessing attribute objects associated with a request.
@@ -65,8 +65,7 @@ public interface RequestAttributes {
 	 * @param scope the scope identifier
 	 * @return the current attribute value, or {@code null} if not found
 	 */
-	@Nullable
-	Object getAttribute(String name, int scope);
+	@Nullable Object getAttribute(String name, int scope);
 
 	/**
 	 * Set the value for the scoped attribute of the given name,
@@ -125,8 +124,7 @@ public interface RequestAttributes {
 	 * @param key the contextual key
 	 * @return the corresponding object, or {@code null} if none found
 	 */
-	@Nullable
-	Object resolveReference(String key);
+	@Nullable Object resolveReference(String key);
 
 	/**
 	 * Return an id for the current underlying session.

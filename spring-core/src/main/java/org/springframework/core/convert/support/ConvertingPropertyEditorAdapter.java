@@ -18,9 +18,10 @@ package org.springframework.core.convert.support;
 
 import java.beans.PropertyEditorSupport;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -61,8 +62,7 @@ public class ConvertingPropertyEditorAdapter extends PropertyEditorSupport {
 	}
 
 	@Override
-	@Nullable
-	public String getAsText() {
+	public @Nullable String getAsText() {
 		if (this.canConvertToString) {
 			return (String) this.conversionService.convert(getValue(), this.targetDescriptor, TypeDescriptor.valueOf(String.class));
 		}

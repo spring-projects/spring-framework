@@ -18,8 +18,9 @@ package org.springframework.web.reactive.config;
 
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 
 /**
@@ -30,11 +31,9 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class BlockingExecutionConfigurer {
 
-	@Nullable
-	private AsyncTaskExecutor executor;
+	private @Nullable AsyncTaskExecutor executor;
 
-	@Nullable
-	private Predicate<HandlerMethod> blockingControllerMethodPredicate;
+	private @Nullable Predicate<HandlerMethod> blockingControllerMethodPredicate;
 
 
 	/**
@@ -63,13 +62,11 @@ public class BlockingExecutionConfigurer {
 	}
 
 
-	@Nullable
-	protected AsyncTaskExecutor getExecutor() {
+	protected @Nullable AsyncTaskExecutor getExecutor() {
 		return this.executor;
 	}
 
-	@Nullable
-	protected Predicate<HandlerMethod> getBlockingControllerMethodPredicate() {
+	protected @Nullable Predicate<HandlerMethod> getBlockingControllerMethodPredicate() {
 		return this.blockingControllerMethodPredicate;
 	}
 

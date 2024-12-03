@@ -33,9 +33,9 @@ import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -72,8 +72,7 @@ final class AnnotationTypeMapping {
 	private static final int[] EMPTY_INT_ARRAY = new int[0];
 
 
-	@Nullable
-	private final AnnotationTypeMapping source;
+	private final @Nullable AnnotationTypeMapping source;
 
 	private final AnnotationTypeMapping root;
 
@@ -83,8 +82,7 @@ final class AnnotationTypeMapping {
 
 	private final List<Class<? extends Annotation>> metaTypes;
 
-	@Nullable
-	private final Annotation annotation;
+	private final @Nullable Annotation annotation;
 
 	private final AttributeMethods attributes;
 
@@ -481,8 +479,7 @@ final class AnnotationTypeMapping {
 	 * Get the source of the mapping or {@code null}.
 	 * @return the source of the mapping
 	 */
-	@Nullable
-	AnnotationTypeMapping getSource() {
+	@Nullable AnnotationTypeMapping getSource() {
 		return this.source;
 	}
 
@@ -511,8 +508,7 @@ final class AnnotationTypeMapping {
 	 * meta-annotation, or {@code null} if this is the root mapping.
 	 * @return the source annotation of the mapping
 	 */
-	@Nullable
-	Annotation getAnnotation() {
+	@Nullable Annotation getAnnotation() {
 		return this.annotation;
 	}
 
@@ -560,8 +556,7 @@ final class AnnotationTypeMapping {
 	 * also be considered.
 	 * @return the mapped annotation value, or {@code null}
 	 */
-	@Nullable
-	Object getMappedAnnotationValue(int attributeIndex, boolean metaAnnotationsOnly) {
+	@Nullable Object getMappedAnnotationValue(int attributeIndex, boolean metaAnnotationsOnly) {
 		int mappedIndex = this.annotationValueMappings[attributeIndex];
 		if (mappedIndex == -1) {
 			return null;
@@ -727,8 +722,7 @@ final class AnnotationTypeMapping {
 			return this.mirrorSets[index];
 		}
 
-		@Nullable
-		MirrorSet getAssigned(int attributeIndex) {
+		@Nullable MirrorSet getAssigned(int attributeIndex) {
 			return this.assigned[attributeIndex];
 		}
 

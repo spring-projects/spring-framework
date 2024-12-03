@@ -28,8 +28,8 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -84,11 +84,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private volatile long timeLastActive = this.timeCreated;
 
-	@Nullable
-	private ScheduledFuture<?> heartbeatFuture;
+	private @Nullable ScheduledFuture<?> heartbeatFuture;
 
-	@Nullable
-	private HeartbeatTask heartbeatTask;
+	private @Nullable HeartbeatTask heartbeatTask;
 
 	private volatile boolean heartbeatDisabled;
 

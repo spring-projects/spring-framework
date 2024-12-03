@@ -27,6 +27,7 @@ import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.adapter.JdkFlowAdapter;
 import reactor.core.publisher.Flux;
@@ -37,7 +38,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 

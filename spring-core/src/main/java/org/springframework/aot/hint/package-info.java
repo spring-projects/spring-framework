@@ -2,9 +2,7 @@
  * Support for registering the need for reflection, resources, java
  * serialization and proxies at runtime.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.aot.hint;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

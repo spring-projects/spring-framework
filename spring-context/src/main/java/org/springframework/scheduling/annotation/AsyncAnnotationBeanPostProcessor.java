@@ -22,12 +22,12 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -77,14 +77,11 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private Supplier<Executor> executor;
+	private @Nullable Supplier<Executor> executor;
 
-	@Nullable
-	private Supplier<AsyncUncaughtExceptionHandler> exceptionHandler;
+	private @Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler;
 
-	@Nullable
-	private Class<? extends Annotation> asyncAnnotationType;
+	private @Nullable Class<? extends Annotation> asyncAnnotationType;
 
 
 

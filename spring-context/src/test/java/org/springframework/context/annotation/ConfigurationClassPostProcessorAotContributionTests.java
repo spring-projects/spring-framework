@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 import javax.lang.model.element.Modifier;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -61,7 +62,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -223,9 +223,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				this.metadata = importMetadata;
 			}
 
-			@Nullable
 			@Override
-			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			public @Nullable Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 				if (beanName.equals("testProcessing")) {
 					return this.metadata;
 				}
@@ -441,8 +440,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 	}
 
 
-	@Nullable
-	private BeanFactoryInitializationAotContribution getContribution(Class<?>... types) {
+	private @Nullable BeanFactoryInitializationAotContribution getContribution(Class<?>... types) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		for (Class<?> type : types) {
 			beanFactory.registerBeanDefinition(type.getName(), new RootBeanDefinition(type));

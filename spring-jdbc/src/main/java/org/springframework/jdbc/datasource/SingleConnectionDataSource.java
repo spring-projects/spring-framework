@@ -25,8 +25,9 @@ import java.sql.SQLException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -64,16 +65,13 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	private boolean rollbackBeforeClose;
 
 	/** Override auto-commit state? */
-	@Nullable
-	private Boolean autoCommit;
+	private @Nullable Boolean autoCommit;
 
 	/** Wrapped Connection. */
-	@Nullable
-	private Connection target;
+	private @Nullable Connection target;
 
 	/** Proxy Connection. */
-	@Nullable
-	private Connection connection;
+	private @Nullable Connection connection;
 
 	/** Lifecycle lock for the shared Connection. */
 	private final Lock connectionLock = new ReentrantLock();
@@ -175,8 +173,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * Return whether the returned Connection's "autoCommit" setting should be overridden.
 	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
-	@Nullable
-	protected Boolean getAutoCommitValue() {
+	protected @Nullable Boolean getAutoCommitValue() {
 		return this.autoCommit;
 	}
 
@@ -368,8 +365,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
 			return switch (method.getName()) {

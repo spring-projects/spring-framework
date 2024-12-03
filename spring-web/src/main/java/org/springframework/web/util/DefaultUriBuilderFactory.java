@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -42,16 +43,13 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
-	@Nullable
-	private final UriComponentsBuilder baseUri;
+	private final @Nullable UriComponentsBuilder baseUri;
 
-	@Nullable
-	private UriComponentsBuilder.ParserType parserType;
+	private UriComponentsBuilder.@Nullable ParserType parserType;
 
 	private EncodingMode encodingMode = EncodingMode.TEMPLATE_AND_VALUES;
 
-	@Nullable
-	private Map<String, Object> defaultUriVariables;
+	private @Nullable Map<String, Object> defaultUriVariables;
 
 	private boolean parsePath = true;
 
@@ -112,8 +110,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * Return the configured parser type.
 	 * @since 6.2
 	 */
-	@Nullable
-	public UriComponentsBuilder.ParserType getParserType() {
+	public UriComponentsBuilder.@Nullable ParserType getParserType() {
 		return this.parserType;
 	}
 

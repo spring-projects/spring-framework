@@ -18,12 +18,12 @@ package org.springframework.messaging.simp.user;
 
 import java.nio.charset.StandardCharsets;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import org.springframework.core.testfixture.security.TestPrincipal;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;

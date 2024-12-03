@@ -36,6 +36,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.meta.When;
 
 import jakarta.annotation.Resource;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,6 @@ import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.NonNullApi;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.asList;
@@ -1548,15 +1548,13 @@ class AnnotatedElementUtilsTests {
 	interface TransactionalService {
 
 		@Transactional
-		@Nullable
-		Object doIt();
+		@Nullable Object doIt();
 	}
 
 	class TransactionalServiceImpl implements TransactionalService {
 
 		@Override
-		@Nullable
-		public Object doIt() {
+		public @Nullable Object doIt() {
 			return null;
 		}
 	}

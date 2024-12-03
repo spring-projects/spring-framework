@@ -34,6 +34,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -44,7 +45,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
@@ -78,18 +78,15 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final WiretapConnector wiretapConnector;
 
-	@Nullable
-	private final JsonEncoderDecoder jsonEncoderDecoder;
+	private final @Nullable JsonEncoderDecoder jsonEncoderDecoder;
 
 	private final ExchangeFunction exchangeFunction;
 
 	private final UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private final HttpHeaders defaultHeaders;
+	private final @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private final MultiValueMap<String, String> defaultCookies;
+	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
 	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
@@ -183,21 +180,17 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final HttpMethod httpMethod;
 
-		@Nullable
-		private URI uri;
+		private @Nullable URI uri;
 
 		private final HttpHeaders headers;
 
-		@Nullable
-		private MultiValueMap<String, String> cookies;
+		private @Nullable MultiValueMap<String, String> cookies;
 
-		@Nullable
-		private BodyInserter<?, ? super ClientHttpRequest> inserter;
+		private @Nullable BodyInserter<?, ? super ClientHttpRequest> inserter;
 
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
-		@Nullable
-		private String uriTemplate;
+		private @Nullable String uriTemplate;
 
 		private final String requestId;
 
@@ -411,8 +404,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final ClientResponse response;
 
-		@Nullable
-		private final JsonEncoderDecoder jsonEncoderDecoder;
+		private final @Nullable JsonEncoderDecoder jsonEncoderDecoder;
 
 		private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
@@ -649,8 +641,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final EntityExchangeResult<byte[]> result;
 
-		@Nullable
-		private final JsonEncoderDecoder jsonEncoderDecoder;
+		private final @Nullable JsonEncoderDecoder jsonEncoderDecoder;
 
 		private final boolean isEmpty;
 

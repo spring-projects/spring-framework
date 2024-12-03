@@ -23,13 +23,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
@@ -50,8 +51,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	private final boolean nestedAnnotationsAsMap;
 
-	@Nullable
-	private Set<String> annotationTypes;
+	private @Nullable Set<String> annotationTypes;
 
 
 	/**
@@ -105,8 +105,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	@Nullable
-	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+	public @Nullable Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		if (this.nestedAnnotationsAsMap) {
 			return AnnotationMetadata.super.getAnnotationAttributes(annotationName, classValuesAsString);
 		}
@@ -115,8 +114,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	@Nullable
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+	public @Nullable MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		if (this.nestedAnnotationsAsMap) {
 			return AnnotationMetadata.super.getAllAnnotationAttributes(annotationName, classValuesAsString);
 		}

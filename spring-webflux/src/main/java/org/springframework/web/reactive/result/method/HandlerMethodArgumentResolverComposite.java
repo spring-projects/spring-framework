@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -123,8 +123,7 @@ class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentRes
 	 * Find a registered {@link HandlerMethodArgumentResolver} that supports
 	 * the given method parameter.
 	 */
-	@Nullable
-	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
+	private @Nullable HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
 			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {

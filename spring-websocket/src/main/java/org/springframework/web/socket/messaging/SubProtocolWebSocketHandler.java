@@ -30,9 +30,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.SmartLifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -86,8 +86,7 @@ public class SubProtocolWebSocketHandler
 
 	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<>();
 
-	@Nullable
-	private SubProtocolHandler defaultProtocolHandler;
+	private @Nullable SubProtocolHandler defaultProtocolHandler;
 
 	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<>();
 
@@ -103,8 +102,7 @@ public class SubProtocolWebSocketHandler
 
 	private final DefaultStats stats = new DefaultStats();
 
-	@Nullable
-	private Integer phase;
+	private @Nullable Integer phase;
 
 	private volatile boolean running;
 
@@ -184,8 +182,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return the default sub-protocol handler to use.
 	 */
-	@Nullable
-	public SubProtocolHandler getDefaultProtocolHandler() {
+	public @Nullable SubProtocolHandler getDefaultProtocolHandler() {
 		return this.defaultProtocolHandler;
 	}
 
@@ -477,8 +474,7 @@ public class SubProtocolWebSocketHandler
 		return handler;
 	}
 
-	@Nullable
-	private String resolveSessionId(Message<?> message) {
+	private @Nullable String resolveSessionId(Message<?> message) {
 		for (SubProtocolHandler handler : this.protocolHandlerLookup.values()) {
 			String sessionId = handler.resolveSessionId(message);
 			if (sessionId != null) {

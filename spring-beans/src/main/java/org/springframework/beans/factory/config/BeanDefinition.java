@@ -16,11 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 
 /**
  * A BeanDefinition describes a bean instance, which has property values,
@@ -93,8 +94,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return the name of the parent definition of this bean definition, if any.
 	 */
-	@Nullable
-	String getParentName();
+	@Nullable String getParentName();
 
 	/**
 	 * Specify the bean class name of this bean definition.
@@ -118,8 +118,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
 	 */
-	@Nullable
-	String getBeanClassName();
+	@Nullable String getBeanClassName();
 
 	/**
 	 * Override the target scope of this bean, specifying a new scope name.
@@ -132,8 +131,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return the name of the current target scope for this bean,
 	 * or {@code null} if not known yet.
 	 */
-	@Nullable
-	String getScope();
+	@Nullable String getScope();
 
 	/**
 	 * Set whether this bean should be lazily initialized.
@@ -155,13 +153,12 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * constructor arguments. This property should just be necessary for other kinds
 	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
-	void setDependsOn(@Nullable String... dependsOn);
+	void setDependsOn(String @Nullable ... dependsOn);
 
 	/**
 	 * Return the bean names that this bean depends on.
 	 */
-	@Nullable
-	String[] getDependsOn();
+	String @Nullable [] getDependsOn();
 
 	/**
 	 * Set whether this bean is a candidate for getting autowired into some other bean.
@@ -222,8 +219,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #getFactoryMethodName()
 	 * @see #getBeanClassName()
 	 */
-	@Nullable
-	String getFactoryBeanName();
+	@Nullable String getFactoryBeanName();
 
 	/**
 	 * Specify a factory method, if any. This method will be invoked with
@@ -240,8 +236,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #getFactoryBeanName()
 	 * @see #getBeanClassName()
 	 */
-	@Nullable
-	String getFactoryMethodName();
+	@Nullable String getFactoryMethodName();
 
 	/**
 	 * Return the constructor argument values for this bean.
@@ -285,8 +280,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return the name of the initializer method.
 	 * @since 5.1
 	 */
-	@Nullable
-	String getInitMethodName();
+	@Nullable String getInitMethodName();
 
 	/**
 	 * Set the name of the destroy method.
@@ -298,8 +292,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return the name of the destroy method.
 	 * @since 5.1
 	 */
-	@Nullable
-	String getDestroyMethodName();
+	@Nullable String getDestroyMethodName();
 
 	/**
 	 * Set the role hint for this {@code BeanDefinition}. The role hint
@@ -331,8 +324,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return a human-readable description of this bean definition.
 	 */
-	@Nullable
-	String getDescription();
+	@Nullable String getDescription();
 
 
 	// Read-only attributes
@@ -373,8 +365,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).
 	 */
-	@Nullable
-	String getResourceDescription();
+	@Nullable String getResourceDescription();
 
 	/**
 	 * Return the originating BeanDefinition, or {@code null} if none.
@@ -382,7 +373,6 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */
-	@Nullable
-	BeanDefinition getOriginatingBeanDefinition();
+	@Nullable BeanDefinition getOriginatingBeanDefinition();
 
 }

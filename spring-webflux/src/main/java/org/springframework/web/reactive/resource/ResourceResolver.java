@@ -18,11 +18,11 @@ package org.springframework.web.reactive.resource;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**

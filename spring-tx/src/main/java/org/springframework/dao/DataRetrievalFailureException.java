@@ -16,7 +16,7 @@
 
 package org.springframework.dao;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown if certain expected data could not be retrieved, for example,

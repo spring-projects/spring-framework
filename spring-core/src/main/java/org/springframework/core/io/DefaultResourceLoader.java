@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
@@ -48,8 +49,7 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
-	@Nullable
-	private ClassLoader classLoader;
+	private @Nullable ClassLoader classLoader;
 
 	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
 
@@ -93,8 +93,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @see ClassPathResource
 	 */
 	@Override
-	@Nullable
-	public ClassLoader getClassLoader() {
+	public @Nullable ClassLoader getClassLoader() {
 		return (this.classLoader != null ? this.classLoader : ClassUtils.getDefaultClassLoader());
 	}
 

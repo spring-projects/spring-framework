@@ -22,6 +22,7 @@ import javax.lang.model.element.Modifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link BeanRegistrationAotProcessor} for {@link ScopedProxyFactoryBean}.
@@ -53,9 +53,8 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 
 	@Override
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (beanClass.equals(ScopedProxyFactoryBean.class)) {
 			String targetBeanName = getTargetBeanName(registeredBean.getMergedBeanDefinition());
@@ -73,14 +72,12 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 		return null;
 	}
 
-	@Nullable
-	private String getTargetBeanName(BeanDefinition beanDefinition) {
+	private @Nullable String getTargetBeanName(BeanDefinition beanDefinition) {
 		Object value = beanDefinition.getPropertyValues().get("targetBeanName");
 		return (value instanceof String targetBeanName ? targetBeanName : null);
 	}
 
-	@Nullable
-	private BeanDefinition getTargetBeanDefinition(
+	private @Nullable BeanDefinition getTargetBeanDefinition(
 			ConfigurableBeanFactory beanFactory, @Nullable String targetBeanName) {
 
 		if (targetBeanName != null && beanFactory.containsBean(targetBeanName)) {

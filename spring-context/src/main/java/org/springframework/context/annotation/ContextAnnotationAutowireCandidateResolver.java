@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -34,7 +36,6 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Complete implementation of the
@@ -48,14 +49,12 @@ import org.springframework.lang.Nullable;
 public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotationAutowireCandidateResolver {
 
 	@Override
-	@Nullable
-	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
+	public @Nullable Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return (isLazy(descriptor) ? buildLazyResolutionProxy(descriptor, beanName) : null);
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getLazyResolutionProxyClass(DependencyDescriptor descriptor, @Nullable String beanName) {
+	public @Nullable Class<?> getLazyResolutionProxyClass(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return (isLazy(descriptor) ? (Class<?>) buildLazyResolutionProxy(descriptor, beanName, true) : null);
 	}
 
@@ -110,11 +109,9 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 
 		private final DependencyDescriptor descriptor;
 
-		@Nullable
-		private final String beanName;
+		private final @Nullable String beanName;
 
-		@Nullable
-		private transient volatile Object cachedTarget;
+		private transient volatile @Nullable Object cachedTarget;
 
 		public LazyDependencyTargetSource(DefaultListableBeanFactory beanFactory,
 				DependencyDescriptor descriptor, @Nullable String beanName) {

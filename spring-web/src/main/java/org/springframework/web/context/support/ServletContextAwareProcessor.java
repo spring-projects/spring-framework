@@ -18,10 +18,10 @@ package org.springframework.web.context.support;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
@@ -41,11 +41,9 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class ServletContextAwareProcessor implements BeanPostProcessor {
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private ServletConfig servletConfig;
+	private @Nullable ServletConfig servletConfig;
 
 
 	/**
@@ -84,8 +82,7 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 	 * can be overridden by subclasses when a context is obtained after the post-processor
 	 * has been registered.
 	 */
-	@Nullable
-	protected ServletContext getServletContext() {
+	protected @Nullable ServletContext getServletContext() {
 		if (this.servletContext == null && getServletConfig() != null) {
 			return getServletConfig().getServletContext();
 		}
@@ -97,8 +94,7 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 	 * can be overridden by subclasses when a context is obtained after the post-processor
 	 * has been registered.
 	 */
-	@Nullable
-	protected ServletConfig getServletConfig() {
+	protected @Nullable ServletConfig getServletConfig() {
 		return this.servletConfig;
 	}
 

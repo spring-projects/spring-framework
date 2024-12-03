@@ -24,8 +24,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.time.Duration;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +43,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
 
-	@Nullable
-	private Proxy proxy;
+	private @Nullable Proxy proxy;
 
 	private int chunkSize = DEFAULT_CHUNK_SIZE;
 

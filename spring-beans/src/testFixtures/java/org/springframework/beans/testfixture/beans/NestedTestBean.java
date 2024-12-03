@@ -16,7 +16,7 @@
 
 package org.springframework.beans.testfixture.beans;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.

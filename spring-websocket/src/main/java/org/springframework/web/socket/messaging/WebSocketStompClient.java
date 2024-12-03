@@ -29,10 +29,10 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
@@ -81,8 +81,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	private int inboundMessageSizeLimit = 64 * 1024;
 
-	@Nullable
-	private Integer outboundMessageSizeLimit;
+	private @Nullable Integer outboundMessageSizeLimit;
 
 	private boolean autoStartup = true;
 
@@ -157,8 +156,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * Get the configured outbound message buffer size in bytes.
 	 * @since 6.2
 	 */
-	@Nullable
-	public Integer getOutboundMessageSizeLimit() {
+	public @Nullable Integer getOutboundMessageSizeLimit() {
 		return this.outboundMessageSizeLimit;
 	}
 
@@ -323,18 +321,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		private final StompWebSocketMessageCodec codec =
 				new StompWebSocketMessageCodec(getInboundMessageSizeLimit(),getOutboundMessageSizeLimit());
 
-		@Nullable
-		private volatile WebSocketSession session;
+		private volatile @Nullable WebSocketSession session;
 
 		private volatile long lastReadTime = -1;
 
 		private volatile long lastWriteTime = -1;
 
-		@Nullable
-		private ScheduledFuture<?> readInactivityFuture;
+		private @Nullable ScheduledFuture<?> readInactivityFuture;
 
-		@Nullable
-		private ScheduledFuture<?> writeInactivityFuture;
+		private @Nullable ScheduledFuture<?> writeInactivityFuture;
 
 		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> stompSession) {
 			Assert.notNull(stompSession, "TcpConnectionHandler must not be null");
@@ -516,8 +511,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final BufferingStompDecoder bufferingDecoder;
 
-		@Nullable
-		private final SplittingStompEncoder splittingEncoder;
+		private final @Nullable SplittingStompEncoder splittingEncoder;
 
 		public StompWebSocketMessageCodec(int inboundMessageSizeLimit, @Nullable Integer outboundMessageSizeLimit) {
 			this.bufferingDecoder = new BufferingStompDecoder(DECODER, inboundMessageSizeLimit);

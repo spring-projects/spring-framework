@@ -26,8 +26,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@code @TestConstructor} is an annotation that can be applied to a test class
@@ -151,8 +150,7 @@ public @interface TestConstructor {
 		 * @since 5.3
 		 * @see AutowireMode#valueOf(String)
 		 */
-		@Nullable
-		public static AutowireMode from(@Nullable String name) {
+		public static @Nullable AutowireMode from(@Nullable String name) {
 			if (name == null) {
 				return null;
 			}

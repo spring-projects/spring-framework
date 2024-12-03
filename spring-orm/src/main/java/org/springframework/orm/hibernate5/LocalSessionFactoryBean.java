@@ -34,6 +34,7 @@ import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.ServiceRegistry;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -52,7 +53,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that creates a Hibernate {@link SessionFactory}. This is the usual
@@ -84,85 +84,59 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		implements FactoryBean<SessionFactory>, ResourceLoaderAware, BeanFactoryAware,
 		InitializingBean, SmartInitializingSingleton, DisposableBean {
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
-	@Nullable
-	private Resource[] configLocations;
+	private Resource @Nullable [] configLocations;
 
-	@Nullable
-	private String[] mappingResources;
+	private String @Nullable [] mappingResources;
 
-	@Nullable
-	private Resource[] mappingLocations;
+	private Resource @Nullable [] mappingLocations;
 
-	@Nullable
-	private Resource[] cacheableMappingLocations;
+	private Resource @Nullable [] cacheableMappingLocations;
 
-	@Nullable
-	private Resource[] mappingJarLocations;
+	private Resource @Nullable [] mappingJarLocations;
 
-	@Nullable
-	private Resource[] mappingDirectoryLocations;
+	private Resource @Nullable [] mappingDirectoryLocations;
 
-	@Nullable
-	private Interceptor entityInterceptor;
+	private @Nullable Interceptor entityInterceptor;
 
-	@Nullable
-	private ImplicitNamingStrategy implicitNamingStrategy;
+	private @Nullable ImplicitNamingStrategy implicitNamingStrategy;
 
-	@Nullable
-	private PhysicalNamingStrategy physicalNamingStrategy;
+	private @Nullable PhysicalNamingStrategy physicalNamingStrategy;
 
-	@Nullable
-	private Object jtaTransactionManager;
+	private @Nullable Object jtaTransactionManager;
 
-	@Nullable
-	private RegionFactory cacheRegionFactory;
+	private @Nullable RegionFactory cacheRegionFactory;
 
-	@Nullable
-	private MultiTenantConnectionProvider<?> multiTenantConnectionProvider;
+	private @Nullable MultiTenantConnectionProvider<?> multiTenantConnectionProvider;
 
-	@Nullable
-	private CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver;
+	private @Nullable CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver;
 
-	@Nullable
-	private Properties hibernateProperties;
+	private @Nullable Properties hibernateProperties;
 
-	@Nullable
-	private TypeFilter[] entityTypeFilters;
+	private TypeFilter @Nullable [] entityTypeFilters;
 
-	@Nullable
-	private Class<?>[] annotatedClasses;
+	private Class<?> @Nullable [] annotatedClasses;
 
-	@Nullable
-	private String[] annotatedPackages;
+	private String @Nullable [] annotatedPackages;
 
-	@Nullable
-	private String[] packagesToScan;
+	private String @Nullable [] packagesToScan;
 
-	@Nullable
-	private AsyncTaskExecutor bootstrapExecutor;
+	private @Nullable AsyncTaskExecutor bootstrapExecutor;
 
-	@Nullable
-	private Integrator[] hibernateIntegrators;
+	private Integrator @Nullable [] hibernateIntegrators;
 
 	private boolean metadataSourcesAccessed = false;
 
-	@Nullable
-	private MetadataSources metadataSources;
+	private @Nullable MetadataSources metadataSources;
 
-	@Nullable
-	private ResourcePatternResolver resourcePatternResolver;
+	private @Nullable ResourcePatternResolver resourcePatternResolver;
 
-	@Nullable
-	private ConfigurableListableBeanFactory beanFactory;
+	private @Nullable ConfigurableListableBeanFactory beanFactory;
 
-	@Nullable
-	private Configuration configuration;
+	private @Nullable Configuration configuration;
 
-	@Nullable
-	private SessionFactory sessionFactory;
+	private @Nullable SessionFactory sessionFactory;
 
 
 	/**
@@ -643,8 +617,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 
 	@Override
-	@Nullable
-	public SessionFactory getObject() {
+	public @Nullable SessionFactory getObject() {
 		return this.sessionFactory;
 	}
 

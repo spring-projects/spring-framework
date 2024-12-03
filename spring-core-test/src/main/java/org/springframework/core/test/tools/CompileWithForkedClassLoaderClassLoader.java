@@ -22,7 +22,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.function.Function;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link ClassLoader} implementation to support
@@ -73,8 +73,7 @@ final class CompileWithForkedClassLoaderClassLoader extends ClassLoader {
 		return (bytes != null ? defineClass(name, bytes, 0, bytes.length, null) : super.findClass(name));
 	}
 
-	@Nullable
-	private byte[] findClassBytes(String name) {
+	private byte @Nullable [] findClassBytes(String name) {
 		byte[] bytes = this.classResourceLookup.apply(name);
 		if (bytes != null) {
 			return bytes;
@@ -98,8 +97,7 @@ final class CompileWithForkedClassLoaderClassLoader extends ClassLoader {
 	}
 
 	@Override
-	@Nullable
-	protected URL findResource(String name) {
+	protected @Nullable URL findResource(String name) {
 		return this.testClassLoader.getResource(name);
 	}
 

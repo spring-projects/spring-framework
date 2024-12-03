@@ -21,7 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -70,8 +71,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
 
 
-	@Nullable
-	private final String name;
+	private final @Nullable String name;
 
 	private final PatternsRequestCondition patternsCondition;
 
@@ -153,8 +153,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Return the name for this mapping, or {@code null}.
 	 */
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -217,8 +216,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Returns the "custom" condition of this {@link RequestMappingInfo}; or {@code null}.
 	 */
-	@Nullable
-	public RequestCondition<?> getCustomCondition() {
+	public @Nullable RequestCondition<?> getCustomCondition() {
 		return this.customConditionHolder.getCondition();
 	}
 
@@ -243,8 +241,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				methods, params, headers, consumes, produces, custom.getCondition(), this.options);
 	}
 
-	@Nullable
-	private String combineNames(RequestMappingInfo other) {
+	private @Nullable String combineNames(RequestMappingInfo other) {
 		if (this.name != null && other.name != null) {
 			return this.name + "#" + other.name;
 		}
@@ -264,8 +261,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
 	 */
 	@Override
-	@Nullable
-	public RequestMappingInfo getMatchingCondition(ServerWebExchange exchange) {
+	public @Nullable RequestMappingInfo getMatchingCondition(ServerWebExchange exchange) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(exchange);
 		if (methods == null) {
 			return null;
@@ -476,30 +472,23 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private String[] paths;
 
-		@Nullable
-		private RequestMethod[] methods;
+		private RequestMethod @Nullable [] methods;
 
-		@Nullable
-		private String[] params;
+		private String @Nullable [] params;
 
-		@Nullable
-		private String[] headers;
+		private String @Nullable [] headers;
 
-		@Nullable
-		private String[] consumes;
+		private String @Nullable [] consumes;
 
-		@Nullable
-		private String[] produces;
+		private String @Nullable [] produces;
 
 		private boolean hasContentType;
 
 		private boolean hasAccept;
 
-		@Nullable
-		private String mappingName;
+		private @Nullable String mappingName;
 
-		@Nullable
-		private RequestCondition<?> customCondition;
+		private @Nullable RequestCondition<?> customCondition;
 
 		private BuilderConfiguration options = new BuilderConfiguration();
 
@@ -618,11 +607,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static class MutateBuilder implements Builder {
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
-		@Nullable
-		private PatternsRequestCondition patternsCondition;
+		private @Nullable PatternsRequestCondition patternsCondition;
 
 		private RequestMethodsRequestCondition methodsCondition;
 
@@ -731,18 +718,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
-		@Nullable
-		private PathPatternParser patternParser;
+		private @Nullable PathPatternParser patternParser;
 
-		@Nullable
-		private RequestedContentTypeResolver contentTypeResolver;
+		private @Nullable RequestedContentTypeResolver contentTypeResolver;
 
 		public void setPatternParser(PathPatternParser patternParser) {
 			this.patternParser = patternParser;
 		}
 
-		@Nullable
-		public PathPatternParser getPatternParser() {
+		public @Nullable PathPatternParser getPatternParser() {
 			return this.patternParser;
 		}
 
@@ -754,8 +738,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.contentTypeResolver = resolver;
 		}
 
-		@Nullable
-		public RequestedContentTypeResolver getContentTypeResolver() {
+		public @Nullable RequestedContentTypeResolver getContentTypeResolver() {
 			return this.contentTypeResolver;
 		}
 	}

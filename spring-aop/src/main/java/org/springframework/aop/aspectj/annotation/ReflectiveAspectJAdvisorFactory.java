@@ -32,6 +32,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -49,7 +50,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -96,8 +96,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 
-	@Nullable
-	private final BeanFactory beanFactory;
+	private final @Nullable BeanFactory beanFactory;
 
 
 	/**
@@ -183,8 +182,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * @param introductionField the field to introspect
 	 * @return the Advisor instance, or {@code null} if not an Advisor
 	 */
-	@Nullable
-	private Advisor getDeclareParentsAdvisor(Field introductionField) {
+	private @Nullable Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = introductionField.getAnnotation(DeclareParents.class);
 		if (declareParents == null) {
 			// Not an introduction field
@@ -201,8 +199,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 
 	@Override
-	@Nullable
-	public Advisor getAdvisor(Method candidateAdviceMethod, MetadataAwareAspectInstanceFactory aspectInstanceFactory,
+	public @Nullable Advisor getAdvisor(Method candidateAdviceMethod, MetadataAwareAspectInstanceFactory aspectInstanceFactory,
 			int declarationOrderInAspect, String aspectName) {
 
 		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
@@ -225,8 +222,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 	}
 
-	@Nullable
-	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
+	private @Nullable AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
 		AspectJAnnotation aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
@@ -244,8 +240,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 
 	@Override
-	@Nullable
-	public Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut expressionPointcut,
+	public @Nullable Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut expressionPointcut,
 			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName) {
 
 		Class<?> candidateAspectClass = aspectInstanceFactory.getAspectMetadata().getAspectClass();

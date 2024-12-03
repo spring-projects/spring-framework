@@ -24,8 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -82,8 +83,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Returns the value of the {@code Sec-WebSocket-Accept} header.
 	 * @return the value of the header
 	 */
-	@Nullable
-	public String getSecWebSocketAccept() {
+	public @Nullable String getSecWebSocketAccept() {
 		return getFirst(SEC_WEBSOCKET_ACCEPT);
 	}
 
@@ -129,8 +129,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Returns the value of the {@code Sec-WebSocket-Key} header.
 	 * @return the value of the header
 	 */
-	@Nullable
-	public String getSecWebSocketKey() {
+	public @Nullable String getSecWebSocketKey() {
 		return getFirst(SEC_WEBSOCKET_KEY);
 	}
 
@@ -179,8 +178,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Returns the value of the {@code Sec-WebSocket-Version} header.
 	 * @return the value of the header
 	 */
-	@Nullable
-	public String getSecWebSocketVersion() {
+	public @Nullable String getSecWebSocketVersion() {
 		return getFirst(SEC_WEBSOCKET_VERSION);
 	}
 
@@ -193,8 +191,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @return the first header value; or {@code null}
 	 */
 	@Override
-	@Nullable
-	public String getFirst(String headerName) {
+	public @Nullable String getFirst(String headerName) {
 		return this.headers.getFirst(headerName);
 	}
 
@@ -257,8 +254,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		return this.headers.get(key);
 	}
 

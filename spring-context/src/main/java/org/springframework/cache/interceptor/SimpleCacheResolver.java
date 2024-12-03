@@ -18,9 +18,10 @@ package org.springframework.cache.interceptor;
 
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.Nullable;
 
 /**
  * A simple {@link CacheResolver} that resolves the {@link Cache} instance(s)
@@ -62,8 +63,7 @@ public class SimpleCacheResolver extends AbstractCacheResolver {
 	 * @return the SimpleCacheResolver ({@code null} if the CacheManager was {@code null})
 	 * @since 5.1
 	 */
-	@Nullable
-	static SimpleCacheResolver of(@Nullable CacheManager cacheManager) {
+	static @Nullable SimpleCacheResolver of(@Nullable CacheManager cacheManager) {
 		return (cacheManager != null ? new SimpleCacheResolver(cacheManager) : null);
 	}
 

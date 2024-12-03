@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -51,7 +52,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.StandardMethodMetadata;
-import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -448,8 +448,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		@Override
-		@NonNull
-		public MethodMetadata getFactoryMethodMetadata() {
+		public @NonNull MethodMetadata getFactoryMethodMetadata() {
 			return this.factoryMethodMetadata;
 		}
 

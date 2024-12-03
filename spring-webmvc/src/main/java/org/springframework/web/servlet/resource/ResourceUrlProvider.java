@@ -25,13 +25,13 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -55,8 +55,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 	private UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
@@ -169,8 +168,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param requestUrl the request URL path to resolve
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
-	@Nullable
-	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
+	public final @Nullable String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		int prefixIndex = getLookupPathIndex(request);
 		int suffixIndex = getEndPathIndex(requestUrl);
 		if (prefixIndex >= suffixIndex) {
@@ -218,9 +216,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param lookupPath the lookup path to check
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public final String getForLookupPath(String lookupPath) {
+	public final @Nullable String getForLookupPath(String lookupPath) {
 		// Clean duplicate slashes or pathWithinPattern won't match lookupPath
 		String previous;
 		do {

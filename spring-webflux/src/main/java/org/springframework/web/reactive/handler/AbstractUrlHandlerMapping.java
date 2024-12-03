@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
@@ -59,8 +59,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private final Map<PathPattern, Object> handlerMap = new LinkedHashMap<>();
 
-	@Nullable
-	private BiPredicate<Object, ServerWebExchange> handlerPredicate;
+	private @Nullable BiPredicate<Object, ServerWebExchange> handlerPredicate;
 
 
 	/**
@@ -127,9 +126,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @return the associated handler instance, or {@code null} if not found
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
-	@Nullable
 	@SuppressWarnings("removal")
-	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
+	protected @Nullable Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
 		List<PathPattern> matches = null;
 		for (PathPattern pattern : this.handlerMap.keySet()) {
 			if (pattern.matches(lookupPath)) {

@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An immutable collection of {@link ClassFile} instances.
@@ -112,8 +112,7 @@ public final class ClassFiles implements Iterable<ClassFile> {
 	 * @param name the fully qualified name to find
 	 * @return a {@link ClassFile} instance or {@code null}
 	 */
-	@Nullable
-	public ClassFile get(String name) {
+	public @Nullable ClassFile get(String name) {
 		return this.files.get(name);
 	}
 

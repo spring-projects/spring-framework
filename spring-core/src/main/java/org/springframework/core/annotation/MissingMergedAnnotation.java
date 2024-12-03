@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An {@link AbstractMergedAnnotation} used as the implementation of
@@ -56,14 +56,12 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public MergedAnnotation<?> getMetaSource() {
+	public @Nullable MergedAnnotation<?> getMetaSource() {
 		return null;
 	}
 

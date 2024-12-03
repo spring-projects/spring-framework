@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -32,7 +33,6 @@ import org.springframework.beans.testfixture.beans.factory.generator.factory.Num
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

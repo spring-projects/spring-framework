@@ -21,9 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -62,8 +62,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	private PathMatcher pathMatcher = defaultPathMatcher;
 
-	@Nullable
-	private String lookupPathAttributeName;
+	private @Nullable String lookupPathAttributeName;
 
 	private boolean allowInitLookupPath = true;
 
@@ -239,8 +238,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 
 	@Override
-	@Nullable
-	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+	public @Nullable CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		Object path = resolvePath(request);
 		boolean isPathContainer = (path instanceof PathContainer);
 		for (Map.Entry<PathPattern, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {

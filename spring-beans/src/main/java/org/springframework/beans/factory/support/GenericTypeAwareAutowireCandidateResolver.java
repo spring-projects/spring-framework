@@ -19,6 +19,8 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -27,7 +29,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -45,8 +46,7 @@ import org.springframework.util.ClassUtils;
 public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCandidateResolver
 		implements BeanFactoryAware, Cloneable {
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	@Override
@@ -54,8 +54,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		this.beanFactory = beanFactory;
 	}
 
-	@Nullable
-	protected final BeanFactory getBeanFactory() {
+	protected final @Nullable BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
 
@@ -161,8 +160,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		return dependencyType.isAssignableFrom(targetType);
 	}
 
-	@Nullable
-	protected RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
+	protected @Nullable RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
 		BeanDefinitionHolder decDef = rbd.getDecoratedDefinition();
 		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
@@ -175,8 +173,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		return null;
 	}
 
-	@Nullable
-	protected ResolvableType getReturnTypeForFactoryMethod(RootBeanDefinition rbd, DependencyDescriptor descriptor) {
+	protected @Nullable ResolvableType getReturnTypeForFactoryMethod(RootBeanDefinition rbd, DependencyDescriptor descriptor) {
 		// Should typically be set for any kind of factory method, since the BeanFactory
 		// pre-resolves them before reaching out to the AutowireCandidateResolver...
 		ResolvableType returnType = rbd.factoryMethodReturnType;

@@ -31,11 +31,11 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -157,8 +157,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	@Nullable
-	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
+	protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
@@ -196,8 +195,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	@Nullable
-	protected String resolveUrlPathInternal(String resourceUrlPath,
+	protected @Nullable String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		String baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);
@@ -218,8 +216,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Find a {@code VersionStrategy} for the request path of the requested resource.
 	 * @return an instance of a {@code VersionStrategy} or null if none matches that request path
 	 */
-	@Nullable
-	protected VersionStrategy getStrategyForPath(String requestPath) {
+	protected @Nullable VersionStrategy getStrategyForPath(String requestPath) {
 		String path = "/".concat(requestPath);
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String pattern : this.versionStrategyMap.keySet()) {
@@ -318,8 +315,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
+		public @Nullable String getFilename() {
 			return this.original.getFilename();
 		}
 

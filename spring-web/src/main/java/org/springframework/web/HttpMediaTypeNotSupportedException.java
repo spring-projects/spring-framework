@@ -19,12 +19,13 @@ package org.springframework.web;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -42,11 +43,9 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 			ErrorResponse.getDefaultDetailMessageCode(HttpMediaTypeNotSupportedException.class, "parseError");
 
 
-	@Nullable
-	private final MediaType contentType;
+	private final @Nullable MediaType contentType;
 
-	@Nullable
-	private final HttpMethod httpMethod;
+	private final @Nullable HttpMethod httpMethod;
 
 
 	/**
@@ -114,8 +113,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	/**
 	 * Return the HTTP request content type method that caused the failure.
 	 */
-	@Nullable
-	public MediaType getContentType() {
+	public @Nullable MediaType getContentType() {
 		return this.contentType;
 	}
 

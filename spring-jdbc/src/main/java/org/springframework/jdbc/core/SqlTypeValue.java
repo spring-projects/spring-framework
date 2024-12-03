@@ -19,8 +19,9 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented for setting values for more complex database-specific

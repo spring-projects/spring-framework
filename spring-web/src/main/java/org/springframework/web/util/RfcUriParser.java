@@ -20,9 +20,9 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.log.LogDelegateFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -386,26 +386,19 @@ abstract class RfcUriParser {
 
 		private final String uri;
 
-		@Nullable
-		private String scheme;
+		private @Nullable String scheme;
 
-		@Nullable
-		String user;
+		@Nullable String user;
 
-		@Nullable
-		private String host;
+		private @Nullable String host;
 
-		@Nullable
-		private String path;
+		private @Nullable String path;
 
-		@Nullable
-		String port;
+		@Nullable String port;
 
-		@Nullable
-		String query;
+		@Nullable String query;
 
-		@Nullable
-		String fragment;
+		@Nullable String fragment;
 
 
 		private State state = State.START;

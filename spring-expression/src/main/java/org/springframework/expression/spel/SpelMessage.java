@@ -18,7 +18,7 @@ package org.springframework.expression.spel;
 
 import java.text.MessageFormat;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Contains all the messages that can be produced by the Spring Expression Language.

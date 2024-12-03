@@ -18,7 +18,8 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**

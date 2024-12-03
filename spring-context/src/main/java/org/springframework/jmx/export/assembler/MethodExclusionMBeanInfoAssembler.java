@@ -23,7 +23,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,11 +57,9 @@ import org.springframework.util.StringUtils;
  */
 public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
-	@Nullable
-	private Set<String> ignoredMethods;
+	private @Nullable Set<String> ignoredMethods;
 
-	@Nullable
-	private Map<String, Set<String>> ignoredMethodMappings;
+	private @Nullable Map<String, Set<String>> ignoredMethodMappings;
 
 
 	/**

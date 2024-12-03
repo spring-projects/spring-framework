@@ -26,8 +26,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@code @NestedTestConfiguration} is an annotation that can be applied to a test
@@ -161,8 +160,7 @@ public @interface NestedTestConfiguration {
 		 * @return the corresponding enum constant or {@code null} if not found
 		 * @see EnclosingConfiguration#valueOf(String)
 		 */
-		@Nullable
-		public static EnclosingConfiguration from(@Nullable String name) {
+		public static @Nullable EnclosingConfiguration from(@Nullable String name) {
 			if (name == null) {
 				return null;
 			}

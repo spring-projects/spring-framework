@@ -20,8 +20,9 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.NonNull;
+
 import org.springframework.core.Ordered;
-import org.springframework.lang.NonNull;
 
 /**
  * Extension of {@link StandardBeanInfoFactory} that supports "non-standard"
@@ -43,8 +44,7 @@ import org.springframework.lang.NonNull;
 public class ExtendedBeanInfoFactory extends StandardBeanInfoFactory {
 
 	@Override
-	@NonNull
-	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
+	public @NonNull BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		BeanInfo beanInfo = super.getBeanInfo(beanClass);
 		return (supports(beanClass) ? new ExtendedBeanInfo(beanInfo) : beanInfo);
 	}

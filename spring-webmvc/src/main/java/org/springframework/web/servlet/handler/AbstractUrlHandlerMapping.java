@@ -25,11 +25,11 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -63,8 +63,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
 
-	@Nullable
-	private Object rootHandler;
+	private @Nullable Object rootHandler;
 
 	private boolean lazyInitHandlers = false;
 
@@ -94,8 +93,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * Return the root handler for this handler mapping (registered for "/"),
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	public Object getRootHandler() {
+	public @Nullable Object getRootHandler() {
 		return this.rootHandler;
 	}
 
@@ -232,8 +230,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @return the handler instance, or {@code null} if none found
 	 */
 	@Override
-	@Nullable
-	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+	protected @Nullable Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = initLookupPath(request);
 		Object handler;
 		if (usesPathPatterns()) {
@@ -274,9 +271,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @return a matching handler, or {@code null} if not found
 	 * @since 5.3
 	 */
-	@Nullable
 	@SuppressWarnings("NullAway")
-	protected Object lookupHandler(
+	protected @Nullable Object lookupHandler(
 			RequestPath path, String lookupPath, HttpServletRequest request) throws Exception {
 
 		Object handler = getDirectMatch(lookupPath, request);
@@ -323,8 +319,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @see #exposePathWithinMapping
 	 * @see AntPathMatcher
 	 */
-	@Nullable
-	protected Object lookupHandler(String lookupPath, HttpServletRequest request) throws Exception {
+	protected @Nullable Object lookupHandler(String lookupPath, HttpServletRequest request) throws Exception {
 		Object handler = getDirectMatch(lookupPath, request);
 		if (handler != null) {
 			return handler;
@@ -385,8 +380,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		return null;
 	}
 
-	@Nullable
-	private Object getDirectMatch(String urlPath, HttpServletRequest request) throws Exception {
+	private @Nullable Object getDirectMatch(String urlPath, HttpServletRequest request) throws Exception {
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
 			// Bean name or resolved handler?
@@ -459,8 +453,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	@Override
-	@Nullable
-	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
 		String lookupPath = UrlPathHelper.getResolvedLookupPath(request);
 		if (getPathMatcher().match(pattern, lookupPath)) {

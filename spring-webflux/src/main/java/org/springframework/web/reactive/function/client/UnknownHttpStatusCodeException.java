@@ -18,10 +18,11 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when an unknown (or custom) HTTP status code is received.

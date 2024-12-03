@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,7 +46,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -127,8 +127,7 @@ final class HttpServiceMethod {
 	}
 
 
-	@Nullable
-	public Object invoke(Object[] arguments) {
+	public @Nullable Object invoke(Object[] arguments) {
 		HttpRequestValues.Builder requestValues = this.requestValuesInitializer.initializeRequestValuesBuilder();
 		applyArguments(requestValues, arguments);
 		return this.responseFunction.execute(requestValues.build());
@@ -223,8 +222,7 @@ final class HttpServiceMethod {
 					acceptableMediaTypes, headers, requestValuesSupplier);
 		}
 
-		@Nullable
-		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+		private static @Nullable HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
 			String methodLevelMethod = methodAnnotation.method();
 			if (StringUtils.hasText(methodLevelMethod)) {
 				return HttpMethod.valueOf(methodLevelMethod);
@@ -238,9 +236,8 @@ final class HttpServiceMethod {
 			return null;
 		}
 
-		@Nullable
 		@SuppressWarnings("NullAway")
-		private static String initUrl(
+		private static @Nullable String initUrl(
 				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
 				@Nullable StringValueResolver embeddedValueResolver) {
 
@@ -266,8 +263,7 @@ final class HttpServiceMethod {
 			return (hasMethodLevelUrl ? methodLevelUrl : typeLevelUrl);
 		}
 
-		@Nullable
-		private static MediaType initContentType(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+		private static @Nullable MediaType initContentType(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
 			String methodLevelContentType = methodAnnotation.contentType();
 			if (StringUtils.hasText(methodLevelContentType)) {
 				return MediaType.parseMediaType(methodLevelContentType);
@@ -281,8 +277,7 @@ final class HttpServiceMethod {
 			return null;
 		}
 
-		@Nullable
-		private static List<MediaType> initAccept(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+		private static @Nullable List<MediaType> initAccept(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
 			String[] methodLevelAccept = methodAnnotation.accept();
 			if (!ObjectUtils.isEmpty(methodLevelAccept)) {
 				return MediaType.parseMediaTypes(List.of(methodLevelAccept));
@@ -322,8 +317,7 @@ final class HttpServiceMethod {
 			return headers;
 		}
 
-		@Nullable
-		private static MultiValueMap<String, String> initHeaders(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
+		private static @Nullable MultiValueMap<String, String> initHeaders(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
 				@Nullable StringValueResolver embeddedValueResolver) {
 			MultiValueMap<String, String> methodLevelHeaders = parseHeaders(methodAnnotation.headers(),
 					embeddedValueResolver);
@@ -384,8 +378,7 @@ final class HttpServiceMethod {
 	 */
 	private interface ResponseFunction {
 
-		@Nullable
-		Object execute(HttpRequestValues requestValues);
+		@Nullable Object execute(HttpRequestValues requestValues);
 
 	}
 
@@ -458,8 +451,7 @@ final class HttpServiceMethod {
 			boolean blockForOptional, @Nullable Duration blockTimeout) implements ResponseFunction {
 
 		@Override
-		@Nullable
-		public Object execute(HttpRequestValues requestValues) {
+		public @Nullable Object execute(HttpRequestValues requestValues) {
 
 			Publisher<?> responsePublisher = this.responseFunction.apply(requestValues);
 

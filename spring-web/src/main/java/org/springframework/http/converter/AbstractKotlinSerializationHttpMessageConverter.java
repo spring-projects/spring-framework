@@ -32,6 +32,7 @@ import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
 import kotlinx.serialization.descriptors.PolymorphicKind;
 import kotlinx.serialization.descriptors.SerialDescriptor;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
@@ -39,7 +40,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -143,8 +143,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	 * @param resolvableType the type to find a serializer for
 	 * @return a resolved serializer for the given type, or {@code null}
 	 */
-	@Nullable
-	private KSerializer<Object> serializer(ResolvableType resolvableType) {
+	private @Nullable KSerializer<Object> serializer(ResolvableType resolvableType) {
 		if (resolvableType.getSource() instanceof MethodParameter parameter) {
 			Method method = parameter.getMethod();
 			Assert.notNull(method, "Method must not be null");

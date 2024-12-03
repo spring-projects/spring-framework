@@ -17,11 +17,11 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.BeforeAdvice;
-import org.springframework.lang.Nullable;
 
 /**
  * Utility methods for dealing with AspectJ advisors.
@@ -59,8 +59,7 @@ public abstract class AspectJAopUtils {
 	 * If neither the advisor nor the advice have precedence information, this method
 	 * will return {@code null}.
 	 */
-	@Nullable
-	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
+	public static @Nullable AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
 		if (anAdvisor instanceof AspectJPrecedenceInformation ajpi) {
 			return ajpi;
 		}

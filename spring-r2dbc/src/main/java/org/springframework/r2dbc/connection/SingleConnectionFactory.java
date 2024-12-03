@@ -27,11 +27,11 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryMetadata;
 import io.r2dbc.spi.Wrapped;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -70,15 +70,13 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	private boolean suppressClose;
 
 	/** Override auto-commit state?. */
-	@Nullable
-	private Boolean autoCommit;
+	private @Nullable Boolean autoCommit;
 
 	/** Wrapped Connection. */
 	private final AtomicReference<Connection> target = new AtomicReference<>();
 
 	/** Proxy Connection. */
-	@Nullable
-	private Connection connection;
+	private @Nullable Connection connection;
 
 	private final Mono<? extends Connection> connectionEmitter;
 
@@ -164,8 +162,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	 * be overridden.
 	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
-	@Nullable
-	protected Boolean getAutoCommitValue() {
+	protected @Nullable Boolean getAutoCommitValue() {
 		return this.autoCommit;
 	}
 
@@ -251,8 +248,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			return switch (method.getName()) {
 				// Only consider equal when proxies are identical.
 				case "equals" -> proxy == args[0];

@@ -34,6 +34,7 @@ import jakarta.persistence.SynchronizationType;
 import jakarta.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -48,7 +49,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -130,8 +130,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	@Nullable
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf)
+	public static @Nullable EntityManager getTransactionalEntityManager(EntityManagerFactory emf)
 			throws DataAccessResourceFailureException {
 
 		return getTransactionalEntityManager(emf, null);
@@ -148,8 +147,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	@Nullable
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties)
+	public static @Nullable EntityManager getTransactionalEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties)
 			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf, properties, true);
@@ -171,8 +169,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(jakarta.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	@Nullable
-	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
+	public static @Nullable EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws PersistenceException {
 
 		return doGetTransactionalEntityManager(emf, properties, true);
@@ -192,8 +189,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(jakarta.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	@Nullable
-	public static EntityManager doGetTransactionalEntityManager(
+	public static @Nullable EntityManager doGetTransactionalEntityManager(
 			EntityManagerFactory emf, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction)
 			throws PersistenceException {
 
@@ -300,8 +296,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * (to be passed into cleanupTransaction)
 	 * @see JpaDialect#prepareTransaction
 	 */
-	@Nullable
-	private static Object prepareTransaction(EntityManager em, EntityManagerFactory emf) {
+	private static @Nullable Object prepareTransaction(EntityManager em, EntityManagerFactory emf) {
 		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null) {
@@ -360,8 +355,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @return the corresponding DataAccessException instance,
 	 * or {@code null} if the exception should not be translated
 	 */
-	@Nullable
-	public static DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
+	public static @Nullable DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
 		// Following the JPA specification, a persistence provider can also
 		// throw these two exceptions, besides PersistenceException.
 		if (ex instanceof IllegalStateException) {
@@ -441,11 +435,9 @@ public abstract class EntityManagerFactoryUtils {
 			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
 			implements Ordered {
 
-		@Nullable
-		private final Object transactionData;
+		private final @Nullable Object transactionData;
 
-		@Nullable
-		private final JpaDialect jpaDialect;
+		private final @Nullable JpaDialect jpaDialect;
 
 		private final boolean newEntityManager;
 

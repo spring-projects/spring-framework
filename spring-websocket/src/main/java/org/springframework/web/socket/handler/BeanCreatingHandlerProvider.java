@@ -16,11 +16,12 @@
 
 package org.springframework.web.socket.handler;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,8 +37,7 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 	private final Class<? extends T> handlerType;
 
-	@Nullable
-	private AutowireCapableBeanFactory beanFactory;
+	private @Nullable AutowireCapableBeanFactory beanFactory;
 
 
 	public BeanCreatingHandlerProvider(Class<? extends T> handlerType) {

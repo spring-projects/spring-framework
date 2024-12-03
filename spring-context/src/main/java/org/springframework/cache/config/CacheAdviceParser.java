@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -36,7 +37,6 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.cache.interceptor.NameMatchCacheOperationSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -185,8 +185,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		private final String method;
 
-		@Nullable
-		private String[] caches;
+		private String @Nullable [] caches;
 
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
@@ -231,8 +230,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			return builder;
 		}
 
-		@Nullable
-		String merge(Element element, ReaderContext readerCtx) {
+		@Nullable String merge(Element element, ReaderContext readerCtx) {
 			String method = element.getAttribute(METHOD_ATTRIBUTE);
 			if (StringUtils.hasText(method)) {
 				return method.trim();

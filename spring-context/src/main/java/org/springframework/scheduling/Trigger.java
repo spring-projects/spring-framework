@@ -19,7 +19,7 @@ package org.springframework.scheduling;
 import java.time.Instant;
 import java.util.Date;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Common interface for trigger objects that determine the next execution time
@@ -42,8 +42,7 @@ public interface Trigger {
 	 * @deprecated as of 6.0, in favor of {@link #nextExecution(TriggerContext)}
 	 */
 	@Deprecated(since = "6.0")
-	@Nullable
-	default Date nextExecutionTime(TriggerContext triggerContext) {
+	default @Nullable Date nextExecutionTime(TriggerContext triggerContext) {
 		Instant instant = nextExecution(triggerContext);
 		return (instant != null ? Date.from(instant) : null);
 	}
@@ -56,7 +55,6 @@ public interface Trigger {
 	 * or {@code null} if the trigger won't fire anymore
 	 * @since 6.0
 	 */
-	@Nullable
-	Instant nextExecution(TriggerContext triggerContext);
+	@Nullable Instant nextExecution(TriggerContext triggerContext);
 
 }

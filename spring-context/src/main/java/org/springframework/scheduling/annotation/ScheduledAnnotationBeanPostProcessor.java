@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -61,7 +62,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.annotation.DurationFormat;
 import org.springframework.format.datetime.standard.DurationFormatterUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
@@ -134,23 +134,17 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	private final ScheduledTaskRegistrar registrar;
 
-	@Nullable
-	private Object scheduler;
+	private @Nullable Object scheduler;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private TaskSchedulerRouter localScheduler;
+	private @Nullable TaskSchedulerRouter localScheduler;
 
 	private final Set<Class<?>> nonAnnotatedClasses = ConcurrentHashMap.newKeySet(64);
 
@@ -554,8 +548,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @deprecated in favor of {@link #createRunnable(Object, Method, String)}
 	 */
 	@Deprecated(since = "6.1")
-	@Nullable
-	protected Runnable createRunnable(Object target, Method method) {
+	protected @Nullable Runnable createRunnable(Object target, Method method) {
 		return null;
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -86,8 +86,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext context) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 
 		registerUrlProvider(context, source);
@@ -154,8 +153,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	@Nullable
-	private String registerResourceHandler(ParserContext context, Element element,
+	private @Nullable String registerResourceHandler(ParserContext context, Element element,
 			RuntimeBeanReference pathHelperRef, @Nullable Object source) {
 
 		String locationAttr = element.getAttribute("location");

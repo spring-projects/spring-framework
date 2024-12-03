@@ -16,11 +16,12 @@
 
 package org.springframework.context.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * Context information for use by {@link Condition} implementations.
@@ -44,8 +45,7 @@ public interface ConditionContext {
 	 * definition should the condition match, or {@code null} if the bean factory is
 	 * not available (or not downcastable to {@code ConfigurableListableBeanFactory}).
 	 */
-	@Nullable
-	ConfigurableListableBeanFactory getBeanFactory();
+	@Nullable ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
 	 * Return the {@link Environment} for which the current application is running.
@@ -62,7 +62,6 @@ public interface ConditionContext {
 	 * (only {@code null} if even the system ClassLoader isn't accessible).
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */
-	@Nullable
-	ClassLoader getClassLoader();
+	@Nullable ClassLoader getClassLoader();
 
 }

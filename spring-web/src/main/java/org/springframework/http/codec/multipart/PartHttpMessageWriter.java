@@ -18,6 +18,7 @@ package org.springframework.http.codec.multipart;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link HttpMessageWriter} for writing with {@link Part}. This can be useful

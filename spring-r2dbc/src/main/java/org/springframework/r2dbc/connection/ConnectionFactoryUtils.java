@@ -31,6 +31,7 @@ import io.r2dbc.spi.R2dbcTimeoutException;
 import io.r2dbc.spi.R2dbcTransientException;
 import io.r2dbc.spi.R2dbcTransientResourceException;
 import io.r2dbc.spi.Wrapped;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
@@ -43,7 +44,6 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
-import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.BadSqlGrammarException;
 import org.springframework.r2dbc.UncategorizedR2dbcException;
 import org.springframework.transaction.NoTransactionException;

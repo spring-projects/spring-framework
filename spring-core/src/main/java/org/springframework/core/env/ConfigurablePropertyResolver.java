@@ -16,8 +16,9 @@
 
 package org.springframework.core.env;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.support.ConfigurableConversionService;
-import org.springframework.lang.Nullable;
 
 /**
  * Configuration interface to be implemented by most if not all {@link PropertyResolver}

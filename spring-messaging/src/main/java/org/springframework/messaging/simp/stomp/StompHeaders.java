@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -146,8 +147,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Return the content-type header value.
 	 */
-	@Nullable
-	public MimeType getContentType() {
+	public @Nullable MimeType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
 		return (StringUtils.hasLength(value) ? MimeTypeUtils.parseMimeType(value) : null);
 	}
@@ -179,8 +179,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the receipt header.
 	 */
-	@Nullable
-	public String getReceipt() {
+	public @Nullable String getReceipt() {
 		return getFirst(RECEIPT);
 	}
 
@@ -195,8 +194,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the host header.
 	 */
-	@Nullable
-	public String getHost() {
+	public @Nullable String getHost() {
 		return getFirst(HOST);
 	}
 
@@ -205,7 +203,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Applies to the CONNECT frame.
 	 * @since 5.0.7
 	 */
-	public void setAcceptVersion(@Nullable String... acceptVersions) {
+	public void setAcceptVersion(String @Nullable ... acceptVersions) {
 		if (ObjectUtils.isEmpty(acceptVersions)) {
 			set(ACCEPT_VERSION, null);
 			return;
@@ -220,8 +218,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the accept-version header.
 	 * @since 5.0.7
 	 */
-	@Nullable
-	public String[] getAcceptVersion() {
+	public String @Nullable [] getAcceptVersion() {
 		String value = getFirst(ACCEPT_VERSION);
 		return value != null ? StringUtils.commaDelimitedListToStringArray(value) : null;
 	}
@@ -237,8 +234,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the login header.
 	 */
-	@Nullable
-	public String getLogin() {
+	public @Nullable String getLogin() {
 		return getFirst(LOGIN);
 	}
 
@@ -253,8 +249,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the passcode header.
 	 */
-	@Nullable
-	public String getPasscode() {
+	public @Nullable String getPasscode() {
 		return getFirst(PASSCODE);
 	}
 
@@ -262,7 +257,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Set the heartbeat header.
 	 * Applies to the CONNECT and CONNECTED frames.
 	 */
-	public void setHeartbeat(@Nullable long[] heartbeat) {
+	public void setHeartbeat(long @Nullable [] heartbeat) {
 		if (heartbeat == null || heartbeat.length != 2) {
 			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " +
 					(heartbeat != null ? heartbeat.length : "null"));
@@ -277,9 +272,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the heartbeat header.
 	 */
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public long[] getHeartbeat() {
+	public long @Nullable [] getHeartbeat() {
 		String rawValue = getFirst(HEARTBEAT);
 		int pos = (rawValue != null ? rawValue.indexOf(',') : -1);
 		if (pos == -1) {
@@ -309,8 +303,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the session header.
 	 */
-	@Nullable
-	public String getSession() {
+	public @Nullable String getSession() {
 		return getFirst(SESSION);
 	}
 
@@ -326,8 +319,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the server header.
 	 * Applies to the CONNECTED frame.
 	 */
-	@Nullable
-	public String getServer() {
+	public @Nullable String getServer() {
 		return getFirst(SERVER);
 	}
 
@@ -342,8 +334,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Get the destination header.
 	 * Applies to the SEND, SUBSCRIBE, and MESSAGE frames.
 	 */
-	@Nullable
-	public String getDestination() {
+	public @Nullable String getDestination() {
 		return getFirst(DESTINATION);
 	}
 
@@ -358,8 +349,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the id header.
 	 */
-	@Nullable
-	public String getId() {
+	public @Nullable String getId() {
 		return getFirst(ID);
 	}
 
@@ -374,8 +364,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the ack header.
 	 */
-	@Nullable
-	public String getAck() {
+	public @Nullable String getAck() {
 		return getFirst(ACK);
 	}
 
@@ -390,8 +379,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the subscription header.
 	 */
-	@Nullable
-	public String getSubscription() {
+	public @Nullable String getSubscription() {
 		return getFirst(SUBSCRIPTION);
 	}
 
@@ -406,8 +394,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the message-id header.
 	 */
-	@Nullable
-	public String getMessageId() {
+	public @Nullable String getMessageId() {
 		return getFirst(MESSAGE_ID);
 	}
 
@@ -422,8 +409,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	/**
 	 * Get the receipt header.
 	 */
-	@Nullable
-	public String getReceiptId() {
+	public @Nullable String getReceiptId() {
 		return getFirst(RECEIPT_ID);
 	}
 
@@ -433,8 +419,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * @return the first header value, or {@code null} if none
 	 */
 	@Override
-	@Nullable
-	public String getFirst(String headerName) {
+	public @Nullable String getFirst(String headerName) {
 		List<String> headerValues = this.headers.get(headerName);
 		return headerValues != null ? headerValues.get(0) : null;
 	}
@@ -515,8 +500,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		return this.headers.get(key);
 	}
 

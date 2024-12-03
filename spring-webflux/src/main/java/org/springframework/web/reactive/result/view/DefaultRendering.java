@@ -19,9 +19,10 @@ package org.springframework.web.reactive.result.view;
 import java.util.Collections;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 
 /**
@@ -39,8 +40,7 @@ class DefaultRendering implements Rendering {
 
 	private final Map<String, Object> model;
 
-	@Nullable
-	private final HttpStatusCode status;
+	private final @Nullable HttpStatusCode status;
 
 	private final HttpHeaders headers;
 
@@ -54,8 +54,7 @@ class DefaultRendering implements Rendering {
 
 
 	@Override
-	@Nullable
-	public Object view() {
+	public @Nullable Object view() {
 		return this.view;
 	}
 
@@ -65,8 +64,7 @@ class DefaultRendering implements Rendering {
 	}
 
 	@Override
-	@Nullable
-	public HttpStatusCode status() {
+	public @Nullable HttpStatusCode status() {
 		return this.status;
 	}
 

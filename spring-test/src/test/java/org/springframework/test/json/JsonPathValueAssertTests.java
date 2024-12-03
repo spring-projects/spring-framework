@@ -25,11 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.StringUtils;
 

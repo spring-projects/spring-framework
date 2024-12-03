@@ -30,6 +30,7 @@ import io.undertow.websockets.client.WebSocketClientNegotiation;
 import io.undertow.websockets.core.WebSocketChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.xnio.IoFuture;
 import org.xnio.XnioWorker;
 import reactor.core.publisher.Mono;
@@ -38,7 +39,6 @@ import reactor.core.publisher.Sinks;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -226,8 +226,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 
 		private final HttpHeaders responseHeaders = new HttpHeaders();
 
-		@Nullable
-		private final WebSocketClientNegotiation delegate;
+		private final @Nullable WebSocketClientNegotiation delegate;
 
 		public DefaultNegotiation(List<String> protocols, HttpHeaders requestHeaders,
 				ConnectionBuilder connectionBuilder) {

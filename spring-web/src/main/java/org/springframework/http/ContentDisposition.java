@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
@@ -70,17 +71,13 @@ public final class ContentDisposition {
 	}
 
 
-	@Nullable
-	private final String type;
+	private final @Nullable String type;
 
-	@Nullable
-	private final String name;
+	private final @Nullable String name;
 
-	@Nullable
-	private final String filename;
+	private final @Nullable String filename;
 
-	@Nullable
-	private final Charset charset;
+	private final @Nullable Charset charset;
 
 
 	/**
@@ -126,16 +123,14 @@ public final class ContentDisposition {
 	 * @see #isFormData()
 	 * @see #isInline()
 	 */
-	@Nullable
-	public String getType() {
+	public @Nullable String getType() {
 		return this.type;
 	}
 
 	/**
 	 * Return the value of the {@literal name} parameter, or {@code null} if not defined.
 	 */
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -144,16 +139,14 @@ public final class ContentDisposition {
 	 * from BASE64 encoding based on RFC 2047, or of the {@literal filename*}
 	 * parameter, possibly decoded as defined in the RFC 5987.
 	 */
-	@Nullable
-	public String getFilename() {
+	public @Nullable String getFilename() {
 		return this.filename;
 	}
 
 	/**
 	 * Return the charset defined in {@literal filename*} parameter, or {@code null} if not defined.
 	 */
-	@Nullable
-	public Charset getCharset() {
+	public @Nullable Charset getCharset() {
 		return this.charset;
 	}
 
@@ -603,14 +596,11 @@ public final class ContentDisposition {
 
 		private final String type;
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
-		@Nullable
-		private String filename;
+		private @Nullable String filename;
 
-		@Nullable
-		private Charset charset;
+		private @Nullable Charset charset;
 
 
 		public BuilderImpl(String type) {

@@ -19,11 +19,11 @@ package org.springframework.jms.support.destination;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +38,7 @@ import org.springframework.util.Assert;
  */
 public class BeanFactoryDestinationResolver implements DestinationResolver, BeanFactoryAware {
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**

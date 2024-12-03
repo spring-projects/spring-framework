@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
@@ -37,7 +39,6 @@ import org.springframework.expression.TypeLocator;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.lang.Nullable;
 
 /**
  * A basic implementation of {@link EvaluationContext} that focuses on a subset
@@ -178,8 +179,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	 * @return always {@code null}
 	 */
 	@Override
-	@Nullable
-	public BeanResolver getBeanResolver() {
+	public @Nullable BeanResolver getBeanResolver() {
 		return null;
 	}
 
@@ -257,8 +257,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	 * @return the value of the variable or function, or {@code null} if not found
 	 */
 	@Override
-	@Nullable
-	public Object lookupVariable(String name) {
+	public @Nullable Object lookupVariable(String name) {
 		return this.variables.get(name);
 	}
 
@@ -344,11 +343,9 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 		private List<MethodResolver> resolvers = Collections.emptyList();
 
-		@Nullable
-		private TypeConverter typeConverter;
+		private @Nullable TypeConverter typeConverter;
 
-		@Nullable
-		private TypedValue rootObject;
+		private @Nullable TypedValue rootObject;
 
 		private boolean assignmentEnabled = true;
 

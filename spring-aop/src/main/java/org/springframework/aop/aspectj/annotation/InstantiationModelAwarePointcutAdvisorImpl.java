@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.aop.Advice;
 import org.aspectj.lang.reflect.PerClauseKind;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
@@ -31,7 +32,6 @@ import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory.AspectJAnnotation;
 import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.aop.support.Pointcuts;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -73,14 +73,11 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	private final boolean lazy;
 
-	@Nullable
-	private Advice instantiatedAdvice;
+	private @Nullable Advice instantiatedAdvice;
 
-	@Nullable
-	private Boolean isBeforeAdvice;
+	private @Nullable Boolean isBeforeAdvice;
 
-	@Nullable
-	private Boolean isAfterAdvice;
+	private @Nullable Boolean isAfterAdvice;
 
 
 	public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
@@ -271,8 +268,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 		private final Pointcut preInstantiationPointcut;
 
-		@Nullable
-		private LazySingletonAspectInstanceFactoryDecorator aspectInstanceFactory;
+		private @Nullable LazySingletonAspectInstanceFactoryDecorator aspectInstanceFactory;
 
 		public PerTargetInstantiationModelPointcut(AspectJExpressionPointcut declaredPointcut,
 				Pointcut preInstantiationPointcut, MetadataAwareAspectInstanceFactory aspectInstanceFactory) {

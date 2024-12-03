@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -66,8 +66,7 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext applicationContext;
 
-	@Nullable
-	private final UrlPathHelper pathHelper;
+	private final @Nullable UrlPathHelper pathHelper;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
@@ -154,8 +153,7 @@ public class ResourceHandlerRegistry {
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case
 	 * of no registrations.
 	 */
-	@Nullable
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected @Nullable AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}

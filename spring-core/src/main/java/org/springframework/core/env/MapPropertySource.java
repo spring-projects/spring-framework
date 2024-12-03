@@ -18,7 +18,8 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -45,8 +46,7 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 
 
 	@Override
-	@Nullable
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		return this.source.get(name);
 	}
 

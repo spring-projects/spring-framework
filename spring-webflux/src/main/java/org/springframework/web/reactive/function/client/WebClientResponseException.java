@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,15 +53,12 @@ public class WebClientResponseException extends WebClientException {
 
 	private final HttpHeaders headers;
 
-	@Nullable
 	@SuppressWarnings("serial")
-	private final Charset responseCharset;
+	private final @Nullable Charset responseCharset;
 
-	@Nullable
-	private final transient HttpRequest request;
+	private final transient @Nullable HttpRequest request;
 
-	@Nullable
-	private transient Function<ResolvableType, ?> bodyDecodeFunction;
+	private transient @Nullable Function<ResolvableType, ?> bodyDecodeFunction;
 
 
 	/**
@@ -69,7 +67,7 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	public WebClientResponseException(
 			int statusCode, String statusText, @Nullable HttpHeaders headers,
-			@Nullable byte[] body, @Nullable Charset charset) {
+			byte @Nullable [] body, @Nullable Charset charset) {
 
 		this(statusCode, statusText, headers, body, charset, null);
 	}
@@ -80,7 +78,7 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	public WebClientResponseException(
 			int status, String reasonPhrase, @Nullable HttpHeaders headers,
-			@Nullable byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
+			byte @Nullable [] body, @Nullable Charset charset, @Nullable HttpRequest request) {
 
 		this(HttpStatusCode.valueOf(status), reasonPhrase, headers, body, charset, request);
 	}
@@ -91,7 +89,7 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	public WebClientResponseException(
 			HttpStatusCode statusCode, String reasonPhrase, @Nullable HttpHeaders headers,
-			@Nullable byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
+			byte @Nullable [] body, @Nullable Charset charset, @Nullable HttpRequest request) {
 
 		this(initMessage(statusCode, reasonPhrase, request),
 				statusCode, reasonPhrase, headers, body, charset, request);
@@ -107,7 +105,7 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	public WebClientResponseException(
 			String message, int statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] responseBody, @Nullable Charset charset) {
+			@Nullable HttpHeaders headers, byte @Nullable [] responseBody, @Nullable Charset charset) {
 
 		this(message, statusCode, statusText, headers, responseBody, charset, null);
 	}
@@ -118,7 +116,7 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	public WebClientResponseException(
 			String message, int statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] responseBody, @Nullable Charset charset,
+			@Nullable HttpHeaders headers, byte @Nullable [] responseBody, @Nullable Charset charset,
 			@Nullable HttpRequest request) {
 
 		this(message, HttpStatusCode.valueOf(statusCode), statusText, headers, responseBody, charset, request);
@@ -130,7 +128,7 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	public WebClientResponseException(
 			String message, HttpStatusCode statusCode, String statusText, @Nullable HttpHeaders headers,
-			@Nullable byte[] responseBody, @Nullable Charset charset, @Nullable HttpRequest request) {
+			byte @Nullable [] responseBody, @Nullable Charset charset, @Nullable HttpRequest request) {
 
 		super(message);
 
@@ -232,8 +230,7 @@ public class WebClientResponseException extends WebClientException {
 	 * @throws org.springframework.core.codec.DecodingException if decoding fails
 	 * @since 6.0
 	 */
-	@Nullable
-	public <E> E getResponseBodyAs(Class<E> targetType) {
+	public <E> @Nullable E getResponseBodyAs(Class<E> targetType) {
 		return decodeBody(ResolvableType.forClass(targetType));
 	}
 
@@ -241,14 +238,12 @@ public class WebClientResponseException extends WebClientException {
 	 * Variant of {@link #getResponseBodyAs(Class)} with {@link ParameterizedTypeReference}.
 	 * @since 6.0
 	 */
-	@Nullable
-	public <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
+	public <E> @Nullable E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
 		return decodeBody(ResolvableType.forType(targetType.getType()));
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <E> E decodeBody(ResolvableType targetType) {
+	private <E> @Nullable E decodeBody(ResolvableType targetType) {
 		Assert.state(this.bodyDecodeFunction != null, "Decoder function not set");
 		return (E) this.bodyDecodeFunction.apply(targetType);
 	}
@@ -257,8 +252,7 @@ public class WebClientResponseException extends WebClientException {
 	 * Return the corresponding request.
 	 * @since 5.1.4
 	 */
-	@Nullable
-	public HttpRequest getRequest() {
+	public @Nullable HttpRequest getRequest() {
 		return this.request;
 	}
 

@@ -20,8 +20,9 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**

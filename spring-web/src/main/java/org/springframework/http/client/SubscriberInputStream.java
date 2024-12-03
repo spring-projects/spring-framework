@@ -32,9 +32,9 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.Exceptions;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -89,18 +89,15 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 
 	private int consumed;
 
-	@Nullable
-	private byte[] available;
+	private byte @Nullable [] available;
 
 	private int position;
 
-	@Nullable
-	private Flow.Subscription subscription;
+	private Flow.@Nullable Subscription subscription;
 
 	private boolean done;
 
-	@Nullable
-	private Throwable error;
+	private @Nullable Throwable error;
 
 
 	/**

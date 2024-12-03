@@ -23,10 +23,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.lang.Nullable;
 
 /**
  * Object to represent a binary parameter value for a SQL statement, for example,

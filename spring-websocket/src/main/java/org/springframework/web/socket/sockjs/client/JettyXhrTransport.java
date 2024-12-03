@@ -29,12 +29,12 @@ import org.eclipse.jetty.client.Response;
 import org.eclipse.jetty.client.StringRequestContent;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.HttpServerErrorException;

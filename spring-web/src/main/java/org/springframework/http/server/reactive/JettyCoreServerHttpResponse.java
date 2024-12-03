@@ -29,6 +29,7 @@ import org.eclipse.jetty.server.HttpCookieUtils;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.IteratingCallback;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,7 +42,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.support.JettyHeadersAdapter;
-import org.springframework.lang.Nullable;
 
 /**
  * Adapt an Eclipse Jetty {@link Response} to an {@link org.springframework.http.server.ServerHttpResponse}.
@@ -192,20 +192,17 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		}
 
 		@Override
-		@Nullable
-		public String getComment() {
+		public @Nullable String getComment() {
 			return null;
 		}
 
 		@Override
-		@Nullable
-		public String getDomain() {
+		public @Nullable String getDomain() {
 			return this.responseCookie.getDomain();
 		}
 
 		@Override
-		@Nullable
-		public String getPath() {
+		public @Nullable String getPath() {
 			return this.responseCookie.getPath();
 		}
 
@@ -214,9 +211,8 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 			return this.responseCookie.isSecure();
 		}
 
-		@Nullable
 		@Override
-		public SameSite getSameSite() {
+		public @Nullable SameSite getSameSite() {
 			// Adding non-null return site breaks tests.
 			return null;
 		}

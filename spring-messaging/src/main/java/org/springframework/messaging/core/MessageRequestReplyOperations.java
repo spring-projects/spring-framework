@@ -18,7 +18,8 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -39,8 +40,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the reply, possibly {@code null} if the message could not be received,
 	 * for example due to a timeout
 	 */
-	@Nullable
-	Message<?> sendAndReceive(Message<?> requestMessage) throws MessagingException;
+	@Nullable Message<?> sendAndReceive(Message<?> requestMessage) throws MessagingException;
 
 	/**
 	 * Send a request message and receive the reply from the given destination.
@@ -49,8 +49,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the reply, possibly {@code null} if the message could not be received,
 	 * for example due to a timeout
 	 */
-	@Nullable
-	Message<?> sendAndReceive(D destination, Message<?> requestMessage) throws MessagingException;
+	@Nullable Message<?> sendAndReceive(D destination, Message<?> requestMessage) throws MessagingException;
 
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
@@ -62,8 +61,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(Object request, Class<T> targetClass) throws MessagingException;
+	<T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass) throws MessagingException;
 
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
@@ -76,8 +74,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) throws MessagingException;
+	<T> @Nullable T convertSendAndReceive(D destination, Object request, Class<T> targetClass) throws MessagingException;
 
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
@@ -91,8 +88,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(
+	<T> @Nullable T convertSendAndReceive(
 			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
 			throws MessagingException;
 
@@ -108,8 +104,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(
+	<T> @Nullable T convertSendAndReceive(
 			Object request, Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor)
 			throws MessagingException;
 
@@ -126,8 +121,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
+	<T> @Nullable T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
 			MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 	/**
@@ -143,8 +137,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(
+	<T> @Nullable T convertSendAndReceive(
 			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass,
 			@Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 

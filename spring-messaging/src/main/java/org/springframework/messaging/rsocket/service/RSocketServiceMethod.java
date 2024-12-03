@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -34,7 +35,6 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
@@ -59,8 +59,7 @@ final class RSocketServiceMethod {
 
 	private final List<RSocketServiceArgumentResolver> argumentResolvers;
 
-	@Nullable
-	private final String route;
+	private final @Nullable String route;
 
 	private final Function<RSocketRequestValues, Object> responseFunction;
 
@@ -91,9 +90,8 @@ final class RSocketServiceMethod {
 		return parameters;
 	}
 
-	@Nullable
 	@SuppressWarnings("NullAway")
-	private static String initRoute(
+	private static @Nullable String initRoute(
 			Method method, Class<?> containingClass, RSocketStrategies strategies,
 			@Nullable StringValueResolver embeddedValueResolver) {
 
@@ -217,8 +215,7 @@ final class RSocketServiceMethod {
 		return this.method;
 	}
 
-	@Nullable
-	public Object invoke(Object[] arguments) {
+	public @Nullable Object invoke(Object[] arguments) {
 		RSocketRequestValues.Builder requestValues = RSocketRequestValues.builder(this.route);
 		applyArguments(requestValues, arguments);
 		return this.responseFunction.apply(requestValues.build());

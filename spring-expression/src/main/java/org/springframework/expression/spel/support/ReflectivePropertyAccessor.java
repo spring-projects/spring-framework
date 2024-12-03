@@ -33,6 +33,7 @@ import kotlin.reflect.KMutableProperty;
 import kotlin.reflect.KProperty;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.ReflectJvmMapping;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.KotlinDetector;
@@ -46,7 +47,6 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -109,8 +109,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Returns {@code null} which means this is a general purpose accessor.
 	 */
 	@Override
-	@Nullable
-	public Class<?>[] getSpecificTargetClasses() {
+	public Class<?> @Nullable [] getSpecificTargetClasses() {
 		return null;
 	}
 
@@ -329,8 +328,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 
-	@Nullable
-	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
+	private @Nullable TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
 		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 
 		if (type.isArray() && name.equals("length")) {
@@ -352,8 +350,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return typeDescriptor;
 	}
 
-	@Nullable
-	private Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
+	private @Nullable Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		boolean targetIsAClass = (target instanceof Class);
 		Method method = findGetterForProperty(propertyName, clazz, targetIsAClass);
 		if (method == null && targetIsAClass) {
@@ -363,8 +360,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return method;
 	}
 
-	@Nullable
-	private Method findSetterForProperty(String propertyName, Class<?> clazz, Object target) {
+	private @Nullable Method findSetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findSetterForProperty(propertyName, clazz, target instanceof Class);
 		// In contrast to findGetterForProperty(), we do not look for setters in
 		// java.lang.Class as a fallback, since Class doesn't have any public setters.
@@ -374,8 +370,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a getter method for the specified property.
 	 */
-	@Nullable
-	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
+	protected @Nullable Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
 				"get", clazz, mustBeStatic, 0, ANY_TYPES);
 		if (method == null) {
@@ -393,14 +388,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a setter method for the specified property.
 	 */
-	@Nullable
-	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
+	protected @Nullable Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		return findMethodForProperty(getPropertyMethodSuffixes(propertyName),
 				"set", clazz, mustBeStatic, 1, ANY_TYPES);
 	}
 
-	@Nullable
-	private Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
+	private @Nullable Method findMethodForProperty(String[] methodSuffixes, String prefix, Class<?> clazz,
 			boolean mustBeStatic, int numberOfParams, Set<Class<?>> requiredReturnTypes) {
 
 		Method[] methods = getSortedMethods(clazz);
@@ -467,8 +460,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return StringUtils.capitalize(propertyName);
 	}
 
-	@Nullable
-	private Field findField(String name, Class<?> clazz, Object target) {
+	private @Nullable Field findField(String name, Class<?> clazz, Object target) {
 		Field field = findField(name, clazz, target instanceof Class);
 		if (field == null && target instanceof Class) {
 			field = findField(name, target.getClass(), false);
@@ -479,8 +471,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Find a field of a certain name on a specified class.
 	 */
-	@Nullable
-	protected Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
+	protected @Nullable Field findField(String name, Class<?> clazz, boolean mustBeStatic) {
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {
 			if (field.getName().equals(name) && (!mustBeStatic || Modifier.isStatic(field.getModifiers()))) {
@@ -619,8 +610,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
-		@Nullable
-		public Class<?>[] getSpecificTargetClasses() {
+		public Class<?> @Nullable [] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 

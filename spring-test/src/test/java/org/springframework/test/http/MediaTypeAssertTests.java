@@ -16,10 +16,10 @@
 
 package org.springframework.test.http;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -201,8 +201,7 @@ class MediaTypeAssertTests {
 	}
 
 
-	@Nullable
-	private static MediaType mediaType(@Nullable String mediaType) {
+	private static @Nullable MediaType mediaType(@Nullable String mediaType) {
 		return (mediaType != null ? MediaType.parseMediaType(mediaType) : null);
 	}
 

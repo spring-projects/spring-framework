@@ -41,12 +41,12 @@ import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -104,8 +104,7 @@ public class SpringFactoriesLoader {
 	static final Map<ClassLoader, Map<String, SpringFactoriesLoader>> cache = new ConcurrentReferenceHashMap<>();
 
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private final Map<String, List<String>> factories;
 
@@ -216,8 +215,7 @@ public class SpringFactoriesLoader {
 		return this.factories.getOrDefault(factoryType.getName(), Collections.emptyList());
 	}
 
-	@Nullable
-	protected <T> T instantiateFactory(String implementationName, Class<T> type,
+	protected <T> @Nullable T instantiateFactory(String implementationName, Class<T> type,
 			@Nullable ArgumentResolver argumentResolver, FailureHandler failureHandler) {
 
 		try {
@@ -397,8 +395,7 @@ public class SpringFactoriesLoader {
 			return new FactoryInstantiator<>((Constructor<T>) constructor);
 		}
 
-		@Nullable
-		private static Constructor<?> findConstructor(Class<?> factoryImplementationClass) {
+		private static @Nullable Constructor<?> findConstructor(Class<?> factoryImplementationClass) {
 			// Same algorithm as BeanUtils.getResolvableConstructor
 			Constructor<?> constructor = findPrimaryKotlinConstructor(factoryImplementationClass);
 			constructor = (constructor != null ? constructor :
@@ -410,8 +407,7 @@ public class SpringFactoriesLoader {
 			return constructor;
 		}
 
-		@Nullable
-		private static Constructor<?> findPrimaryKotlinConstructor(Class<?> factoryImplementationClass) {
+		private static @Nullable Constructor<?> findPrimaryKotlinConstructor(Class<?> factoryImplementationClass) {
 			return (isKotlinType(factoryImplementationClass) ?
 					KotlinDelegate.findPrimaryConstructor(factoryImplementationClass) : null);
 		}
@@ -420,13 +416,11 @@ public class SpringFactoriesLoader {
 			return KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(factoryImplementationClass);
 		}
 
-		@Nullable
-		private static Constructor<?> findSingleConstructor(Constructor<?>[] constructors) {
+		private static @Nullable Constructor<?> findSingleConstructor(Constructor<?>[] constructors) {
 			return (constructors.length == 1 ? constructors[0] : null);
 		}
 
-		@Nullable
-		private static Constructor<?> findDeclaredConstructor(Class<?> factoryImplementationClass) {
+		private static @Nullable Constructor<?> findDeclaredConstructor(Class<?> factoryImplementationClass) {
 			try {
 				return factoryImplementationClass.getDeclaredConstructor();
 			}
@@ -443,8 +437,7 @@ public class SpringFactoriesLoader {
 	 */
 	private static class KotlinDelegate {
 
-		@Nullable
-		static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
+		static <T> @Nullable Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 			try {
 				KFunction<T> primaryConstructor = KClasses.getPrimaryConstructor(JvmClassMappingKt.getKotlinClass(clazz));
 				if (primaryConstructor != null) {
@@ -512,8 +505,7 @@ public class SpringFactoriesLoader {
 		 * @param type the argument type
 		 * @return the resolved argument value or {@code null}
 		 */
-		@Nullable
-		<T> T resolve(Class<T> type);
+		<T> @Nullable T resolve(Class<T> type);
 
 		/**
 		 * Create a new composed {@link ArgumentResolver} by combining this resolver

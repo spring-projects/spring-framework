@@ -25,6 +25,7 @@ import java.util.List;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +59,6 @@ import org.springframework.context.testfixture.beans.TestApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.testfixture.TimeStamped;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;

@@ -19,7 +19,7 @@ package org.springframework.util.comparator;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link Comparator} for {@link Boolean} objects that can sort either

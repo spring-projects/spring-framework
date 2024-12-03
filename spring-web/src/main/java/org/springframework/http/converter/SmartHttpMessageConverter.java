@@ -19,11 +19,12 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 /**
  * A specialization of {@link HttpMessageConverter} that can convert an HTTP request

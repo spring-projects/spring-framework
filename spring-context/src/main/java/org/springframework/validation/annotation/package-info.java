@@ -5,9 +5,7 @@
  * <p>Provides an extended variant of JSR-303's {@code @Valid},
  * supporting the specification of validation groups.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.validation.annotation;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

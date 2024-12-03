@@ -20,6 +20,8 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
@@ -31,7 +33,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -57,8 +58,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
-	@Nullable
-	private SpelNodeImpl parent;
+	private @Nullable SpelNodeImpl parent;
 
 	/**
 	 * Indicates the type descriptor for the result of this expression node.
@@ -69,11 +69,10 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * It does not include the trailing semicolon (for non array reference types).
 	 * Some examples: Ljava/lang/String, I, [I
 	 */
-	@Nullable
-	protected volatile String exitTypeDescriptor;
+	protected volatile @Nullable String exitTypeDescriptor;
 
 
-	public SpelNodeImpl(int startPos, int endPos, @Nullable SpelNodeImpl... operands) {
+	public SpelNodeImpl(int startPos, int endPos, SpelNodeImpl @Nullable ... operands) {
 		this.startPos = startPos;
 		this.endPos = endPos;
 		if (!ObjectUtils.isEmpty(operands)) {
@@ -111,8 +110,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	@Nullable
-	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
+	public final @Nullable Object getValue(ExpressionState expressionState) throws EvaluationException {
 		return getValueInternal(expressionState).getValue();
 	}
 
@@ -165,8 +163,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectClass(@Nullable Object obj) {
+	public @Nullable Class<?> getObjectClass(@Nullable Object obj) {
 		if (obj == null) {
 			return null;
 		}
@@ -193,13 +190,11 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		return false;
 	}
 
-	@Nullable
-	public String getExitDescriptor() {
+	public @Nullable String getExitDescriptor() {
 		return this.exitTypeDescriptor;
 	}
 
-	@Nullable
-	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
+	protected final <T> @Nullable T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
 		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
 	}
 
@@ -302,8 +297,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		}
 	}
 
-	@Nullable
-	private static Class<?> loadClassForExitDescriptor(@Nullable String exitDescriptor, ClassLoader classLoader) {
+	private static @Nullable Class<?> loadClassForExitDescriptor(@Nullable String exitDescriptor, ClassLoader classLoader) {
 		if (!StringUtils.hasText(exitDescriptor)) {
 			return null;
 		}

@@ -18,8 +18,9 @@ package org.springframework.beans.testfixture.beans.factory.aot;
 
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -31,8 +32,7 @@ import org.springframework.util.Assert;
  */
 public class DeferredTypeBuilder implements Consumer<TypeSpec.Builder> {
 
-	@Nullable
-	private Consumer<TypeSpec.Builder> type;
+	private @Nullable Consumer<TypeSpec.Builder> type;
 
 	@Override
 	public void accept(TypeSpec.Builder type) {

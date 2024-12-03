@@ -18,10 +18,10 @@ package org.springframework.web.reactive.resource;
 
 import java.util.Collections;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -35,8 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class ResourceTransformerSupport implements ResourceTransformer {
 
-	@Nullable
-	private ResourceUrlProvider resourceUrlProvider;
+	private @Nullable ResourceUrlProvider resourceUrlProvider;
 
 
 	/**
@@ -53,8 +52,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	/**
 	 * Return the configured {@code ResourceUrlProvider}.
 	 */
-	@Nullable
-	public ResourceUrlProvider getResourceUrlProvider() {
+	public @Nullable ResourceUrlProvider getResourceUrlProvider() {
 		return this.resourceUrlProvider;
 	}
 

@@ -29,6 +29,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -215,8 +215,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
 	}
 
-	@Nullable
-	private BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	private @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
 		return postProcessor.processAheadOfTime(registeredBean);
 	}

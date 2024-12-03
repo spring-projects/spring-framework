@@ -21,6 +21,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.function.UnaryOperator;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GenerationContext;
@@ -44,7 +45,6 @@ import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanFactory
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

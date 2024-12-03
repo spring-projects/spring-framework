@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -48,7 +49,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
@@ -479,8 +479,8 @@ public abstract class RequestPredicates {
 
 			private final boolean value;
 
-			@Nullable
-			private final Consumer<Map<String, Object>> modifyAttributes;
+
+			private final @Nullable Consumer<Map<String, Object>> modifyAttributes;
 
 
 			private Result(boolean value, @Nullable Consumer<Map<String, Object>> modifyAttributes) {
@@ -818,8 +818,7 @@ public abstract class RequestPredicates {
 
 		private final Predicate<String> extensionPredicate;
 
-		@Nullable
-		private final String extension;
+		private final @Nullable String extension;
 
 		public PathExtensionPredicate(Predicate<String> extensionPredicate) {
 			Assert.notNull(extensionPredicate, "Predicate must not be null");
@@ -868,8 +867,7 @@ public abstract class RequestPredicates {
 
 		private final Predicate<String> valuePredicate;
 
-		@Nullable
-		private final String value;
+		private final @Nullable String value;
 
 		public ParamPredicate(String name, Predicate<String> valuePredicate) {
 			Assert.notNull(name, "Name must not be null");

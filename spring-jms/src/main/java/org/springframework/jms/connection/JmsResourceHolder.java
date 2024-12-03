@@ -29,8 +29,8 @@ import jakarta.jms.Session;
 import jakarta.jms.TransactionInProgressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -53,8 +53,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
-	@Nullable
-	private ConnectionFactory connectionFactory;
+	private @Nullable ConnectionFactory connectionFactory;
 
 	private boolean frozen = false;
 
@@ -175,8 +174,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * Return this resource holder's default Connection,
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	public Connection getConnection() {
+	public @Nullable Connection getConnection() {
 		return this.connections.peek();
 	}
 
@@ -184,8 +182,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * Return this resource holder's Connection of the given type,
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	public <C extends Connection> C getConnection(Class<C> connectionType) {
+	public <C extends Connection> @Nullable C getConnection(Class<C> connectionType) {
 		return CollectionUtils.findValueOfType(this.connections, connectionType);
 	}
 
@@ -194,8 +191,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * <p>In contrast to {@link #getSession()}, this must not lazily initialize
 	 * a new Session, not even in {@link JmsResourceHolder} subclasses.
 	 */
-	@Nullable
-	Session getOriginalSession() {
+	@Nullable Session getOriginalSession() {
 		return this.sessions.peek();
 	}
 
@@ -203,8 +199,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * Return this resource holder's default Session,
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	public Session getSession() {
+	public @Nullable Session getSession() {
 		return this.sessions.peek();
 	}
 
@@ -212,8 +207,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * Return this resource holder's Session of the given type,
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	public <S extends Session> S getSession(Class<S> sessionType) {
+	public <S extends Session> @Nullable S getSession(Class<S> sessionType) {
 		return getSession(sessionType, null);
 	}
 
@@ -221,9 +215,8 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * Return this resource holder's Session of the given type
 	 * for the given connection, or {@code null} if none.
 	 */
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
+	public <S extends Session> @Nullable S getSession(Class<S> sessionType, @Nullable Connection connection) {
 		Deque<Session> sessions =
 				(connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
 		return CollectionUtils.findValueOfType(sessions, sessionType);

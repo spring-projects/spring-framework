@@ -19,8 +19,7 @@ package org.springframework.http.server.observation;
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Context that holds information for metadata collection regarding
@@ -33,8 +32,7 @@ import org.springframework.lang.Nullable;
  */
 public class ServerRequestObservationContext extends RequestReplyReceiverContext<HttpServletRequest, HttpServletResponse> {
 
-	@Nullable
-	private String pathPattern;
+	private @Nullable String pathPattern;
 
 	public ServerRequestObservationContext(HttpServletRequest request, HttpServletResponse response) {
 		super(HttpServletRequest::getHeader);
@@ -42,8 +40,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 		setResponse(response);
 	}
 
-	@Nullable
-	public String getPathPattern() {
+	public @Nullable String getPathPattern() {
 		return this.pathPattern;
 	}
 

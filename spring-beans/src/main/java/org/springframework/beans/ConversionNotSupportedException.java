@@ -18,7 +18,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown when no suitable editor or converter can be found for a bean property.

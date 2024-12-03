@@ -18,11 +18,12 @@ package org.springframework.http.codec.support;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
-import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link ServerCodecConfigurer.ServerDefaultCodecs}.
@@ -31,8 +32,7 @@ import org.springframework.lang.Nullable;
  */
 class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecConfigurer.ServerDefaultCodecs {
 
-	@Nullable
-	private Encoder<?> sseEncoder;
+	private @Nullable Encoder<?> sseEncoder;
 
 
 	ServerDefaultCodecsImpl() {
@@ -55,8 +55,7 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 		objectWriters.add(new ServerSentEventHttpMessageWriter(getSseEncoder()));
 	}
 
-	@Nullable
-	private Encoder<?> getSseEncoder() {
+	private @Nullable Encoder<?> getSseEncoder() {
 		return this.sseEncoder != null ? this.sseEncoder :
 				jackson2Present ? getJackson2JsonEncoder() :
 				kotlinSerializationJsonPresent ? getKotlinSerializationJsonEncoder() :

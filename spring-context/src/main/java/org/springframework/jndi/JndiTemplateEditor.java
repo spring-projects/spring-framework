@@ -19,8 +19,9 @@ package org.springframework.jndi;
 import java.beans.PropertyEditorSupport;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.propertyeditors.PropertiesEditor;
-import org.springframework.lang.Nullable;
 
 /**
  * Properties editor for JndiTemplate objects. Allows properties of type

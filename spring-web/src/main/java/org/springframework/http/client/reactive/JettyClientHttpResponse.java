@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -30,7 +31,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.support.JettyHeadersAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -77,8 +77,7 @@ class JettyClientHttpResponse extends AbstractClientHttpResponse {
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
-	@Nullable
-	private static String parseSameSite(String headerValue) {
+	private static @Nullable String parseSameSite(String headerValue) {
 		Matcher matcher = SAME_SITE_PATTERN.matcher(headerValue);
 		return (matcher.matches() ? matcher.group(1) : null);
 	}

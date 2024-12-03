@@ -17,11 +17,11 @@
 package org.springframework.web.method.annotation;
 
 import jakarta.servlet.ServletException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -65,8 +65,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	}
 
 	@Override
-	@Nullable
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
+	protected @Nullable Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
 		// No name to resolve
 		return null;
 	}

@@ -18,7 +18,8 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -37,14 +38,11 @@ public class TypeMismatchException extends PropertyAccessException {
 	public static final String ERROR_CODE = "typeMismatch";
 
 
-	@Nullable
-	private String propertyName;
+	private @Nullable String propertyName;
 
-	@Nullable
-	private final transient Object value;
+	private final transient @Nullable Object value;
 
-	@Nullable
-	private final Class<?> requiredType;
+	private final @Nullable Class<?> requiredType;
 
 
 	/**
@@ -123,8 +121,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Return the name of the affected property, if available.
 	 */
 	@Override
-	@Nullable
-	public String getPropertyName() {
+	public @Nullable String getPropertyName() {
 		return this.propertyName;
 	}
 
@@ -132,16 +129,14 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Return the offending value (may be {@code null}).
 	 */
 	@Override
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 
 	/**
 	 * Return the required target type, if any.
 	 */
-	@Nullable
-	public Class<?> getRequiredType() {
+	public @Nullable Class<?> getRequiredType() {
 		return this.requiredType;
 	}
 

@@ -21,10 +21,10 @@ import java.util.Collection;
 import java.util.Map;
 
 import jakarta.servlet.jsp.JspException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -94,11 +94,9 @@ class OptionWriter {
 
 	private final BindStatus bindStatus;
 
-	@Nullable
-	private final String valueProperty;
+	private final @Nullable String valueProperty;
 
-	@Nullable
-	private final String labelProperty;
+	private final @Nullable String labelProperty;
 
 	private final boolean htmlEscape;
 

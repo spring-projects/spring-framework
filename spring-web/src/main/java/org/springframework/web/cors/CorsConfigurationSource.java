@@ -17,8 +17,7 @@
 package org.springframework.web.cors;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by classes (usually HTTP request handlers) that
@@ -33,7 +32,6 @@ public interface CorsConfigurationSource {
 	 * Return a {@link CorsConfiguration} based on the incoming request.
 	 * @return the associated {@link CorsConfiguration}, or {@code null} if none
 	 */
-	@Nullable
-	CorsConfiguration getCorsConfiguration(HttpServletRequest request);
+	@Nullable CorsConfiguration getCorsConfiguration(HttpServletRequest request);
 
 }

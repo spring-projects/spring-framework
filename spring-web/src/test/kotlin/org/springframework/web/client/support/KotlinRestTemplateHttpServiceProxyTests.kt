@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.lang.Nullable
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
@@ -259,7 +258,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 		fun getRequestWithPathVariable(@PathVariable id: String): ResponseEntity<String>
 
 		@GetExchange("/test/{id}")
-		fun getRequestWithDynamicUri(@Nullable uri: URI, @PathVariable id: String): Optional<String>
+		fun getRequestWithDynamicUri(uri: URI?, @PathVariable id: String): Optional<String>
 
 		@PostExchange("/test")
 		fun postRequestWithHeader(@RequestHeader("testHeaderName") testHeader: String,

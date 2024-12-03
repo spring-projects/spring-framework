@@ -18,7 +18,8 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -79,11 +80,9 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	public static final String VALUE_0 = "0";
 
 
-	@Nullable
-	private final String trueString;
+	private final @Nullable String trueString;
 
-	@Nullable
-	private final String falseString;
+	private final @Nullable String falseString;
 
 	private final boolean allowEmpty;
 

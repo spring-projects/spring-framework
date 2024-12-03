@@ -30,6 +30,7 @@ import jakarta.jms.Queue;
 import jakarta.jms.QueueBrowser;
 import jakarta.jms.Session;
 import jakarta.jms.TemporaryQueue;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
@@ -39,7 +40,6 @@ import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -99,11 +99,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
 
 
-	@Nullable
-	private Object defaultDestination;
+	private @Nullable Object defaultDestination;
 
-	@Nullable
-	private MessageConverter messageConverter;
+	private @Nullable MessageConverter messageConverter;
 
 
 	private boolean messageIdEnabled = true;
@@ -125,8 +123,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
 
-	@Nullable
-	private ObservationRegistry observationRegistry;
+	private @Nullable ObservationRegistry observationRegistry;
 
 
 	/**
@@ -181,13 +178,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the destination to be used on send/receive operations that do not
 	 * have a destination parameter.
 	 */
-	@Nullable
-	public Destination getDefaultDestination() {
+	public @Nullable Destination getDefaultDestination() {
 		return (this.defaultDestination instanceof Destination dest ? dest : null);
 	}
 
-	@Nullable
-	private Queue getDefaultQueue() {
+	private @Nullable Queue getDefaultQueue() {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination == null) {
 			return null;
@@ -218,8 +213,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the destination name to be used on send/receive operations that
 	 * do not have a destination parameter.
 	 */
-	@Nullable
-	public String getDefaultDestinationName() {
+	public @Nullable String getDefaultDestinationName() {
 		return (this.defaultDestination instanceof String name ? name : null);
 	}
 
@@ -249,8 +243,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Return the message converter for this template.
 	 */
-	@Nullable
-	public MessageConverter getMessageConverter() {
+	public @Nullable MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}
 
@@ -485,8 +478,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//---------------------------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public <T> T execute(SessionCallback<T> action) throws JmsException {
+	public <T> @Nullable T execute(SessionCallback<T> action) throws JmsException {
 		return execute(action, false);
 	}
 
@@ -505,8 +497,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #receive
 	 */
 	@SuppressWarnings("resource")
-	@Nullable
-	public <T> T execute(SessionCallback<T> action, boolean startConnection) throws JmsException {
+	public <T> @Nullable T execute(SessionCallback<T> action, boolean startConnection) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		Connection conToClose = null;
 		Session sessionToClose = null;
@@ -539,8 +530,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public <T> T execute(ProducerCallback<T> action) throws JmsException {
+	public <T> @Nullable T execute(ProducerCallback<T> action) throws JmsException {
 		String defaultDestinationName = getDefaultDestinationName();
 		if (defaultDestinationName != null) {
 			return execute(defaultDestinationName, action);
@@ -551,8 +541,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public <T> T execute(final @Nullable Destination destination, final ProducerCallback<T> action) throws JmsException {
+	public <T> @Nullable T execute(final @Nullable Destination destination, final ProducerCallback<T> action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(session -> {
 			MessageProducer producer = createProducer(session, destination);
@@ -566,8 +555,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public <T> T execute(final String destinationName, final ProducerCallback<T> action) throws JmsException {
+	public <T> @Nullable T execute(final String destinationName, final ProducerCallback<T> action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
@@ -726,8 +714,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//---------------------------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public Message receive() throws JmsException {
+	public @Nullable Message receive() throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return receive(defaultDestination);
@@ -738,20 +725,17 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public Message receive(Destination destination) throws JmsException {
+	public @Nullable Message receive(Destination destination) throws JmsException {
 		return receiveSelected(destination, null);
 	}
 
 	@Override
-	@Nullable
-	public Message receive(String destinationName) throws JmsException {
+	public @Nullable Message receive(String destinationName) throws JmsException {
 		return receiveSelected(destinationName, null);
 	}
 
 	@Override
-	@Nullable
-	public Message receiveSelected(String messageSelector) throws JmsException {
+	public @Nullable Message receiveSelected(String messageSelector) throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return receiveSelected(defaultDestination, messageSelector);
@@ -762,14 +746,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public Message receiveSelected(final Destination destination, @Nullable final String messageSelector) throws JmsException {
+	public @Nullable Message receiveSelected(final Destination destination, final @Nullable String messageSelector) throws JmsException {
 		return execute(session -> doReceive(session, destination, messageSelector), true);
 	}
 
 	@Override
-	@Nullable
-	public Message receiveSelected(final String destinationName, @Nullable final String messageSelector) throws JmsException {
+	public @Nullable Message receiveSelected(final String destinationName, final @Nullable String messageSelector) throws JmsException {
 		return execute(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			return doReceive(session, destination, messageSelector);
@@ -784,8 +766,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
-	@Nullable
-	protected Message doReceive(Session session, Destination destination, @Nullable String messageSelector)
+	protected @Nullable Message doReceive(Session session, Destination destination, @Nullable String messageSelector)
 			throws JMSException {
 
 		return doReceive(session, createConsumer(session, destination, messageSelector));
@@ -798,8 +779,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
-	@Nullable
-	protected Message doReceive(Session session, MessageConsumer consumer) throws JMSException {
+	protected @Nullable Message doReceive(Session session, MessageConsumer consumer) throws JMSException {
 		try {
 			// Use transaction timeout (if available).
 			long timeout = getReceiveTimeout();
@@ -838,38 +818,32 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//---------------------------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public Object receiveAndConvert() throws JmsException {
+	public @Nullable Object receiveAndConvert() throws JmsException {
 		return doConvertFromMessage(receive());
 	}
 
 	@Override
-	@Nullable
-	public Object receiveAndConvert(Destination destination) throws JmsException {
+	public @Nullable Object receiveAndConvert(Destination destination) throws JmsException {
 		return doConvertFromMessage(receive(destination));
 	}
 
 	@Override
-	@Nullable
-	public Object receiveAndConvert(String destinationName) throws JmsException {
+	public @Nullable Object receiveAndConvert(String destinationName) throws JmsException {
 		return doConvertFromMessage(receive(destinationName));
 	}
 
 	@Override
-	@Nullable
-	public Object receiveSelectedAndConvert(String messageSelector) throws JmsException {
+	public @Nullable Object receiveSelectedAndConvert(String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(messageSelector));
 	}
 
 	@Override
-	@Nullable
-	public Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
+	public @Nullable Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(destination, messageSelector));
 	}
 
 	@Override
-	@Nullable
-	public Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
+	public @Nullable Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
 	}
 
@@ -878,8 +852,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @param message the JMS Message to convert (can be {@code null})
 	 * @return the content of the message, or {@code null} if none
 	 */
-	@Nullable
-	protected Object doConvertFromMessage(@Nullable Message message) {
+	protected @Nullable Object doConvertFromMessage(@Nullable Message message) {
 		if (message != null) {
 			try {
 				return getRequiredMessageConverter().fromMessage(message);
@@ -897,8 +870,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//---------------------------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public Message sendAndReceive(MessageCreator messageCreator) throws JmsException {
+	public @Nullable Message sendAndReceive(MessageCreator messageCreator) throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return sendAndReceive(defaultDestination, messageCreator);
@@ -909,14 +881,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public Message sendAndReceive(final Destination destination, final MessageCreator messageCreator) throws JmsException {
+	public @Nullable Message sendAndReceive(final Destination destination, final MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> doSendAndReceive(session, destination, messageCreator), true);
 	}
 
 	@Override
-	@Nullable
-	public Message sendAndReceive(final String destinationName, final MessageCreator messageCreator) throws JmsException {
+	public @Nullable Message sendAndReceive(final String destinationName, final MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			return doSendAndReceive(session, destination, messageCreator);
@@ -929,8 +899,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>Return the response message or {@code null} if no message has
 	 * @throws JMSException if thrown by JMS API methods
 	 */
-	@Nullable
-	protected Message doSendAndReceive(Session session, Destination destination, MessageCreator messageCreator)
+	protected @Nullable Message doSendAndReceive(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
 
 		Assert.notNull(messageCreator, "MessageCreator must not be null");
@@ -963,8 +932,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * creates a non-transactional {@link Session}. The given {@link SessionCallback}
 	 * does not participate in an existing transaction.
 	 */
-	@Nullable
-	private <T> T executeLocal(SessionCallback<T> action, boolean startConnection) throws JmsException {
+	private <T> @Nullable T executeLocal(SessionCallback<T> action, boolean startConnection) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		Connection con = null;
 		Session session = null;
@@ -997,8 +965,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//---------------------------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public <T> T browse(BrowserCallback<T> action) throws JmsException {
+	public <T> @Nullable T browse(BrowserCallback<T> action) throws JmsException {
 		Queue defaultQueue = getDefaultQueue();
 		if (defaultQueue != null) {
 			return browse(defaultQueue, action);
@@ -1009,20 +976,17 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public <T> T browse(Queue queue, BrowserCallback<T> action) throws JmsException {
+	public <T> @Nullable T browse(Queue queue, BrowserCallback<T> action) throws JmsException {
 		return browseSelected(queue, null, action);
 	}
 
 	@Override
-	@Nullable
-	public <T> T browse(String queueName, BrowserCallback<T> action) throws JmsException {
+	public <T> @Nullable T browse(String queueName, BrowserCallback<T> action) throws JmsException {
 		return browseSelected(queueName, null, action);
 	}
 
 	@Override
-	@Nullable
-	public <T> T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException {
+	public <T> @Nullable T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException {
 		Queue defaultQueue = getDefaultQueue();
 		if (defaultQueue != null) {
 			return browseSelected(defaultQueue, messageSelector, action);
@@ -1033,8 +997,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public <T> T browseSelected(final Queue queue, @Nullable final String messageSelector, final BrowserCallback<T> action)
+	public <T> @Nullable T browseSelected(final Queue queue, final @Nullable String messageSelector, final BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");
@@ -1050,8 +1013,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	@Nullable
-	public <T> T browseSelected(final String queueName, @Nullable final String messageSelector, final BrowserCallback<T> action)
+	public <T> @Nullable T browseSelected(final String queueName, final @Nullable String messageSelector, final BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");
@@ -1075,8 +1037,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return an appropriate Connection fetched from the holder,
 	 * or {@code null} if none found
 	 */
-	@Nullable
-	protected Connection getConnection(JmsResourceHolder holder) {
+	protected @Nullable Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
 	}
 
@@ -1087,8 +1048,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @return an appropriate Session fetched from the holder,
 	 * or {@code null} if none found
 	 */
-	@Nullable
-	protected Session getSession(JmsResourceHolder holder) {
+	protected @Nullable Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
 	}
 
@@ -1193,14 +1153,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	private class JmsTemplateResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		@Override
-		@Nullable
-		public Connection getConnection(JmsResourceHolder holder) {
+		public @Nullable Connection getConnection(JmsResourceHolder holder) {
 			return JmsTemplate.this.getConnection(holder);
 		}
 
 		@Override
-		@Nullable
-		public Session getSession(JmsResourceHolder holder) {
+		public @Nullable Session getSession(JmsResourceHolder holder) {
 			return JmsTemplate.this.getSession(holder);
 		}
 

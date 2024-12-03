@@ -20,8 +20,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.TimeZone;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -46,20 +47,15 @@ import org.springframework.util.StringUtils;
  */
 public class DateTimeFormatterFactory {
 
-	@Nullable
-	private String pattern;
+	private @Nullable String pattern;
 
-	@Nullable
-	private ISO iso;
+	private @Nullable ISO iso;
 
-	@Nullable
-	private FormatStyle dateStyle;
+	private @Nullable FormatStyle dateStyle;
 
-	@Nullable
-	private FormatStyle timeStyle;
+	private @Nullable FormatStyle timeStyle;
 
-	@Nullable
-	private TimeZone timeZone;
+	private @Nullable TimeZone timeZone;
 
 
 	/**
@@ -137,8 +133,7 @@ public class DateTimeFormatterFactory {
 		this.timeStyle = convertStyleCharacter(style.charAt(1));
 	}
 
-	@Nullable
-	private FormatStyle convertStyleCharacter(char c) {
+	private @Nullable FormatStyle convertStyleCharacter(char c) {
 		return switch (c) {
 			case 'S' -> FormatStyle.SHORT;
 			case 'M' -> FormatStyle.MEDIUM;

@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An interface used by {@link JdbcTemplate} for mapping rows of a
@@ -61,7 +61,6 @@ public interface RowMapper<T> {
 	 * @throws SQLException if an SQLException is encountered while getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
-	@Nullable
-	T mapRow(ResultSet rs, int rowNum) throws SQLException;
+	@Nullable T mapRow(ResultSet rs, int rowNum) throws SQLException;
 
 }

@@ -33,6 +33,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
@@ -55,7 +57,6 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -149,7 +150,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addInitDestroyMethods(Builder code, AbstractBeanDefinition beanDefinition,
-			@Nullable String[] methodNames, String format) {
+			String @Nullable [] methodNames, String format) {
 
 		// For Publisher-based destroy methods
 		this.hints.reflection().registerType(TypeReference.of("org.reactivestreams.Publisher"));
@@ -395,8 +396,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 			threadLocal.get().pop();
 		}
 
-		@Nullable
-		static String peek() {
+		static @Nullable String peek() {
 			String value = threadLocal.get().peek();
 			return ("".equals(value) ? null : value);
 		}

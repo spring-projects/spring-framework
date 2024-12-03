@@ -19,12 +19,13 @@ package org.springframework.http.client.support;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link ClientHttpRequestInterceptor} to apply a given HTTP Basic Authentication

@@ -35,6 +35,8 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -45,8 +47,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -214,31 +214,26 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@NonNull
-	public InetSocketAddress getLocalAddress() {
+	public @NonNull InetSocketAddress getLocalAddress() {
 		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
 	}
 
 	@Override
-	@NonNull
-	public InetSocketAddress getRemoteAddress() {
+	public @NonNull InetSocketAddress getRemoteAddress() {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
 	@Override
-	@Nullable
-	protected SslInfo initSslInfo() {
+	protected @Nullable SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
 		return (certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null);
 	}
 
-	@Nullable
-	private String getSslSessionId() {
+	private @Nullable String getSslSessionId() {
 		return (String) this.request.getAttribute("jakarta.servlet.request.ssl_session_id");
 	}
 
-	@Nullable
-	private X509Certificate[] getX509Certificates() {
+	private X509Certificate @Nullable [] getX509Certificates() {
 		return (X509Certificate[]) this.request.getAttribute("jakarta.servlet.request.X509Certificate");
 	}
 
@@ -359,8 +354,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		@Nullable
-		protected DataBuffer read() throws IOException {
+		protected @Nullable DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
 				DataBuffer dataBuffer = readFromInputStream();
 				if (dataBuffer == EOF_BUFFER) {

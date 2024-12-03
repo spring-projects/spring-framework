@@ -21,9 +21,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.core.OrderComparator;
-import org.springframework.lang.Nullable;
 
 /**
  * A variant of {@link ObjectFactory} designed specifically for injection points,
@@ -88,8 +89,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
-	@Nullable
-	default T getIfAvailable() throws BeansException {
+	default @Nullable T getIfAvailable() throws BeansException {
 		try {
 			return getObject();
 		}
@@ -141,8 +141,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
-	@Nullable
-	default T getIfUnique() throws BeansException {
+	default @Nullable T getIfUnique() throws BeansException {
 		try {
 			return getObject();
 		}

@@ -21,11 +21,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ObjectUtils;
@@ -110,9 +111,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @see #getMethodArgumentValues
 	 * @see #doInvoke
 	 */
-	@Nullable
-	public Object invoke(Message<?> message, @Nullable Object... providedArgs) throws Exception {
-		Object[] args = getMethodArgumentValues(message, providedArgs);
+	public @Nullable Object invoke(Message<?> message, @Nullable Object... providedArgs) throws Exception {
+		@Nullable Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
@@ -125,13 +125,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * <p>The resulting array will be passed into {@link #doInvoke}.
 	 * @since 5.1.2
 	 */
-	protected Object[] getMethodArgumentValues(Message<?> message, @Nullable Object... providedArgs) throws Exception {
+	protected @Nullable Object[] getMethodArgumentValues(Message<?> message, @Nullable Object... providedArgs) throws Exception {
 		MethodParameter[] parameters = getMethodParameters();
 		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
 
-		Object[] args = new Object[parameters.length];
+		@Nullable Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
@@ -163,8 +163,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
-	@Nullable
-	protected Object doInvoke(Object... args) throws Exception {
+	protected @Nullable Object doInvoke(@Nullable Object... args) throws Exception {
 		try {
 			return getBridgedMethod().invoke(getBean(), args);
 		}
@@ -199,8 +198,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private class AsyncResultMethodParameter extends AnnotatedMethodParameter {
 
-		@Nullable
-		private final Object returnValue;
+		private final @Nullable Object returnValue;
 
 		private final ResolvableType returnType;
 

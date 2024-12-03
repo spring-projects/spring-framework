@@ -23,6 +23,7 @@ import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.observability.DefaultSignalListener;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
@@ -41,7 +42,6 @@ import org.springframework.http.server.reactive.observation.DefaultServerRequest
 import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationConvention;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -86,20 +86,17 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
-	@Nullable
-	private ServerCodecConfigurer codecConfigurer;
+	private @Nullable ServerCodecConfigurer codecConfigurer;
 
 	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
-	@Nullable
-	private ForwardedHeaderTransformer forwardedHeaderTransformer;
+	private @Nullable ForwardedHeaderTransformer forwardedHeaderTransformer;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
 	private ServerRequestObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 	/** Whether to log potentially sensitive info (form data at DEBUG, headers at TRACE). */
 	private boolean enableLoggingRequestDetails = false;
@@ -194,8 +191,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Return the configured {@link ForwardedHeaderTransformer}.
 	 * @since 5.1
 	 */
-	@Nullable
-	public ForwardedHeaderTransformer getForwardedHeaderTransformer() {
+	public @Nullable ForwardedHeaderTransformer getForwardedHeaderTransformer() {
 		return this.forwardedHeaderTransformer;
 	}
 
@@ -250,8 +246,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Return the configured {@code ApplicationContext}, if any.
 	 * @since 5.0.3
 	 */
-	@Nullable
-	public ApplicationContext getApplicationContext() {
+	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 

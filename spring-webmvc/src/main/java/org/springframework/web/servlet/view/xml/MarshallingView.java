@@ -24,8 +24,8 @@ import javax.xml.transform.stream.StreamResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.xml.bind.JAXBElement;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
@@ -53,11 +53,9 @@ public class MarshallingView extends AbstractView {
 	public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
 
-	@Nullable
-	private Marshaller marshaller;
+	private @Nullable Marshaller marshaller;
 
-	@Nullable
-	private String modelKey;
+	private @Nullable String modelKey;
 
 
 	/**
@@ -130,8 +128,7 @@ public class MarshallingView extends AbstractView {
 	 * {@linkplain #setModelKey(String) model key} is not supported by the marshaller
 	 * @see #setModelKey(String)
 	 */
-	@Nullable
-	protected Object locateToBeMarshalled(Map<String, Object> model) throws IllegalStateException {
+	protected @Nullable Object locateToBeMarshalled(Map<String, Object> model) throws IllegalStateException {
 		if (this.modelKey != null) {
 			Object value = model.get(this.modelKey);
 			if (value == null) {

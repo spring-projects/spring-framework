@@ -27,11 +27,11 @@ import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.MessageListener;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jms.StubQueue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;

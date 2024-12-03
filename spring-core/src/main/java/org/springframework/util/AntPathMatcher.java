@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
@@ -91,8 +91,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private boolean trimTokens = false;
 
-	@Nullable
-	private volatile Boolean cachePatterns;
+	private volatile @Nullable Boolean cachePatterns;
 
 	private final Map<String, String[]> tokenizedPatternCache = new ConcurrentHashMap<>(256);
 
@@ -654,8 +653,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		private final boolean exactMatch;
 
-		@Nullable
-		private final Pattern pattern;
+		private final @Nullable Pattern pattern;
 
 		private final List<String> variableNames = new ArrayList<>();
 
@@ -856,8 +854,8 @@ public class AntPathMatcher implements PathMatcher {
 		 */
 		private static class PatternInfo {
 
-			@Nullable
-			private final String pattern;
+
+			private final @Nullable String pattern;
 
 			private int uriVars;
 
@@ -869,8 +867,7 @@ public class AntPathMatcher implements PathMatcher {
 
 			private boolean prefixPattern;
 
-			@Nullable
-			private Integer length;
+			private @Nullable Integer length;
 
 			PatternInfo(@Nullable String pattern, String pathSeparator) {
 				this.pattern = pattern;

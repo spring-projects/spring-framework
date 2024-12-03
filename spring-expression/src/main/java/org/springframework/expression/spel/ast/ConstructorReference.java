@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -39,7 +41,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -73,12 +74,10 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	private final boolean isArrayConstructor;
 
-	@Nullable
-	private final SpelNodeImpl[] dimensions;
+	private final SpelNodeImpl @Nullable [] dimensions;
 
 	/** The cached executor that may be reused on subsequent evaluations. */
-	@Nullable
-	private volatile ConstructorExecutor cachedExecutor;
+	private volatile @Nullable ConstructorExecutor cachedExecutor;
 
 
 	/**

@@ -16,8 +16,9 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.reactive.BindingContext;
@@ -38,9 +39,8 @@ public class SessionStatusMethodArgumentResolver implements SyncHandlerMethodArg
 		return SessionStatus.class == parameter.getParameterType();
 	}
 
-	@Nullable
 	@Override
-	public Object resolveArgumentValue(
+	public @Nullable Object resolveArgumentValue(
 			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		Assert.isInstanceOf(InitBinderBindingContext.class, bindingContext);

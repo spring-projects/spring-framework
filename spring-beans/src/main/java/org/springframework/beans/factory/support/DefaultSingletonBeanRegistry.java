@@ -28,6 +28,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCreationNotAllowedException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -35,7 +37,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.SimpleAliasRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -104,8 +105,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private volatile boolean singletonsCurrentlyInDestruction = false;
 
 	/** Collection of suppressed Exceptions, available for associating related causes. */
-	@Nullable
-	private Set<Exception> suppressedExceptions;
+	private @Nullable Set<Exception> suppressedExceptions;
 
 	/** Disposable bean instances: bean name to disposable instance. */
 	private final Map<String, DisposableBean> disposableBeans = new LinkedHashMap<>();
@@ -176,8 +176,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	@Override
-	@Nullable
-	public Object getSingleton(String beanName) {
+	public @Nullable Object getSingleton(String beanName) {
 		return getSingleton(beanName, true);
 	}
 
@@ -189,8 +188,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param allowEarlyReference whether early references should be created or not
 	 * @return the registered singleton object, or {@code null} if none found
 	 */
-	@Nullable
-	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+	protected @Nullable Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock.
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
@@ -334,8 +332,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * indication (traditional behavior: always holding a full lock)
 	 * @since 6.2
 	 */
-	@Nullable
-	protected Boolean isCurrentThreadAllowedToHoldSingletonLock() {
+	protected @Nullable Boolean isCurrentThreadAllowedToHoldSingletonLock() {
 		return null;
 	}
 

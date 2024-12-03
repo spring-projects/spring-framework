@@ -22,13 +22,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.method.ControllerAdviceBean;
 
@@ -108,8 +109,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	}
 
 	@Override
-	@Nullable
-	public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType contentType,
+	public @Nullable Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType contentType,
 			Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
 
@@ -117,8 +117,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	}
 
 	@Override
-	@Nullable
-	public Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+	public @Nullable Object handleEmptyBody(@Nullable Object body, HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
@@ -131,8 +130,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <T> Object processBody(@Nullable Object body, MethodParameter returnType, MediaType contentType,
+	private <T> @Nullable Object processBody(@Nullable Object body, MethodParameter returnType, MediaType contentType,
 			Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
 

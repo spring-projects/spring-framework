@@ -18,9 +18,10 @@ package org.springframework.jdbc.object;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,12 +37,10 @@ import org.springframework.util.Assert;
  */
 public class GenericSqlQuery<T> extends SqlQuery<T> {
 
-	@Nullable
-	private RowMapper<T> rowMapper;
+	private @Nullable RowMapper<T> rowMapper;
 
 	@SuppressWarnings("rawtypes")
-	@Nullable
-	private Class<? extends RowMapper> rowMapperClass;
+	private @Nullable Class<? extends RowMapper> rowMapperClass;
 
 
 	/**
@@ -71,7 +70,7 @@ public class GenericSqlQuery<T> extends SqlQuery<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected RowMapper<T> newRowMapper(@Nullable Object[] parameters, @Nullable Map<?, ?> context) {
+	protected RowMapper<T> newRowMapper(Object @Nullable [] parameters, @Nullable Map<?, ?> context) {
 		if (this.rowMapper != null) {
 			return this.rowMapper;
 		}

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default "no op" {@code ApplicationStartup} implementation.
@@ -54,8 +54,7 @@ class DefaultApplicationStartup implements ApplicationStartup {
 		}
 
 		@Override
-		@Nullable
-		public Long getParentId() {
+		public @Nullable Long getParentId() {
 			return null;
 		}
 

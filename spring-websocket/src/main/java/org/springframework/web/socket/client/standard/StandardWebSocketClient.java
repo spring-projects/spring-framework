@@ -37,11 +37,11 @@ import jakarta.websocket.Endpoint;
 import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.WebSocketContainer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FutureUtils;
 import org.springframework.web.socket.WebSocketExtension;
@@ -65,11 +65,9 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final Map<String,Object> userProperties = new HashMap<>();
 
-	@Nullable
-	private SSLContext sslContext;
+	private @Nullable SSLContext sslContext;
 
-	@Nullable
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private @Nullable AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 
 	/**
@@ -124,8 +122,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	 * Return the {@link SSLContext} to use.
 	 * @since 6.1.3
 	 */
-	@Nullable
-	public SSLContext getSslContext() {
+	public @Nullable SSLContext getSslContext() {
 		return this.sslContext;
 	}
 
@@ -142,8 +139,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	/**
 	 * Return the configured {@link AsyncTaskExecutor}.
 	 */
-	@Nullable
-	public AsyncTaskExecutor getTaskExecutor() {
+	public @Nullable AsyncTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
 	}
 

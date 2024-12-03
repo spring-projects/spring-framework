@@ -16,8 +16,9 @@
 
 package org.springframework.http.converter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link HttpMessageConverter} implementations when a conversion attempt fails.

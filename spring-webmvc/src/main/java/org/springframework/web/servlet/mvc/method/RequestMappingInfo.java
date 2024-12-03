@@ -20,9 +20,9 @@ import java.util.Set;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
@@ -80,14 +80,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
 
 
-	@Nullable
-	private final String name;
+	private final @Nullable String name;
 
-	@Nullable
-	private final PathPatternsRequestCondition pathPatternsCondition;
+	private final @Nullable PathPatternsRequestCondition pathPatternsCondition;
 
-	@Nullable
-	private final PatternsRequestCondition patternsCondition;
+	private final @Nullable PatternsRequestCondition patternsCondition;
 
 	private final RequestMethodsRequestCondition methodsCondition;
 
@@ -184,8 +181,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Return the name for this mapping, or {@code null}.
 	 */
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -197,8 +193,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * @since 5.3
 	 * @see #getActivePatternsCondition()
 	 */
-	@Nullable
-	public PathPatternsRequestCondition getPathPatternsCondition() {
+	public @Nullable PathPatternsRequestCondition getPathPatternsCondition() {
 		return this.pathPatternsCondition;
 	}
 
@@ -208,8 +203,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * <p>This is mutually exclusive with {@link #getPathPatternsCondition()}
 	 * such that when one returns {@code null} the other one returns an instance.
 	 */
-	@Nullable
-	public PatternsRequestCondition getPatternsCondition() {
+	public @Nullable PatternsRequestCondition getPatternsCondition() {
 		return this.patternsCondition;
 	}
 
@@ -306,8 +300,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	/**
 	 * Return the "custom" condition of this {@link RequestMappingInfo}, or {@code null}.
 	 */
-	@Nullable
-	public RequestCondition<?> getCustomCondition() {
+	public @Nullable RequestCondition<?> getCustomCondition() {
 		return this.customConditionHolder.getCondition();
 	}
 
@@ -354,8 +347,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				methods, params, headers, consumes, produces, custom, this.options);
 	}
 
-	@Nullable
-	private String combineNames(RequestMappingInfo other) {
+	private @Nullable String combineNames(RequestMappingInfo other) {
 		if (this.name != null && other.name != null) {
 			String separator = RequestMappingInfoHandlerMethodMappingNamingStrategy.SEPARATOR;
 			return this.name + separator + other.name;
@@ -378,8 +370,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * @return a new instance in case of a match; or {@code null} otherwise
 	 */
 	@Override
-	@Nullable
-	public RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
+	public @Nullable RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(request);
 		if (methods == null) {
 			return null;
@@ -627,11 +618,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private boolean hasAccept;
 
-		@Nullable
-		private String mappingName;
+		private @Nullable String mappingName;
 
-		@Nullable
-		private RequestCondition<?> customCondition;
+		private @Nullable RequestCondition<?> customCondition;
 
 		private BuilderConfiguration options = new BuilderConfiguration();
 
@@ -740,14 +729,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static class MutateBuilder implements Builder {
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
-		@Nullable
-		private PathPatternsRequestCondition pathPatternsCondition;
+		private @Nullable PathPatternsRequestCondition pathPatternsCondition;
 
-		@Nullable
-		private PatternsRequestCondition patternsCondition;
+		private @Nullable PatternsRequestCondition patternsCondition;
 
 		private RequestMethodsRequestCondition methodsCondition;
 
@@ -869,14 +855,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		private static final PathPatternParser defaultPatternParser = new PathPatternParser();
 
 
-		@Nullable
-		private PathPatternParser patternParser;
+		private @Nullable PathPatternParser patternParser;
 
-		@Nullable
-		private PathMatcher pathMatcher;
+		private @Nullable PathMatcher pathMatcher;
 
-		@Nullable
-		private ContentNegotiationManager contentNegotiationManager;
+		private @Nullable ContentNegotiationManager contentNegotiationManager;
 
 
 		/**
@@ -898,8 +881,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@code PathPatternParser}, or {@code null}.
 		 * @since 5.3
 		 */
-		@Nullable
-		public PathPatternParser getPatternParser() {
+		public @Nullable PathPatternParser getPatternParser() {
 			return this.patternParser;
 		}
 
@@ -920,9 +902,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)};
 		 * this method always returns {@link UrlPathHelper#defaultInstance}.
 		 */
-		@Nullable
 		@Deprecated
-		public UrlPathHelper getUrlPathHelper() {
+		public @Nullable UrlPathHelper getUrlPathHelper() {
 			return UrlPathHelper.defaultInstance;
 		}
 
@@ -939,8 +920,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Return a custom PathMatcher to use for the PatternsRequestCondition, if any.
 		 */
-		@Nullable
-		public PathMatcher getPathMatcher() {
+		public @Nullable PathMatcher getPathMatcher() {
 			return this.pathMatcher;
 		}
 
@@ -950,8 +930,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * and {@code PathMatcher} are not set.
 		 * @since 6.1.2
 		 */
-		@Nullable
-		public PathPatternParser getPatternParserToUse() {
+		public @Nullable PathPatternParser getPatternParserToUse() {
 			if (this.patternParser == null && this.pathMatcher == null) {
 				return defaultPatternParser;
 			}
@@ -970,8 +949,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Return the ContentNegotiationManager to use for the ProducesRequestCondition,
 		 * if any.
 		 */
-		@Nullable
-		public ContentNegotiationManager getContentNegotiationManager() {
+		public @Nullable ContentNegotiationManager getContentNegotiationManager() {
 			return this.contentNegotiationManager;
 		}
 	}

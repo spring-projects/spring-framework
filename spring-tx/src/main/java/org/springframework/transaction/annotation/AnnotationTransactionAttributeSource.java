@@ -23,7 +23,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -73,8 +74,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	private boolean publicMethodsOnly = true;
 
-	@Nullable
-	private Set<RollbackRuleAttribute> defaultRollbackRules;
+	private @Nullable Set<RollbackRuleAttribute> defaultRollbackRules;
 
 
 	/**
@@ -175,14 +175,12 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	}
 
 	@Override
-	@Nullable
-	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
+	protected @Nullable TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return determineTransactionAttribute(clazz);
 	}
 
 	@Override
-	@Nullable
-	protected TransactionAttribute findTransactionAttribute(Method method) {
+	protected @Nullable TransactionAttribute findTransactionAttribute(Method method) {
 		return determineTransactionAttribute(method);
 	}
 
@@ -196,8 +194,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * @param element the annotated method or class
 	 * @return the configured transaction attribute, or {@code null} if none was found
 	 */
-	@Nullable
-	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
+	protected @Nullable TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
 		for (TransactionAnnotationParser parser : this.annotationParsers) {
 			TransactionAttribute attr = parser.parseTransactionAnnotation(element);
 			if (attr != null) {

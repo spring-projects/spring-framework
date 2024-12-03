@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
@@ -67,16 +68,13 @@ class InternalPathPatternParser {
 	private int variableCaptureStart;
 
 	// Variables captures in this path pattern
-	@Nullable
-	private List<String> capturedVariableNames;
+	private @Nullable List<String> capturedVariableNames;
 
 	// The head of the path element chain currently being built
-	@Nullable
-	private PathElement headPE;
+	private @Nullable PathElement headPE;
 
 	// The most recently constructed path element in the chain
-	@Nullable
-	private PathElement currentPE;
+	private @Nullable PathElement currentPE;
 
 
 	/**

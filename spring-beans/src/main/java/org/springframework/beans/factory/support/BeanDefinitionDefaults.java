@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -29,18 +30,15 @@ import org.springframework.util.StringUtils;
  */
 public class BeanDefinitionDefaults {
 
-	@Nullable
-	private Boolean lazyInit;
+	private @Nullable Boolean lazyInit;
 
 	private int autowireMode = AbstractBeanDefinition.AUTOWIRE_NO;
 
 	private int dependencyCheck = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
 
-	@Nullable
-	private String initMethodName;
+	private @Nullable String initMethodName;
 
-	@Nullable
-	private String destroyMethodName;
+	private @Nullable String destroyMethodName;
 
 
 	/**
@@ -68,8 +66,7 @@ public class BeanDefinitionDefaults {
 	 * @return the lazy-init flag if explicitly set, or {@code null} otherwise
 	 * @since 5.2
 	 */
-	@Nullable
-	public Boolean getLazyInit() {
+	public @Nullable Boolean getLazyInit() {
 		return this.lazyInit;
 	}
 
@@ -124,8 +121,7 @@ public class BeanDefinitionDefaults {
 	/**
 	 * Return the name of the default initializer method.
 	 */
-	@Nullable
-	public String getInitMethodName() {
+	public @Nullable String getInitMethodName() {
 		return this.initMethodName;
 	}
 
@@ -143,8 +139,7 @@ public class BeanDefinitionDefaults {
 	/**
 	 * Return the name of the default destroy method.
 	 */
-	@Nullable
-	public String getDestroyMethodName() {
+	public @Nullable String getDestroyMethodName() {
 		return this.destroyMethodName;
 	}
 

@@ -22,7 +22,8 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -40,8 +41,7 @@ import org.springframework.util.StringUtils;
  */
 public class WeavingTransformer {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private final List<ClassFileTransformer> transformers = new ArrayList<>();
 

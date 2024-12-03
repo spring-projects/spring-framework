@@ -30,7 +30,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Specialization of {@link Properties} that sorts properties alphanumerically

@@ -24,9 +24,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -174,8 +174,7 @@ public abstract class DataSourceUtils {
 	 * @see Connection#setTransactionIsolation
 	 * @see Connection#setReadOnly
 	 */
-	@Nullable
-	public static Integer prepareConnectionForTransaction(Connection con, @Nullable TransactionDefinition definition)
+	public static @Nullable Integer prepareConnectionForTransaction(Connection con, @Nullable TransactionDefinition definition)
 			throws SQLException {
 
 		Assert.notNull(con, "No Connection specified");

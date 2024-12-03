@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
@@ -39,7 +40,6 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,8 +33,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -276,11 +276,9 @@ public final class MultipartBodyBuilder {
 
 		private final String name;
 
-		@Nullable
-		protected HttpHeaders headers;
+		protected @Nullable HttpHeaders headers;
 
-		@Nullable
-		protected final Object body;
+		protected final @Nullable Object body;
 
 		public DefaultPartBuilder(String name, @Nullable HttpHeaders headers, @Nullable Object body) {
 			this.name = name;
@@ -381,8 +379,7 @@ public final class MultipartBodyBuilder {
 		 * Return the element type for the {@code Publisher} body.
 		 */
 		@Override
-		@NonNull
-		public ResolvableType getResolvableType() {
+		public @NonNull ResolvableType getResolvableType() {
 			return this.resolvableType;
 		}
 	}

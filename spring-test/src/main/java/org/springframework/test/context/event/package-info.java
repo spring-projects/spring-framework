@@ -1,9 +1,7 @@
 /**
  * Test event support classes for the <em>Spring TestContext Framework</em>.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.context.event;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

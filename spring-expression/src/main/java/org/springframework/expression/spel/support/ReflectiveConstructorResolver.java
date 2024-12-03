@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -31,7 +33,6 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
-import org.springframework.lang.Nullable;
 
 /**
  * A constructor resolver that uses reflection to locate the constructor that
@@ -56,8 +57,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	 * </ol>
 	 */
 	@Override
-	@Nullable
-	public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
+	public @Nullable ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
 
 		try {

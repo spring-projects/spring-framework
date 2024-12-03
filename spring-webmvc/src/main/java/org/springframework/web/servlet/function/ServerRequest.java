@@ -34,6 +34,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -44,7 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -445,8 +445,7 @@ public interface ServerRequest {
 		 * {@linkplain InetSocketAddress#getPort() port} in the returned address will
 		 * be {@code 0}.
 		 */
-		@Nullable
-		InetSocketAddress host();
+		@Nullable InetSocketAddress host();
 
 		/**
 		 * Get the value of the {@code Range} header.
@@ -467,8 +466,7 @@ public interface ServerRequest {
 		 * @param headerName the header name
 		 * @since 5.2.5
 		 */
-		@Nullable
-		default String firstHeader(String headerName) {
+		default @Nullable String firstHeader(String headerName) {
 			List<String> list = header(headerName);
 			return list.isEmpty() ? null : list.get(0);
 		}

@@ -28,10 +28,10 @@ import java.util.StringTokenizer;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -68,11 +68,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
 
-	@Nullable
-	private String contentType = DEFAULT_CONTENT_TYPE;
+	private @Nullable String contentType = DEFAULT_CONTENT_TYPE;
 
-	@Nullable
-	private String requestContextAttribute;
+	private @Nullable String requestContextAttribute;
 
 	private final Map<String, Object> staticAttributes = new LinkedHashMap<>();
 
@@ -80,11 +78,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	private boolean exposeContextBeansAsAttributes = false;
 
-	@Nullable
-	private Set<String> exposedContextBeanNames;
+	private @Nullable Set<String> exposedContextBeanNames;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
 
 
@@ -102,8 +98,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the content type for this view.
 	 */
 	@Override
-	@Nullable
-	public String getContentType() {
+	public @Nullable String getContentType() {
 		return this.contentType;
 	}
 
@@ -118,8 +113,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return the name of the RequestContext attribute, if any.
 	 */
-	@Nullable
-	public String getRequestContextAttribute() {
+	public @Nullable String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}
 
@@ -287,8 +281,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the view's name. Should never be {@code null},
 	 * if the view was correctly configured.
 	 */
-	@Nullable
-	public String getBeanName() {
+	public @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

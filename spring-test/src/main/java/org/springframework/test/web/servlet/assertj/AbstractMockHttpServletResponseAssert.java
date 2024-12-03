@@ -23,8 +23,8 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ByteArrayAssert;
 import org.assertj.core.api.StringAssert;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.test.json.AbstractJsonContentAssert;
@@ -44,8 +44,7 @@ import org.springframework.test.web.UriAssert;
 public abstract class AbstractMockHttpServletResponseAssert<SELF extends AbstractMockHttpServletResponseAssert<SELF, ACTUAL>, ACTUAL>
 		extends AbstractHttpServletResponseAssert<MockHttpServletResponse, SELF, ACTUAL> {
 
-	@Nullable
-	private final HttpMessageContentConverter contentConverter;
+	private final @Nullable HttpMessageContentConverter contentConverter;
 
 	protected AbstractMockHttpServletResponseAssert(
 			@Nullable HttpMessageContentConverter contentConverter, ACTUAL actual, Class<?> selfType) {

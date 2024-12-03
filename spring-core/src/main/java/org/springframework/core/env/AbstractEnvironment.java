@@ -24,10 +24,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.ConfigurableConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -288,8 +288,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @since 5.3.4
 	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
 	 */
-	@Nullable
-	protected String doGetActiveProfilesProperty() {
+	protected @Nullable String doGetActiveProfilesProperty() {
 		return getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
@@ -355,8 +354,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @since 5.3.4
 	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
 	 */
-	@Nullable
-	protected String doGetDefaultProfilesProperty() {
+	protected @Nullable String doGetDefaultProfilesProperty() {
 		return getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
@@ -552,8 +550,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	@Nullable
-	public String getProperty(String key) {
+	public @Nullable String getProperty(String key) {
 		return this.propertyResolver.getProperty(key);
 	}
 
@@ -563,8 +560,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	@Nullable
-	public <T> T getProperty(String key, Class<T> targetType) {
+	public <T> @Nullable T getProperty(String key, Class<T> targetType) {
 		return this.propertyResolver.getProperty(key, targetType);
 	}
 

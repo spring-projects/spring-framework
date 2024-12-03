@@ -21,9 +21,9 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.web.servlet.resource.ResourceResolver}
@@ -38,28 +38,24 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 
 
 	@Override
-	@Nullable
-	public Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
+	public @Nullable Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return resolveResourceInternal(request, requestPath, locations, chain);
 	}
 
 	@Override
-	@Nullable
-	public String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+	public @Nullable String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
 		return resolveUrlPathInternal(resourceUrlPath, locations, chain);
 	}
 
 
-	@Nullable
-	protected abstract Resource resolveResourceInternal(@Nullable HttpServletRequest request,
+	protected abstract @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request,
 			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain);
 
-	@Nullable
-	protected abstract String resolveUrlPathInternal(String resourceUrlPath,
+	protected abstract @Nullable String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 
 }

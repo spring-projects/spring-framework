@@ -49,6 +49,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -61,7 +62,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -101,8 +101,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final Map<String, Object> attributes;
 
-	@Nullable
-	private MultiValueMap<String, Part> parts;
+	private @Nullable MultiValueMap<String, Part> parts;
 
 
 	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
@@ -385,8 +384,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
-		@Nullable
-		public InetSocketAddress host() {
+		public @Nullable InetSocketAddress host() {
 			return this.httpHeaders.getHost();
 		}
 
@@ -637,8 +635,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
-		@Nullable
-		public String getHeader(String name) {
+		public @Nullable String getHeader(String name) {
 			return this.headers.getFirst(name);
 		}
 

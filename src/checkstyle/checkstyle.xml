@@ -22,19 +22,11 @@
 
 		<!-- Package-level null-safety annotations -->
 		<module name="RegexpSinglelineJavaCheck">
-			<property name="id" value="packageLevelNonNullApiAnnotation"/>
-			<property name="format" value="@NonNullApi"/>
+			<property name="id" value="packageLevelNullMarkedAnnotation"/>
+			<property name="format" value="@NullMarked"/>
 			<property name="minimum" value="1"/>
 			<property name="maximum" value="1"/>
-			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullApi."/>
-			<property name="ignoreComments" value="true"/>
-		</module>
-		<module name="RegexpSinglelineJavaCheck">
-			<property name="id" value="packageLevelNonNullFieldsAnnotation"/>
-			<property name="format" value="@NonNullFields"/>
-			<property name="minimum" value="1"/>
-			<property name="maximum" value="1"/>
-			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullFields."/>
+			<property name="message" value="package-info.java is missing required null-safety annotation @NullMarked."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
 
@@ -44,9 +36,7 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck"/>
-		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck">
-			<property name="allowSamelineSingleParameterlessAnnotation" value="false"/>
-		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck"/>
 
 		<!-- Block Checks -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyBlockCheck">
@@ -125,7 +115,7 @@
 			<property name="id" value="bannedImports"/>
 			<property name="regexp" value="true"/>
 			<property name="illegalClasses"
-				value="^reactor\.core\.support\.Assert,^org\.slf4j\.LoggerFactory,^(?!org\.springframework).*(NonNull|Nonnull|NonNullApi|NonNullFields|Nullable)$"/>
+				value="^reactor\.core\.support\.Assert,^org\.slf4j\.LoggerFactory,^(?!org\.jspecify|\.annotations).*(NonNull|Nullable)$"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
 			<property name="id" value="bannedJUnit3Imports"/>

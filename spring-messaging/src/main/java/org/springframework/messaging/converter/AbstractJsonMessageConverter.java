@@ -28,7 +28,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ClassUtils;
@@ -62,8 +63,7 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 	}
 
 	@Override
-	@Nullable
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	protected @Nullable Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		try {
 			Type resolvedType = getResolvedType(targetClass, conversionHint);
 			Object payload = message.getPayload();
@@ -84,8 +84,7 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 	}
 
 	@Override
-	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected @Nullable Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		try {
 			Type resolvedType = getResolvedType(payload.getClass(), conversionHint);
 			if (byte[].class == getSerializedPayloadClass()) {

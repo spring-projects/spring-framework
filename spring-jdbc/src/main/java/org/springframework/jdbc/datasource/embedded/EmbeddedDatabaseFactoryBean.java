@@ -18,12 +18,13 @@ package org.springframework.jdbc.datasource.embedded;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * A subclass of {@link EmbeddedDatabaseFactory} that implements {@link FactoryBean}
@@ -44,8 +45,7 @@ import org.springframework.lang.Nullable;
 public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 		implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
 
-	@Nullable
-	private DatabasePopulator databaseCleaner;
+	private @Nullable DatabasePopulator databaseCleaner;
 
 
 	/**
@@ -66,8 +66,7 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 
 
 	@Override
-	@Nullable
-	public DataSource getObject() {
+	public @Nullable DataSource getObject() {
 		return getDataSource();
 	}
 

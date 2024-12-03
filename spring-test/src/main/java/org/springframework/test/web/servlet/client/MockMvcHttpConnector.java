@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import jakarta.servlet.http.Cookie;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -43,7 +44,6 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -151,7 +151,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 	}
 
 	private AbstractMockHttpServletRequestBuilder<?> initRequestBuilder(
-			HttpMethod httpMethod, URI uri, MockClientHttpRequest httpRequest, @Nullable byte[] bytes) {
+			HttpMethod httpMethod, URI uri, MockClientHttpRequest httpRequest, byte @Nullable [] bytes) {
 
 		String contentType = httpRequest.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 		if (!StringUtils.startsWithIgnoreCase(contentType, "multipart/")) {
@@ -266,27 +266,23 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 			return this.mvcResult.getResponse();
 		}
 
-		@Nullable
 		@Override
-		public Object getHandler() {
+		public @Nullable Object getHandler() {
 			return this.mvcResult.getHandler();
 		}
 
-		@Nullable
 		@Override
-		public HandlerInterceptor[] getInterceptors() {
+		public HandlerInterceptor @Nullable [] getInterceptors() {
 			return this.mvcResult.getInterceptors();
 		}
 
-		@Nullable
 		@Override
-		public ModelAndView getModelAndView() {
+		public @Nullable ModelAndView getModelAndView() {
 			return this.mvcResult.getModelAndView();
 		}
 
-		@Nullable
 		@Override
-		public Exception getResolvedException() {
+		public @Nullable Exception getResolvedException() {
 			return this.mvcResult.getResolvedException();
 		}
 

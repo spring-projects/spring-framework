@@ -33,6 +33,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -44,7 +45,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.servlet.ModelAndView;
@@ -82,8 +82,7 @@ public interface ServerResponse {
 	 * @param context the context to use when writing
 	 * @return a {@code ModelAndView} to render, or {@code null} if handled directly
 	 */
-	@Nullable
-	ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
+	@Nullable ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
 		throws ServletException, IOException;
 
 
@@ -335,7 +334,7 @@ public interface ServerResponse {
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B header(String headerName, String... headerValues);
+		B header(String headerName, @Nullable String... headerValues);
 
 		/**
 		 * Manipulate this response's headers with the given consumer. The
@@ -466,8 +465,7 @@ public interface ServerResponse {
 			 * @return a {@code ModelAndView} to render, or {@code null} if handled directly
 			 * @throws Exception in case of Servlet errors
 			 */
-			@Nullable
-			ModelAndView write(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Exception;
+			@Nullable ModelAndView write(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Exception;
 
 		}
 

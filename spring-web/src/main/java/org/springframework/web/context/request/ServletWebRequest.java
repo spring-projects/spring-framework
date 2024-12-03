@@ -29,12 +29,12 @@ import java.util.TimeZone;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -91,20 +91,17 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	@Nullable
-	public Object getNativeResponse() {
+	public @Nullable Object getNativeResponse() {
 		return getResponse();
 	}
 
 	@Override
-	@Nullable
-	public <T> T getNativeRequest(@Nullable Class<T> requiredType) {
+	public <T> @Nullable T getNativeRequest(@Nullable Class<T> requiredType) {
 		return WebUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
 	@Override
-	@Nullable
-	public <T> T getNativeResponse(@Nullable Class<T> requiredType) {
+	public <T> @Nullable T getNativeResponse(@Nullable Class<T> requiredType) {
 		HttpServletResponse response = getResponse();
 		return (response != null ? WebUtils.getNativeResponse(response, requiredType) : null);
 	}
@@ -118,14 +115,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	@Nullable
-	public String getHeader(String headerName) {
+	public @Nullable String getHeader(String headerName) {
 		return getRequest().getHeader(headerName);
 	}
 
 	@Override
-	@Nullable
-	public String[] getHeaderValues(String headerName) {
+	public String @Nullable [] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
 	}
@@ -136,14 +131,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	@Nullable
-	public String getParameter(String paramName) {
+	public @Nullable String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
 
 	@Override
-	@Nullable
-	public String[] getParameterValues(String paramName) {
+	public String @Nullable [] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
 	}
 
@@ -168,14 +161,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	@Nullable
-	public String getRemoteUser() {
+	public @Nullable String getRemoteUser() {
 		return getRequest().getRemoteUser();
 	}
 
 	@Override
-	@Nullable
-	public Principal getUserPrincipal() {
+	public @Nullable Principal getUserPrincipal() {
 		return getRequest().getUserPrincipal();
 	}
 

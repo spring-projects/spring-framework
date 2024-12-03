@@ -53,6 +53,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -63,7 +64,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -97,40 +97,31 @@ public class MBeanClientInterceptor
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private MBeanServerConnection server;
+	private @Nullable MBeanServerConnection server;
 
-	@Nullable
-	private JMXServiceURL serviceUrl;
+	private @Nullable JMXServiceURL serviceUrl;
 
-	@Nullable
-	private Map<String, ?> environment;
+	private @Nullable Map<String, ?> environment;
 
-	@Nullable
-	private String agentId;
+	private @Nullable String agentId;
 
 	private boolean connectOnStartup = true;
 
 	private boolean refreshOnConnectFailure = false;
 
-	@Nullable
-	private ObjectName objectName;
+	private @Nullable ObjectName objectName;
 
 	private boolean useStrictCasing = true;
 
-	@Nullable
-	private Class<?> managementInterface;
+	private @Nullable Class<?> managementInterface;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private final ConnectorDelegate connector = new ConnectorDelegate();
 
-	@Nullable
-	private MBeanServerConnection serverToUse;
+	private @Nullable MBeanServerConnection serverToUse;
 
-	@Nullable
-	private MBeanServerInvocationHandler invocationHandler;
+	private @Nullable MBeanServerInvocationHandler invocationHandler;
 
 	private Map<String, MBeanAttributeInfo> allowedAttributes = Collections.emptyMap();
 
@@ -171,8 +162,7 @@ public class MBeanClientInterceptor
 	 * {@code environment[myKey]}. This is particularly useful for
 	 * adding or overriding entries in child bean definitions.
 	 */
-	@Nullable
-	public Map<String, ?> getEnvironment() {
+	public @Nullable Map<String, ?> getEnvironment() {
 		return this.environment;
 	}
 
@@ -239,8 +229,7 @@ public class MBeanClientInterceptor
 	 * Return the management interface of the target MBean,
 	 * or {@code null} if none specified.
 	 */
-	@Nullable
-	protected final Class<?> getManagementInterface() {
+	protected final @Nullable Class<?> getManagementInterface() {
 		return this.managementInterface;
 	}
 
@@ -356,8 +345,7 @@ public class MBeanClientInterceptor
 	 * @see #handleConnectFailure
 	 */
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 		// Lazily connect to MBeanServer if necessary.
 		synchronized (this.preparationMonitor) {
 			if (!isPrepared()) {
@@ -384,8 +372,7 @@ public class MBeanClientInterceptor
 	 * @see #setRefreshOnConnectFailure
 	 * @see #doInvoke
 	 */
-	@Nullable
-	protected Object handleConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
+	protected @Nullable Object handleConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
 		if (this.refreshOnConnectFailure) {
 			String msg = "Could not connect to JMX server - retrying";
 			if (logger.isDebugEnabled()) {
@@ -410,8 +397,7 @@ public class MBeanClientInterceptor
 	 * @return the value returned as a result of the re-routed invocation
 	 * @throws Throwable an invocation error propagated to the user
 	 */
-	@Nullable
-	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
+	protected @Nullable Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 		try {
 			Object result;
@@ -477,8 +463,7 @@ public class MBeanClientInterceptor
 		}
 	}
 
-	@Nullable
-	private Object invokeAttribute(PropertyDescriptor pd, MethodInvocation invocation)
+	private @Nullable Object invokeAttribute(PropertyDescriptor pd, MethodInvocation invocation)
 			throws JMException, IOException {
 
 		Assert.state(this.serverToUse != null, "No MBeanServerConnection available");
@@ -552,8 +537,7 @@ public class MBeanClientInterceptor
 	 * @return the converted result object, or the passed-in object if no conversion
 	 * is necessary
 	 */
-	@Nullable
-	protected Object convertResultValueIfNecessary(@Nullable Object result, MethodParameter parameter) {
+	protected @Nullable Object convertResultValueIfNecessary(@Nullable Object result, MethodParameter parameter) {
 		Class<?> targetClass = parameter.getParameterType();
 		try {
 			if (result == null) {
@@ -648,7 +632,7 @@ public class MBeanClientInterceptor
 		 * @param name the name of the method
 		 * @param parameterTypes the arguments in the method signature
 		 */
-		public MethodCacheKey(String name, @Nullable Class<?>[] parameterTypes) {
+		public MethodCacheKey(String name, Class<?> @Nullable [] parameterTypes) {
 			this.name = name;
 			this.parameterTypes = (parameterTypes != null ? parameterTypes : new Class<?>[0]);
 		}

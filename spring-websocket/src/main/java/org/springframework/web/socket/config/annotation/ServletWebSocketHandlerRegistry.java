@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
@@ -45,8 +46,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	private int order = 1;
 
-	@Nullable
-	private UrlPathHelper urlPathHelper;
+	private @Nullable UrlPathHelper urlPathHelper;
 
 
 	public ServletWebSocketHandlerRegistry() {
@@ -82,8 +82,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 		this.urlPathHelper = urlPathHelper;
 	}
 
-	@Nullable
-	public UrlPathHelper getUrlPathHelper() {
+	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 

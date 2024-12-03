@@ -18,6 +18,7 @@ package org.springframework.messaging.handler.invocation.reactive;
 
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -30,7 +31,6 @@ import reactor.util.context.Context;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -68,9 +68,8 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 
 	@Override
-	@Nullable
 	@SuppressWarnings("rawtypes")
-	public Object scanUnsafe(Attr key) {
+	public @Nullable Object scanUnsafe(Attr key) {
 		if (key == Attr.PREFETCH) {
 			return Integer.MAX_VALUE;
 		}
@@ -134,16 +133,13 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		private final WriteCompletionBarrier writeCompletionBarrier;
 
 		/* Upstream write source subscription */
-		@Nullable
-		private Subscription subscription;
+		private @Nullable Subscription subscription;
 
 		/** Cached data item before readyToWrite. */
-		@Nullable
-		private T item;
+		private @Nullable T item;
 
 		/** Cached error signal before readyToWrite. */
-		@Nullable
-		private Throwable error;
+		private @Nullable Throwable error;
 
 		/** Cached onComplete signal before readyToWrite. */
 		private boolean completed = false;
@@ -155,8 +151,7 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		private State state = State.NEW;
 
 		/** The actual writeSubscriber from the HTTP server adapter. */
-		@Nullable
-		private Subscriber<? super T> writeSubscriber;
+		private @Nullable Subscriber<? super T> writeSubscriber;
 
 
 		WriteBarrier(CoreSubscriber<? super Void> completionSubscriber) {
@@ -391,8 +386,7 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		private final WriteBarrier writeBarrier;
 
-		@Nullable
-		private Subscription subscription;
+		private @Nullable Subscription subscription;
 
 
 		public WriteCompletionBarrier(CoreSubscriber<? super Void> subscriber, WriteBarrier writeBarrier) {

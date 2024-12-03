@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
@@ -44,8 +45,7 @@ public interface SmartMessageConverter extends MessageConverter {
 	 * perform the conversion
 	 * @see #fromMessage(Message, Class)
 	 */
-	@Nullable
-	Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint);
+	@Nullable Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint);
 
 	/**
 	 * A variant of {@link #toMessage(Object, MessageHeaders)} which takes an extra
@@ -59,7 +59,6 @@ public interface SmartMessageConverter extends MessageConverter {
 	 * Object type or the target media type
 	 * @see #toMessage(Object, MessageHeaders)
 	 */
-	@Nullable
-	Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint);
+	@Nullable Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint);
 
 }

@@ -25,6 +25,7 @@ import jakarta.xml.bind.annotation.XmlRegistry;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
 import jakarta.xml.bind.annotation.XmlType;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -34,7 +35,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.Nullable;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;

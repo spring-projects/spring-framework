@@ -18,9 +18,10 @@ package org.springframework.web.method.annotation;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -71,8 +72,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 	@Override
-	@Nullable
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+	protected @Nullable Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
 		String[] headerValues = request.getHeaderValues(name);
 		if (headerValues != null) {
 			return (headerValues.length == 1 ? headerValues[0] : headerValues);

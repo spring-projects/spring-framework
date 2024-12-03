@@ -16,8 +16,9 @@
 
 package org.springframework.jmx.export.metadata;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jmx.support.MetricType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -31,21 +32,17 @@ import org.springframework.util.Assert;
  */
 public class ManagedMetric extends AbstractJmxAttribute {
 
-	@Nullable
-	private String category;
+	private @Nullable String category;
 
-	@Nullable
-	private String displayName;
+	private @Nullable String displayName;
 
 	private MetricType metricType = MetricType.GAUGE;
 
 	private int persistPeriod = -1;
 
-	@Nullable
-	private String persistPolicy;
+	private @Nullable String persistPolicy;
 
-	@Nullable
-	private String unit;
+	private @Nullable String unit;
 
 
 	/**
@@ -58,8 +55,7 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * The category of this metric (ex. throughput, performance, utilization).
 	 */
-	@Nullable
-	public String getCategory() {
+	public @Nullable String getCategory() {
 		return this.category;
 	}
 
@@ -73,8 +69,7 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * A display name for this metric.
 	 */
-	@Nullable
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return this.displayName;
 	}
 
@@ -117,8 +112,7 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * The persist policy for this metric.
 	 */
-	@Nullable
-	public String getPersistPolicy() {
+	public @Nullable String getPersistPolicy() {
 		return this.persistPolicy;
 	}
 
@@ -132,8 +126,7 @@ public class ManagedMetric extends AbstractJmxAttribute {
 	/**
 	 * The expected unit of measurement values.
 	 */
-	@Nullable
-	public String getUnit() {
+	public @Nullable String getUnit() {
 		return this.unit;
 	}
 

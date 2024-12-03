@@ -19,8 +19,8 @@ package org.springframework.orm.hibernate5;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerHolder;
 
 /**
@@ -38,11 +38,9 @@ import org.springframework.orm.jpa.EntityManagerHolder;
  */
 public class SessionHolder extends EntityManagerHolder {
 
-	@Nullable
-	private Transaction transaction;
+	private @Nullable Transaction transaction;
 
-	@Nullable
-	private FlushMode previousFlushMode;
+	private @Nullable FlushMode previousFlushMode;
 
 
 	public SessionHolder(Session session) {
@@ -59,8 +57,7 @@ public class SessionHolder extends EntityManagerHolder {
 		setTransactionActive(transaction != null);
 	}
 
-	@Nullable
-	public Transaction getTransaction() {
+	public @Nullable Transaction getTransaction() {
 		return this.transaction;
 	}
 
@@ -68,8 +65,7 @@ public class SessionHolder extends EntityManagerHolder {
 		this.previousFlushMode = previousFlushMode;
 	}
 
-	@Nullable
-	public FlushMode getPreviousFlushMode() {
+	public @Nullable FlushMode getPreviousFlushMode() {
 		return this.previousFlushMode;
 	}
 

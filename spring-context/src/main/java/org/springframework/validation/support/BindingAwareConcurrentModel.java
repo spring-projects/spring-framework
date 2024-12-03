@@ -18,7 +18,8 @@ package org.springframework.validation.support;
 
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.validation.BindingResult;
 
@@ -43,8 +44,7 @@ import org.springframework.validation.BindingResult;
 public class BindingAwareConcurrentModel extends ConcurrentModel {
 
 	@Override
-	@Nullable
-	public Object put(String key, @Nullable Object value) {
+	public @Nullable Object put(String key, @Nullable Object value) {
 		removeBindingResultIfNecessary(key, value);
 		return super.put(key, value);
 	}

@@ -18,7 +18,7 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown when an I/O error occurs.

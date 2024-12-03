@@ -20,6 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -35,7 +37,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -210,8 +211,7 @@ public abstract class AnnotationConfigUtils {
 		return new BeanDefinitionHolder(definition, beanName);
 	}
 
-	@Nullable
-	private static DefaultListableBeanFactory unwrapDefaultListableBeanFactory(BeanDefinitionRegistry registry) {
+	private static @Nullable DefaultListableBeanFactory unwrapDefaultListableBeanFactory(BeanDefinitionRegistry registry) {
 		if (registry instanceof DefaultListableBeanFactory dlbf) {
 			return dlbf;
 		}
@@ -271,13 +271,11 @@ public abstract class AnnotationConfigUtils {
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 
-	@Nullable
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationType) {
+	static @Nullable AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annotationType) {
 		return attributesFor(metadata, annotationType.getName());
 	}
 
-	@Nullable
-	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationTypeName) {
+	static @Nullable AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annotationTypeName) {
 		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationTypeName));
 	}
 

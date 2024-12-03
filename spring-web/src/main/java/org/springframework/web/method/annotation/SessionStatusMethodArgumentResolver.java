@@ -16,8 +16,9 @@
 
 package org.springframework.web.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;

@@ -17,11 +17,11 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +38,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
 	private final Pointcut pointcut;
 
-	@Nullable
-	private Integer order;
+	private @Nullable Integer order;
 
 
 	/**

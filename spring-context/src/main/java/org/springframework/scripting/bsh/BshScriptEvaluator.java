@@ -22,9 +22,9 @@ import java.util.Map;
 
 import bsh.EvalError;
 import bsh.Interpreter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
@@ -38,8 +38,7 @@ import org.springframework.scripting.ScriptSource;
  */
 public class BshScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware {
 
-	@Nullable
-	private ClassLoader classLoader;
+	private @Nullable ClassLoader classLoader;
 
 
 	/**
@@ -64,14 +63,12 @@ public class BshScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware
 
 
 	@Override
-	@Nullable
-	public Object evaluate(ScriptSource script) {
+	public @Nullable Object evaluate(ScriptSource script) {
 		return evaluate(script, null);
 	}
 
 	@Override
-	@Nullable
-	public Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) {
+	public @Nullable Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) {
 		try {
 			Interpreter interpreter = new Interpreter();
 			interpreter.setClassLoader(this.classLoader);

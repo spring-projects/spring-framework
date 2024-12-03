@@ -16,7 +16,7 @@
 
 package org.springframework.expression;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An index accessor is able to read from and possibly write to an indexed

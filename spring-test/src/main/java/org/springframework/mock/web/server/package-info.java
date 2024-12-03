@@ -1,9 +1,7 @@
 /**
  * Mock implementations of Spring's reactive server web API abstractions.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.mock.web.server;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

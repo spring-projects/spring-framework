@@ -16,8 +16,9 @@
 
 package org.springframework.test.web.servlet.client;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
@@ -58,7 +59,7 @@ class RouterFunctionMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcWebTest
 	}
 
 	@Override
-	public MockMvcWebTestClient.RouterFunctionSpec mappedInterceptors(@Nullable String[] pathPatterns, HandlerInterceptor... interceptors) {
+	public MockMvcWebTestClient.RouterFunctionSpec mappedInterceptors(String @Nullable [] pathPatterns, HandlerInterceptor... interceptors) {
 		this.mockMvcBuilder.addMappedInterceptors(pathPatterns, interceptors);
 		return this;
 	}

@@ -18,13 +18,13 @@ package org.springframework.web.context.support;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
@@ -60,17 +60,13 @@ import org.springframework.web.context.ServletContextAware;
 public class StaticWebApplicationContext extends StaticApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private ServletConfig servletConfig;
+	private @Nullable ServletConfig servletConfig;
 
-	@Nullable
-	private String namespace;
+	private @Nullable String namespace;
 
-	@Nullable
-	private ThemeSource themeSource;
+	private @Nullable ThemeSource themeSource;
 
 
 	public StaticWebApplicationContext() {
@@ -87,8 +83,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public ServletContext getServletContext() {
+	public @Nullable ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
@@ -101,8 +96,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public ServletConfig getServletConfig() {
+	public @Nullable ServletConfig getServletConfig() {
 		return this.servletConfig;
 	}
 
@@ -115,8 +109,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public String getNamespace() {
+	public @Nullable String getNamespace() {
 		return this.namespace;
 	}
 
@@ -139,8 +132,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public String[] getConfigLocations() {
+	public String @Nullable [] getConfigLocations() {
 		return null;
 	}
 
@@ -200,9 +192,8 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
-	@Nullable
 	@Deprecated
-	public Theme getTheme(String themeName) {
+	public @Nullable Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);
 	}

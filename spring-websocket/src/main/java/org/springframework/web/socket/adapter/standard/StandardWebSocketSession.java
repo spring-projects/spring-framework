@@ -29,9 +29,9 @@ import jakarta.websocket.CloseReason;
 import jakarta.websocket.CloseReason.CloseCodes;
 import jakarta.websocket.Extension;
 import jakarta.websocket.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -53,25 +53,19 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	private final String id;
 
-	@Nullable
-	private URI uri;
+	private @Nullable URI uri;
 
 	private final HttpHeaders handshakeHeaders;
 
-	@Nullable
-	private String acceptedProtocol;
+	private @Nullable String acceptedProtocol;
 
-	@Nullable
-	private List<WebSocketExtension> extensions;
+	private @Nullable List<WebSocketExtension> extensions;
 
-	@Nullable
-	private Principal user;
+	private @Nullable Principal user;
 
-	@Nullable
-	private final InetSocketAddress localAddress;
+	private final @Nullable InetSocketAddress localAddress;
 
-	@Nullable
-	private final InetSocketAddress remoteAddress;
+	private final @Nullable InetSocketAddress remoteAddress;
 
 
 	/**
@@ -117,8 +111,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
-	@Nullable
-	public URI getUri() {
+	public @Nullable URI getUri() {
 		checkNativeSessionInitialized();
 		return this.uri;
 	}
@@ -129,8 +122,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
-	@Nullable
-	public String getAcceptedProtocol() {
+	public @Nullable String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
 		return this.acceptedProtocol;
 	}
@@ -142,20 +134,17 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	}
 
 	@Override
-	@Nullable
-	public Principal getPrincipal() {
+	public @Nullable Principal getPrincipal() {
 		return this.user;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 

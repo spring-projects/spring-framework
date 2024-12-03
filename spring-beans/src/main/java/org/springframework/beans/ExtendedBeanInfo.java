@@ -36,8 +36,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -185,8 +185,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 	}
 
-	@Nullable
-	private PropertyDescriptor findExistingPropertyDescriptor(String propertyName, Class<?> propertyType) {
+	private @Nullable PropertyDescriptor findExistingPropertyDescriptor(String propertyName, Class<?> propertyType) {
 		for (PropertyDescriptor pd : this.propertyDescriptors) {
 			final Class<?> candidateType;
 			final String candidateName = pd.getName();
@@ -265,17 +264,13 @@ class ExtendedBeanInfo implements BeanInfo {
 	 */
 	static class SimplePropertyDescriptor extends PropertyDescriptor {
 
-		@Nullable
-		private Method readMethod;
+		private @Nullable Method readMethod;
 
-		@Nullable
-		private Method writeMethod;
+		private @Nullable Method writeMethod;
 
-		@Nullable
-		private Class<?> propertyType;
+		private @Nullable Class<?> propertyType;
 
-		@Nullable
-		private Class<?> propertyEditorClass;
+		private @Nullable Class<?> propertyEditorClass;
 
 		public SimplePropertyDescriptor(PropertyDescriptor original) throws IntrospectionException {
 			this(original.getName(), original.getReadMethod(), original.getWriteMethod());
@@ -292,8 +287,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Method getReadMethod() {
+		public @Nullable Method getReadMethod() {
 			return this.readMethod;
 		}
 
@@ -303,8 +297,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Method getWriteMethod() {
+		public @Nullable Method getWriteMethod() {
 			return this.writeMethod;
 		}
 
@@ -314,8 +307,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Class<?> getPropertyType() {
+		public @Nullable Class<?> getPropertyType() {
 			if (this.propertyType == null) {
 				try {
 					this.propertyType = PropertyDescriptorUtils.findPropertyType(this.readMethod, this.writeMethod);
@@ -328,8 +320,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Class<?> getPropertyEditorClass() {
+		public @Nullable Class<?> getPropertyEditorClass() {
 			return this.propertyEditorClass;
 		}
 
@@ -362,26 +353,19 @@ class ExtendedBeanInfo implements BeanInfo {
 	 */
 	static class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 
-		@Nullable
-		private Method readMethod;
+		private @Nullable Method readMethod;
 
-		@Nullable
-		private Method writeMethod;
+		private @Nullable Method writeMethod;
 
-		@Nullable
-		private Class<?> propertyType;
+		private @Nullable Class<?> propertyType;
 
-		@Nullable
-		private Method indexedReadMethod;
+		private @Nullable Method indexedReadMethod;
 
-		@Nullable
-		private Method indexedWriteMethod;
+		private @Nullable Method indexedWriteMethod;
 
-		@Nullable
-		private Class<?> indexedPropertyType;
+		private @Nullable Class<?> indexedPropertyType;
 
-		@Nullable
-		private Class<?> propertyEditorClass;
+		private @Nullable Class<?> propertyEditorClass;
 
 		public SimpleIndexedPropertyDescriptor(IndexedPropertyDescriptor original) throws IntrospectionException {
 			this(original.getName(), original.getReadMethod(), original.getWriteMethod(),
@@ -404,8 +388,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Method getReadMethod() {
+		public @Nullable Method getReadMethod() {
 			return this.readMethod;
 		}
 
@@ -415,8 +398,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Method getWriteMethod() {
+		public @Nullable Method getWriteMethod() {
 			return this.writeMethod;
 		}
 
@@ -426,8 +408,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Class<?> getPropertyType() {
+		public @Nullable Class<?> getPropertyType() {
 			if (this.propertyType == null) {
 				try {
 					this.propertyType = PropertyDescriptorUtils.findPropertyType(this.readMethod, this.writeMethod);
@@ -440,8 +421,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Method getIndexedReadMethod() {
+		public @Nullable Method getIndexedReadMethod() {
 			return this.indexedReadMethod;
 		}
 
@@ -451,8 +431,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Method getIndexedWriteMethod() {
+		public @Nullable Method getIndexedWriteMethod() {
 			return this.indexedWriteMethod;
 		}
 
@@ -462,8 +441,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Class<?> getIndexedPropertyType() {
+		public @Nullable Class<?> getIndexedPropertyType() {
 			if (this.indexedPropertyType == null) {
 				try {
 					this.indexedPropertyType = PropertyDescriptorUtils.findIndexedPropertyType(
@@ -477,8 +455,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		@Nullable
-		public Class<?> getPropertyEditorClass() {
+		public @Nullable Class<?> getPropertyEditorClass() {
 			return this.propertyEditorClass;
 		}
 

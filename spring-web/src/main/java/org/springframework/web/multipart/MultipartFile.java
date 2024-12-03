@@ -22,9 +22,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -64,16 +65,14 @@ public interface MultipartFile extends InputStreamSource {
 	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
 	 * @see <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Upload</a>
 	 */
-	@Nullable
-	String getOriginalFilename();
+	@Nullable String getOriginalFilename();
 
 	/**
 	 * Return the content type of the file.
 	 * @return the content type, or {@code null} if not defined
 	 * (or no file has been chosen in the multipart form)
 	 */
-	@Nullable
-	String getContentType();
+	@Nullable String getContentType();
 
 	/**
 	 * Return whether the uploaded file is empty, that is, either no file has

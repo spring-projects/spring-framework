@@ -51,6 +51,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
 import org.hibernate.service.UnknownServiceException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -62,7 +63,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.
@@ -146,8 +146,7 @@ public abstract class SessionFactoryUtils {
 	 * @return the DataSource, or {@code null} if none found
 	 * @see ConnectionProvider
 	 */
-	@Nullable
-	public static DataSource getDataSource(SessionFactory sessionFactory) {
+	public static @Nullable DataSource getDataSource(SessionFactory sessionFactory) {
 		Map<String, Object> props = sessionFactory.getProperties();
 		if (props != null) {
 			Object dataSourceValue = props.get(Environment.JAKARTA_NON_JTA_DATASOURCE);

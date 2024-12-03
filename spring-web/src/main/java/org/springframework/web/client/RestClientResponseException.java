@@ -22,11 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -51,14 +52,11 @@ public class RestClientResponseException extends RestClientException {
 
 	private final byte[] responseBody;
 
-	@Nullable
-	private final HttpHeaders responseHeaders;
+	private final @Nullable HttpHeaders responseHeaders;
 
-	@Nullable
-	private final String responseCharset;
+	private final @Nullable String responseCharset;
 
-	@Nullable
-	private transient Function<ResolvableType, ?> bodyConvertFunction;
+	private transient @Nullable Function<ResolvableType, ?> bodyConvertFunction;
 
 
 	/**
@@ -71,7 +69,7 @@ public class RestClientResponseException extends RestClientException {
 	 */
 	public RestClientResponseException(
 			String message, int statusCode, String statusText, @Nullable HttpHeaders headers,
-			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+			byte @Nullable [] responseBody, @Nullable Charset responseCharset) {
 
 		this(message, HttpStatusCode.valueOf(statusCode), statusText, headers, responseBody, responseCharset);
 	}
@@ -87,7 +85,7 @@ public class RestClientResponseException extends RestClientException {
 	 */
 	public RestClientResponseException(
 			String message, HttpStatusCode statusCode, String statusText, @Nullable HttpHeaders headers,
-			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+			byte @Nullable [] responseBody, @Nullable Charset responseCharset) {
 
 		super(message);
 		this.statusCode = statusCode;
@@ -101,8 +99,7 @@ public class RestClientResponseException extends RestClientException {
 	 * Copies the given headers, because the backing map might not be
 	 * serializable.
 	 */
-	@Nullable
-	private static HttpHeaders copyHeaders(@Nullable HttpHeaders headers) {
+	private static @Nullable HttpHeaders copyHeaders(@Nullable HttpHeaders headers) {
 		if (headers != null) {
 			MultiValueMap<String, String> result =
 					CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ROOT));
@@ -133,8 +130,7 @@ public class RestClientResponseException extends RestClientException {
 	/**
 	 * Return the HTTP response headers.
 	 */
-	@Nullable
-	public HttpHeaders getResponseHeaders() {
+	public @Nullable HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
 	}
 
@@ -179,8 +175,7 @@ public class RestClientResponseException extends RestClientException {
 	 * @return the converted object, or {@code null} if there is no content
 	 * @since 6.0
 	 */
-	@Nullable
-	public <E> E getResponseBodyAs(Class<E> targetType) {
+	public <E> @Nullable E getResponseBodyAs(Class<E> targetType) {
 		return getResponseBodyAs(ResolvableType.forClass(targetType));
 	}
 
@@ -189,14 +184,12 @@ public class RestClientResponseException extends RestClientException {
 	 * {@link ParameterizedTypeReference}.
 	 * @since 6.0
 	 */
-	@Nullable
-	public <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
+	public <E> @Nullable E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
 		return getResponseBodyAs(ResolvableType.forType(targetType.getType()));
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <E> E getResponseBodyAs(ResolvableType targetType) {
+	private <E> @Nullable E getResponseBodyAs(ResolvableType targetType) {
 		Assert.state(this.bodyConvertFunction != null, "Function to convert body not set");
 		return (E) this.bodyConvertFunction.apply(targetType);
 	}

@@ -33,6 +33,7 @@ import groovy.lang.GroovySystem;
 import groovy.lang.MetaClass;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.InvokerHelper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -53,7 +54,6 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -151,11 +151,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
 
-	@Nullable
-	private Binding binding;
+	private @Nullable Binding binding;
 
-	@Nullable
-	private GroovyBeanDefinitionWrapper currentBeanDefinition;
+	private @Nullable GroovyBeanDefinitionWrapper currentBeanDefinition;
 
 
 	/**
@@ -207,8 +205,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	/**
 	 * Return a specified binding for Groovy variables, if any.
 	 */
-	@Nullable
-	public Binding getBinding() {
+	public @Nullable Binding getBinding() {
 		return this.binding;
 	}
 
@@ -251,8 +248,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		@SuppressWarnings("serial")
 		Closure<Object> beans = new Closure<>(this) {
 			@Override
-			@Nullable
-			public Object call(Object... args) {
+			public @Nullable Object call(Object... args) {
 				invokeBeanDefiningClosure((Closure<?>) args[0]);
 				return null;
 			}
@@ -658,8 +654,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * </ul>
 	 */
 	@Override
-	@Nullable
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		Binding binding = getBinding();
 		if (binding != null && binding.hasVariable(name)) {
 			return binding.getVariable(name);
@@ -733,8 +728,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 		private final String name;
 
-		@Nullable
-		public Object value;
+		public @Nullable Object value;
 
 		public DeferredProperty(GroovyBeanDefinitionWrapper beanDefinition, String name, @Nullable Object value) {
 			this.beanDefinition = beanDefinition;
@@ -769,8 +763,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 
 		@Override
-		@Nullable
-		public Object getProperty(String property) {
+		public @Nullable Object getProperty(String property) {
 			if (property.equals("beanName")) {
 				return getBeanName();
 			}
@@ -809,8 +802,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 			private final String propertyName;
 
-			@Nullable
-			private final Object propertyValue;
+			private final @Nullable Object propertyValue;
 
 			public GroovyPropertyValue(String propertyName, @Nullable Object propertyValue) {
 				this.propertyName = propertyName;

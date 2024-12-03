@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
@@ -42,8 +42,7 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext context) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext context) {
 		context.pushContainingComponent(
 				new CompositeComponentDefinition(element.getTagName(), context.extractSource(element)));
 

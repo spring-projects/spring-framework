@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,8 +54,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();
 
-	@Nullable
-	private Charset defaultCharset;
+	private @Nullable Charset defaultCharset;
 
 
 	/**
@@ -119,8 +118,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Return the default character set, if any.
 	 * @since 4.3
 	 */
-	@Nullable
-	public Charset getDefaultCharset() {
+	public @Nullable Charset getDefaultCharset() {
 		return this.defaultCharset;
 	}
 
@@ -281,8 +279,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @param t the type to return the content type for
 	 * @return the content type, or {@code null} if not known
 	 */
-	@Nullable
-	protected MediaType getDefaultContentType(T t) throws IOException {
+	protected @Nullable MediaType getDefaultContentType(T t) throws IOException {
 		List<MediaType> mediaTypes = getSupportedMediaTypes();
 		return (!mediaTypes.isEmpty() ? mediaTypes.get(0) : null);
 	}
@@ -294,8 +291,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @param t the type to return the content length for
 	 * @return the content length, or {@code null} if not known
 	 */
-	@Nullable
-	protected Long getContentLength(T t, @Nullable MediaType contentType) throws IOException {
+	protected @Nullable Long getContentLength(T t, @Nullable MediaType contentType) throws IOException {
 		return null;
 	}
 

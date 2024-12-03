@@ -18,7 +18,7 @@ package org.springframework.beans.factory.parsing;
 
 import java.util.ArrayDeque;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Simple {@link ArrayDeque}-based structure for tracking the logical position during
@@ -74,8 +74,7 @@ public final class ParseState {
 	 * Return the {@link Entry} currently at the top of the {@link ArrayDeque} or
 	 * {@code null} if the {@link ArrayDeque} is empty.
 	 */
-	@Nullable
-	public Entry peek() {
+	public @Nullable Entry peek() {
 		return this.state.peek();
 	}
 

@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.BeanNameAware;
@@ -41,7 +42,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.ReactiveMessageHandler;
@@ -87,11 +87,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
-	@Nullable
-	private Predicate<Class<?>> handlerPredicate;
+	private @Nullable Predicate<Class<?>> handlerPredicate;
 
-	@Nullable
-	List<Object> handlers;
+	@Nullable List<Object> handlers;
 
 	private ArgumentResolverConfigurer argumentResolverConfigurer = new ArgumentResolverConfigurer();
 
@@ -99,11 +97,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private final InvocableHelper invocableHelper = new InvocableHelper(this::createExceptionMethodResolverFor);
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
 	private final Map<T, HandlerMethod> handlerMethods = new ConcurrentHashMap<>(64);
 
@@ -124,8 +120,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Return the {@link #setHandlerPredicate configured} handler predicate.
 	 */
-	@Nullable
-	public Predicate<Class<?>> getHandlerPredicate() {
+	public @Nullable Predicate<Class<?>> getHandlerPredicate() {
 		return this.handlerPredicate;
 	}
 
@@ -193,8 +188,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.applicationContext = applicationContext;
 	}
 
-	@Nullable
-	public ApplicationContext getApplicationContext() {
+	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -365,8 +359,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param handlerType the handler type, possibly a subtype of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
-	@Nullable
-	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
+	protected abstract @Nullable T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
 	 * Register a handler method and its unique mapping.
@@ -461,8 +454,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		return this.invocableHelper.handleMessage(handlerMethod, message);
 	}
 
-	@Nullable
-	private Match<T> getHandlerMethod(Message<?> message) {
+	private @Nullable Match<T> getHandlerMethod(Message<?> message) {
 		List<Match<T>> matches = new ArrayList<>();
 
 		RouteMatcher.Route destination = getDestination(message);
@@ -502,8 +494,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Extract the destination from the given message.
 	 * @see #getDirectLookupMappings(Object)
 	 */
-	@Nullable
-	protected abstract RouteMatcher.Route getDestination(Message<?> message);
+	protected abstract RouteMatcher.@Nullable Route getDestination(Message<?> message);
 
 	@SuppressWarnings("NullAway")
 	private void addMatchesToCollection(
@@ -524,8 +515,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param message the message being handled
 	 * @return the match or {@code null} if there is no match
 	 */
-	@Nullable
-	protected abstract T getMatchingMapping(T mapping, Message<?> message);
+	protected abstract @Nullable T getMatchingMapping(T mapping, Message<?> message);
 
 	/**
 	 * Return a comparator for sorting matching mappings.
@@ -540,7 +530,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param destination the destination
 	 * @param message the message
 	 */
-	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
+	protected void handleNoMatch(RouteMatcher.@Nullable Route destination, Message<?> message) {
 		logger.debug("No handlers for destination '" +
 				(destination != null ? destination.value() : "") + "'");
 	}

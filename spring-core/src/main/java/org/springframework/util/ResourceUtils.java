@@ -26,7 +26,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility methods for resolving resource locations to files in the

@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import jakarta.servlet.http.Cookie;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**

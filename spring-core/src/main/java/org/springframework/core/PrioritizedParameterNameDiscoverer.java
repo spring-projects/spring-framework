@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link ParameterNameDiscoverer} implementation that tries several discoverer
@@ -49,10 +49,9 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 
 
 	@Override
-	@Nullable
-	public String[] getParameterNames(Method method) {
+	public @Nullable String @Nullable [] getParameterNames(Method method) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
-			String[] result = pnd.getParameterNames(method);
+			@Nullable String[] result = pnd.getParameterNames(method);
 			if (result != null) {
 				return result;
 			}
@@ -61,10 +60,9 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	}
 
 	@Override
-	@Nullable
-	public String[] getParameterNames(Constructor<?> ctor) {
+	public @Nullable String @Nullable [] getParameterNames(Constructor<?> ctor) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
-			String[] result = pnd.getParameterNames(ctor);
+			@Nullable String[] result = pnd.getParameterNames(ctor);
 			if (result != null) {
 				return result;
 			}

@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Adapts a given {@link MultiValueMap} to the {@link Map} contract. The
@@ -46,11 +46,9 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 
 	private final MultiValueMap<K, V> targetMap;
 
-	@Nullable
-	private transient Collection<V> values;
+	private transient @Nullable Collection<V> values;
 
-	@Nullable
-	private transient Set<Entry<K, V>> entries;
+	private transient @Nullable Set<Entry<K, V>> entries;
 
 
 	/**
@@ -101,20 +99,17 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 	}
 
 	@Override
-	@Nullable
-	public V get(Object key) {
+	public @Nullable V get(Object key) {
 		return adaptValue(this.targetMap.get(key));
 	}
 
-	@Nullable
 	@Override
-	public V put(K key, @Nullable V value) {
+	public @Nullable V put(K key, @Nullable V value) {
 		return adaptValue(this.targetMap.put(key, adaptValue(value)));
 	}
 
 	@Override
-	@Nullable
-	public V remove(Object key) {
+	public @Nullable V remove(Object key) {
 		return adaptValue(this.targetMap.remove(key));
 	}
 
@@ -205,8 +200,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		this.targetMap.forEach((k, vs) -> action.accept(k, vs.get(0)));
 	}
 
-	@Nullable
-	private V adaptValue(@Nullable List<V> values) {
+	private @Nullable V adaptValue(@Nullable List<V> values) {
 		if (!CollectionUtils.isEmpty(values)) {
 			return values.get(0);
 		}
@@ -215,8 +209,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		}
 	}
 
-	@Nullable
-	private List<V> adaptValue(@Nullable V value) {
+	private @Nullable List<V> adaptValue(@Nullable V value) {
 		if (value != null) {
 			return Collections.singletonList(value);
 		}

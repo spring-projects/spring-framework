@@ -28,11 +28,11 @@ import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.protocol.Handshake;
 import io.undertow.websockets.core.protocol.version13.Hybi13Handshake;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;

@@ -19,10 +19,11 @@ package org.springframework.core.type.classreading;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**

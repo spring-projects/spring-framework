@@ -1,9 +1,7 @@
 /**
  * AspectJ-based transaction management support.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.transaction.aspectj;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

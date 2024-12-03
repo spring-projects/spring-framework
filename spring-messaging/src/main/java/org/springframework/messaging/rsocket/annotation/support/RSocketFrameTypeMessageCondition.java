@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 import io.rsocket.frame.FrameType;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.util.Assert;
@@ -117,8 +117,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	 * @param message the current message
 	 * @return the frame type or {@code null} if not found
 	 */
-	@Nullable
-	public static FrameType getFrameType(Message<?> message) {
+	public static @Nullable FrameType getFrameType(Message<?> message) {
 		return (FrameType) message.getHeaders().get(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER);
 	}
 
@@ -134,8 +133,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	}
 
 	@Override
-	@Nullable
-	public RSocketFrameTypeMessageCondition getMatchingCondition(Message<?> message) {
+	public @Nullable RSocketFrameTypeMessageCondition getMatchingCondition(Message<?> message) {
 		FrameType actual = message.getHeaders().get(FRAME_TYPE_HEADER, FrameType.class);
 		if (actual != null) {
 			for (FrameType type : this.frameTypes) {

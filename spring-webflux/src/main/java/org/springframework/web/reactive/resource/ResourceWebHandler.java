@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -43,7 +44,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -90,8 +90,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
 
-	@Nullable
-	private ResourceLoader resourceLoader;
+	private @Nullable ResourceLoader resourceLoader;
 
 	private final List<String> locationValues = new ArrayList<>(4);
 
@@ -103,25 +102,19 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
-	@Nullable
-	private ResourceResolverChain resolverChain;
+	private @Nullable ResourceResolverChain resolverChain;
 
-	@Nullable
-	private ResourceTransformerChain transformerChain;
+	private @Nullable ResourceTransformerChain transformerChain;
 
-	@Nullable
-	private CacheControl cacheControl;
+	private @Nullable CacheControl cacheControl;
 
-	@Nullable
-	private ResourceHttpMessageWriter resourceHttpMessageWriter;
+	private @Nullable ResourceHttpMessageWriter resourceHttpMessageWriter;
 
-	@Nullable
-	private Map<String, MediaType> mediaTypes;
+	private @Nullable Map<String, MediaType> mediaTypes;
 
 	private boolean useLastModified = true;
 
-	@Nullable
-	private Function<Resource, String> etagGenerator;
+	private @Nullable Function<Resource, String> etagGenerator;
 
 	private boolean optimizeLocations = false;
 
@@ -235,8 +228,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	/**
 	 * Return the configured resource message writer.
 	 */
-	@Nullable
-	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
+	public @Nullable ResourceHttpMessageWriter getResourceHttpMessageWriter() {
 		return this.resourceHttpMessageWriter;
 	}
 
@@ -252,8 +244,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * Return the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
 	 */
-	@Nullable
-	public CacheControl getCacheControl() {
+	public @Nullable CacheControl getCacheControl() {
 		return this.cacheControl;
 	}
 
@@ -296,8 +287,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * @return the HTTP ETag generator function
 	 * @since 6.1
 	 */
-	@Nullable
-	public Function<Resource, String> getEtagGenerator() {
+	public @Nullable Function<Resource, String> getEtagGenerator() {
 		return this.etagGenerator;
 	}
 
@@ -525,8 +515,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		return false;
 	}
 
-	@Nullable
-	private MediaType getMediaType(Resource resource) {
+	private @Nullable MediaType getMediaType(Resource resource) {
 		MediaType mediaType = null;
 		String filename = resource.getFilename();
 		if (!CollectionUtils.isEmpty(this.mediaTypes)) {

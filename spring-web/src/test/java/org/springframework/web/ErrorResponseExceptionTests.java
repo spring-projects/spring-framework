@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -33,7 +34,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -456,7 +456,7 @@ class ErrorResponseExceptionTests {
 	}
 
 	private void assertDetailMessageCode(
-			ErrorResponse ex, @Nullable String suffix, @Nullable Object[] arguments) {
+			ErrorResponse ex, @Nullable String suffix, Object @Nullable [] arguments) {
 
 		assertThat(ex.getDetailMessageCode())
 				.isEqualTo(ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), suffix));

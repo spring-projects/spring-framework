@@ -32,6 +32,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -43,7 +44,6 @@ import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -114,11 +114,9 @@ import org.springframework.util.Assert;
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private SessionFactory sessionFactory;
+	private @Nullable SessionFactory sessionFactory;
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
 	private boolean autodetectDataSource = true;
 
@@ -128,18 +126,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private boolean hibernateManagedSession = false;
 
-	@Nullable
-	private Consumer<Session> sessionInitializer;
+	private @Nullable Consumer<Session> sessionInitializer;
 
-	@Nullable
-	private Object entityInterceptor;
+	private @Nullable Object entityInterceptor;
 
 	/**
 	 * Just needed for entityInterceptorBeanName.
 	 * @see #setEntityInterceptorBeanName
 	 */
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**
@@ -170,8 +165,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Return the SessionFactory that this instance should manage transactions for.
 	 */
-	@Nullable
-	public SessionFactory getSessionFactory() {
+	public @Nullable SessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
 
@@ -231,8 +225,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
-	@Nullable
-	public DataSource getDataSource() {
+	public @Nullable DataSource getDataSource() {
 		return this.dataSource;
 	}
 
@@ -363,8 +356,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see #setEntityInterceptorBeanName
 	 * @see #setBeanFactory
 	 */
-	@Nullable
-	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
+	public @Nullable Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
 		if (this.entityInterceptor instanceof Interceptor interceptor) {
 			return interceptor;
 		}
@@ -799,8 +791,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	private class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
-		@Nullable
-		private SessionHolder sessionHolder;
+		private @Nullable SessionHolder sessionHolder;
 
 		private boolean newSessionHolder;
 
@@ -808,8 +799,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private boolean needsConnectionReset;
 
-		@Nullable
-		private Integer previousHoldability;
+		private @Nullable Integer previousHoldability;
 
 		public void setSession(Session session) {
 			this.sessionHolder = new SessionHolder(session);
@@ -858,8 +848,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			this.previousHoldability = previousHoldability;
 		}
 
-		@Nullable
-		public Integer getPreviousHoldability() {
+		public @Nullable Integer getPreviousHoldability() {
 			return this.previousHoldability;
 		}
 
@@ -911,8 +900,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private final SessionHolder sessionHolder;
 
-		@Nullable
-		private final ConnectionHolder connectionHolder;
+		private final @Nullable ConnectionHolder connectionHolder;
 
 		private SuspendedResourcesHolder(SessionHolder sessionHolder, @Nullable ConnectionHolder conHolder) {
 			this.sessionHolder = sessionHolder;
@@ -923,8 +911,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			return this.sessionHolder;
 		}
 
-		@Nullable
-		private ConnectionHolder getConnectionHolder() {
+		private @Nullable ConnectionHolder getConnectionHolder() {
 			return this.connectionHolder;
 		}
 	}

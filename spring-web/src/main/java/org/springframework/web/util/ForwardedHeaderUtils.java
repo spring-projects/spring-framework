@@ -21,8 +21,9 @@ import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -145,8 +146,7 @@ public abstract class ForwardedHeaderUtils {
 	 * {@code null} if the headers are not present
 	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.2">RFC 7239, Section 5.2</a>
 	 */
-	@Nullable
-	public static InetSocketAddress parseForwardedFor(
+	public static @Nullable InetSocketAddress parseForwardedFor(
 			URI uri, HttpHeaders headers, @Nullable InetSocketAddress remoteAddress) {
 
 		int port = (remoteAddress != null ?

@@ -16,7 +16,7 @@
 
 package org.springframework.test.annotation;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * <p>
@@ -49,7 +49,6 @@ public interface ProfileValueSource {
 	 * @return the String value of the <em>profile value</em>, or {@code null}
 	 * if there is no <em>profile value</em> with that key
 	 */
-	@Nullable
-	String get(String key);
+	@Nullable String get(String key);
 
 }

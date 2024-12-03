@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Composite set that combines two other sets. This type is only exposed through

@@ -19,12 +19,13 @@ package org.springframework.test.context.web;
 import java.util.List;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
@@ -105,9 +106,9 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], List, String[], Set, String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}
 	 */
 	@Deprecated(since = "6.1")
-	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+	public WebMergedContextConfiguration(Class<?> testClass, String @Nullable [] locations, @Nullable Class<?>[] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
+			String @Nullable [] activeProfiles, String @Nullable [] propertySourceLocations, String @Nullable [] propertySourceProperties,
 			String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
@@ -144,9 +145,9 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], List, String[], Set, String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}
 	 */
 	@Deprecated(since = "6.1")
-	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+	public WebMergedContextConfiguration(Class<?> testClass, String @Nullable [] locations, Class<?> @Nullable [] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations, @Nullable String[] propertySourceProperties,
+			String @Nullable [] activeProfiles, String @Nullable [] propertySourceLocations, String @Nullable [] propertySourceProperties,
 			@Nullable Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 
@@ -180,10 +181,10 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 6.1
 	 */
-	public WebMergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+	public WebMergedContextConfiguration(Class<?> testClass, String @Nullable [] locations, Class<?> @Nullable [] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			@Nullable String[] activeProfiles,
-			List<PropertySourceDescriptor> propertySourceDescriptors, @Nullable String[] propertySourceProperties,
+			String @Nullable [] activeProfiles,
+			List<PropertySourceDescriptor> propertySourceDescriptors, String @Nullable [] propertySourceProperties,
 			@Nullable Set<ContextCustomizer> contextCustomizers, String resourceBasePath, ContextLoader contextLoader,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, @Nullable MergedContextConfiguration parent) {
 

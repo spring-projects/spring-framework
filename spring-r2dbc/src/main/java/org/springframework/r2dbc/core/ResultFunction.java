@@ -22,9 +22,9 @@ import java.util.function.Supplier;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -46,8 +46,7 @@ final class ResultFunction implements ConnectionFunction<Flux<Result>> {
 	final StatementFilterFunction filterFunction;
 	final ExecuteFunction executeFunction;
 
-	@Nullable
-	String resolvedSql = null;
+	@Nullable String resolvedSql = null;
 
 	ResultFunction(Supplier<String> sqlSupplier, BiFunction<Connection, String, Statement> statementFunction, StatementFilterFunction filterFunction, ExecuteFunction executeFunction) {
 		this.sqlSupplier = sqlSupplier;
@@ -66,9 +65,8 @@ final class ResultFunction implements ConnectionFunction<Flux<Result>> {
 				.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
 	}
 
-	@Nullable
 	@Override
-	public String getSql() {
+	public @Nullable String getSql() {
 		return this.resolvedSql;
 	}
 }

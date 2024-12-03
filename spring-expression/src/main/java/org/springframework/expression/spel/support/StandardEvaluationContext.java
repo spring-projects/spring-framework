@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
@@ -36,7 +38,6 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -81,29 +82,21 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private TypedValue rootObject;
 
-	@Nullable
-	private volatile List<PropertyAccessor> propertyAccessors;
+	private volatile @Nullable List<PropertyAccessor> propertyAccessors;
 
-	@Nullable
-	private volatile List<IndexAccessor> indexAccessors;
+	private volatile @Nullable List<IndexAccessor> indexAccessors;
 
-	@Nullable
-	private volatile List<ConstructorResolver> constructorResolvers;
+	private volatile @Nullable List<ConstructorResolver> constructorResolvers;
 
-	@Nullable
-	private volatile List<MethodResolver> methodResolvers;
+	private volatile @Nullable List<MethodResolver> methodResolvers;
 
-	@Nullable
-	private volatile ReflectiveMethodResolver reflectiveMethodResolver;
+	private volatile @Nullable ReflectiveMethodResolver reflectiveMethodResolver;
 
-	@Nullable
-	private BeanResolver beanResolver;
+	private @Nullable BeanResolver beanResolver;
 
-	@Nullable
-	private TypeLocator typeLocator;
+	private @Nullable TypeLocator typeLocator;
 
-	@Nullable
-	private TypeConverter typeConverter;
+	private @Nullable TypeConverter typeConverter;
 
 	private TypeComparator typeComparator = StandardTypeComparator.INSTANCE;
 
@@ -248,8 +241,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	@Override
-	@Nullable
-	public BeanResolver getBeanResolver() {
+	public @Nullable BeanResolver getBeanResolver() {
 		return this.beanResolver;
 	}
 
@@ -400,8 +392,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 * @return the value of the variable or function, or {@code null} if not found
 	 */
 	@Override
-	@Nullable
-	public Object lookupVariable(String name) {
+	public @Nullable Object lookupVariable(String name) {
 		return this.variables.get(name);
 	}
 

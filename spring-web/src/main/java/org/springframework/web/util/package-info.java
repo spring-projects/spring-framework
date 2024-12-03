@@ -1,9 +1,7 @@
 /**
  * Miscellaneous web utility classes, such as HTML escaping and cookie handling.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.util;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

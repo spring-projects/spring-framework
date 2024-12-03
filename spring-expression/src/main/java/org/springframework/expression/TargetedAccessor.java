@@ -16,7 +16,7 @@
 
 package org.springframework.expression;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy for types that access elements of specific target classes.
@@ -52,7 +52,6 @@ public interface TargetedAccessor {
 	 * @return an array of classes that this accessor is suitable for
 	 * (or {@code null} or an empty array if a generic accessor)
 	 */
-	@Nullable
-	Class<?>[] getSpecificTargetClasses();
+	Class<?> @Nullable [] getSpecificTargetClasses();
 
 }

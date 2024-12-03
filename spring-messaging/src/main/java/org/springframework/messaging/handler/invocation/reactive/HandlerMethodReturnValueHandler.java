@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**

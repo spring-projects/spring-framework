@@ -16,8 +16,9 @@
 
 package org.springframework.jms.support.converter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jms.JmsException;
-import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link MessageConverter} implementations when the conversion

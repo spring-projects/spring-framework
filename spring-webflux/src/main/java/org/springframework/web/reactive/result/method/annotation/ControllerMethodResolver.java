@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.scheduler.Scheduler;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -40,7 +41,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -112,14 +112,11 @@ class ControllerMethodResolver {
 
 	private final RequestedContentTypeResolver contentTypeResolver;
 
-	@Nullable
-	private final Scheduler invocationScheduler;
+	private final @Nullable Scheduler invocationScheduler;
 
-	@Nullable
-	private final Predicate<? super HandlerMethod> blockingMethodPredicate;
+	private final @Nullable Predicate<? super HandlerMethod> blockingMethodPredicate;
 
-	@Nullable
-	private final MethodValidator methodValidator;
+	private final @Nullable MethodValidator methodValidator;
 
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
 
@@ -313,8 +310,7 @@ class ControllerMethodResolver {
 	 * blocking by the underlying blocking method predicate, or null if no
 	 * particular scheduler should be used for this method invocation.
 	 */
-	@Nullable
-	public Scheduler getSchedulerFor(HandlerMethod handlerMethod) {
+	public @Nullable Scheduler getSchedulerFor(HandlerMethod handlerMethod) {
 		if (this.invocationScheduler != null) {
 			Assert.state(this.blockingMethodPredicate != null, "Expected HandlerMethod Predicate");
 			if (this.blockingMethodPredicate.test(handlerMethod)) {
@@ -412,9 +408,8 @@ class ControllerMethodResolver {
 	 * @param handlerMethod the controller method that raised the exception,
 	 *        or if {@code null}, check only {@code @ControllerAdvice} classes.
 	 */
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, ServerWebExchange exchange, @Nullable HandlerMethod handlerMethod) {
+	public @Nullable InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, ServerWebExchange exchange, @Nullable HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
 		List<MediaType> requestedMediaTypes = List.of(MediaType.ALL);

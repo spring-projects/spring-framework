@@ -18,9 +18,10 @@ package org.springframework.context;
 
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

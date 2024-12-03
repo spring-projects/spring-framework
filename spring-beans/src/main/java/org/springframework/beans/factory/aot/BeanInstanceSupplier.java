@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
@@ -43,7 +45,6 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -85,20 +86,17 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 
 	private final ExecutableLookup lookup;
 
-	@Nullable
-	private final ThrowingFunction<RegisteredBean, T> generatorWithoutArguments;
+	private final @Nullable ThrowingFunction<RegisteredBean, T> generatorWithoutArguments;
 
-	@Nullable
-	private final ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generatorWithArguments;
+	private final @Nullable ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generatorWithArguments;
 
-	@Nullable
-	private final String[] shortcutBeanNames;
+	private final String @Nullable [] shortcutBeanNames;
 
 
 	private BeanInstanceSupplier(ExecutableLookup lookup,
 			@Nullable ThrowingFunction<RegisteredBean, T> generatorWithoutArguments,
 			@Nullable ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generatorWithArguments,
-			@Nullable String[] shortcutBeanNames) {
+			String @Nullable [] shortcutBeanNames) {
 
 		this.lookup = lookup;
 		this.generatorWithoutArguments = generatorWithoutArguments;
@@ -208,8 +206,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	}
 
 	@Override
-	@Nullable
-	public Method getFactoryMethod() {
+	public @Nullable Method getFactoryMethod() {
 		// Cached factory method retrieval for qualifier introspection etc.
 		if (this.lookup instanceof FactoryMethodLookup factoryMethodLookup) {
 			return factoryMethodLookup.get();
@@ -217,8 +214,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 		return null;
 	}
 
-	@Nullable
-	private Method getFactoryMethodForGenerator() {
+	private @Nullable Method getFactoryMethodForGenerator() {
 		// Avoid unnecessary currentlyInvokedFactoryMethod exposure outside of full configuration classes.
 		if (this.lookup instanceof FactoryMethodLookup factoryMethodLookup &&
 				factoryMethodLookup.declaringClass.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)) {
@@ -328,8 +324,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 		return resolvedHolder;
 	}
 
-	@Nullable
-	private Object resolveAutowiredArgument(RegisteredBean registeredBean, DependencyDescriptor descriptor,
+	private @Nullable Object resolveAutowiredArgument(RegisteredBean registeredBean, DependencyDescriptor descriptor,
 			@Nullable ValueHolder argumentValue, Set<String> autowiredBeanNames) {
 
 		TypeConverter typeConverter = registeredBean.getBeanFactory().getTypeConverter();
@@ -426,8 +421,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 
 		private final Class<?>[] parameterTypes;
 
-		@Nullable
-		private volatile Method resolvedMethod;
+		private volatile @Nullable Method resolvedMethod;
 
 		FactoryMethodLookup(Class<?> declaringClass, String methodName, Class<?>[] parameterTypes) {
 			this.declaringClass = declaringClass;

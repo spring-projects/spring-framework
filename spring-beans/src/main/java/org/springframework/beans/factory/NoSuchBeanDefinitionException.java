@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a {@code BeanFactory} is asked for a bean instance for which it
@@ -35,11 +36,9 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class NoSuchBeanDefinitionException extends BeansException {
 
-	@Nullable
-	private final String beanName;
+	private final @Nullable String beanName;
 
-	@Nullable
-	private final ResolvableType resolvableType;
+	private final @Nullable ResolvableType resolvableType;
 
 
 	/**
@@ -107,8 +106,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	/**
 	 * Return the name of the missing bean, if it was a lookup <em>by name</em> that failed.
 	 */
-	@Nullable
-	public String getBeanName() {
+	public @Nullable String getBeanName() {
 		return this.beanName;
 	}
 
@@ -116,8 +114,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * Return the required type of the missing bean, if it was a lookup <em>by type</em>
 	 * that failed.
 	 */
-	@Nullable
-	public Class<?> getBeanType() {
+	public @Nullable Class<?> getBeanType() {
 		return (this.resolvableType != null ? this.resolvableType.resolve() : null);
 	}
 
@@ -126,8 +123,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * <em>by type</em> that failed.
 	 * @since 4.3.4
 	 */
-	@Nullable
-	public ResolvableType getResolvableType() {
+	public @Nullable ResolvableType getResolvableType() {
 		return this.resolvableType;
 	}
 

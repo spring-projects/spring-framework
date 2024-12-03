@@ -20,9 +20,10 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.TypeUtils;
 

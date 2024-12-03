@@ -24,8 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 /**
  * Builder for a composite {@link RequestedContentTypeResolver} that delegates
@@ -115,8 +116,7 @@ public class RequestedContentTypeResolverBuilder {
 
 		private final Map<String, MediaType> mediaTypes = new HashMap<>();
 
-		@Nullable
-		private String parameterName;
+		private @Nullable String parameterName;
 
 		/**
 		 * Configure a mapping between a lookup key (extracted from a query

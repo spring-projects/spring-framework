@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
@@ -33,7 +34,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -68,19 +68,15 @@ public abstract class AbstractFactoryBean<T>
 
 	private boolean singleton = true;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 	private boolean initialized = false;
 
-	@Nullable
-	private T singletonInstance;
+	private @Nullable T singletonInstance;
 
-	@Nullable
-	private T earlySingletonInstance;
+	private @Nullable T earlySingletonInstance;
 
 
 	/**
@@ -109,8 +105,7 @@ public abstract class AbstractFactoryBean<T>
 	/**
 	 * Return the BeanFactory that this bean runs in.
 	 */
-	@Nullable
-	protected BeanFactory getBeanFactory() {
+	protected @Nullable BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
 
@@ -184,8 +179,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @return the singleton instance that this FactoryBean holds
 	 * @throws IllegalStateException if the singleton instance is not initialized
 	 */
-	@Nullable
-	private T getSingletonInstance() throws IllegalStateException {
+	private @Nullable T getSingletonInstance() throws IllegalStateException {
 		Assert.state(this.initialized, "Singleton instance not initialized yet");
 		return this.singletonInstance;
 	}
@@ -208,8 +202,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
 	@Override
-	@Nullable
-	public abstract Class<?> getObjectType();
+	public abstract @Nullable Class<?> getObjectType();
 
 	/**
 	 * Template method that subclasses must override to construct
@@ -234,8 +227,7 @@ public abstract class AbstractFactoryBean<T>
 	 * or {@code null} to indicate a FactoryBeanNotInitializedException
 	 * @see org.springframework.beans.factory.FactoryBeanNotInitializedException
 	 */
-	@Nullable
-	protected Class<?>[] getEarlySingletonInterfaces() {
+	protected Class<?> @Nullable [] getEarlySingletonInterfaces() {
 		Class<?> type = getObjectType();
 		return (type != null && type.isInterface() ? new Class<?>[] {type} : null);
 	}

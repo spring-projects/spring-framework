@@ -18,9 +18,10 @@ package org.springframework.web.bind.support;
 
 import java.lang.annotation.Annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.WebDataBinder;
@@ -35,8 +36,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
-	@Nullable
-	private final WebBindingInitializer initializer;
+	private final @Nullable WebBindingInitializer initializer;
 
 	private boolean methodValidationApplicable;
 

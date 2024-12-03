@@ -30,8 +30,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.MapAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.http.HttpMessageContentConverter;
@@ -204,8 +204,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 		return this.myself;
 	}
 
-	@Nullable
-	private Throwable getFailure() {
+	private @Nullable Throwable getFailure() {
 		Exception unresolvedException = this.actual.getUnresolvedException();
 		if (unresolvedException != null) {
 			return unresolvedException;

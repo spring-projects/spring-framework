@@ -18,13 +18,14 @@ package org.springframework.context.support;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.lang.Nullable;
 
 /**
  * A factory providing convenient access to a ConversionService configured with
@@ -50,11 +51,9 @@ import org.springframework.lang.Nullable;
  */
 public class ConversionServiceFactoryBean implements FactoryBean<ConversionService>, InitializingBean {
 
-	@Nullable
-	private Set<?> converters;
+	private @Nullable Set<?> converters;
 
-	@Nullable
-	private GenericConversionService conversionService;
+	private @Nullable GenericConversionService conversionService;
 
 
 	/**
@@ -87,8 +86,7 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	// implementing FactoryBean
 
 	@Override
-	@Nullable
-	public ConversionService getObject() {
+	public @Nullable ConversionService getObject() {
 		return this.conversionService;
 	}
 

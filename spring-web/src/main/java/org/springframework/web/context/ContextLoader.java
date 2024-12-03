@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -37,7 +38,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -142,17 +142,14 @@ public class ContextLoader {
 	 * The 'current' WebApplicationContext, if the ContextLoader class is
 	 * deployed in the web app ClassLoader itself.
 	 */
-	@Nullable
-	private static volatile WebApplicationContext currentContext;
+	private static volatile @Nullable WebApplicationContext currentContext;
 
-	@Nullable
-	private static Properties defaultStrategies;
+	private static @Nullable Properties defaultStrategies;
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
 	 */
-	@Nullable
-	private WebApplicationContext rootContext;
+	private @Nullable WebApplicationContext rootContext;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context. */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
@@ -222,7 +219,7 @@ public class ContextLoader {
 	 * @see #customizeContext
 	 */
 	@SuppressWarnings("unchecked")
-	public void setContextInitializers(@Nullable ApplicationContextInitializer<?>... initializers) {
+	public void setContextInitializers(ApplicationContextInitializer<?> @Nullable ... initializers) {
 		if (initializers != null) {
 			for (ApplicationContextInitializer<?> initializer : initializers) {
 				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
@@ -492,8 +489,7 @@ public class ContextLoader {
 	 * @param servletContext current servlet context
 	 * @return the parent application context, or {@code null} if none
 	 */
-	@Nullable
-	protected ApplicationContext loadParentContext(ServletContext servletContext) {
+	protected @Nullable ApplicationContext loadParentContext(ServletContext servletContext) {
 		return null;
 	}
 
@@ -531,8 +527,7 @@ public class ContextLoader {
 	 * if none found
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */
-	@Nullable
-	public static WebApplicationContext getCurrentWebApplicationContext() {
+	public static @Nullable WebApplicationContext getCurrentWebApplicationContext() {
 		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 		if (ccl != null) {
 			WebApplicationContext ccpt = currentContextPerThread.get(ccl);

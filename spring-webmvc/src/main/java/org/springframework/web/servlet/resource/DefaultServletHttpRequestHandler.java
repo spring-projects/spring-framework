@@ -24,8 +24,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
@@ -67,11 +67,9 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	private static final String WEBSPHERE_DEFAULT_SERVLET_NAME = "SimpleFileServlet";
 
 
-	@Nullable
-	private String defaultServletName;
+	private @Nullable String defaultServletName;
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
 
 	/**

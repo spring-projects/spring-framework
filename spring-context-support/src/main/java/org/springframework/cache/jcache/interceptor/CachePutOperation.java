@@ -23,9 +23,10 @@ import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CachePut;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ExceptionTypeFilter;
 
 /**
@@ -81,7 +82,7 @@ class CachePutOperation extends AbstractJCacheKeyOperation<CachePut> {
 	 * @param values the parameters value for a particular invocation
 	 * @return the {@link CacheInvocationParameter} instance for the value parameter
 	 */
-	public CacheInvocationParameter getValueParameter(Object... values) {
+	public CacheInvocationParameter getValueParameter(@Nullable Object... values) {
 		int parameterPosition = this.valueParameterDetail.getParameterPosition();
 		if (parameterPosition >= values.length) {
 			throw new IllegalStateException("Values mismatch, value parameter at position " +
@@ -91,8 +92,7 @@ class CachePutOperation extends AbstractJCacheKeyOperation<CachePut> {
 	}
 
 
-	@Nullable
-	private static CacheParameterDetail initializeValueParameterDetail(
+	private static @Nullable CacheParameterDetail initializeValueParameterDetail(
 			Method method, List<CacheParameterDetail> allParameters) {
 
 		CacheParameterDetail result = null;

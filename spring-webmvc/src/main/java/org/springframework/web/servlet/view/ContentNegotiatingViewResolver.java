@@ -28,13 +28,13 @@ import java.util.Set;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
@@ -90,18 +90,15 @@ import org.springframework.web.servlet.ViewResolver;
 public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		implements ViewResolver, Ordered, InitializingBean {
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
+	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
 	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
-	@Nullable
-	private List<View> defaultViews;
+	private @Nullable List<View> defaultViews;
 
-	@Nullable
-	private List<ViewResolver> viewResolvers;
+	private @Nullable List<ViewResolver> viewResolvers;
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
@@ -120,8 +117,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * Return the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * @since 4.1.9
 	 */
-	@Nullable
-	public ContentNegotiationManager getContentNegotiationManager() {
+	public @Nullable ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}
 
@@ -219,8 +215,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 
 
 	@Override
-	@Nullable
-	public View resolveViewName(String viewName, Locale locale) throws Exception {
+	public @Nullable View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
 		Assert.state(attrs instanceof ServletRequestAttributes, "No current ServletRequestAttributes");
 		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
@@ -252,8 +247,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	 * @param request the current servlet request
 	 * @return the list of media types requested, if any
 	 */
-	@Nullable
-	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
+	protected @Nullable List<MediaType> getMediaTypes(HttpServletRequest request) {
 		Assert.state(this.contentNegotiationManager != null, "No ContentNegotiationManager set");
 		try {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
@@ -334,8 +328,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		return candidateViews;
 	}
 
-	@Nullable
-	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
+	private @Nullable View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
 			if (candidateView instanceof SmartView smartView) {
 				if (smartView.isRedirectView()) {
@@ -365,8 +358,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	private static final View NOT_ACCEPTABLE_VIEW = new View() {
 
 		@Override
-		@Nullable
-		public String getContentType() {
+		public @Nullable String getContentType() {
 			return null;
 		}
 

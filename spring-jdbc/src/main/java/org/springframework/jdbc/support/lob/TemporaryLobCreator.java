@@ -28,9 +28,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -60,7 +60,7 @@ public class TemporaryLobCreator implements LobCreator {
 
 
 	@Override
-	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, @Nullable byte[] content)
+	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte @Nullable [] content)
 			throws SQLException {
 
 		if (content != null) {

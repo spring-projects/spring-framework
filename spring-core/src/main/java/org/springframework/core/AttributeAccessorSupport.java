@@ -21,7 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -55,8 +56,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name) {
+	public @Nullable Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
@@ -73,8 +73,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 	@Override
-	@Nullable
-	public Object removeAttribute(String name) {
+	public @Nullable Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);
 	}

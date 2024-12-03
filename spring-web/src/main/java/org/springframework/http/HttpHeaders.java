@@ -45,7 +45,8 @@ import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -659,8 +660,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Access-Control-Allow-Origin} response header.
 	 */
-	@Nullable
-	public String getAccessControlAllowOrigin() {
+	public @Nullable String getAccessControlAllowOrigin() {
 		return getFieldValues(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
 
@@ -726,8 +726,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Access-Control-Request-Method} request header.
 	 */
-	@Nullable
-	public HttpMethod getAccessControlRequestMethod() {
+	public @Nullable HttpMethod getAccessControlRequestMethod() {
 		String requestMethod = getFirst(ACCESS_CONTROL_REQUEST_METHOD);
 		if (requestMethod != null) {
 			return HttpMethod.valueOf(requestMethod);
@@ -896,8 +895,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Cache-Control} header.
 	 */
-	@Nullable
-	public String getCacheControl() {
+	public @Nullable String getCacheControl() {
 		return getFieldValues(CACHE_CONTROL);
 	}
 
@@ -989,8 +987,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * if unknown
 	 * @since 5.0
 	 */
-	@Nullable
-	public Locale getContentLanguage() {
+	public @Nullable Locale getContentLanguage() {
 		return getValuesAsList(CONTENT_LANGUAGE)
 				.stream()
 				.findFirst()
@@ -1042,8 +1039,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>Returns {@code null} when the {@code Content-Type} header is not set.
 	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
-	@Nullable
-	public MediaType getContentType() {
+	public @Nullable MediaType getContentType() {
 		String value = getFirst(CONTENT_TYPE);
 		return (StringUtils.hasLength(value) ? MediaType.parseMediaType(value) : null);
 	}
@@ -1102,8 +1098,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the entity tag of the body, as specified by the {@code ETag} header.
 	 */
-	@Nullable
-	public String getETag() {
+	public @Nullable String getETag() {
 		return getFirst(ETAG);
 	}
 
@@ -1174,8 +1169,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * be {@code 0}.
 	 * @since 5.0
 	 */
-	@Nullable
-	public InetSocketAddress getHost() {
+	public @Nullable InetSocketAddress getHost() {
 		String value = getFirst(HOST);
 		if (value == null) {
 			return null;
@@ -1376,8 +1370,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Location} header.
 	 * <p>Returns {@code null} when the location is unknown.
 	 */
-	@Nullable
-	public URI getLocation() {
+	public @Nullable URI getLocation() {
 		String value = getFirst(LOCATION);
 		return (value != null ? URI.create(value) : null);
 	}
@@ -1392,8 +1385,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Origin} header.
 	 */
-	@Nullable
-	public String getOrigin() {
+	public @Nullable String getOrigin() {
 		return getFirst(ORIGIN);
 	}
 
@@ -1407,8 +1399,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Pragma} header.
 	 */
-	@Nullable
-	public String getPragma() {
+	public @Nullable String getPragma() {
 		return getFirst(PRAGMA);
 	}
 
@@ -1439,8 +1430,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the value of the {@code Upgrade} header.
 	 */
-	@Nullable
-	public String getUpgrade() {
+	public @Nullable String getUpgrade() {
 		return getFirst(UPGRADE);
 	}
 
@@ -1532,8 +1522,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return the parsed date header, or {@code null} if none
 	 * @since 5.0
 	 */
-	@Nullable
-	public ZonedDateTime getFirstZonedDateTime(String headerName) {
+	public @Nullable ZonedDateTime getFirstZonedDateTime(String headerName) {
 		return getFirstZonedDateTime(headerName, true);
 	}
 
@@ -1548,8 +1537,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * in that case ({@code false})
 	 * @return the parsed date header, or {@code null} if none (or invalid)
 	 */
-	@Nullable
-	private ZonedDateTime getFirstZonedDateTime(String headerName, boolean rejectInvalid) {
+	private @Nullable ZonedDateTime getFirstZonedDateTime(String headerName, boolean rejectInvalid) {
 		String headerValue = getFirst(headerName);
 		if (headerValue == null) {
 			// No header value sent at all
@@ -1700,8 +1688,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return the combined result
 	 * @since 4.3
 	 */
-	@Nullable
-	protected String getFieldValues(String headerName) {
+	protected @Nullable String getFieldValues(String headerName) {
 		List<String> headerValues = get(headerName);
 		return (headerValues != null ? toCommaDelimitedString(headerValues) : null);
 	}
@@ -1744,8 +1731,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return the first header value, or {@code null} if none
 	 */
 	@Override
-	@Nullable
-	public String getFirst(String headerName) {
+	public @Nullable String getFirst(String headerName) {
 		return this.headers.getFirst(headerName);
 	}
 
@@ -1818,8 +1804,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		return this.headers.get(key);
 	}
 
@@ -2081,8 +2066,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 			private final Iterator<String> namesIterator;
 
-			@Nullable
-			private String currentName;
+			private @Nullable String currentName;
 
 			private CaseInsensitiveIterator(Iterator<String> namesIterator) {
 				this.namesIterator = namesIterator;

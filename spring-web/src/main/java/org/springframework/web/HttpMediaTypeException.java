@@ -20,10 +20,10 @@ import java.util.Collections;
 import java.util.List;
 
 import jakarta.servlet.ServletException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract base for exceptions related to media types. Adds a list of supported {@link MediaType MediaTypes}.
@@ -40,8 +40,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 
 	private final String messageDetailCode;
 
-	@Nullable
-	private final Object[] messageDetailArguments;
+	private final Object @Nullable [] messageDetailArguments;
 
 
 	/**
@@ -54,7 +53,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	 * @since 6.0
 	 */
 	protected HttpMediaTypeException(@Nullable String message, List<MediaType> supportedMediaTypes,
-			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+			@Nullable String messageDetailCode, Object @Nullable [] messageDetailArguments) {
 
 		super(message);
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
@@ -82,8 +81,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	}
 
 	@Override
-	@Nullable
-	public Object[] getDetailMessageArguments() {
+	public Object @Nullable [] getDetailMessageArguments() {
 		return this.messageDetailArguments;
 	}
 

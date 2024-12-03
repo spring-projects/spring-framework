@@ -25,11 +25,12 @@ import java.net.URL;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 
 /**
  * Resource-based implementation of {@link HandlerFunction}.
@@ -130,8 +131,7 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
+		public @Nullable String getFilename() {
 			return this.delegate.getFilename();
 		}
 

@@ -20,7 +20,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.Assert;
@@ -45,22 +46,17 @@ class DefaultMvcResult implements MvcResult {
 
 	private final MockHttpServletResponse mockResponse;
 
-	@Nullable
-	private Object handler;
+	private @Nullable Object handler;
 
-	@Nullable
-	private HandlerInterceptor[] interceptors;
+	private HandlerInterceptor @Nullable [] interceptors;
 
-	@Nullable
-	private ModelAndView modelAndView;
+	private @Nullable ModelAndView modelAndView;
 
-	@Nullable
-	private Exception resolvedException;
+	private @Nullable Exception resolvedException;
 
 	private final AtomicReference<Object> asyncResult = new AtomicReference<>(RESULT_NONE);
 
-	@Nullable
-	private CountDownLatch asyncDispatchLatch;
+	private @Nullable CountDownLatch asyncDispatchLatch;
 
 
 	/**
@@ -87,18 +83,16 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
-	@Nullable
-	public Object getHandler() {
+	public @Nullable Object getHandler() {
 		return this.handler;
 	}
 
-	public void setInterceptors(@Nullable HandlerInterceptor... interceptors) {
+	public void setInterceptors(HandlerInterceptor @Nullable ... interceptors) {
 		this.interceptors = interceptors;
 	}
 
 	@Override
-	@Nullable
-	public HandlerInterceptor[] getInterceptors() {
+	public HandlerInterceptor @Nullable [] getInterceptors() {
 		return this.interceptors;
 	}
 
@@ -107,8 +101,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
-	@Nullable
-	public Exception getResolvedException() {
+	public @Nullable Exception getResolvedException() {
 		return this.resolvedException;
 	}
 
@@ -117,8 +110,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
-	@Nullable
-	public ModelAndView getModelAndView() {
+	public @Nullable ModelAndView getModelAndView() {
 		return this.modelAndView;
 	}
 

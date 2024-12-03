@@ -18,10 +18,11 @@ package org.springframework.beans.factory.config;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -35,12 +36,10 @@ import org.springframework.util.CollectionUtils;
  */
 public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 
-	@Nullable
-	private Set<?> sourceSet;
+	private @Nullable Set<?> sourceSet;
 
 	@SuppressWarnings("rawtypes")
-	@Nullable
-	private Class<? extends Set> targetSetClass;
+	private @Nullable Class<? extends Set> targetSetClass;
 
 
 	/**

@@ -19,6 +19,8 @@ package org.springframework.messaging.rsocket.service;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.ProxyHints;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.Search;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -46,9 +47,8 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  */
 class RSocketExchangeBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	@Nullable
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		Set<Class<?>> exchangeInterfaces = new HashSet<>();
 		Search search = MergedAnnotations.search(TYPE_HIERARCHY);

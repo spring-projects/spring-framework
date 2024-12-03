@@ -18,6 +18,7 @@ package org.springframework.web.context.support;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -25,7 +26,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
@@ -82,11 +82,9 @@ import org.springframework.web.context.ServletContextAware;
 public class GenericWebApplicationContext extends GenericApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private ThemeSource themeSource;
+	private @Nullable ThemeSource themeSource;
 
 
 	/**
@@ -142,8 +140,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public ServletContext getServletContext() {
+	public @Nullable ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
@@ -213,9 +210,8 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
-	@Nullable
 	@Deprecated
-	public Theme getTheme(String themeName) {
+	public @Nullable Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);
 	}
@@ -231,8 +227,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public ServletConfig getServletConfig() {
+	public @Nullable ServletConfig getServletConfig() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getServletConfig()");
 	}
@@ -243,8 +238,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
-	@Nullable
-	public String getNamespace() {
+	public @Nullable String getNamespace() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getNamespace()");
 	}

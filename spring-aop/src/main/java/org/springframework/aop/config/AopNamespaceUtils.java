@@ -16,13 +16,13 @@
 
 package org.springframework.aop.config;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.lang.Nullable;
 
 /**
  * Utility class for handling registration of auto-proxy creators used internally

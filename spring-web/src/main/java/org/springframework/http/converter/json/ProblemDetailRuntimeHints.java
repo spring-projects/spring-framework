@@ -16,11 +16,12 @@
 
 package org.springframework.http.converter.json;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**

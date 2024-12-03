@@ -23,11 +23,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -82,8 +83,7 @@ import org.springframework.util.CollectionUtils;
  */
 public class ContentNegotiationManagerFactoryBean implements FactoryBean<ContentNegotiationManager>, InitializingBean {
 
-	@Nullable
-	private List<ContentNegotiationStrategy> strategies;
+	private @Nullable List<ContentNegotiationStrategy> strategies;
 
 
 	private boolean favorParameter = false;
@@ -92,16 +92,13 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 
 	private final Map<String, MediaType> mediaTypes = new HashMap<>();
 
-	@Nullable
-	private Boolean useRegisteredExtensionsOnly;
+	private @Nullable Boolean useRegisteredExtensionsOnly;
 
 	private boolean ignoreAcceptHeader = false;
 
-	@Nullable
-	private ContentNegotiationStrategy defaultNegotiationStrategy;
+	private @Nullable ContentNegotiationStrategy defaultNegotiationStrategy;
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
+	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
 
 	/**
@@ -286,8 +283,7 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 
 
 	@Override
-	@Nullable
-	public ContentNegotiationManager getObject() {
+	public @Nullable ContentNegotiationManager getObject() {
 		return this.contentNegotiationManager;
 	}
 

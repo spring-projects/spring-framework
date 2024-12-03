@@ -16,7 +16,7 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface for resolving properties against any underlying source.
@@ -43,8 +43,7 @@ public interface PropertyResolver {
 	 * @see #getProperty(String, Class)
 	 * @see #getRequiredProperty(String)
 	 */
-	@Nullable
-	String getProperty(String key);
+	@Nullable String getProperty(String key);
 
 	/**
 	 * Return the property value associated with the given key, or
@@ -63,8 +62,7 @@ public interface PropertyResolver {
 	 * @param targetType the expected type of the property value
 	 * @see #getRequiredProperty(String, Class)
 	 */
-	@Nullable
-	<T> T getProperty(String key, Class<T> targetType);
+	<T> @Nullable T getProperty(String key, Class<T> targetType);
 
 	/**
 	 * Return the property value associated with the given key,

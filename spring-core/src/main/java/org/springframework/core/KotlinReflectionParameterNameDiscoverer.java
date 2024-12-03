@@ -23,8 +23,7 @@ import java.util.List;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link ParameterNameDiscoverer} implementation which uses Kotlin's reflection facilities
@@ -41,8 +40,7 @@ import org.springframework.lang.Nullable;
 public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	@Override
-	@Nullable
-	public String[] getParameterNames(Method method) {
+	public @Nullable String @Nullable [] getParameterNames(Method method) {
 		if (!KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 			return null;
 		}
@@ -57,8 +55,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	}
 
 	@Override
-	@Nullable
-	public String[] getParameterNames(Constructor<?> ctor) {
+	public @Nullable String @Nullable [] getParameterNames(Constructor<?> ctor) {
 		if (ctor.getDeclaringClass().isEnum() || !KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
 			return null;
 		}
@@ -72,8 +69,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 		}
 	}
 
-	@Nullable
-	private String[] getParameterNames(List<KParameter> parameters) {
+	private @Nullable String @Nullable [] getParameterNames(List<KParameter> parameters) {
 		String[] parameterNames = parameters.stream()
 				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
 				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))

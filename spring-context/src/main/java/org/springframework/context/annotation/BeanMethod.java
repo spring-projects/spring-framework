@@ -18,11 +18,12 @@ package org.springframework.context.annotation;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a {@link Configuration @Configuration} class method annotated with

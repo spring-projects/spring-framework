@@ -25,12 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.reflect.PerClauseKind;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -49,8 +49,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 
 	private final AspectJAdvisorFactory advisorFactory;
 
-	@Nullable
-	private volatile List<String> aspectBeanNames;
+	private volatile @Nullable List<String> aspectBeanNames;
 
 	private final Map<String, List<Advisor>> advisorsCache = new ConcurrentHashMap<>();
 

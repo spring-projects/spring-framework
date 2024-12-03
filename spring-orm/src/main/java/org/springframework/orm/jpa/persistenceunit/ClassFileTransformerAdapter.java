@@ -22,8 +22,8 @@ import java.security.ProtectionDomain;
 import jakarta.persistence.spi.ClassTransformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,8 +53,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 
 
 	@Override
-	@Nullable
-	public byte[] transform(
+	public byte @Nullable [] transform(
 			ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
 

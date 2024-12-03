@@ -29,10 +29,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * A generic implementation of the {@link TableMetaDataProvider} interface
@@ -54,12 +54,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/** The name of the user currently connected. */
-	@Nullable
-	private final String userName;
+	private final @Nullable String userName;
 
 	/** The version of the database. */
-	@Nullable
-	private String databaseVersion;
+	private @Nullable String databaseVersion;
 
 	/** Indicates whether column meta-data has been used. */
 	private boolean tableColumnMetaDataUsed = false;
@@ -186,31 +184,26 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String tableNameToUse(@Nullable String tableName) {
+	public @Nullable String tableNameToUse(@Nullable String tableName) {
 		return identifierNameToUse(tableName);
 	}
 
 	@Override
-	@Nullable
-	public String columnNameToUse(@Nullable String columnName) {
+	public @Nullable String columnNameToUse(@Nullable String columnName) {
 		return identifierNameToUse(columnName);
 	}
 
 	@Override
-	@Nullable
-	public String catalogNameToUse(@Nullable String catalogName) {
+	public @Nullable String catalogNameToUse(@Nullable String catalogName) {
 		return identifierNameToUse(catalogName);
 	}
 
 	@Override
-	@Nullable
-	public String schemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String schemaNameToUse(@Nullable String schemaName) {
 		return identifierNameToUse(schemaName);
 	}
 
-	@Nullable
-	private String identifierNameToUse(@Nullable String identifierName) {
+	private @Nullable String identifierNameToUse(@Nullable String identifierName) {
 		if (identifierName == null) {
 			return null;
 		}
@@ -226,14 +219,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
+	public @Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		return catalogNameToUse(catalogName);
 	}
 
 	@Override
-	@Nullable
-	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (schemaName == null) {
 			return schemaNameToUse(getDefaultSchema());
 		}
@@ -243,16 +234,14 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/**
 	 * Provide access to the default schema for subclasses.
 	 */
-	@Nullable
-	protected String getDefaultSchema() {
+	protected @Nullable String getDefaultSchema() {
 		return this.userName;
 	}
 
 	/**
 	 * Provide access to the version info for subclasses.
 	 */
-	@Nullable
-	protected String getDatabaseVersion() {
+	protected @Nullable String getDatabaseVersion() {
 		return this.databaseVersion;
 	}
 
@@ -276,8 +265,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
+	public @Nullable String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return null;
 	}
 

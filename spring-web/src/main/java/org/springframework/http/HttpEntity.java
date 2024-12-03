@@ -16,7 +16,8 @@
 
 package org.springframework.http;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -65,8 +66,7 @@ public class HttpEntity<T> {
 
 	private final HttpHeaders headers;
 
-	@Nullable
-	private final T body;
+	private final @Nullable T body;
 
 
 	/**
@@ -113,8 +113,7 @@ public class HttpEntity<T> {
 	/**
 	 * Returns the body of this entity.
 	 */
-	@Nullable
-	public T getBody() {
+	public @Nullable T getBody() {
 		return this.body;
 	}
 

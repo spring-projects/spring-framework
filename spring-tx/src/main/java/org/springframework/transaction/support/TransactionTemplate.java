@@ -20,9 +20,9 @@ import java.lang.reflect.UndeclaredThrowableException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -68,8 +68,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private PlatformTransactionManager transactionManager;
+	private @Nullable PlatformTransactionManager transactionManager;
 
 
 	/**
@@ -112,8 +111,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	/**
 	 * Return the transaction management strategy to be used.
 	 */
-	@Nullable
-	public PlatformTransactionManager getTransactionManager() {
+	public @Nullable PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
 
@@ -126,8 +124,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 
 	@Override
-	@Nullable
-	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
+	public <T> @Nullable T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager cpptm) {

@@ -20,8 +20,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Implementation of RowCallbackHandler. Convenient superclass for callback handlers.
@@ -55,14 +56,12 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * Indexed from 0. Type (as in java.sql.Types) for the columns
 	 * as returned by ResultSetMetaData object.
 	 */
-	@Nullable
-	private int[] columnTypes;
+	private int @Nullable [] columnTypes;
 
 	/**
 	 * Indexed from 0. Column name as returned by ResultSetMetaData object.
 	 */
-	@Nullable
-	private String[] columnNames;
+	private String @Nullable [] columnNames;
 
 
 	/**
@@ -105,8 +104,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * @return the types of the columns as java.sql.Types constants.
 	 * <b>Indexed from 0 to n-1.</b>
 	 */
-	@Nullable
-	public final int[] getColumnTypes() {
+	public final int @Nullable [] getColumnTypes() {
 		return this.columnTypes;
 	}
 
@@ -116,8 +114,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * @return the names of the columns.
 	 * <b>Indexed from 0 to n-1.</b>
 	 */
-	@Nullable
-	public final String[] getColumnNames() {
+	public final String @Nullable [] getColumnNames() {
 		return this.columnNames;
 	}
 

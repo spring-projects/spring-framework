@@ -40,7 +40,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.core.testfixture.stereotype.Component;
-import org.springframework.lang.NonNullApi;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -429,8 +428,7 @@ class AnnotationUtilsTests {
 	@Test
 	void isAnnotationMetaPresentForPlainType() {
 		assertThat(isAnnotationMetaPresent(Order.class, Documented.class)).isTrue();
-		assertThat(isAnnotationMetaPresent(NonNullApi.class, Documented.class)).isTrue();
-		assertThat(isAnnotationMetaPresent(NonNullApi.class, Nonnull.class)).isTrue();
+		assertThat(isAnnotationMetaPresent(ParametersAreNonnullByDefault.class, Documented.class)).isTrue();
 		assertThat(isAnnotationMetaPresent(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
 	}
 

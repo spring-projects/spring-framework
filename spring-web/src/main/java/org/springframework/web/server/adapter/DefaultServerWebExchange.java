@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -46,7 +47,6 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -99,15 +99,13 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private volatile boolean multipartRead = false;
 
-	@Nullable
-	private final ApplicationContext applicationContext;
+	private final @Nullable ApplicationContext applicationContext;
 
 	private volatile boolean notModified;
 
 	private Function<String, String> urlTransformer = url -> url;
 
-	@Nullable
-	private Object logId;
+	private @Nullable Object logId;
 
 	private String logPrefix = "";
 
@@ -183,8 +181,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 				.cache();
 	}
 
-	@Nullable
-	private static MediaType getContentType(ServerHttpRequest request) {
+	private static @Nullable MediaType getContentType(ServerHttpRequest request) {
 		MediaType contentType = null;
 		try {
 			contentType = request.getHeaders().getContentType();
@@ -196,8 +193,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private static <E> HttpMessageReader<E> getReader(
+	private static <E> @Nullable HttpMessageReader<E> getReader(
 			ServerCodecConfigurer configurer, MediaType contentType, ResolvableType targetType) {
 
 		HttpMessageReader<E> result = null;
@@ -278,8 +274,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	@Nullable
-	public ApplicationContext getApplicationContext() {
+	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 

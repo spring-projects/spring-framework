@@ -19,6 +19,7 @@ package org.springframework.web.reactive.handler;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.BeanNameAware;
@@ -26,7 +27,6 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
@@ -60,15 +60,13 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	private final PathPatternParser patternParser = new PathPatternParser();
 
-	@Nullable
-	private CorsConfigurationSource corsConfigurationSource;
+	private @Nullable CorsConfigurationSource corsConfigurationSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
 
 	/**
@@ -214,8 +212,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * @param exchange the current exchange
 	 * @return the CORS configuration for the handler, or {@code null} if none
 	 */
-	@Nullable
-	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
+	protected @Nullable CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
 		if (handler instanceof CorsConfigurationSource ccs) {
 			return ccs.getCorsConfiguration(exchange);
 		}

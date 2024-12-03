@@ -20,6 +20,8 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
@@ -28,7 +30,6 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -46,8 +47,7 @@ class BeanDefinitionMethodGenerator {
 
 	private final RegisteredBean registeredBean;
 
-	@Nullable
-	private final String currentPropertyName;
+	private final @Nullable String currentPropertyName;
 
 	private final List<BeanRegistrationAotContribution> aotContributions;
 

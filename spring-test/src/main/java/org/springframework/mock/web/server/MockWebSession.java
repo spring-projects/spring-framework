@@ -21,9 +21,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.InMemoryWebSessionStore;

@@ -20,10 +20,11 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of
@@ -59,8 +60,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * check in the superclass.
 	 */
 	@Override
-	@Nullable
-	protected Integer findOrder(Object obj) {
+	protected @Nullable Integer findOrder(Object obj) {
 		Integer order = super.findOrder(obj);
 		if (order != null) {
 			return order;
@@ -68,8 +68,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 		return findOrderFromAnnotation(obj);
 	}
 
-	@Nullable
-	private Integer findOrderFromAnnotation(Object obj) {
+	private @Nullable Integer findOrderFromAnnotation(Object obj) {
 		AnnotatedElement element = (obj instanceof AnnotatedElement ae ? ae : obj.getClass());
 		MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY);
 		Integer order = OrderUtils.getOrderFromAnnotations(element, annotations);
@@ -86,8 +85,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * multiple matches but only one object to be returned.
 	 */
 	@Override
-	@Nullable
-	public Integer getPriority(Object obj) {
+	public @Nullable Integer getPriority(Object obj) {
 		if (obj instanceof Class<?> clazz) {
 			return OrderUtils.getPriority(clazz);
 		}

@@ -19,6 +19,8 @@ package org.springframework.web.servlet.config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -26,7 +28,6 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -114,8 +115,7 @@ public abstract class MvcNamespaceUtils {
 	 * Return the {@link PathMatcher} bean definition if it has been registered
 	 * in the context as an alias with its well-known name, or {@code null}.
 	 */
-	@Nullable
-	static RuntimeBeanReference getCustomPathMatcher(ParserContext context) {
+	static @Nullable RuntimeBeanReference getCustomPathMatcher(ParserContext context) {
 		if(context.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
 			return new RuntimeBeanReference(PATH_MATCHER_BEAN_NAME);
 		}
@@ -154,8 +154,7 @@ public abstract class MvcNamespaceUtils {
 	 * Return the {@link PathPatternParser} bean definition if it has been registered
 	 * in the context as an alias with its well-known name, or {@code null}.
 	 */
-	@Nullable
-	static RuntimeBeanReference getCustomPatternParser(ParserContext context) {
+	static @Nullable RuntimeBeanReference getCustomPatternParser(ParserContext context) {
 		if (context.getRegistry().isAlias(PATTERN_PARSER_BEAN_NAME)) {
 			return new RuntimeBeanReference(PATTERN_PARSER_BEAN_NAME);
 		}
@@ -356,8 +355,7 @@ public abstract class MvcNamespaceUtils {
 	 * with the {@code annotation-driven} element.
 	 * @return a bean definition, bean reference, or {@code null} if none defined
 	 */
-	@Nullable
-	public static Object getContentNegotiationManager(ParserContext context) {
+	public static @Nullable Object getContentNegotiationManager(ParserContext context) {
 		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
 		if (context.getRegistry().containsBeanDefinition(name)) {
 			BeanDefinition handlerMappingBeanDef = context.getRegistry().getBeanDefinition(name);

@@ -18,8 +18,9 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.pattern.PathPattern;
@@ -34,21 +35,16 @@ import org.springframework.web.util.pattern.PathPattern;
  */
 public class RequestMatchResult {
 
-	@Nullable
-	private final PathPattern pathPattern;
+	private final @Nullable PathPattern pathPattern;
 
-	@Nullable
-	private final PathContainer lookupPathContainer;
+	private final @Nullable PathContainer lookupPathContainer;
 
 
-	@Nullable
-	private final String pattern;
+	private final @Nullable String pattern;
 
-	@Nullable
-	private final String lookupPath;
+	private final @Nullable String lookupPath;
 
-	@Nullable
-	private final PathMatcher pathMatcher;
+	private final @Nullable PathMatcher pathMatcher;
 
 
 	/**

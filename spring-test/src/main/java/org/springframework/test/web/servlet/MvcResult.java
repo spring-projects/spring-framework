@@ -16,7 +16,8 @@
 
 package org.springframework.test.web.servlet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
@@ -48,30 +49,26 @@ public interface MvcResult {
 	 * Return the executed handler.
 	 * @return the handler, possibly {@code null} if none were executed
 	 */
-	@Nullable
-	Object getHandler();
+	@Nullable Object getHandler();
 
 	/**
 	 * Return interceptors around the handler.
 	 * @return interceptors, or {@code null} if none were selected
 	 */
-	@Nullable
-	HandlerInterceptor[] getInterceptors();
+	HandlerInterceptor @Nullable [] getInterceptors();
 
 	/**
 	 * Return the {@code ModelAndView} prepared by the handler.
 	 * @return a {@code ModelAndView}, or {@code null} if none
 	 */
-	@Nullable
-	ModelAndView getModelAndView();
+	@Nullable ModelAndView getModelAndView();
 
 	/**
 	 * Return any exception raised by a handler and successfully resolved
 	 * through a {@link HandlerExceptionResolver}.
 	 * @return an exception, or {@code null} if none
 	 */
-	@Nullable
-	Exception getResolvedException();
+	@Nullable Exception getResolvedException();
 
 	/**
 	 * Return the "output" flash attributes saved during request processing.

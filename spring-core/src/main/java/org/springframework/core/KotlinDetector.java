@@ -19,7 +19,8 @@ package org.springframework.core;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -32,11 +33,9 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("unchecked")
 public abstract class KotlinDetector {
 
-	@Nullable
-	private static final Class<? extends Annotation> kotlinMetadata;
+	private static final @Nullable Class<? extends Annotation> kotlinMetadata;
 
-	@Nullable
-	private static final Class<? extends Annotation> kotlinJvmInline;
+	private static final @Nullable Class<? extends Annotation> kotlinJvmInline;
 
 	// For ConstantFieldFeature compliance, otherwise could be deduced from kotlinMetadata
 	private static final boolean kotlinPresent;

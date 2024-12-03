@@ -20,8 +20,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Convenient superclass for JNDI accessors, providing "jndiTemplate"
@@ -70,8 +69,7 @@ public class JndiAccessor {
 	/**
 	 * Return the JNDI environment to use for JNDI lookups.
 	 */
-	@Nullable
-	public Properties getJndiEnvironment() {
+	public @Nullable Properties getJndiEnvironment() {
 		return this.jndiTemplate.getEnvironment();
 	}
 

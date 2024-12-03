@@ -16,8 +16,9 @@
 
 package org.springframework.web.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -49,8 +50,7 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 	}
 
 	@Override
-	@Nullable
-	public Object resolveArgument(MethodParameter parameter,
+	public @Nullable Object resolveArgument(MethodParameter parameter,
 			@Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
 			@Nullable WebDataBinderFactory binderFactory) throws Exception {
 

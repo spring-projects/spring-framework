@@ -21,11 +21,12 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

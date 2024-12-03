@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
@@ -27,7 +29,6 @@ import org.springframework.context.annotation.AnnotationConfigRegistry;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScopeMetadataResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -99,11 +100,9 @@ import org.springframework.web.context.ContextLoader;
 public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
 		implements AnnotationConfigRegistry {
 
-	@Nullable
-	private BeanNameGenerator beanNameGenerator;
+	private @Nullable BeanNameGenerator beanNameGenerator;
 
-	@Nullable
-	private ScopeMetadataResolver scopeMetadataResolver;
+	private @Nullable ScopeMetadataResolver scopeMetadataResolver;
 
 	private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
 
@@ -125,8 +124,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * Return the custom {@link BeanNameGenerator} for use with {@link AnnotatedBeanDefinitionReader}
 	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
 	 */
-	@Nullable
-	protected BeanNameGenerator getBeanNameGenerator() {
+	protected @Nullable BeanNameGenerator getBeanNameGenerator() {
 		return this.beanNameGenerator;
 	}
 
@@ -145,8 +143,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * Return the custom {@link ScopeMetadataResolver} for use with {@link AnnotatedBeanDefinitionReader}
 	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
 	 */
-	@Nullable
-	protected ScopeMetadataResolver getScopeMetadataResolver() {
+	protected @Nullable ScopeMetadataResolver getScopeMetadataResolver() {
 		return this.scopeMetadataResolver;
 	}
 

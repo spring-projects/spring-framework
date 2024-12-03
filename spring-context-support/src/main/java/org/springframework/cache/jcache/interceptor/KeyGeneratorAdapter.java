@@ -25,8 +25,9 @@ import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -43,11 +44,9 @@ class KeyGeneratorAdapter implements KeyGenerator {
 
 	private final JCacheOperationSource cacheOperationSource;
 
-	@Nullable
-	private KeyGenerator keyGenerator;
+	private @Nullable KeyGenerator keyGenerator;
 
-	@Nullable
-	private CacheKeyGenerator cacheKeyGenerator;
+	private @Nullable CacheKeyGenerator cacheKeyGenerator;
 
 
 	/**
@@ -85,7 +84,8 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	}
 
 	@Override
-	public Object generate(Object target, Method method, Object... params) {
+	@SuppressWarnings("NullAway")
+	public Object generate(Object target, Method method, @Nullable Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
 		if (!(operation instanceof AbstractJCacheKeyOperation)) {
 			throw new IllegalStateException("Invalid operation, should be a key-based operation " + operation);
@@ -119,7 +119,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 
 	@SuppressWarnings("unchecked")
 	private CacheKeyInvocationContext<?> createCacheKeyInvocationContext(
-			Object target, JCacheOperation<?> operation, Object[] params) {
+			Object target, JCacheOperation<?> operation, @Nullable Object[] params) {
 
 		AbstractJCacheKeyOperation<Annotation> keyCacheOperation = (AbstractJCacheKeyOperation<Annotation>) operation;
 		return new DefaultCacheKeyInvocationContext<>(keyCacheOperation, target, params);

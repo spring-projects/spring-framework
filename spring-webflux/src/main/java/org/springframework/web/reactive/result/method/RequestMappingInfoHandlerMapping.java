@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -36,7 +37,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -88,8 +88,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @return an info in case of a match; or {@code null} otherwise.
 	 */
 	@Override
-	@Nullable
-	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, ServerWebExchange exchange) {
+	protected @Nullable RequestMappingInfo getMatchingMapping(RequestMappingInfo info, ServerWebExchange exchange) {
 		return info.getMatchingCondition(exchange);
 	}
 
@@ -170,8 +169,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * method but not by query parameter conditions
 	 */
 	@Override
-	@Nullable
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos,
+	protected @Nullable HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos,
 			ServerWebExchange exchange) throws Exception {
 
 		if (CollectionUtils.isEmpty(infos)) {

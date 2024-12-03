@@ -25,11 +25,11 @@ import java.util.concurrent.Future;
 
 import jakarta.enterprise.concurrent.ManagedExecutors;
 import jakarta.enterprise.concurrent.ManagedTask;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.support.TaskExecutorAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.ClassUtils;
@@ -68,8 +68,7 @@ public class ConcurrentTaskExecutor implements AsyncTaskExecutor, SchedulingTask
 		throw new IllegalStateException("Executor not configured");
 	});
 
-	@Nullable
-	private static Class<?> managedExecutorServiceClass;
+	private static @Nullable Class<?> managedExecutorServiceClass;
 
 	static {
 		try {
@@ -88,8 +87,7 @@ public class ConcurrentTaskExecutor implements AsyncTaskExecutor, SchedulingTask
 
 	private TaskExecutorAdapter adaptedExecutor = new TaskExecutorAdapter(STUB_EXECUTOR);
 
-	@Nullable
-	private TaskDecorator taskDecorator;
+	private @Nullable TaskDecorator taskDecorator;
 
 
 	/**

@@ -16,7 +16,7 @@
 
 package org.springframework.expression;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Superclass for exceptions that can occur whilst processing expressions.
@@ -28,8 +28,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ExpressionException extends RuntimeException {
 
-	@Nullable
-	protected final String expressionString;
+	protected final @Nullable String expressionString;
 
 	protected int position;  // -1 if not known; should be known in all reasonable cases
 
@@ -105,8 +104,7 @@ public class ExpressionException extends RuntimeException {
 	/**
 	 * Return the expression string.
 	 */
-	@Nullable
-	public final String getExpressionString() {
+	public final @Nullable String getExpressionString() {
 		return this.expressionString;
 	}
 

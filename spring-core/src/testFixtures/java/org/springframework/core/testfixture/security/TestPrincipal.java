@@ -18,7 +18,7 @@ package org.springframework.core.testfixture.security;
 
 import java.security.Principal;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An implementation of {@link Principal} for testing.

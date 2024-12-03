@@ -21,10 +21,11 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -70,8 +71,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private final PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, null, false);
 
-	@Nullable
-	private MessageHeaderInitializer headerInitializer;
+	private @Nullable MessageHeaderInitializer headerInitializer;
 
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
@@ -129,8 +129,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	/**
 	 * Return the configured header initializer.
 	 */
-	@Nullable
-	public MessageHeaderInitializer getHeaderInitializer() {
+	public @Nullable MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
@@ -208,8 +207,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				new DestinationHelper(headers, m1, m2) : new DestinationHelper(headers, c1, c2));
 	}
 
-	@Nullable
-	protected String getUserName(Message<?> message, MessageHeaders headers) {
+	protected @Nullable String getUserName(Message<?> message, MessageHeaders headers) {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 		if (principal != null) {
 			return (principal instanceof DestinationUserNameProvider provider ?
@@ -260,11 +258,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 		private final PlaceholderResolver placeholderResolver;
 
-		@Nullable
-		private final SendTo sendTo;
+		private final @Nullable SendTo sendTo;
 
-		@Nullable
-		private final SendToUser sendToUser;
+		private final @Nullable SendToUser sendToUser;
 
 
 		public DestinationHelper(MessageHeaders headers, @Nullable SendToUser sendToUser, @Nullable SendTo sendTo) {
@@ -280,13 +276,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			return (Map<String, String>) headers.getOrDefault(name, Collections.emptyMap());
 		}
 
-		@Nullable
-		public SendTo getSendTo() {
+		public @Nullable SendTo getSendTo() {
 			return this.sendTo;
 		}
 
-		@Nullable
-		public SendToUser getSendToUser() {
+		public @Nullable SendToUser getSendToUser() {
 			return this.sendToUser;
 		}
 

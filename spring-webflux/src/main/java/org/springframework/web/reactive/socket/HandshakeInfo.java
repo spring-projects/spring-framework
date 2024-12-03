@@ -22,11 +22,11 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -53,16 +53,13 @@ public class HandshakeInfo {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
-	@Nullable
-	private final String protocol;
+	private final @Nullable String protocol;
 
-	@Nullable
-	private final InetSocketAddress remoteAddress;
+	private final @Nullable InetSocketAddress remoteAddress;
 
 	private final Map<String, Object> attributes;
 
-	@Nullable
-	private final String logPrefix;
+	private final @Nullable String logPrefix;
 
 
 	/**
@@ -169,8 +166,7 @@ public class HandshakeInfo {
 	 * @see <a href="https://tools.ietf.org/html/rfc6455#section-1.9">
 	 * https://tools.ietf.org/html/rfc6455#section-1.9</a>
 	 */
-	@Nullable
-	public String getSubProtocol() {
+	public @Nullable String getSubProtocol() {
 		return this.protocol;
 	}
 
@@ -179,8 +175,7 @@ public class HandshakeInfo {
 	 * request came from. For a client session, it is {@code null}.
 	 * @since 5.1
 	 */
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
@@ -197,8 +192,7 @@ public class HandshakeInfo {
 	 * @return a log prefix, or {@code null} if not specified
 	 * @since 5.1
 	 */
-	@Nullable
-	public String getLogPrefix() {
+	public @Nullable String getLogPrefix() {
 		return this.logPrefix;
 	}
 

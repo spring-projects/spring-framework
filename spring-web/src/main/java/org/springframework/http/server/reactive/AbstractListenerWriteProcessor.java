@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.log.LogDelegateFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -58,11 +58,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
-	@Nullable
-	private Subscription subscription;
+	private @Nullable Subscription subscription;
 
-	@Nullable
-	private volatile T currentData;
+	private volatile @Nullable T currentData;
 
 	/* Indicates "onComplete" was received during the (last) write. */
 	private volatile boolean sourceCompleted;

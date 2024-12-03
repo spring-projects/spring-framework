@@ -26,7 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -185,8 +186,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	// Redeclared for visibility within simp.stomp
 	@Override
-	@Nullable
-	protected Map<String, List<String>> getNativeHeaders() {
+	protected @Nullable Map<String, List<String>> getNativeHeaders() {
 		return super.getNativeHeaders();
 	}
 
@@ -228,8 +228,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the STOMP command, or {@code null} if not yet set.
 	 */
-	@Nullable
-	public StompCommand getCommand() {
+	public @Nullable StompCommand getCommand() {
 		return (StompCommand) getHeader(COMMAND_HEADER);
 	}
 
@@ -261,8 +260,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_HOST_HEADER, host);
 	}
 
-	@Nullable
-	public String getHost() {
+	public @Nullable String getHost() {
 		return getFirstNativeHeader(STOMP_HOST_HEADER);
 	}
 
@@ -300,8 +298,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		}
 	}
 
-	@Nullable
-	public Integer getContentLength() {
+	public @Nullable Integer getContentLength() {
 		String header = getFirstNativeHeader(STOMP_CONTENT_LENGTH_HEADER);
 		return (header != null ? Integer.valueOf(header) : null);
 	}
@@ -318,8 +315,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_ACK_HEADER, ack);
 	}
 
-	@Nullable
-	public String getAck() {
+	public @Nullable String getAck() {
 		return getFirstNativeHeader(STOMP_ACK_HEADER);
 	}
 
@@ -327,8 +323,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_NACK_HEADER, nack);
 	}
 
-	@Nullable
-	public String getNack() {
+	public @Nullable String getNack() {
 		return getFirstNativeHeader(STOMP_NACK_HEADER);
 	}
 
@@ -336,8 +331,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_LOGIN_HEADER, login);
 	}
 
-	@Nullable
-	public String getLogin() {
+	public @Nullable String getLogin() {
 		return getFirstNativeHeader(STOMP_LOGIN_HEADER);
 	}
 
@@ -357,8 +351,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the passcode header value, or {@code null} if not set.
 	 */
-	@Nullable
-	public String getPasscode() {
+	public @Nullable String getPasscode() {
 		StompPasscode credentials = (StompPasscode) getHeader(CREDENTIALS_HEADER);
 		return (credentials != null ? credentials.passcode : null);
 	}
@@ -367,8 +360,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_RECEIPT_ID_HEADER, receiptId);
 	}
 
-	@Nullable
-	public String getReceiptId() {
+	public @Nullable String getReceiptId() {
 		return getFirstNativeHeader(STOMP_RECEIPT_ID_HEADER);
 	}
 
@@ -376,13 +368,11 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_RECEIPT_HEADER, receiptId);
 	}
 
-	@Nullable
-	public String getReceipt() {
+	public @Nullable String getReceipt() {
 		return getFirstNativeHeader(STOMP_RECEIPT_HEADER);
 	}
 
-	@Nullable
-	public String getMessage() {
+	public @Nullable String getMessage() {
 		return getFirstNativeHeader(STOMP_MESSAGE_HEADER);
 	}
 
@@ -390,8 +380,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_MESSAGE_HEADER, content);
 	}
 
-	@Nullable
-	public String getMessageId() {
+	public @Nullable String getMessageId() {
 		return getFirstNativeHeader(STOMP_MESSAGE_ID_HEADER);
 	}
 
@@ -399,8 +388,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_MESSAGE_ID_HEADER, id);
 	}
 
-	@Nullable
-	public String getVersion() {
+	public @Nullable String getVersion() {
 		return getFirstNativeHeader(STOMP_VERSION_HEADER);
 	}
 
@@ -526,22 +514,19 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	/**
 	 * Return the STOMP command from the given headers, or {@code null} if not set.
 	 */
-	@Nullable
-	public static StompCommand getCommand(Map<String, Object> headers) {
+	public static @Nullable StompCommand getCommand(Map<String, Object> headers) {
 		return (StompCommand) headers.get(COMMAND_HEADER);
 	}
 
 	/**
 	 * Return the passcode header value, or {@code null} if not set.
 	 */
-	@Nullable
-	public static String getPasscode(Map<String, Object> headers) {
+	public static @Nullable String getPasscode(Map<String, Object> headers) {
 		StompPasscode credentials = (StompPasscode) headers.get(CREDENTIALS_HEADER);
 		return (credentials != null ? credentials.passcode : null);
 	}
 
-	@Nullable
-	public static Integer getContentLength(Map<String, List<String>> nativeHeaders) {
+	public static @Nullable Integer getContentLength(Map<String, List<String>> nativeHeaders) {
 		List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
 		return (!CollectionUtils.isEmpty(values) ? Integer.valueOf(values.get(0)) : null);
 	}

@@ -20,11 +20,11 @@ import java.util.Map;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;

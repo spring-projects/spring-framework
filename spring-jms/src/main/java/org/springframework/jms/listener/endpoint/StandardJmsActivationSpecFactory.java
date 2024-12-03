@@ -24,13 +24,13 @@ import jakarta.jms.Session;
 import jakarta.jms.Topic;
 import jakarta.resource.spi.ActivationSpec;
 import jakarta.resource.spi.ResourceAdapter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.jms.support.destination.DestinationResolver;
-import org.springframework.lang.Nullable;
 
 /**
  * Standard implementation of the {@link JmsActivationSpecFactory} interface.
@@ -52,14 +52,11 @@ import org.springframework.lang.Nullable;
  */
 public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactory {
 
-	@Nullable
-	private Class<?> activationSpecClass;
+	private @Nullable Class<?> activationSpecClass;
 
-	@Nullable
-	private Map<String, String> defaultProperties;
+	private @Nullable Map<String, String> defaultProperties;
 
-	@Nullable
-	private DestinationResolver destinationResolver;
+	private @Nullable DestinationResolver destinationResolver;
 
 
 	/**
@@ -98,8 +95,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	/**
 	 * Return the {@link DestinationResolver} to use for resolving destinations names.
 	 */
-	@Nullable
-	public DestinationResolver getDestinationResolver() {
+	public @Nullable DestinationResolver getDestinationResolver() {
 		return this.destinationResolver;
 	}
 
@@ -131,8 +127,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * if not determinable
 	 * @see #setActivationSpecClass
 	 */
-	@Nullable
-	protected Class<?> determineActivationSpecClass(ResourceAdapter adapter) {
+	protected @Nullable Class<?> determineActivationSpecClass(ResourceAdapter adapter) {
 		return null;
 	}
 

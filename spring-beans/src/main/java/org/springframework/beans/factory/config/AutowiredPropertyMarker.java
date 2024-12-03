@@ -18,7 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Simple marker class for an individually autowired property value, to be added

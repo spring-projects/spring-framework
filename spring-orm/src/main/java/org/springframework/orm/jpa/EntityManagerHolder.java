@@ -17,8 +17,8 @@
 package org.springframework.orm.jpa;
 
 import jakarta.persistence.EntityManager;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
@@ -40,13 +40,11 @@ import org.springframework.util.Assert;
  */
 public class EntityManagerHolder extends ResourceHolderSupport {
 
-	@Nullable
-	private final EntityManager entityManager;
+	private final @Nullable EntityManager entityManager;
 
 	private boolean transactionActive;
 
-	@Nullable
-	private SavepointManager savepointManager;
+	private @Nullable SavepointManager savepointManager;
 
 
 	public EntityManagerHolder(@Nullable EntityManager entityManager) {
@@ -71,8 +69,7 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		this.savepointManager = savepointManager;
 	}
 
-	@Nullable
-	protected SavepointManager getSavepointManager() {
+	protected @Nullable SavepointManager getSavepointManager() {
 		return this.savepointManager;
 	}
 

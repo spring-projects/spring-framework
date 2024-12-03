@@ -16,7 +16,7 @@
 
 package org.springframework.beans;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by bean metadata elements
@@ -31,8 +31,7 @@ public interface BeanMetadataElement {
 	 * Return the configuration source {@code Object} for this metadata element
 	 * (may be {@code null}).
 	 */
-	@Nullable
-	default Object getSource() {
+	default @Nullable Object getSource() {
 		return null;
 	}
 

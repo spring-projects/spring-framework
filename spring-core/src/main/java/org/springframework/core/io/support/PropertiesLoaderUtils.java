@@ -24,8 +24,9 @@ import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultPropertiesPersister;

@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,7 +26,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -101,8 +101,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	 * {@link #decode(DataBuffer, ResolvableType, MimeType, Map)} instead
 	 */
 	@Deprecated
-	@Nullable
-	protected T decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
+	protected @Nullable T decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return decode(buffer, elementType, mimeType, hints);

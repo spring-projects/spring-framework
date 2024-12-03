@@ -16,8 +16,9 @@
 
 package org.springframework.orm;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown if a mapped object could not be retrieved via its identifier.
@@ -29,11 +30,9 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ObjectRetrievalFailureException extends DataRetrievalFailureException {
 
-	@Nullable
-	private final Object persistentClass;
+	private final @Nullable Object persistentClass;
 
-	@Nullable
-	private final Object identifier;
+	private final @Nullable Object identifier;
 
 
 	/**
@@ -109,8 +108,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Return the persistent class of the object that was not found.
 	 * If no Class was specified, this method returns null.
 	 */
-	@Nullable
-	public Class<?> getPersistentClass() {
+	public @Nullable Class<?> getPersistentClass() {
 		return (this.persistentClass instanceof Class<?> clazz ? clazz : null);
 	}
 
@@ -118,8 +116,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Return the name of the persistent class of the object that was not found.
 	 * Will work for both Class objects and String names.
 	 */
-	@Nullable
-	public String getPersistentClassName() {
+	public @Nullable String getPersistentClassName() {
 		if (this.persistentClass instanceof Class<?> clazz) {
 			return clazz.getName();
 		}
@@ -129,8 +126,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	/**
 	 * Return the identifier of the object that was not found.
 	 */
-	@Nullable
-	public Object getIdentifier() {
+	public @Nullable Object getIdentifier() {
 		return this.identifier;
 	}
 

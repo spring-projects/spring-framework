@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -96,8 +97,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	 * @return a Mono with a {@link HandlerResult}.
 	 * @throws ServerErrorException if method argument resolution or method invocation fails
 	 */
-	@Nullable
-	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
+	public @Nullable HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
 		CompletableFuture<HandlerResult> future =

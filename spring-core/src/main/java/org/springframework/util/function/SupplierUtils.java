@@ -18,7 +18,7 @@ package org.springframework.util.function;
 
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Convenience utilities for {@link java.util.function.Supplier} handling.
@@ -35,8 +35,7 @@ public abstract class SupplierUtils {
 	 * @param supplier the supplier to resolve
 	 * @return the supplier's result, or {@code null} if none
 	 */
-	@Nullable
-	public static <T> T resolve(@Nullable Supplier<T> supplier) {
+	public static <T> @Nullable T resolve(@Nullable Supplier<T> supplier) {
 		return (supplier != null ? supplier.get() : null);
 	}
 
@@ -47,8 +46,7 @@ public abstract class SupplierUtils {
 	 * @return a supplier's result or the given Object as-is
 	 * @since 6.1.4
 	 */
-	@Nullable
-	public static Object resolve(@Nullable Object candidate) {
+	public static @Nullable Object resolve(@Nullable Object candidate) {
 		return (candidate instanceof Supplier<?> supplier ? supplier.get() : candidate);
 	}
 

@@ -18,6 +18,8 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
@@ -26,7 +28,6 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,8 +54,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 
-	@Nullable
-	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
+	private @Nullable BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
 
 
 	@Override
@@ -73,8 +73,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 
 	@Override
-	@Nullable
-	protected Object[] getAdvicesAndAdvisorsForBean(
+	protected Object @Nullable [] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);

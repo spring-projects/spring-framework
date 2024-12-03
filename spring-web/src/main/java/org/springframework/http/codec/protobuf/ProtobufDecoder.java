@@ -28,6 +28,7 @@ import java.util.function.Function;
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,7 +39,6 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MimeType;
@@ -193,8 +193,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		private final int maxMessageSize;
 
-		@Nullable
-		private DataBuffer output;
+		private @Nullable DataBuffer output;
 
 		private int messageBytesToRead;
 

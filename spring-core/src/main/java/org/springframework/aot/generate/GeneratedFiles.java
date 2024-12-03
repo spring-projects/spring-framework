@@ -18,9 +18,10 @@ package org.springframework.aot.generate;
 
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.javapoet.JavaFile;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -264,8 +265,7 @@ public interface GeneratedFiles {
 		 * Return an {@link InputStreamSource} for the content of the file or
 		 * {@code null} if the file does not exist.
 		 */
-		@Nullable
-		public InputStreamSource getContent() {
+		public @Nullable InputStreamSource getContent() {
 			return (exists() ? this.existingContent.get() : null);
 		}
 

@@ -20,8 +20,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -60,20 +61,17 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
-	@Nullable
-	public ValueWrapper get(Object key) {
+	public @Nullable ValueWrapper get(Object key) {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public <T> T get(Object key, @Nullable Class<T> type) {
+	public <T> @Nullable T get(Object key, @Nullable Class<T> type) {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	public <T> @Nullable T get(Object key, Callable<T> valueLoader) {
 		try {
 			return valueLoader.call();
 		}
@@ -83,8 +81,7 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
-	@Nullable
-	public CompletableFuture<?> retrieve(Object key) {
+	public @Nullable CompletableFuture<?> retrieve(Object key) {
 		return null;
 	}
 
@@ -98,8 +95,7 @@ public class NoOpCache implements Cache {
 	}
 
 	@Override
-	@Nullable
-	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
+	public @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		return null;
 	}
 

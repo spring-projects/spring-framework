@@ -26,11 +26,11 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -80,14 +80,11 @@ public class EmbeddedDatabaseFactory {
 
 	private DataSourceFactory dataSourceFactory = new SimpleDriverDataSourceFactory();
 
-	@Nullable
-	private EmbeddedDatabaseConfigurer databaseConfigurer;
+	private @Nullable EmbeddedDatabaseConfigurer databaseConfigurer;
 
-	@Nullable
-	private DatabasePopulator databasePopulator;
+	private @Nullable DatabasePopulator databasePopulator;
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
 
 	/**
@@ -248,8 +245,7 @@ public class EmbeddedDatabaseFactory {
 	 * or if the database has been shut down. Subclasses may call this method to
 	 * access the {@code DataSource} instance directly.
 	 */
-	@Nullable
-	protected final DataSource getDataSource() {
+	protected final @Nullable DataSource getDataSource() {
 		return this.dataSource;
 	}
 

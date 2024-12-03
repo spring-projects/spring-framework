@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aop.scope.ScopedObject;
@@ -44,7 +45,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -67,19 +67,15 @@ public class EventListenerMethodProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private ConfigurableApplicationContext applicationContext;
+	private @Nullable ConfigurableApplicationContext applicationContext;
 
-	@Nullable
-	private ConfigurableListableBeanFactory beanFactory;
+	private @Nullable ConfigurableListableBeanFactory beanFactory;
 
-	@Nullable
-	private List<EventListenerFactory> eventListenerFactories;
+	private @Nullable List<EventListenerFactory> eventListenerFactories;
 
 	private final StandardEvaluationContext originalEvaluationContext;
 
-	@Nullable
-	private final EventExpressionEvaluator evaluator;
+	private final @Nullable EventExpressionEvaluator evaluator;
 
 	private final Set<Class<?>> nonAnnotatedClasses = ConcurrentHashMap.newKeySet(64);
 

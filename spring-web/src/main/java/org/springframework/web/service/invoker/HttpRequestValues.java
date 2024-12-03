@@ -23,11 +23,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,17 +53,13 @@ public class HttpRequestValues {
 			CollectionUtils.toMultiValueMap(Collections.emptyMap());
 
 
-	@Nullable
-	private final HttpMethod httpMethod;
+	private final @Nullable HttpMethod httpMethod;
 
-	@Nullable
-	private final URI uri;
+	private final @Nullable URI uri;
 
-	@Nullable
-	private final UriBuilderFactory uriBuilderFactory;
+	private final @Nullable UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private final String uriTemplate;
+	private final @Nullable String uriTemplate;
 
 	private final Map<String, String> uriVariables;
 
@@ -72,8 +69,7 @@ public class HttpRequestValues {
 
 	private final Map<String, Object> attributes;
 
-	@Nullable
-	private final Object bodyValue;
+	private final @Nullable Object bodyValue;
 
 
 	/**
@@ -103,8 +99,7 @@ public class HttpRequestValues {
 	/**
 	 * Return the HTTP method to use for the request.
 	 */
-	@Nullable
-	public HttpMethod getHttpMethod() {
+	public @Nullable HttpMethod getHttpMethod() {
 		return this.httpMethod;
 	}
 
@@ -114,8 +109,7 @@ public class HttpRequestValues {
 	 * the caller with the option to override the {@link #getUriTemplate()
 	 * uriTemplate} from class and method {@code HttpExchange} annotations.
 	 */
-	@Nullable
-	public URI getUri() {
+	public @Nullable URI getUri() {
 		return this.uri;
 	}
 
@@ -127,8 +121,7 @@ public class HttpRequestValues {
 	 * underlying client.
 	 * @since 6.1
 	 */
-	@Nullable
-	public UriBuilderFactory getUriBuilderFactory() {
+	public @Nullable UriBuilderFactory getUriBuilderFactory() {
 		return this.uriBuilderFactory;
 	}
 
@@ -136,8 +129,7 @@ public class HttpRequestValues {
 	 * Return the URL template for the request. This comes from the values in
 	 * class and method {@code HttpExchange} annotations.
 	 */
-	@Nullable
-	public String getUriTemplate() {
+	public @Nullable String getUriTemplate() {
 		return this.uriTemplate;
 	}
 
@@ -172,8 +164,7 @@ public class HttpRequestValues {
 	/**
 	 * Return the request body as a value to be serialized, if set.
 	 */
-	@Nullable
-	public Object getBodyValue() {
+	public @Nullable Object getBodyValue() {
 		return this.bodyValue;
 	}
 
@@ -192,26 +183,22 @@ public class HttpRequestValues {
 		/**
 		 * Return the HTTP method, if known.
 		 */
-		@Nullable
-		HttpMethod getHttpMethod();
+		@Nullable HttpMethod getHttpMethod();
 
 		/**
 		 * Return the URI template, if set already.
 		 */
-		@Nullable
-		String getUriTemplate();
+		@Nullable String getUriTemplate();
 
 		/**
 		 * Return the content type, if set already.
 		 */
-		@Nullable
-		MediaType getContentType();
+		@Nullable MediaType getContentType();
 
 		/**
 		 * Return the acceptable media types, if set already.
 		 */
-		@Nullable
-		List<MediaType> getAcceptMediaTypes();
+		@Nullable List<MediaType> getAcceptMediaTypes();
 	}
 
 
@@ -220,38 +207,27 @@ public class HttpRequestValues {
 	 */
 	public static class Builder implements Metadata {
 
-		@Nullable
-		private HttpMethod httpMethod;
+		private @Nullable HttpMethod httpMethod;
 
-		@Nullable
-		private URI uri;
+		private @Nullable URI uri;
 
-		@Nullable
-		private UriBuilderFactory uriBuilderFactory;
+		private @Nullable UriBuilderFactory uriBuilderFactory;
 
-		@Nullable
-		private String uriTemplate;
+		private @Nullable String uriTemplate;
 
-		@Nullable
-		private Map<String, String> uriVars;
+		private @Nullable Map<String, String> uriVars;
 
-		@Nullable
-		private HttpHeaders headers;
+		private @Nullable HttpHeaders headers;
 
-		@Nullable
-		private MultiValueMap<String, String> cookies;
+		private @Nullable MultiValueMap<String, String> cookies;
 
-		@Nullable
-		private MultiValueMap<String, String> requestParams;
+		private @Nullable MultiValueMap<String, String> requestParams;
 
-		@Nullable
-		private MultiValueMap<String, Object> parts;
+		private @Nullable MultiValueMap<String, Object> parts;
 
-		@Nullable
-		private Map<String, Object> attributes;
+		private @Nullable Map<String, Object> attributes;
 
-		@Nullable
-		private Object bodyValue;
+		private @Nullable Object bodyValue;
 
 		/**
 		 * Set the HTTP method for the request.
@@ -393,26 +369,22 @@ public class HttpRequestValues {
 		// Implementation of {@link Metadata} methods
 
 		@Override
-		@Nullable
-		public HttpMethod getHttpMethod() {
+		public @Nullable HttpMethod getHttpMethod() {
 			return this.httpMethod;
 		}
 
 		@Override
-		@Nullable
-		public String getUriTemplate() {
+		public @Nullable String getUriTemplate() {
 			return this.uriTemplate;
 		}
 
 		@Override
-		@Nullable
-		public MediaType getContentType() {
+		public @Nullable MediaType getContentType() {
 			return (this.headers != null ? this.headers.getContentType() : null);
 		}
 
 		@Override
-		@Nullable
-		public List<MediaType> getAcceptMediaTypes() {
+		public @Nullable List<MediaType> getAcceptMediaTypes() {
 			return (this.headers != null ? this.headers.getAccept() : null);
 		}
 

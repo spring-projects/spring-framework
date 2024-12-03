@@ -36,6 +36,7 @@ import javax.lang.model.element.Modifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
@@ -102,7 +103,6 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -152,13 +152,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
-	@Nullable
-	private Environment environment;
+	private @Nullable Environment environment;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
@@ -168,8 +166,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private final Set<Integer> factoriesPostProcessed = new HashSet<>();
 
-	@Nullable
-	private ConfigurationClassBeanDefinitionReader reader;
+	private @Nullable ConfigurationClassBeanDefinitionReader reader;
 
 	private boolean localBeanNameGeneratorSet = false;
 
@@ -181,8 +178,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
-	@Nullable
-	private List<PropertySourceDescriptor> propertySourceDescriptors;
+	private @Nullable List<PropertySourceDescriptor> propertySourceDescriptors;
 
 
 	@Override
@@ -311,9 +307,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
-	@Nullable
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Object configClassAttr = registeredBean.getMergedBeanDefinition()
 				.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
 		if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
@@ -324,9 +319,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+	public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
 		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
 		if (hasPropertySourceDescriptors || hasImportRegistry) {
@@ -343,8 +337,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		return null;
 	}
 
-	@Nullable
-	private Resource resolvePropertySourceLocation(String location) {
+	private @Nullable Resource resolvePropertySourceLocation(String location) {
 		try {
 			String resolvedLocation = (this.environment != null ?
 					this.environment.resolveRequiredPlaceholders(location) : location);
@@ -557,8 +550,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		@Nullable
-		public PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
+		public @Nullable PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
 			// postProcessProperties method attempts to autowire other configuration beans.
 			if (bean instanceof EnhancedConfiguration enhancedConfiguration) {

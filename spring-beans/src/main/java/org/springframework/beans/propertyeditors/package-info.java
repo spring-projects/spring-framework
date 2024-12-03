@@ -6,9 +6,7 @@
  * "CustomXxxEditor" classes are intended for manual registration in
  * specific binding processes, as they are localized or the like.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.beans.propertyeditors;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

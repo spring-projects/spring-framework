@@ -39,6 +39,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import jakarta.annotation.Priority;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -87,7 +88,6 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;

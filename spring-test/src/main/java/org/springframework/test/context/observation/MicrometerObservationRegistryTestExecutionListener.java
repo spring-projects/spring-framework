@@ -22,10 +22,10 @@ import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Conventions;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.ReflectionUtils;
@@ -68,8 +68,7 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 	static final String OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME =
 			"io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor";
 
-	@Nullable
-	private static final String ERROR_MESSAGE;
+	private static final @Nullable String ERROR_MESSAGE;
 
 	static {
 		// Trigger eager resolution of Micrometer Observation types to ensure that

@@ -39,11 +39,11 @@ import jakarta.jms.TopicConnection;
 import jakarta.jms.TopicConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Lifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -92,28 +92,22 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private ConnectionFactory targetConnectionFactory;
+	private @Nullable ConnectionFactory targetConnectionFactory;
 
-	@Nullable
-	private String clientId;
+	private @Nullable String clientId;
 
-	@Nullable
-	private ExceptionListener exceptionListener;
+	private @Nullable ExceptionListener exceptionListener;
 
 	private boolean reconnectOnException = false;
 
 	/** The target Connection. */
-	@Nullable
-	private Connection connection;
+	private @Nullable Connection connection;
 
 	/** A hint whether to create a queue or topic connection. */
-	@Nullable
-	private Boolean pubSubMode;
+	private @Nullable Boolean pubSubMode;
 
 	/** An internal aggregator allowing for per-connection ExceptionListeners. */
-	@Nullable
-	private AggregatedExceptionListener aggregatedExceptionListener;
+	private @Nullable AggregatedExceptionListener aggregatedExceptionListener;
 
 	/** Whether the shared Connection has been started. */
 	private int startedCount = 0;
@@ -161,8 +155,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return the target ConnectionFactory which will be used to lazily
 	 * create a single Connection, if any.
 	 */
-	@Nullable
-	public ConnectionFactory getTargetConnectionFactory() {
+	public @Nullable ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
 	}
 
@@ -183,8 +176,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return a JMS client ID for the single Connection created and exposed
 	 * by this ConnectionFactory, if any.
 	 */
-	@Nullable
-	protected String getClientId() {
+	protected @Nullable String getClientId() {
 		return this.clientId;
 	}
 
@@ -201,8 +193,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Return the JMS ExceptionListener implementation that should be registered
 	 * with the single Connection created by this factory, if any.
 	 */
-	@Nullable
-	protected ExceptionListener getExceptionListener() {
+	protected @Nullable ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
 	}
 
@@ -519,8 +510,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * creation of a raw standard Session
 	 * @throws JMSException if thrown by the JMS API
 	 */
-	@Nullable
-	protected Session getSession(Connection con, Integer mode) throws JMSException {
+	protected @Nullable Session getSession(Connection con, Integer mode) throws JMSException {
 		return null;
 	}
 
@@ -616,14 +606,12 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	private class SharedConnectionInvocationHandler implements InvocationHandler {
 
-		@Nullable
-		private ExceptionListener localExceptionListener;
+		private @Nullable ExceptionListener localExceptionListener;
 
 		private boolean locallyStarted = false;
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			switch (method.getName()) {
 				case "equals" -> {
 					Object other = args[0];

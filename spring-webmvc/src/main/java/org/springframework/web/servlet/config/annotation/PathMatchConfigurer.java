@@ -20,7 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
@@ -45,26 +46,19 @@ public class PathMatchConfigurer {
 
 	private boolean preferPathMatcher = false;
 
-	@Nullable
-	private PathPatternParser patternParser;
+	private @Nullable PathPatternParser patternParser;
 
-	@Nullable
-	private Map<String, Predicate<Class<?>>> pathPrefixes;
+	private @Nullable Map<String, Predicate<Class<?>>> pathPrefixes;
 
-	@Nullable
-	private UrlPathHelper urlPathHelper;
+	private @Nullable UrlPathHelper urlPathHelper;
 
-	@Nullable
-	private PathMatcher pathMatcher;
+	private @Nullable PathMatcher pathMatcher;
 
-	@Nullable
-	private PathPatternParser defaultPatternParser;
+	private @Nullable PathPatternParser defaultPatternParser;
 
-	@Nullable
-	private UrlPathHelper defaultUrlPathHelper;
+	private @Nullable UrlPathHelper defaultUrlPathHelper;
 
-	@Nullable
-	private PathMatcher defaultPathMatcher;
+	private @Nullable PathMatcher defaultPathMatcher;
 
 
 	/**
@@ -158,23 +152,19 @@ public class PathMatchConfigurer {
 	 * Return the {@link PathPatternParser} to use, if configured.
 	 * @since 5.3
 	 */
-	@Nullable
-	public PathPatternParser getPatternParser() {
+	public @Nullable PathPatternParser getPatternParser() {
 		return this.patternParser;
 	}
 
-	@Nullable
-	protected Map<String, Predicate<Class<?>>> getPathPrefixes() {
+	protected @Nullable Map<String, Predicate<Class<?>>> getPathPrefixes() {
 		return this.pathPrefixes;
 	}
 
-	@Nullable
-	public UrlPathHelper getUrlPathHelper() {
+	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
-	@Nullable
-	public PathMatcher getPathMatcher() {
+	public @Nullable PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 

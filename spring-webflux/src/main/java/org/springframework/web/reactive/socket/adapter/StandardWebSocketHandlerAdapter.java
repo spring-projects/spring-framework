@@ -25,9 +25,9 @@ import jakarta.websocket.Endpoint;
 import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.PongMessage;
 import jakarta.websocket.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -50,8 +50,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 	private final Function<Session, StandardWebSocketSession> sessionFactory;
 
-	@Nullable
-	private StandardWebSocketSession delegateSession;
+	private @Nullable StandardWebSocketSession delegateSession;
 
 
 	public StandardWebSocketHandlerAdapter(WebSocketHandler handler,

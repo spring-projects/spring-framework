@@ -20,8 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,8 +39,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 
 	private final int numberOfBeansFound;
 
-	@Nullable
-	private final Collection<String> beanNamesFound;
+	private final @Nullable Collection<String> beanNamesFound;
 
 
 	/**
@@ -126,8 +126,7 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @since 4.3
 	 * @see #getBeanType()
 	 */
-	@Nullable
-	public Collection<String> getBeanNamesFound() {
+	public @Nullable Collection<String> getBeanNamesFound() {
 		return this.beanNamesFound;
 	}
 

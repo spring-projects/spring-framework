@@ -18,10 +18,11 @@ package org.springframework.beans.factory.config;
 
 import java.util.Iterator;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.lang.Nullable;
 
 /**
  * Configuration interface to be implemented by most listable bean factories.

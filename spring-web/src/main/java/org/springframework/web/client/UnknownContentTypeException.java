@@ -19,10 +19,11 @@ package org.springframework.web.client;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 /**
  * Raised when no suitable
@@ -130,8 +131,7 @@ public class UnknownContentTypeException extends RestClientException {
 	/**
 	 * Return the HTTP response headers.
 	 */
-	@Nullable
-	public HttpHeaders getResponseHeaders() {
+	public @Nullable HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
 	}
 

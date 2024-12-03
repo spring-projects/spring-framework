@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
@@ -36,7 +38,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -172,8 +173,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * {@code null} if no qualifier has been found at all
 	 */
 
-	@Nullable
-	protected Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
+	protected @Nullable Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
 		boolean qualifierFound = false;
 		if (!ObjectUtils.isEmpty(annotationsToSearch)) {
 			SimpleTypeConverter typeConverter = new SimpleTypeConverter();
@@ -327,14 +327,12 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		return true;
 	}
 
-	@Nullable
-	protected Annotation getQualifiedElementAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
+	protected @Nullable Annotation getQualifiedElementAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		AnnotatedElement qualifiedElement = bd.getQualifiedElement();
 		return (qualifiedElement != null ? AnnotationUtils.getAnnotation(qualifiedElement, type) : null);
 	}
 
-	@Nullable
-	protected Annotation getFactoryMethodAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
+	protected @Nullable Annotation getFactoryMethodAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
 		Method resolvedFactoryMethod = bd.getResolvedFactoryMethod();
 		return (resolvedFactoryMethod != null ? AnnotationUtils.getAnnotation(resolvedFactoryMethod, type) : null);
 	}
@@ -370,8 +368,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	@Override
-	@Nullable
-	public String getSuggestedName(DependencyDescriptor descriptor) {
+	public @Nullable String getSuggestedName(DependencyDescriptor descriptor) {
 		for (Annotation annotation : descriptor.getAnnotations()) {
 			if (isQualifier(annotation.annotationType())) {
 				Object value = AnnotationUtils.getValue(annotation);
@@ -388,8 +385,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * @see Value
 	 */
 	@Override
-	@Nullable
-	public Object getSuggestedValue(DependencyDescriptor descriptor) {
+	public @Nullable Object getSuggestedValue(DependencyDescriptor descriptor) {
 		Object value = findValue(descriptor.getAnnotations());
 		if (value == null) {
 			MethodParameter methodParam = descriptor.getMethodParameter();
@@ -403,8 +399,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	/**
 	 * Determine a suggested value from any of the given candidate annotations.
 	 */
-	@Nullable
-	protected Object findValue(Annotation[] annotationsToSearch) {
+	protected @Nullable Object findValue(Annotation[] annotationsToSearch) {
 		if (annotationsToSearch.length > 0) {   // qualifier annotations have to be local
 			AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
 					AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);

@@ -31,7 +31,7 @@ import javax.xml.stream.events.ProcessingInstruction;
 import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.XMLEvent;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Implementation of the {@link javax.xml.stream.XMLStreamReader} interface that wraps a
@@ -79,8 +79,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	}
 
 	@Override
-	@Nullable
-	public String getVersion() {
+	public @Nullable String getVersion() {
 		if (this.event.isStartDocument()) {
 			return ((StartDocument) this.event).getVersion();
 		}
@@ -115,14 +114,12 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	}
 
 	@Override
-	@Nullable
-	public String getEncoding() {
+	public @Nullable String getEncoding() {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public String getCharacterEncodingScheme() {
+	public @Nullable String getCharacterEncodingScheme() {
 		return null;
 	}
 

@@ -30,6 +30,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
@@ -40,7 +41,6 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.StandardScriptEvalException;
 import org.springframework.scripting.support.StandardScriptUtils;
 import org.springframework.util.Assert;
@@ -73,32 +73,23 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
 
 
-	@Nullable
-	private ScriptEngine engine;
+	private @Nullable ScriptEngine engine;
 
-	@Nullable
-	private Supplier<ScriptEngine> engineSupplier;
+	private @Nullable Supplier<ScriptEngine> engineSupplier;
 
-	@Nullable
-	private String engineName;
+	private @Nullable String engineName;
 
-	@Nullable
-	private Boolean sharedEngine;
+	private @Nullable Boolean sharedEngine;
 
-	@Nullable
-	private String[] scripts;
+	private String @Nullable [] scripts;
 
-	@Nullable
-	private String renderObject;
+	private @Nullable String renderObject;
 
-	@Nullable
-	private String renderFunction;
+	private @Nullable String renderFunction;
 
-	@Nullable
-	private String[] resourceLoaderPaths;
+	private String @Nullable [] resourceLoaderPaths;
 
-	@Nullable
-	private volatile ScriptEngineManager scriptEngineManager;
+	private volatile @Nullable ScriptEngineManager scriptEngineManager;
 
 
 	/**
@@ -305,8 +296,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-	@Nullable
-	protected Resource getResource(String location) {
+	protected @Nullable Resource getResource(String location) {
 		if (this.resourceLoaderPaths != null) {
 			for (String path : this.resourceLoaderPaths) {
 				Resource resource = obtainApplicationContext().getResource(path + location);

@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;

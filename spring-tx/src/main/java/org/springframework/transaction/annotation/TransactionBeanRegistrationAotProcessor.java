@@ -20,6 +20,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -47,8 +48,7 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 
 	@Override
-	@Nullable
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (isTransactional(beanClass)) {
 			return new AotContribution(beanClass);

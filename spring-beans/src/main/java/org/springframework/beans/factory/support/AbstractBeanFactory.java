@@ -31,6 +31,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
@@ -69,7 +71,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.log.LogMessage;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -115,27 +116,22 @@ import org.springframework.util.StringValueResolver;
 public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
 
 	/** Parent bean factory, for bean inheritance support. */
-	@Nullable
-	private BeanFactory parentBeanFactory;
+	private @Nullable BeanFactory parentBeanFactory;
 
 	/** ClassLoader to resolve bean class names with, if necessary. */
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** ClassLoader to temporarily resolve bean class names with, if necessary. */
-	@Nullable
-	private ClassLoader tempClassLoader;
+	private @Nullable ClassLoader tempClassLoader;
 
 	/** Whether to cache bean metadata or rather reobtain it for every access. */
 	private boolean cacheBeanMetadata = true;
 
 	/** Resolution strategy for expressions in bean definition values. */
-	@Nullable
-	private BeanExpressionResolver beanExpressionResolver;
+	private @Nullable BeanExpressionResolver beanExpressionResolver;
 
 	/** Spring ConversionService to use instead of PropertyEditors. */
-	@Nullable
-	private ConversionService conversionService;
+	private @Nullable ConversionService conversionService;
 
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory. */
 	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars = new LinkedHashSet<>(4);
@@ -144,8 +140,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Map<Class<?>, Class<? extends PropertyEditor>> customEditors = new HashMap<>(4);
 
 	/** A custom TypeConverter to use, overriding the default PropertyEditor mechanism. */
-	@Nullable
-	private TypeConverter typeConverter;
+	private @Nullable TypeConverter typeConverter;
 
 	/** String resolvers to apply, for example, to annotation attribute values. */
 	private final List<StringValueResolver> embeddedValueResolvers = new CopyOnWriteArrayList<>();
@@ -154,8 +149,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final List<BeanPostProcessor> beanPostProcessors = new BeanPostProcessorCacheAwareList();
 
 	/** Cache of pre-filtered post-processors. */
-	@Nullable
-	private BeanPostProcessorCache beanPostProcessorCache;
+	private @Nullable BeanPostProcessorCache beanPostProcessorCache;
 
 	/** Map from scope identifier String to corresponding Scope. */
 	private final Map<String, Scope> scopes = new LinkedHashMap<>(8);
@@ -205,7 +199,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public Object getBean(String name, Object... args) throws BeansException {
+	public Object getBean(String name, @Nullable Object @Nullable ... args) throws BeansException {
 		return doGetBean(name, null, args, false);
 	}
 
@@ -218,7 +212,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args)
+	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object @Nullable ... args)
 			throws BeansException {
 
 		return doGetBean(name, requiredType, args, false);
@@ -237,7 +231,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(
-			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
+			String name, @Nullable Class<T> requiredType, @Nullable Object @Nullable [] args, boolean typeCheckOnly)
 			throws BeansException {
 
 		String beanName = transformedBeanName(name);
@@ -703,14 +697,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+	public @Nullable Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		return getType(name, true);
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+	public @Nullable Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
 		// Check manually registered singletons.
@@ -798,8 +790,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	//---------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public BeanFactory getParentBeanFactory() {
+	public @Nullable BeanFactory getParentBeanFactory() {
 		return this.parentBeanFactory;
 	}
 
@@ -832,8 +823,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getBeanClassLoader() {
+	public @Nullable ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
 
@@ -843,8 +833,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getTempClassLoader() {
+	public @Nullable ClassLoader getTempClassLoader() {
 		return this.tempClassLoader;
 	}
 
@@ -864,8 +853,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public BeanExpressionResolver getBeanExpressionResolver() {
+	public @Nullable BeanExpressionResolver getBeanExpressionResolver() {
 		return this.beanExpressionResolver;
 	}
 
@@ -875,8 +863,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public ConversionService getConversionService() {
+	public @Nullable ConversionService getConversionService() {
 		return this.conversionService;
 	}
 
@@ -921,8 +908,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Return the custom TypeConverter to use, if any.
 	 * @return the custom TypeConverter, or {@code null} if none specified
 	 */
-	@Nullable
-	protected TypeConverter getCustomTypeConverter() {
+	protected @Nullable TypeConverter getCustomTypeConverter() {
 		return this.typeConverter;
 	}
 
@@ -953,8 +939,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public String resolveEmbeddedValue(@Nullable String value) {
+	public @Nullable String resolveEmbeddedValue(@Nullable String value) {
 		if (value == null) {
 			return null;
 		}
@@ -1089,8 +1074,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	@Nullable
-	public Scope getRegisteredScope(String scopeName) {
+	public @Nullable Scope getRegisteredScope(String scopeName) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		return this.scopes.get(scopeName);
 	}
@@ -1489,7 +1473,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 * @param args the arguments for bean creation, if any
 	 */
-	protected void checkMergedBeanDefinition(RootBeanDefinition mbd, String beanName, @Nullable Object[] args) {
+	protected void checkMergedBeanDefinition(RootBeanDefinition mbd, String beanName, @Nullable Object @Nullable [] args) {
 		if (mbd.isAbstract()) {
 			throw new BeanIsAbstractException(beanName);
 		}
@@ -1534,8 +1518,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the resolved bean class (or {@code null} if none)
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
-	@Nullable
-	protected Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch)
+	protected @Nullable Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch)
 			throws CannotLoadBeanClassException {
 
 		try {
@@ -1560,8 +1543,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
-	@Nullable
-	private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch)
+	private @Nullable Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch)
 			throws ClassNotFoundException {
 
 		ClassLoader beanClassLoader = getBeanClassLoader();
@@ -1628,8 +1610,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the resolved value
 	 * @see #setBeanExpressionResolver
 	 */
-	@Nullable
-	protected Object evaluateBeanDefinitionString(@Nullable String value, @Nullable BeanDefinition beanDefinition) {
+	protected @Nullable Object evaluateBeanDefinitionString(@Nullable String value, @Nullable BeanDefinition beanDefinition) {
 		if (this.beanExpressionResolver == null) {
 			return value;
 		}
@@ -1660,8 +1641,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * (also signals that the returned {@code Class} will never be exposed to application code)
 	 * @return the type of the bean, or {@code null} if not predictable
 	 */
-	@Nullable
-	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+	protected @Nullable Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
 		Class<?> targetType = mbd.getTargetType();
 		if (targetType != null) {
 			return targetType;
@@ -1978,7 +1958,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */
-	protected abstract Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
+	protected abstract Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object @Nullable [] args)
 			throws BeanCreationException;
 
 

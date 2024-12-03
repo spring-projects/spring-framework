@@ -33,9 +33,9 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpMessage;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -58,8 +58,7 @@ class HeadersAdaptersBaseline {
 
 
 		@Override
-		@Nullable
-		public String getFirst(String key) {
+		public @Nullable String getFirst(String key) {
 			Header header = this.message.getFirstHeader(key);
 			return (header != null ? header.getValue() : null);
 		}
@@ -117,9 +116,8 @@ class HeadersAdaptersBaseline {
 					Arrays.stream(this.message.getHeaders()).anyMatch(h -> h.getValue().equals(value)));
 		}
 
-		@Nullable
 		@Override
-		public List<String> get(Object key) {
+		public @Nullable List<String> get(Object key) {
 			List<String> values = null;
 			if (containsKey(key)) {
 				Header[] headers = this.message.getHeaders((String) key);
@@ -131,17 +129,15 @@ class HeadersAdaptersBaseline {
 			return values;
 		}
 
-		@Nullable
 		@Override
-		public List<String> put(String key, List<String> values) {
+		public @Nullable List<String> put(String key, List<String> values) {
 			List<String> oldValues = remove(key);
 			values.forEach(value -> add(key, value));
 			return oldValues;
 		}
 
-		@Nullable
 		@Override
-		public List<String> remove(Object key) {
+		public @Nullable List<String> remove(Object key) {
 			if (key instanceof String headerName) {
 				List<String> oldValues = get(key);
 				this.message.removeHeaders(headerName);
@@ -249,8 +245,7 @@ class HeadersAdaptersBaseline {
 
 		private final HttpFields headers;
 
-		@Nullable
-		private final HttpFields.Mutable mutable;
+		private final HttpFields.@Nullable Mutable mutable;
 
 
 		/**
@@ -343,9 +338,8 @@ class HeadersAdaptersBaseline {
 			return false;
 		}
 
-		@Nullable
 		@Override
-		public List<String> get(Object key) {
+		public @Nullable List<String> get(Object key) {
 			List<String> list = null;
 			if (key instanceof String name) {
 				for (HttpField f : this.headers) {
@@ -360,9 +354,8 @@ class HeadersAdaptersBaseline {
 			return list;
 		}
 
-		@Nullable
 		@Override
-		public List<String> put(String key, List<String> value) {
+		public @Nullable List<String> put(String key, List<String> value) {
 			HttpFields.Mutable mutableHttpFields = mutableFields();
 			List<String> oldValues = get(key);
 
@@ -383,9 +376,8 @@ class HeadersAdaptersBaseline {
 			return oldValues;
 		}
 
-		@Nullable
 		@Override
-		public List<String> remove(Object key) {
+		public @Nullable List<String> remove(Object key) {
 			HttpFields.Mutable mutableHttpFields = mutableFields();
 			List<String> list = null;
 			if (key instanceof String name) {
@@ -515,8 +507,7 @@ class HeadersAdaptersBaseline {
 
 			private final Iterator<String> iterator;
 
-			@Nullable
-			private String currentName;
+			private @Nullable String currentName;
 
 			private HeaderNamesIterator(Iterator<String> iterator) {
 				this.iterator = iterator;
@@ -563,8 +554,7 @@ class HeadersAdaptersBaseline {
 
 
 		@Override
-		@Nullable
-		public String getFirst(String key) {
+		public @Nullable String getFirst(String key) {
 			return this.headers.get(key);
 		}
 
@@ -632,25 +622,22 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		@Nullable
-		public List<String> get(Object key) {
+		public @Nullable List<String> get(Object key) {
 			if (containsKey(key)) {
 				return this.headers.getAll((String) key);
 			}
 			return null;
 		}
 
-		@Nullable
 		@Override
-		public List<String> put(String key, @Nullable List<String> value) {
+		public @Nullable List<String> put(String key, @Nullable List<String> value) {
 			List<String> previousValues = this.headers.getAll(key);
 			this.headers.set(key, value);
 			return previousValues;
 		}
 
-		@Nullable
 		@Override
-		public List<String> remove(Object key) {
+		public @Nullable List<String> remove(Object key) {
 			if (key instanceof String headerName) {
 				List<String> previousValues = this.headers.getAll(headerName);
 				this.headers.remove(headerName);
@@ -762,8 +749,7 @@ class HeadersAdaptersBaseline {
 
 			private final Iterator<String> iterator;
 
-			@Nullable
-			private String currentName;
+			private @Nullable String currentName;
 
 			private HeaderNamesIterator(Iterator<String> iterator) {
 				this.iterator = iterator;
@@ -810,8 +796,7 @@ class HeadersAdaptersBaseline {
 
 
 		@Override
-		@Nullable
-		public String getFirst(String key) {
+		public @Nullable String getFirst(String key) {
 			CharSequence value = this.headers.get(key);
 			return (value != null ? value.toString() : null);
 		}
@@ -876,8 +861,7 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		@Nullable
-		public List<String> get(Object key) {
+		public @Nullable List<String> get(Object key) {
 			Iterator<CharSequence> iterator = this.headers.valuesIterator((CharSequence) key);
 			if (iterator.hasNext()) {
 				List<String> result = new ArrayList<>();
@@ -887,17 +871,15 @@ class HeadersAdaptersBaseline {
 			return null;
 		}
 
-		@Nullable
 		@Override
-		public List<String> put(String key, @Nullable List<String> value) {
+		public @Nullable List<String> put(String key, @Nullable List<String> value) {
 			List<String> previousValues = get(key);
 			this.headers.set(key, value);
 			return previousValues;
 		}
 
-		@Nullable
 		@Override
-		public List<String> remove(Object key) {
+		public @Nullable List<String> remove(Object key) {
 			if (key instanceof String headerName) {
 				List<String> previousValues = get(headerName);
 				this.headers.remove(headerName);
@@ -1010,8 +992,7 @@ class HeadersAdaptersBaseline {
 
 			private final Iterator<CharSequence> iterator;
 
-			@Nullable
-			private CharSequence currentName;
+			private @Nullable CharSequence currentName;
 
 			private HeaderNamesIterator(Iterator<CharSequence> iterator) {
 				this.iterator = iterator;

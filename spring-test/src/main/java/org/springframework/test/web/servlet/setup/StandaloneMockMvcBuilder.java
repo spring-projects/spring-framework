@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -35,7 +36,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
@@ -91,8 +91,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private final List<Object> controllers;
 
-	@Nullable
-	private List<Object> controllerAdvice;
+	private @Nullable List<Object> controllerAdvice;
 
 	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
@@ -102,36 +101,27 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 
-	@Nullable
-	private Validator validator;
+	private @Nullable Validator validator;
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
+	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
-	@Nullable
-	private FormattingConversionService conversionService;
+	private @Nullable FormattingConversionService conversionService;
 
-	@Nullable
-	private List<HandlerExceptionResolver> handlerExceptionResolvers;
+	private @Nullable List<HandlerExceptionResolver> handlerExceptionResolvers;
 
-	@Nullable
-	private Long asyncRequestTimeout;
+	private @Nullable Long asyncRequestTimeout;
 
-	@Nullable
-	private List<ViewResolver> viewResolvers;
+	private @Nullable List<ViewResolver> viewResolvers;
 
 	private LocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
 
-	@Nullable
-	private FlashMapManager flashMapManager;
+	private @Nullable FlashMapManager flashMapManager;
 
 	private boolean preferPathMatcher = false;
 
-	@Nullable
-	private PathPatternParser patternParser;
+	private @Nullable PathPatternParser patternParser;
 
-	@Nullable
-	private Boolean removeSemicolonContent;
+	private @Nullable Boolean removeSemicolonContent;
 
 	private final Map<String, String> placeholderValues = new HashMap<>();
 
@@ -210,7 +200,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * Add interceptors mapped to a set of path patterns.
 	 */
 	public StandaloneMockMvcBuilder addMappedInterceptors(
-			@Nullable String[] pathPatterns, HandlerInterceptor... interceptors) {
+			String @Nullable [] pathPatterns, HandlerInterceptor... interceptors) {
 
 		for (HandlerInterceptor interceptor : interceptors) {
 			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, null, interceptor));

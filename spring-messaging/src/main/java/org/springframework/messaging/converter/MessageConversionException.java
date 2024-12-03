@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 

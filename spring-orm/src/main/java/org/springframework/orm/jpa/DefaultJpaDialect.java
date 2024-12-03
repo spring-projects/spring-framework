@@ -21,10 +21,10 @@ import java.sql.SQLException;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -56,8 +56,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * @see #cleanupTransaction
 	 */
 	@Override
-	@Nullable
-	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
+	public @Nullable Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
@@ -70,8 +69,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	}
 
 	@Override
-	@Nullable
-	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
+	public @Nullable Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException {
 
 		return null;
@@ -91,8 +89,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * indicating that no JDBC Connection can be provided.
 	 */
 	@Override
-	@Nullable
-	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
+	public @Nullable ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
 		return null;
@@ -121,8 +118,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
 	@Override
-	@Nullable
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+	public @Nullable DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 	}
 

@@ -16,11 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -110,25 +111,20 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	protected String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
-	@Nullable
-	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
+	protected @Nullable String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
 	/** Defaults to {@link #DEFAULT_ESCAPE_CHARACTER}. */
-	@Nullable
-	protected Character escapeCharacter = DEFAULT_ESCAPE_CHARACTER;
+	protected @Nullable Character escapeCharacter = DEFAULT_ESCAPE_CHARACTER;
 
 	protected boolean trimValues = false;
 
-	@Nullable
-	protected String nullValue;
+	protected @Nullable String nullValue;
 
 	protected boolean ignoreUnresolvablePlaceholders = false;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**

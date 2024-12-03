@@ -16,7 +16,8 @@
 
 package org.springframework.core.type.filter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -55,19 +56,16 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	@Override
-	@Nullable
-	protected Boolean matchSuperClass(String superClassName) {
+	protected @Nullable Boolean matchSuperClass(String superClassName) {
 		return matchTargetType(superClassName);
 	}
 
 	@Override
-	@Nullable
-	protected Boolean matchInterface(String interfaceName) {
+	protected @Nullable Boolean matchInterface(String interfaceName) {
 		return matchTargetType(interfaceName);
 	}
 
-	@Nullable
-	protected Boolean matchTargetType(String typeName) {
+	protected @Nullable Boolean matchTargetType(String typeName) {
 		if (this.targetType.getName().equals(typeName)) {
 			return true;
 		}

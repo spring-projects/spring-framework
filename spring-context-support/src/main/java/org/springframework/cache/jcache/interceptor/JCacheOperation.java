@@ -21,6 +21,8 @@ import java.lang.annotation.Annotation;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheResolver;
 
@@ -48,6 +50,6 @@ public interface JCacheOperation<A extends Annotation> extends BasicOperation, C
 	 * <p>The method arguments must match the signature of the related method invocation
 	 * @param values the parameters value for a particular invocation
 	 */
-	CacheInvocationParameter[] getAllParameters(Object... values);
+	CacheInvocationParameter[] getAllParameters(@Nullable Object... values);
 
 }

@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,7 +48,6 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -81,8 +81,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 	private final Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
 
-	@Nullable
-	private final HttpMessageWriter<MultiValueMap<String, String>> formWriter;
+	private final @Nullable HttpMessageWriter<MultiValueMap<String, String>> formWriter;
 
 
 	/**
@@ -154,8 +153,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * Return the configured form writer.
 	 * @since 5.1.13
 	 */
-	@Nullable
-	public HttpMessageWriter<MultiValueMap<String, String>> getFormWriter() {
+	public @Nullable HttpMessageWriter<MultiValueMap<String, String>> getFormWriter() {
 		return this.formWriter;
 	}
 
@@ -315,8 +313,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 		private final AtomicBoolean committed = new AtomicBoolean();
 
-		@Nullable
-		private Flux<DataBuffer> body;
+		private @Nullable Flux<DataBuffer> body;
 
 		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory) {
 			this.bufferFactory = bufferFactory;

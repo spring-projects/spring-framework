@@ -16,8 +16,9 @@
 
 package org.springframework.beans;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.AttributeAccessorSupport;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link org.springframework.core.AttributeAccessorSupport},
@@ -30,8 +31,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport implements BeanMetadataElement {
 
-	@Nullable
-	private Object source;
+	private @Nullable Object source;
 
 
 	/**
@@ -43,8 +43,7 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.source;
 	}
 
@@ -63,8 +62,7 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	 * @return the corresponding BeanMetadataAttribute object,
 	 * or {@code null} if no such attribute defined
 	 */
-	@Nullable
-	public BeanMetadataAttribute getMetadataAttribute(String name) {
+	public @Nullable BeanMetadataAttribute getMetadataAttribute(String name) {
 		return (BeanMetadataAttribute) super.getAttribute(name);
 	}
 
@@ -74,15 +72,13 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name) {
+	public @Nullable Object getAttribute(String name) {
 		BeanMetadataAttribute attribute = (BeanMetadataAttribute) super.getAttribute(name);
 		return (attribute != null ? attribute.getValue() : null);
 	}
 
 	@Override
-	@Nullable
-	public Object removeAttribute(String name) {
+	public @Nullable Object removeAttribute(String name) {
 		BeanMetadataAttribute attribute = (BeanMetadataAttribute) super.removeAttribute(name);
 		return (attribute != null ? attribute.getValue() : null);
 	}

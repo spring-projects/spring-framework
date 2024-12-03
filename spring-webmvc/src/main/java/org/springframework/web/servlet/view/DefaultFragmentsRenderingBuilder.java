@@ -22,9 +22,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -36,11 +37,9 @@ import org.springframework.web.servlet.ModelAndView;
  */
 final class DefaultFragmentsRenderingBuilder implements FragmentsRendering.Builder {
 
-	@Nullable
-	private HttpStatusCode status;
+	private @Nullable HttpStatusCode status;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
 	private final Collection<ModelAndView> fragments = new ArrayList<>();
 

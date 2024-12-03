@@ -18,11 +18,11 @@ package org.springframework.web.servlet.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -39,11 +39,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ParameterizableViewController extends AbstractController {
 
-	@Nullable
-	private Object view;
+	private @Nullable Object view;
 
-	@Nullable
-	private HttpStatusCode statusCode;
+	private @Nullable HttpStatusCode statusCode;
 
 	private boolean statusOnly;
 
@@ -66,8 +64,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the name of the view to delegate to, or {@code null} if using a
 	 * View instance.
 	 */
-	@Nullable
-	public String getViewName() {
+	public @Nullable String getViewName() {
 		if (this.view instanceof String viewName) {
 			if (getStatusCode() != null && getStatusCode().is3xxRedirection()) {
 				return viewName.startsWith("redirect:") ? viewName : "redirect:" + viewName;
@@ -93,8 +90,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 * @since 4.1
 	 */
-	@Nullable
-	public View getView() {
+	public @Nullable View getView() {
 		return (this.view instanceof View v ? v : null);
 	}
 
@@ -117,8 +113,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the configured HTTP status code or {@code null}.
 	 * @since 4.1
 	 */
-	@Nullable
-	public HttpStatusCode getStatusCode() {
+	public @Nullable HttpStatusCode getStatusCode() {
 		return this.statusCode;
 	}
 
@@ -149,8 +144,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * @see #getViewName()
 	 */
 	@Override
-	@Nullable
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+	protected @Nullable ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		String viewName = getViewName();

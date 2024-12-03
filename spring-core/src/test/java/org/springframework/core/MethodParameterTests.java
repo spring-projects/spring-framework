@@ -237,7 +237,19 @@ class MethodParameterTests {
 		assertThat(m3.getTypeIndexForCurrentLevel()).isEqualTo(3);
 	}
 
-	public int method(String p1, long p2) {
+	@Test
+	void nullableWithSpringAnnotation() {
+		MethodParameter m = MethodParameter.forExecutable(method, 1);
+		assertThat(m.isOptional()).isTrue();
+	}
+
+	@Test
+	void nullableWithJSpecifyAnnotation() {
+		MethodParameter m = MethodParameter.forExecutable(method, 0);
+		assertThat(m.isOptional()).isTrue();
+	}
+
+	public int method(@org.jspecify.annotations.Nullable String p1, @org.springframework.lang.Nullable long p2) {
 		return 42;
 	}
 

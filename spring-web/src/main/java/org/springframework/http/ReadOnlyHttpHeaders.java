@@ -26,7 +26,8 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -42,12 +43,10 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	private static final long serialVersionUID = -8578554704772377436L;
 
-	@Nullable
-	private MediaType cachedContentType;
+	private @Nullable MediaType cachedContentType;
 
-	@Nullable
 	@SuppressWarnings("serial")
-	private List<MediaType> cachedAccept;
+	private @Nullable List<MediaType> cachedAccept;
 
 
 	ReadOnlyHttpHeaders(MultiValueMap<String, String> headers) {
@@ -56,8 +55,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 
 	@Override
-	@Nullable
-	public MediaType getContentType() {
+	public @Nullable MediaType getContentType() {
 		if (this.cachedContentType != null) {
 			return this.cachedContentType;
 		}
@@ -86,8 +84,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		List<String> values = this.headers.get(key);
 		return (values != null ? Collections.unmodifiableList(values) : null);
 	}

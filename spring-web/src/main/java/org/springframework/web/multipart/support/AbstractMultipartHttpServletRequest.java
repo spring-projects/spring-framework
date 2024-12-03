@@ -24,10 +24,10 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,8 +44,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public abstract class AbstractMultipartHttpServletRequest extends HttpServletRequestWrapper
 		implements MultipartHttpServletRequest {
 
-	@Nullable
-	private MultiValueMap<String, MultipartFile> multipartFiles;
+	private @Nullable MultiValueMap<String, MultipartFile> multipartFiles;
 
 
 	/**
@@ -84,8 +83,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	}
 
 	@Override
-	@Nullable
-	public MultipartFile getFile(String name) {
+	public @Nullable MultipartFile getFile(String name) {
 		return getMultipartFiles().getFirst(name);
 	}
 

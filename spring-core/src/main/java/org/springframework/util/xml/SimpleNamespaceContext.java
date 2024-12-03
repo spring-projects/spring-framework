@@ -26,7 +26,8 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -66,8 +67,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 	}
 
 	@Override
-	@Nullable
-	public String getPrefix(String namespaceUri) {
+	public @Nullable String getPrefix(String namespaceUri) {
 		Set<String> prefixes = getPrefixesSet(namespaceUri);
 		return (!prefixes.isEmpty() ? prefixes.iterator().next() : null);
 	}

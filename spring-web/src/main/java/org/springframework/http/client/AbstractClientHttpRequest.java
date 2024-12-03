@@ -21,8 +21,9 @@ import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,11 +39,9 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private boolean executed = false;
 
-	@Nullable
-	private HttpHeaders readOnlyHeaders;
+	private @Nullable HttpHeaders readOnlyHeaders;
 
-	@Nullable
-	private Map<String, Object> attributes;
+	private @Nullable Map<String, Object> attributes;
 
 
 	@Override

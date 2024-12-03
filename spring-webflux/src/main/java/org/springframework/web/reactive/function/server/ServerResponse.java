@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -234,7 +235,7 @@ public interface ServerResponse {
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B header(String headerName, String... headerValues);
+		B header(String headerName, @Nullable String... headerValues);
 
 		/**
 		 * Manipulate this response's headers with the given consumer. The

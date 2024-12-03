@@ -38,6 +38,8 @@ import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
@@ -62,7 +64,6 @@ import org.springframework.jmx.export.notification.ModelMBeanNotificationPublish
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -154,12 +155,10 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 
 	/** The beans to be exposed as JMX managed resources, with JMX names as keys. */
-	@Nullable
-	private Map<String, Object> beans;
+	private @Nullable Map<String, Object> beans;
 
 	/** The autodetect mode to use for this MBeanExporter. */
-	@Nullable
-	Integer autodetectMode;
+	@Nullable Integer autodetectMode;
 
 	/** Whether to eagerly initialize candidate beans when auto-detecting MBeans. */
 	private boolean allowEagerInit = false;
@@ -180,23 +179,19 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private final Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
-	@Nullable
-	private MBeanExporterListener[] listeners;
+	private MBeanExporterListener @Nullable [] listeners;
 
 	/** The NotificationListeners to register for the MBeans registered by this exporter. */
-	@Nullable
-	private NotificationListenerBean[] notificationListeners;
+	private NotificationListenerBean @Nullable [] notificationListeners;
 
 	/** Map of actually registered NotificationListeners. */
 	private final Map<NotificationListenerBean, ObjectName[]> registeredNotificationListeners = new LinkedHashMap<>();
 
 	/** Stores the ClassLoader to use for generating lazy-init proxies. */
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** Stores the BeanFactory for use in auto-detection process. */
-	@Nullable
-	private ListableBeanFactory beanFactory;
+	private @Nullable ListableBeanFactory beanFactory;
 
 
 	/**
@@ -794,8 +789,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @return the adapted MBean, or {@code null} if not possible
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
+	protected @Nullable DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass != bean.getClass()) {
 			Class<?> ifc = JmxUtils.getMXBeanInterface(targetClass);
@@ -1097,11 +1091,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	@SuppressWarnings("serial")
 	private class NotificationPublisherAwareLazyTargetSource extends LazyInitTargetSource {
 
-		@Nullable
-		private ModelMBean modelMBean;
+		private @Nullable ModelMBean modelMBean;
 
-		@Nullable
-		private ObjectName objectName;
+		private @Nullable ObjectName objectName;
 
 		public void setModelMBean(ModelMBean modelMBean) {
 			this.modelMBean = modelMBean;

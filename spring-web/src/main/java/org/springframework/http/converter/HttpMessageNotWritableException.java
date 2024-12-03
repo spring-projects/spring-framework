@@ -16,7 +16,7 @@
 
 package org.springframework.http.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Thrown by {@link HttpMessageConverter} implementations when the

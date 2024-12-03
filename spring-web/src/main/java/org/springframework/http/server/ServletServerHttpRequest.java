@@ -41,12 +41,12 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -67,18 +67,14 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServletRequest servletRequest;
 
-	@Nullable
-	private URI uri;
+	private @Nullable URI uri;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
-	@Nullable
-	private Map<String, Object> attributes;
+	private @Nullable Map<String, Object> attributes;
 
 
-	@Nullable
-	private ServerHttpAsyncRequestControl asyncRequestControl;
+	private @Nullable ServerHttpAsyncRequestControl asyncRequestControl;
 
 
 	/**
@@ -209,7 +205,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Principal getPrincipal() {
+	public @Nullable Principal getPrincipal() {
 		return this.servletRequest.getUserPrincipal();
 	}
 
@@ -305,14 +301,11 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private final class AttributesMap extends AbstractMap<String, Object> {
 
-		@Nullable
-		private transient Set<String> keySet;
+		private @Nullable transient Set<String> keySet;
 
-		@Nullable
-		private transient Collection<Object> values;
+		private @Nullable transient Collection<Object> values;
 
-		@Nullable
-		private transient Set<Entry<String, Object>> entrySet;
+		private @Nullable transient Set<Entry<String, Object>> entrySet;
 
 
 		@Override
@@ -325,8 +318,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 
 		@Override
-		@Nullable
-		public Object get(Object key) {
+		public @Nullable Object get(Object key) {
 			if (key instanceof String name) {
 				return servletRequest.getAttribute(name);
 			}
@@ -336,16 +328,14 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 
 		@Override
-		@Nullable
-		public Object put(String key, Object value) {
+		public @Nullable Object put(String key, Object value) {
 			Object old = get(key);
 			servletRequest.setAttribute(key, value);
 			return old;
 		}
 
 		@Override
-		@Nullable
-		public Object remove(Object key) {
+		public @Nullable Object remove(Object key) {
 			if (key instanceof String name) {
 				Object old = get(key);
 				servletRequest.removeAttribute(name);

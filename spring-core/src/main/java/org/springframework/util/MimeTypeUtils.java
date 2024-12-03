@@ -30,7 +30,7 @@ import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Miscellaneous {@link MimeType} utility methods.
@@ -167,8 +167,7 @@ public abstract class MimeTypeUtils {
 	private static final ConcurrentLruCache<String, MimeType> cachedMimeTypes =
 			new ConcurrentLruCache<>(64, MimeTypeUtils::parseMimeTypeInternal);
 
-	@Nullable
-	private static volatile Random random;
+	private static volatile @Nullable Random random;
 
 	static {
 		// Not using "parseMimeType" to avoid static init cost

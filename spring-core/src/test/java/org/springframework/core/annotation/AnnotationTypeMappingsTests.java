@@ -476,14 +476,12 @@ class AnnotationTypeMappingsTests {
 		return result;
 	}
 
-	@Nullable
-	private Method getAliasMapping(AnnotationTypeMapping mapping, int attributeIndex) {
+	private @Nullable Method getAliasMapping(AnnotationTypeMapping mapping, int attributeIndex) {
 		int mapped = mapping.getAliasMapping(attributeIndex);
 		return mapped != -1 ? mapping.getRoot().getAttributes().get(mapped) : null;
 	}
 
-	@Nullable
-	private Method getConventionMapping(AnnotationTypeMapping mapping, int attributeIndex) {
+	private @Nullable Method getConventionMapping(AnnotationTypeMapping mapping, int attributeIndex) {
 		int mapped = mapping.getConventionMapping(attributeIndex);
 		return mapped != -1 ? mapping.getRoot().getAttributes().get(mapped) : null;
 	}

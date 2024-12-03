@@ -22,9 +22,9 @@ import jakarta.el.ELResolver;
 import jakarta.faces.context.FacesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -64,8 +64,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 
 
 	@Override
-	@Nullable
-	public Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext wac) {
 				String beanName = property.toString();
@@ -101,8 +100,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext wac) {
 				String beanName = property.toString();
@@ -164,8 +162,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	 * @return the Spring web application context
 	 * @see org.springframework.web.jsf.FacesContextUtils#getWebApplicationContext
 	 */
-	@Nullable
-	protected WebApplicationContext getWebApplicationContext(ELContext elContext) {
+	protected @Nullable WebApplicationContext getWebApplicationContext(ELContext elContext) {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		return FacesContextUtils.getRequiredWebApplicationContext(facesContext);
 	}

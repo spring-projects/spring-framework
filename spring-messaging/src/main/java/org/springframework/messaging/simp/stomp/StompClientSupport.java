@@ -19,7 +19,8 @@ package org.springframework.messaging.simp.stomp;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
@@ -44,8 +45,7 @@ public abstract class StompClientSupport {
 
 	private MessageConverter messageConverter = new SimpleMessageConverter();
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
 	private long[] defaultHeartbeat = new long[] {10000, 10000};
 
@@ -85,8 +85,7 @@ public abstract class StompClientSupport {
 	/**
 	 * The configured TaskScheduler.
 	 */
-	@Nullable
-	public TaskScheduler getTaskScheduler() {
+	public @Nullable TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
 

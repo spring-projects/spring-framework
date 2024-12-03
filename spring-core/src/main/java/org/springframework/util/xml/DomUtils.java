@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
@@ -29,7 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ContentHandler;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -92,8 +92,7 @@ public abstract class DomUtils {
 	 * @param childEleName the child element name to look for
 	 * @return the {@code org.w3c.dom.Element} instance, or {@code null} if none found
 	 */
-	@Nullable
-	public static Element getChildElementByTagName(Element ele, String childEleName) {
+	public static @Nullable Element getChildElementByTagName(Element ele, String childEleName) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleName, "Element name must not be null");
 		NodeList nl = ele.getChildNodes();
@@ -112,8 +111,7 @@ public abstract class DomUtils {
 	 * @param childEleName the child element name to look for
 	 * @return the extracted text value, or {@code null} if no child element found
 	 */
-	@Nullable
-	public static String getChildElementValueByTagName(Element ele, String childEleName) {
+	public static @Nullable String getChildElementValueByTagName(Element ele, String childEleName) {
 		Element child = getChildElementByTagName(ele, childEleName);
 		return (child != null ? getTextValue(child) : null);
 	}

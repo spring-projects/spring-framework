@@ -26,6 +26,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -234,8 +234,7 @@ class RestTemplateObservationTests {
 
 		final TestObservationRegistry observationRegistry;
 
-		@Nullable
-		Observation currentObservation;
+		@Nullable Observation currentObservation;
 
 		ObservationErrorHandler(TestObservationRegistry observationRegistry) {
 			this.observationRegistry = observationRegistry;

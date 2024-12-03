@@ -21,8 +21,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * Simple adapter for {@link PreparedStatementSetter} that applies the given
@@ -33,11 +34,9 @@ import org.springframework.lang.Nullable;
  */
 public class ArgumentTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
-	@Nullable
-	private final Object[] args;
+	private final @Nullable Object @Nullable [] args;
 
-	@Nullable
-	private final int[] argTypes;
+	private final int @Nullable [] argTypes;
 
 
 	/**
@@ -47,7 +46,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 	 * @param argTypes the corresponding SQL types of the arguments
 	 */
 	@SuppressWarnings("NullAway")
-	public ArgumentTypePreparedStatementSetter(@Nullable Object[] args, @Nullable int[] argTypes) {
+	public ArgumentTypePreparedStatementSetter(@Nullable Object @Nullable [] args, int @Nullable [] argTypes) {
 		if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
 				(args != null && args.length != argTypes.length)) {
 			throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");

@@ -24,8 +24,7 @@ import java.io.Writer;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.tagext.BodyContent;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Mock implementation of the {@link jakarta.servlet.jsp.tagext.BodyContent} class.

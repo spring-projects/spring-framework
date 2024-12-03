@@ -21,11 +21,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -65,9 +65,8 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 	 * streaming} mime types.
 	 * @since 5.3
 	 */
-	@Nullable
 	@Override
-	protected byte[] getStreamingMediaTypeSeparator(@Nullable MimeType mimeType) {
+	protected byte @Nullable [] getStreamingMediaTypeSeparator(@Nullable MimeType mimeType) {
 		for (MediaType streamingMediaType : getStreamingMediaTypes()) {
 			if (streamingMediaType.isCompatibleWith(mimeType)) {
 				return STREAM_SEPARATOR;

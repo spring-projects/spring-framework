@@ -21,11 +21,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -50,8 +51,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * <p>Allows factory method implementations to determine whether the current
 	 * caller is the container itself as opposed to user code.
 	 */
-	@Nullable
-	public static Method getCurrentlyInvokedFactoryMethod() {
+	public static @Nullable Method getCurrentlyInvokedFactoryMethod() {
 		return currentlyInvokedFactoryMethod.get();
 	}
 
@@ -145,8 +145,9 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			@Nullable Object factoryBean, Method factoryMethod, Object... args) {
+			@Nullable Object factoryBean, Method factoryMethod, @Nullable Object... args) {
 
 		return instantiateWithFactoryMethod(factoryMethod, () -> {
 			try {

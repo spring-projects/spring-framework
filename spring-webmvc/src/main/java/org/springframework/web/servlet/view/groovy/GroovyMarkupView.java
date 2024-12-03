@@ -26,13 +26,13 @@ import groovy.text.markup.MarkupTemplateEngine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
@@ -51,8 +51,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class GroovyMarkupView extends AbstractTemplateView {
 
-	@Nullable
-	private MarkupTemplateEngine engine;
+	private @Nullable MarkupTemplateEngine engine;
 
 
 	/**

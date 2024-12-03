@@ -19,7 +19,7 @@ package org.springframework.aot.hint;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A hint that describes the need to access a {@link ResourceBundle}.
@@ -32,8 +32,7 @@ public final class ResourceBundleHint implements ConditionalHint {
 
 	private final String baseName;
 
-	@Nullable
-	private final TypeReference reachableType;
+	private final @Nullable TypeReference reachableType;
 
 
 	ResourceBundleHint(Builder builder) {
@@ -49,9 +48,8 @@ public final class ResourceBundleHint implements ConditionalHint {
 		return this.baseName;
 	}
 
-	@Nullable
 	@Override
-	public TypeReference getReachableType() {
+	public @Nullable TypeReference getReachableType() {
 		return this.reachableType;
 	}
 
@@ -74,8 +72,7 @@ public final class ResourceBundleHint implements ConditionalHint {
 
 		private String baseName;
 
-		@Nullable
-		private TypeReference reachableType;
+		private @Nullable TypeReference reachableType;
 
 		Builder(String baseName) {
 			this.baseName = baseName;

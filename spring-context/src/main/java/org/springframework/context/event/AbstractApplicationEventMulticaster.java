@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -37,7 +39,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -70,11 +71,9 @@ public abstract class AbstractApplicationEventMulticaster
 
 	final Map<ListenerCacheKey, CachedListenerRetriever> retrieverCache = new ConcurrentHashMap<>(64);
 
-	@Nullable
-	private ClassLoader beanClassLoader;
+	private @Nullable ClassLoader beanClassLoader;
 
-	@Nullable
-	private ConfigurableBeanFactory beanFactory;
+	private @Nullable ConfigurableBeanFactory beanFactory;
 
 
 	@Override
@@ -407,8 +406,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 		private final ResolvableType eventType;
 
-		@Nullable
-		private final Class<?> sourceType;
+		private final @Nullable Class<?> sourceType;
 
 		public ListenerCacheKey(ResolvableType eventType, @Nullable Class<?> sourceType) {
 			Assert.notNull(eventType, "Event type must not be null");
@@ -457,14 +455,11 @@ public abstract class AbstractApplicationEventMulticaster
 	 */
 	private class CachedListenerRetriever {
 
-		@Nullable
-		public volatile Set<ApplicationListener<?>> applicationListeners;
+		public volatile @Nullable Set<ApplicationListener<?>> applicationListeners;
 
-		@Nullable
-		public volatile Set<String> applicationListenerBeans;
+		public volatile @Nullable Set<String> applicationListenerBeans;
 
-		@Nullable
-		public Collection<ApplicationListener<?>> getApplicationListeners() {
+		public @Nullable Collection<ApplicationListener<?>> getApplicationListeners() {
 			Set<ApplicationListener<?>> applicationListeners = this.applicationListeners;
 			Set<String> applicationListenerBeans = this.applicationListenerBeans;
 			if (applicationListeners == null || applicationListenerBeans == null) {

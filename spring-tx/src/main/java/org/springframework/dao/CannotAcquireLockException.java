@@ -16,7 +16,7 @@
 
 package org.springframework.dao;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown on failure to acquire a lock during an update,

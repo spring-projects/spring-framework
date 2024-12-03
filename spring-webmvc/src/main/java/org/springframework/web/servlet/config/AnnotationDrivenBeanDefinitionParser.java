@@ -22,6 +22,7 @@ import java.util.Properties;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -57,7 +58,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
@@ -196,8 +196,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext context) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		XmlReaderContext readerContext = context.getReaderContext();
 
@@ -363,8 +362,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return conversionServiceRef;
 	}
 
-	@Nullable
-	private RuntimeBeanReference getValidator(Element element, @Nullable Object source, ParserContext context) {
+	private @Nullable RuntimeBeanReference getValidator(Element element, @Nullable Object source, ParserContext context) {
 		if (element.hasAttribute("validator")) {
 			return new RuntimeBeanReference(element.getAttribute("validator"));
 		}
@@ -466,8 +464,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return defaultMediaTypes;
 	}
 
-	@Nullable
-	private RuntimeBeanReference getMessageCodesResolver(Element element) {
+	private @Nullable RuntimeBeanReference getMessageCodesResolver(Element element) {
 		if (element.hasAttribute("message-codes-resolver")) {
 			return new RuntimeBeanReference(element.getAttribute("message-codes-resolver"));
 		}
@@ -476,14 +473,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	@Nullable
-	private String getAsyncTimeout(Element element) {
+	private @Nullable String getAsyncTimeout(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		return (asyncElement != null ? asyncElement.getAttribute("default-timeout") : null);
 	}
 
-	@Nullable
-	private RuntimeBeanReference getAsyncExecutor(Element element) {
+	private @Nullable RuntimeBeanReference getAsyncExecutor(Element element) {
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null && asyncElement.hasAttribute("task-executor")) {
 			return new RuntimeBeanReference(asyncElement.getAttribute("task-executor"));
@@ -512,8 +507,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return interceptors;
 	}
 
-	@Nullable
-	private ManagedList<?> getArgumentResolvers(Element element, ParserContext context) {
+	private @Nullable ManagedList<?> getArgumentResolvers(Element element, ParserContext context) {
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {
 			ManagedList<Object> resolvers = extractBeanSubElements(resolversElement, context);
@@ -541,8 +535,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return result;
 	}
 
-	@Nullable
-	private ManagedList<?> getReturnValueHandlers(Element element, ParserContext context) {
+	private @Nullable ManagedList<?> getReturnValueHandlers(Element element, ParserContext context) {
 		Element handlers = DomUtils.getChildElementByTagName(element, "return-value-handlers");
 		return (handlers != null ? extractBeanSubElements(handlers, context) : null);
 	}
@@ -660,14 +653,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	static class CompositeUriComponentsContributorFactoryBean
 			implements FactoryBean<CompositeUriComponentsContributor>, InitializingBean {
 
-		@Nullable
-		private RequestMappingHandlerAdapter handlerAdapter;
+		private @Nullable RequestMappingHandlerAdapter handlerAdapter;
 
-		@Nullable
-		private ConversionService conversionService;
+		private @Nullable ConversionService conversionService;
 
-		@Nullable
-		private CompositeUriComponentsContributor uriComponentsContributor;
+		private @Nullable CompositeUriComponentsContributor uriComponentsContributor;
 
 		public void setHandlerAdapter(RequestMappingHandlerAdapter handlerAdapter) {
 			this.handlerAdapter = handlerAdapter;
@@ -685,8 +675,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		@Override
-		@Nullable
-		public CompositeUriComponentsContributor getObject() {
+		public @Nullable CompositeUriComponentsContributor getObject() {
 			return this.uriComponentsContributor;
 		}
 

@@ -16,7 +16,8 @@
 
 package org.springframework.web.context.request;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.ui.ModelMap;
 
 /**

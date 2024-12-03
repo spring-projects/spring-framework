@@ -18,10 +18,10 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.AbstractCookieValueMethodArgumentResolver;
@@ -68,8 +68,7 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
 
 
 	@Override
-	@Nullable
-	protected Object resolveName(String cookieName, MethodParameter parameter,
+	protected @Nullable Object resolveName(String cookieName, MethodParameter parameter,
 			NativeWebRequest webRequest) throws Exception {
 
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);

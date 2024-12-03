@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -36,7 +37,6 @@ import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -83,8 +83,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
@@ -185,8 +184,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomTypeCondition(Class)
 	 */
 	@Override
-	@Nullable
-	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+	protected @Nullable RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
@@ -204,8 +202,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return info;
 	}
 
-	@Nullable
-	String getPathPrefix(Class<?> handlerType) {
+	@Nullable String getPathPrefix(Class<?> handlerType) {
 		for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
 			if (entry.getValue().test(handlerType)) {
 				String prefix = entry.getKey();
@@ -218,8 +215,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return null;
 	}
 
-	@Nullable
-	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+	private @Nullable RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
 		RequestMappingInfo requestMappingInfo = null;
 		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
@@ -262,8 +258,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
-	@Nullable
-	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
+	protected @Nullable RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
 
@@ -278,8 +273,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
-	@Nullable
-	protected RequestCondition<?> getCustomMethodCondition(Method method) {
+	protected @Nullable RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
 
@@ -397,8 +391,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
-	@Nullable
-	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
 		RequestMappingInfo info = RequestMappingInfo.paths(pattern).options(this.config).build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
@@ -410,8 +403,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
-	@Nullable
-	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
+	protected @Nullable CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 		Class<?> beanType = handlerMethod.getBeanType();
 		CrossOrigin typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(beanType, CrossOrigin.class);

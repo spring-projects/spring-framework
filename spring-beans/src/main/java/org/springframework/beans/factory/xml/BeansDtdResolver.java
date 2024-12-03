@@ -21,12 +21,12 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link EntityResolver} implementation for the Spring beans DTD,
@@ -52,8 +52,7 @@ public class BeansDtdResolver implements EntityResolver {
 
 
 	@Override
-	@Nullable
-	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
+	public @Nullable InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");

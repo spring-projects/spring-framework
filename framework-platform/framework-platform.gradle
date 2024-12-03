@@ -131,6 +131,7 @@ dependencies {
 		api("org.htmlunit:htmlunit:4.6.0")
 		api("org.javamoney:moneta:1.4.4")
 		api("org.jruby:jruby:9.4.9.0")
+		api("org.jspecify:jspecify:1.0.0")
 		api("org.junit.support:testng-engine:1.0.5")
 		api("org.mozilla:rhino:1.7.15")
 		api("org.ogce:xpp3:1.1.6")

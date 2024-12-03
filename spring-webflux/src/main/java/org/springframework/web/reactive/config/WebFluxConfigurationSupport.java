@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.BeanInitializationException;
@@ -38,7 +39,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
@@ -91,23 +91,17 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			ClassUtils.isPresent("jakarta.validation.Validator", WebFluxConfigurationSupport.class.getClassLoader());
 
 
-	@Nullable
-	private Map<String, CorsConfiguration> corsConfigurations;
+	private @Nullable Map<String, CorsConfiguration> corsConfigurations;
 
-	@Nullable
-	private PathMatchConfigurer pathMatchConfigurer;
+	private @Nullable PathMatchConfigurer pathMatchConfigurer;
 
-	@Nullable
-	private BlockingExecutionConfigurer blockingExecutionConfigurer;
+	private @Nullable BlockingExecutionConfigurer blockingExecutionConfigurer;
 
-	@Nullable
-	private List<ErrorResponse.Interceptor> errorResponseInterceptors;
+	private @Nullable List<ErrorResponse.Interceptor> errorResponseInterceptors;
 
-	@Nullable
-	private ViewResolverRegistry viewResolverRegistry;
+	private @Nullable ViewResolverRegistry viewResolverRegistry;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 
 	@Override
@@ -120,8 +114,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		}
 	}
 
-	@Nullable
-	public final ApplicationContext getApplicationContext() {
+	public final @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -419,16 +412,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	/**
 	 * Override this method to provide a custom {@link Validator}.
 	 */
-	@Nullable
-	protected Validator getValidator() {
+	protected @Nullable Validator getValidator() {
 		return null;
 	}
 
 	/**
 	 * Override this method to provide a custom {@link MessageCodesResolver}.
 	 */
-	@Nullable
-	protected MessageCodesResolver getMessageCodesResolver() {
+	protected @Nullable MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}
 
@@ -488,8 +479,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		return service;
 	}
 
-	@Nullable
-	protected WebSocketService getWebSocketService() {
+	protected @Nullable WebSocketService getWebSocketService() {
 		return null;
 	}
 

@@ -21,11 +21,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -99,11 +99,9 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	@Nullable
-	private PropertyEditorRegistrar[] propertyEditorRegistrars;
+	private PropertyEditorRegistrar @Nullable [] propertyEditorRegistrars;
 
-	@Nullable
-	private Map<Class<?>, Class<? extends PropertyEditor>> customEditors;
+	private @Nullable Map<Class<?>, Class<? extends PropertyEditor>> customEditors;
 
 
 	public void setOrder(int order) {

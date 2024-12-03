@@ -25,10 +25,10 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.lang.Nullable;
 
 /**
  * Bean that checks if a database has already started up. To be referenced
@@ -57,11 +57,9 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
-	@Nullable
-	private String validationQuery;
+	private @Nullable String validationQuery;
 
 	private int interval = DEFAULT_INTERVAL;
 

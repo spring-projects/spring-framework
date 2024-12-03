@@ -18,8 +18,9 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -47,8 +48,7 @@ import org.springframework.web.servlet.view.FragmentsRendering;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@Nullable
-	private String[] redirectPatterns;
+	private String @Nullable [] redirectPatterns;
 
 
 	/**
@@ -58,7 +58,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	 * There must be a custom {@link View} that recognizes the prefix as well.
 	 * @since 4.1
 	 */
-	public void setRedirectPatterns(@Nullable String... redirectPatterns) {
+	public void setRedirectPatterns(String @Nullable ... redirectPatterns) {
 		this.redirectPatterns = redirectPatterns;
 	}
 
@@ -66,8 +66,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 	 * Return the configured redirect patterns, if any.
 	 * @since 4.1
 	 */
-	@Nullable
-	public String[] getRedirectPatterns() {
+	public String @Nullable [] getRedirectPatterns() {
 		return this.redirectPatterns;
 	}
 

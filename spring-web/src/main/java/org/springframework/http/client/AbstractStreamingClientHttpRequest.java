@@ -19,9 +19,10 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
 
@@ -36,11 +37,9 @@ import org.springframework.util.FastByteArrayOutputStream;
 abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequest
 		implements StreamingHttpOutputMessage {
 
-	@Nullable
-	private Body body;
+	private @Nullable Body body;
 
-	@Nullable
-	private FastByteArrayOutputStream bodyStream;
+	private @Nullable FastByteArrayOutputStream bodyStream;
 
 
 	@Override

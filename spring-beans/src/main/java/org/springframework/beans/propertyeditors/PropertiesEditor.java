@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Custom {@link java.beans.PropertyEditor} for {@link Properties} objects.

@@ -28,8 +28,8 @@ import jakarta.jms.TopicConnectionFactory;
 import jakarta.jms.TopicSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -131,20 +131,17 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	@Nullable
-	public static Session getTransactionalSession(final ConnectionFactory cf,
-			@Nullable final Connection existingCon, final boolean synchedLocalTransactionAllowed)
+	public static @Nullable Session getTransactionalSession(final ConnectionFactory cf,
+			final @Nullable Connection existingCon, final boolean synchedLocalTransactionAllowed)
 			throws JMSException {
 
 		return doGetTransactionalSession(cf, new ResourceFactory() {
 			@Override
-			@Nullable
-			public Session getSession(JmsResourceHolder holder) {
+			public @Nullable Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(Session.class, existingCon);
 			}
 			@Override
-			@Nullable
-			public Connection getConnection(JmsResourceHolder holder) {
+			public @Nullable Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection());
 			}
 			@Override
@@ -176,20 +173,17 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	@Nullable
-	public static QueueSession getTransactionalQueueSession(final QueueConnectionFactory cf,
-			@Nullable final QueueConnection existingCon, final boolean synchedLocalTransactionAllowed)
+	public static @Nullable QueueSession getTransactionalQueueSession(final QueueConnectionFactory cf,
+			final @Nullable QueueConnection existingCon, final boolean synchedLocalTransactionAllowed)
 			throws JMSException {
 
 		return (QueueSession) doGetTransactionalSession(cf, new ResourceFactory() {
 			@Override
-			@Nullable
-			public Session getSession(JmsResourceHolder holder) {
+			public @Nullable Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(QueueSession.class, existingCon);
 			}
 			@Override
-			@Nullable
-			public Connection getConnection(JmsResourceHolder holder) {
+			public @Nullable Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection(QueueConnection.class));
 			}
 			@Override
@@ -221,20 +215,17 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	@Nullable
-	public static TopicSession getTransactionalTopicSession(final TopicConnectionFactory cf,
-			@Nullable final TopicConnection existingCon, final boolean synchedLocalTransactionAllowed)
+	public static @Nullable TopicSession getTransactionalTopicSession(final TopicConnectionFactory cf,
+			final @Nullable TopicConnection existingCon, final boolean synchedLocalTransactionAllowed)
 			throws JMSException {
 
 		return (TopicSession) doGetTransactionalSession(cf, new ResourceFactory() {
 			@Override
-			@Nullable
-			public Session getSession(JmsResourceHolder holder) {
+			public @Nullable Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(TopicSession.class, existingCon);
 			}
 			@Override
-			@Nullable
-			public Connection getConnection(JmsResourceHolder holder) {
+			public @Nullable Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection(TopicConnection.class));
 			}
 			@Override
@@ -265,8 +256,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @throws JMSException in case of JMS failure
 	 * @see #doGetTransactionalSession(jakarta.jms.ConnectionFactory, ResourceFactory, boolean)
 	 */
-	@Nullable
-	public static Session doGetTransactionalSession(
+	public static @Nullable Session doGetTransactionalSession(
 			ConnectionFactory connectionFactory, ResourceFactory resourceFactory) throws JMSException {
 
 		return doGetTransactionalSession(connectionFactory, resourceFactory, true);
@@ -284,9 +274,8 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	@Nullable
 	@SuppressWarnings("NullAway")
-	public static Session doGetTransactionalSession(
+	public static @Nullable Session doGetTransactionalSession(
 			ConnectionFactory connectionFactory, ResourceFactory resourceFactory, boolean startConnection)
 			throws JMSException {
 
@@ -373,8 +362,7 @@ public abstract class ConnectionFactoryUtils {
 		 * @return an appropriate Session fetched from the holder,
 		 * or {@code null} if none found
 		 */
-		@Nullable
-		Session getSession(JmsResourceHolder holder);
+		@Nullable Session getSession(JmsResourceHolder holder);
 
 		/**
 		 * Fetch an appropriate Connection from the given JmsResourceHolder.
@@ -382,8 +370,7 @@ public abstract class ConnectionFactoryUtils {
 		 * @return an appropriate Connection fetched from the holder,
 		 * or {@code null} if none found
 		 */
-		@Nullable
-		Connection getConnection(JmsResourceHolder holder);
+		@Nullable Connection getConnection(JmsResourceHolder holder);
 
 		/**
 		 * Create a new JMS Connection for registration with a JmsResourceHolder.

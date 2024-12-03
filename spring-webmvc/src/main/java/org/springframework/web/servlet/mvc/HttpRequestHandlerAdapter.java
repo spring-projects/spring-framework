@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
@@ -45,8 +45,7 @@ public class HttpRequestHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	@Nullable
-	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	public @Nullable ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
 		((HttpRequestHandler) handler).handleRequest(request, response);

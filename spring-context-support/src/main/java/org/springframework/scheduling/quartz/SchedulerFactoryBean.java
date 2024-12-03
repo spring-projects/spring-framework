@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
@@ -44,7 +45,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -119,8 +119,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setApplicationContext
 	 * @see ResourceLoaderClassLoadHelper
 	 */
-	@Nullable
-	public static ResourceLoader getConfigTimeResourceLoader() {
+	public static @Nullable ResourceLoader getConfigTimeResourceLoader() {
 		return configTimeResourceLoaderHolder.get();
 	}
 
@@ -133,8 +132,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setTaskExecutor
 	 * @see LocalTaskExecutorThreadPool
 	 */
-	@Nullable
-	public static Executor getConfigTimeTaskExecutor() {
+	public static @Nullable Executor getConfigTimeTaskExecutor() {
 		return configTimeTaskExecutorHolder.get();
 	}
 
@@ -147,8 +145,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setDataSource
 	 * @see LocalDataSourceJobStore
 	 */
-	@Nullable
-	public static DataSource getConfigTimeDataSource() {
+	public static @Nullable DataSource getConfigTimeDataSource() {
 		return configTimeDataSourceHolder.get();
 	}
 
@@ -161,43 +158,32 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setNonTransactionalDataSource
 	 * @see LocalDataSourceJobStore
 	 */
-	@Nullable
-	public static DataSource getConfigTimeNonTransactionalDataSource() {
+	public static @Nullable DataSource getConfigTimeNonTransactionalDataSource() {
 		return configTimeNonTransactionalDataSourceHolder.get();
 	}
 
 
-	@Nullable
-	private SchedulerFactory schedulerFactory;
+	private @Nullable SchedulerFactory schedulerFactory;
 
 	private Class<? extends SchedulerFactory> schedulerFactoryClass = StdSchedulerFactory.class;
 
-	@Nullable
-	private String schedulerName;
+	private @Nullable String schedulerName;
 
-	@Nullable
-	private Resource configLocation;
+	private @Nullable Resource configLocation;
 
-	@Nullable
-	private Properties quartzProperties;
+	private @Nullable Properties quartzProperties;
 
-	@Nullable
-	private Executor taskExecutor;
+	private @Nullable Executor taskExecutor;
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
-	@Nullable
-	private DataSource nonTransactionalDataSource;
+	private @Nullable DataSource nonTransactionalDataSource;
 
-	@Nullable
-	private Map<String, ?> schedulerContextMap;
+	private @Nullable Map<String, ?> schedulerContextMap;
 
-	@Nullable
-	private String applicationContextSchedulerContextKey;
+	private @Nullable String applicationContextSchedulerContextKey;
 
-	@Nullable
-	private JobFactory jobFactory;
+	private @Nullable JobFactory jobFactory;
 
 	private boolean jobFactorySet = false;
 
@@ -211,14 +197,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private Scheduler scheduler;
+	private @Nullable Scheduler scheduler;
 
 
 	/**
@@ -773,8 +756,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	@Override
-	@Nullable
-	public Scheduler getObject() {
+	public @Nullable Scheduler getObject() {
 		return this.scheduler;
 	}
 

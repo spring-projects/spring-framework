@@ -1,9 +1,7 @@
 /**
  * Core support package for type introspection.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.core.type;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

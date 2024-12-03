@@ -16,7 +16,7 @@
 
 package org.springframework.core.style;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy that encapsulates value String styling algorithms

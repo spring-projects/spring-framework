@@ -31,10 +31,10 @@ import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
 /**
@@ -58,14 +58,11 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	private final FastByteArrayOutputStream cachedContent;
 
-	@Nullable
-	private final Integer contentCacheLimit;
+	private final @Nullable Integer contentCacheLimit;
 
-	@Nullable
-	private ServletInputStream inputStream;
+	private @Nullable ServletInputStream inputStream;
 
-	@Nullable
-	private BufferedReader reader;
+	private @Nullable BufferedReader reader;
 
 
 	/**

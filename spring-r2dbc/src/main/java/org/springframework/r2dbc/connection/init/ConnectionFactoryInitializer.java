@@ -17,10 +17,10 @@
 package org.springframework.r2dbc.connection.init;
 
 import io.r2dbc.spi.ConnectionFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,14 +36,11 @@ import org.springframework.util.Assert;
  */
 public class ConnectionFactoryInitializer implements InitializingBean, DisposableBean {
 
-	@Nullable
-	private ConnectionFactory connectionFactory;
+	private @Nullable ConnectionFactory connectionFactory;
 
-	@Nullable
-	private DatabasePopulator databasePopulator;
+	private @Nullable DatabasePopulator databasePopulator;
 
-	@Nullable
-	private DatabasePopulator databaseCleaner;
+	private @Nullable DatabasePopulator databaseCleaner;
 
 	private boolean enabled = true;
 

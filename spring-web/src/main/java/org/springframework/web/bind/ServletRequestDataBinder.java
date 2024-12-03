@@ -25,12 +25,12 @@ import java.util.Set;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
@@ -216,8 +216,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 		private final WebDataBinder dataBinder;
 
-		@Nullable
-		private Set<String> parameterNames;
+		private @Nullable Set<String> parameterNames;
 
 		protected ServletRequestValueResolver(ServletRequest request, WebDataBinder dataBinder) {
 			this.request = request;
@@ -228,9 +227,8 @@ public class ServletRequestDataBinder extends WebDataBinder {
 			return this.request;
 		}
 
-		@Nullable
 		@Override
-		public final Object resolveValue(String name, Class<?> paramType) {
+		public @Nullable final Object resolveValue(String name, Class<?> paramType) {
 			Object value = getRequestParameter(name, paramType);
 			if (value == null) {
 				value = this.dataBinder.resolvePrefixValue(name, paramType, this::getRequestParameter);
@@ -241,14 +239,12 @@ public class ServletRequestDataBinder extends WebDataBinder {
 			return value;
 		}
 
-		@Nullable
-		protected Object getRequestParameter(String name, Class<?> type) {
+		protected @Nullable Object getRequestParameter(String name, Class<?> type) {
 			Object value = this.request.getParameterValues(name);
 			return (ObjectUtils.isArray(value) && Array.getLength(value) == 1 ? Array.get(value, 0) : value);
 		}
 
-		@Nullable
-		private Object getMultipartValue(String name) {
+		private @Nullable Object getMultipartValue(String name) {
 			MultipartRequest multipartRequest = WebUtils.getNativeRequest(this.request, MultipartRequest.class);
 			if (multipartRequest != null) {
 				List<MultipartFile> files = multipartRequest.getFiles(name);

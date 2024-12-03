@@ -21,7 +21,7 @@ import java.lang.annotation.Annotation;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKeyInvocationContext;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The default {@link CacheKeyInvocationContext} implementation.
@@ -35,11 +35,10 @@ class DefaultCacheKeyInvocationContext<A extends Annotation> extends DefaultCach
 
 	private final CacheInvocationParameter[] keyParameters;
 
-	@Nullable
-	private final CacheInvocationParameter valueParameter;
+	private final @Nullable CacheInvocationParameter valueParameter;
 
 
-	public DefaultCacheKeyInvocationContext(AbstractJCacheKeyOperation<A> operation, Object target, Object[] args) {
+	public DefaultCacheKeyInvocationContext(AbstractJCacheKeyOperation<A> operation, Object target, @Nullable Object[] args) {
 		super(operation, target, args);
 		this.keyParameters = operation.getKeyParameters(args);
 		if (operation instanceof CachePutOperation cachePutOperation) {
@@ -57,8 +56,7 @@ class DefaultCacheKeyInvocationContext<A extends Annotation> extends DefaultCach
 	}
 
 	@Override
-	@Nullable
-	public CacheInvocationParameter getValueParameter() {
+	public @Nullable CacheInvocationParameter getValueParameter() {
 		return this.valueParameter;
 	}
 

@@ -20,9 +20,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.lang.Nullable;
 
 /**
  * A simple transaction-backed {@link Scope} implementation, delegating to
@@ -61,8 +62,7 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
-	@Nullable
-	public Object remove(String name) {
+	public @Nullable Object remove(String name) {
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects != null) {
 			scopedObjects.destructionCallbacks.remove(name);
@@ -82,14 +82,12 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
-	@Nullable
-	public Object resolveContextualObject(String key) {
+	public @Nullable Object resolveContextualObject(String key) {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public String getConversationId() {
+	public @Nullable String getConversationId() {
 		return TransactionSynchronizationManager.getCurrentTransactionName();
 	}
 

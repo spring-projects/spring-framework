@@ -18,8 +18,9 @@ package org.springframework.beans.factory.config;
 
 import java.util.Comparator;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -39,17 +40,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class TypedStringValue implements BeanMetadataElement, Comparable<TypedStringValue> {
 
-	@Nullable
-	private String value;
+	private @Nullable String value;
 
-	@Nullable
-	private volatile Object targetType;
+	private volatile @Nullable Object targetType;
 
-	@Nullable
-	private Object source;
+	private @Nullable Object source;
 
-	@Nullable
-	private String specifiedTypeName;
+	private @Nullable String specifiedTypeName;
 
 	private volatile boolean dynamic;
 
@@ -97,8 +94,7 @@ public class TypedStringValue implements BeanMetadataElement, Comparable<TypedSt
 	/**
 	 * Return the String value.
 	 */
-	@Nullable
-	public String getValue() {
+	public @Nullable String getValue() {
 		return this.value;
 	}
 
@@ -133,8 +129,7 @@ public class TypedStringValue implements BeanMetadataElement, Comparable<TypedSt
 	/**
 	 * Return the type to convert to.
 	 */
-	@Nullable
-	public String getTargetTypeName() {
+	public @Nullable String getTargetTypeName() {
 		Object targetTypeValue = this.targetType;
 		if (targetTypeValue instanceof Class<?> clazz) {
 			return clazz.getName();
@@ -159,8 +154,7 @@ public class TypedStringValue implements BeanMetadataElement, Comparable<TypedSt
 	 * @return the resolved type to convert to
 	 * @throws ClassNotFoundException if the type cannot be resolved
 	 */
-	@Nullable
-	public Class<?> resolveTargetType(@Nullable ClassLoader classLoader) throws ClassNotFoundException {
+	public @Nullable Class<?> resolveTargetType(@Nullable ClassLoader classLoader) throws ClassNotFoundException {
 		String typeName = getTargetTypeName();
 		if (typeName == null) {
 			return null;
@@ -180,8 +174,7 @@ public class TypedStringValue implements BeanMetadataElement, Comparable<TypedSt
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.source;
 	}
 
@@ -195,8 +188,7 @@ public class TypedStringValue implements BeanMetadataElement, Comparable<TypedSt
 	/**
 	 * Return the type name as actually specified for this particular value, if any.
 	 */
-	@Nullable
-	public String getSpecifiedTypeName() {
+	public @Nullable String getSpecifiedTypeName() {
 		return this.specifiedTypeName;
 	}
 

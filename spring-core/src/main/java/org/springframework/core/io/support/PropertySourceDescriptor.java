@@ -19,7 +19,7 @@ package org.springframework.core.io.support;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Descriptor for a {@link org.springframework.core.env.PropertySource PropertySource}.

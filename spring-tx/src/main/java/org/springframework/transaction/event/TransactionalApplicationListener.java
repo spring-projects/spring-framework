@@ -18,11 +18,12 @@ package org.springframework.transaction.event;
 
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 
 /**
  * An {@link ApplicationListener} that is invoked according to a {@link TransactionPhase}.

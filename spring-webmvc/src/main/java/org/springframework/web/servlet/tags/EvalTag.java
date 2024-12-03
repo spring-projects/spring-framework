@@ -21,6 +21,7 @@ import java.io.IOException;
 import jakarta.el.ELContext;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.EnvironmentAccessor;
@@ -35,7 +36,6 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
@@ -113,11 +113,9 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	private final ExpressionParser expressionParser = new SpelExpressionParser();
 
-	@Nullable
-	private Expression expression;
+	private @Nullable Expression expression;
 
-	@Nullable
-	private String var;
+	private @Nullable String var;
 
 	private int scope = PageContext.PAGE_SCOPE;
 
@@ -202,8 +200,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		return context;
 	}
 
-	@Nullable
-	private ConversionService getConversionService(PageContext pageContext) {
+	private @Nullable ConversionService getConversionService(PageContext pageContext) {
 		return (ConversionService) pageContext.getRequest().getAttribute(ConversionService.class.getName());
 	}
 
@@ -213,8 +210,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 		private final PageContext pageContext;
 
-		@Nullable
-		private final ELContext elContext;
+		private final @Nullable ELContext elContext;
 
 
 		public JspPropertyAccessor(PageContext pageContext) {
@@ -223,8 +219,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 
 		@Override
-		@Nullable
-		public Class<?>[] getSpecificTargetClasses() {
+		public Class<?> @Nullable [] getSpecificTargetClasses() {
 			return null;
 		}
 
@@ -253,8 +248,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			throw new UnsupportedOperationException();
 		}
 
-		@Nullable
-		private Object resolveImplicitVariable(String name) throws AccessException {
+		private @Nullable Object resolveImplicitVariable(String name) throws AccessException {
 			if (this.elContext == null) {
 				return null;
 			}

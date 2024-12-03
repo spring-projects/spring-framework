@@ -24,13 +24,13 @@ import java.util.function.Function;
 import io.netty.channel.ChannelOption;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,23 +52,17 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 			client -> client.compress(true).responseTimeout(Duration.ofSeconds(10));
 
 
-	@Nullable
-	private final ReactorResourceFactory resourceFactory;
+	private final @Nullable ReactorResourceFactory resourceFactory;
 
-	@Nullable
-	private final Function<HttpClient, HttpClient> mapper;
+	private final @Nullable Function<HttpClient, HttpClient> mapper;
 
-	@Nullable
-	private Integer connectTimeout;
+	private @Nullable Integer connectTimeout;
 
-	@Nullable
-	private Duration readTimeout;
+	private @Nullable Duration readTimeout;
 
-	@Nullable
-	private Duration exchangeTimeout;
+	private @Nullable Duration exchangeTimeout;
 
-	@Nullable
-	private volatile HttpClient httpClient;
+	private volatile @Nullable HttpClient httpClient;
 
 	private final Object lifecycleMonitor = new Object();
 

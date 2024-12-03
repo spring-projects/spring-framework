@@ -18,10 +18,11 @@ package org.springframework.aop.aspectj;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**

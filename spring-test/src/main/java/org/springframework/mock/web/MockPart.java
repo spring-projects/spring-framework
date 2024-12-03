@@ -23,10 +23,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +42,7 @@ public class MockPart implements Part {
 
 	private final String name;
 
-	@Nullable
-	private final String filename;
+	private final @Nullable String filename;
 
 	private final byte[] content;
 
@@ -54,7 +53,7 @@ public class MockPart implements Part {
 	 * Constructor for a part with a name and content only.
 	 * @see #getHeaders()
 	 */
-	public MockPart(String name, @Nullable byte[] content) {
+	public MockPart(String name, byte @Nullable [] content) {
 		this(name, null, content);
 	}
 
@@ -62,7 +61,7 @@ public class MockPart implements Part {
 	 * Constructor for a part with a name, filename, and content.
 	 * @see #getHeaders()
 	 */
-	public MockPart(String name, @Nullable String filename, @Nullable byte[] content) {
+	public MockPart(String name, @Nullable String filename, byte @Nullable [] content) {
 		this(name, filename, content, null);
 	}
 
@@ -71,7 +70,7 @@ public class MockPart implements Part {
 	 * @since 6.1.2
 	 * @see #getHeaders()
 	 */
-	public MockPart(String name, @Nullable String filename, @Nullable byte[] content, @Nullable MediaType contentType) {
+	public MockPart(String name, @Nullable String filename, byte @Nullable [] content, @Nullable MediaType contentType) {
 		Assert.hasLength(name, "'name' must not be empty");
 		this.name = name;
 		this.filename = filename;
@@ -87,14 +86,12 @@ public class MockPart implements Part {
 	}
 
 	@Override
-	@Nullable
-	public String getSubmittedFileName() {
+	public @Nullable String getSubmittedFileName() {
 		return this.filename;
 	}
 
 	@Override
-	@Nullable
-	public String getContentType() {
+	public @Nullable String getContentType() {
 		MediaType contentType = this.headers.getContentType();
 		return (contentType != null ? contentType.toString() : null);
 	}
@@ -120,8 +117,7 @@ public class MockPart implements Part {
 	}
 
 	@Override
-	@Nullable
-	public String getHeader(String name) {
+	public @Nullable String getHeader(String name) {
 		return this.headers.getFirst(name);
 	}
 

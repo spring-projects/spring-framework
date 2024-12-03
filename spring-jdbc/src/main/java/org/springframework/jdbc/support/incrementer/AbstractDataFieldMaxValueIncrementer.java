@@ -18,9 +18,10 @@ package org.springframework.jdbc.support.incrementer;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,12 +36,10 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
 	/** The name of the sequence/table containing the sequence. */
-	@Nullable
-	private String incrementerName;
+	private @Nullable String incrementerName;
 
 	/** The length to which a string result should be pre-pended with zeroes. */
 	protected int paddingLength = 0;

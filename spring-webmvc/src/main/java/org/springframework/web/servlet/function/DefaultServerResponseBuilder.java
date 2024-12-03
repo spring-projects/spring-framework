@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
@@ -35,7 +36,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -69,7 +69,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder header(String headerName, String... headerValues) {
+	@SuppressWarnings("NullAway") // TODO NullAway bug potentially due to the recursive generic type
+	public ServerResponse.BodyBuilder header(String headerName, @Nullable String... headerValues) {
 		Assert.notNull(headerName, "HeaderName must not be null");
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
@@ -227,8 +228,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		@Nullable
-		protected ModelAndView writeToInternal(HttpServletRequest request, HttpServletResponse response,
+		protected @Nullable ModelAndView writeToInternal(HttpServletRequest request, HttpServletResponse response,
 				Context context) throws Exception {
 
 			return this.writeFunction.write(request, response);

@@ -16,7 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionException;
@@ -50,8 +51,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	private boolean completed = false;
 
-	@Nullable
-	private Object savepoint;
+	private @Nullable Object savepoint;
 
 
 	//---------------------------------------------------------------------
@@ -129,8 +129,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	/**
 	 * Get the savepoint for this transaction, if any.
 	 */
-	@Nullable
-	protected Object getSavepoint() {
+	protected @Nullable Object getSavepoint() {
 		return this.savepoint;
 	}
 

@@ -23,7 +23,8 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 
@@ -39,8 +40,7 @@ import org.springframework.scheduling.Trigger;
 public class NoOpTaskScheduler implements TaskScheduler {
 
 	@Override
-	@Nullable
-	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+	public @Nullable ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		Instant nextExecution = trigger.nextExecution(new SimpleTriggerContext(getClock()));
 		return (nextExecution != null ? new NoOpScheduledFuture<>() : null);
 	}

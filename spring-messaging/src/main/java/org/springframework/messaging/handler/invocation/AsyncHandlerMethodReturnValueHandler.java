@@ -18,8 +18,9 @@ package org.springframework.messaging.handler.invocation;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * An extension of {@link HandlerMethodReturnValueHandler} for handling async,
@@ -61,7 +62,6 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * no further handling will be performed
 	 * @since 6.0
 	 */
-	@Nullable
-	CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType);
+	@Nullable CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType);
 
 }

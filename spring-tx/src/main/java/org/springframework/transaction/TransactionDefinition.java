@@ -16,7 +16,7 @@
 
 package org.springframework.transaction;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface that defines Spring-compliant transaction properties.
@@ -272,8 +272,7 @@ public interface TransactionDefinition {
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
-	@Nullable
-	default String getName() {
+	default @Nullable String getName() {
 		return null;
 	}
 

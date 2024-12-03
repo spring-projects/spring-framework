@@ -19,8 +19,9 @@ package org.springframework.jdbc.support;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface for retrieving keys, typically used for auto-generated keys
@@ -58,8 +59,7 @@ public interface KeyHolder {
 	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered
 	 * @see #getKeyAs(Class)
 	 */
-	@Nullable
-	Number getKey() throws InvalidDataAccessApiUsageException;
+	@Nullable Number getKey() throws InvalidDataAccessApiUsageException;
 
 	/**
 	 * Retrieve the first item from the first map, assuming that there is just
@@ -76,8 +76,7 @@ public interface KeyHolder {
 	 * @since 5.3
 	 * @see #getKey()
 	 */
-	@Nullable
-	<T> T getKeyAs(Class<T> keyType) throws InvalidDataAccessApiUsageException;
+	<T> @Nullable T getKeyAs(Class<T> keyType) throws InvalidDataAccessApiUsageException;
 
 	/**
 	 * Retrieve the first map of keys.
@@ -86,8 +85,7 @@ public interface KeyHolder {
 	 * @return the Map of generated keys for a single row
 	 * @throws InvalidDataAccessApiUsageException if keys for multiple rows are encountered
 	 */
-	@Nullable
-	Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException;
+	@Nullable Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException;
 
 	/**
 	 * Return a reference to the List that contains the keys.

@@ -16,9 +16,10 @@
 
 package org.springframework.context.event.test;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
-import org.springframework.lang.Nullable;
 
 /**
  * A simple POJO that implements {@link ResolvableTypeProvider}.

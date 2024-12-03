@@ -31,6 +31,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutParameter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.MethodMatcher;
@@ -42,7 +43,6 @@ import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -118,16 +118,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * This will be non-null if the creator of this advice object knows the argument names
 	 * and sets them explicitly.
 	 */
-	@Nullable
-	private String[] argumentNames;
+	private @Nullable String @Nullable [] argumentNames;
 
 	/** Non-null if after throwing advice binds the thrown value. */
-	@Nullable
-	private String throwingName;
+	private @Nullable String throwingName;
 
 	/** Non-null if after returning advice binds the return value. */
-	@Nullable
-	private String returningName;
+	private @Nullable String returningName;
 
 	private Class<?> discoveredReturningType = Object.class;
 
@@ -145,13 +142,11 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 
-	@Nullable
-	private Map<String, Integer> argumentBindings;
+	private @Nullable Map<String, Integer> argumentBindings;
 
 	private boolean argumentsIntrospected = false;
 
-	@Nullable
-	private Type discoveredReturningGenericType;
+	private @Nullable Type discoveredReturningGenericType;
 	// Note: Unlike return type, no such generic information is needed for the throwing type,
 	// since Java doesn't allow exception types to be parameterized.
 
@@ -212,8 +207,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Return the ClassLoader for aspect instances.
 	 */
-	@Nullable
-	public final ClassLoader getAspectClassLoader() {
+	public final @Nullable ClassLoader getAspectClassLoader() {
 		return this.aspectInstanceFactory.getAspectClassLoader();
 	}
 
@@ -318,8 +312,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.discoveredReturningType;
 	}
 
-	@Nullable
-	protected Type getDiscoveredReturningGenericType() {
+	protected @Nullable Type getDiscoveredReturningGenericType() {
 		return this.discoveredReturningGenericType;
 	}
 
@@ -657,8 +650,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Get the current join point match at the join point we are being dispatched on.
 	 */
-	@Nullable
-	protected JoinPointMatch getJoinPointMatch() {
+	protected @Nullable JoinPointMatch getJoinPointMatch() {
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
 		if (!(mi instanceof ProxyMethodInvocation pmi)) {
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
@@ -672,8 +664,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	// 'last man wins' which is not what we want at all.
 	// Using the expression is guaranteed to be safe, since 2 identical expressions
 	// are guaranteed to bind in exactly the same way.
-	@Nullable
-	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation pmi) {
+	protected @Nullable JoinPointMatch getJoinPointMatch(ProxyMethodInvocation pmi) {
 		String expression = this.pointcut.getExpression();
 		return (expression != null ? (JoinPointMatch) pmi.getUserAttribute(expression) : null);
 	}

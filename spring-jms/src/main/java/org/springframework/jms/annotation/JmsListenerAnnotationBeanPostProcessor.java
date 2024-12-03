@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -52,7 +53,6 @@ import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MethodJmsListenerEndpoint;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
@@ -99,20 +99,16 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
+	private @Nullable String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
-	@Nullable
-	private JmsListenerEndpointRegistry endpointRegistry;
+	private @Nullable JmsListenerEndpointRegistry endpointRegistry;
 
 	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
 			new MessageHandlerMethodFactoryAdapter();
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
@@ -324,8 +320,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 	}
 
-	@Nullable
-	private String resolve(String value) {
+	private @Nullable String resolve(String value) {
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
@@ -338,8 +333,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	 */
 	private class MessageHandlerMethodFactoryAdapter implements MessageHandlerMethodFactory {
 
-		@Nullable
-		private MessageHandlerMethodFactory messageHandlerMethodFactory;
+		private @Nullable MessageHandlerMethodFactory messageHandlerMethodFactory;
 
 		public void setMessageHandlerMethodFactory(MessageHandlerMethodFactory messageHandlerMethodFactory) {
 			this.messageHandlerMethodFactory = messageHandlerMethodFactory;

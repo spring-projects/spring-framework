@@ -21,10 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,8 +38,7 @@ import org.springframework.util.Assert;
  */
 public final class GeneratedClass {
 
-	@Nullable
-	private final GeneratedClass enclosingClass;
+	private final @Nullable GeneratedClass enclosingClass;
 
 	private final ClassName name;
 
@@ -98,8 +98,7 @@ public final class GeneratedClass {
 	 * instance represents a top-level class.
 	 * @return the enclosing generated class, if any
 	 */
-	@Nullable
-	public GeneratedClass getEnclosingClass() {
+	public @Nullable GeneratedClass getEnclosingClass() {
 		return this.enclosingClass;
 	}
 

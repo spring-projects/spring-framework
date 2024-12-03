@@ -18,8 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.WebRequestInterceptor;

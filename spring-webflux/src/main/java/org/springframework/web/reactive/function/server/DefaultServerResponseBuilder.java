@@ -31,6 +31,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -90,7 +91,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 
 	@Override
-	public ServerResponse.BodyBuilder header(String headerName, String... headerValues) {
+	@SuppressWarnings("NullAway") // TODO NullAway bug potentially due to the recursive generic type
+	public ServerResponse.BodyBuilder header(String headerName, @Nullable String... headerValues) {
 		Assert.notNull(headerName, "HeaderName must not be null");
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);

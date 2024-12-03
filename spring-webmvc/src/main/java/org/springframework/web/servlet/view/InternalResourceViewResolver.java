@@ -16,7 +16,8 @@
 
 package org.springframework.web.servlet.view;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -51,8 +52,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	private static final boolean jstlPresent = ClassUtils.isPresent(
 			"jakarta.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader());
 
-	@Nullable
-	private Boolean alwaysInclude;
+	private @Nullable Boolean alwaysInclude;
 
 
 	/**

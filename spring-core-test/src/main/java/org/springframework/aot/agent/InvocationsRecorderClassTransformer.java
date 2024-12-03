@@ -21,8 +21,9 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.ClassReader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

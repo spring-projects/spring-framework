@@ -28,9 +28,7 @@ class CustomCacheConfiguration {
 	// tag::snippet[]
 	@Bean
 	fun cacheManager(): CacheManager {
-		return CaffeineCacheManager().apply {
-			cacheNames = listOf("default", "books")
-		}
+		return CaffeineCacheManager("default", "books")
 	}
 	// end::snippet[]
 }

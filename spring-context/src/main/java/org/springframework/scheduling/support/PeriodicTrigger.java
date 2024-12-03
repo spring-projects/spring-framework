@@ -21,7 +21,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
@@ -51,11 +52,9 @@ public class PeriodicTrigger implements Trigger {
 
 	private final Duration period;
 
-	@Nullable
-	private final ChronoUnit chronoUnit;
+	private final @Nullable ChronoUnit chronoUnit;
 
-	@Nullable
-	private volatile Duration initialDelay;
+	private volatile @Nullable Duration initialDelay;
 
 	private volatile boolean fixedRate;
 
@@ -197,8 +196,7 @@ public class PeriodicTrigger implements Trigger {
 	 * Return the initial delay, or {@code null} if none.
 	 * @since 6.0
 	 */
-	@Nullable
-	public Duration getInitialDelayDuration() {
+	public @Nullable Duration getInitialDelayDuration() {
 		return this.initialDelay;
 	}
 

@@ -18,11 +18,12 @@ package org.springframework.orm.jpa;
 
 import java.util.Collections;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**

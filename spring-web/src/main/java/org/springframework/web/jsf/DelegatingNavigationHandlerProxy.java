@@ -18,9 +18,9 @@ package org.springframework.web.jsf;
 
 import jakarta.faces.application.NavigationHandler;
 import jakarta.faces.context.FacesContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -79,8 +79,7 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	 */
 	public static final String DEFAULT_TARGET_BEAN_NAME = "jsfNavigationHandler";
 
-	@Nullable
-	private NavigationHandler originalNavigationHandler;
+	private @Nullable NavigationHandler originalNavigationHandler;
 
 
 	/**

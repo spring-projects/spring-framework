@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -29,7 +30,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
@@ -173,8 +173,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 	}
 
-	@Nullable
-	private Object removeReactiveAttribute(String name, Model model) {
+	private @Nullable Object removeReactiveAttribute(String name, Model model) {
 		for (Map.Entry<String, Object> entry : model.asMap().entrySet()) {
 			if (entry.getKey().startsWith(name)) {
 				ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());

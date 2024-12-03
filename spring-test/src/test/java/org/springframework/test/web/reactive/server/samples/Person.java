@@ -19,8 +19,7 @@ package org.springframework.test.web.reactive.server.samples;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.xml.bind.annotation.XmlRootElement;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @XmlRootElement
 class Person {

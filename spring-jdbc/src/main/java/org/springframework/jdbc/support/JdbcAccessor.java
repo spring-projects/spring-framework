@@ -20,9 +20,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,11 +43,9 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
-	@Nullable
-	private volatile SQLExceptionTranslator exceptionTranslator;
+	private volatile @Nullable SQLExceptionTranslator exceptionTranslator;
 
 	private boolean lazyInit = true;
 
@@ -62,8 +60,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Return the DataSource used by this template.
 	 */
-	@Nullable
-	public DataSource getDataSource() {
+	public @Nullable DataSource getDataSource() {
 		return this.dataSource;
 	}
 

@@ -18,7 +18,7 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract superclass for expression pointcuts,
@@ -33,11 +33,9 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public abstract class AbstractExpressionPointcut implements ExpressionPointcut, Serializable {
 
-	@Nullable
-	private String location;
+	private @Nullable String location;
 
-	@Nullable
-	private String expression;
+	private @Nullable String expression;
 
 
 	/**
@@ -53,8 +51,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	 * @return location information as a human-readable String,
 	 * or {@code null} if none is available
 	 */
-	@Nullable
-	public String getLocation() {
+	public @Nullable String getLocation() {
 		return this.location;
 	}
 
@@ -89,8 +86,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	 * Return this pointcut's expression.
 	 */
 	@Override
-	@Nullable
-	public String getExpression() {
+	public @Nullable String getExpression() {
 		return this.expression;
 	}
 

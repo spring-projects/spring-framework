@@ -32,8 +32,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockFilterRegistration;
 import org.springframework.mock.web.MockServletContext;
@@ -58,11 +58,9 @@ final class MockMvcFilterDecorator implements Filter {
 
 	private final Filter delegate;
 
-	@Nullable
-	private final Function<ServletContext, FilterConfig> filterConfigInitializer;
+	private final @Nullable Function<ServletContext, FilterConfig> filterConfigInitializer;
 
-	@Nullable
-	private final EnumSet<DispatcherType> dispatcherTypes;
+	private final @Nullable EnumSet<DispatcherType> dispatcherTypes;
 
 	private final boolean hasPatterns;
 

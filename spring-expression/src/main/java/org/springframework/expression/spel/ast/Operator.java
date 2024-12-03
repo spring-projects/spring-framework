@@ -19,11 +19,12 @@ package org.springframework.expression.spel.ast;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
-import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -47,11 +48,9 @@ public abstract class Operator extends SpelNodeImpl {
 	// whose accessors seem to only be returning 'Object' - the actual descriptors may
 	// indicate 'int')
 
-	@Nullable
-	protected String leftActualDescriptor;
+	protected @Nullable String leftActualDescriptor;
 
-	@Nullable
-	protected String rightActualDescriptor;
+	protected @Nullable String rightActualDescriptor;
 
 
 	public Operator(String payload, int startPos, int endPos, SpelNodeImpl... operands) {

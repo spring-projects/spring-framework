@@ -34,6 +34,7 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -44,7 +45,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.Assert;
@@ -77,14 +77,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	private static final Failures failures = Failures.instance();
 
 
-	@Nullable
-	private final HttpMessageContentConverter contentConverter;
+	private final @Nullable HttpMessageContentConverter contentConverter;
 
-	@Nullable
-	private Class<?> resourceLoadClass;
+	private @Nullable Class<?> resourceLoadClass;
 
-	@Nullable
-	private Charset charset;
+	private @Nullable Charset charset;
 
 	private JsonLoader jsonLoader;
 
@@ -488,8 +485,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 		return this.myself;
 	}
 
-	@Nullable
-	private String toJsonString() {
+	private @Nullable String toJsonString() {
 		return (this.actual != null ? this.actual.getJson() : null);
 	}
 
@@ -546,8 +542,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 			this.jsonPath = JsonPath.compile(this.path);
 		}
 
-		@Nullable
-		Object assertHasPath() {
+		@Nullable Object assertHasPath() {
 			return getValue();
 		}
 
@@ -560,8 +555,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 			}
 		}
 
-		@Nullable
-		Object getValue() {
+		@Nullable Object getValue() {
 			try {
 				return read();
 			}
@@ -570,8 +564,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 			}
 		}
 
-		@Nullable
-		private Object read() {
+		private @Nullable Object read() {
 			return this.jsonPath.read(this.json);
 		}
 

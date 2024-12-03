@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 
 /**
  * Factory hook that allows for custom modification of new bean instances &mdash;
@@ -70,8 +71,7 @@ public interface BeanPostProcessor {
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
-	@Nullable
-	default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	default @Nullable Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
@@ -96,8 +96,7 @@ public interface BeanPostProcessor {
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.beans.factory.FactoryBean
 	 */
-	@Nullable
-	default Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+	default @Nullable Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 

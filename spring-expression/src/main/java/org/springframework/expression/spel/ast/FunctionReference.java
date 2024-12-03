@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -34,7 +36,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectionHelper;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -62,8 +63,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
-	@Nullable
-	private volatile Method method;
+	private volatile @Nullable Method method;
 
 
 	public FunctionReference(String functionName, int startPos, int endPos, SpelNodeImpl... arguments) {
@@ -174,6 +174,7 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @throws EvaluationException if there is any problem invoking the method
 	 * @since 6.1
 	 */
+	@SuppressWarnings("NullAway") // TODO Remove when NullAway 0.12.2 is released, see https://github.com/uber/NullAway/pull/1089
 	private TypedValue executeFunctionViaMethodHandle(ExpressionState state, MethodHandle methodHandle) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
 		MethodType declaredParams = methodHandle.type();

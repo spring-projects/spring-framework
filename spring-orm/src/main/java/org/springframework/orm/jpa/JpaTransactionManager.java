@@ -28,6 +28,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.RollbackException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -40,7 +41,6 @@ import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
@@ -117,21 +117,17 @@ import org.springframework.util.CollectionUtils;
 public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private EntityManagerFactory entityManagerFactory;
+	private @Nullable EntityManagerFactory entityManagerFactory;
 
-	@Nullable
-	private String persistenceUnitName;
+	private @Nullable String persistenceUnitName;
 
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
 
-	@Nullable
-	private Consumer<EntityManager> entityManagerInitializer;
+	private @Nullable Consumer<EntityManager> entityManagerInitializer;
 
 
 	/**
@@ -168,8 +164,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the EntityManagerFactory that this instance should manage transactions for.
 	 */
-	@Nullable
-	public EntityManagerFactory getEntityManagerFactory() {
+	public @Nullable EntityManagerFactory getEntityManagerFactory() {
 		return this.entityManagerFactory;
 	}
 
@@ -200,8 +195,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the name of the persistence unit to manage transactions for, if any.
 	 */
-	@Nullable
-	public String getPersistenceUnitName() {
+	public @Nullable String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
 
@@ -276,8 +270,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
-	@Nullable
-	public DataSource getDataSource() {
+	public @Nullable DataSource getDataSource() {
 		return this.dataSource;
 	}
 
@@ -665,13 +658,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	private class JpaTransactionObject extends JdbcTransactionObjectSupport {
 
-		@Nullable
-		private EntityManagerHolder entityManagerHolder;
+		private @Nullable EntityManagerHolder entityManagerHolder;
 
 		private boolean newEntityManagerHolder;
 
-		@Nullable
-		private Object transactionData;
+		private @Nullable Object transactionData;
 
 		public void setEntityManagerHolder(
 				@Nullable EntityManagerHolder entityManagerHolder, boolean newEntityManagerHolder) {
@@ -705,8 +696,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
-		@Nullable
-		public Object getTransactionData() {
+		public @Nullable Object getTransactionData() {
 			return this.transactionData;
 		}
 
@@ -808,8 +798,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		private final EntityManagerHolder entityManagerHolder;
 
-		@Nullable
-		private final ConnectionHolder connectionHolder;
+		private final @Nullable ConnectionHolder connectionHolder;
 
 		private SuspendedResourcesHolder(EntityManagerHolder emHolder, @Nullable ConnectionHolder conHolder) {
 			this.entityManagerHolder = emHolder;
@@ -820,8 +809,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			return this.entityManagerHolder;
 		}
 
-		@Nullable
-		private ConnectionHolder getConnectionHolder() {
+		private @Nullable ConnectionHolder getConnectionHolder() {
 			return this.connectionHolder;
 		}
 	}

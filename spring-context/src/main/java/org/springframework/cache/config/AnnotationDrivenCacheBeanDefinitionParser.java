@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.aop.config.AopNamespaceUtils;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -79,8 +79,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 * register an AutoProxyCreator} with the container as necessary.
 	 */
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {
 			// mode="aspectj"

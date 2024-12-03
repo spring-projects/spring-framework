@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -29,7 +30,6 @@ import reactor.core.publisher.Operators;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.log.LogDelegateFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -70,15 +70,13 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	private static final AtomicLongFieldUpdater<AbstractListenerReadPublisher> DEMAND_FIELD_UPDATER =
 			AtomicLongFieldUpdater.newUpdater(AbstractListenerReadPublisher.class, "demand");
 
-	@Nullable
-	private volatile Subscriber<? super T> subscriber;
+	private volatile @Nullable Subscriber<? super T> subscriber;
 
 	/** Flag to defer transition to COMPLETED briefly while SUBSCRIBING or READING. */
 	private volatile boolean completionPending;
 
 	/** Flag to defer transition to COMPLETED briefly while SUBSCRIBING or READING. */
-	@Nullable
-	private volatile Throwable errorPending;
+	private volatile @Nullable Throwable errorPending;
 
 	private final String logPrefix;
 
@@ -162,8 +160,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * Read once from the input, if possible.
 	 * @return the item that was read; or {@code null}
 	 */
-	@Nullable
-	protected abstract T read() throws IOException;
+	protected abstract @Nullable T read() throws IOException;
 
 	/**
 	 * Invoked when reading is paused due to a lack of demand.

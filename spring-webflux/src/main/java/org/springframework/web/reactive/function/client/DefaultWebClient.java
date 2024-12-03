@@ -34,6 +34,7 @@ import java.util.function.Predicate;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,7 +49,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -83,26 +83,21 @@ final class DefaultWebClient implements WebClient {
 
 	private final ExchangeFunction exchangeFunction;
 
-	@Nullable
-	private final ExchangeFilterFunction filterFunctions;
+	private final @Nullable ExchangeFilterFunction filterFunctions;
 
 	private final UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private final HttpHeaders defaultHeaders;
+	private final @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private final MultiValueMap<String, String> defaultCookies;
+	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
+	private final @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest;
 
 	private final List<DefaultResponseSpec.StatusHandler> defaultStatusHandlers;
 
 	private final ObservationRegistry observationRegistry;
 
-	@Nullable
-	private final ClientRequestObservationConvention observationConvention;
+	private final @Nullable ClientRequestObservationConvention observationConvention;
 
 	private final DefaultWebClientBuilder builder;
 
@@ -202,25 +197,19 @@ final class DefaultWebClient implements WebClient {
 
 		private final HttpMethod httpMethod;
 
-		@Nullable
-		private URI uri;
+		private @Nullable URI uri;
 
-		@Nullable
-		private HttpHeaders headers;
+		private @Nullable HttpHeaders headers;
 
-		@Nullable
-		private MultiValueMap<String, String> cookies;
+		private @Nullable MultiValueMap<String, String> cookies;
 
-		@Nullable
-		private BodyInserter<?, ? super ClientHttpRequest> inserter;
+		private @Nullable BodyInserter<?, ? super ClientHttpRequest> inserter;
 
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
-		@Nullable
-		private Function<Context, Context> contextModifier;
+		private @Nullable Function<Context, Context> contextModifier;
 
-		@Nullable
-		private Consumer<ClientHttpRequest> httpRequestConsumer;
+		private @Nullable Consumer<ClientHttpRequest> httpRequestConsumer;
 
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
@@ -684,8 +673,7 @@ final class DefaultWebClient implements WebClient {
 			return t -> response.createException().flatMap(ex -> Mono.error(ex.initCause(t)));
 		}
 
-		@Nullable
-		private <T> Mono<T> applyStatusHandlers(ClientResponse response) {
+		private <T> @Nullable Mono<T> applyStatusHandlers(ClientResponse response) {
 			HttpStatusCode statusCode = response.statusCode();
 			for (StatusHandler handler : this.statusHandlers) {
 				if (handler.test(statusCode)) {

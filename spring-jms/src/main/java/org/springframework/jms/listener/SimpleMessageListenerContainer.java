@@ -30,9 +30,9 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.support.JmsUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -73,14 +73,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private int concurrentConsumers = 1;
 
-	@Nullable
-	private Executor taskExecutor;
+	private @Nullable Executor taskExecutor;
 
-	@Nullable
-	private Set<Session> sessions;
+	private @Nullable Set<Session> sessions;
 
-	@Nullable
-	private Set<MessageConsumer> consumers;
+	private @Nullable Set<MessageConsumer> consumers;
 
 	private final Lock consumersLock = new ReentrantLock();
 

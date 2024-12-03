@@ -20,10 +20,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Postgres-specific implementation for the {@link CallMetaDataProvider} interface.
@@ -65,8 +66,7 @@ public class PostgresCallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		return (schemaName == null ? this.schemaName : super.metaDataSchemaNameToUse(schemaName));
 	}
 

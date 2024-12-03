@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Adapts a given {@link Map} to the {@link MultiValueMap} contract.
@@ -56,8 +56,7 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	// MultiValueMap implementation
 
 	@Override
-	@Nullable
-	public V getFirst(K key) {
+	public @Nullable V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
 		return (!CollectionUtils.isEmpty(values) ? values.get(0) : null);
 	}
@@ -126,26 +125,22 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	}
 
 	@Override
-	@Nullable
-	public List<V> get(Object key) {
+	public @Nullable List<V> get(Object key) {
 		return this.targetMap.get(key);
 	}
 
 	@Override
-	@Nullable
-	public List<V> put(K key, List<V> value) {
+	public @Nullable List<V> put(K key, List<V> value) {
 		return this.targetMap.put(key, value);
 	}
 
 	@Override
-	@Nullable
-	public List<V> putIfAbsent(K key, List<V> value) {
+	public @Nullable List<V> putIfAbsent(K key, List<V> value) {
 		return this.targetMap.putIfAbsent(key, value);
 	}
 
 	@Override
-	@Nullable
-	public List<V> remove(Object key) {
+	public @Nullable List<V> remove(Object key) {
 		return this.targetMap.remove(key);
 	}
 

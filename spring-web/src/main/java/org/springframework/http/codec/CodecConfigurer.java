@@ -19,9 +19,10 @@ package org.springframework.http.codec;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.lang.Nullable;
 
 /**
  * Defines a common interface for configuring either client or server HTTP
@@ -396,15 +397,13 @@ public interface CodecConfigurer {
 		 * Get the configured limit on the number of bytes that can be buffered whenever
 		 * the input stream needs to be aggregated.
 		 */
-		@Nullable
-		Integer maxInMemorySize();
+		@Nullable Integer maxInMemorySize();
 
 		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
 		 */
-		@Nullable
-		Boolean isEnableLoggingRequestDetails();
+		@Nullable Boolean isEnableLoggingRequestDetails();
 	}
 
 

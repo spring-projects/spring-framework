@@ -25,11 +25,11 @@ import java.util.function.IntPredicate;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.buffer.CloseableDataBuffer;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -50,8 +50,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
-	@Nullable
-	private JettyWebSocketSession delegateSession;
+	private @Nullable JettyWebSocketSession delegateSession;
 
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,

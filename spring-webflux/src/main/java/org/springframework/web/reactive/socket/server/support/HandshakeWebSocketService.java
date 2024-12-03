@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.Lifecycle;
@@ -34,7 +35,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -102,8 +102,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private final RequestUpgradeStrategy upgradeStrategy;
 
-	@Nullable
-	private Predicate<String> sessionAttributePredicate;
+	private @Nullable Predicate<String> sessionAttributePredicate;
 
 	private volatile boolean running;
 
@@ -150,8 +149,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	 * attributes from {@code WebSession} attributes.
 	 * @since 5.1
 	 */
-	@Nullable
-	public Predicate<String> getSessionAttributePredicate() {
+	public @Nullable Predicate<String> getSessionAttributePredicate() {
 		return this.sessionAttributePredicate;
 	}
 
@@ -230,8 +228,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return Mono.error(new ServerWebInputException(reason));
 	}
 
-	@Nullable
-	private String selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
+	private @Nullable String selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
 		String protocolHeader = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
 		if (protocolHeader != null) {
 			List<String> supportedProtocols = handler.getSubProtocols();

@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.SchedulerConfigException;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.quartz.impl.jdbcjobstore.SimpleSemaphore;
@@ -34,7 +35,6 @@ import org.quartz.utils.DBConnectionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.lang.Nullable;
 
 /**
  * Subclass of Quartz's {@link JobStoreCMT} class that delegates to a Spring-managed
@@ -86,8 +86,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	public static final String NON_TX_DATA_SOURCE_PREFIX = "springNonTxDataSource.";
 
 
-	@Nullable
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
 
 	@Override

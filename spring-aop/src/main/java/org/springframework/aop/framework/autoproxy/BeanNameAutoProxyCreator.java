@@ -19,10 +19,11 @@ package org.springframework.aop.framework.autoproxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
@@ -48,8 +49,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
 	private static final String[] NO_ALIASES = new String[0];
 
-	@Nullable
-	private List<String> beanNames;
+	private @Nullable List<String> beanNames;
 
 
 	/**
@@ -81,8 +81,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * @see #setBeanNames(String...)
 	 */
 	@Override
-	@Nullable
-	protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
+	protected @Nullable TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
 		return (isSupportedBeanName(beanClass, beanName) ?
 				super.getCustomTargetSource(beanClass, beanName) : null);
 	}
@@ -93,8 +92,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * @see #setBeanNames(String...)
 	 */
 	@Override
-	@Nullable
-	protected Object[] getAdvicesAndAdvisorsForBean(
+	protected Object @Nullable [] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 
 		return (isSupportedBeanName(beanClass, beanName) ?

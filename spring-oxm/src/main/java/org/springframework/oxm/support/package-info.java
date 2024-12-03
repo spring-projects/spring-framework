@@ -4,9 +4,7 @@
  * with TrAX, MarshallingView for use within Spring Web MVC, and the
  * MarshallingMessageConverter for use within Spring's JMS support.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.oxm.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

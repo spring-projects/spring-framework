@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
@@ -35,7 +37,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -60,8 +61,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
-	@Nullable
-	private List<HttpMessageConverter<?>> messageConverters;
+	private @Nullable List<HttpMessageConverter<?>> messageConverters;
 
 
 	/**
@@ -194,8 +194,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @return the associated charset, or {@code null} if none
 	 * @since 4.3.8
 	 */
-	@Nullable
-	protected Charset getCharset(ClientHttpResponse response) {
+	protected @Nullable Charset getCharset(ClientHttpResponse response) {
 		MediaType contentType = response.getHeaders().getContentType();
 		return (contentType != null ? contentType.getCharset() : null);
 	}
@@ -207,7 +206,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * </pre>
 	 */
 	private String getErrorMessage(
-			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset,
+			int rawStatusCode, String statusText, byte @Nullable [] responseBody, @Nullable Charset charset,
 			@Nullable URI url, @Nullable HttpMethod method) {
 
 		StringBuilder msg = new StringBuilder(rawStatusCode + " " + statusText);

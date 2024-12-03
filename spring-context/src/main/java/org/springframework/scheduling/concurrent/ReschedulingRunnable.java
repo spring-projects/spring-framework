@@ -26,7 +26,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -53,11 +54,9 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final ScheduledExecutorService executor;
 
-	@Nullable
-	private ScheduledFuture<?> currentFuture;
+	private @Nullable ScheduledFuture<?> currentFuture;
 
-	@Nullable
-	private Instant scheduledExecutionTime;
+	private @Nullable Instant scheduledExecutionTime;
 
 	private final Object triggerContextMonitor = new Object();
 
@@ -72,8 +71,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	}
 
 
-	@Nullable
-	public ScheduledFuture<?> schedule() {
+	public @Nullable ScheduledFuture<?> schedule() {
 		synchronized (this.triggerContextMonitor) {
 			this.scheduledExecutionTime = this.trigger.nextExecution(this.triggerContext);
 			if (this.scheduledExecutionTime == null) {

@@ -24,12 +24,12 @@ import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -62,23 +62,20 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	/**
 	 * Stores the mappings of bean key to {@code ObjectName}.
 	 */
-	@Nullable
-	private Properties mappings;
+	private @Nullable Properties mappings;
 
 	/**
 	 * Stores the {@code Resource}s containing properties that should be loaded
 	 * into the final merged set of {@code Properties} used for {@code ObjectName}
 	 * resolution.
 	 */
-	@Nullable
-	private Resource[] mappingLocations;
+	private Resource @Nullable [] mappingLocations;
 
 	/**
 	 * Stores the result of merging the {@code mappings} {@code Properties}
 	 * with the properties stored in the resources defined by {@code mappingLocations}.
 	 */
-	@Nullable
-	private Properties mergedMappings;
+	private @Nullable Properties mergedMappings;
 
 
 	/**

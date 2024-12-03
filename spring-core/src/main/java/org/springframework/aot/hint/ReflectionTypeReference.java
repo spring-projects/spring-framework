@@ -16,7 +16,8 @@
 
 package org.springframework.aot.hint;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -35,8 +36,7 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 		this.type = type;
 	}
 
-	@Nullable
-	private static TypeReference getEnclosingClass(Class<?> type) {
+	private static @Nullable TypeReference getEnclosingClass(Class<?> type) {
 		Class<?> candidate = (type.isArray() ? type.componentType().getEnclosingClass() :
 				type.getEnclosingClass());
 		return (candidate != null ? new ReflectionTypeReference(candidate) : null);

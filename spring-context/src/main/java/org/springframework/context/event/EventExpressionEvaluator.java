@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.CachedExpressionEvaluator;
@@ -51,7 +53,7 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 	 * to {@code true}.
 	 */
 	public boolean condition(String conditionExpression, ApplicationEvent event, Method targetMethod,
-			AnnotatedElementKey methodKey, Object[] args) {
+			AnnotatedElementKey methodKey, @Nullable Object[] args) {
 
 		EventExpressionRootObject rootObject = new EventExpressionRootObject(event, args);
 		EvaluationContext evaluationContext = createEvaluationContext(rootObject, targetMethod, args);
@@ -60,7 +62,7 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 	}
 
 	private EvaluationContext createEvaluationContext(EventExpressionRootObject rootObject,
-			Method method, Object[] args) {
+			Method method, @Nullable Object[] args) {
 
 		MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(rootObject,
 				method, args, getParameterNameDiscoverer());

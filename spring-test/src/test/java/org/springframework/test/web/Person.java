@@ -18,8 +18,8 @@ package org.springframework.test.web;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 @XmlRootElement

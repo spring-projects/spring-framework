@@ -22,7 +22,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -66,14 +67,11 @@ public class PagedListHolder<E> implements Serializable {
 
 	private List<E> source = Collections.emptyList();
 
-	@Nullable
-	private Date refreshDate;
+	private @Nullable Date refreshDate;
 
-	@Nullable
-	private SortDefinition sort;
+	private @Nullable SortDefinition sort;
 
-	@Nullable
-	private SortDefinition sortUsed;
+	private @Nullable SortDefinition sortUsed;
 
 	private int pageSize = DEFAULT_PAGE_SIZE;
 
@@ -134,8 +132,7 @@ public class PagedListHolder<E> implements Serializable {
 	/**
 	 * Return the last time the list has been fetched from the source provider.
 	 */
-	@Nullable
-	public Date getRefreshDate() {
+	public @Nullable Date getRefreshDate() {
 		return this.refreshDate;
 	}
 
@@ -151,8 +148,7 @@ public class PagedListHolder<E> implements Serializable {
 	/**
 	 * Return the sort definition for this holder.
 	 */
-	@Nullable
-	public SortDefinition getSort() {
+	public @Nullable SortDefinition getSort() {
 		return this.sort;
 	}
 

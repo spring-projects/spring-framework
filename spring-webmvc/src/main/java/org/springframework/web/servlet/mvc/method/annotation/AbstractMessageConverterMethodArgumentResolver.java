@@ -32,6 +32,7 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -49,7 +50,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Errors;
@@ -123,8 +123,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws IOException if the reading from the request fails
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
-	@Nullable
-	protected Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
+	protected @Nullable Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
@@ -143,9 +142,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws IOException if the reading from the request fails
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
-	@Nullable
 	@SuppressWarnings({"rawtypes", "unchecked", "NullAway"})
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter,
+	protected <T> @Nullable Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		Class<?> contextClass = parameter.getContainingClass();
@@ -330,8 +328,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @return the adapted argument, or the original resolved argument as-is
 	 * @since 4.3.5
 	 */
-	@Nullable
-	protected Object adaptArgumentIfNecessary(@Nullable Object arg, MethodParameter parameter) {
+	protected @Nullable Object adaptArgumentIfNecessary(@Nullable Object arg, MethodParameter parameter) {
 		if (parameter.getParameterType() == Optional.class) {
 			if (arg == null || (arg instanceof Collection<?> collection && collection.isEmpty()) ||
 					(arg instanceof Object[] array && array.length == 0)) {
@@ -358,8 +355,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		private final HttpHeaders headers;
 
-		@Nullable
-		private final InputStream body;
+		private final @Nullable InputStream body;
 
 		public EmptyBodyCheckingHttpInputMessage(HttpInputMessage inputMessage) throws IOException {
 			this.headers = inputMessage.getHeaders();

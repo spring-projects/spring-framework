@@ -18,7 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.util.Collection;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.TransactionDefinition;
 
 /**
@@ -41,8 +42,7 @@ public interface TransactionAttribute extends TransactionDefinition {
 	 * to process this specific transaction.
 	 * @since 3.0
 	 */
-	@Nullable
-	String getQualifier();
+	@Nullable String getQualifier();
 
 	/**
 	 * Return labels associated with this transaction attribute.

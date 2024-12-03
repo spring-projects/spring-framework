@@ -23,9 +23,10 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -57,8 +58,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	List<Resource> scripts = new ArrayList<>();
 
-	@Nullable
-	private String sqlScriptEncoding;
+	private @Nullable String sqlScriptEncoding;
 
 	private String separator = ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 

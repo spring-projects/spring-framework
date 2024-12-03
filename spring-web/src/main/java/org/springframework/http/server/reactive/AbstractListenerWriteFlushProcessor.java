@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.log.LogDelegateFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,13 +56,11 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
-	@Nullable
-	private Subscription subscription;
+	private @Nullable Subscription subscription;
 
 	private volatile boolean sourceCompleted;
 
-	@Nullable
-	private volatile AbstractListenerWriteProcessor<?> currentWriteProcessor;
+	private volatile @Nullable AbstractListenerWriteProcessor<?> currentWriteProcessor;
 
 	private final WriteResultPublisher resultPublisher;
 

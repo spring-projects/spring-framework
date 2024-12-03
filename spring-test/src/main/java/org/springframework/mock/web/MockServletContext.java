@@ -43,13 +43,13 @@ import jakarta.servlet.SessionTrackingMode;
 import jakarta.servlet.descriptor.JspConfigDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -132,18 +132,15 @@ public class MockServletContext implements ServletContext {
 
 	private final Set<String> declaredRoles = new LinkedHashSet<>();
 
-	@Nullable
-	private Set<SessionTrackingMode> sessionTrackingModes;
+	private @Nullable Set<SessionTrackingMode> sessionTrackingModes;
 
 	private final SessionCookieConfig sessionCookieConfig = new MockSessionCookieConfig();
 
 	private int sessionTimeout;
 
-	@Nullable
-	private String requestCharacterEncoding;
+	private @Nullable String requestCharacterEncoding;
 
-	@Nullable
-	private String responseCharacterEncoding;
+	private @Nullable String responseCharacterEncoding;
 
 	private final Map<String, FilterRegistration> filterRegistrations = new LinkedHashMap<>();
 
@@ -226,8 +223,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public ServletContext getContext(String contextPath) {
+	public @Nullable ServletContext getContext(String contextPath) {
 		if (this.contextPath.equals(contextPath)) {
 			return this;
 		}
@@ -271,8 +267,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public String getMimeType(String filePath) {
+	public @Nullable String getMimeType(String filePath) {
 		String extension = StringUtils.getFilenameExtension(filePath);
 		if (this.mimeTypes.containsKey(extension)) {
 			return this.mimeTypes.get(extension).toString();
@@ -295,8 +290,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public Set<String> getResourcePaths(String path) {
+	public @Nullable Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
 		String resourceLocation = getResourceLocation(actualPath);
 		Resource resource = null;
@@ -327,8 +321,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public URL getResource(String path) throws MalformedURLException {
+	public @Nullable URL getResource(String path) throws MalformedURLException {
 		String resourceLocation = getResourceLocation(path);
 		Resource resource = null;
 		try {
@@ -351,8 +344,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public InputStream getResourceAsStream(String path) {
+	public @Nullable InputStream getResourceAsStream(String path) {
 		String resourceLocation = getResourceLocation(path);
 		Resource resource = null;
 		try {
@@ -379,8 +371,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public RequestDispatcher getNamedDispatcher(String path) {
+	public @Nullable RequestDispatcher getNamedDispatcher(String path) {
 		return this.namedRequestDispatchers.get(path);
 	}
 
@@ -446,8 +437,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public String getRealPath(String path) {
+	public @Nullable String getRealPath(String path) {
 		String resourceLocation = getResourceLocation(path);
 		Resource resource = null;
 		try {
@@ -469,8 +459,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public String getInitParameter(String name) {
+	public @Nullable String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
@@ -496,8 +485,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name) {
+	public @Nullable Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
@@ -534,8 +522,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getClassLoader() {
+	public @Nullable ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
 
@@ -590,8 +577,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override  // on Servlet 4.0
-	@Nullable
-	public String getRequestCharacterEncoding() {
+	public @Nullable String getRequestCharacterEncoding() {
 		return this.requestCharacterEncoding;
 	}
 
@@ -601,8 +587,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override  // on Servlet 4.0
-	@Nullable
-	public String getResponseCharacterEncoding() {
+	public @Nullable String getResponseCharacterEncoding() {
 		return this.responseCharacterEncoding;
 	}
 
@@ -615,8 +600,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
-	@Nullable
-	public FilterRegistration getFilterRegistration(String filterName) {
+	public @Nullable FilterRegistration getFilterRegistration(String filterName) {
 		return this.filterRegistrations.get(filterName);
 	}
 
@@ -665,8 +649,7 @@ public class MockServletContext implements ServletContext {
 	 * @see jakarta.servlet.ServletContext#getServletRegistration(java.lang.String)
 	 */
 	@Override
-	@Nullable
-	public ServletRegistration getServletRegistration(String servletName) {
+	public @Nullable ServletRegistration getServletRegistration(String servletName) {
 		return null;
 	}
 

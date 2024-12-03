@@ -30,6 +30,7 @@ import java.util.Set;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -53,7 +54,6 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
@@ -551,8 +551,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		return (mediaType != null && (safeMediaType(mediaType)));
 	}
 
-	@Nullable
-	private MediaType resolveMediaType(ServletRequest request, String extension) {
+	private @Nullable MediaType resolveMediaType(ServletRequest request, String extension) {
 		MediaType result = null;
 		String rawMimeType = request.getServletContext().getMimeType("file." + extension);
 		if (StringUtils.hasText(rawMimeType)) {

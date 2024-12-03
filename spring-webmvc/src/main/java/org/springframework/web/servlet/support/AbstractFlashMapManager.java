@@ -26,8 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -89,8 +89,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 
 	@Override
-	@Nullable
-	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
+	public final @Nullable FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
 		List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
 		if (CollectionUtils.isEmpty(allFlashMaps)) {
 			return null;
@@ -139,8 +138,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * Return a FlashMap contained in the given list that matches the request.
 	 * @return a matching FlashMap or {@code null}
 	 */
-	@Nullable
-	private FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
+	private @Nullable FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
 		List<FlashMap> result = new ArrayList<>();
 		for (FlashMap flashMap : allMaps) {
 			if (isFlashMapForRequest(flashMap, request)) {
@@ -218,8 +216,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		}
 	}
 
-	@Nullable
-	private String decodeAndNormalizePath(@Nullable String path, HttpServletRequest request) {
+	private @Nullable String decodeAndNormalizePath(@Nullable String path, HttpServletRequest request) {
 		if (StringUtils.hasLength(path)) {
 			path = getUrlPathHelper().decodeRequestString(request, path);
 			if (path.charAt(0) != '/') {
@@ -236,8 +233,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @param request the current request
 	 * @return a List with FlashMap instances, or {@code null} if none found
 	 */
-	@Nullable
-	protected abstract List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
+	protected abstract @Nullable List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
 
 	/**
 	 * Update the FlashMap instances in the underlying storage.
@@ -258,8 +254,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @return the mutex to use (may be {@code null} if none applicable)
 	 * @since 4.0.3
 	 */
-	@Nullable
-	protected Object getFlashMapsMutex(HttpServletRequest request) {
+	protected @Nullable Object getFlashMapsMutex(HttpServletRequest request) {
 		return DEFAULT_FLASH_MAPS_MUTEX;
 	}
 

@@ -28,6 +28,7 @@ import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -35,7 +36,6 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.CachingDestinationResolver;
 import org.springframework.jms.support.destination.DestinationResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -190,8 +190,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		);
 
 
-	@Nullable
-	private Executor taskExecutor;
+	private @Nullable Executor taskExecutor;
 
 	private boolean virtualThreads = false;
 
@@ -221,8 +220,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private volatile boolean interrupted;
 
-	@Nullable
-	private Runnable stopCallback;
+	private @Nullable Runnable stopCallback;
 
 	private Object currentRecoveryMarker = new Object();
 
@@ -1246,14 +1244,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	private class AsyncMessageListenerInvoker implements SchedulingAwareRunnable {
 
-		@Nullable
-		private Session session;
+		private @Nullable Session session;
 
-		@Nullable
-		private MessageConsumer consumer;
+		private @Nullable MessageConsumer consumer;
 
-		@Nullable
-		private Object lastRecoveryMarker;
+		private @Nullable Object lastRecoveryMarker;
 
 		private boolean lastMessageSucceeded;
 
@@ -1261,8 +1256,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private volatile boolean idle = true;
 
-		@Nullable
-		private volatile Thread currentReceiveThread;
+		private volatile @Nullable Thread currentReceiveThread;
 
 		@Override
 		public void run() {

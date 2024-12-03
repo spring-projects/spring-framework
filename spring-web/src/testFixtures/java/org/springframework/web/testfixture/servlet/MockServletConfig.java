@@ -23,8 +23,8 @@ import java.util.Map;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
@@ -37,14 +38,11 @@ import org.springframework.web.server.session.WebSessionManager;
 abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		implements WebTestClient.MockServerSpec<B> {
 
-	@Nullable
-	private List<WebFilter> filters;
+	private @Nullable List<WebFilter> filters;
 
-	@Nullable
-	private WebSessionManager sessionManager;
+	private @Nullable WebSessionManager sessionManager;
 
-	@Nullable
-	private List<MockServerConfigurer> configurers;
+	private @Nullable List<MockServerConfigurer> configurers;
 
 
 	AbstractMockServerSpec() {

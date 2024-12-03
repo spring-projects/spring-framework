@@ -28,13 +28,13 @@ import java.util.Set;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -106,8 +106,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @return an info in case of a match; or {@code null} otherwise.
 	 */
 	@Override
-	@Nullable
-	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
+	protected @Nullable RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
 		return info.getMatchingCondition(request);
 	}
 
@@ -120,8 +119,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	@Override
-	@Nullable
-	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+	protected @Nullable HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
 		request.removeAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		try {
 			return super.getHandlerInternal(request);
@@ -244,8 +242,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * but not by consumable/producible media types
 	 */
 	@Override
-	@Nullable
-	protected HandlerMethod handleNoMatch(
+	protected @Nullable HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
 		if (CollectionUtils.isEmpty(infos)) {

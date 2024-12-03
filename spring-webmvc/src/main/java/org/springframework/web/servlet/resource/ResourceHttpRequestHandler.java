@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -45,7 +46,6 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -113,38 +113,29 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
-	@Nullable
-	private ResourceResolverChain resolverChain;
+	private @Nullable ResourceResolverChain resolverChain;
 
-	@Nullable
-	private ResourceTransformerChain transformerChain;
+	private @Nullable ResourceTransformerChain transformerChain;
 
-	@Nullable
-	private ResourceHttpMessageConverter resourceHttpMessageConverter;
+	private @Nullable ResourceHttpMessageConverter resourceHttpMessageConverter;
 
-	@Nullable
-	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
+	private @Nullable ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
+	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
 	private final Map<String, MediaType> mediaTypes = new HashMap<>(4);
 
-	@Nullable
-	private CorsConfiguration corsConfiguration;
+	private @Nullable CorsConfiguration corsConfiguration;
 
-	@Nullable
-	private UrlPathHelper urlPathHelper;
+	private @Nullable UrlPathHelper urlPathHelper;
 
 	private boolean useLastModified = true;
 
-	@Nullable
-	private Function<Resource, String> etagGenerator;
+	private @Nullable Function<Resource, String> etagGenerator;
 
 	private boolean optimizeLocations = false;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 
 	public ResourceHttpRequestHandler() {
@@ -257,8 +248,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Return the configured resource converter.
 	 * @since 4.3
 	 */
-	@Nullable
-	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
+	public @Nullable ResourceHttpMessageConverter getResourceHttpMessageConverter() {
 		return this.resourceHttpMessageConverter;
 	}
 
@@ -275,8 +265,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Return the configured resource region converter.
 	 * @since 4.3
 	 */
-	@Nullable
-	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
+	public @Nullable ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
 		return this.resourceRegionHttpMessageConverter;
 	}
 
@@ -316,8 +305,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * Return the specified CORS configuration.
 	 */
 	@Override
-	@Nullable
-	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+	public @Nullable CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		return this.corsConfiguration;
 	}
 
@@ -335,8 +323,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * The configured {@link UrlPathHelper}.
 	 * @since 4.3.13
 	 */
-	@Nullable
-	public UrlPathHelper getUrlPathHelper() {
+	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
@@ -379,8 +366,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @return the HTTP ETag generator function
 	 * @since 6.1
 	 */
-	@Nullable
-	public Function<Resource, String> getEtagGenerator() {
+	public @Nullable Function<Resource, String> getEtagGenerator() {
 		return this.etagGenerator;
 	}
 
@@ -585,8 +571,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 	}
 
-	@Nullable
-	protected Resource getResource(HttpServletRequest request) throws IOException {
+	protected @Nullable Resource getResource(HttpServletRequest request) throws IOException {
 		String path = getPath(request);
 		path = processPath(path);
 		if (ResourceHandlerUtils.shouldIgnoreInputPath(path) || isInvalidPath(path)) {
@@ -644,8 +629,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	@Nullable
-	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
+	protected @Nullable MediaType getMediaType(HttpServletRequest request, Resource resource) {
 		MediaType result = null;
 		String mimeType = request.getServletContext().getMimeType(resource.getFilename());
 		if (StringUtils.hasText(mimeType)) {

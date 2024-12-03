@@ -26,7 +26,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -29,7 +30,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.LoggingCodecSupport;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeTypeUtils;

@@ -18,11 +18,10 @@ package org.springframework.messaging.rsocket;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RSocket} that saves the name of the invoked method and the input payload(s).
@@ -33,11 +32,11 @@ public class TestRSocket implements RSocket {
 
 	private Flux<Payload> payloadFluxToReturn = Flux.empty();
 
-	@Nullable private volatile String savedMethodName;
+	private volatile @Nullable String savedMethodName;
 
-	@Nullable private volatile Payload savedPayload;
+	private volatile @Nullable Payload savedPayload;
 
-	@Nullable private volatile Flux<Payload> savedPayloadFlux;
+	private volatile @Nullable Flux<Payload> savedPayloadFlux;
 
 
 	public void setPayloadMonoToReturn(Mono<Payload> payloadMonoToReturn) {
@@ -48,18 +47,15 @@ public class TestRSocket implements RSocket {
 		this.payloadFluxToReturn = payloadFluxToReturn;
 	}
 
-	@Nullable
-	public String getSavedMethodName() {
+	public @Nullable String getSavedMethodName() {
 		return this.savedMethodName;
 	}
 
-	@Nullable
-	public Payload getSavedPayload() {
+	public @Nullable Payload getSavedPayload() {
 		return this.savedPayload;
 	}
 
-	@Nullable
-	public Flux<Payload> getSavedPayloadFlux() {
+	public @Nullable Flux<Payload> getSavedPayloadFlux() {
 		return this.savedPayloadFlux;
 	}
 

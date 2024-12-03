@@ -18,11 +18,12 @@ package org.springframework.beans;
 
 import java.lang.reflect.Field;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,19 +36,16 @@ import org.springframework.util.Assert;
  */
 public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport implements TypeConverter {
 
-	@Nullable
-	TypeConverterDelegate typeConverterDelegate;
+	@Nullable TypeConverterDelegate typeConverterDelegate;
 
 
 	@Override
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
+	public <T> @Nullable T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
 		return convertIfNecessary(null, value, requiredType, TypeDescriptor.valueOf(requiredType));
 	}
 
 	@Override
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
+	public <T> @Nullable T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
 			@Nullable MethodParameter methodParam) throws TypeMismatchException {
 
 		return convertIfNecessary((methodParam != null ? methodParam.getParameterName() : null), value, requiredType,
@@ -55,8 +53,7 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	}
 
 	@Override
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
+	public <T> @Nullable T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 
 		return convertIfNecessary((field != null ? field.getName() : null), value, requiredType,
@@ -64,15 +61,13 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	}
 
 	@Override
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
+	public <T> @Nullable T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
 			@Nullable TypeDescriptor typeDescriptor) throws TypeMismatchException {
 
 		return convertIfNecessary(null, value, requiredType, typeDescriptor);
 	}
 
-	@Nullable
-	private <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object value,
+	private <T> @Nullable T convertIfNecessary(@Nullable String propertyName, @Nullable Object value,
 			@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws TypeMismatchException {
 
 		Assert.state(this.typeConverterDelegate != null, "No TypeConverterDelegate");

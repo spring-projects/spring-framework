@@ -18,8 +18,9 @@ package org.springframework.messaging.handler.annotation;
 
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Predicates for messaging annotations.
@@ -55,8 +56,7 @@ public class MessagingPredicates {
 
 	public static class DestinationVariablePredicate implements Predicate<MethodParameter> {
 
-		@Nullable
-		private String value;
+		private @Nullable String value;
 
 
 		public DestinationVariablePredicate value(@Nullable String name) {
@@ -79,14 +79,11 @@ public class MessagingPredicates {
 
 	public static class HeaderPredicate implements Predicate<MethodParameter> {
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
-		@Nullable
-		private Boolean required;
+		private @Nullable Boolean required;
 
-		@Nullable
-		private String defaultValue;
+		private @Nullable String defaultValue;
 
 
 		public HeaderPredicate name(@Nullable String name) {

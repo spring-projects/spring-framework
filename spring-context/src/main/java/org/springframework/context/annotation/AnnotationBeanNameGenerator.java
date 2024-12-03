@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -38,7 +39,6 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -119,8 +119,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @param annotatedDef the annotation-aware bean definition
 	 * @return the bean name, or {@code null} if none is found
 	 */
-	@Nullable
-	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
+	protected @Nullable String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata metadata = annotatedDef.getMetadata();
 
 		String beanName = getExplicitBeanName(metadata);
@@ -185,8 +184,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @since 6.1
 	 * @see org.springframework.stereotype.Component#value()
 	 */
-	@Nullable
-	private String getExplicitBeanName(AnnotationMetadata metadata) {
+	private @Nullable String getExplicitBeanName(AnnotationMetadata metadata) {
 		List<String> names = metadata.getAnnotations().stream(COMPONENT_ANNOTATION_CLASSNAME)
 				.map(annotation -> annotation.getString(MergedAnnotation.VALUE))
 				.filter(StringUtils::hasText)

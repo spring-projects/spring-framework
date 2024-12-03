@@ -23,8 +23,8 @@ import java.util.Deque;
 
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -245,11 +245,9 @@ public class TagWriter {
 	 */
 	private static final class SafeWriter {
 
-		@Nullable
-		private PageContext pageContext;
+		private @Nullable PageContext pageContext;
 
-		@Nullable
-		private Writer writer;
+		private @Nullable Writer writer;
 
 		public SafeWriter(PageContext pageContext) {
 			this.pageContext = pageContext;

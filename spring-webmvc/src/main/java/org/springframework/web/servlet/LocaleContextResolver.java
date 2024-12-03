@@ -20,10 +20,10 @@ import java.util.Locale;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link LocaleResolver} that adds support for a rich locale context

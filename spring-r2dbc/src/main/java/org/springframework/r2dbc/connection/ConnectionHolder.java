@@ -18,8 +18,8 @@ package org.springframework.r2dbc.connection;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
@@ -48,8 +48,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
 
 
-	@Nullable
-	private Connection currentConnection;
+	private @Nullable Connection currentConnection;
 
 	private boolean transactionActive;
 

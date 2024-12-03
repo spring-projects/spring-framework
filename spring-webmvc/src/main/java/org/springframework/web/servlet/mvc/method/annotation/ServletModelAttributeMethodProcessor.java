@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.Map;
 
 import jakarta.servlet.ServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DataBinder;
@@ -70,8 +70,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @see #createAttributeFromRequestValue
 	 */
 	@Override
-	@Nullable
-	protected final Object createAttribute(String attributeName, MethodParameter parameter,
+	protected final @Nullable Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
@@ -95,8 +94,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @param request the current request
 	 * @return the request value to try to convert, or {@code null} if none
 	 */
-	@Nullable
-	protected String getRequestValueForAttribute(String attributeName, NativeWebRequest request) {
+	protected @Nullable String getRequestValueForAttribute(String attributeName, NativeWebRequest request) {
 		Map<String, String> variables = getUriTemplateVariables(request);
 		String variableValue = variables.get(attributeName);
 		if (StringUtils.hasText(variableValue)) {
@@ -129,8 +127,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @return the created model attribute, or {@code null} if no suitable
 	 * conversion found
 	 */
-	@Nullable
-	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
+	protected @Nullable Object createAttributeFromRequestValue(String sourceValue, String attributeName,
 			MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
 

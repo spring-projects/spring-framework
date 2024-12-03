@@ -38,9 +38,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
@@ -67,8 +68,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final Executor executor;
 
-	@Nullable
-	private final Duration timeout;
+	private final @Nullable Duration timeout;
 
 
 	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
@@ -244,8 +244,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 		}
 
-		@Nullable
-		public InputStream wrapInputStream(HttpResponse<InputStream> response) {
+		public @Nullable InputStream wrapInputStream(HttpResponse<InputStream> response) {
 			InputStream body = response.body();
 			if (body == null) {
 				return body;

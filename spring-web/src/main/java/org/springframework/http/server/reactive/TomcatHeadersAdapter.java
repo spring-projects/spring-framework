@@ -29,9 +29,9 @@ import java.util.Set;
 
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -128,8 +128,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		if (containsKey(key)) {
 			return Collections.list(this.headers.values((String) key));
 		}
@@ -137,8 +136,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	@Nullable
-	public List<String> put(String key, List<String> value) {
+	public @Nullable List<String> put(String key, List<String> value) {
 		List<String> previousValues = get(key);
 		this.headers.removeHeader(key);
 		value.forEach(v -> this.headers.addValue(key).setString(v));
@@ -146,8 +144,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	@Nullable
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(Object key) {
 		if (key instanceof String headerName) {
 			List<String> previousValues = get(key);
 			this.headers.removeHeader(headerName);
@@ -227,15 +224,13 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 			return this.key;
 		}
 
-		@Nullable
 		@Override
-		public List<String> getValue() {
+		public @Nullable List<String> getValue() {
 			return get(this.key);
 		}
 
-		@Nullable
 		@Override
-		public List<String> setValue(List<String> value) {
+		public @Nullable List<String> setValue(List<String> value) {
 			List<String> previous = getValue();
 			headers.removeHeader(this.key);
 			addAll(this.key, value);
@@ -267,8 +262,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 		private final Enumeration<String> enumeration;
 
-		@Nullable
-		private String currentName;
+		private @Nullable String currentName;
 
 		private HeaderNamesIterator(Enumeration<String> enumeration) {
 			this.enumeration = enumeration;

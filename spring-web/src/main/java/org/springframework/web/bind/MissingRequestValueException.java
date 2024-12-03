@@ -16,8 +16,9 @@
 
 package org.springframework.web.bind;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link ServletRequestBindingException} exceptions that could
@@ -56,7 +57,7 @@ public class MissingRequestValueException extends ServletRequestBindingException
 	 * @since 6.0
 	 */
 	protected MissingRequestValueException(String msg, boolean missingAfterConversion,
-			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+			@Nullable String messageDetailCode, Object @Nullable [] messageDetailArguments) {
 
 		super(msg, messageDetailCode, messageDetailArguments);
 		this.missingAfterConversion = missingAfterConversion;

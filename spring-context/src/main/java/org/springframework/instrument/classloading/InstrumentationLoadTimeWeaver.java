@@ -23,8 +23,9 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.instrument.InstrumentationSavingAgent;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -56,11 +57,9 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 			InstrumentationLoadTimeWeaver.class.getClassLoader());
 
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
-	@Nullable
-	private final Instrumentation instrumentation;
+	private final @Nullable Instrumentation instrumentation;
 
 	private final List<ClassFileTransformer> transformers = new ArrayList<>(4);
 
@@ -142,8 +141,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * @return the Instrumentation instance, or {@code null} if none found
 	 * @see #isInstrumentationAvailable()
 	 */
-	@Nullable
-	private static Instrumentation getInstrumentation() {
+	private static @Nullable Instrumentation getInstrumentation() {
 		if (AGENT_CLASS_PRESENT) {
 			return InstrumentationAccessor.getInstrumentation();
 		}
@@ -171,8 +169,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 		private final ClassFileTransformer targetTransformer;
 
-		@Nullable
-		private final ClassLoader targetClassLoader;
+		private final @Nullable ClassLoader targetClassLoader;
 
 		public FilteringClassFileTransformer(
 				ClassFileTransformer targetTransformer, @Nullable ClassLoader targetClassLoader) {
@@ -182,8 +179,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		}
 
 		@Override
-		@Nullable
-		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+		public byte @Nullable [] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
 			if (this.targetClassLoader != loader) {

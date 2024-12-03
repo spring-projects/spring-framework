@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -35,7 +36,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -64,8 +64,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	private BodyInserter<?, ? super ClientHttpRequest> body = BodyInserters.empty();
 
-	@Nullable
-	private Consumer<ClientHttpRequest> httpRequestConsumer;
+	private @Nullable Consumer<ClientHttpRequest> httpRequestConsumer;
 
 
 	public DefaultClientRequestBuilder(ClientRequest other) {
@@ -190,8 +189,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final Map<String, Object> attributes;
 
-		@Nullable
-		private final Consumer<ClientHttpRequest> httpRequestConsumer;
+		private final @Nullable Consumer<ClientHttpRequest> httpRequestConsumer;
 
 		private final String logPrefix;
 
@@ -242,8 +240,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		}
 
 		@Override
-		@Nullable
-		public Consumer<ClientHttpRequest> httpRequest() {
+		public @Nullable Consumer<ClientHttpRequest> httpRequest() {
 			return this.httpRequestConsumer;
 		}
 

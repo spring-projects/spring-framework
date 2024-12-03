@@ -21,6 +21,7 @@ import java.lang.reflect.Proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.TargetSource;
@@ -45,7 +46,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -414,8 +414,7 @@ class AutoProxyCreatorTests {
 		}
 
 		@Override
-		@Nullable
-		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String name, @Nullable TargetSource customTargetSource) {
+		protected Object @Nullable [] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String name, @Nullable TargetSource customTargetSource) {
 			if (StaticMessageSource.class.equals(beanClass)) {
 				return DO_NOT_PROXY;
 			}

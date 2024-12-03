@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Assist with configuring {@code HandlerMapping}'s with path matching options.
@@ -31,11 +31,9 @@ import org.springframework.lang.Nullable;
  */
 public class PathMatchConfigurer {
 
-	@Nullable
-	private Boolean caseSensitiveMatch;
+	private @Nullable Boolean caseSensitiveMatch;
 
-	@Nullable
-	private Map<String, Predicate<Class<?>>> pathPrefixes;
+	private @Nullable Map<String, Predicate<Class<?>>> pathPrefixes;
 
 
 	/**
@@ -68,13 +66,11 @@ public class PathMatchConfigurer {
 	}
 
 
-	@Nullable
-	protected Boolean isUseCaseSensitiveMatch() {
+	protected @Nullable Boolean isUseCaseSensitiveMatch() {
 		return this.caseSensitiveMatch;
 	}
 
-	@Nullable
-	protected Map<String, Predicate<Class<?>>> getPathPrefixes() {
+	protected @Nullable Map<String, Predicate<Class<?>>> getPathPrefixes() {
 		return this.pathPrefixes;
 	}
 }

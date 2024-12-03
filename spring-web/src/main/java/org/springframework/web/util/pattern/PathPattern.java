@@ -23,11 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
 import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.http.server.PathContainer.Separator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -116,8 +117,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	private final boolean caseSensitive;
 
 	/** First path element in the parsed chain of path elements for this pattern. */
-	@Nullable
-	private final PathElement head;
+	private final @Nullable PathElement head;
 
 	/** How many variables are captured in this pattern. */
 	private int capturedVariableCount;
@@ -217,8 +217,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @param pathContainer the candidate path to attempt to match against
 	 * @return info object with the extracted variables, or {@code null} for no match
 	 */
-	@Nullable
-	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
+	public @Nullable PathMatchInfo matchAndExtract(PathContainer pathContainer) {
 		if (this.head == null) {
 			return (hasLength(pathContainer) && !pathContainerIsJustSeparator(pathContainer) ? null : PathMatchInfo.EMPTY);
 		}
@@ -241,8 +240,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @param pathContainer the candidate path to attempt to match against
 	 * @return info object with the match result or {@code null} for no match
 	 */
-	@Nullable
-	public PathRemainingMatchInfo matchStartOfPath(PathContainer pathContainer) {
+	public @Nullable PathRemainingMatchInfo matchStartOfPath(PathContainer pathContainer) {
 		if (this.head == null) {
 			return new PathRemainingMatchInfo(EMPTY_PATH, pathContainer);
 		}
@@ -492,8 +490,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		return sb.toString();
 	}
 
-	@Nullable
-	PathElement getHeadSection() {
+	@Nullable PathElement getHeadSection() {
 		return this.head;
 	}
 
@@ -647,11 +644,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		final int pathLength;
 
-		@Nullable
-		private Map<String, String> extractedUriVariables;
+		private @Nullable Map<String, String> extractedUriVariables;
 
-		@Nullable
-		private Map<String, MultiValueMap<String, String>> extractedMatrixVariables;
+		private @Nullable Map<String, MultiValueMap<String, String>> extractedMatrixVariables;
 
 		boolean extractingVariables;
 

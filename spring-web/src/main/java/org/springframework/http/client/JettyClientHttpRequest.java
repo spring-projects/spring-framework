@@ -29,10 +29,10 @@ import org.eclipse.jetty.client.InputStreamResponseListener;
 import org.eclipse.jetty.client.OutputStreamRequestContent;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.client.Response;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**

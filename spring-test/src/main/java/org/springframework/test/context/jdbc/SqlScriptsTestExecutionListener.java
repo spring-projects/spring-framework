@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
@@ -35,7 +36,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.aot.AotTestExecutionListener;
@@ -238,16 +238,14 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	/**
 	 * Get the {@code @SqlMergeMode} annotation declared on the supplied class.
 	 */
-	@Nullable
-	private SqlMergeMode getSqlMergeModeFor(Class<?> clazz) {
+	private @Nullable SqlMergeMode getSqlMergeModeFor(Class<?> clazz) {
 		return TestContextAnnotationUtils.findMergedAnnotation(clazz, SqlMergeMode.class);
 	}
 
 	/**
 	 * Get the {@code @SqlMergeMode} annotation declared on the supplied method.
 	 */
-	@Nullable
-	private SqlMergeMode getSqlMergeModeFor(Method method) {
+	private @Nullable SqlMergeMode getSqlMergeModeFor(Method method) {
 		return AnnotatedElementUtils.findMergedAnnotation(method, SqlMergeMode.class);
 	}
 
@@ -386,8 +384,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					.equals(TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds2));
 	}
 
-	@Nullable
-	private DataSource getDataSourceFromTransactionManager(PlatformTransactionManager transactionManager) {
+	private @Nullable DataSource getDataSourceFromTransactionManager(PlatformTransactionManager transactionManager) {
 		try {
 			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");
 			Object obj = ReflectionUtils.invokeMethod(getDataSourceMethod, transactionManager);

@@ -3,9 +3,7 @@
  * Provides standard LocaleResolver implementations,
  * and a HandlerInterceptor for locale changes.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.i18n;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

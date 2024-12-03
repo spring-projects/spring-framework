@@ -26,8 +26,8 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 /**
@@ -76,13 +76,11 @@ final class PlaceholderParser {
 
 	private final String simplePrefix;
 
-	@Nullable
-	private final String separator;
+	private final @Nullable String separator;
 
 	private final boolean ignoreUnresolvablePlaceholders;
 
-	@Nullable
-	private final Character escape;
+	private final @Nullable Character escape;
 
 
 	/**
@@ -211,8 +209,7 @@ final class PlaceholderParser {
 		return new NestedPlaceholderPart(text, parts, null);
 	}
 
-	@Nullable
-	private String[] splitKeyAndDefault(String value) {
+	private String @Nullable [] splitKeyAndDefault(String value) {
 		if (this.separator == null || !value.contains(this.separator)) {
 			return null;
 		}
@@ -309,8 +306,7 @@ final class PlaceholderParser {
 
 		private final PlaceholderResolver resolver;
 
-		@Nullable
-		private Set<String> visitedPlaceholders;
+		private @Nullable Set<String> visitedPlaceholders;
 
 
 		PartResolutionContext(PlaceholderResolver resolver, String prefix, String suffix,
@@ -323,8 +319,7 @@ final class PlaceholderParser {
 		}
 
 		@Override
-		@Nullable
-		public String resolvePlaceholder(String placeholderName) {
+		public @Nullable String resolvePlaceholder(String placeholderName) {
 			String value = this.resolver.resolvePlaceholder(placeholderName);
 			if (value != null && logger.isTraceEnabled()) {
 				logger.trace("Resolved placeholder '" + placeholderName + "'");
@@ -444,8 +439,7 @@ final class PlaceholderParser {
 		 * @return the full resolution of the given {@code key} or {@code null} if
 		 * the placeholder has no value to begin with
 		 */
-		@Nullable
-		protected String resolveRecursively(PartResolutionContext resolutionContext, String key) {
+		protected @Nullable String resolveRecursively(PartResolutionContext resolutionContext, String key) {
 			String resolvedValue = resolutionContext.resolvePlaceholder(key);
 			if (resolvedValue != null) {
 				resolutionContext.flagPlaceholderAsVisited(key);
@@ -502,8 +496,7 @@ final class PlaceholderParser {
 
 		private final String key;
 
-		@Nullable
-		private final String fallback;
+		private final @Nullable String fallback;
 
 		/**
 		 * Create a new instance.
@@ -539,8 +532,7 @@ final class PlaceholderParser {
 
 		private final List<Part> keyParts;
 
-		@Nullable
-		private final List<Part> defaultParts;
+		private final @Nullable List<Part> defaultParts;
 
 		/**
 		 * Create a new instance.

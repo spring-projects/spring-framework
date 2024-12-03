@@ -28,12 +28,12 @@ import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
@@ -60,8 +60,7 @@ class TypeConverterDelegate {
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
-	@Nullable
-	private final Object targetObject;
+	private final @Nullable Object targetObject;
 
 
 	/**
@@ -93,8 +92,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue,
+	public <T> @Nullable T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue,
 			Object newValue, @Nullable Class<T> requiredType) throws IllegalArgumentException {
 
 		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
@@ -113,8 +111,7 @@ class TypeConverterDelegate {
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
+	public <T> @Nullable T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
 			@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		// Custom editor for this type?
@@ -337,8 +334,7 @@ class TypeConverterDelegate {
 	 * @param requiredType the type to find an editor for
 	 * @return the corresponding editor, or {@code null} if none
 	 */
-	@Nullable
-	private PropertyEditor findDefaultEditor(@Nullable Class<?> requiredType) {
+	private @Nullable PropertyEditor findDefaultEditor(@Nullable Class<?> requiredType) {
 		PropertyEditor editor = null;
 		if (requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
@@ -362,8 +358,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	@Nullable
-	private Object doConvertValue(@Nullable Object oldValue, @Nullable Object newValue,
+	private @Nullable Object doConvertValue(@Nullable Object oldValue, @Nullable Object newValue,
 			@Nullable Class<?> requiredType, @Nullable PropertyEditor editor) {
 
 		Object convertedValue = newValue;
@@ -628,15 +623,13 @@ class TypeConverterDelegate {
 		return (originalAllowed ? original : convertedCopy);
 	}
 
-	@Nullable
-	private String buildIndexedPropertyName(@Nullable String propertyName, int index) {
+	private @Nullable String buildIndexedPropertyName(@Nullable String propertyName, int index) {
 		return (propertyName != null ?
 				propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + index + PropertyAccessor.PROPERTY_KEY_SUFFIX :
 				null);
 	}
 
-	@Nullable
-	private String buildKeyedPropertyName(@Nullable String propertyName, Object key) {
+	private @Nullable String buildKeyedPropertyName(@Nullable String propertyName, Object key) {
 		return (propertyName != null ?
 				propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + key + PropertyAccessor.PROPERTY_KEY_SUFFIX :
 				null);

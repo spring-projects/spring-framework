@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Wraps a real parse exception. This exception flows to the top parse method and then
@@ -33,8 +33,7 @@ public class InternalParseException extends RuntimeException {
 	}
 
 	@Override
-	@Nullable
-	public SpelParseException getCause() {
+	public @Nullable SpelParseException getCause() {
 		return (SpelParseException) super.getCause();
 	}
 

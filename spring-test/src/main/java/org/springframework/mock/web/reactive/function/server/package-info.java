@@ -4,9 +4,7 @@
  * <p>Useful for testing router and handler functions.
  *
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.mock.web.reactive.function.server;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

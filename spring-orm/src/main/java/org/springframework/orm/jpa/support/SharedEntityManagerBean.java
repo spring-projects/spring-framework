@@ -18,10 +18,10 @@ package org.springframework.orm.jpa.support;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
@@ -52,13 +52,11 @@ import org.springframework.util.Assert;
 public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 		implements FactoryBean<EntityManager>, InitializingBean {
 
-	@Nullable
-	private Class<? extends EntityManager> entityManagerInterface;
+	private @Nullable Class<? extends EntityManager> entityManagerInterface;
 
 	private boolean synchronizedWithTransaction = true;
 
-	@Nullable
-	private EntityManager shared;
+	private @Nullable EntityManager shared;
 
 
 	/**
@@ -108,8 +106,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 
 
 	@Override
-	@Nullable
-	public EntityManager getObject() {
+	public @Nullable EntityManager getObject() {
 		return this.shared;
 	}
 

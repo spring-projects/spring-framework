@@ -36,6 +36,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -45,7 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -82,39 +82,29 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 	private final HttpMethod method;
 
-	@Nullable
-	private String uriTemplate;
+	private @Nullable String uriTemplate;
 
-	@Nullable
-	private URI uri;
+	private @Nullable URI uri;
 
 	private String contextPath = "";
 
 	private String servletPath = "";
 
-	@Nullable
-	private String pathInfo = "";
+	private @Nullable String pathInfo = "";
 
-	@Nullable
-	private Boolean secure;
+	private @Nullable Boolean secure;
 
-	@Nullable
-	private Principal principal;
+	private @Nullable Principal principal;
 
-	@Nullable
-	private MockHttpSession session;
+	private @Nullable MockHttpSession session;
 
-	@Nullable
-	private String remoteAddress;
+	private @Nullable String remoteAddress;
 
-	@Nullable
-	private String characterEncoding;
+	private @Nullable String characterEncoding;
 
-	@Nullable
-	private byte[] content;
+	private byte @Nullable [] content;
 
-	@Nullable
-	private String contentType;
+	private @Nullable String contentType;
 
 	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
 

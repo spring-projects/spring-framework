@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -54,31 +55,24 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
-	@Nullable
-	private PathMatcher pathMatcher;
+	private @Nullable PathMatcher pathMatcher;
 
-	@Nullable
-	private Integer cacheLimit;
+	private @Nullable Integer cacheLimit;
 
-	@Nullable
-	private String selectorHeaderName;
+	private @Nullable String selectorHeaderName;
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
-	@Nullable
-	private long[] heartbeatValue;
+	private long @Nullable [] heartbeatValue;
 
-	@Nullable
-	private MessageHeaderInitializer headerInitializer;
+	private @Nullable MessageHeaderInitializer headerInitializer;
 
 
 	private SubscriptionRegistry subscriptionRegistry;
 
 	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
-	@Nullable
-	private ScheduledFuture<?> heartbeatFuture;
+	private @Nullable ScheduledFuture<?> heartbeatFuture;
 
 
 	/**
@@ -212,8 +206,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Return the configured TaskScheduler.
 	 * @since 4.2
 	 */
-	@Nullable
-	public TaskScheduler getTaskScheduler() {
+	public @Nullable TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
 
@@ -226,7 +219,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * (in milliseconds).
 	 * @since 4.2
 	 */
-	public void setHeartbeatValue(@Nullable long[] heartbeat) {
+	public void setHeartbeatValue(long @Nullable [] heartbeat) {
 		if (heartbeat != null && (heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0)) {
 			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
 		}
@@ -237,8 +230,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * The configured value for the heart-beat settings.
 	 * @since 4.2
 	 */
-	@Nullable
-	public long[] getHeartbeatValue() {
+	public long @Nullable [] getHeartbeatValue() {
 		return this.heartbeatValue;
 	}
 
@@ -256,8 +248,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Return the configured header initializer.
 	 * @since 4.1
 	 */
-	@Nullable
-	public MessageHeaderInitializer getHeaderInitializer() {
+	public @Nullable MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
@@ -444,8 +435,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		private final String sessionId;
 
-		@Nullable
-		private final Principal user;
+		private final @Nullable Principal user;
 
 		private final MessageChannel clientOutboundChannel;
 
@@ -459,7 +449,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 
 		public SessionInfo(String sessionId, @Nullable Principal user, MessageChannel outboundChannel,
-				@Nullable long[] clientHeartbeat, @Nullable long[] serverHeartbeat) {
+				long @Nullable [] clientHeartbeat, long @Nullable [] serverHeartbeat) {
 
 			this.sessionId = sessionId;
 			this.user = user;
@@ -481,8 +471,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return this.sessionId;
 		}
 
-		@Nullable
-		public Principal getUser() {
+		public @Nullable Principal getUser() {
 			return this.user;
 		}
 

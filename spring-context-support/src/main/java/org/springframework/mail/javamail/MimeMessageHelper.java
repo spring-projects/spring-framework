@@ -38,10 +38,10 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.internet.MimePart;
 import jakarta.mail.internet.MimeUtility;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 
@@ -165,14 +165,11 @@ public class MimeMessageHelper {
 
 	private final MimeMessage mimeMessage;
 
-	@Nullable
-	private MimeMultipart rootMimeMultipart;
+	private @Nullable MimeMultipart rootMimeMultipart;
 
-	@Nullable
-	private MimeMultipart mimeMultipart;
+	private @Nullable MimeMultipart mimeMultipart;
 
-	@Nullable
-	private final String encoding;
+	private final @Nullable String encoding;
 
 	private FileTypeMap fileTypeMap;
 
@@ -426,8 +423,7 @@ public class MimeMessageHelper {
 	 * @return the default encoding associated with the MimeMessage,
 	 * or {@code null} if none found
 	 */
-	@Nullable
-	protected String getDefaultEncoding(MimeMessage mimeMessage) {
+	protected @Nullable String getDefaultEncoding(MimeMessage mimeMessage) {
 		if (mimeMessage instanceof SmartMimeMessage smartMimeMessage) {
 			return smartMimeMessage.getDefaultEncoding();
 		}
@@ -437,8 +433,7 @@ public class MimeMessageHelper {
 	/**
 	 * Return the specific character encoding used for this message, if any.
 	 */
-	@Nullable
-	public String getEncoding() {
+	public @Nullable String getEncoding() {
 		return this.encoding;
 	}
 

@@ -19,7 +19,7 @@ package org.springframework.messaging.simp.user;
 import java.security.Principal;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a connected user.
@@ -40,8 +40,7 @@ public interface SimpUser {
 	 * server in a multi-server user registry scenario.
 	 * @since 5.3
 	 */
-	@Nullable
-	Principal getPrincipal();
+	@Nullable Principal getPrincipal();
 
 	/**
 	 * Whether the user has any sessions.
@@ -53,8 +52,7 @@ public interface SimpUser {
 	 * @param sessionId the session id
 	 * @return the matching session, or {@code null} if none found
 	 */
-	@Nullable
-	SimpSession getSession(String sessionId);
+	@Nullable SimpSession getSession(String sessionId);
 
 	/**
 	 * Return the sessions for the user.

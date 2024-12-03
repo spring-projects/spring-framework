@@ -25,11 +25,12 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -50,33 +51,25 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private final URI uri;
 
-	@Nullable
-	private final String contextPath;
+	private final @Nullable String contextPath;
 
-	@Nullable
-	private RequestPath path;
+	private @Nullable RequestPath path;
 
 	private final HttpHeaders headers;
 
 	private final HttpMethod method;
 
-	@Nullable
-	private MultiValueMap<String, String> queryParams;
+	private @Nullable MultiValueMap<String, String> queryParams;
 
-	@Nullable
-	private MultiValueMap<String, HttpCookie> cookies;
+	private @Nullable MultiValueMap<String, HttpCookie> cookies;
 
-	@Nullable
-	private SslInfo sslInfo;
+	private @Nullable SslInfo sslInfo;
 
-	@Nullable
-	private String id;
+	private @Nullable String id;
 
-	@Nullable
-	private String logPrefix;
+	private @Nullable String logPrefix;
 
-	@Nullable
-	private Supplier<Map<String, Object>> attributesSupplier;
+	private @Nullable Supplier<Map<String, Object>> attributesSupplier;
 
 
 	/**
@@ -117,8 +110,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * identity of this request instance is used.
 	 * @since 5.1
 	 */
-	@Nullable
-	protected String initId() {
+	protected @Nullable String initId() {
 		return null;
 	}
 
@@ -209,9 +201,8 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
 
-	@Nullable
 	@Override
-	public SslInfo getSslInfo() {
+	public @Nullable SslInfo getSslInfo() {
 		if (this.sslInfo == null) {
 			this.sslInfo = initSslInfo();
 		}
@@ -223,8 +214,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * @return the session information, or {@code null} if none available
 	 * @since 5.0.2
 	 */
-	@Nullable
-	protected abstract SslInfo initSslInfo();
+	protected abstract @Nullable SslInfo initSslInfo();
 
 	/**
 	 * Return the underlying server response.

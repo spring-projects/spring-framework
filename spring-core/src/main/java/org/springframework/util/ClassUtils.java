@@ -52,7 +52,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
@@ -221,8 +221,7 @@ public abstract class ClassUtils {
 	 * @see Thread#getContextClassLoader()
 	 * @see ClassLoader#getSystemClassLoader()
 	 */
-	@Nullable
-	public static ClassLoader getDefaultClassLoader() {
+	public static @Nullable ClassLoader getDefaultClassLoader() {
 		ClassLoader cl = null;
 		try {
 			cl = Thread.currentThread().getContextClassLoader();
@@ -253,8 +252,7 @@ public abstract class ClassUtils {
 	 * @param classLoaderToUse the actual ClassLoader to use for the thread context
 	 * @return the original thread context ClassLoader, or {@code null} if not overridden
 	 */
-	@Nullable
-	public static ClassLoader overrideThreadContextClassLoader(@Nullable ClassLoader classLoaderToUse) {
+	public static @Nullable ClassLoader overrideThreadContextClassLoader(@Nullable ClassLoader classLoaderToUse) {
 		Thread currentThread = Thread.currentThread();
 		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
 		if (classLoaderToUse != null && !classLoaderToUse.equals(threadContextClassLoader)) {
@@ -495,8 +493,7 @@ public abstract class ClassUtils {
 	 * @return the primitive class, or {@code null} if the name does not denote
 	 * a primitive class or primitive array class
 	 */
-	@Nullable
-	public static Class<?> resolvePrimitiveClassName(@Nullable String name) {
+	public static @Nullable Class<?> resolvePrimitiveClassName(@Nullable String name) {
 		Class<?> result = null;
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
@@ -883,8 +880,7 @@ public abstract class ClassUtils {
 	 * given classes is {@code null}, the other class will be returned.
 	 * @since 3.2.6
 	 */
-	@Nullable
-	public static Class<?> determineCommonAncestor(@Nullable Class<?> clazz1, @Nullable Class<?> clazz2) {
+	public static @Nullable Class<?> determineCommonAncestor(@Nullable Class<?> clazz1, @Nullable Class<?> clazz2) {
 		if (clazz1 == null) {
 			return clazz2;
 		}
@@ -1030,8 +1026,7 @@ public abstract class ClassUtils {
 	 * @param value the value to introspect
 	 * @return the qualified name of the class
 	 */
-	@Nullable
-	public static String getDescriptiveType(@Nullable Object value) {
+	public static @Nullable String getDescriptiveType(@Nullable Object value) {
 		if (value == null) {
 			return null;
 		}
@@ -1194,8 +1189,7 @@ public abstract class ClassUtils {
 	 * @return the constructor, or {@code null} if not found
 	 * @see Class#getConstructor
 	 */
-	@Nullable
-	public static <T> Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... paramTypes) {
+	public static <T> @Nullable Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
 			return clazz.getConstructor(paramTypes);
@@ -1288,8 +1282,7 @@ public abstract class ClassUtils {
 	 * @return the method, or {@code null} if not found
 	 * @see Class#getMethod
 	 */
-	@Nullable
-	public static Method getMethodIfAvailable(Class<?> clazz, String methodName, @Nullable Class<?>... paramTypes) {
+	public static @Nullable Method getMethodIfAvailable(Class<?> clazz, String methodName, @Nullable Class<?> @Nullable ... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		if (paramTypes != null) {
@@ -1460,8 +1453,7 @@ public abstract class ClassUtils {
 		return (result != null ? result : method);
 	}
 
-	@Nullable
-	private static Method findInterfaceMethodIfPossible(String methodName, Class<?>[] parameterTypes,
+	private static @Nullable Method findInterfaceMethodIfPossible(String methodName, Class<?>[] parameterTypes,
 			Class<?> startClass, Class<?> endClass, boolean requirePublicInterface) {
 
 		Class<?> current = startClass;
@@ -1526,8 +1518,7 @@ public abstract class ClassUtils {
 		return (result != null ? result : method);
 	}
 
-	@Nullable
-	private static Method findPubliclyAccessibleMethodIfPossible(
+	private static @Nullable Method findPubliclyAccessibleMethodIfPossible(
 			String methodName, Class<?>[] parameterTypes, Class<?> declaringClass) {
 
 		Class<?> current = declaringClass.getSuperclass();
@@ -1589,8 +1580,7 @@ public abstract class ClassUtils {
 	 * @return the static method, or {@code null} if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
-	@Nullable
-	public static Method getStaticMethod(Class<?> clazz, String methodName, Class<?>... args) {
+	public static @Nullable Method getStaticMethod(Class<?> clazz, String methodName, Class<?>... args) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
@@ -1603,8 +1593,7 @@ public abstract class ClassUtils {
 	}
 
 
-	@Nullable
-	private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
+	private static @Nullable Method getMethodOrNull(Class<?> clazz, String methodName, @Nullable Class<?> @Nullable [] paramTypes) {
 		try {
 			return clazz.getMethod(methodName, paramTypes);
 		}

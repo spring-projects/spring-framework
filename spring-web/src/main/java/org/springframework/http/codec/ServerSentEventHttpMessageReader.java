@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,7 +35,6 @@ import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
-import org.springframework.lang.Nullable;
 
 /**
  * Reader that supports a stream of {@link ServerSentEvent ServerSentEvents} and also plain
@@ -50,8 +50,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
 
 
-	@Nullable
-	private final Decoder<?> decoder;
+	private final @Nullable Decoder<?> decoder;
 
 	private final StringDecoder lineDecoder = StringDecoder.textPlainOnly();
 
@@ -76,8 +75,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	/**
 	 * Return the configured {@code Decoder}.
 	 */
-	@Nullable
-	public Decoder<?> getDecoder() {
+	public @Nullable Decoder<?> getDecoder() {
 		return this.decoder;
 	}
 
@@ -137,9 +135,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				});
 	}
 
-	@Nullable
 	@SuppressWarnings("NullAway")
-	private Object buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
+	private @Nullable Object buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
 			Map<String, Object> hints) {
 
 		ServerSentEvent.Builder<Object> sseBuilder = (shouldWrap ? ServerSentEvent.builder() : null);
@@ -191,8 +188,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		}
 	}
 
-	@Nullable
-	private Object decodeData(StringBuilder data, ResolvableType dataType, Map<String, Object> hints) {
+	private @Nullable Object decodeData(StringBuilder data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
 			return data.substring(0, data.length() - 1);
 		}

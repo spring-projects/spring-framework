@@ -16,8 +16,9 @@
 
 package org.springframework.test.web.reactive.server;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.lang.Nullable;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**

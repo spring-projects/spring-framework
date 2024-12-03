@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -36,8 +37,7 @@ import org.springframework.util.ClassUtils;
 public class SimpleMessageConverter implements MessageConverter {
 
 	@Override
-	@Nullable
-	public Object fromMessage(Message<?> message, Class<?> targetClass) {
+	public @Nullable Object fromMessage(Message<?> message, Class<?> targetClass) {
 		Object payload = message.getPayload();
 		return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
 	}

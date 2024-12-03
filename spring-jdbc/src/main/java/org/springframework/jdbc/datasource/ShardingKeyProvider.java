@@ -19,7 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.SQLException;
 import java.sql.ShardingKey;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy interface for determining sharding keys which are used to establish direct
@@ -43,8 +43,7 @@ public interface ShardingKeyProvider {
 	 * @return the sharding key, or {@code null} if it is not available or cannot be determined
 	 * @throws SQLException if an error occurs while obtaining the sharding key
 	 */
-	@Nullable
-	ShardingKey getShardingKey() throws SQLException;
+	@Nullable ShardingKey getShardingKey() throws SQLException;
 
 	/**
 	 * Determine the super sharding key, if any. This method returns the super sharding key
@@ -53,8 +52,7 @@ public interface ShardingKeyProvider {
 	 * determined (the default)
 	 * @throws SQLException if an error occurs while obtaining the super sharding key
 	 */
-	@Nullable
-	default ShardingKey getSuperShardingKey() throws SQLException {
+	default @Nullable ShardingKey getSuperShardingKey() throws SQLException {
 		return null;
 	}
 

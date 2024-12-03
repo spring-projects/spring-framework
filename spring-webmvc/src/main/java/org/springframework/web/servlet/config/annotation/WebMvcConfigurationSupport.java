@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -59,7 +60,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -233,38 +233,27 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private List<Object> interceptors;
+	private @Nullable List<Object> interceptors;
 
-	@Nullable
-	private PathMatchConfigurer pathMatchConfigurer;
+	private @Nullable PathMatchConfigurer pathMatchConfigurer;
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
+	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
-	@Nullable
-	private List<HandlerMethodArgumentResolver> argumentResolvers;
+	private @Nullable List<HandlerMethodArgumentResolver> argumentResolvers;
 
-	@Nullable
-	private List<HandlerMethodReturnValueHandler> returnValueHandlers;
+	private @Nullable List<HandlerMethodReturnValueHandler> returnValueHandlers;
 
-	@Nullable
-	private List<HttpMessageConverter<?>> messageConverters;
+	private @Nullable List<HttpMessageConverter<?>> messageConverters;
 
-	@Nullable
-	private List<ErrorResponse.Interceptor> errorResponseInterceptors;
+	private @Nullable List<ErrorResponse.Interceptor> errorResponseInterceptors;
 
-	@Nullable
-	private Map<String, CorsConfiguration> corsConfigurations;
+	private @Nullable Map<String, CorsConfiguration> corsConfigurations;
 
-	@Nullable
-	private AsyncSupportConfigurer asyncSupportConfigurer;
+	private @Nullable AsyncSupportConfigurer asyncSupportConfigurer;
 
 
 	/**
@@ -279,8 +268,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Return the associated Spring {@link ApplicationContext}.
 	 * @since 4.2
 	 */
-	@Nullable
-	public final ApplicationContext getApplicationContext() {
+	public final @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -297,8 +285,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Return the associated {@link jakarta.servlet.ServletContext}.
 	 * @since 4.2
 	 */
-	@Nullable
-	public final ServletContext getServletContext() {
+	public final @Nullable ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
@@ -475,8 +462,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * {@link #addViewControllers}.
 	 */
 	@Bean
-	@Nullable
-	public HandlerMapping viewControllerHandlerMapping(
+	public @Nullable HandlerMapping viewControllerHandlerMapping(
 			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
 			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 
@@ -569,8 +555,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * {@link #addResourceHandlers}.
 	 */
 	@Bean
-	@Nullable
-	public HandlerMapping resourceHandlerMapping(
+	public @Nullable HandlerMapping resourceHandlerMapping(
 			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager,
 			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
 			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
@@ -614,8 +599,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * override {@link #configureDefaultServletHandling}.
 	 */
 	@Bean
-	@Nullable
-	public HandlerMapping defaultServletHandlerMapping() {
+	public @Nullable HandlerMapping defaultServletHandlerMapping() {
 		Assert.state(this.servletContext != null, "No ServletContext set");
 		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(this.servletContext);
 		configureDefaultServletHandling(configurer);
@@ -716,8 +700,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	/**
 	 * Override this method to provide a custom {@link MessageCodesResolver}.
 	 */
-	@Nullable
-	protected MessageCodesResolver getMessageCodesResolver() {
+	protected @Nullable MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}
 
@@ -770,8 +753,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	/**
 	 * Override this method to provide a custom {@link Validator}.
 	 */
-	@Nullable
-	protected Validator getValidator() {
+	protected @Nullable Validator getValidator() {
 		return null;
 	}
 

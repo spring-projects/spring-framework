@@ -37,6 +37,7 @@ import org.crac.CheckpointException;
 import org.crac.Core;
 import org.crac.RestoreException;
 import org.crac.management.CRaCMXBean;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -49,7 +50,6 @@ import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.NativeDetector;
 import org.springframework.core.SpringProperties;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -108,15 +108,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private volatile boolean running;
 
-	@Nullable
-	private volatile ConfigurableListableBeanFactory beanFactory;
+	private volatile @Nullable ConfigurableListableBeanFactory beanFactory;
 
-	@Nullable
-	private volatile Set<String> stoppedBeans;
+	private volatile @Nullable Set<String> stoppedBeans;
 
 	// Just for keeping a strong reference to the registered CRaC Resource, if any
-	@Nullable
-	private Object cracResource;
+	private @Nullable Object cracResource;
 
 
 	public DefaultLifecycleProcessor() {
@@ -592,8 +589,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class CracResourceAdapter implements org.crac.Resource {
 
-		@Nullable
-		private CyclicBarrier barrier;
+		private @Nullable CyclicBarrier barrier;
 
 		@Override
 		public void beforeCheckpoint(org.crac.Context<? extends org.crac.Resource> context) {

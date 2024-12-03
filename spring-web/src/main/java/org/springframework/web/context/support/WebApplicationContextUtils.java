@@ -29,12 +29,12 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource.StubPropertySource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -96,8 +96,7 @@ public abstract class WebApplicationContextUtils {
 	 * @return the root WebApplicationContext for this web app, or {@code null} if none
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	@Nullable
-	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
+	public static @Nullable WebApplicationContext getWebApplicationContext(ServletContext sc) {
 		return getWebApplicationContext(sc, WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 	}
 
@@ -107,8 +106,7 @@ public abstract class WebApplicationContextUtils {
 	 * @param attrName the name of the ServletContext attribute to look for
 	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
 	 */
-	@Nullable
-	public static WebApplicationContext getWebApplicationContext(ServletContext sc, String attrName) {
+	public static @Nullable WebApplicationContext getWebApplicationContext(ServletContext sc, String attrName) {
 		Assert.notNull(sc, "ServletContext must not be null");
 		Object attr = sc.getAttribute(attrName);
 		if (attr == null) {
@@ -144,8 +142,7 @@ public abstract class WebApplicationContextUtils {
 	 * @see #getWebApplicationContext(ServletContext)
 	 * @see ServletContext#getAttributeNames()
 	 */
-	@Nullable
-	public static WebApplicationContext findWebApplicationContext(ServletContext sc) {
+	public static @Nullable WebApplicationContext findWebApplicationContext(ServletContext sc) {
 		WebApplicationContext wac = getWebApplicationContext(sc);
 		if (wac == null) {
 			Enumeration<String> attrNames = sc.getAttributeNames();

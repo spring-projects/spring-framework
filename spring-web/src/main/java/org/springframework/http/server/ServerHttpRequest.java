@@ -19,9 +19,10 @@ package org.springframework.http.server;
 import java.net.InetSocketAddress;
 import java.security.Principal;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a server-side HTTP request.
@@ -37,8 +38,7 @@ public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
 	 * authenticated user.
 	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
-	@Nullable
-	Principal getPrincipal();
+	@Nullable Principal getPrincipal();
 
 	/**
 	 * Return the address on which the request was received.

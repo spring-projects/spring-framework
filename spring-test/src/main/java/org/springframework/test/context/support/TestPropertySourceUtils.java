@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -49,7 +50,6 @@ import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
@@ -116,8 +116,7 @@ public abstract class TestPropertySourceUtils {
 		return new MergedTestPropertySources(mergeLocations(attributesList), mergeProperties(attributesList));
 	}
 
-	@Nullable
-	private static TestPropertySourceAttributes mergeTestPropertySourceAttributes(
+	private static @Nullable TestPropertySourceAttributes mergeTestPropertySourceAttributes(
 			List<TestPropertySourceAttributes> aggregatedAttributesList) {
 
 		TestPropertySourceAttributes mergedAttributes = null;
@@ -460,8 +459,7 @@ public abstract class TestPropertySourceUtils {
 		private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
 		@Override
-		@Nullable
-		public Object put(Object key, Object value) {
+		public @Nullable Object put(Object key, Object value) {
 			if (key instanceof String str) {
 				return this.map.put(str, value);
 			}

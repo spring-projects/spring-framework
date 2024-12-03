@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.annotation.Reflective;
@@ -33,7 +35,6 @@ import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContrib
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -95,8 +96,7 @@ public class ReflectiveProcessorAotContributionBuilder {
 		return withClasses(scanner.scan(packageNames));
 	}
 
-	@Nullable
-	public BeanFactoryInitializationAotContribution build() {
+	public @Nullable BeanFactoryInitializationAotContribution build() {
 		return (!this.classes.isEmpty() ? new AotContribution(this.classes) : null);
 	}
 
@@ -118,8 +118,7 @@ public class ReflectiveProcessorAotContributionBuilder {
 
 	private static class ReflectiveClassPathScanner extends ClassPathScanningCandidateComponentProvider {
 
-		@Nullable
-		private final ClassLoader classLoader;
+		private final @Nullable ClassLoader classLoader;
 
 		ReflectiveClassPathScanner(@Nullable ClassLoader classLoader) {
 			super(false);

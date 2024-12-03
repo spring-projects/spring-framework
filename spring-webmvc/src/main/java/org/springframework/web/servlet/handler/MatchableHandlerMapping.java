@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -38,8 +38,7 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * case pre-parsed patterns are used.
 	 * @since 5.3
 	 */
-	@Nullable
-	default PathPatternParser getPatternParser() {
+	default @Nullable PathPatternParser getPatternParser() {
 		return null;
 	}
 
@@ -51,7 +50,6 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * @param pattern the pattern to match
 	 * @return the result from request matching, or {@code null} if none
 	 */
-	@Nullable
-	RequestMatchResult match(HttpServletRequest request, String pattern);
+	@Nullable RequestMatchResult match(HttpServletRequest request, String pattern);
 
 }

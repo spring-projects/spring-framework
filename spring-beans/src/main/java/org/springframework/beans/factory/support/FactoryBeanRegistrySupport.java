@@ -19,6 +19,8 @@ package org.springframework.beans.factory.support;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -26,7 +28,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 
 /**
  * Support base class for singleton registries which need to handle
@@ -50,8 +51,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the FactoryBean's object type,
 	 * or {@code null} if the type cannot be determined yet
 	 */
-	@Nullable
-	protected Class<?> getTypeForFactoryBean(FactoryBean<?> factoryBean) {
+	protected @Nullable Class<?> getTypeForFactoryBean(FactoryBean<?> factoryBean) {
 		try {
 			return factoryBean.getObjectType();
 		}
@@ -102,8 +102,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the object obtained from the FactoryBean,
 	 * or {@code null} if not available
 	 */
-	@Nullable
-	protected Object getCachedObjectForFactoryBean(String beanName) {
+	protected @Nullable Object getCachedObjectForFactoryBean(String beanName) {
 		return this.factoryBeanObjectCache.get(beanName);
 	}
 

@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -41,29 +42,21 @@ import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsServ
  */
 public class SockJsServiceRegistration {
 
-	@Nullable
-	private TaskScheduler scheduler;
+	private @Nullable TaskScheduler scheduler;
 
-	@Nullable
-	private String clientLibraryUrl;
+	private @Nullable String clientLibraryUrl;
 
-	@Nullable
-	private Integer streamBytesLimit;
+	private @Nullable Integer streamBytesLimit;
 
-	@Nullable
-	private Boolean sessionCookieNeeded;
+	private @Nullable Boolean sessionCookieNeeded;
 
-	@Nullable
-	private Long heartbeatTime;
+	private @Nullable Long heartbeatTime;
 
-	@Nullable
-	private Long disconnectDelay;
+	private @Nullable Long disconnectDelay;
 
-	@Nullable
-	private Integer httpMessageCacheSize;
+	private @Nullable Integer httpMessageCacheSize;
 
-	@Nullable
-	private Boolean webSocketEnabled;
+	private @Nullable Boolean webSocketEnabled;
 
 	private final List<TransportHandler> transportHandlers = new ArrayList<>();
 
@@ -75,11 +68,9 @@ public class SockJsServiceRegistration {
 
 	private final List<String> allowedOriginPatterns = new ArrayList<>();
 
-	@Nullable
-	private Boolean suppressCors;
+	private @Nullable Boolean suppressCors;
 
-	@Nullable
-	private SockJsMessageCodec messageCodec;
+	private @Nullable SockJsMessageCodec messageCodec;
 
 
 	public SockJsServiceRegistration() {
@@ -310,8 +301,7 @@ public class SockJsServiceRegistration {
 	/**
 	 * Return the TaskScheduler, if configured.
 	 */
-	@Nullable
-	protected TaskScheduler getTaskScheduler() {
+	protected @Nullable TaskScheduler getTaskScheduler() {
 		return this.scheduler;
 	}
 

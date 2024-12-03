@@ -21,8 +21,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -50,8 +51,7 @@ import org.springframework.util.StringUtils;
  */
 public class URIEditor extends PropertyEditorSupport {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private final boolean encode;
 

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -133,8 +133,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext context) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		context.pushContainingComponent(compDefinition);
@@ -277,8 +276,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(name);
 	}
 
-	@Nullable
-	private RootBeanDefinition getDefaultExecutorBeanDefinition(String channelName) {
+	private @Nullable RootBeanDefinition getDefaultExecutorBeanDefinition(String channelName) {
 		if (channelName.equals("brokerChannel")) {
 			return null;
 		}
@@ -588,8 +586,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		registerBeanDef(beanDef, context, source);
 	}
 
-	@Nullable
-	private RuntimeBeanReference getValidator(
+	private @Nullable RuntimeBeanReference getValidator(
 			Element messageBrokerElement, @Nullable Object source, ParserContext context) {
 
 		if (messageBrokerElement.hasAttribute("validator")) {

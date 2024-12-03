@@ -16,7 +16,7 @@
 
 package org.springframework.dao;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown when an attempt to insert or update data

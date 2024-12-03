@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.beans.factory.aot.AotException;
 import org.springframework.beans.factory.aot.AotProcessingException;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContrib
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * A collection of {@link BeanFactoryInitializationAotContribution AOT
@@ -74,8 +75,7 @@ class BeanFactoryInitializationAotContributions {
 		return Collections.unmodifiableList(contributions);
 	}
 
-	@Nullable
-	private BeanFactoryInitializationAotContribution processAheadOfTime(BeanFactoryInitializationAotProcessor processor,
+	private @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(BeanFactoryInitializationAotProcessor processor,
 			DefaultListableBeanFactory beanFactory) {
 
 		try {

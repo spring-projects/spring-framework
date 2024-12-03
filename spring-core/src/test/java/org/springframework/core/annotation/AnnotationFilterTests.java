@@ -21,9 +21,10 @@ import java.lang.annotation.RetentionPolicy;
 
 import javax.annotation.Nonnull;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.lang.Nullable;
+import org.springframework.lang.Contract;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +71,7 @@ class AnnotationFilterTests {
 
 	@Test
 	void plainWhenSpringLangAnnotationReturnsTrue() {
-		assertThat(AnnotationFilter.PLAIN.matches(Nullable.class)).isTrue();
+		assertThat(AnnotationFilter.PLAIN.matches(Contract.class)).isTrue();
 	}
 
 	@Test

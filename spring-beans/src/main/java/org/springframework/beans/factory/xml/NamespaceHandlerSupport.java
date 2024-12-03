@@ -19,13 +19,13 @@ package org.springframework.beans.factory.xml;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.lang.Nullable;
 
 /**
  * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}.
@@ -68,8 +68,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * registered for that {@link Element}.
 	 */
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinitionParser parser = findParserForElement(element, parserContext);
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}
@@ -78,8 +77,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Locates the {@link BeanDefinitionParser} from the register implementations using
 	 * the local name of the supplied {@link Element}.
 	 */
-	@Nullable
-	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
+	private @Nullable BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
 		String localName = parserContext.getDelegate().getLocalName(element);
 		BeanDefinitionParser parser = this.parsers.get(localName);
 		if (parser == null) {
@@ -94,8 +92,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * is registered to handle that {@link Node}.
 	 */
 	@Override
-	@Nullable
-	public BeanDefinitionHolder decorate(
+	public @Nullable BeanDefinitionHolder decorate(
 			Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 
 		BeanDefinitionDecorator decorator = findDecoratorForNode(node, parserContext);
@@ -107,8 +104,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * the local name of the supplied {@link Node}. Supports both {@link Element Elements}
 	 * and {@link Attr Attrs}.
 	 */
-	@Nullable
-	private BeanDefinitionDecorator findDecoratorForNode(Node node, ParserContext parserContext) {
+	private @Nullable BeanDefinitionDecorator findDecoratorForNode(Node node, ParserContext parserContext) {
 		BeanDefinitionDecorator decorator = null;
 		String localName = parserContext.getDelegate().getLocalName(node);
 		if (node instanceof Element) {

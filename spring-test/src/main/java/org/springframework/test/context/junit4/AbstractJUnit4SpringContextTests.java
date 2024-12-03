@@ -18,11 +18,11 @@ package org.springframework.test.context.junit4;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.junit.runner.RunWith;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
@@ -75,8 +75,7 @@ public abstract class AbstractJUnit4SpringContextTests implements ApplicationCon
 	 * The {@link ApplicationContext} that was injected into this test instance
 	 * via {@link #setApplicationContext(ApplicationContext)}.
 	 */
-	@Nullable
-	protected ApplicationContext applicationContext;
+	protected @Nullable ApplicationContext applicationContext;
 
 
 	/**

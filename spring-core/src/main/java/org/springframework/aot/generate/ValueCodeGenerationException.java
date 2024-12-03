@@ -16,7 +16,7 @@
 
 package org.springframework.aot.generate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Thrown when value code generation fails.
@@ -27,8 +27,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ValueCodeGenerationException extends RuntimeException {
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
 
 	protected ValueCodeGenerationException(String message, @Nullable Object value, @Nullable Throwable cause) {
@@ -54,8 +53,7 @@ public class ValueCodeGenerationException extends RuntimeException {
 	/**
 	 * Return the value that failed to be generated.
 	 */
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 

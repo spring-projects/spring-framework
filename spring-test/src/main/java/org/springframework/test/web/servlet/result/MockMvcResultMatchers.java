@@ -21,8 +21,8 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriComponentsBuilder;

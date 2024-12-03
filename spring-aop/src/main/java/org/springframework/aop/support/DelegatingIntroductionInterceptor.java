@@ -17,11 +17,11 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -57,8 +57,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	 * Object that actually implements the interfaces.
 	 * May be "this" if a subclass implements the introduced interfaces.
 	 */
-	@Nullable
-	private Object delegate;
+	private @Nullable Object delegate;
 
 
 	/**
@@ -102,8 +101,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	 * method, which handles introduced interfaces and forwarding to the target.
 	 */
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation mi) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation mi) throws Throwable {
 		if (isMethodOnIntroducedInterface(mi)) {
 			// Using the following method rather than direct reflection, we
 			// get correct handling of InvocationTargetException
@@ -131,8 +129,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	 * that it is introduced into. This method is <strong>never</strong> called for
 	 * {@link MethodInvocation MethodInvocations} on the introduced interfaces.
 	 */
-	@Nullable
-	protected Object doProceed(MethodInvocation mi) throws Throwable {
+	protected @Nullable Object doProceed(MethodInvocation mi) throws Throwable {
 		// If we get here, just pass the invocation on.
 		return mi.proceed();
 	}

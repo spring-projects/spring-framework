@@ -25,12 +25,11 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for SAX {@code ContentHandler} and {@code LexicalHandler}

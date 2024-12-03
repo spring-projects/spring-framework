@@ -30,6 +30,8 @@ import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheValue;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ExceptionTypeFilter;
@@ -105,7 +107,8 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 	@Override
-	public CacheInvocationParameter[] getAllParameters(Object... values) {
+	@SuppressWarnings("NullAway")
+	public CacheInvocationParameter[] getAllParameters(@Nullable Object... values) {
 		if (this.allParameterDetails.size() != values.length) {
 			throw new IllegalStateException("Values mismatch, operation has " +
 					this.allParameterDetails.size() + " parameter(s) but got " + values.length + " value(s)");
@@ -200,7 +203,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 			return this.isValue;
 		}
 
-		public CacheInvocationParameter toCacheInvocationParameter(Object value) {
+		public CacheInvocationParameter toCacheInvocationParameter(@Nullable Object value) {
 			return new CacheInvocationParameterImpl(this, value);
 		}
 	}
@@ -213,9 +216,9 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 		private final CacheParameterDetail detail;
 
-		private final Object value;
+		private final @Nullable Object value;
 
-		public CacheInvocationParameterImpl(CacheParameterDetail detail, Object value) {
+		public CacheInvocationParameterImpl(CacheParameterDetail detail, @Nullable Object value) {
 			this.detail = detail;
 			this.value = value;
 		}
@@ -226,7 +229,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 		}
 
 		@Override
-		public Object getValue() {
+		public @Nullable Object getValue() {
 			return this.value;
 		}
 

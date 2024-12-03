@@ -107,7 +107,8 @@ configure([rootProject] + javaProjects) { project ->
 			// Previously there could be a split-package issue between JSR250 and JSR305 javax.annotation packages,
 			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
 			// JakartaEE equivalents in the jakarta.annotation package.
-			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
+			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
+			"https://jspecify.dev/docs/api/"
 	] as String[]
 }
 

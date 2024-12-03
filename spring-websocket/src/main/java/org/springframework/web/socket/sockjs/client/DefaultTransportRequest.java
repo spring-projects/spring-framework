@@ -28,9 +28,9 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
@@ -62,18 +62,15 @@ class DefaultTransportRequest implements TransportRequest {
 
 	private final SockJsMessageCodec codec;
 
-	@Nullable
-	private Principal user;
+	private @Nullable Principal user;
 
 	private long timeoutValue;
 
-	@Nullable
-	private TaskScheduler timeoutScheduler;
+	private @Nullable TaskScheduler timeoutScheduler;
 
 	private final List<Runnable> timeoutTasks = new ArrayList<>();
 
-	@Nullable
-	private DefaultTransportRequest fallbackRequest;
+	private @Nullable DefaultTransportRequest fallbackRequest;
 
 
 	public DefaultTransportRequest(SockJsUrlInfo sockJsUrlInfo,
@@ -118,8 +115,7 @@ class DefaultTransportRequest implements TransportRequest {
 	}
 
 	@Override
-	@Nullable
-	public Principal getUser() {
+	public @Nullable Principal getUser() {
 		return this.user;
 	}
 

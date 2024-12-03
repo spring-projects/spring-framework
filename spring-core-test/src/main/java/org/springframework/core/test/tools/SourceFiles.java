@@ -20,7 +20,8 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -117,8 +118,7 @@ public final class SourceFiles implements Iterable<SourceFile> {
 	 * @param path the path to find
 	 * @return a {@link SourceFile} instance or {@code null}
 	 */
-	@Nullable
-	public SourceFile get(String path) {
+	public @Nullable SourceFile get(String path) {
 		return this.files.get(path);
 	}
 

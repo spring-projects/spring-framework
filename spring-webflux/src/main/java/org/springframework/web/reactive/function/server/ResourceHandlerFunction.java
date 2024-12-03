@@ -25,13 +25,13 @@ import java.net.URL;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.BodyInserters;
 
 /**
@@ -137,8 +137,7 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
+		public @Nullable String getFilename() {
 			return this.delegate.getFilename();
 		}
 

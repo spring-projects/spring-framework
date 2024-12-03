@@ -20,10 +20,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

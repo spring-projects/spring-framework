@@ -38,6 +38,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanUtils;
@@ -68,7 +69,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -133,7 +133,7 @@ class ConstructorResolver {
 	 */
 	@SuppressWarnings("NullAway")
 	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
-			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
+			Constructor<?> @Nullable [] chosenCtors, @Nullable Object @Nullable [] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -395,7 +395,7 @@ class ConstructorResolver {
 	 */
 	@SuppressWarnings("NullAway")
 	public BeanWrapper instantiateUsingFactoryMethod(
-			String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
+			String beanName, RootBeanDefinition mbd, @Nullable Object @Nullable [] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -431,7 +431,7 @@ class ConstructorResolver {
 
 		Method factoryMethodToUse = null;
 		ArgumentsHolder argsHolderToUse = null;
-		Object[] argsToUse = null;
+		@Nullable Object[] argsToUse = null;
 
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
@@ -647,7 +647,7 @@ class ConstructorResolver {
 	}
 
 	private Object instantiate(String beanName, RootBeanDefinition mbd,
-			@Nullable Object factoryBean, Method factoryMethod, Object[] args) {
+			@Nullable Object factoryBean, Method factoryMethod, @Nullable Object[] args) {
 
 		try {
 			return this.beanFactory.getInstantiationStrategy().instantiate(
@@ -719,7 +719,7 @@ class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, @Nullable ConstructorArgumentValues resolvedValues,
-			BeanWrapper bw, Class<?>[] paramTypes, @Nullable String[] paramNames, Executable executable,
+			BeanWrapper bw, Class<?>[] paramTypes, String @Nullable [] paramNames, Executable executable,
 			boolean autowiring, boolean fallback) throws UnsatisfiedDependencyException {
 
 		TypeConverter customConverter = this.beanFactory.getCustomTypeConverter();
@@ -897,8 +897,7 @@ class ConstructorResolver {
 	/**
 	 * Resolve the specified argument which is supposed to be autowired.
 	 */
-	@Nullable
-	Object resolveAutowiredArgument(DependencyDescriptor descriptor, Class<?> paramType, String beanName,
+	@Nullable Object resolveAutowiredArgument(DependencyDescriptor descriptor, Class<?> paramType, String beanName,
 			@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback) {
 
 		if (InjectionPoint.class.isAssignableFrom(paramType)) {
@@ -1041,8 +1040,7 @@ class ConstructorResolver {
 		return ResolvableType.forInstance(value);
 	}
 
-	@Nullable
-	private Constructor<?> resolveConstructor(String beanName, RootBeanDefinition mbd,
+	private @Nullable Constructor<?> resolveConstructor(String beanName, RootBeanDefinition mbd,
 			Supplier<ResolvableType> beanType, List<ResolvableType> valueTypes) {
 
 		Class<?> type = ClassUtils.getUserClass(beanType.get().toClass());
@@ -1089,8 +1087,7 @@ class ConstructorResolver {
 		return (typeConversionFallbackMatches.size() == 1 ? typeConversionFallbackMatches.get(0) : null);
 	}
 
-	@Nullable
-	private Method resolveFactoryMethod(String beanName, RootBeanDefinition mbd, List<ResolvableType> valueTypes) {
+	private @Nullable Method resolveFactoryMethod(String beanName, RootBeanDefinition mbd, List<ResolvableType> valueTypes) {
 		if (mbd.isFactoryMethodUnique) {
 			Method resolvedFactoryMethod = mbd.getResolvedFactoryMethod();
 			if (resolvedFactoryMethod != null) {
@@ -1149,8 +1146,7 @@ class ConstructorResolver {
 		return null;
 	}
 
-	@Nullable
-	private Method resolveFactoryMethod(List<Method> executables,
+	private @Nullable Method resolveFactoryMethod(List<Method> executables,
 			Function<Method, List<ResolvableType>> parameterTypesFactory,
 			List<ResolvableType> valueTypes) {
 
@@ -1257,8 +1253,7 @@ class ConstructorResolver {
 				BeanUtils.isSimpleValueType(valueType.toClass()));
 	}
 
-	@Nullable
-	private Class<?> getFactoryBeanClass(String beanName, RootBeanDefinition mbd) {
+	private @Nullable Class<?> getFactoryBeanClass(String beanName, RootBeanDefinition mbd) {
 		Class<?> beanClass = this.beanFactory.resolveBeanClass(mbd, beanName);
 		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) ? beanClass : null);
 	}
@@ -1288,8 +1283,7 @@ class ConstructorResolver {
 	 * This variant adds a lenient fallback to the default constructor if available, similar to
 	 * {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#determineCandidateConstructors}.
 	 */
-	@Nullable
-	static Constructor<?>[] determinePreferredConstructors(Class<?> clazz) {
+	static Constructor<?> @Nullable [] determinePreferredConstructors(Class<?> clazz) {
 		Constructor<?> primaryCtor = BeanUtils.findPrimaryConstructor(clazz);
 
 		Constructor<?> defaultCtor;
@@ -1337,11 +1331,11 @@ class ConstructorResolver {
 	 */
 	private static class ArgumentsHolder {
 
-		public final Object[] rawArguments;
+		public final @Nullable Object[] rawArguments;
 
-		public final Object[] arguments;
+		public final @Nullable Object[] arguments;
 
-		public final Object[] preparedArguments;
+		public final @Nullable Object[] preparedArguments;
 
 		public boolean resolveNecessary = false;
 
@@ -1351,7 +1345,7 @@ class ConstructorResolver {
 			this.preparedArguments = new Object[size];
 		}
 
-		public ArgumentsHolder(Object[] args) {
+		public ArgumentsHolder(@Nullable Object[] args) {
 			this.rawArguments = args;
 			this.arguments = args;
 			this.preparedArguments = args;
@@ -1401,8 +1395,7 @@ class ConstructorResolver {
 	 */
 	private static class ConstructorPropertiesChecker {
 
-		@Nullable
-		public static String[] evaluate(Constructor<?> candidate, int paramCount) {
+		public static String @Nullable [] evaluate(Constructor<?> candidate, int paramCount) {
 			ConstructorProperties cp = candidate.getAnnotation(ConstructorProperties.class);
 			if (cp != null) {
 				String[] names = cp.value();
@@ -1427,8 +1420,7 @@ class ConstructorResolver {
 	@SuppressWarnings("serial")
 	private static class ConstructorDependencyDescriptor extends DependencyDescriptor {
 
-		@Nullable
-		private volatile String shortcut;
+		private volatile @Nullable String shortcut;
 
 		public ConstructorDependencyDescriptor(MethodParameter methodParameter, boolean required) {
 			super(methodParameter, required);
@@ -1443,8 +1435,7 @@ class ConstructorResolver {
 		}
 
 		@Override
-		@Nullable
-		public Object resolveShortcut(BeanFactory beanFactory) {
+		public @Nullable Object resolveShortcut(BeanFactory beanFactory) {
 			String shortcut = this.shortcut;
 			return (shortcut != null ? beanFactory.getBean(shortcut, getDependencyType()) : null);
 		}

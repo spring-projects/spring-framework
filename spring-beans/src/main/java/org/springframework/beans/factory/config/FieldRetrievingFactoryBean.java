@@ -18,13 +18,14 @@ package org.springframework.beans.factory.config;
 
 import java.lang.reflect.Field;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -58,27 +59,20 @@ import org.springframework.util.StringUtils;
 public class FieldRetrievingFactoryBean
 		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
-	@Nullable
-	private Class<?> targetClass;
+	private @Nullable Class<?> targetClass;
 
-	@Nullable
-	private Object targetObject;
+	private @Nullable Object targetObject;
 
-	@Nullable
-	private String targetField;
+	private @Nullable String targetField;
 
-	@Nullable
-	private String staticField;
+	private @Nullable String staticField;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	// the field we will retrieve
-	@Nullable
-	private Field fieldObject;
+	private @Nullable Field fieldObject;
 
 
 	/**
@@ -95,8 +89,7 @@ public class FieldRetrievingFactoryBean
 	/**
 	 * Return the target class on which the field is defined.
 	 */
-	@Nullable
-	public Class<?> getTargetClass() {
+	public @Nullable Class<?> getTargetClass() {
 		return this.targetClass;
 	}
 
@@ -114,8 +107,7 @@ public class FieldRetrievingFactoryBean
 	/**
 	 * Return the target object on which the field is defined.
 	 */
-	@Nullable
-	public Object getTargetObject() {
+	public @Nullable Object getTargetObject() {
 		return this.targetObject;
 	}
 
@@ -133,8 +125,7 @@ public class FieldRetrievingFactoryBean
 	/**
 	 * Return the name of the field to be retrieved.
 	 */
-	@Nullable
-	public String getTargetField() {
+	public @Nullable String getTargetField() {
 		return this.targetField;
 	}
 
@@ -210,8 +201,7 @@ public class FieldRetrievingFactoryBean
 
 
 	@Override
-	@Nullable
-	public Object getObject() throws IllegalAccessException {
+	public @Nullable Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {
 			throw new FactoryBeanNotInitializedException();
 		}
@@ -227,8 +217,7 @@ public class FieldRetrievingFactoryBean
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		return (this.fieldObject != null ? this.fieldObject.getType() : null);
 	}
 

@@ -18,7 +18,8 @@ package org.springframework.web.servlet;
 
 import java.util.HashMap;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -49,8 +50,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public final class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
 
-	@Nullable
-	private String targetRequestPath;
+	private @Nullable String targetRequestPath;
 
 	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<>(3);
 
@@ -69,8 +69,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	/**
 	 * Return the target URL path (or {@code null} if none specified).
 	 */
-	@Nullable
-	public String getTargetRequestPath() {
+	public @Nullable String getTargetRequestPath() {
 		return this.targetRequestPath;
 	}
 

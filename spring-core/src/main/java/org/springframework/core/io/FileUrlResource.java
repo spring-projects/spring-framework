@@ -26,7 +26,8 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -45,8 +46,7 @@ import org.springframework.util.ResourceUtils;
  */
 public class FileUrlResource extends UrlResource implements WritableResource {
 
-	@Nullable
-	private volatile File file;
+	private volatile @Nullable File file;
 
 
 	/**

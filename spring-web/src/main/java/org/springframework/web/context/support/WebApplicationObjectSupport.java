@@ -19,10 +19,10 @@ package org.springframework.web.context.support;
 import java.io.File;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
@@ -43,8 +43,7 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport implements ServletContextAware {
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
 
 	@Override
@@ -105,8 +104,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 * @see #getApplicationContext()
 	 */
-	@Nullable
-	protected final WebApplicationContext getWebApplicationContext() throws IllegalStateException {
+	protected final @Nullable WebApplicationContext getWebApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
 		if (ctx instanceof WebApplicationContext wac) {
 			return wac;
@@ -125,8 +123,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * @throws IllegalStateException if not running within a required ServletContext
 	 * @see #isContextRequired()
 	 */
-	@Nullable
-	protected final ServletContext getServletContext() throws IllegalStateException {
+	protected final @Nullable ServletContext getServletContext() throws IllegalStateException {
 		if (this.servletContext != null) {
 			return this.servletContext;
 		}

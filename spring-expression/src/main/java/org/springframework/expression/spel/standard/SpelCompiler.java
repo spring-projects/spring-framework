@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
@@ -32,7 +33,6 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompiledExpression;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -98,8 +98,7 @@ public final class SpelCompiler implements Opcodes {
 	 * @return an instance of the class implementing the compiled expression,
 	 * or {@code null} if compilation is not possible
 	 */
-	@Nullable
-	public CompiledExpression compile(SpelNodeImpl expression) {
+	public @Nullable CompiledExpression compile(SpelNodeImpl expression) {
 		if (expression.isCompilable()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("SpEL: compiling " + expression.toStringAST());
@@ -133,8 +132,7 @@ public final class SpelCompiler implements Opcodes {
 	 * @return the expression call, or {@code null} if the decision was to opt out of
 	 * compilation during code generation
 	 */
-	@Nullable
-	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
+	private @Nullable Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline:
 		// org.springframework.expression.spel.generated.CompiledExpression##### extends org.springframework.expression.spel.CompiledExpression
 		String className = "org/springframework/expression/spel/generated/CompiledExpression" + getNextSuffix();

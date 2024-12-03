@@ -20,11 +20,11 @@ import java.io.IOException;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.lang.Nullable;
 
 /**
  * Factory bean that creates a FreeMarker {@link Configuration} and provides it
@@ -57,8 +57,7 @@ import org.springframework.lang.Nullable;
 public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationFactory
 		implements FactoryBean<Configuration>, InitializingBean, ResourceLoaderAware {
 
-	@Nullable
-	private Configuration configuration;
+	private @Nullable Configuration configuration;
 
 
 	@Override
@@ -68,8 +67,7 @@ public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationF
 
 
 	@Override
-	@Nullable
-	public Configuration getObject() {
+	public @Nullable Configuration getObject() {
 		return this.configuration;
 	}
 

@@ -18,7 +18,8 @@ package org.springframework.scheduling.support;
 
 import java.time.temporal.Temporal;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -56,9 +57,8 @@ final class CompositeCronField extends CronField {
 	}
 
 
-	@Nullable
 	@Override
-	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
+	public <T extends Temporal & Comparable<? super T>> @Nullable T nextOrSame(T temporal) {
 		T result = null;
 		for (CronField field : this.fields) {
 			T candidate = field.nextOrSame(temporal);

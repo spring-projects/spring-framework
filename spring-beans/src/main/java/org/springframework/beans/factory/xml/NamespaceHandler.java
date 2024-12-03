@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.lang.Nullable;
 
 /**
  * Base interface used by the {@link DefaultBeanDefinitionDocumentReader}
@@ -69,8 +69,7 @@ public interface NamespaceHandler {
 	 * @param parserContext the object encapsulating the current state of the parsing process
 	 * @return the primary {@code BeanDefinition} (can be {@code null} as explained above)
 	 */
-	@Nullable
-	BeanDefinition parse(Element element, ParserContext parserContext);
+	@Nullable BeanDefinition parse(Element element, ParserContext parserContext);
 
 	/**
 	 * Parse the specified {@link Node} and decorate the supplied
@@ -91,7 +90,6 @@ public interface NamespaceHandler {
 	 * A {@code null} value is strictly speaking invalid, but will be leniently
 	 * treated like the case where the original bean definition gets returned.
 	 */
-	@Nullable
-	BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
+	@Nullable BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
 
 }

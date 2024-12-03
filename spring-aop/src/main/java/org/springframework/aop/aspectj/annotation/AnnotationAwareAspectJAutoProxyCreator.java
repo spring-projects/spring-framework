@@ -20,11 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -49,14 +50,11 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorAutoProxyCreator {
 
-	@Nullable
-	private List<Pattern> includePatterns;
+	private @Nullable List<Pattern> includePatterns;
 
-	@Nullable
-	private AspectJAdvisorFactory aspectJAdvisorFactory;
+	private @Nullable AspectJAdvisorFactory aspectJAdvisorFactory;
 
-	@Nullable
-	private BeanFactoryAspectJAdvisorsBuilder aspectJAdvisorsBuilder;
+	private @Nullable BeanFactoryAspectJAdvisorsBuilder aspectJAdvisorsBuilder;
 
 
 	/**

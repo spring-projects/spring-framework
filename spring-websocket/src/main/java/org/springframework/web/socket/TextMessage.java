@@ -18,7 +18,7 @@ package org.springframework.web.socket;
 
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A text WebSocket message.
@@ -28,8 +28,7 @@ import org.springframework.lang.Nullable;
  */
 public final class TextMessage extends AbstractWebSocketMessage<String> {
 
-	@Nullable
-	private final byte[] bytes;
+	private final byte @Nullable [] bytes;
 
 
 	/**

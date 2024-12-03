@@ -19,10 +19,11 @@ package org.springframework.http.converter.xml;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.util.Assert;
@@ -43,11 +44,9 @@ import org.springframework.util.Assert;
  */
 public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConverter<Object> {
 
-	@Nullable
-	private Marshaller marshaller;
+	private @Nullable Marshaller marshaller;
 
-	@Nullable
-	private Unmarshaller unmarshaller;
+	private @Nullable Unmarshaller unmarshaller;
 
 
 	/**

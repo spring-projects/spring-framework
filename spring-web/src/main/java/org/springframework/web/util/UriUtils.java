@@ -23,7 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -393,8 +394,7 @@ public abstract class UriUtils {
 	 * @return the extracted file extension (for example, "html")
 	 * @since 4.3.2
 	 */
-	@Nullable
-	public static String extractFileExtension(String path) {
+	public static @Nullable String extractFileExtension(String path) {
 		int end = path.indexOf('?');
 		int fragmentIndex = path.indexOf('#');
 		if (fragmentIndex != -1 && (end == -1 || fragmentIndex < end)) {

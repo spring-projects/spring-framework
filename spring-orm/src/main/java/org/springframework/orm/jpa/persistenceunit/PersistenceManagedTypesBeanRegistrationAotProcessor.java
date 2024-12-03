@@ -33,6 +33,7 @@ import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
@@ -50,7 +51,6 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -71,9 +71,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 	private static final boolean jpaPresent = ClassUtils.isPresent("jakarta.persistence.Entity",
 			PersistenceManagedTypesBeanRegistrationAotProcessor.class.getClassLoader());
 
-	@Nullable
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		if (jpaPresent) {
 			if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
 				return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
@@ -230,8 +229,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
-		@Nullable
-		private static Class<? extends Annotation> loadClass(String className, @Nullable ClassLoader classLoader) {
+		private static @Nullable Class<? extends Annotation> loadClass(String className, @Nullable ClassLoader classLoader) {
 			try {
 				return (Class<? extends Annotation>) ClassUtils.forName(className, classLoader);
 			}

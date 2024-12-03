@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHandlingException;
@@ -89,8 +89,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private Log handlerMethodLogger;
+	private @Nullable Log handlerMethodLogger;
 
 
 	private final List<String> destinationPrefixes = new ArrayList<>();
@@ -105,8 +104,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
 			new HandlerMethodReturnValueHandlerComposite();
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
 
@@ -225,8 +223,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.applicationContext = applicationContext;
 	}
 
-	@Nullable
-	public ApplicationContext getApplicationContext() {
+	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -343,8 +340,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param handlerType the handler type, possibly a subtype of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
-	@Nullable
-	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
+	protected abstract @Nullable T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
 	 * Register a handler method and its unique mapping.
@@ -399,8 +395,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Return a logger to set on {@link HandlerMethodReturnValueHandlerComposite}.
 	 * @since 5.1
 	 */
-	@Nullable
-	protected Log getReturnValueHandlerLogger() {
+	protected @Nullable Log getReturnValueHandlerLogger() {
 		return null;
 	}
 
@@ -408,8 +403,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Return a logger to set on {@link InvocableHandlerMethod}.
 	 * @since 5.1
 	 */
-	@Nullable
-	protected Log getHandlerMethodLogger() {
+	protected @Nullable Log getHandlerMethodLogger() {
 		return null;
 	}
 
@@ -458,8 +452,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		headerAccessor.setImmutable();
 	}
 
-	@Nullable
-	protected abstract String getDestination(Message<?> message);
+	protected abstract @Nullable String getDestination(Message<?> message);
 
 	/**
 	 * Check whether the given destination (of an incoming message) matches to
@@ -469,8 +462,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p>If there are no destination prefixes, return the destination as is.
 	 */
 	@SuppressWarnings("ForLoopReplaceableByForEach")
-	@Nullable
-	protected String getLookupDestination(@Nullable String destination) {
+	protected @Nullable String getLookupDestination(@Nullable String destination) {
 		if (destination == null) {
 			return null;
 		}
@@ -539,8 +531,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param message the message being handled
 	 * @return the match or {@code null} if there is no match
 	 */
-	@Nullable
-	protected abstract T getMatchingMapping(T mapping, Message<?> message);
+	protected abstract @Nullable T getMatchingMapping(T mapping, Message<?> message);
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
 		logger.debug("No matching message handler methods.");
@@ -628,8 +619,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @return a method to handle the exception, or {@code null}
 	 * @since 4.2
 	 */
-	@Nullable
-	protected InvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
+	protected @Nullable InvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching methods to handle " + exception.getClass().getSimpleName());
 		}

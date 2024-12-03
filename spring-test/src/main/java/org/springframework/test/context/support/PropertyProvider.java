@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy for providing named properties &mdash; for example, for looking up
@@ -35,7 +35,6 @@ public interface PropertyProvider {
 	 * @param name the name of the property to retrieve
 	 * @return the value of the property or {@code null} if not found
 	 */
-	@Nullable
-	String get(String name);
+	@Nullable String get(String name);
 
 }

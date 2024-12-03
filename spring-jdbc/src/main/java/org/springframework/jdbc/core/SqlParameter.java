@@ -19,7 +19,8 @@ package org.springframework.jdbc.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -36,19 +37,16 @@ import org.springframework.util.Assert;
 public class SqlParameter {
 
 	// The name of the parameter, if any
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
 	// SQL type constant from {@code java.sql.Types}
 	private final int sqlType;
 
 	// Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types
-	@Nullable
-	private String typeName;
+	private @Nullable String typeName;
 
 	// The scale to apply in case of a NUMERIC or DECIMAL type, if any
-	@Nullable
-	private Integer scale;
+	private @Nullable Integer scale;
 
 
 	/**
@@ -131,8 +129,7 @@ public class SqlParameter {
 	/**
 	 * Return the name of the parameter, or {@code null} if anonymous.
 	 */
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -146,16 +143,14 @@ public class SqlParameter {
 	/**
 	 * Return the type name of the parameter, if any.
 	 */
-	@Nullable
-	public String getTypeName() {
+	public @Nullable String getTypeName() {
 		return this.typeName;
 	}
 
 	/**
 	 * Return the scale of the parameter, if any.
 	 */
-	@Nullable
-	public Integer getScale() {
+	public @Nullable Integer getScale() {
 		return this.scale;
 	}
 
@@ -183,7 +178,7 @@ public class SqlParameter {
 	 * Convert a list of JDBC types, as defined in {@code java.sql.Types},
 	 * to a List of SqlParameter objects as used in this package.
 	 */
-	public static List<SqlParameter> sqlTypesToAnonymousParameterList(@Nullable int... types) {
+	public static List<SqlParameter> sqlTypesToAnonymousParameterList(int @Nullable ... types) {
 		if (types == null) {
 			return new ArrayList<>();
 		}

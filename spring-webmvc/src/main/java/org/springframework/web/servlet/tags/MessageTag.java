@@ -24,11 +24,11 @@ import java.util.List;
 
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.JspTagException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -153,24 +153,19 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	public static final String DEFAULT_ARGUMENT_SEPARATOR = ",";
 
 
-	@Nullable
-	private MessageSourceResolvable message;
+	private @Nullable MessageSourceResolvable message;
 
-	@Nullable
-	private String code;
+	private @Nullable String code;
 
-	@Nullable
-	private Object arguments;
+	private @Nullable Object arguments;
 
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
 	private List<Object> nestedArguments = Collections.emptyList();
 
-	@Nullable
-	private String text;
+	private @Nullable String text;
 
-	@Nullable
-	private String var;
+	private @Nullable String var;
 
 	private String scope = TagUtils.SCOPE_PAGE;
 
@@ -339,7 +334,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 		throw new JspTagException("No resolvable message");
 	}
 
-	private Object[] appendArguments(@Nullable Object[] sourceArguments, Object[] additionalArguments) {
+	private Object[] appendArguments(Object @Nullable [] sourceArguments, Object[] additionalArguments) {
 		if (ObjectUtils.isEmpty(sourceArguments)) {
 			return additionalArguments;
 		}
@@ -356,8 +351,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * @throws JspException if argument conversion failed
 	 * @see #setArguments
 	 */
-	@Nullable
-	protected Object[] resolveArguments(@Nullable Object arguments) throws JspException {
+	protected Object @Nullable [] resolveArguments(@Nullable Object arguments) throws JspException {
 		if (arguments instanceof String string) {
 			return StringUtils.delimitedListToStringArray(string, this.argumentSeparator);
 		}
@@ -396,8 +390,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	/**
 	 * Return default exception message.
 	 */
-	@Nullable
-	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
+	protected @Nullable String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
 		return ex.getMessage();
 	}
 

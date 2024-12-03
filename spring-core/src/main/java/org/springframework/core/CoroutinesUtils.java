@@ -41,11 +41,11 @@ import kotlinx.coroutines.GlobalScope;
 import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.reactor.MonoKt;
 import kotlinx.coroutines.reactor.ReactorFlowKt;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 

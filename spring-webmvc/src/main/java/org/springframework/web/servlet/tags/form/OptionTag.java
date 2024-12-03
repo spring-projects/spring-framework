@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import jakarta.servlet.jsp.tagext.BodyTag;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
@@ -227,20 +227,16 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * The 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
-	@Nullable
-	private Object value;
+	private @Nullable Object value;
 
 	/**
 	 * The text body of the rendered HTML {@code <option>} tag.
 	 */
-	@Nullable
-	private String label;
+	private @Nullable String label;
 
-	@Nullable
-	private Object oldValue;
+	private @Nullable Object oldValue;
 
-	@Nullable
-	private Object oldDisplayValue;
+	private @Nullable Object oldDisplayValue;
 
 	private boolean disabled;
 
@@ -255,8 +251,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Get the 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
-	@Nullable
-	protected Object getValue() {
+	protected @Nullable Object getValue() {
 		return this.value;
 	}
 
@@ -285,8 +280,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Get the text body of the rendered HTML {@code <option>} tag.
 	 */
-	@Nullable
-	protected String getLabel() {
+	protected @Nullable String getLabel() {
 		return this.label;
 	}
 
@@ -364,8 +358,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	@Override
-	@Nullable
-	protected String autogenerateId() throws JspException {
+	protected @Nullable String autogenerateId() throws JspException {
 		return null;
 	}
 
@@ -393,8 +386,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
 	}
 
-	@Nullable
-	private Object resolveValue() throws JspException {
+	private @Nullable Object resolveValue() throws JspException {
 		return evaluate(VALUE_VARIABLE_NAME, getValue());
 	}
 

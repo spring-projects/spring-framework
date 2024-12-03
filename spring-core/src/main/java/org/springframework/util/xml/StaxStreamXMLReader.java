@@ -22,13 +22,13 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -51,8 +51,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
-	@Nullable
-	private String encoding;
+	private @Nullable String encoding;
 
 
 	/**
@@ -142,13 +141,11 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 					return (location != null ? location.getLineNumber() : -1);
 				}
 				@Override
-				@Nullable
-				public String getPublicId() {
+				public @Nullable String getPublicId() {
 					return (location != null ? location.getPublicId() : null);
 				}
 				@Override
-				@Nullable
-				public String getSystemId() {
+				public @Nullable String getSystemId() {
 					return (location != null ? location.getSystemId() : null);
 				}
 				@Override
@@ -156,8 +153,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 					return xmlVersion;
 				}
 				@Override
-				@Nullable
-				public String getEncoding() {
+				public @Nullable String getEncoding() {
 					return encoding;
 				}
 			});

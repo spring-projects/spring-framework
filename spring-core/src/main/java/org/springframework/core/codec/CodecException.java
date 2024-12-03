@@ -16,8 +16,9 @@
 
 package org.springframework.core.codec;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * General error that indicates a problem while encoding and decoding to and

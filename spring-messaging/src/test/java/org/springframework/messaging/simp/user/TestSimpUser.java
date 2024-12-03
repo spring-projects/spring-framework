@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Rossen Stoyanchev
@@ -44,9 +44,8 @@ public class TestSimpUser implements SimpUser {
 		return name;
 	}
 
-	@Nullable
 	@Override
-	public Principal getPrincipal() {
+	public @Nullable Principal getPrincipal() {
 		return null;
 	}
 

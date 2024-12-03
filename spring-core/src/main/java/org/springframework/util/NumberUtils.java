@@ -23,7 +23,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Miscellaneous utility methods for number conversion and parsing.

@@ -16,8 +16,9 @@
 
 package org.springframework.transaction.event;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Juergen Hoeller
@@ -25,14 +26,11 @@ import org.springframework.lang.Nullable;
  */
 class CapturingSynchronizationCallback implements TransactionalApplicationListener.SynchronizationCallback {
 
-	@Nullable
-	ApplicationEvent preEvent;
+	@Nullable ApplicationEvent preEvent;
 
-	@Nullable
-	ApplicationEvent postEvent;
+	@Nullable ApplicationEvent postEvent;
 
-	@Nullable
-	Throwable ex;
+	@Nullable Throwable ex;
 
 	@Override
 	public void preProcessEvent(ApplicationEvent event) {

@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.sockjs;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Indicates a serious failure that occurred in the SockJS implementation as opposed to

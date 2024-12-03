@@ -19,7 +19,7 @@ package org.springframework.web.reactive.result.condition;
 import java.util.Collection;
 import java.util.StringJoiner;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A base class for {@link RequestCondition} types providing implementations of

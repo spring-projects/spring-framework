@@ -34,8 +34,9 @@ import java.util.SortedSet;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.lang.Contract;
-import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous collection utility methods.
@@ -268,8 +269,7 @@ public abstract class CollectionUtils {
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or {@code null} if not found
 	 */
-	@Nullable
-	public static <E> E findFirstMatch(Collection<?> source, Collection<E> candidates) {
+	public static <E> @Nullable E findFirstMatch(Collection<?> source, Collection<E> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
@@ -289,8 +289,7 @@ public abstract class CollectionUtils {
 	 * or {@code null} if none or more than one such value found
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <T> T findValueOfType(Collection<?> collection, @Nullable Class<T> type) {
+	public static <T> @Nullable T findValueOfType(Collection<?> collection, @Nullable Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
 		}
@@ -316,8 +315,7 @@ public abstract class CollectionUtils {
 	 * @return a value of one of the given types found if there is a clear match,
 	 * or {@code null} if none or more than one such value found
 	 */
-	@Nullable
-	public static Object findValueOfType(Collection<?> collection, Class<?>[] types) {
+	public static @Nullable Object findValueOfType(Collection<?> collection, Class<?>[] types) {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
 			return null;
 		}
@@ -360,8 +358,7 @@ public abstract class CollectionUtils {
 	 * @return the common element type, or {@code null} if no clear
 	 * common type has been found (or the collection was empty)
 	 */
-	@Nullable
-	public static Class<?> findCommonElementType(Collection<?> collection) {
+	public static @Nullable Class<?> findCommonElementType(Collection<?> collection) {
 		if (isEmpty(collection)) {
 			return null;
 		}
@@ -389,8 +386,7 @@ public abstract class CollectionUtils {
 	 * @see LinkedHashMap#keySet()
 	 * @see java.util.LinkedHashSet
 	 */
-	@Nullable
-	public static <T> T firstElement(@Nullable Set<T> set) {
+	public static <T> @Nullable T firstElement(@Nullable Set<T> set) {
 		if (isEmpty(set)) {
 			return null;
 		}
@@ -412,8 +408,7 @@ public abstract class CollectionUtils {
 	 * @return the first element, or {@code null} if none
 	 * @since 5.2.3
 	 */
-	@Nullable
-	public static <T> T firstElement(@Nullable List<T> list) {
+	public static <T> @Nullable T firstElement(@Nullable List<T> list) {
 		if (isEmpty(list)) {
 			return null;
 		}
@@ -430,8 +425,7 @@ public abstract class CollectionUtils {
 	 * @see LinkedHashMap#keySet()
 	 * @see java.util.LinkedHashSet
 	 */
-	@Nullable
-	public static <T> T lastElement(@Nullable Set<T> set) {
+	public static <T> @Nullable T lastElement(@Nullable Set<T> set) {
 		if (isEmpty(set)) {
 			return null;
 		}
@@ -454,8 +448,7 @@ public abstract class CollectionUtils {
 	 * @return the last element, or {@code null} if none
 	 * @since 5.0.3
 	 */
-	@Nullable
-	public static <T> T lastElement(@Nullable List<T> list) {
+	public static <T> @Nullable T lastElement(@Nullable List<T> list) {
 		if (isEmpty(list)) {
 			return null;
 		}

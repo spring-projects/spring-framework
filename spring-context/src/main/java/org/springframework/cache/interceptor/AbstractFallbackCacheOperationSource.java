@@ -25,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.MethodClassKey;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -78,8 +78,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	}
 
 	@Override
-	@Nullable
-	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
+	public @Nullable Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		return getCacheOperations(method, targetClass, true);
 	}
 
@@ -92,8 +91,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return {@link CacheOperation} for this method, or {@code null} if the method
 	 * is not cacheable
 	 */
-	@Nullable
-	private Collection<CacheOperation> getCacheOperations(
+	private @Nullable Collection<CacheOperation> getCacheOperations(
 			Method method, @Nullable Class<?> targetClass, boolean cacheNull) {
 
 		if (ReflectionUtils.isObjectMethod(method)) {
@@ -133,8 +131,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		return new MethodClassKey(method, targetClass);
 	}
 
-	@Nullable
-	private Collection<CacheOperation> computeCacheOperations(Method method, @Nullable Class<?> targetClass) {
+	private @Nullable Collection<CacheOperation> computeCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow non-public methods, as configured.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -179,8 +176,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @param clazz the class to retrieve the cache operations for
 	 * @return all cache operations associated with this class, or {@code null} if none
 	 */
-	@Nullable
-	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
+	protected abstract @Nullable Collection<CacheOperation> findCacheOperations(Class<?> clazz);
 
 	/**
 	 * Subclasses need to implement this to return the cache operations for the
@@ -188,8 +184,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @param method the method to retrieve the cache operations for
 	 * @return all cache operations associated with this method, or {@code null} if none
 	 */
-	@Nullable
-	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
+	protected abstract @Nullable Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?

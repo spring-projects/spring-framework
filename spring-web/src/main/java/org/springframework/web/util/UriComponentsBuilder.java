@@ -30,7 +30,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -76,27 +77,21 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Object[] EMPTY_VALUES = new Object[0];
 
-	@Nullable
-	private String scheme;
+	private @Nullable String scheme;
 
-	@Nullable
-	private String ssp;
+	private @Nullable String ssp;
 
-	@Nullable
-	private String userInfo;
+	private @Nullable String userInfo;
 
-	@Nullable
-	private String host;
+	private @Nullable String host;
 
-	@Nullable
-	private String port;
+	private @Nullable String port;
 
 	private CompositePathComponentBuilder pathBuilder;
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
-	@Nullable
-	private String fragment;
+	private @Nullable String fragment;
 
 	private final Map<String, Object> uriVariables = new HashMap<>(4);
 
@@ -610,8 +605,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	@Nullable
-	private String getQueryParamValue(@Nullable Object value) {
+	private @Nullable String getQueryParamValue(@Nullable Object value) {
 		if (value != null) {
 			return (value instanceof Optional<?> optional ?
 					optional.map(Object::toString).orElse(null) :
@@ -777,8 +771,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private interface PathComponentBuilder {
 
-		@Nullable
-		PathComponent build();
+		@Nullable PathComponent build();
 
 		PathComponentBuilder cloneBuilder();
 	}
@@ -819,8 +812,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@SuppressWarnings("unchecked")
-		@Nullable
-		private <T> T getLastBuilder(Class<T> builderClass) {
+		private <T> @Nullable T getLastBuilder(Class<T> builderClass) {
 			if (!this.builders.isEmpty()) {
 				PathComponentBuilder last = this.builders.getLast();
 				if (builderClass.isInstance(last)) {
@@ -869,8 +861,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		@Nullable
-		public PathComponent build() {
+		public @Nullable PathComponent build() {
 			if (this.path.isEmpty()) {
 				return null;
 			}
@@ -920,8 +911,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		@Nullable
-		public PathComponent build() {
+		public @Nullable PathComponent build() {
 			return (this.pathSegments.isEmpty() ? null :
 					new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments));
 		}

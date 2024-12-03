@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -41,14 +42,11 @@ public class InterceptorRegistration {
 
 	private final HandlerInterceptor interceptor;
 
-	@Nullable
-	private List<String> includePatterns;
+	private @Nullable List<String> includePatterns;
 
-	@Nullable
-	private List<String> excludePatterns;
+	private @Nullable List<String> excludePatterns;
 
-	@Nullable
-	private PathMatcher pathMatcher;
+	private @Nullable PathMatcher pathMatcher;
 
 	private int order = 0;
 

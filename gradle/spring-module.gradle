@@ -13,8 +13,8 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
-	errorprone 'com.uber.nullaway:nullaway:0.10.26'
-	errorprone 'com.google.errorprone:error_prone_core:2.9.0'
+	errorprone 'com.uber.nullaway:nullaway:0.12.2'
+	errorprone 'com.google.errorprone:error_prone_core:2.35.1'
 }
 
 pluginManager.withPlugin("kotlin") {

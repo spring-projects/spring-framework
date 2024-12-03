@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Delegate interface for a configured AOP proxy, allowing for the creation

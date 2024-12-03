@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -48,7 +49,6 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -75,8 +75,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private URI uri;
 
-	@Nullable
-	private String contextPath;
+	private @Nullable String contextPath;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -428,9 +427,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			return this.delegate.getLocaleContext();
 		}
 
-		@Nullable
 		@Override
-		public ApplicationContext getApplicationContext() {
+		public @Nullable ApplicationContext getApplicationContext() {
 			return this.delegate.getApplicationContext();
 		}
 

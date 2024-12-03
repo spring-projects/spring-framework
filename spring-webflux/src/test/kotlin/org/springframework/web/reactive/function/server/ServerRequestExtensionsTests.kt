@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,13 +177,6 @@ class ServerRequestExtensionsTests {
 	fun `queryParamOrNull with values`() {
 		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("bar", "bar")))
 		assertThat(request.queryParamOrNull("foo")).isEqualTo("bar")
-		verify { request.queryParams() }
-	}
-
-	@Test
-	fun `queryParamOrNull with null value`() {
-		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf(null)))
-		assertThat(request.queryParamOrNull("foo")).isEqualTo("")
 		verify { request.queryParams() }
 	}
 
