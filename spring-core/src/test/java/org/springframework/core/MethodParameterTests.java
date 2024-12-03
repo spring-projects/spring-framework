@@ -49,6 +49,10 @@ class MethodParameterTests {
 
 	private MethodParameter intReturnType;
 
+	private MethodParameter jspecifyNullableParameter;
+
+	private MethodParameter springNullableParameter;
+
 
 	@BeforeEach
 	void setup() throws NoSuchMethodException {
@@ -56,6 +60,10 @@ class MethodParameterTests {
 		stringParameter = new MethodParameter(method, 0);
 		longParameter = new MethodParameter(method, 1);
 		intReturnType = new MethodParameter(method, -1);
+		Method jspecifyNullableMethod = getClass().getMethod("jspecifyNullableMethod", String.class);
+		jspecifyNullableParameter = new MethodParameter(jspecifyNullableMethod, 0);
+		Method springNullableMethod = getClass().getMethod("springNullableMethod", String.class);
+		springNullableParameter = new MethodParameter(springNullableMethod, 0);
 	}
 
 
@@ -238,19 +246,27 @@ class MethodParameterTests {
 	}
 
 	@Test
-	void nullableWithSpringAnnotation() {
-		MethodParameter m = MethodParameter.forExecutable(method, 1);
-		assertThat(m.isOptional()).isTrue();
+	void jspecifyNullableParameter() {
+		assertThat(jspecifyNullableParameter.isOptional()).isTrue();
 	}
 
 	@Test
-	void nullableWithJSpecifyAnnotation() {
-		MethodParameter m = MethodParameter.forExecutable(method, 0);
-		assertThat(m.isOptional()).isTrue();
+	void springNullableParameter() {
+		assertThat(springNullableParameter.isOptional()).isTrue();
 	}
 
-	public int method(@org.jspecify.annotations.Nullable String p1, @org.springframework.lang.Nullable long p2) {
+	public int method(String p1, long p2) {
 		return 42;
+	}
+
+	public @org.jspecify.annotations.Nullable String jspecifyNullableMethod(@org.jspecify.annotations.Nullable String parameter) {
+		return parameter;
+	}
+
+	@SuppressWarnings("deprecation")
+	@org.springframework.lang.Nullable
+	public String springNullableMethod(@org.springframework.lang.Nullable String parameter) {
+		return parameter;
 	}
 
 	@SuppressWarnings("unused")

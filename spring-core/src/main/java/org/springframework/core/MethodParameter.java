@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -388,8 +389,8 @@ public class MethodParameter {
 	/**
 	 * Return whether this method indicates a parameter which is not required:
 	 * either in the form of Java 8's {@link java.util.Optional}, any variant
-	 * of a parameter-level {@code Nullable} annotation (such as from JSR-305
-	 * or the FindBugs set of annotations), or a language-level nullable type
+	 * of a parameter-level {@code Nullable} annotation (such as from JSpecify,
+	 * JSR-305 or Jakarta set of annotations), or a language-level nullable type
 	 * declaration or {@code Continuation} parameter in Kotlin.
 	 * @since 4.3
 	 */
@@ -402,13 +403,20 @@ public class MethodParameter {
 
 	/**
 	 * Check whether this method parameter is annotated with any variant of a
-	 * {@code Nullable} annotation, for example, {@code jakarta.annotation.Nullable} or
-	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
+	 * {@code Nullable} annotation, for example, {@code org.springframework.lang.Nullable},
+	 * {@code org.jspecify.annotations.Nullable} or {@code jakarta.annotation.Nullable}.
 	 */
 	private boolean hasNullableAnnotation() {
 		for (Annotation ann : getParameterAnnotations()) {
 			if ("Nullable".equals(ann.annotationType().getSimpleName())) {
 				return true;
+			}
+		}
+		for (AnnotatedType annotatedType : this.executable.getAnnotatedParameterTypes()) {
+			for (Annotation ann : annotatedType.getAnnotations()) {
+				if ("Nullable".equals(ann.annotationType().getSimpleName())) {
+					return true;
+				}
 			}
 		}
 		return false;
