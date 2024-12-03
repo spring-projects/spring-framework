@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,17 @@ class ScheduledAnnotationReactiveSupportTests {
 				.isEqualTo("reactor.core.publisher.FluxOnAssembly");
 
 		assertThat(p).hasToString("checkpoint(\"@Scheduled 'mono()' in 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'\")");
+	}
+
+	@Test
+	void shouldProvideToString() {
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
+		Scheduled cron = AnnotationUtils.synthesizeAnnotation(Map.of("cron", "-"), Scheduled.class, null);
+		List<Runnable> tracker = new ArrayList<>();
+
+		assertThat(createSubscriptionRunnable(m, target, cron, () -> ObservationRegistry.NOOP, tracker))
+				.hasToString("org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods.mono");
 	}
 
 
