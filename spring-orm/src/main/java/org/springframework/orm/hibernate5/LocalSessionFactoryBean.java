@@ -121,10 +121,10 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	private RegionFactory cacheRegionFactory;
 
 	@Nullable
-	private MultiTenantConnectionProvider multiTenantConnectionProvider;
+	private MultiTenantConnectionProvider<?> multiTenantConnectionProvider;
 
 	@Nullable
-	private CurrentTenantIdentifierResolver currentTenantIdentifierResolver;
+	private CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver;
 
 	@Nullable
 	private Properties hibernateProperties;
@@ -312,7 +312,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * @since 4.3
 	 * @see LocalSessionFactoryBuilder#setMultiTenantConnectionProvider
 	 */
-	public void setMultiTenantConnectionProvider(MultiTenantConnectionProvider multiTenantConnectionProvider) {
+	public void setMultiTenantConnectionProvider(MultiTenantConnectionProvider<?> multiTenantConnectionProvider) {
 		this.multiTenantConnectionProvider = multiTenantConnectionProvider;
 	}
 
@@ -320,7 +320,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * Set a {@link CurrentTenantIdentifierResolver} to be passed on to the SessionFactory.
 	 * @see LocalSessionFactoryBuilder#setCurrentTenantIdentifierResolver
 	 */
-	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
+	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver) {
 		this.currentTenantIdentifierResolver = currentTenantIdentifierResolver;
 	}
 

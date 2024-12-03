@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,10 +216,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * {@link Component @Component} meta-annotation including the
 	 * {@link Repository @Repository}, {@link Service @Service}, and
 	 * {@link Controller @Controller} stereotype annotations.
-	 * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
-	 * JSR-330's {@link jakarta.inject.Named} annotations (as well as their
-	 * pre-Jakarta {@code javax.annotation.ManagedBean} and {@code javax.inject.Named}
-	 * equivalents), if available.
+	 * <p>Also supports JSR-330's {@link jakarta.inject.Named} annotation if available.
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
@@ -227,35 +224,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("jakarta.annotation.ManagedBean", cl)), false));
-			logger.trace("JSR-250 'jakarta.annotation.ManagedBean' found and supported for component scanning");
-		}
-		catch (ClassNotFoundException ex) {
-			// JSR-250 1.1 API (as included in Jakarta EE) not available - simply skip.
-		}
-		try {
-			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
-			logger.trace("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
-		}
-		catch (ClassNotFoundException ex) {
-			// JSR-250 1.1 API not available - simply skip.
-		}
-		try {
-			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) ClassUtils.forName("jakarta.inject.Named", cl)), false));
 			logger.trace("JSR-330 'jakarta.inject.Named' annotation found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API (as included in Jakarta EE) not available - simply skip.
-		}
-		try {
-			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));
-			logger.trace("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
-		}
-		catch (ClassNotFoundException ex) {
-			// JSR-330 API not available - simply skip.
 		}
 	}
 

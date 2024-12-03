@@ -103,8 +103,6 @@ import org.springframework.util.StringUtils;
  *
  * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation,
  * if available, as a direct alternative to Spring's own {@code @Autowired}.
- * Additionally, it retains support for the {@code javax.inject.Inject} variant
- * dating back to the original JSR-330 specification (as known from Java EE 6-8).
  *
  * <h3>Autowired Constructors</h3>
  * <p>Only one constructor of any given bean class may declare this annotation with
@@ -189,8 +187,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * Create a new {@code AutowiredAnnotationBeanPostProcessor} for Spring's
 	 * standard {@link Autowired @Autowired} and {@link Value @Value} annotations.
-	 * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation,
-	 * if available, as well as the original {@code javax.inject.Inject} variant.
+	 * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation
+	 * if available.
 	 */
 	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationBeanPostProcessor() {
@@ -205,15 +203,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 		catch (ClassNotFoundException ex) {
 			// jakarta.inject API not available - simply skip.
-		}
-
-		try {
-			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("javax.inject.Inject", classLoader));
-			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
-		}
-		catch (ClassNotFoundException ex) {
-			// javax.inject API not available - simply skip.
 		}
 	}
 

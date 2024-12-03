@@ -63,14 +63,4 @@ class JakartaAnnotationsRuntimeHintsTests {
 		assertThat(RuntimeHintsPredicates.reflection().onType(Qualifier.class)).accepts(this.hints);
 	}
 
-	@Test  // gh-33345
-	void javaxInjectAnnotationHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(javax.inject.Inject.class)).accepts(this.hints);
-	}
-
-	@Test  // gh-33345
-	void javaxQualifierAnnotationHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(javax.inject.Qualifier.class)).accepts(this.hints);
-	}
-
 }

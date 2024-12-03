@@ -185,6 +185,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Parse the unit info DOM element.
 	 */
+	@SuppressWarnings("removal")
 	SpringPersistenceUnitInfo parsePersistenceUnitInfo(
 			Element persistenceUnit, String version, @Nullable URL rootUrl) throws IOException {
 

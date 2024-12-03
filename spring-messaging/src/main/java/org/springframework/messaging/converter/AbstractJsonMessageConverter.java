@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.converter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -91,7 +92,6 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				Writer writer = getWriter(out, headers);
 				toJson(payload, resolvedType, writer);
-				writer.flush();
 				return out.toByteArray();
 			}
 			else {
@@ -120,11 +120,11 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 	}
 
 
-	protected abstract Object fromJson(Reader reader, Type resolvedType);
+	protected abstract Object fromJson(Reader reader, Type resolvedType) throws IOException;
 
 	protected abstract Object fromJson(String payload, Type resolvedType);
 
-	protected abstract void toJson(Object payload, Type resolvedType, Writer writer);
+	protected abstract void toJson(Object payload, Type resolvedType, Writer writer) throws IOException;
 
 	protected abstract String toJson(Object payload, Type resolvedType);
 

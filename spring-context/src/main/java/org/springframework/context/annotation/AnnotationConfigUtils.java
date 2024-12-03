@@ -117,9 +117,6 @@ public abstract class AnnotationConfigUtils {
 	private static final boolean jakartaAnnotationsPresent =
 			ClassUtils.isPresent("jakarta.annotation.PostConstruct", classLoader);
 
-	private static final boolean jsr250Present =
-			ClassUtils.isPresent("javax.annotation.PostConstruct", classLoader);
-
 	private static final boolean jpaPresent =
 			ClassUtils.isPresent("jakarta.persistence.EntityManagerFactory", classLoader) &&
 					ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, classLoader);
@@ -169,8 +166,7 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for Jakarta Annotations support, and if present add the CommonAnnotationBeanPostProcessor.
-		if ((jakartaAnnotationsPresent || jsr250Present) &&
-				!registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+		if (jakartaAnnotationsPresent && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));

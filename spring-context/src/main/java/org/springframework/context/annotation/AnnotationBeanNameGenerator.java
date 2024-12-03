@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,8 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.stereotype.Repository @Repository}) are
  * themselves annotated with {@code @Component}.
  *
- * <p>Also supports Jakarta EE's {@link jakarta.annotation.ManagedBean} and
- * JSR-330's {@link jakarta.inject.Named} annotations (as well as their pre-Jakarta
- * {@code javax.annotation.ManagedBean} and {@code javax.inject.Named} equivalents),
- * if available. Note that Spring component annotations always override such
- * standard annotations.
+ * <p>Also supports JSR-330's {@link jakarta.inject.Named} annotation if available.
+ * Note that Spring component annotations always override such standard annotations.
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
@@ -219,10 +216,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 			Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
 
 		boolean isStereotype = metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
-				annotationType.equals("jakarta.annotation.ManagedBean") ||
-				annotationType.equals("javax.annotation.ManagedBean") ||
-				annotationType.equals("jakarta.inject.Named") ||
-				annotationType.equals("javax.inject.Named");
+				annotationType.equals("jakarta.inject.Named");
 
 		return (isStereotype && attributes.containsKey("value"));
 	}

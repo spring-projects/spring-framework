@@ -21,8 +21,6 @@ dependencies {
 	optional("jakarta.inject:jakarta.inject-api")
 	optional("jakarta.interceptor:jakarta.interceptor-api")
 	optional("jakarta.validation:jakarta.validation-api")
-	optional("javax.annotation:javax.annotation-api")
-	optional("javax.inject:javax.inject")
 	optional("javax.money:money-api")
 	optional("org.apache.groovy:groovy")
 	optional("org.apache-extras.beanshell:bsh")

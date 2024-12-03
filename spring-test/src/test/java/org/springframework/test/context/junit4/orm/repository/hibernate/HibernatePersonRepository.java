@@ -42,7 +42,7 @@ public class HibernatePersonRepository implements PersonRepository {
 
 	@Override
 	public Person save(Person person) {
-		this.sessionFactory.getCurrentSession().save(person);
+		this.sessionFactory.getCurrentSession().persist(person);
 		return person;
 	}
 
