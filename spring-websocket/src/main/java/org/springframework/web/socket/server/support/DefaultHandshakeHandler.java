@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package org.springframework.web.socket.server.support;
 
 import jakarta.servlet.ServletContext;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
+import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy;
 
 /**
  * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation,
  * extending {@link AbstractHandshakeHandler} with Servlet-specific initialization support.
- * See {@link AbstractHandshakeHandler}'s javadoc for details on supported servers etc.
+ * As of 7.0, this class prefers {@link JettyRequestUpgradeStrategy} when Jetty WebSocket
+ * is available on the classpath, using {@link StandardWebSocketUpgradeStrategy} otherwise.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -32,7 +36,13 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class DefaultHandshakeHandler extends AbstractHandshakeHandler implements ServletContextAware {
 
+	private static final boolean jettyWsPresent = ClassUtils.isPresent(
+			"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer",
+			DefaultHandshakeHandler.class.getClassLoader());
+
+
 	public DefaultHandshakeHandler() {
+		super(jettyWsPresent ? new JettyRequestUpgradeStrategy() : new StandardWebSocketUpgradeStrategy());
 	}
 
 	public DefaultHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {

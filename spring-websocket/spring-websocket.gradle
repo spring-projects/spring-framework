@@ -12,19 +12,11 @@ dependencies {
 	optional("jakarta.servlet:jakarta.servlet-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")
-	optional("org.apache.tomcat:tomcat-websocket") {
-		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
-		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
-	}
-	optional("org.eclipse.jetty.ee10:jetty-ee10-webapp") {
-		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
-	}
-	optional("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
-	optional("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server")
 	optional("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	optional("org.glassfish.tyrus:tyrus-container-servlet")
+	optional("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
+	optional("org.eclipse.jetty:jetty-client")
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("io.projectreactor.netty:reactor-netty-http")

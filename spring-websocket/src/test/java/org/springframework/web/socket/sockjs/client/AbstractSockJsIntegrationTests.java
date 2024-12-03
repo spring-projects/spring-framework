@@ -62,6 +62,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -143,7 +144,9 @@ abstract class AbstractSockJsIntegrationTests {
 	}
 
 
-	protected abstract Class<?> upgradeStrategyConfigClass();
+	protected Class<?> upgradeStrategyConfigClass() {
+		return StandardWebSocketUpgradeStrategy.class;
+	}
 
 	protected abstract WebSocketTestServer createWebSocketTestServer();
 

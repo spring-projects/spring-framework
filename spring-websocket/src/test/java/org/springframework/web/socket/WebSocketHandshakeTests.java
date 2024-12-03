@@ -104,8 +104,8 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		TestWebSocketHandler handler() {
 			return new TestWebSocketHandler();
 		}
-
 	}
+
 
 	@SuppressWarnings("rawtypes")
 	private static class TestWebSocketHandler extends AbstractWebSocketHandler {
