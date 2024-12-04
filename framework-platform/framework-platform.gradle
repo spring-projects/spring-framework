@@ -58,7 +58,7 @@ dependencies {
 		api("io.smallrye.reactive:mutiny:1.10.0")
 		api("io.undertow:undertow-core:2.3.18.Final")
 		api("io.undertow:undertow-servlet:2.3.18.Final")
-		api("io.undertow:undertow-websockets-jsr:2.3.17.Final")
+		api("io.undertow:undertow-websockets-jsr:2.3.18.Final")
 		api("io.vavr:vavr:0.10.4")
 		api("jakarta.activation:jakarta.activation-api:2.0.1")
 		api("jakarta.annotation:jakarta.annotation-api:2.0.0")
