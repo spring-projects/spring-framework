@@ -67,6 +67,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		this.timeout = timeout;
 	}
 
+
 	@Override
 	public ServerResponse block() {
 		try {
@@ -114,8 +115,8 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		}
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
 			throws ServletException, IOException {
 
@@ -169,6 +170,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		return result;
 	}
 
+
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static AsyncServerResponse create(Object obj, @Nullable Duration timeout) {
 		Assert.notNull(obj, "Argument to async must not be null");
@@ -191,6 +193,5 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		}
 		throw new IllegalArgumentException("Asynchronous type not supported: " + obj.getClass());
 	}
-
 
 }

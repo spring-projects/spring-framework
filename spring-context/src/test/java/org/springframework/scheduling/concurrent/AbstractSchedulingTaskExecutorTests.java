@@ -209,18 +209,10 @@ abstract class AbstractSchedulingTaskExecutorTests {
 		CompletableFuture<?> future1 = executor.submitCompletable(new TestTask(this.testName, -1));
 		CompletableFuture<?> future2 = executor.submitCompletable(new TestTask(this.testName, -1));
 		shutdownExecutor();
-
-		try {
+		assertThatExceptionOfType(TimeoutException.class).isThrownBy(() -> {
 			future1.get(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (Exception ex) {
-			// ignore
-		}
-		Awaitility.await()
-				.atMost(5, TimeUnit.SECONDS)
-				.pollInterval(10, TimeUnit.MILLISECONDS)
-				.untilAsserted(() -> assertThatExceptionOfType(TimeoutException.class)
-						.isThrownBy(() -> future2.get(1000, TimeUnit.MILLISECONDS)));
+			future2.get(1000, TimeUnit.MILLISECONDS);
+		});
 	}
 
 	@Test

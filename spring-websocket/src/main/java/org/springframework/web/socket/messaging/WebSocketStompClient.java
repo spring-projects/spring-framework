@@ -234,7 +234,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	/**
 	 * An overloaded version of
-	 * {@link #connect(String, StompSessionHandler, Object...)} that also
+	 * {@link #connectAsync(String, StompSessionHandler, Object...)} that also
 	 * accepts {@link WebSocketHttpHeaders} to use for the WebSocket handshake.
 	 * @param url the url to connect to
 	 * @param handshakeHeaders the headers for the WebSocket handshake
@@ -254,7 +254,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	/**
 	 * An overloaded version of
-	 * {@link #connect(String, StompSessionHandler, Object...)} that also
+	 * {@link #connectAsync(String, StompSessionHandler, Object...)} that also
 	 * accepts {@link WebSocketHttpHeaders} to use for the WebSocket handshake.
 	 * @param url the url to connect to
 	 * @param handshakeHeaders the headers for the WebSocket handshake
@@ -271,7 +271,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	/**
 	 * An overloaded version of
-	 * {@link #connect(String, StompSessionHandler, Object...)} that also accepts
+	 * {@link #connectAsync(String, StompSessionHandler, Object...)} that also accepts
 	 * {@link WebSocketHttpHeaders} to use for the WebSocket handshake and
 	 * {@link StompHeaders} for the STOMP CONNECT frame.
 	 * @param url the url to connect to
@@ -293,7 +293,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	/**
 	 * An overloaded version of
-	 * {@link #connect(String, StompSessionHandler, Object...)} that also accepts
+	 * {@link #connectAsync(String, StompSessionHandler, Object...)} that also accepts
 	 * {@link WebSocketHttpHeaders} to use for the WebSocket handshake and
 	 * {@link StompHeaders} for the STOMP CONNECT frame.
 	 * @param url the url to connect to
@@ -314,7 +314,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	/**
 	 * An overloaded version of
-	 * {@link #connect(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
+	 * {@link #connectAsync(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
 	 * that accepts a fully prepared {@link java.net.URI}.
 	 * @param url the url to connect to
 	 * @param handshakeHeaders the headers for the WebSocket handshake
@@ -334,7 +334,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	/**
 	 * An overloaded version of
-	 * {@link #connect(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
+	 * {@link #connectAsync(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
 	 * that accepts a fully prepared {@link java.net.URI}.
 	 * @param url the url to connect to
 	 * @param handshakeHeaders the headers for the WebSocket handshake

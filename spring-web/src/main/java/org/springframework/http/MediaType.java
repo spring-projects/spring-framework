@@ -853,7 +853,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * <blockquote>audio/basic == text/html</blockquote>
 	 * <blockquote>audio/basic == audio/wave</blockquote>
 	 * @param mediaTypes the list of media types to be sorted
-	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
+	 * @deprecated as of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
 	 */
 	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {
@@ -882,7 +882,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * </ol>
 	 * @param mediaTypes the list of media types to be sorted
 	 * @see #getQualityValue()
-	 * @deprecated As of 6.0, with no direct replacement
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortByQualityValue(List<MediaType> mediaTypes) {
@@ -895,9 +895,9 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Sorts the given list of {@code MediaType} objects by specificity as the
 	 * primary criteria and quality value the secondary.
-	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
+	 * @deprecated as of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -908,7 +908,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Comparator used by {@link #sortByQualityValue(List)}.
-	 * @deprecated As of 6.0, with no direct replacement
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated(since = "6.0", forRemoval = true)
 	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = (mediaType1, mediaType2) -> {
@@ -948,7 +948,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
-	 * @deprecated As of 6.0, with no direct replacement
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated(since = "6.0", forRemoval = true)
 	@SuppressWarnings("removal")

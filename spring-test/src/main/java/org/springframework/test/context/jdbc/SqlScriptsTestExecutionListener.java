@@ -182,10 +182,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	@Override
 	public void processAheadOfTime(RuntimeHints runtimeHints, Class<?> testClass, ClassLoader classLoader) {
 		getSqlAnnotationsFor(testClass).forEach(sql ->
-			registerClasspathResources(getScripts(sql, testClass, null, true), runtimeHints, classLoader));
+				registerClasspathResources(getScripts(sql, testClass, null, true), runtimeHints, classLoader));
 		getSqlMethods(testClass).forEach(testMethod ->
-			getSqlAnnotationsFor(testMethod).forEach(sql ->
-				registerClasspathResources(getScripts(sql, testClass, testMethod, false), runtimeHints, classLoader)));
+				getSqlAnnotationsFor(testMethod).forEach(sql ->
+						registerClasspathResources(getScripts(sql, testClass, testMethod, false), runtimeHints, classLoader)));
 	}
 
 	/**
