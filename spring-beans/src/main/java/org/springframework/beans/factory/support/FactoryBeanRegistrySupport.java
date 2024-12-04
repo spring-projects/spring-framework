@@ -118,39 +118,45 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 */
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		if (factory.isSingleton() && containsSingleton(beanName)) {
-			Object object = this.factoryBeanObjectCache.get(beanName);
-			if (object == null) {
-				object = doGetObjectFromFactoryBean(factory, beanName);
-				// Only post-process and store if not put there already during getObject() call above
-				// (for example, because of circular reference processing triggered by custom getBean calls)
-				Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
-				if (alreadyThere != null) {
-					object = alreadyThere;
-				}
-				else {
-					if (shouldPostProcess) {
-						if (isSingletonCurrentlyInCreation(beanName)) {
-							// Temporarily return non-post-processed object, not storing it yet
-							return object;
+			this.singletonLock.lock();
+			try {
+				Object object = this.factoryBeanObjectCache.get(beanName);
+				if (object == null) {
+					object = doGetObjectFromFactoryBean(factory, beanName);
+					// Only post-process and store if not put there already during getObject() call above
+					// (for example, because of circular reference processing triggered by custom getBean calls)
+					Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
+					if (alreadyThere != null) {
+						object = alreadyThere;
+					}
+					else {
+						if (shouldPostProcess) {
+							if (isSingletonCurrentlyInCreation(beanName)) {
+								// Temporarily return non-post-processed object, not storing it yet
+								return object;
+							}
+							beforeSingletonCreation(beanName);
+							try {
+								object = postProcessObjectFromFactoryBean(object, beanName);
+							}
+							catch (Throwable ex) {
+								throw new BeanCreationException(beanName,
+										"Post-processing of FactoryBean's singleton object failed", ex);
+							}
+							finally {
+								afterSingletonCreation(beanName);
+							}
 						}
-						beforeSingletonCreation(beanName);
-						try {
-							object = postProcessObjectFromFactoryBean(object, beanName);
-						}
-						catch (Throwable ex) {
-							throw new BeanCreationException(beanName,
-									"Post-processing of FactoryBean's singleton object failed", ex);
-						}
-						finally {
-							afterSingletonCreation(beanName);
+						if (containsSingleton(beanName)) {
+							this.factoryBeanObjectCache.put(beanName, object);
 						}
 					}
-					if (containsSingleton(beanName)) {
-						this.factoryBeanObjectCache.put(beanName, object);
-					}
 				}
+				return object;
 			}
-			return object;
+			finally {
+				this.singletonLock.unlock();
+			}
 		}
 		else {
 			Object object = doGetObjectFromFactoryBean(factory, beanName);
