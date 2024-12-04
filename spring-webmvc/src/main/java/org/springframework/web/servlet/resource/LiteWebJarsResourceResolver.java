@@ -49,6 +49,7 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 
 	private final WebJarVersionLocator webJarVersionLocator;
 
+
 	/**
 	 * Create a {@code LiteWebJarsResourceResolver} with a default {@code WebJarVersionLocator} instance.
 	 */
@@ -63,6 +64,7 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 	public LiteWebJarsResourceResolver(WebJarVersionLocator webJarVersionLocator) {
 		this.webJarVersionLocator = webJarVersionLocator;
 	}
+
 
 	@Override
 	@Nullable

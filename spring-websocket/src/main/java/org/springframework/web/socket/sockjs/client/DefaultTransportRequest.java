@@ -279,6 +279,7 @@ class DefaultTransportRequest implements TransportRequest {
 		}
 	}
 
+
 	/**
 	 * Updates the given (global) future based success or failure to connect for
 	 * the entire SockJS request regardless of which transport actually managed

@@ -125,7 +125,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	void submitListenableRunnable() {
 		TestTask task = new TestTask(this.testName, 1);
 		// Act
@@ -156,7 +156,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	void submitFailingListenableRunnable() {
 		TestTask task = new TestTask(this.testName, 0);
 		org.springframework.util.concurrent.ListenableFuture<?> future = executor.submitListenable(task);
@@ -185,7 +185,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	void submitListenableRunnableWithGetAfterShutdown() throws Exception {
 		org.springframework.util.concurrent.ListenableFuture<?> future1 = executor.submitListenable(new TestTask(this.testName, -1));
 		org.springframework.util.concurrent.ListenableFuture<?> future2 = executor.submitListenable(new TestTask(this.testName, -1));
@@ -209,18 +209,10 @@ abstract class AbstractSchedulingTaskExecutorTests {
 		CompletableFuture<?> future1 = executor.submitCompletable(new TestTask(this.testName, -1));
 		CompletableFuture<?> future2 = executor.submitCompletable(new TestTask(this.testName, -1));
 		shutdownExecutor();
-
-		try {
+		assertThatExceptionOfType(TimeoutException.class).isThrownBy(() -> {
 			future1.get(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (Exception ex) {
-			// ignore
-		}
-		Awaitility.await()
-				.atMost(5, TimeUnit.SECONDS)
-				.pollInterval(10, TimeUnit.MILLISECONDS)
-				.untilAsserted(() -> assertThatExceptionOfType(TimeoutException.class)
-						.isThrownBy(() -> future2.get(1000, TimeUnit.MILLISECONDS)));
+			future2.get(1000, TimeUnit.MILLISECONDS);
+		});
 	}
 
 	@Test
@@ -260,7 +252,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	void submitListenableCallable() {
 		TestCallable task = new TestCallable(this.testName, 1);
 		// Act
@@ -275,7 +267,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	void submitFailingListenableCallable() {
 		TestCallable task = new TestCallable(this.testName, 0);
 		// Act
@@ -291,7 +283,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "deprecation", "removal" })
+	@SuppressWarnings("removal")
 	void submitListenableCallableWithGetAfterShutdown() throws Exception {
 		org.springframework.util.concurrent.ListenableFuture<?> future1 = executor.submitListenable(new TestCallable(this.testName, -1));
 		org.springframework.util.concurrent.ListenableFuture<?> future2 = executor.submitListenable(new TestCallable(this.testName, -1));

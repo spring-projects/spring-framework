@@ -84,7 +84,6 @@ class XhrTransportTests {
 	}
 
 	@Test
-	@SuppressWarnings({"deprecation", "removal"})
 	void connect() {
 		HttpHeaders handshakeHeaders = new HttpHeaders();
 		handshakeHeaders.setOrigin("foo");
@@ -96,7 +95,7 @@ class XhrTransportTests {
 
 		TestXhrTransport transport = new TestXhrTransport();
 		WebSocketHandler handler = mock();
-		transport.connect(request, handler);
+		transport.connectAsync(request, handler);
 
 		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
 		verify(request).getSockJsUrlInfo();
@@ -126,7 +125,6 @@ class XhrTransportTests {
 		private HttpHeaders actualHandshakeHeaders;
 
 		private XhrClientSockJsSession actualSession;
-
 
 		@Override
 		protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
