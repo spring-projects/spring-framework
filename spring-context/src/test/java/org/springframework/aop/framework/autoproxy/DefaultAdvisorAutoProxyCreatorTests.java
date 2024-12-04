@@ -43,15 +43,18 @@ class DefaultAdvisorAutoProxyCreatorTests {
 	 * @see StaticMethodMatcherPointcut#matches(Method, Class)
 	 */
 	@Test  // gh-33915
-	void staticMethodMatcherPointcutMatchesMethodIsInvokedAgainForActualMethodInvocation() {
+	void staticMethodMatcherPointcutMatchesMethodIsNotInvokedAgainForActualMethodInvocation() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				DemoBean.class, DemoPointcutAdvisor.class, DefaultAdvisorAutoProxyCreator.class);
 		DemoPointcutAdvisor demoPointcutAdvisor = context.getBean(DemoPointcutAdvisor.class);
 		DemoBean demoBean = context.getBean(DemoBean.class);
 
 		assertThat(demoPointcutAdvisor.matchesInvocationCount).as("matches() invocations before").isEqualTo(2);
+		// Invoke multiple times to ensure additional invocations don't affect the outcome.
 		assertThat(demoBean.sayHello()).isEqualTo("Advised: Hello!");
-		assertThat(demoPointcutAdvisor.matchesInvocationCount).as("matches() invocations after").isEqualTo(3);
+		assertThat(demoBean.sayHello()).isEqualTo("Advised: Hello!");
+		assertThat(demoBean.sayHello()).isEqualTo("Advised: Hello!");
+		assertThat(demoPointcutAdvisor.matchesInvocationCount).as("matches() invocations after").isEqualTo(2);
 
 		context.close();
 	}

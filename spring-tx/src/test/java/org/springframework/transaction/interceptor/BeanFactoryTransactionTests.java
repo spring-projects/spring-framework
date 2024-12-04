@@ -139,10 +139,10 @@ class BeanFactoryTransactionTests {
 		// Invokes: getAge() * 2 and setAge() * 1 --> 2 + 1 = 3 method invocations.
 		assertGetsAreNotTransactional(testBean);
 
-		// The transaction pointcut is currently asked if it matches() for all method
-		// invocations, but we cannot assert it's equal to 3 since the pointcut may be
-		// optimized and only invoked once.
-		assertThat(txnPointcut.counter).as("txnPointcut").isGreaterThanOrEqualTo(1).isLessThanOrEqualTo(3);
+		// The matches(Method, Class) method of the static transaction pointcut should not
+		// have been invoked for the actual invocation of the getAge() and setAge() methods.
+		assertThat(txnPointcut.counter).as("txnPointcut").isZero();
+
 		assertThat(preInterceptor.counter).as("preInterceptor").isEqualTo(3);
 		assertThat(postInterceptor.counter).as("postInterceptor").isEqualTo(3);
 	}
