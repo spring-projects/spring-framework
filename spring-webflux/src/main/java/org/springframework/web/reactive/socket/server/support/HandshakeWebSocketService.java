@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgrad
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNetty2RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.StandardWebSocketUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
@@ -73,8 +72,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	private static final Mono<Map<String, Object>> EMPTY_ATTRIBUTES = Mono.just(Collections.emptyMap());
 
 
-	private static final boolean tomcatWsPresent;
-
 	private static final boolean jettyWsPresent;
 
 	private static final boolean jettyCoreWsPresent;
@@ -87,8 +84,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	static {
 		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
-		tomcatWsPresent = ClassUtils.isPresent(
-				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
 		jettyWsPresent = ClassUtils.isPresent(
 				"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer", classLoader);
 		jettyCoreWsPresent = ClassUtils.isPresent(
@@ -277,10 +272,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 
 	static RequestUpgradeStrategy initUpgradeStrategy() {
-		if (tomcatWsPresent) {
-			return new TomcatRequestUpgradeStrategy();
-		}
-		else if (jettyWsPresent) {
+		if (jettyWsPresent) {
 			return new JettyRequestUpgradeStrategy();
 		}
 		else if (jettyCoreWsPresent) {
