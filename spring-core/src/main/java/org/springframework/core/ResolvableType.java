@@ -342,15 +342,14 @@ public class ResolvableType implements Serializable {
 				return (ourBounds.isSameKind(typeBounds) &&
 						ourBounds.isAssignableFrom(typeBounds.getBounds(), matchedBefore));
 			}
-			else if (upUntilUnresolvable) {
+			if (upUntilUnresolvable || other.isUnresolvableTypeVariable()) {
 				return typeBounds.isAssignableFrom(this, matchedBefore);
 			}
-			else if (!exactMatch) {
+			if (!exactMatch) {
 				return typeBounds.isAssignableTo(this, matchedBefore);
 			}
-			else {
-				return false;
-			}
+
+			return false;
 		}
 
 		// In the form <? extends Number> is assignable to X...
