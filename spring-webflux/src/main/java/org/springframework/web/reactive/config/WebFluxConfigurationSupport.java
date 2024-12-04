@@ -478,9 +478,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			try {
 				service = new HandshakeWebSocketService();
 			}
-			catch (IllegalStateException ex) {
+			catch (Throwable ex) {
 				// Don't fail, test environment perhaps
-				service = new NoUpgradeStrategyWebSocketService();
+				service = new NoUpgradeStrategyWebSocketService(ex);
 			}
 		}
 		return service;
@@ -578,9 +578,15 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	private static final class NoUpgradeStrategyWebSocketService implements WebSocketService {
 
+		private final Throwable ex;
+
+		public NoUpgradeStrategyWebSocketService(Throwable ex) {
+			this.ex = ex;
+		}
+
 		@Override
 		public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler webSocketHandler) {
-			return Mono.error(new IllegalStateException("No suitable RequestUpgradeStrategy"));
+			return Mono.error(new IllegalStateException("No suitable RequestUpgradeStrategy", this.ex));
 		}
 	}
 
