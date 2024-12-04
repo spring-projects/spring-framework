@@ -33,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -123,7 +124,8 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	}
 
 	@Override
-	public List<MediaType> resolveMediaTypes(NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
+	public List<MediaType> resolveMediaTypes(NativeWebRequest request)
+			throws HttpMediaTypeNotAcceptableException, TooManyHttpMediaTypesException {
 		for (ContentNegotiationStrategy strategy : this.strategies) {
 			List<MediaType> mediaTypes = strategy.resolveMediaTypes(request);
 			if (mediaTypes.equals(MEDIA_TYPE_ALL_LIST)) {

@@ -59,6 +59,7 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -181,7 +182,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * {@link #writeWithMessageConverters(Object, MethodParameter, ServletServerHttpRequest, ServletServerHttpResponse)}
 	 */
 	protected <T> void writeWithMessageConverters(T value, MethodParameter returnType, NativeWebRequest webRequest)
-			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
+			throws IOException, HttpMediaTypeNotAcceptableException,
+			HttpMessageNotWritableException, TooManyHttpMediaTypesException {
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
@@ -200,11 +202,13 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * @throws HttpMessageNotWritableException thrown if a given message cannot
 	 * be written by a converter, or if the content-type chosen by the server
 	 * has no compatible converter.
+	 * @throws TooManyHttpMediaTypesException thrown when the mimeTypes in Accept header contains too many elements
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked", "NullAway"})
 	protected <T> void writeWithMessageConverters(@Nullable T value, MethodParameter returnType,
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
-			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
+			throws IOException, HttpMediaTypeNotAcceptableException,
+			HttpMessageNotWritableException, TooManyHttpMediaTypesException {
 
 		Object body;
 		Class<?> valueType;
@@ -255,7 +259,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			try {
 				acceptableTypes = getAcceptableMediaTypes(request);
 			}
-			catch (HttpMediaTypeNotAcceptableException ex) {
+			catch (HttpMediaTypeNotAcceptableException | TooManyHttpMediaTypesException ex) {
 				int series = outputMessage.getServletResponse().getStatus() / 100;
 				if (body == null || series == 4 || series == 5) {
 					if (logger.isDebugEnabled()) {
@@ -447,7 +451,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request)
-			throws HttpMediaTypeNotAcceptableException {
+			throws HttpMediaTypeNotAcceptableException, TooManyHttpMediaTypesException {
 
 		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
 	}

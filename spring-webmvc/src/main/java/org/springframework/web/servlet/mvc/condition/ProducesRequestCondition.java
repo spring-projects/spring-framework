@@ -31,6 +31,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -273,7 +274,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			}
 			return 0;
 		}
-		catch (HttpMediaTypeNotAcceptableException ex) {
+		catch (HttpMediaTypeNotAcceptableException | TooManyHttpMediaTypesException ex) {
 			// should never happen
 			throw new IllegalStateException("Cannot compare without having any requested media types", ex);
 		}
@@ -281,7 +282,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 	@SuppressWarnings("unchecked")
 	private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request)
-			throws HttpMediaTypeNotAcceptableException {
+			throws HttpMediaTypeNotAcceptableException, TooManyHttpMediaTypesException {
 
 		List<MediaType> result = (List<MediaType>) request.getAttribute(MEDIA_TYPES_ATTRIBUTE);
 		if (result == null) {

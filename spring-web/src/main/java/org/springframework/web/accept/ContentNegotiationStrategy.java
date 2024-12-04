@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -48,8 +49,10 @@ public interface ContentNegotiationStrategy {
 	 * were requested.
 	 * @throws HttpMediaTypeNotAcceptableException if the requested media
 	 * types cannot be parsed
+	 * @throws TooManyHttpMediaTypesException if the requested media
+	 * types is too many
 	 */
 	List<MediaType> resolveMediaTypes(NativeWebRequest webRequest)
-			throws HttpMediaTypeNotAcceptableException;
+			throws HttpMediaTypeNotAcceptableException, TooManyHttpMediaTypesException;
 
 }

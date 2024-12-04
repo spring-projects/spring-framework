@@ -32,10 +32,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.method.MethodValidationException;
-import org.springframework.web.ErrorResponse;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -193,6 +190,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				else if (ex instanceof HttpMediaTypeNotAcceptableException theEx) {
 					mav = handleHttpMediaTypeNotAcceptable(theEx, request, response, handler);
 				}
+				else if (ex instanceof TooManyHttpMediaTypesException theEx) {
+					mav = handleTooManyHttpMediaTypesException(theEx, request, response, handler);
+				}
 				else if (ex instanceof MissingPathVariableException theEx) {
 					mav = handleMissingPathVariable(theEx, request, response, handler);
 				}
@@ -256,6 +256,22 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 		}
 
+		return null;
+	}
+
+	/**
+	 * Handle the case where the mimeTypes in Accept header contains too many elements.
+	 * <p>The default implementation returns {@code null} in which case the
+	 * exception is handled in {@link #handleErrorResponse}.
+	 * @param ex the TooManyHttpMediaTypesException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 */
+	private ModelAndView handleTooManyHttpMediaTypesException(TooManyHttpMediaTypesException ex, HttpServletRequest request, HttpServletResponse response, Object handler) {
 		return null;
 	}
 

@@ -25,7 +25,9 @@ import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.TooManyMimeTypesException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -43,7 +45,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 	 */
 	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request)
-			throws HttpMediaTypeNotAcceptableException {
+			throws HttpMediaTypeNotAcceptableException, TooManyHttpMediaTypesException {
 
 		String[] headerValueArray = request.getHeaderValues(HttpHeaders.ACCEPT);
 		if (headerValueArray == null) {
@@ -55,6 +57,10 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 			List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerValues);
 			MimeTypeUtils.sortBySpecificity(mediaTypes);
 			return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST;
+		}
+		catch (TooManyMimeTypesException ex) {
+			throw new TooManyHttpMediaTypesException(
+					"Could not parse 'Accept' header " + headerValues + ": " + ex.getMessage());
 		}
 		catch (InvalidMediaTypeException | InvalidMimeTypeException ex) {
 			throw new HttpMediaTypeNotAcceptableException(

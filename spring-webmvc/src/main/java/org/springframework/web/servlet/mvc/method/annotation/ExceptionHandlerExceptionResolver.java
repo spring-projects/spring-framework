@@ -42,6 +42,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.ui.ModelMap;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
@@ -509,7 +510,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		try {
 			acceptedMediaTypes = this.contentNegotiationManager.resolveMediaTypes(webRequest);
 		}
-		catch (HttpMediaTypeNotAcceptableException mediaTypeExc) {
+		catch (HttpMediaTypeNotAcceptableException | TooManyHttpMediaTypesException mediaTypeExc) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Could not resolve accepted media types for @ExceptionHandler [" + webRequest.getHeader(HttpHeaders.ACCEPT) + "]", mediaTypeExc);
 			}

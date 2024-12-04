@@ -40,6 +40,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.TooManyHttpMediaTypesException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
@@ -194,7 +195,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	@Override
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
+			throws IOException, HttpMediaTypeNotAcceptableException,
+			HttpMessageNotWritableException, TooManyHttpMediaTypesException {
 
 		mavContainer.setRequestHandled(true);
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
