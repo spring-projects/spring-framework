@@ -51,7 +51,7 @@ dependencies {
 	testImplementation('io.micrometer:context-propagation')
 	testImplementation("io.micrometer:micrometer-observation-test")
 	testRuntimeOnly("jakarta.xml.bind:jakarta.xml.bind-api")
-	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("jakarta.el:jakarta.el-api")
 	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)
 	testRuntimeOnly("org.glassfish.external:opendmk_jmxremote_optional_jar")
 	testRuntimeOnly("org.javamoney:moneta")

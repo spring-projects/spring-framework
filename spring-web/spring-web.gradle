@@ -98,6 +98,6 @@ dependencies {
 	testRuntimeOnly("jakarta.json:jakarta.json-api")
 	testRuntimeOnly("org.eclipse.angus:angus-mail")
 	testRuntimeOnly("org.eclipse:yasson")
-	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("jakarta.el:jakarta.el-api")
 	testRuntimeOnly("org.hibernate:hibernate-validator")
 }

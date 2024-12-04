@@ -59,7 +59,7 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("com.sun.activation:jakarta.activation")
 	testRuntimeOnly("io.netty:netty5-buffer")
-	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("jakarta.el:jakarta.el-api")
 	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")

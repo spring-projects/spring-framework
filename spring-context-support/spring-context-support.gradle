@@ -26,5 +26,5 @@ dependencies {
 	testRuntimeOnly("org.eclipse.angus:angus-mail")
 	testRuntimeOnly("org.ehcache:ehcache")
 	testRuntimeOnly("org.ehcache:jcache")
-	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("jakarta.el:jakarta.el-api")
 }

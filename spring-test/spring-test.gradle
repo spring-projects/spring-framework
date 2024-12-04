@@ -83,7 +83,7 @@ dependencies {
 	testImplementation("org.junit.platform:junit-platform-testkit")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
-	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("jakarta.el:jakarta.el-api")
 	testRuntimeOnly("org.junit.support:testng-engine")
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
