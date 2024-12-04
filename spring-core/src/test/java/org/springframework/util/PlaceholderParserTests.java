@@ -196,7 +196,7 @@ class PlaceholderParserTests {
 
 		@ParameterizedTest(name = "{0} -> {1}")
 		@MethodSource("nestedPlaceholders")
-		void nestedPlaceholdersAreReplaced(String text, String expected) {
+		void testPlaceholderResolution(String input, String expected) {
 			Properties properties = new Properties();
 			properties.setProperty("p1", "v1");
 			properties.setProperty("p2", "v2");
@@ -204,11 +204,13 @@ class PlaceholderParserTests {
 			properties.setProperty("p4", "${p3}");                    // deeply nested placeholders
 			properties.setProperty("p5", "${p1}:${p2}:${bogus}");     // unresolvable placeholder
 			properties.setProperty("p6", "${p1}:${p2}:${bogus:def}"); // unresolvable w/ default
-			assertThat(this.parser.replacePlaceholders(text, properties::getProperty)).isEqualTo(expected);
-		}
+			
+	    PlaceholderResolver resolver = mockPlaceholderResolver(input, expected);
+	    assertThat(this.parser.replacePlaceholders(input, resolver)).isEqualTo(expected);
+	}
 
-		static Stream<Arguments> nestedPlaceholders() {
-			return Stream.of(
+			static Stream<Arguments> placeholderTestCases() {
+			    return Stream.of(
 					Arguments.of("${p6}", "v1:v2:def"),
 					Arguments.of("${invalid:${p1}:${p2}}", "v1:v2"),
 					Arguments.of("${invalid:${p3}}", "v1:v2"),
