@@ -443,33 +443,29 @@ final class PlaceholderParser {
 
 		@Override
 		public String resolve(PartResolutionContext resolutionContext) {
-			String resolvedValue = resolveToText(resolutionContext, this.key);
-			if (resolvedValue != null) {
-				return resolvedValue;
-			}
-			else if (this.fallback != null) {
-				return this.fallback;
-			}
-			return resolutionContext.handleUnresolvablePlaceholder(this.key, this.text);
+		    String resolvedKey = Part.resolveAll(this.keyParts, resolutionContext);
+		    String value = resolveToText(resolutionContext, resolvedKey);
+		    if (value != null) {
+		        return value;
+		    } else if (this.defaultParts != null) {
+		        return Part.resolveAll(this.defaultParts, resolutionContext);
+		    }
+		    return resolutionContext.handleUnresolvablePlaceholder(resolvedKey, this.text);
+		}
+		
+		private String resolveToText(PartResolutionContext resolutionContext, String text) {
+		    String resolvedValue = resolutionContext.resolvePlaceholder(text);
+		    if (resolvedValue != null) {
+		        resolutionContext.flagPlaceholderAsVisited(text);
+		        // Check for nested placeholders
+		        List<Part> nestedParts = resolutionContext.parse(resolvedValue);
+		        String value = Part.resolveAll(nestedParts, resolutionContext);
+		        resolutionContext.removePlaceholder(text);
+		        return value;
+		    }
+		    return null;
 		}
 
-		@Nullable
-		private String resolveToText(PartResolutionContext resolutionContext, String text) {
-			String resolvedValue = resolutionContext.resolvePlaceholder(text);
-			if (resolvedValue != null) {
-				resolutionContext.flagPlaceholderAsVisited(text);
-				// Let's check if we need to recursively resolve that value
-				List<Part> nestedParts = resolutionContext.parse(resolvedValue);
-				String value = toText(nestedParts);
-				if (!isTextOnly(nestedParts)) {
-					value = new ParsedValue(resolvedValue, nestedParts).resolve(resolutionContext);
-				}
-				resolutionContext.removePlaceholder(text);
-				return value;
-			}
-			// Not found
-			return null;
-		}
 
 		private boolean isTextOnly(List<Part> parts) {
 			return parts.stream().allMatch(TextPart.class::isInstance);
