@@ -20,7 +20,6 @@ dependencies {
 	optional("com.google.code.gson:gson")
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("com.rometools:rome")
-	optional("com.squareup.okhttp3:okhttp")
 	optional("io.micrometer:context-propagation")
 	optional("io.netty:netty-buffer")
 	optional("io.netty:netty-handler")

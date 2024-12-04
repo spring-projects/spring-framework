@@ -136,29 +136,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
-
-		// For backwards compatibility try handle(response) first
-		HandleErrorResponseDecorator decorator = new HandleErrorResponseDecorator(response);
-		handleError(decorator);
-		if (decorator.isHandled()) {
-			return;
-		}
-
 		handleError(response, response.getStatusCode(), url, method);
-	}
-
-	@SuppressWarnings("removal")
-	@Override
-	public void handleError(ClientHttpResponse response) throws IOException {
-
-		// Called via handleError(url, method, response)
-		if (response instanceof HandleErrorResponseDecorator decorator) {
-			decorator.setNotHandled();
-			return;
-		}
-
-		// Called directly, so do handle
-		handleError(response, response.getStatusCode(), null, null);
 	}
 
 	/**
@@ -286,24 +264,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 						"Error while extracting response for type [" + resolvableType + "]", ex);
 			}
 		};
-	}
-
-
-	private static class HandleErrorResponseDecorator extends ClientHttpResponseDecorator {
-
-		private boolean handled = true;
-
-		public HandleErrorResponseDecorator(ClientHttpResponse delegate) {
-			super(delegate);
-		}
-
-		public void setNotHandled() {
-			this.handled = false;
-		}
-
-		public boolean isHandled() {
-			return this.handled;
-		}
 	}
 
 }

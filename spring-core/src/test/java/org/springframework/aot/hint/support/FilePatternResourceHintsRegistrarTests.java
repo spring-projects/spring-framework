@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class FilePatternResourceHintsRegistrarTests {
 
 	@Test
 	void registerWithMultipleClasspathLocations() {
-		FilePatternResourceHintsRegistrar.forClassPathLocations("").withClasspathLocations("META-INF")
+		FilePatternResourceHintsRegistrar.forClassPathLocations("").withClassPathLocations("META-INF")
 				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
@@ -133,7 +133,7 @@ class FilePatternResourceHintsRegistrarTests {
 	@Test
 	void registerWithNonExistingLocationDoesNotRegisterHint() {
 		FilePatternResourceHintsRegistrar.forClassPathLocations("does-not-exist/")
-				.withClasspathLocations("another-does-not-exist/")
+				.withClassPathLocations("another-does-not-exist/")
 				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).isEmpty();

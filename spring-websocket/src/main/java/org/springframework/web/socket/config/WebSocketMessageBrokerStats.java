@@ -162,15 +162,6 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 
 	/**
 	 * Get stats about WebSocket sessions.
-	 * @deprecated as of 6.2 in favor of {@link #getWebSocketSessionStats()}.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public String getWebSocketSessionStatsInfo() {
-		return (this.webSocketHandler != null ? this.webSocketHandler.getStatsInfo() : "null");
-	}
-
-	/**
-	 * Get stats about WebSocket sessions.
 	 * Can return {@code null} if no {@link #setSubProtocolWebSocketHandler(SubProtocolWebSocketHandler) WebSocket handler}
 	 * is configured.
 	 * @since 6.2
@@ -182,30 +173,12 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 
 	/**
 	 * Get stats about STOMP-related WebSocket message processing.
-	 * @deprecated as of 6.2 in favor of {@link #getStompSubProtocolStats()}.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public String getStompSubProtocolStatsInfo() {
-		return (this.stompSubProtocolHandler != null ? this.stompSubProtocolHandler.getStatsInfo() : "null");
-	}
-
-	/**
-	 * Get stats about STOMP-related WebSocket message processing.
 	 * Can return {@code null} if no {@link SubProtocolHandler} was found.
 	 * @since 6.2
 	 */
 	@Nullable
 	public StompSubProtocolHandler.Stats getStompSubProtocolStats() {
 		return (this.stompSubProtocolHandler != null ? this.stompSubProtocolHandler.getStats() : null);
-	}
-
-	/**
-	 * Get stats about STOMP broker relay (when using a full-featured STOMP broker).
-	 * @deprecated as of 6.2 in favor of {@link #getStompBrokerRelayStats()}.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public String getStompBrokerRelayStatsInfo() {
-		return (this.stompBrokerRelay != null ? this.stompBrokerRelay.getStatsInfo() : "null");
 	}
 
 	/**
@@ -281,11 +254,10 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	}
 
 	@Override
-	@SuppressWarnings("removal")
 	public String toString() {
-		return "WebSocketSession[" + getWebSocketSessionStatsInfo() + "]" +
-				", stompSubProtocol[" + getStompSubProtocolStatsInfo() + "]" +
-				", stompBrokerRelay[" + getStompBrokerRelayStatsInfo() + "]" +
+		return "WebSocketSession[" + getWebSocketSessionStats() + "]" +
+				", stompSubProtocol[" + getStompSubProtocolStats() + "]" +
+				", stompBrokerRelay[" + getStompBrokerRelayStats() + "]" +
 				", inboundChannel[" + getClientInboundExecutorStatsInfo() + "]" +
 				", outboundChannel[" + getClientOutboundExecutorStatsInfo() + "]" +
 				", sockJsScheduler[" + getSockJsTaskSchedulerStatsInfo() + "]";

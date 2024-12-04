@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,20 +58,6 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 */
 	default boolean setRawStatusCode(@Nullable Integer value) {
 		return setStatusCode(value != null ? HttpStatusCode.valueOf(value) : null);
-	}
-
-	/**
-	 * Return the status code that has been set, or otherwise fall back on the
-	 * status of the response from the underlying server. The return value may
-	 * be {@code null} if there is no default value from the underlying server.
-	 * @since 5.2.4
-	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@Nullable
-	default Integer getRawStatusCode() {
-		HttpStatusCode httpStatus = getStatusCode();
-		return (httpStatus != null ? httpStatus.value() : null);
 	}
 
 	/**

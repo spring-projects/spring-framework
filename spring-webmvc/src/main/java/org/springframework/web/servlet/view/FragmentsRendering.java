@@ -88,43 +88,6 @@ public interface FragmentsRendering extends SmartView {
 		return new DefaultFragmentsRenderingBuilder().fragments(fragments);
 	}
 
-	/**
-	 * Create a builder with one HTML fragment, also inheriting attributes from
-	 * the shared model for the request.
-	 * @param viewName the name of the view for the fragment
-	 * @return the created builder
-	 * @deprecated in favor of {@link #fragment(String)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder with(String viewName) {
-		return fragment(viewName);
-	}
-
-	/**
-	 * Create a builder with one HTML fragment.
-	 * @param viewName the view name for the fragment
-	 * @param model attributes for the fragment, in addition to attributes from the
-	 * shared model for the request
-	 * @return the created builder
-	 * @deprecated in favor of {@link #fragment(String, Map)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder with(String viewName, Map<String, Object> model) {
-		return fragment(viewName, model);
-	}
-
-	/**
-	 * Create a builder with multiple HTML fragments.
-	 * @param fragments the fragments to add; each fragment also inherits
-	 * attributes from the shared model for the request
-	 * @return the created builder
-	 * @deprecated in favor of {@link #fragments(Collection)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder with(Collection<ModelAndView> fragments) {
-		return fragments(fragments);
-	}
-
 
 	/**
 	 * Defines a builder for {@link FragmentsRendering}.

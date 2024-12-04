@@ -22,10 +22,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.FailureCallback;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * A pass-through {@code Future} handle that can be used for method signatures
@@ -46,8 +42,7 @@ import org.springframework.util.concurrent.SuccessCallback;
  * @deprecated as of 6.0, in favor of {@link CompletableFuture}
  */
 @Deprecated(since = "6.0")
-@SuppressWarnings("removal")
-public class AsyncResult<V> implements ListenableFuture<V> {
+public class AsyncResult<V> implements Future<V> {
 
 	@Nullable
 	private final V value;
@@ -105,38 +100,6 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 		return get();
 	}
 
-	@Override
-	public void addCallback(ListenableFutureCallback<? super V> callback) {
-		addCallback(callback, callback);
-	}
-
-	@Override
-	public void addCallback(SuccessCallback<? super V> successCallback, FailureCallback failureCallback) {
-		try {
-			if (this.executionException != null) {
-				failureCallback.onFailure(exposedException(this.executionException));
-			}
-			else {
-				successCallback.onSuccess(this.value);
-			}
-		}
-		catch (Throwable ex) {
-			// Ignore
-		}
-	}
-
-	@Override
-	public CompletableFuture<V> completable() {
-		if (this.executionException != null) {
-			CompletableFuture<V> completable = new CompletableFuture<>();
-			completable.completeExceptionally(exposedException(this.executionException));
-			return completable;
-		}
-		else {
-			return CompletableFuture.completedFuture(this.value);
-		}
-	}
-
 
 	/**
 	 * Create a new async result which exposes the given value from {@link Future#get()}.
@@ -144,7 +107,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * @since 4.2
 	 * @see Future#get()
 	 */
-	public static <V> org.springframework.util.concurrent.ListenableFuture<V> forValue(V value) {
+	public static <V> Future<V> forValue(V value) {
 		return new AsyncResult<>(value, null);
 	}
 
@@ -156,7 +119,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * @since 4.2
 	 * @see ExecutionException
 	 */
-	public static <V> org.springframework.util.concurrent.ListenableFuture<V> forExecutionException(Throwable ex) {
+	public static <V> Future<V> forExecutionException(Throwable ex) {
 		return new AsyncResult<>(null, ex);
 	}
 

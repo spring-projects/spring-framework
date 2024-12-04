@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,11 +88,10 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		return "Resolved [" + className + ": " + message + "] for HTTP " + request.getMethod() + " " + path;
 	}
 
-	@SuppressWarnings("deprecation")
 	private boolean updateResponse(ServerHttpResponse response, Throwable ex) {
 		boolean result = false;
 		HttpStatusCode statusCode = determineStatus(ex);
-		int code = (statusCode != null ? statusCode.value() : determineRawStatusCode(ex));
+		int code = (statusCode != null ? statusCode.value() : -1);
 		if (code != -1) {
 			if (response.setStatusCode(statusCode)) {
 				if (ex instanceof ResponseStatusException responseStatusException) {
@@ -125,21 +124,6 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		else {
 			return null;
 		}
-	}
-
-	/**
-	 * Determine the raw status code for the given exception.
-	 * @param ex the exception to check
-	 * @return the associated HTTP status code, or -1 if it can't be derived.
-	 * @since 5.3
-	 * @deprecated in favor of {@link #determineStatus(Throwable)}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	protected int determineRawStatusCode(Throwable ex) {
-		if (ex instanceof ResponseStatusException responseStatusException) {
-			return responseStatusException.getStatusCode().value();
-		}
-		return -1;
 	}
 
 }

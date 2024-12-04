@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,19 +52,6 @@ public interface ResponseErrorHandler {
 	 * @since 5.0
 	 */
 	default void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
-		handleError(response);
-	}
-
-	/**
-	 * Handle the error in the given response.
-	 * <p>This method is only called when {@link #hasError(ClientHttpResponse)}
-	 * has returned {@code true}.
-	 * @param response the response with the error
-	 * @throws IOException in case of I/O errors
-	 * @deprecated in favor of {@link #handleError(URI, HttpMethod, ClientHttpResponse)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	default void handleError(ClientHttpResponse response) throws IOException {
 	}
 
 }

@@ -84,13 +84,6 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 	}
 
 	@Override
-	@Deprecated
-	@SuppressWarnings("removal")
-	public int rawStatusCode() {
-		return delegate(ServerResponse::rawStatusCode);
-	}
-
-	@Override
 	public HttpHeaders headers() {
 		return delegate(ServerResponse::headers);
 	}
@@ -110,8 +103,8 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		}
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
 			throws ServletException, IOException {
 
@@ -164,4 +157,5 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		});
 		return result;
 	}
+
 }

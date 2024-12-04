@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,23 +98,6 @@ public class MediaType extends MimeType implements Serializable {
 	 * A String equivalent of {@link MediaType#APPLICATION_FORM_URLENCODED}.
 	 */
 	public static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
-
-	/**
-	 * Public constant media type for {@code application/graphql+json}.
-	 * @since 5.3.19
-	 * @see <a href="https://github.com/graphql/graphql-over-http/pull/215">GraphQL over HTTP spec change</a>
-	 * @deprecated as of 6.0.3, in favor of {@link MediaType#APPLICATION_GRAPHQL_RESPONSE}
-	 */
-	@Deprecated(since = "6.0.3", forRemoval = true)
-	public static final MediaType APPLICATION_GRAPHQL;
-
-	/**
-	 * A String equivalent of {@link MediaType#APPLICATION_GRAPHQL}.
-	 * @since 5.3.19
-	 * @deprecated as of 6.0.3, in favor of {@link MediaType#APPLICATION_GRAPHQL_RESPONSE_VALUE}
-	 */
-	@Deprecated(since = "6.0.3", forRemoval = true)
-	public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql+json";
 
 	/**
 	 * Public constant media type for {@code application/graphql-response+json}.
@@ -456,7 +438,6 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
 		APPLICATION_CBOR = new MediaType("application", "cbor");
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
-		APPLICATION_GRAPHQL = new MediaType("application", "graphql+json");
 		APPLICATION_GRAPHQL_RESPONSE = new MediaType("application", "graphql-response+json");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
@@ -846,142 +827,5 @@ public class MediaType extends MimeType implements Serializable {
 	public static String toString(Collection<MediaType> mediaTypes) {
 		return MimeTypeUtils.toString(mediaTypes);
 	}
-
-	/**
-	 * Sorts the given list of {@code MediaType} objects by specificity.
-	 * <p>Given two media types:
-	 * <ol>
-	 * <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
-	 * wildcard is ordered before the other.</li>
-	 * <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
-	 * remain their current order.</li>
-	 * <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
-	 * the wildcard is sorted before the other.</li>
-	 * <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
-	 * and remain their current order.</li>
-	 * <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
-	 * with the highest quality value is ordered before the other.</li>
-	 * <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
-	 * media type with the most parameters is ordered before the other.</li>
-	 * </ol>
-	 * <p>For example:
-	 * <blockquote>audio/basic &lt; audio/* &lt; *&#047;*</blockquote>
-	 * <blockquote>audio/* &lt; audio/*;q=0.7; audio/*;q=0.3</blockquote>
-	 * <blockquote>audio/basic;level=1 &lt; audio/basic</blockquote>
-	 * <blockquote>audio/basic == text/html</blockquote>
-	 * <blockquote>audio/basic == audio/wave</blockquote>
-	 * @param mediaTypes the list of media types to be sorted
-	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public static void sortBySpecificity(List<MediaType> mediaTypes) {
-		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
-		if (mediaTypes.size() > 1) {
-			mediaTypes.sort(SPECIFICITY_COMPARATOR);
-		}
-	}
-
-	/**
-	 * Sorts the given list of {@code MediaType} objects by quality value.
-	 * <p>Given two media types:
-	 * <ol>
-	 * <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
-	 * with the highest quality value is ordered before the other.</li>
-	 * <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
-	 * wildcard is ordered before the other.</li>
-	 * <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
-	 * remain their current order.</li>
-	 * <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
-	 * the wildcard is sorted before the other.</li>
-	 * <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
-	 * and remain their current order.</li>
-	 * <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
-	 * media type with the most parameters is ordered before the other.</li>
-	 * </ol>
-	 * @param mediaTypes the list of media types to be sorted
-	 * @see #getQualityValue()
-	 * @deprecated As of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public static void sortByQualityValue(List<MediaType> mediaTypes) {
-		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
-		if (mediaTypes.size() > 1) {
-			mediaTypes.sort(QUALITY_VALUE_COMPARATOR);
-		}
-	}
-
-	/**
-	 * Sorts the given list of {@code MediaType} objects by specificity as the
-	 * primary criteria and quality value the secondary.
-	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
-	 */
-	@Deprecated(since = "6.0")
-	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
-		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
-		if (mediaTypes.size() > 1) {
-			mediaTypes.sort(MediaType.SPECIFICITY_COMPARATOR.thenComparing(MediaType.QUALITY_VALUE_COMPARATOR));
-		}
-	}
-
-
-	/**
-	 * Comparator used by {@link #sortByQualityValue(List)}.
-	 * @deprecated As of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = (mediaType1, mediaType2) -> {
-		double quality1 = mediaType1.getQualityValue();
-		double quality2 = mediaType2.getQualityValue();
-		int qualityComparison = Double.compare(quality2, quality1);
-		if (qualityComparison != 0) {
-			return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
-		}
-		else if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) {  // */* < audio/*
-			return 1;
-		}
-		else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) {  // audio/* > */*
-			return -1;
-		}
-		else if (!mediaType1.getType().equals(mediaType2.getType())) {  // audio/basic == text/html
-			return 0;
-		}
-		else {  // mediaType1.getType().equals(mediaType2.getType())
-			if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) {  // audio/* < audio/basic
-				return 1;
-			}
-			else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) {  // audio/basic > audio/*
-				return -1;
-			}
-			else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) {  // audio/basic == audio/wave
-				return 0;
-			}
-			else {
-				int paramsSize1 = mediaType1.getParameters().size();
-				int paramsSize2 = mediaType2.getParameters().size();
-				return Integer.compare(paramsSize2, paramsSize1);  // audio/basic;level=1 < audio/basic
-			}
-		}
-	};
-
-
-	/**
-	 * Comparator used by {@link #sortBySpecificity(List)}.
-	 * @deprecated As of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>() {
-
-		@Override
-		protected int compareParameters(MediaType mediaType1, MediaType mediaType2) {
-			double quality1 = mediaType1.getQualityValue();
-			double quality2 = mediaType2.getQualityValue();
-			int qualityComparison = Double.compare(quality2, quality1);
-			if (qualityComparison != 0) {
-				return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
-			}
-			return super.compareParameters(mediaType1, mediaType2);
-		}
-	};
 
 }

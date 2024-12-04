@@ -172,30 +172,6 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	}
 
 	/**
-	 * Return a new {@link BeanInstanceSupplier} instance that uses the specified
-	 * {@code generator} supplier to instantiate the underlying bean.
-	 * @param generator a {@link ThrowingSupplier} to instantiate the underlying bean
-	 * @return a new {@link BeanInstanceSupplier} instance with the specified generator
-	 * @deprecated in favor of {@link #withGenerator(ThrowingFunction)}
-	 */
-	@Deprecated(since = "6.0.11", forRemoval = true)
-	public BeanInstanceSupplier<T> withGenerator(ThrowingSupplier<T> generator) {
-		Assert.notNull(generator, "'generator' must not be null");
-		return new BeanInstanceSupplier<>(this.lookup, registeredBean -> generator.get(),
-				null, this.shortcutBeanNames);
-	}
-
-	/**
-	 * Return a new {@link BeanInstanceSupplier} instance
-	 * that uses direct bean name injection shortcuts for specific parameters.
-	 * @deprecated in favor of {@link #withShortcut(String...)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public BeanInstanceSupplier<T> withShortcuts(String... beanNames) {
-		return withShortcut(beanNames);
-	}
-
-	/**
 	 * Return a new {@link BeanInstanceSupplier} instance that uses
 	 * direct bean name injection shortcuts for specific parameters.
 	 * @param beanNames the bean names to use as shortcut (aligned with the

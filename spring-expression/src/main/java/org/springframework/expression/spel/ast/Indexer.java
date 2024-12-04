@@ -124,17 +124,6 @@ public class Indexer extends SpelNodeImpl {
 
 
 	/**
-	 * Create an {@code Indexer} with the given start position, end position, and
-	 * index expression.
-	 * @see #Indexer(boolean, int, int, SpelNodeImpl)
-	 * @deprecated as of 6.2, in favor of {@link #Indexer(boolean, int, int, SpelNodeImpl)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public Indexer(int startPos, int endPos, SpelNodeImpl indexExpression) {
-		this(false, startPos, endPos, indexExpression);
-	}
-
-	/**
 	 * Create an {@code Indexer} with the given null-safe flag, start position,
 	 * end position, and index expression.
 	 * @since 6.2

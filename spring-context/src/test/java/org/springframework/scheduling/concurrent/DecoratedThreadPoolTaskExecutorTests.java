@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 
@@ -26,8 +27,7 @@ import org.springframework.scheduling.support.TaskUtils;
 class DecoratedThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	@Override
-	@SuppressWarnings("removal")
-	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
+	protected AsyncTaskExecutor buildExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setTaskDecorator(runnable ->
 				new DelegatingErrorHandlingRunnable(runnable, TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER));

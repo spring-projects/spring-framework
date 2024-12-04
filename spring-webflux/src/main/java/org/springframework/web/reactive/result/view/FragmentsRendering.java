@@ -122,66 +122,6 @@ public interface FragmentsRendering {
 		return fragmentsPublisher(publisher);
 	}
 
-	/**
-	 * Create a builder with one HTML fragment, also inheriting attributes from
-	 * the shared model for the request.
-	 * @param viewName the name of the view for the fragment
-	 * @return this builder
-	 * @deprecated in favor of {@link #fragment(String)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder with(String viewName) {
-		return fragment(viewName);
-	}
-
-	/**
-	 * Create a builder with one HTML fragment.
-	 * @param viewName the view name for the fragment
-	 * @param model attributes for the fragment, in addition to attributes from the
-	 * shared model for the request
-	 * @return this builder
-	 * @deprecated in favor of {@link #fragment(String, Map)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder with(String viewName, Map<String, Object> model) {
-		return fragment(viewName, model);
-	}
-
-	/**
-	 * Create a builder with multiple HTML fragments.
-	 * @param fragments the fragments to add; each fragment also inherits
-	 * attributes from the shared model for the request
-	 * @return the created builder
-	 * @deprecated in favor of {@link #fragments(Collection)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder withCollection(Collection<Fragment> fragments) {
-		return fragments(fragments);
-	}
-
-	/**
-	 * Create a builder with a {@link Publisher} of fragments.
-	 * @param fragmentsPublisher the fragments to add; each fragment also
-	 * inherits model attributes from the shared model for the request
-	 * @return the created builder
-	 * @deprecated in favor of {@link #fragmentsPublisher(Publisher)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static <P extends Publisher<Fragment>> Builder withPublisher(P fragmentsPublisher) {
-		return fragmentsPublisher(fragmentsPublisher);
-	}
-
-	/**
-	 * Variant of {@link #fragmentsPublisher(Publisher)} that allows using any
-	 * producer that can be resolved to {@link Publisher} via
-	 * {@link ReactiveAdapterRegistry}.
-	 * @deprecated in favor of {@link #fragmentsProducer(Object)}
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	static Builder withProducer(Object fragmentsProducer) {
-		return fragmentsProducer(fragmentsProducer);
-	}
-
 
 	/**
 	 * Defines a builder for {@link FragmentsRendering}.

@@ -114,6 +114,7 @@ import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.springframework.web.servlet.resource.FixedVersionStrategy;
+import org.springframework.web.servlet.resource.LiteWebJarsResourceResolver;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
@@ -122,7 +123,6 @@ import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
-import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.servlet.theme.CookieThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
@@ -439,7 +439,6 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
 	void testResourcesWithResolversTransformers() {
 		loadBeanDefinitions("mvc-config-resources-chain.xml");
 
@@ -456,7 +455,7 @@ public class MvcNamespaceTests {
 		assertThat(resolvers).hasSize(4);
 		assertThat(resolvers).element(0).isInstanceOf(CachingResourceResolver.class);
 		assertThat(resolvers).element(1).isInstanceOf(VersionResourceResolver.class);
-		assertThat(resolvers).element(2).isInstanceOf(WebJarsResourceResolver.class);
+		assertThat(resolvers).element(2).isInstanceOf(LiteWebJarsResourceResolver.class);
 		assertThat(resolvers).element(3).isInstanceOf(PathResourceResolver.class);
 
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);

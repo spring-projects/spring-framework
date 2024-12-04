@@ -38,7 +38,6 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
 	optional("org.reactivestreams:reactive-streams")
-	optional("org.webjars:webjars-locator-core")
 	optional("org.webjars:webjars-locator-lite")
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))

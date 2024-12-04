@@ -280,25 +280,6 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
-	@SuppressWarnings({"deprecation", "removal"})
-	void listenableFutureReply() {
-		load(TestEventListener.class, ReplyEventListener.class);
-		org.springframework.util.concurrent.SettableListenableFuture<String> future =
-				new org.springframework.util.concurrent.SettableListenableFuture<>();
-		future.set("dummy");
-		AnotherTestEvent event = new AnotherTestEvent(this, future);
-		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
-		TestEventListener listener = this.context.getBean(TestEventListener.class);
-
-		this.eventCollector.assertNoEventReceived(listener);
-		this.eventCollector.assertNoEventReceived(replyEventListener);
-		this.context.publishEvent(event);
-		this.eventCollector.assertEvent(replyEventListener, event);
-		this.eventCollector.assertEvent(listener, "dummy"); // reply
-		this.eventCollector.assertTotalEventsCount(2);
-	}
-
-	@Test
 	void completableFutureReply() {
 		load(TestEventListener.class, ReplyEventListener.class);
 		AnotherTestEvent event = new AnotherTestEvent(this, CompletableFuture.completedFuture("dummy"));

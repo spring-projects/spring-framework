@@ -223,11 +223,6 @@ class RouterFunctionsTests {
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
 					}
-					@SuppressWarnings("removal")
-					@Override
-					public int rawStatusCode() {
-						return 200;
-					}
 					@Override
 					public HttpHeaders headers() {
 						return new HttpHeaders();
@@ -261,11 +256,6 @@ class RouterFunctionsTests {
 					@Override
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
-					}
-					@SuppressWarnings("removal")
-					@Override
-					public int rawStatusCode() {
-						return 200;
 					}
 					@Override
 					public HttpHeaders headers() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,13 +94,6 @@ public class GenericReactiveTransaction implements ReactiveTransaction {
 		this.readOnly = readOnly;
 		this.debug = debug;
 		this.suspendedResources = suspendedResources;
-	}
-
-	@Deprecated(since = "6.1", forRemoval = true)
-	public GenericReactiveTransaction(@Nullable Object transaction, boolean newTransaction,
-			boolean newSynchronization, boolean readOnly, boolean debug, @Nullable Object suspendedResources) {
-
-		this(null, transaction, newTransaction, newSynchronization, false, readOnly, debug, suspendedResources);
 	}
 
 

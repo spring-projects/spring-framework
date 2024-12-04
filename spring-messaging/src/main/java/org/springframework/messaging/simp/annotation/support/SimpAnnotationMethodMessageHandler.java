@@ -344,13 +344,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
-	@SuppressWarnings("removal")
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
 
-		handlers.add(new org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler());
 		handlers.add(new CompletableFutureReturnValueHandler());
 		if (reactorPresent) {
 			handlers.add(new ReactiveReturnValueHandler());

@@ -86,21 +86,6 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		this.contentCacheLimit = (cacheLimit > 0 ? cacheLimit : null);
 	}
 
-	/**
-	 * Create a new ContentCachingRequestWrapper for the given servlet request.
-	 * @param request the original servlet request
-	 * @deprecated in favor of {@link #ContentCachingRequestWrapper(HttpServletRequest, int)}
-	 * in order to explicitly choose the cache limit
-	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
-	public ContentCachingRequestWrapper(HttpServletRequest request) {
-		super(request);
-		int contentLength = request.getContentLength();
-		this.cachedContent = (contentLength > 0 ?
-				new FastByteArrayOutputStream(contentLength) : new FastByteArrayOutputStream());
-		this.contentCacheLimit = null;
-	}
-
 
 	@Override
 	public ServletInputStream getInputStream() throws IOException {

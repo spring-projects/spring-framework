@@ -23,13 +23,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * Adapter that takes a JDK {@code java.util.concurrent.Executor} and
@@ -43,8 +41,8 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.Executors
  */
-@SuppressWarnings({"deprecation", "removal"})
-public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
+@SuppressWarnings("deprecation")
+public class TaskExecutorAdapter implements AsyncTaskExecutor {
 
 	private final Executor concurrentExecutor;
 
@@ -127,30 +125,6 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 				doExecute(this.concurrentExecutor, this.taskDecorator, future);
 				return future;
 			}
-		}
-		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
-		}
-	}
-
-	@Override
-	public ListenableFuture<?> submitListenable(Runnable task) {
-		try {
-			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
-			doExecute(this.concurrentExecutor, this.taskDecorator, future);
-			return future;
-		}
-		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
-		}
-	}
-
-	@Override
-	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
-		try {
-			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
-			doExecute(this.concurrentExecutor, this.taskDecorator, future);
-			return future;
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException(this.concurrentExecutor, task, ex);

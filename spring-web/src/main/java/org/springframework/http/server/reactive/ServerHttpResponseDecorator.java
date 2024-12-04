@@ -72,14 +72,6 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	}
 
 	@Override
-	@Nullable
-	@Deprecated
-	@SuppressWarnings("removal")
-	public Integer getRawStatusCode() {
-		return getDelegate().getRawStatusCode();
-	}
-
-	@Override
 	public HttpHeaders getHeaders() {
 		return getDelegate().getHeaders();
 	}

@@ -26,14 +26,13 @@ import java.util.concurrent.Future;
 import jakarta.enterprise.concurrent.ManagedExecutors;
 import jakarta.enterprise.concurrent.ManagedTask;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Adapter that takes a {@code java.util.concurrent.Executor} and exposes
@@ -62,8 +61,8 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see DefaultManagedTaskExecutor
  * @see ThreadPoolTaskExecutor
  */
-@SuppressWarnings({"deprecation", "removal"})
-public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
+@SuppressWarnings("deprecation")
+public class ConcurrentTaskExecutor implements AsyncTaskExecutor, SchedulingTaskExecutor {
 
 	private static final Executor STUB_EXECUTOR = (task -> {
 		throw new IllegalStateException("Executor not configured");
@@ -172,16 +171,6 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		return this.adaptedExecutor.submit(task);
 	}
 
-	@Override
-	public ListenableFuture<?> submitListenable(Runnable task) {
-		return this.adaptedExecutor.submitListenable(task);
-	}
-
-	@Override
-	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
-		return this.adaptedExecutor.submitListenable(task);
-	}
-
 
 	private TaskExecutorAdapter getAdaptedExecutor(Executor originalExecutor) {
 		TaskExecutorAdapter adapter =
@@ -223,16 +212,6 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		@Override
 		public <T> Future<T> submit(Callable<T> task) {
 			return super.submit(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
-		}
-
-		@Override
-		public ListenableFuture<?> submitListenable(Runnable task) {
-			return super.submitListenable(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
-		}
-
-		@Override
-		public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
-			return super.submitListenable(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
 		}
 	}
 

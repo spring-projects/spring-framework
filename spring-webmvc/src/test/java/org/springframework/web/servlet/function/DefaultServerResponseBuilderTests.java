@@ -54,12 +54,11 @@ class DefaultServerResponseBuilderTests {
 
 	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
+
 	@Test
-	@SuppressWarnings("removal")
 	void status() {
 		ServerResponse response = ServerResponse.status(HttpStatus.CREATED).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test
@@ -74,7 +73,6 @@ class DefaultServerResponseBuilderTests {
 		assertThat(result.headers().getFirst("foo")).isEqualTo("bar");
 		assertThat(result.cookies().getFirst("foo")).isEqualTo(cookie);
 	}
-
 
 	@Test
 	void ok() {
