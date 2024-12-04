@@ -34,11 +34,9 @@ import org.springframework.web.socket.WebSocketExtension;
  */
 public class StandardToWebSocketExtensionAdapter extends WebSocketExtension {
 
-
 	public StandardToWebSocketExtensionAdapter(Extension extension) {
 		super(extension.getName(), initParameters(extension));
 	}
-
 
 	private static Map<String, String> initParameters(Extension extension) {
 		List<Extension.Parameter> parameters = extension.getParameters();
