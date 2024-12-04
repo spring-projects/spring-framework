@@ -37,7 +37,7 @@ import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeSt
 public class DefaultHandshakeHandler extends AbstractHandshakeHandler implements ServletContextAware {
 
 	private static final boolean jettyWsPresent = ClassUtils.isPresent(
-			"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer",
+			"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer",
 			DefaultHandshakeHandler.class.getClassLoader());
 
 

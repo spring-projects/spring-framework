@@ -90,7 +90,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
 		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer", classLoader);
+				"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer", classLoader);
 		jettyCoreWsPresent = ClassUtils.isPresent(
 				"org.eclipse.jetty.websocket.server.ServerWebSocketContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
