@@ -341,6 +341,18 @@ class ProxyFactoryTests {
 	}
 
 	@Test
+	void proxyInterfaceInCaseOfIntroducedInterfaceOnly() {
+		ProxyFactory pf = new ProxyFactory();
+		pf.addInterface(TimeStamped.class);
+		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(0L);
+		pf.addAdvisor(new DefaultIntroductionAdvisor(ti, TimeStamped.class));
+		Object proxy = pf.getProxy();
+		assertThat(AopUtils.isJdkDynamicProxy(proxy)).as("Proxy is a JDK proxy").isTrue();
+		assertThat(proxy).isInstanceOf(TimeStamped.class);
+		assertThat(AopProxyUtils.ultimateTargetClass(proxy)).isEqualTo(proxy.getClass());
+	}
+
+	@Test
 	void proxyInterfaceInCaseOfNonTargetInterface() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(MyDate.class);
