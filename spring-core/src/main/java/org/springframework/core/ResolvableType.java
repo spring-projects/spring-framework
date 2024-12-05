@@ -309,12 +309,12 @@ public class ResolvableType implements Serializable {
 
 		// Deal with wildcard bounds
 		WildcardBounds ourBounds = WildcardBounds.get(this);
-		WildcardBounds typeBounds = WildcardBounds.get(other);
+		WildcardBounds otherBounds = WildcardBounds.get(other);
 
 		// In the form X is assignable to <? extends Number>
-		if (typeBounds != null) {
-			return (ourBounds != null && ourBounds.isSameKind(typeBounds) &&
-					ourBounds.isAssignableFrom(typeBounds.getBounds()));
+		if (otherBounds != null) {
+			return (ourBounds != null && ourBounds.isSameKind(otherBounds) &&
+					ourBounds.isAssignableFrom(otherBounds.getBounds()));
 		}
 
 		// In the form <? extends Number> is assignable to X...
@@ -365,8 +365,8 @@ public class ResolvableType implements Serializable {
 		if (checkGenerics) {
 			// Recursively check each generic
 			ResolvableType[] ourGenerics = getGenerics();
-			ResolvableType[] typeGenerics = other.as(ourResolved).getGenerics();
-			if (ourGenerics.length != typeGenerics.length) {
+			ResolvableType[] otherGenerics = other.as(ourResolved).getGenerics();
+			if (ourGenerics.length != otherGenerics.length) {
 				return false;
 			}
 			if (ourGenerics.length > 0) {
@@ -375,7 +375,7 @@ public class ResolvableType implements Serializable {
 				}
 				matchedBefore.put(this.type, other.type);
 				for (int i = 0; i < ourGenerics.length; i++) {
-					if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], true, matchedBefore)) {
+					if (!ourGenerics[i].isAssignableFrom(otherGenerics[i], true, matchedBefore)) {
 						return false;
 					}
 				}
