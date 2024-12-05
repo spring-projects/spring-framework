@@ -127,7 +127,7 @@ Kotlin::
 ======
 
 For Spring MVC, use the following where the Spring `ApplicationContext` is passed to
-{spring-framework-api}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
+{spring-framework-api}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup(org.springframework.web.context.WebApplicationContext)[MockMvcBuilders.webAppContextSetup]
 to create a xref:testing/mockmvc.adoc[MockMvc] instance to handle
 requests:
 
