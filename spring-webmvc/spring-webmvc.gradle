@@ -60,7 +60,6 @@ dependencies {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	testImplementation("org.hibernate:hibernate-validator")
-	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
 	testImplementation("org.mozilla:rhino")
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")
@@ -70,7 +69,6 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("org.apache.httpcomponents.client5:httpclient5")
 	testRuntimeOnly("org.glassfish:jakarta.el")
-	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")
 	testRuntimeOnly("org.webjars:underscorejs")

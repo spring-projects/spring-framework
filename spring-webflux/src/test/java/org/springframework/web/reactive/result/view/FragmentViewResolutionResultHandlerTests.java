@@ -33,7 +33,6 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.BindingContext;
@@ -53,6 +52,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * Tests for {@link Fragment} rendering through {@link ViewResolutionResultHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class FragmentViewResolutionResultHandlerTests {
 
@@ -138,8 +138,8 @@ public class FragmentViewResolutionResultHandlerTests {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ScriptTemplatingConfiguration.class);
 
-		String prefix = "org/springframework/web/reactive/result/view/script/kotlin/";
-		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".kts");
+		String prefix = "org/springframework/web/reactive/result/view/script/jython/";
+		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".html");
 		viewResolver.setApplicationContext(context);
 		viewResolver.setSupportedMediaTypes(List.of(MediaType.TEXT_HTML, MediaType.TEXT_EVENT_STREAM));
 
@@ -166,17 +166,10 @@ public class FragmentViewResolutionResultHandlerTests {
 		@Bean
 		public ScriptTemplateConfigurer kotlinScriptConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("kotlin");
-			configurer.setScripts("org/springframework/web/reactive/result/view/script/kotlin/render.kts");
+			configurer.setEngineName("jython");
+			configurer.setScripts("org/springframework/web/reactive/result/view/script/jython/render.py");
 			configurer.setRenderFunction("render");
 			return configurer;
-		}
-
-		@Bean
-		public ResourceBundleMessageSource messageSource() {
-			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-			messageSource.setBasename("org/springframework/web/reactive/result/view/script/messages");
-			return messageSource;
 		}
 	}
 

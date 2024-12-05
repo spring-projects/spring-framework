@@ -26,7 +26,6 @@ import reactor.core.publisher.Flux;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.task.SyncTaskExecutor;
@@ -50,7 +49,9 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Tests for streaming of {@link ModelAndView} fragments.
+ *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class FragmentRenderingStreamTests {
 
@@ -72,8 +73,8 @@ public class FragmentRenderingStreamTests {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ScriptTemplatingConfiguration.class);
 
-		String prefix = "org/springframework/web/servlet/view/script/kotlin/";
-		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".kts");
+		String prefix = "org/springframework/web/servlet/view/script/jython/";
+		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".html");
 		viewResolver.setApplicationContext(context);
 
 		this.handler = new ResponseBodyEmitterReturnValueHandler(
@@ -165,18 +166,12 @@ public class FragmentRenderingStreamTests {
 		@Bean
 		ScriptTemplateConfigurer kotlinScriptConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("kotlin");
-			configurer.setScripts("org/springframework/web/servlet/view/script/kotlin/render.kts");
+			configurer.setEngineName("jython");
+			configurer.setScripts("org/springframework/web/servlet/view/script/jython/render.py");
 			configurer.setRenderFunction("render");
 			return configurer;
 		}
 
-		@Bean
-		ResourceBundleMessageSource messageSource() {
-			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-			messageSource.setBasename("org/springframework/web/servlet/view/script/messages");
-			return messageSource;
-		}
 	}
 
 }

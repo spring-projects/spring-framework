@@ -21,26 +21,23 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 /**
  * Tests for rendering through {@link DefaultFragmentsRendering}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
-@DisabledForJreRange(min = JAVA_21, disabledReason = "Kotlin doesn't support Java 21+ yet")
 public class DefaultFragmentsRenderingTests {
 
 	@Test
@@ -49,8 +46,8 @@ public class DefaultFragmentsRenderingTests {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ScriptTemplatingConfiguration.class);
 
-		String prefix = "org/springframework/web/servlet/view/script/kotlin/";
-		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".kts");
+		String prefix = "org/springframework/web/servlet/view/script/jython/";
+		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".html");
 		viewResolver.setApplicationContext(context);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -82,18 +79,12 @@ public class DefaultFragmentsRenderingTests {
 		@Bean
 		ScriptTemplateConfigurer kotlinScriptConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("kotlin");
-			configurer.setScripts("org/springframework/web/servlet/view/script/kotlin/render.kts");
+			configurer.setEngineName("jython");
+			configurer.setScripts("org/springframework/web/servlet/view/script/jython/render.py");
 			configurer.setRenderFunction("render");
 			return configurer;
 		}
 
-		@Bean
-		ResourceBundleMessageSource messageSource() {
-			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-			messageSource.setBasename("org/springframework/web/servlet/view/script/messages");
-			return messageSource;
-		}
 	}
 
 }
