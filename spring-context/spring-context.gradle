@@ -47,6 +47,7 @@ dependencies {
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.reactivex.rxjava3:rxjava")
 	testImplementation('io.micrometer:context-propagation')
 	testImplementation("io.micrometer:micrometer-observation-test")
