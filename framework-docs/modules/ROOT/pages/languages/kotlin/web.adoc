@@ -75,54 +75,6 @@ mockMvc.get("/person/{name}", "Lee") {
 
 
 
-[[kotlin-script-templates]]
-== Kotlin Script Templates
-
-Spring Framework provides a
-{spring-framework-api}/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
-which supports {JSR}223[JSR-223] to render templates by using script engines.
-
-By leveraging `scripting-jsr223` dependencies, it
-is possible to use such feature to render Kotlin-based templates with
-{kotlin-github-org}/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
-
-`build.gradle.kts`
-[source,kotlin,indent=0]
-----
-dependencies {
-        runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223:${kotlinVersion}")
-}
-----
-
-Configuration is usually done with `ScriptTemplateConfigurer` and `ScriptTemplateViewResolver` beans.
-
-`KotlinScriptConfiguration.kt`
-[source,kotlin,indent=0]
-----
-@Configuration
-class KotlinScriptConfiguration {
-
-    @Bean
-	fun kotlinScriptConfigurer() = ScriptTemplateConfigurer().apply {
-		engineName = "kotlin"
-		setScripts("scripts/render.kts")
-		renderFunction = "render"
-		isSharedEngine = false
-	}
-
-    @Bean
-    fun kotlinScriptViewResolver() = ScriptTemplateViewResolver().apply {
-        setPrefix("templates/")
-        setSuffix(".kts")
-    }
-}
-----
-
-See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
-project for more details.
-
-
-
 [[kotlin-multiplatform-serialization]]
 == Kotlin multiplatform serialization
 
