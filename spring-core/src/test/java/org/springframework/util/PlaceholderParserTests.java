@@ -210,6 +210,8 @@ class PlaceholderParserTests {
 		static Stream<Arguments> nestedPlaceholders() {
 			return Stream.of(
 					Arguments.of("${p6}", "v1:v2:def"),
+					Arguments.of("${p6:not-used}", "v1:v2:def"),
+					Arguments.of("${p6:${invalid}}", "v1:v2:def"),
 					Arguments.of("${invalid:${p1}:${p2}}", "v1:v2"),
 					Arguments.of("${invalid:${p3}}", "v1:v2"),
 					Arguments.of("${invalid:${p4}}", "v1:v2"),
