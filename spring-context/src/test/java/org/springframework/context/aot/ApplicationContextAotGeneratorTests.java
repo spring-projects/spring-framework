@@ -66,8 +66,10 @@ import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.testfixture.context.annotation.AutowiredCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.AutowiredComponent;
 import org.springframework.context.testfixture.context.annotation.AutowiredGenericTemplate;
+import org.springframework.context.testfixture.context.annotation.AutowiredMixedCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.ConfigurableCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.GenericTemplateConfiguration;
@@ -461,6 +463,33 @@ class ApplicationContextAotGeneratorTests {
 				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 				assertThat(freshApplicationContext.getBean("prefix", String.class)).isEqualTo("Hello0");
 				assertThat(freshApplicationContext.getBean("text", String.class)).isEqualTo("Hello0 World");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasCglibProxyAndAutowiring() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(AutowiredCglibConfiguration.class);
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(context -> {
+					context.setEnvironment(new MockEnvironment().withProperty("hello", "Hi"));
+					initializer.initialize(context);
+				});
+				assertThat(freshApplicationContext.getBean("text", String.class)).isEqualTo("Hi World");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasCglibProxyAndMixedAutowiring() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(AutowiredMixedCglibConfiguration.class);
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(context -> {
+					context.setEnvironment(new MockEnvironment().withProperty("hello", "Hi")
+							.withProperty("world", "AOT World"));
+					initializer.initialize(context);
+				});
+				assertThat(freshApplicationContext.getBean("text", String.class)).isEqualTo("Hi AOT World");
 			});
 		}
 
