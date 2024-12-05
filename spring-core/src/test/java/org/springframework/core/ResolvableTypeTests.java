@@ -1189,6 +1189,26 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void isAssignableFromForUnresolvedWildcards() {
+		ResolvableType wildcard = ResolvableType.forInstance(new Wildcard<>());
+		ResolvableType wildcardFixed = ResolvableType.forInstance(new WildcardFixed());
+		ResolvableType wildcardConcrete = ResolvableType.forClassWithGenerics(Wildcard.class, Number.class);
+
+		assertThat(wildcard.isAssignableFrom(wildcardFixed)).isTrue();
+		assertThat(wildcard.isAssignableFromResolvedPart(wildcardFixed)).isTrue();
+		assertThat(wildcard.isAssignableFrom(wildcardConcrete)).isTrue();
+		assertThat(wildcard.isAssignableFromResolvedPart(wildcardConcrete)).isTrue();
+		assertThat(wildcardFixed.isAssignableFrom(wildcard)).isFalse();
+		assertThat(wildcardFixed.isAssignableFromResolvedPart(wildcard)).isFalse();
+		assertThat(wildcardFixed.isAssignableFrom(wildcardConcrete)).isFalse();
+		assertThat(wildcardFixed.isAssignableFromResolvedPart(wildcardConcrete)).isFalse();
+		assertThat(wildcardConcrete.isAssignableFrom(wildcard)).isTrue();
+		assertThat(wildcardConcrete.isAssignableFromResolvedPart(wildcard)).isTrue();
+		assertThat(wildcardConcrete.isAssignableFrom(wildcardFixed)).isFalse();
+		assertThat(wildcardConcrete.isAssignableFromResolvedPart(wildcardFixed)).isFalse();
+	}
+
+	@Test
 	void identifyTypeVariable() throws Exception {
 		Method method = ClassArguments.class.getMethod("typedArgumentFirst", Class.class, Class.class, Class.class);
 		ResolvableType returnType = ResolvableType.forMethodReturnType(method, ClassArguments.class);
@@ -1685,7 +1705,6 @@ class ResolvableTypeTests {
 		}
 	}
 
-
 	public class MySimpleInterfaceType implements MyInterfaceType<String> {
 	}
 
@@ -1695,7 +1714,6 @@ class ResolvableTypeTests {
 	public abstract class ExtendsMySimpleInterfaceTypeWithImplementsRaw extends MySimpleInterfaceTypeWithImplementsRaw {
 	}
 
-
 	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
 	}
 
@@ -1703,20 +1721,17 @@ class ResolvableTypeTests {
 	public abstract class MySuperclassType<T> {
 	}
 
-
 	public class MySimpleSuperclassType extends MySuperclassType<String> {
 	}
-
 
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
 	}
 
 
-	interface Wildcard<T extends Number> extends List<T> {
+	public class Wildcard<T extends Number> {
 	}
 
-
-	interface RawExtendsWildcard extends Wildcard {
+	public class WildcardFixed extends Wildcard<Integer> {
 	}
 
 
