@@ -247,7 +247,7 @@ final class PlaceholderParser {
 			if (!parts.isEmpty()) {
 				Part current = parts.removeLast();
 				if (current instanceof TextPart textPart) {
-					parts.add(new TextPart(textPart.text + text));
+					parts.add(new TextPart(textPart.text() + text));
 				}
 				else {
 					parts.add(current);
@@ -420,51 +420,42 @@ final class PlaceholderParser {
 
 
 	/**
-	 * A {@link Part} implementation that does not contain a valid placeholder.
-	 * @param text the raw (and resolved) text
+	 * A base {@link Part} implementation.
 	 */
-	record TextPart(String text) implements Part {
+	abstract static class AbstractPart implements Part {
+
+		private final String text;
+
+		protected AbstractPart(String text) {
+			this.text = text;
+		}
 
 		@Override
-		public String resolve(PartResolutionContext resolutionContext) {
+		public String text() {
 			return this.text;
 		}
-	}
 
-
-	/**
-	 * A {@link Part} implementation that represents a single placeholder with
-	 * a hard-coded fallback.
-	 * @param text the raw text
-	 * @param key the key of the placeholder
-	 * @param fallback the fallback to use, if any
-	 */
-	record SimplePlaceholderPart(String text, String key, @Nullable String fallback) implements Part {
-
-		@Override
-		public String resolve(PartResolutionContext resolutionContext) {
-			String resolvedValue = resolveToText(resolutionContext, this.key);
-			if (resolvedValue != null) {
-				return resolvedValue;
-			}
-			else if (this.fallback != null) {
-				return this.fallback;
-			}
-			return resolutionContext.handleUnresolvablePlaceholder(this.key, this.text);
-		}
-
+		/**
+		 * Resolve the placeholder with the given {@code key}. If the result of such
+		 * resolution return other placeholders, those are resolved as well until the
+		 * resolution no longer contains any placeholders.
+		 * @param resolutionContext the resolution context to use
+		 * @param key the initial placeholder
+		 * @return the full resolution of the given {@code key} or {@code null} if
+		 * the placeholder has no value to begin with
+		 */
 		@Nullable
-		private String resolveToText(PartResolutionContext resolutionContext, String text) {
-			String resolvedValue = resolutionContext.resolvePlaceholder(text);
+		protected String resolveRecursively(PartResolutionContext resolutionContext, String key) {
+			String resolvedValue = resolutionContext.resolvePlaceholder(key);
 			if (resolvedValue != null) {
-				resolutionContext.flagPlaceholderAsVisited(text);
+				resolutionContext.flagPlaceholderAsVisited(key);
 				// Let's check if we need to recursively resolve that value
 				List<Part> nestedParts = resolutionContext.parse(resolvedValue);
 				String value = toText(nestedParts);
 				if (!isTextOnly(nestedParts)) {
 					value = new ParsedValue(resolvedValue, nestedParts).resolve(resolutionContext);
 				}
-				resolutionContext.removePlaceholder(text);
+				resolutionContext.removePlaceholder(key);
 				return value;
 			}
 			// Not found
@@ -484,25 +475,96 @@ final class PlaceholderParser {
 
 
 	/**
+	 * A {@link Part} implementation that does not contain a valid placeholder.
+	 */
+	static class TextPart extends AbstractPart {
+
+		/**
+		 * Create a new instance.
+		 * @param text the raw (and resolved) text
+		 */
+		public TextPart(String text) {
+			super(text);
+		}
+
+		@Override
+		public String resolve(PartResolutionContext resolutionContext) {
+			return text();
+		}
+	}
+
+
+	/**
+	 * A {@link Part} implementation that represents a single placeholder with
+	 * a hard-coded fallback.
+	 */
+	static class SimplePlaceholderPart extends AbstractPart {
+
+		private final String key;
+
+		@Nullable
+		private final String fallback;
+
+		/**
+		 * Create a new instance.
+		 * @param text the raw text
+		 * @param key the key of the placeholder
+		 * @param fallback the fallback to use, if any
+		 */
+		public SimplePlaceholderPart(String text,String key, @Nullable String fallback) {
+			super(text);
+			this.key = key;
+			this.fallback = fallback;
+		}
+
+		@Override
+		public String resolve(PartResolutionContext resolutionContext) {
+			String value = resolveRecursively(resolutionContext, this.key);
+			if (value != null) {
+				return value;
+			}
+			else if (this.fallback != null) {
+				return this.fallback;
+			}
+			return resolutionContext.handleUnresolvablePlaceholder(this.key, text());
+		}
+	}
+
+
+	/**
 	 * A {@link Part} implementation that represents a single placeholder
 	 * containing nested placeholders.
-	 * @param text the raw text of the root placeholder
-	 * @param keyParts the parts of the key
-	 * @param defaultParts the parts of the fallback, if any
 	 */
-	record NestedPlaceholderPart(String text, List<Part> keyParts, @Nullable List<Part> defaultParts) implements Part {
+	static class NestedPlaceholderPart extends AbstractPart {
+
+		private final List<Part> keyParts;
+
+		@Nullable
+		private final List<Part> defaultParts;
+
+		/**
+		 * Create a new instance.
+		 * @param text the raw text of the root placeholder
+		 * @param keyParts the parts of the key
+		 * @param defaultParts the parts of the fallback, if any
+		 */
+		NestedPlaceholderPart(String text, List<Part> keyParts, @Nullable List<Part> defaultParts) {
+			super(text);
+			this.keyParts = keyParts;
+			this.defaultParts = defaultParts;
+		}
 
 		@Override
 		public String resolve(PartResolutionContext resolutionContext) {
 			String resolvedKey = Part.resolveAll(this.keyParts, resolutionContext);
-			String value = resolutionContext.resolvePlaceholder(resolvedKey);
+			String value = resolveRecursively(resolutionContext, resolvedKey);
 			if (value != null) {
 				return value;
 			}
 			else if (this.defaultParts != null) {
 				return Part.resolveAll(this.defaultParts, resolutionContext);
 			}
-			return resolutionContext.handleUnresolvablePlaceholder(resolvedKey, this.text);
+			return resolutionContext.handleUnresolvablePlaceholder(resolvedKey, text());
 		}
 	}
 

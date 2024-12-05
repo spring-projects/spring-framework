@@ -712,13 +712,6 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("removal")
-		public JsonPathAssertions jsonPath(String expression, Object... args) {
-			Assert.hasText(expression, "expression must not be null or empty");
-			return jsonPath(expression.formatted(args));
-		}
-
-		@Override
 		public XpathAssertions xpath(String expression, @Nullable Map<String, String> namespaces, Object... args) {
 			return new XpathAssertions(this, expression, namespaces, args);
 		}

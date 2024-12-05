@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit4.orm;
 
-import jakarta.persistence.PersistenceException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
@@ -115,16 +114,8 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 	@Test
 	public void updateSamWithNullDriversLicenseWithSessionFlush() {
 		updateSamWithNullDriversLicense();
-		assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> {
-			// Manual flush is required to avoid false positive in test
-			try {
-				sessionFactory.getCurrentSession().flush();
-			}
-			catch (PersistenceException ex) {
-				// Wrapped in Hibernate 5.2, with the constraint violation as cause
-				throw ex.getCause();
-			}
-		});
+		// Manual flush is required to avoid false positive in test
+		assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(sessionFactory.getCurrentSession()::flush);
 	}
 
 	private void updateSamWithNullDriversLicense() {

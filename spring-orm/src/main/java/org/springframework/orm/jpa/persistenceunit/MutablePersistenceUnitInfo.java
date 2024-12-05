@@ -45,6 +45,7 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @since 2.0
  */
+@SuppressWarnings("removal")
 public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	@Nullable
@@ -287,6 +288,18 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	@Override
 	public ClassLoader getNewTempClassLoader() {
 		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
+	}
+
+	@Override
+	@Nullable
+	public String getScopeAnnotationName() {
+		return null;
+	}
+
+	@Override
+	@Nullable
+	public List<String> getQualifierAnnotationNames() {
+		return null;
 	}
 
 

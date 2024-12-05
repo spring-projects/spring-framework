@@ -44,6 +44,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.lang.Nullable;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
@@ -78,7 +79,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(MethodParameterLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(MethodParameterLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(ExistsValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -88,7 +89,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(ConstructorParameterLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(ConstructorParameterLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(ExistsValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -98,7 +99,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(PropertyLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(PropertyLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(ExistsValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -108,7 +109,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(GenericTypeLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(GenericTypeLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -118,9 +119,9 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(TransitiveGenericTypeLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(3);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TransitiveGenericTypeLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(Exclude.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -131,7 +132,15 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(beanClass);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(1);
 		assertThat(RuntimeHintsPredicates.reflection().onType(beanClass)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@Test  // gh-33940
+	void shouldSkipConstraintWithMissingDependency() throws Exception {
+		MissingDependencyClassLoader classLoader = new MissingDependencyClassLoader(getClass().getClassLoader());
+		Class<?> beanClass = classLoader.loadClass(ConstraintWithMissingDependency.class.getName());
+		process(beanClass);
+		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
 	}
 
 	private void process(Class<?> beanClass) {
@@ -267,6 +276,33 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 	static class BeanWithRecursiveOptional {
 		Optional<BeanWithRecursiveOptional> optional;
+	}
+
+	static class ConstraintWithMissingDependency {
+
+		MissingType missingType;
+	}
+
+	static class MissingType {}
+
+	static class MissingDependencyClassLoader extends OverridingClassLoader {
+
+		MissingDependencyClassLoader(ClassLoader parent) {
+			super(parent);
+		}
+
+		@Override
+		protected boolean isEligibleForOverriding(String className) {
+			return className.startsWith(BeanValidationBeanRegistrationAotProcessorTests.class.getName());
+		}
+
+		@Override
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+			if (name.contains("MissingType")) {
+				throw new NoClassDefFoundError(name);
+			}
+			return super.loadClassForOverriding(name);
+		}
 	}
 
 }

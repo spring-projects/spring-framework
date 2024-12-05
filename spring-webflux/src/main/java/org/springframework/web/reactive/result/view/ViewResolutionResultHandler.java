@@ -208,7 +208,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 		if (adapter != null) {
 			if (adapter.isMultiValue()) {
 				valueMono = (result.getReturnValue() != null ?
-						Mono.just(FragmentsRendering.withPublisher(adapter.toPublisher(result.getReturnValue())).build()) :
+						Mono.just(FragmentsRendering.fragmentsPublisher(adapter.toPublisher(result.getReturnValue())).build()) :
 						Mono.empty());
 
 				valueType = ResolvableType.forClass(FragmentsRendering.class);
@@ -242,7 +242,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					}
 
 					if (Collection.class.isAssignableFrom(clazz)) {
-						returnValue = FragmentsRendering.withCollection((Collection<Fragment>) returnValue).build();
+						returnValue = FragmentsRendering.fragments((Collection<Fragment>) returnValue).build();
 						clazz = FragmentsRendering.class;
 					}
 

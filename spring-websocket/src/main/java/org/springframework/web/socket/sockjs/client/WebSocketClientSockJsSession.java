@@ -43,18 +43,6 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 	private WebSocketSession webSocketSession;
 
 
-	/**
-	 * Create a new {@code WebSocketClientSockJsSession}.
-	 * @deprecated as of 6.0, in favor of {@link #WebSocketClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
-
-		super(request, handler, connectFuture);
-	}
-
 	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
 			CompletableFuture<WebSocketSession> connectFuture) {
 

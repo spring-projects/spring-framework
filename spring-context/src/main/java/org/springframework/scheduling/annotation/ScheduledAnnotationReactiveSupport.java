@@ -123,8 +123,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 		Publisher<?> publisher = getPublisherFor(method, targetBean);
 		Supplier<ScheduledTaskObservationContext> contextSupplier =
 				() -> new ScheduledTaskObservationContext(targetBean, method);
+		String displayName = targetBean.getClass().getName() + "." + method.getName();
 		return new SubscribingRunnable(publisher, shouldBlock, scheduled.scheduler(),
-				subscriptionTrackerRegistry, observationRegistrySupplier, contextSupplier);
+				subscriptionTrackerRegistry, displayName, observationRegistrySupplier, contextSupplier);
 	}
 
 	/**
@@ -192,6 +193,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		final boolean shouldBlock;
 
+		final String displayName;
+
 		@Nullable
 		private final String qualifier;
 
@@ -202,12 +205,13 @@ abstract class ScheduledAnnotationReactiveSupport {
 		final Supplier<ScheduledTaskObservationContext> contextSupplier;
 
 		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock,
-				@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
-				Supplier<ObservationRegistry> observationRegistrySupplier,
-				Supplier<ScheduledTaskObservationContext> contextSupplier) {
+							@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
+							String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
+							Supplier<ScheduledTaskObservationContext> contextSupplier) {
 
 			this.publisher = publisher;
 			this.shouldBlock = shouldBlock;
+			this.displayName = displayName;
 			this.qualifier = qualifier;
 			this.subscriptionTrackerRegistry = subscriptionTrackerRegistry;
 			this.observationRegistrySupplier = observationRegistrySupplier;
@@ -252,6 +256,11 @@ abstract class ScheduledAnnotationReactiveSupport {
 			else {
 				this.publisher.subscribe(subscriber);
 			}
+		}
+
+		@Override
+		public String toString() {
+			return this.displayName;
 		}
 	}
 

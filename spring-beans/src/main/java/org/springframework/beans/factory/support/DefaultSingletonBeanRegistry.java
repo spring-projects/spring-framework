@@ -76,6 +76,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private static final int SUPPRESSED_EXCEPTIONS_LIMIT = 100;
 
 
+	/** Common lock for singleton creation. */
+	final Lock singletonLock = new ReentrantLock();
+
 	/** Cache of singleton objects: bean name to bean instance. */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
@@ -90,8 +93,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/** Set of registered singletons, containing the bean names in registration order. */
 	private final Set<String> registeredSingletons = Collections.synchronizedSet(new LinkedHashSet<>(256));
-
-	private final Lock singletonLock = new ReentrantLock();
 
 	/** Names of beans that are currently in creation. */
 	private final Set<String> singletonsCurrentlyInCreation = ConcurrentHashMap.newKeySet(16);

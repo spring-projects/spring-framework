@@ -58,17 +58,6 @@ public interface ClientResponse {
 	HttpStatusCode statusCode();
 
 	/**
-	 * Return the raw status code of this response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.1
-	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	default int rawStatusCode() {
-		return statusCode().value();
-	}
-
-	/**
 	 * Return the headers of this response.
 	 */
 	Headers headers();

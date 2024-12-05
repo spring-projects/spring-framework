@@ -53,3 +53,4 @@ atlassian-ide-plugin.xml
 cached-antora-playbook.yml
 
 node_modules
+/.kotlin/

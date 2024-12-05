@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.HttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -241,34 +240,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Deprecated(since = "6.2")
 	public static UriComponentsBuilder fromHttpUrl(String httpUrl) throws InvalidUrlException {
 		return fromUriString(httpUrl);
-	}
-
-	/**
-	 * Create a new {@code UriComponents} object from the URI associated with
-	 * the given HttpRequest while also overlaying with values from the headers
-	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
-	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
-	 * "Forwarded" is not found.
-	 * @param request the source request
-	 * @return the URI components of the URI
-	 * @since 4.1.5
-	 * @deprecated in favor of {@link ForwardedHeaderUtils#adaptFromForwardedHeaders};
-	 * to be removed in 7.0
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
-		return ForwardedHeaderUtils.adaptFromForwardedHeaders(request.getURI(), request.getHeaders());
-	}
-
-	/**
-	 * Create an instance by parsing the "Origin" header of an HTTP request.
-	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454</a>
-	 * @deprecated in favor of {@link UriComponentsBuilder#fromUriString(String)};
-	 * to be removed in 7.0
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		return fromUriString(origin);
 	}
 
 

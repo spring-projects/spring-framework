@@ -71,31 +71,19 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	/**
 	 * Create a new ContentCachingRequestWrapper for the given servlet request.
 	 * @param request the original servlet request
-	 */
-	public ContentCachingRequestWrapper(HttpServletRequest request) {
-		super(request);
-		int contentLength = request.getContentLength();
-		this.cachedContent = (contentLength > 0) ? new FastByteArrayOutputStream(contentLength) : new FastByteArrayOutputStream();
-		this.contentCacheLimit = null;
-	}
-
-	/**
-	 * Create a new ContentCachingRequestWrapper for the given servlet request.
-	 * @param request the original servlet request
-	 * @param contentCacheLimit the maximum number of bytes to cache per request
+	 * @param cacheLimit the maximum number of bytes to cache per request;
+	 * no limit is set if the value is 0 or less. It is recommended to set a
+	 * concrete limit in order to avoid using too much memory.
 	 * @since 4.3.6
 	 * @see #handleContentOverflow(int)
 	 */
-	public ContentCachingRequestWrapper(HttpServletRequest request, int contentCacheLimit) {
+	public ContentCachingRequestWrapper(HttpServletRequest request, int cacheLimit) {
 		super(request);
 		int contentLength = request.getContentLength();
-		if (contentLength > 0) {
-			this.cachedContent = new FastByteArrayOutputStream(Math.min(contentLength, contentCacheLimit));
-		}
-		else {
-			this.cachedContent = new FastByteArrayOutputStream();
-		}
-		this.contentCacheLimit = contentCacheLimit;
+		this.cachedContent = (contentLength > 0 ?
+				new FastByteArrayOutputStream((cacheLimit > 0 ? Math.min(contentLength, cacheLimit) : contentLength)) :
+				new FastByteArrayOutputStream());
+		this.contentCacheLimit = (cacheLimit > 0 ? cacheLimit : null);
 	}
 
 

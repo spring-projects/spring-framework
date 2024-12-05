@@ -89,7 +89,7 @@ configure([rootProject] + javaProjects) { project ->
 
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
-			"https://jakarta.ee/specifications/platform/9/apidocs/",
+			"https://jakarta.ee/specifications/platform/11/apidocs/",
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",

@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Savepoint;
 
 import org.springframework.lang.Nullable;
@@ -178,6 +179,9 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
 			conHolder.getConnection().releaseSavepoint((Savepoint) savepoint);
+		}
+		catch (SQLFeatureNotSupportedException ex) {
+			// typically on Oracle - ignore
 		}
 		catch (Throwable ex) {
 			throw new TransactionSystemException("Could not explicitly release JDBC savepoint", ex);

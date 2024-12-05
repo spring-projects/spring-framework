@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import jakarta.persistence.EntityListeners;
@@ -173,7 +174,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 			ReflectionUtils.doWithFields(managedClass, field -> {
 				Convert convertFieldAnnotation = AnnotationUtils.findAnnotation(field, Convert.class);
-				if (convertFieldAnnotation != null && convertFieldAnnotation.converter() != void.class) {
+				if (convertFieldAnnotation != null && convertFieldAnnotation.converter() != AttributeConverter.class) {
 					reflectionHints.registerType(convertFieldAnnotation.converter(), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 				}
 			});

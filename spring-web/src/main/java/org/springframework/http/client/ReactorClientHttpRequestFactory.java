@@ -180,36 +180,6 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 		setReadTimeout(Duration.ofMillis(readTimeout));
 	}
 
-	/**
-	 * Set the timeout for the HTTP exchange in milliseconds.
-	 * <p>By default, as of 6.2 this is no longer set.
-	 * @see #setConnectTimeout(int)
-	 * @see #setReadTimeout(Duration)
-	 * @see <a href="https://projectreactor.io/docs/netty/release/reference/index.html#timeout-configuration">Timeout Configuration</a>
-	 * @deprecated as of 6.2 and no longer set by default (previously 5 seconds)
-	 * in favor of using Reactor Netty HttpClient timeout configuration.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public void setExchangeTimeout(long exchangeTimeout) {
-		Assert.isTrue(exchangeTimeout > 0, "Timeout must be a positive value");
-		this.exchangeTimeout = Duration.ofMillis(exchangeTimeout);
-	}
-
-	/**
-	 * Variant of {@link #setExchangeTimeout(long)} with a Duration value.
-	 * <p>By default, as of 6.2 this is no longer set.
-	 * @see #setConnectTimeout(int)
-	 * @see #setReadTimeout(Duration)
-	 * @see <a href="https://projectreactor.io/docs/netty/release/reference/index.html#timeout-configuration">Timeout Configuration</a>
-	 * @deprecated as of 6.2 and no longer set by default (previously 5 seconds)
-	 * in favor of using Reactor Netty HttpClient timeout configuration.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public void setExchangeTimeout(Duration exchangeTimeout) {
-		Assert.notNull(exchangeTimeout, "ExchangeTimeout must not be null");
-		setExchangeTimeout((int) exchangeTimeout.toMillis());
-	}
-
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {

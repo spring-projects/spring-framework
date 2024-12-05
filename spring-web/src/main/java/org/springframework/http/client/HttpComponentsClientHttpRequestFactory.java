@@ -210,18 +210,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Indicates whether this request factory should buffer the request body internally.
-	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is
-	 * recommended to change this property to {@code false}, so as not to run out of memory.
-	 * @since 4.0
-	 * @deprecated since 6.1 requests are never buffered, as if this property is {@code false}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public void setBufferRequestBody(boolean bufferRequestBody) {
-		// no-op
-	}
-
-	/**
 	 * Configure a factory to pre-create the {@link HttpContext} for each request.
 	 * <p>This may be useful for example in mutual TLS authentication where a
 	 * different {@code RestTemplate} for each client certificate such that

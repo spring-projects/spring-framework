@@ -33,20 +33,6 @@ public interface TcpConnection<P> extends Closeable {
 	/**
 	 * Send the given message.
 	 * @param message the message
-	 * @return a ListenableFuture that can be used to determine when and if the
-	 * message was successfully sent
-	 * @deprecated as of 6.0, in favor of {@link #sendAsync(Message)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	default org.springframework.util.concurrent.ListenableFuture<Void> send(Message<P> message) {
-		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
-				sendAsync(message));
-	}
-
-	/**
-	 * Send the given message.
-	 * @param message the message
 	 * @return a CompletableFuture that can be used to determine when and if the
 	 * message was successfully sent
 	 * @since 6.0

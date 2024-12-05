@@ -275,39 +275,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void listenableFutureSuccess() {
-		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
-		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
-
-		ListenableFutureController controller = new ListenableFutureController();
-		this.messageHandler.registerHandler(controller);
-		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
-
-		Message<?> message = createMessage("/app1/listenable-future/success");
-		this.messageHandler.handleMessage(message);
-
-		assertThat(controller.future).isNotNull();
-		controller.future.run();
-		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
-		assertThat(this.payloadCaptor.getValue()).isEqualTo("foo");
-	}
-
-	@Test
-	void listenableFutureFailure() {
-		ListenableFutureController controller = new ListenableFutureController();
-		this.messageHandler.registerHandler(controller);
-		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
-
-		Message<?> message = createMessage("/app1/listenable-future/failure");
-		this.messageHandler.handleMessage(message);
-
-		controller.future.run();
-		assertThat(controller.exceptionCaught).isTrue();
-	}
-
-	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void completableFutureSuccess() {
 		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
@@ -565,36 +532,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		@MessageMapping("foo")
 		public void handleFoo() {
 			this.method = "handleFoo";
-		}
-	}
-
-
-	@Controller
-	@MessageMapping("listenable-future")
-	@SuppressWarnings({"deprecation", "removal"})
-	private static class ListenableFutureController {
-
-		org.springframework.util.concurrent.ListenableFutureTask<String> future;
-
-		boolean exceptionCaught = false;
-
-		@MessageMapping("success")
-		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFuture() {
-			this.future = new org.springframework.util.concurrent.ListenableFutureTask<>(() -> "foo");
-			return this.future;
-		}
-
-		@MessageMapping("failure")
-		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFutureException() {
-			this.future = new org.springframework.util.concurrent.ListenableFutureTask<>(() -> {
-				throw new IllegalStateException();
-			});
-			return this.future;
-		}
-
-		@MessageExceptionHandler(IllegalStateException.class)
-		public void handleValidationException() {
-			this.exceptionCaught = true;
 		}
 	}
 

@@ -114,28 +114,6 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 * @param subProtocols requested sub-protocols, or an empty list
 	 * @param extensions requested WebSocket extensions, or an empty list
 	 * @param attributes the attributes to associate with the WebSocketSession, i.e. via
-	 * {@link WebSocketSession#getAttributes()}; currently always an empty map.
-	 * @return the established WebSocket session wrapped in a {@code ListenableFuture}.
-	 * @deprecated as of 6.0, in favor of {@link #executeInternal(WebSocketHandler, HttpHeaders, URI, List, List, Map)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	protected org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshakeInternal(
-			WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri, List<String> subProtocols,
-			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
-
-		throw new UnsupportedOperationException("doHandshakeInternal is deprecated in favor of executeInternal");
-	}
-
-	/**
-	 * Perform the actual handshake to establish a connection to the server.
-	 * @param webSocketHandler the client-side handler for WebSocket messages
-	 * @param headers the HTTP headers to use for the handshake, with unwanted (forbidden)
-	 * headers filtered out (never {@code null})
-	 * @param uri the target URI for the handshake (never {@code null})
-	 * @param subProtocols requested sub-protocols, or an empty list
-	 * @param extensions requested WebSocket extensions, or an empty list
-	 * @param attributes the attributes to associate with the WebSocketSession, i.e. via
 	 * {@link WebSocketSession#getAttributes()}; currently always an empty map
 	 * @return the established WebSocket session wrapped in a {@code CompletableFuture}.
 	 */

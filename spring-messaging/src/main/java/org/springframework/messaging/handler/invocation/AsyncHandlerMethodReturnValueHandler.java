@@ -51,35 +51,6 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
 
 	/**
-	 * Adapt the asynchronous return value to a
-	 * {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}.
-	 * <p>Implementations should consider returning an instance of
-	 * {@link org.springframework.util.concurrent.SettableListenableFuture
-	 * SettableListenableFuture}. Return value handling will then continue when
-	 * the ListenableFuture is completed with either success or error.
-	 * <p><strong>Note:</strong> this method will only be invoked after
-	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
-	 * is called and it returns {@code true}.
-	 * @param returnValue the value returned from the handler method
-	 * @param returnType the type of the return value
-	 * @return the resulting ListenableFuture, or {@code null} in which case
-	 * no further handling will be performed
-	 * @deprecated as of 6.0, in favor of
-	 * {@link #toCompletableFuture(Object, MethodParameter)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	@Nullable
-	default org.springframework.util.concurrent.ListenableFuture<?> toListenableFuture(
-			Object returnValue, MethodParameter returnType) {
-
-		CompletableFuture<?> result = toCompletableFuture(returnValue, returnType);
-		return (result != null ?
-				new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(result) :
-				null);
-	}
-
-	/**
 	 * Adapt the asynchronous return value to a {@link CompletableFuture}.
 	 * <p>Return value handling will then continue when
 	 * the CompletableFuture is completed with either success or error.

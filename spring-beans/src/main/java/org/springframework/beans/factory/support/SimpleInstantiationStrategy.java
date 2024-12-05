@@ -56,23 +56,6 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	}
 
 	/**
-	 * Set the factory method currently being invoked or {@code null} to remove
-	 * the  current value, if any.
-	 * @param method the factory method currently being invoked or {@code null}
-	 * @since 6.0
-	 * @deprecated in favor of {@link #instantiateWithFactoryMethod(Method, Supplier)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public static void setCurrentlyInvokedFactoryMethod(@Nullable Method method) {
-		if (method != null) {
-			currentlyInvokedFactoryMethod.set(method);
-		}
-		else {
-			currentlyInvokedFactoryMethod.remove();
-		}
-	}
-
-	/**
 	 * Invoke the given {@code instanceSupplier} with the factory method exposed
 	 * as being invoked.
 	 * @param method the factory method to expose

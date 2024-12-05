@@ -48,16 +48,11 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 	@Test
 	fun shouldProcessKotlinBean() {
 		process(SampleKotlinBean::class.java)
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleKotlinBean::class.java))
+			.accepts(generationContext.runtimeHints)
 		assertThat(
-			RuntimeHintsPredicates.reflection()
-				.onType(SampleKotlinBean::class.java)
-				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)
-		).accepts(generationContext.runtimeHints)
-		assertThat(
-			RuntimeHintsPredicates.reflection()
-				.onType(BaseKotlinBean::class.java)
-				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)
-		).accepts(generationContext.runtimeHints)
+			RuntimeHintsPredicates.reflection().onType(BaseKotlinBean::class.java))
+			.accepts(generationContext.runtimeHints)
 	}
 
 	@Test
@@ -72,7 +67,6 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 		assertThat(
 			RuntimeHintsPredicates.reflection()
 				.onType(OuterBean.NestedBean::class.java)
-				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)
 				.and(RuntimeHintsPredicates.reflection().onType(OuterBean::class.java))
 		).accepts(generationContext.runtimeHints)
 	}

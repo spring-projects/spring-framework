@@ -574,7 +574,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	private void assertHasDeclaredFieldsHint(Class<?> beanType) {
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onType(beanType).withMemberCategory(MemberCategory.DECLARED_FIELDS))
+				.onType(beanType).withMemberCategory(MemberCategory.INVOKE_DECLARED_FIELDS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 

@@ -19,24 +19,8 @@ package org.springframework.docs.integration.jmx.jmxexporting
 // tag::snippet[]
 class JmxTestBean : IJmxTestBean {
 
-	private lateinit var name: String
-	private var age = 0
-
-	override fun getAge(): Int {
-		return age
-	}
-
-	override fun setAge(age: Int) {
-		this.age = age
-	}
-
-	override fun setName(name: String) {
-		this.name = name
-	}
-
-	override fun getName(): String {
-		return name
-	}
+	override lateinit var name: String
+	override var age = 0
 
 	override fun add(x: Int, y: Int): Int {
 		return x + y

@@ -63,6 +63,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		this.timeout = timeout;
 	}
 
+
 	@Override
 	public ServerResponse block() {
 		try {
@@ -81,13 +82,6 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 	@Override
 	public HttpStatusCode statusCode() {
 		return delegate(ServerResponse::statusCode);
-	}
-
-	@Override
-	@Deprecated
-	@SuppressWarnings("removal")
-	public int rawStatusCode() {
-		return delegate(ServerResponse::rawStatusCode);
 	}
 
 	@Override
@@ -110,8 +104,8 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		}
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
 			throws ServletException, IOException {
 
@@ -164,4 +158,5 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		});
 		return result;
 	}
+
 }

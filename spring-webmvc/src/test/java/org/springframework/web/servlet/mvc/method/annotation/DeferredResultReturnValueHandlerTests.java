@@ -63,13 +63,9 @@ class DeferredResultReturnValueHandlerTests {
 
 
 	@Test
-	@SuppressWarnings({"deprecation", "removal"})
 	public void supportsReturnType() throws Exception {
 		assertThat(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(DeferredResult.class, String.class))).isTrue();
-
-		assertThat(this.handler.supportsReturnType(
-				on(TestController.class).resolveReturnType(org.springframework.util.concurrent.ListenableFuture.class, String.class))).isTrue();
 
 		assertThat(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(CompletableFuture.class, String.class))).isTrue();
@@ -88,15 +84,6 @@ class DeferredResultReturnValueHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings({"deprecation", "removal"})
-	public void listenableFuture() throws Exception {
-		org.springframework.util.concurrent.SettableListenableFuture<String> future =
-				new org.springframework.util.concurrent.SettableListenableFuture<>();
-		testHandle(future, org.springframework.util.concurrent.ListenableFuture.class,
-				() -> future.set("foo"), "foo");
-	}
-
-	@Test
 	void completableFuture() throws Exception {
 		CompletableFuture<String> future = new CompletableFuture<>();
 		testHandle(future, CompletableFuture.class, () -> future.complete("foo"), "foo");
@@ -106,16 +93,6 @@ class DeferredResultReturnValueHandlerTests {
 	void deferredResultWithError() throws Exception {
 		DeferredResult<String> result = new DeferredResult<>();
 		testHandle(result, DeferredResult.class, () -> result.setResult("foo"), "foo");
-	}
-
-	@Test
-	@SuppressWarnings({"deprecation", "removal"})
-	public void listenableFutureWithError() throws Exception {
-		org.springframework.util.concurrent.SettableListenableFuture<String> future =
-				new org.springframework.util.concurrent.SettableListenableFuture<>();
-		IllegalStateException ex = new IllegalStateException();
-		testHandle(future, org.springframework.util.concurrent.ListenableFuture.class,
-				() -> future.setException(ex), ex);
 	}
 
 	@Test
@@ -149,9 +126,6 @@ class DeferredResultReturnValueHandlerTests {
 		String handleString() { return null; }
 
 		DeferredResult<String> handleDeferredResult() { return null; }
-
-		@SuppressWarnings({"deprecation", "removal"})
-		org.springframework.util.concurrent.ListenableFuture<String> handleListenableFuture() { return null; }
 
 		CompletableFuture<String> handleCompletableFuture() { return null; }
 	}

@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @since 6.0
  */
+@SuppressWarnings("removal")
 class ExecutableHintTests {
 
 	@Test

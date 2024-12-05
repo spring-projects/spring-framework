@@ -56,8 +56,7 @@ class InstanceSupplierCodeGeneratorKotlinTests {
 			Assertions.assertThat(bean).isInstanceOf(KotlinTestBean::class.java)
 			Assertions.assertThat(compiled.sourceFile).contains("InstanceSupplier.using(KotlinTestBean::new)")
 		}
-		Assertions.assertThat(getReflectionHints().getTypeHint(KotlinTestBean::class.java))
-			.satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT))
+		Assertions.assertThat(getReflectionHints().getTypeHint(KotlinTestBean::class.java)).isNotNull
 	}
 
 	@Test
@@ -90,8 +89,7 @@ class InstanceSupplierCodeGeneratorKotlinTests {
 				"getBeanFactory().getBean(\"config\", KotlinConfiguration.class).stringBean()"
 			)
 		}
-		Assertions.assertThat<TypeHint?>(getReflectionHints().getTypeHint(KotlinConfiguration::class.java))
-			.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT))
+		Assertions.assertThat<TypeHint?>(getReflectionHints().getTypeHint(KotlinConfiguration::class.java)).isNotNull
 	}
 
 	@Test

@@ -19,14 +19,13 @@ package org.springframework.aot.hint.predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentLruCache;
 
 /**
  * Generator of {@link ResourceHints} predicates, testing whether the given hints
@@ -39,7 +38,7 @@ import org.springframework.util.ConcurrentLruCache;
  */
 public class ResourceHintsPredicates {
 
-	private static final ConcurrentLruCache<ResourcePatternHint, Pattern> CACHED_RESOURCE_PATTERNS = new ConcurrentLruCache<>(32, ResourcePatternHint::toRegex);
+	private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
 	ResourceHintsPredicates() {
 	}
@@ -100,26 +99,18 @@ public class ResourceHintsPredicates {
 		return hints -> {
 			AggregatedResourcePatternHints aggregatedResourcePatternHints = AggregatedResourcePatternHints.of(
 					hints.resources());
-			boolean isExcluded = aggregatedResourcePatternHints.excludes().stream().anyMatch(excluded ->
-					CACHED_RESOURCE_PATTERNS.get(excluded).matcher(resourceNameToUse).matches());
-			if (isExcluded) {
-				return false;
-			}
 			return aggregatedResourcePatternHints.includes().stream().anyMatch(included ->
-					CACHED_RESOURCE_PATTERNS.get(included).matcher(resourceNameToUse).matches());
+					PATH_MATCHER.match(included.getPattern(), resourceNameToUse));
 		};
 	}
 
-	private record AggregatedResourcePatternHints(List<ResourcePatternHint> includes, List<ResourcePatternHint> excludes) {
+	private record AggregatedResourcePatternHints(List<ResourcePatternHint> includes) {
 
 		static AggregatedResourcePatternHints of(ResourceHints resourceHints) {
 			List<ResourcePatternHint> includes = new ArrayList<>();
-			List<ResourcePatternHint> excludes = new ArrayList<>();
-			resourceHints.resourcePatternHints().forEach(resourcePatternHint -> {
-				includes.addAll(resourcePatternHint.getIncludes());
-				excludes.addAll(resourcePatternHint.getExcludes());
-			});
-			return new AggregatedResourcePatternHints(includes, excludes);
+			resourceHints.resourcePatternHints().forEach(resourcePatternHint ->
+					includes.addAll(resourcePatternHint.getIncludes()));
+			return new AggregatedResourcePatternHints(includes);
 		}
 
 	}

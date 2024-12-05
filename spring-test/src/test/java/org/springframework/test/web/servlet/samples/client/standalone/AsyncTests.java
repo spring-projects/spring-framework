@@ -118,16 +118,6 @@ class AsyncTests {
 	}
 
 	@Test
-	void listenableFuture() {
-		this.testClient.get()
-				.uri("/1?listenableFuture=true")
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON)
-				.expectBody().json("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}");
-	}
-
-	@Test
 	void completableFutureWithImmediateValue() {
 		this.testClient.get()
 				.uri("/1?completableFutureWithImmediateValue=true")
@@ -191,15 +181,6 @@ class AsyncTests {
 			DeferredResult<Person> result = new DeferredResult<>();
 			delay(100, () -> result.setErrorResult(new RuntimeException("Delayed Error")));
 			return result;
-		}
-
-		@GetMapping(params = "listenableFuture")
-		@SuppressWarnings({ "deprecation", "removal" })
-		org.springframework.util.concurrent.ListenableFuture<Person> getListenableFuture() {
-			org.springframework.util.concurrent.ListenableFutureTask<Person> futureTask =
-					new org.springframework.util.concurrent.ListenableFutureTask<>(() -> new Person("Joe"));
-			delay(100, futureTask);
-			return futureTask;
 		}
 
 		@GetMapping(params = "completableFutureWithImmediateValue")

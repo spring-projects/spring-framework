@@ -90,12 +90,10 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	@interface ParameterizedRestTemplateTest {
 	}
 
-	@SuppressWarnings("removal")
 	static Stream<Arguments> clientHttpRequestFactories() {
 		return Stream.of(
 			argumentSet("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),
 			argumentSet("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
-			argumentSet("OkHttp", new org.springframework.http.client.OkHttp3ClientHttpRequestFactory()),
 			argumentSet("Jetty", new JettyClientHttpRequestFactory()),
 			argumentSet("JDK HttpClient", new JdkClientHttpRequestFactory()),
 			argumentSet("Reactor Netty", new ReactorClientHttpRequestFactory())

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.ProviderUtil;
@@ -95,6 +96,11 @@ class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBea
 			actualName = emfName;
 			actualProps = properties;
 			return mockEmf;
+		}
+
+		@Override
+		public EntityManagerFactory createEntityManagerFactory(PersistenceConfiguration persistenceConfiguration) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

@@ -281,14 +281,10 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param returnType the declared return type (potentially a {@link Future} variant)
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
-	@SuppressWarnings("removal")
 	@Nullable
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
 			return executor.submitCompletable(task);
-		}
-		else if (org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((org.springframework.core.task.AsyncListenableTaskExecutor) executor).submitListenable(task);
 		}
 		else if (Future.class.isAssignableFrom(returnType)) {
 			return executor.submit(task);

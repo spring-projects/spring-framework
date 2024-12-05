@@ -2,7 +2,7 @@
 = Requirements
 :page-section-summary-toc: 1
 
-Spring Framework supports Kotlin 1.7+ and requires
+Spring Framework supports Kotlin 2.1+ and requires
 https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-stdlib[`kotlin-stdlib`]
 and https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotlin-reflect`]
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on

@@ -310,7 +310,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return new Object[] {event};
 	}
 
-	@SuppressWarnings({"removal", "unchecked", "deprecation"})
 	protected void handleResult(Object result) {
 		if (reactiveStreamsPresent && new ReactiveResultHandler().subscribeToPublisher(result)) {
 			if (logger.isTraceEnabled()) {
@@ -326,9 +325,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 					publishEvents(event);
 				}
 			});
-		}
-		else if (result instanceof org.springframework.util.concurrent.ListenableFuture<?> listenableFuture) {
-			listenableFuture.addCallback(this::publishEvents, this::handleAsyncError);
 		}
 		else {
 			publishEvents(result);

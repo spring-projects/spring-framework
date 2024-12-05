@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.web.jsf.el;
-
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
 
 import jakarta.el.ELContext;
 import jakarta.el.ELException;
@@ -127,12 +124,6 @@ public class SpringBeanFacesELResolver extends ELResolver {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	@Nullable
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, @Nullable Object base) {
-		return null;
 	}
 
 	@Override

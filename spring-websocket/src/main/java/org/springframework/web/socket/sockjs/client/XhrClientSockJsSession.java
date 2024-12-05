@@ -57,27 +57,6 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	/**
 	 * Create a new {@code XhrClientSockJsSession}.
-	 * @deprecated as of 6.0, in favor of
-	 * {@link #XhrClientSockJsSession(TransportRequest, WebSocketHandler, XhrTransport, CompletableFuture)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	public XhrClientSockJsSession(
-			TransportRequest request, WebSocketHandler handler, XhrTransport transport,
-			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
-
-		super(request, handler, connectFuture);
-		Assert.notNull(transport, "XhrTransport is required");
-		this.transport = transport;
-		this.headers = request.getHttpRequestHeaders();
-		this.sendHeaders = new HttpHeaders();
-		this.sendHeaders.putAll(this.headers);
-		this.sendHeaders.setContentType(MediaType.APPLICATION_JSON);
-		this.sendUrl = request.getSockJsUrlInfo().getTransportUrl(TransportType.XHR_SEND);
-	}
-
-	/**
-	 * Create a new {@code XhrClientSockJsSession}.
 	 * @since 6.0
 	 */
 	public XhrClientSockJsSession(TransportRequest request, WebSocketHandler handler,

@@ -56,6 +56,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 				"/org/springframework/orm/jpa/hibernate/inject-hibernate-spring-bean-container-tests.xml"};
 	}
 
+	@SuppressWarnings("deprecation")
 	private ManagedBeanRegistry getManagedBeanRegistry() {
 		SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 		ServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();

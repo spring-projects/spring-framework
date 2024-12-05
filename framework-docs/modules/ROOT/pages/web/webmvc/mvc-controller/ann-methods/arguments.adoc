@@ -30,8 +30,7 @@ and others) and is equivalent to `required=false`.
 
 | `jakarta.servlet.http.PushBuilder`
 | Servlet 4.0 push builder API for programmatic HTTP/2 resource pushes.
-  Note that, per the Servlet specification, the injected `PushBuilder` instance can be null if the client
-  does not support that HTTP/2 feature.
+  Note that this API has been deprecated as of Servlet 6.1.
 
 | `java.security.Principal`
 | Currently authenticated user -- possibly a specific `Principal` implementation class if known.

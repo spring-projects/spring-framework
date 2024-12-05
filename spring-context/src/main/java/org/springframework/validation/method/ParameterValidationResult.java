@@ -85,35 +85,6 @@ public class ParameterValidationResult {
 		this.sourceLookup = sourceLookup;
 	}
 
-	/**
-	 * Create a {@code ParameterValidationResult}.
-	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, BiFunction)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public ParameterValidationResult(
-			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors,
-			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
-
-		this(param, arg, errors, container, index, key, (error, sourceType) -> {
-			throw new IllegalArgumentException("No source object of the given type");
-		});
-	}
-
-	/**
-	 * Create a {@code ParameterValidationResult}.
-	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, BiFunction)}
-	 */
-	@Deprecated(since = "6.1.3", forRemoval = true)
-	public ParameterValidationResult(
-			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors) {
-
-		this(param, arg, errors, null, null, null, (error, sourceType) -> {
-			throw new IllegalArgumentException("No source object of the given type");
-		});
-	}
-
 
 	/**
 	 * The method parameter the validation results are for.

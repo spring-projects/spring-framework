@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,18 +134,6 @@ public final class MappedInterceptor implements HandlerInterceptor {
 		this(includePatterns, excludePatterns, new WebRequestHandlerInterceptorAdapter(interceptor));
 	}
 
-
-	/**
-	 * Get the include path patterns this interceptor is mapped to.
-	 * @see #getIncludePathPatterns()
-	 * @see #getExcludePathPatterns()
-	 * @deprecated since 6.1 in favor of {@link #getIncludePathPatterns()}
-	 */
-	@Nullable
-	@Deprecated(since = "6.1", forRemoval = true)
-	public String[] getPathPatterns() {
-		return getIncludePathPatterns();
-	}
 
 	/**
 	 * Get the include path patterns this interceptor is mapped to.

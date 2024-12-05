@@ -33,14 +33,10 @@ class JakartaAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		// javax.inject.Provider is omitted from the list, since we do not currently load
-		// it via reflection.
 		Stream.of(
 				"jakarta.inject.Inject",
 				"jakarta.inject.Provider",
-				"jakarta.inject.Qualifier",
-				"javax.inject.Inject",
-				"javax.inject.Qualifier"
+				"jakarta.inject.Qualifier"
 			).forEach(typeName -> hints.reflection().registerType(TypeReference.of(typeName)));
 	}
 

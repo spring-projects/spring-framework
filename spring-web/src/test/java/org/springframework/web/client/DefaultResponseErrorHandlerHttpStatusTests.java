@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -80,7 +82,8 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 		given(this.response.getStatusCode()).willReturn(httpStatus);
 		given(this.response.getHeaders()).willReturn(headers);
 
-		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> this.handler.handleError(this.response));
+		assertThatExceptionOfType(expectedExceptionClass)
+				.isThrownBy(() -> this.handler.handleError(URI.create("/"), HttpMethod.GET, this.response));
 	}
 
 	static Stream<Arguments> errorCodes() {

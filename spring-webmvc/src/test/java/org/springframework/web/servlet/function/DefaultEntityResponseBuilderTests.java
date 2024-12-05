@@ -48,6 +48,7 @@ class DefaultEntityResponseBuilderTests {
 
 	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
+
 	@Test
 	void fromObject() {
 		String body = "foo";
@@ -66,14 +67,12 @@ class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
 	void status() {
 		String body = "foo";
 		EntityResponse<String> result =
 				EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(result.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test

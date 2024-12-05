@@ -78,8 +78,7 @@ class BindingReflectionHintsRegistrarKotlinTests {
 	@Test
 	fun `Register reflection hints on declared methods for Kotlin class`() {
 		bindingRegistrar.registerReflectionHints(hints.reflection(), SampleClass::class.java)
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleClass::class.java)
-			.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)).accepts(hints)
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleClass::class.java)).accepts(hints)
 	}
 }
 

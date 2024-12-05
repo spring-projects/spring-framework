@@ -146,19 +146,6 @@ class DefaultTransportRequest implements TransportRequest {
 	}
 
 
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings({"deprecation", "removal"})
-	public void connect(WebSocketHandler handler,
-			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Starting " + this);
-		}
-		ListenableConnectCallback connectCallback = new ListenableConnectCallback(handler, future);
-		scheduleConnectTimeoutTask(connectCallback);
-		this.transport.connect(this, handler).addCallback(connectCallback);
-	}
-
 	public void connect(WebSocketHandler handler, CompletableFuture<WebSocketSession> future) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Starting " + this);
@@ -168,19 +155,6 @@ class DefaultTransportRequest implements TransportRequest {
 		this.transport.connectAsync(this, handler).whenComplete(connectCallback);
 	}
 
-
-	private void scheduleConnectTimeoutTask(ListenableConnectCallback connectHandler) {
-		if (this.timeoutScheduler != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Scheduling connect to time out after " + this.timeoutValue + " ms.");
-			}
-			Instant timeoutDate = Instant.now().plus(this.timeoutValue, ChronoUnit.MILLIS);
-			this.timeoutScheduler.schedule(connectHandler, timeoutDate);
-		}
-		else if (logger.isTraceEnabled()) {
-			logger.trace("Connect timeout task not scheduled (no TaskScheduler configured).");
-		}
-	}
 
 	private void scheduleConnectTimeoutTask(CompletableConnectCallback connectHandler) {
 		if (this.timeoutScheduler != null) {
@@ -201,83 +175,6 @@ class DefaultTransportRequest implements TransportRequest {
 		return "TransportRequest[url=" + getTransportUrl() + "]";
 	}
 
-
-	/**
-	 * Updates the given (global) future based success or failure to connect for
-	 * the entire SockJS request regardless of which transport actually managed
-	 * to connect. Also implements {@code Runnable} to handle a scheduled timeout
-	 * callback.
-	 */
-	@SuppressWarnings({"deprecation", "removal"})
-	private class ListenableConnectCallback implements
-			org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>, Runnable {
-
-		private final WebSocketHandler handler;
-
-		private final org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future;
-
-		private final AtomicBoolean handled = new AtomicBoolean();
-
-		public ListenableConnectCallback(WebSocketHandler handler,
-				org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
-			this.handler = handler;
-			this.future = future;
-		}
-
-		@Override
-		public void onSuccess(@Nullable WebSocketSession session) {
-			if (this.handled.compareAndSet(false, true)) {
-				this.future.set(session);
-			}
-			else if (logger.isErrorEnabled()) {
-				logger.error("Connect success/failure already handled for " + DefaultTransportRequest.this);
-			}
-		}
-
-		@Override
-		public void onFailure(Throwable ex) {
-			handleFailure(ex, false);
-		}
-
-		@Override
-		public void run() {
-			handleFailure(null, true);
-		}
-
-		private void handleFailure(@Nullable Throwable ex, boolean isTimeoutFailure) {
-			if (this.handled.compareAndSet(false, true)) {
-				if (isTimeoutFailure) {
-					String message = "Connect timed out for " + DefaultTransportRequest.this;
-					logger.error(message);
-					ex = new SockJsTransportFailureException(message, getSockJsUrlInfo().getSessionId(), ex);
-				}
-				if (fallbackRequest != null) {
-					logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.", ex);
-					fallbackRequest.connect(this.handler, this.future);
-				}
-				else {
-					logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
-					if (ex != null) {
-						this.future.setException(ex);
-					}
-				}
-				if (isTimeoutFailure) {
-					try {
-						for (Runnable runnable : timeoutTasks) {
-							runnable.run();
-						}
-					}
-					catch (Throwable ex2) {
-						logger.error("Transport failed to run timeout tasks for " + DefaultTransportRequest.this, ex2);
-					}
-				}
-			}
-			else {
-				logger.error("Connect success/failure events already took place for " +
-						DefaultTransportRequest.this + ". Ignoring this additional failure event.", ex);
-			}
-		}
-	}
 
 	/**
 	 * Updates the given (global) future based success or failure to connect for

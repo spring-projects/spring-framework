@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,6 @@ class RouterFunctionMappingTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
 	void mappedRequestShouldHoldAttributes() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
@@ -135,8 +134,6 @@ class RouterFunctionMappingTests {
 		PathPattern matchingPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 		assertThat(matchingPattern).isNotNull();
 		assertThat(matchingPattern.getPatternString()).isEqualTo("/match");
-		assertThat(org.springframework.web.filter.reactive.ServerHttpObservationFilter.findObservationContext(exchange))
-				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
 		assertThat(ServerRequestObservationContext.findCurrent(exchange.getAttributes()))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
 
@@ -147,11 +144,9 @@ class RouterFunctionMappingTests {
 		assertThat(handler).isEqualTo(handlerFunction);
 	}
 
-	@SuppressWarnings("removal")
 	private ServerWebExchange createExchange(String urlTemplate) {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(urlTemplate));
 		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
-		exchange.getAttributes().put(org.springframework.web.filter.reactive.ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		return exchange;
 	}

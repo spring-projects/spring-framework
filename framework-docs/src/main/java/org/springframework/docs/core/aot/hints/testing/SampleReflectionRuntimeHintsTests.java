@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.agent.EnabledIfRuntimeHintsAgent;
 import org.springframework.aot.test.agent.RuntimeHintsInvocations;
-import org.springframework.aot.test.agent.RuntimeHintsRecorder;
 import org.springframework.core.SpringVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // method is only enabled if the RuntimeHintsAgent is loaded on the current JVM.
 // It also tags tests with the "RuntimeHints" JUnit tag.
 @EnabledIfRuntimeHintsAgent
+@SuppressWarnings("removal")
 class SampleReflectionRuntimeHintsTests {
 
 	@Test
@@ -43,7 +43,7 @@ class SampleReflectionRuntimeHintsTests {
 				typeHint.withMethod("getVersion", List.of(), ExecutableMode.INVOKE));
 
 		// Invoke the relevant piece of code we want to test within a recording lambda
-		RuntimeHintsInvocations invocations = RuntimeHintsRecorder.record(() -> {
+		RuntimeHintsInvocations invocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
 			SampleReflection sample = new SampleReflection();
 			sample.performReflection();
 		});

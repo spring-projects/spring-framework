@@ -1,7 +1,8 @@
 /**
  * Sample package-info for testing purposes.
  */
-@TypeDef(name = "test", typeClass = Object.class)
+@TypeRegistration(basicClass = Object.class, userType = UserTypeLegacyBridge.class)
 package org.springframework.orm.jpa.domain2;
 
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeRegistration;
+import org.hibernate.usertype.UserTypeLegacyBridge;

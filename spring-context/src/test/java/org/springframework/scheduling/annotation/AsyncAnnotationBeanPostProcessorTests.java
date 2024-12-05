@@ -200,20 +200,6 @@ class AsyncAnnotationBeanPostProcessorTests {
 		assertFutureWithException(result, exceptionHandler);
 	}
 
-	@Test
-	@SuppressWarnings("resource")
-	public void handleExceptionWithListenableFuture() {
-		ConfigurableApplicationContext context =
-				new AnnotationConfigApplicationContext(ConfigWithExceptionHandler.class);
-		ITestBean testBean = context.getBean("target", ITestBean.class);
-
-		TestableAsyncUncaughtExceptionHandler exceptionHandler =
-				context.getBean("exceptionHandler", TestableAsyncUncaughtExceptionHandler.class);
-		assertThat(exceptionHandler.isCalled()).as("handler should not have been called yet").isFalse();
-		Future<Object> result = testBean.failWithListenableFuture();
-		assertFutureWithException(result, exceptionHandler);
-	}
-
 	private void assertFutureWithException(Future<Object> result,
 			TestableAsyncUncaughtExceptionHandler exceptionHandler) {
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
@@ -275,9 +261,6 @@ class AsyncAnnotationBeanPostProcessorTests {
 
 		Future<Object> failWithFuture();
 
-		@SuppressWarnings({"deprecation", "removal"})
-		org.springframework.util.concurrent.ListenableFuture<Object> failWithListenableFuture();
-
 		void failWithVoid();
 
 		void await(long timeout);
@@ -306,13 +289,6 @@ class AsyncAnnotationBeanPostProcessorTests {
 		@Override
 		public Future<Object> failWithFuture() {
 			throw new UnsupportedOperationException("failWithFuture");
-		}
-
-		@Async
-		@Override
-		@SuppressWarnings({"deprecation", "removal"})
-		public org.springframework.util.concurrent.ListenableFuture<Object> failWithListenableFuture() {
-			throw new UnsupportedOperationException("failWithListenableFuture");
 		}
 
 		@Async

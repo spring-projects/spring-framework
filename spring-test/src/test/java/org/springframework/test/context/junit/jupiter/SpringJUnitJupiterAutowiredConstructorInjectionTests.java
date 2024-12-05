@@ -57,15 +57,6 @@ class SpringJUnitJupiterAutowiredConstructorInjectionTests {
 		}
 	}
 
-	@Nested
-	class JavaxInjectTests extends BaseClass {
-
-		@javax.inject.Inject
-		JavaxInjectTests(ApplicationContext context, Person dilbert, Dog dog, @Value("${enigma}") Integer enigma) {
-			super(context, dilbert, dog, enigma);
-		}
-	}
-
 
 	@SpringJUnitConfig(TestConfig.class)
 	@TestPropertySource(properties = "enigma = 42")

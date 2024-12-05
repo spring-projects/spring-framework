@@ -320,13 +320,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		@Deprecated
-		@SuppressWarnings("removal")
-		public int rawStatusCode() {
-			return this.statusCode.value();
-		}
-
-		@Override
 		public final HttpHeaders headers() {
 			return this.headers;
 		}

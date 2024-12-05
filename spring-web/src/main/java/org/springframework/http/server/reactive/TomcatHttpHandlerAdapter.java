@@ -69,7 +69,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			AsyncContext asyncContext, ServletServerHttpRequest request) throws IOException {
 
 		return new TomcatServerHttpResponse(
-				response, asyncContext, getDataBufferFactory(), getBufferSize(), request);
+				response, asyncContext, getDataBufferFactory(), request);
 	}
 
 
@@ -129,9 +129,9 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		TomcatServerHttpResponse(HttpServletResponse response, AsyncContext context,
-				DataBufferFactory factory, int bufferSize, ServletServerHttpRequest request) throws IOException {
+				DataBufferFactory factory, ServletServerHttpRequest request) throws IOException {
 
-			super(createTomcatHttpHeaders(response), response, context, factory, bufferSize, request);
+			super(createTomcatHttpHeaders(response), response, context, factory, request);
 		}
 
 		private static HttpHeaders createTomcatHttpHeaders(HttpServletResponse response) {

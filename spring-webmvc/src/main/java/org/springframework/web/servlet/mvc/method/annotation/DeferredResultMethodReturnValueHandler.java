@@ -28,8 +28,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Handler for return values of type {@link DeferredResult},
- * {@link org.springframework.util.concurrent.ListenableFuture}, and
+ * Handler for return values of type {@link DeferredResult} and
  * {@link CompletionStage}.
  *
  * @author Rossen Stoyanchev
@@ -37,16 +36,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class DeferredResultMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@SuppressWarnings({"deprecation", "removal"})
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> type = returnType.getParameterType();
 		return (DeferredResult.class.isAssignableFrom(type) ||
-				org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(type) ||
 				CompletionStage.class.isAssignableFrom(type));
 	}
 
-	@SuppressWarnings({"deprecation", "removal"})
 	@Override
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
@@ -61,9 +57,6 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		if (returnValue instanceof DeferredResult<?> deferredResult) {
 			result = deferredResult;
 		}
-		else if (returnValue instanceof org.springframework.util.concurrent.ListenableFuture<?> listenableFuture) {
-			result = adaptListenableFuture(listenableFuture);
-		}
 		else if (returnValue instanceof CompletionStage<?> completionStage) {
 			result = adaptCompletionStage(completionStage);
 		}
@@ -73,22 +66,6 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		}
 
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result, mavContainer);
-	}
-
-	@SuppressWarnings({"deprecation", "removal"})
-	private DeferredResult<Object> adaptListenableFuture(org.springframework.util.concurrent.ListenableFuture<?> future) {
-		DeferredResult<Object> result = new DeferredResult<>();
-		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<Object>() {
-			@Override
-			public void onSuccess(@Nullable Object value) {
-				result.setResult(value);
-			}
-			@Override
-			public void onFailure(Throwable ex) {
-				result.setErrorResult(ex);
-			}
-		});
-		return result;
 	}
 
 	private DeferredResult<Object> adaptCompletionStage(CompletionStage<?> future) {

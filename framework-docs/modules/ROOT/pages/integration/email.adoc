@@ -11,9 +11,7 @@ Spring Framework's email support:
 * The https://jakartaee.github.io/mail-api/[Jakarta Mail] library
 
 This library is freely available on the web -- for example, in Maven Central as
-`com.sun.mail:jakarta.mail`. Please make sure to use the latest 2.x version (which uses
-the `jakarta.mail` package namespace) rather than Jakarta Mail 1.6.x (which uses the
-`javax.mail` package namespace).
+`org.eclipse.angus:angus-mail`.
 ****
 
 The Spring Framework provides a helpful utility library for sending email that shields

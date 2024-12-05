@@ -82,19 +82,6 @@ public interface MethodValidationResult {
 	List<ParameterValidationResult> getParameterValidationResults();
 
 	/**
-	 * Return all validation results. This includes both method parameters with
-	 * errors directly on them, and Object method parameters with nested errors
-	 * on their fields and properties.
-	 * @see #getValueResults()
-	 * @see #getBeanResults()
-	 * @deprecated deprecated in favor of {@link #getParameterValidationResults()}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	default List<ParameterValidationResult> getAllValidationResults() {
-		return getParameterValidationResults();
-	}
-
-	/**
 	 * Return the subset of {@link #getParameterValidationResults() allValidationResults}
 	 * that includes method parameters with validation errors directly on method
 	 * argument values. This excludes {@link #getBeanResults() beanResults} with

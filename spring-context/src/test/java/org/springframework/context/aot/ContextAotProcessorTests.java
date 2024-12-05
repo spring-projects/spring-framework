@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class ContextAotProcessorTests {
 			assertThat(directory.resolve(
 					"source/org/springframework/context/aot/ContextAotProcessorTests_SampleApplication__BeanFactoryRegistrations.java"))
 					.exists().isRegularFile();
-			assertThat(directory.resolve("resource/META-INF/native-image/com.example/example/reflect-config.json"))
+			assertThat(directory.resolve("resource/META-INF/native-image/com.example/example/reachability-metadata.json"))
 					.exists().isRegularFile();
 			Path nativeImagePropertiesFile = directory
 					.resolve("resource/META-INF/native-image/com.example/example/native-image.properties");

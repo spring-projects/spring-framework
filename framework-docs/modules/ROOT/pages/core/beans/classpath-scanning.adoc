@@ -674,9 +674,7 @@ By default, the `AnnotationBeanNameGenerator` is used. For Spring
 xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[stereotype annotations],
 if you supply a name via the annotation's `value` attribute that name will be used as
 the name in the corresponding bean definition. This convention also applies when the
-following JSR-250 and JSR-330 annotations are used instead of Spring stereotype
-annotations: `@jakarta.annotation.ManagedBean`, `@javax.annotation.ManagedBean`,
-`@jakarta.inject.Named`, and `@javax.inject.Named`.
+`@jakarta.inject.Named` annotation is used instead of Spring stereotype annotations.
 
 As of Spring Framework 6.1, the name of the annotation attribute that is used to specify
 the bean name is no longer required to be `value`. Custom stereotype annotations can

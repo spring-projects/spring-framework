@@ -67,15 +67,6 @@ public interface ServerResponse {
 	HttpStatusCode statusCode();
 
 	/**
-	 * Return the status code of this response as integer.
-	 * @return the status as an integer
-	 * @since 5.2
-	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	int rawStatusCode();
-
-	/**
 	 * Return the headers of this response.
 	 */
 	HttpHeaders headers();

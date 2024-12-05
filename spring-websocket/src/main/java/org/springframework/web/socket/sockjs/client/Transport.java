@@ -43,22 +43,6 @@ public interface Transport {
 	 * @param request the transport request
 	 * @param webSocketHandler the application handler to delegate lifecycle events to
 	 * @return a future to indicate success or failure to connect
-	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TransportRequest, WebSocketHandler)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
-			TransportRequest request, WebSocketHandler webSocketHandler) {
-
-		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
-				connectAsync(request, webSocketHandler));
-	}
-
-	/**
-	 * Connect the transport.
-	 * @param request the transport request
-	 * @param webSocketHandler the application handler to delegate lifecycle events to
-	 * @return a future to indicate success or failure to connect
 	 * @since 6.0
 	 */
 	CompletableFuture<WebSocketSession> connectAsync(TransportRequest request, WebSocketHandler webSocketHandler);

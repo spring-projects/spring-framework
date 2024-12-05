@@ -82,18 +82,6 @@ public class JsonPathExpectationsHelper {
 		this.configuration = (configuration != null) ? configuration : Configuration.defaultConfiguration();
 	}
 
-	/**
-	 * Construct a new {@code JsonPathExpectationsHelper}.
-	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
-	 * @param args arguments to parameterize the {@code JsonPath} expression with,
-	 * using formatting specifiers defined in {@link String#format(String, Object...)}
-	 * @deprecated in favor of calling {@link String#formatted(Object...)} upfront
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public JsonPathExpectationsHelper(String expression, Object... args) {
-		this(expression.formatted(args), (Configuration) null);
-	}
-
 
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}

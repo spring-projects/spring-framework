@@ -23,6 +23,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
@@ -52,7 +53,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "removal"})
 class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 
 	// Static fields set by inner class DummyPersistenceProvider
@@ -311,6 +312,11 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 		}
 
 		@Override
+		public EntityManagerFactory createEntityManagerFactory(PersistenceConfiguration persistenceConfiguration) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public ProviderUtil getProviderUtil() {
 			throw new UnsupportedOperationException();
 		}
@@ -356,6 +362,15 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 		@Override
 		public boolean isActive() {
 			return false;
+		}
+
+		@Override
+		public void setTimeout(Integer integer) {
+		}
+
+		@Override
+		public Integer getTimeout() {
+			return null;
 		}
 	}
 

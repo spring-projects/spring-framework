@@ -330,7 +330,7 @@ class WebExchangeDataBinderTests {
 	}
 
 
-	private static class MultipartDataClass {
+	static class MultipartDataClass {
 
 		private final FilePart part;
 
@@ -351,4 +351,5 @@ class WebExchangeDataBinderTests {
 			return nullablePart;
 		}
 	}
+
 }

@@ -55,24 +55,6 @@ public class PropertyPlaceholderHelper {
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 * @param valueSeparator the separating character between the placeholder variable
 	 * and the associated default value, if any
-	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
-	 * be ignored ({@code true}) or cause an exception ({@code false})
-	 * @deprecated as of 6.2, in favor of
-	 * {@link PropertyPlaceholderHelper#PropertyPlaceholderHelper(String, String, String, Character, boolean)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
-
-		this(placeholderPrefix, placeholderSuffix, valueSeparator, null, ignoreUnresolvablePlaceholders);
-	}
-
-	/**
-	 * Create a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
-	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
-	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
-	 * @param valueSeparator the separating character between the placeholder variable
-	 * and the associated default value, if any
 	 * @param escapeCharacter the escape character to use to ignore placeholder prefix
 	 * or value separator, if any
 	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
