@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.integration.jmx.jmxexporting
+package org.springframework.docs.integration.mailusagesimple
 
-// tag::snippet[]
-class JmxTestBean : IJmxTestBean {
-
-	override lateinit var name: String
-	override var age = 0
-
-	override fun add(x: Int, y: Int): Int {
-		return x + y
-	}
-
-	override fun dontExposeMe() {
-		throw RuntimeException()
-	}
-}
-// end::snippet[]
+data class Customer(
+	val emailAddress: String,
+	val firstName: String,
+	val lastName: String
+)

@@ -41,6 +41,13 @@ repositories {
 	}
 }
 
+// To avoid a redeclaration error with Kotlin compiler
+sourceSets {
+	main {
+		java.exclude("org/springframework/docs/**/*.java")
+	}
+}
+
 dependencies {
 	api(project(":spring-aspects"))
 	api(project(":spring-context"))
@@ -68,6 +75,7 @@ dependencies {
 	api("org.aspectj:aspectjweaver")
 	api("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
 	api("org.jetbrains.kotlin:kotlin-stdlib")
+	api("jakarta.websocket:jakarta.websocket-api")
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")

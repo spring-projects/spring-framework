@@ -31,11 +31,11 @@ class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure(dataSour
 				cs: CallableStatement, colIndx: Int, _: Int, _: String? ->
 				val struct = cs.getObject(colIndx) as Struct
 				val attr = struct.attributes
-				val item = TestItem()
-				item.id = (attr[0] as Number).toLong()
-				item.description = attr[1] as String
-				item.expirationDate = attr[2] as Date
-				item
+				TestItem(
+					(attr[0] as Number).toLong(),
+					attr[1] as String,
+					attr[2] as Date
+				)
 			})
 		// ...
 	}

@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.integration.jmx.jmxexporting
+package org.springframework.docs.core.beans.dependencies.beansfactorylazyinit
 
-// tag::snippet[]
-class JmxTestBean : IJmxTestBean {
-
-	override lateinit var name: String
-	override var age = 0
-
-	override fun add(x: Int, y: Int): Int {
-		return x + y
-	}
-
-	override fun dontExposeMe() {
-		throw RuntimeException()
-	}
+class AnotherBean {
 }
-// end::snippet[]

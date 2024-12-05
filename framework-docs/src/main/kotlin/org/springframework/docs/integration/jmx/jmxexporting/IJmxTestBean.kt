@@ -16,18 +16,10 @@
 
 package org.springframework.docs.integration.jmx.jmxexporting
 
-// tag::snippet[]
-class JmxTestBean : IJmxTestBean {
+interface IJmxTestBean {
 
-	override lateinit var name: String
-	override var age = 0
-
-	override fun add(x: Int, y: Int): Int {
-		return x + y
-	}
-
-	override fun dontExposeMe() {
-		throw RuntimeException()
-	}
+	var name: String
+	var age: Int
+	fun add(x: Int, y: Int): Int
+	fun dontExposeMe()
 }
-// end::snippet[]

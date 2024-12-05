@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.integration.jmx.jmxexporting
 
-// tag::snippet[]
-class JmxTestBean : IJmxTestBean {
+package org.springframework.docs.core.expressions.expressionsbeandef
 
-	override lateinit var name: String
-	override var age = 0
-
-	override fun add(x: Int, y: Int): Int {
-		return x + y
-	}
-
-	override fun dontExposeMe() {
-		throw RuntimeException()
-	}
+class MovieFinder {
 }
-// end::snippet[]

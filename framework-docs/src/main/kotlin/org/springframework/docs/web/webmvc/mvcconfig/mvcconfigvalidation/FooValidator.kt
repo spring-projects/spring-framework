@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.integration.jmx.jmxexporting
+package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigvalidation
 
-// tag::snippet[]
-class JmxTestBean : IJmxTestBean {
+import org.springframework.validation.Errors
+import org.springframework.validation.Validator
 
-	override lateinit var name: String
-	override var age = 0
+class FooValidator : Validator {
+	override fun supports(clazz: Class<*>) = false
 
-	override fun add(x: Int, y: Int): Int {
-		return x + y
-	}
-
-	override fun dontExposeMe() {
-		throw RuntimeException()
+	override fun validate(target: Any, errors: Errors) {
 	}
 }
-// end::snippet[]
