@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -93,12 +94,15 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		Set<String> generatedBeanNames = new HashSet<>();
 		for (BeanOverrideHandler handler : this.beanOverrideHandlers) {
-			registerBeanOverride(beanFactory, handler);
+			registerBeanOverride(beanFactory, handler, generatedBeanNames);
 		}
 	}
 
-	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler) {
+	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
+			Set<String> generatedBeanNames) {
+
 		String beanName = handler.getBeanName();
 		Field field = handler.getField();
 		Assert.state(!BeanFactoryUtils.isFactoryDereference(beanName),() -> """
@@ -107,14 +111,14 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 					beanName, field.getDeclaringClass().getSimpleName(), field.getName()));
 
 		switch (handler.getStrategy()) {
-			case REPLACE -> replaceOrCreateBean(beanFactory, handler, true);
-			case REPLACE_OR_CREATE -> replaceOrCreateBean(beanFactory, handler, false);
+			case REPLACE -> replaceOrCreateBean(beanFactory, handler, generatedBeanNames, true);
+			case REPLACE_OR_CREATE -> replaceOrCreateBean(beanFactory, handler, generatedBeanNames, false);
 			case WRAP -> wrapBean(beanFactory, handler);
 		}
 	}
 
 	private void replaceOrCreateBean(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
-			boolean requireExistingBean) {
+			Set<String> generatedBeanNames, boolean requireExistingBean) {
 
 		// NOTE: This method supports 3 distinct scenarios which must be accounted for.
 		//
@@ -134,7 +138,15 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
 			beanName = getBeanNameForType(beanFactory, handler, requireExistingBean);
-			if (beanName != null) {
+			// If the generatedBeanNames set already contains the beanName that we
+			// just found by-type, that means we are experiencing a "phantom read"
+			// (i.e., we found a bean that was not previously there). Consequently,
+			// we cannot "override the override", because we would lose one of the
+			// overrides. Instead, we must create a new override for the current
+			// handler. For example, if one handler creates an override for a SubType
+			// and a subsequent handler creates an override for a SuperType of that
+			// SubType, we must end up with overrides for both SuperType and SubType.
+			if (beanName != null && !generatedBeanNames.contains(beanName)) {
 				// 1) We are overriding an existing bean by-type.
 				beanName = BeanFactoryUtils.transformedBeanName(beanName);
 				// If we are overriding a manually registered singleton, we won't find
@@ -197,6 +209,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			// Generate a name for the nonexistent bean.
 			if (PSEUDO_BEAN_NAME_PLACEHOLDER.equals(beanName)) {
 				beanName = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
+				generatedBeanNames.add(beanName);
 			}
 
 			registry.registerBeanDefinition(beanName, pseudoBeanDefinition);

@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +42,7 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	public BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		Set<BeanOverrideHandler> handlers = new HashSet<>();
+		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>();
 		findBeanOverrideHandler(testClass, handlers);
 		if (handlers.isEmpty()) {
 			return null;
