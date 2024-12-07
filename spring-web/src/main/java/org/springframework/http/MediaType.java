@@ -58,7 +58,7 @@ public class MediaType extends MimeType implements Serializable {
 	private static final long serialVersionUID = 2069937152339670231L;
 
 	/**
-	 * Public constant media type that includes all media ranges (i.e. "&#42;/&#42;").
+	 * Public constant media type that includes all media ranges (i.e&#x2e; "&#42;/&#42;").
 	 */
 	public static final MediaType ALL;
 
