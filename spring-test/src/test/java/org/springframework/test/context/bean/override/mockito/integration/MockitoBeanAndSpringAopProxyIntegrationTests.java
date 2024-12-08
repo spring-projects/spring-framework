@@ -18,7 +18,6 @@ package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cache.CacheManager;
@@ -39,6 +38,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
 
 /**
  * Tests for {@link MockitoBean @MockitoBean} used in combination with Spring AOP.
@@ -69,7 +69,7 @@ class MockitoBeanAndSpringAopProxyIntegrationTests {
 	@RepeatedTest(2)
 	void mockShouldNotBeAnAopProxy() {
 		assertThat(AopUtils.isAopProxy(dateService)).as("is Spring AOP proxy").isFalse();
-		assertThat(Mockito.mockingDetails(dateService).isMock()).as("is Mockito mock").isTrue();
+		assertIsMock(dateService);
 
 		given(dateService.getDate(false)).willReturn(1L);
 		Long date = dateService.getDate(false);

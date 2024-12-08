@@ -19,7 +19,6 @@ package org.springframework.test.context.bean.override.mockito;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.mockito.MockitoAssertions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,7 +59,7 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 	void fieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+				.satisfies(MockitoAssertions::assertIsMock)
 				.isSameAs(this.field)
 				.isSameAs(this.renamed1);
 
@@ -71,7 +71,7 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 	void fieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
 		assertThat(ctx.getBean("nonExistingBean"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+				.satisfies(MockitoAssertions::assertIsMock)
 				.isSameAs(this.nonExisting1);
 
 		assertThat(this.nonExisting1.greeting()).as("mocked greeting").isNull();
@@ -86,7 +86,7 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 		void fieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+					.satisfies(MockitoAssertions::assertIsMock)
 					.isSameAs(nestedField)
 					.isSameAs(renamed2);
 		}
@@ -95,7 +95,7 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 		void fieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedNonExistingBean"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+					.satisfies(MockitoAssertions::assertIsMock)
 					.isSameAs(nonExisting2);
 		}
 	}

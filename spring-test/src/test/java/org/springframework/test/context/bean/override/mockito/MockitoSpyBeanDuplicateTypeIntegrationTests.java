@@ -19,7 +19,6 @@ package org.springframework.test.context.bean.override.mockito;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.MockingDetails;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +28,7 @@ import org.springframework.test.context.bean.override.example.RealExampleService
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mockingDetails;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsSpy;
 
 /**
  * Integration tests for duplicate {@link MockitoSpyBean @MockitoSpyBean}
@@ -58,8 +57,7 @@ public class MockitoSpyBeanDuplicateTypeIntegrationTests {
 		assertThat(service1).isSameAs(service2);
 		assertThat(services).containsExactly(service1);
 
-		MockingDetails mockingDetails = mockingDetails(service1);
-		assertThat(mockingDetails.isSpy()).as("isSpy(field1)").isTrue();
+		assertIsSpy(service1, "service1");
 	}
 
 
