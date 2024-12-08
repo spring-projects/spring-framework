@@ -77,17 +77,6 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	}
 
 	/**
-	 * Delegates to {@link #getHeaders()}.
-	 * @since 5.1.13
-	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
-	 */
-	@Deprecated(since = "6.0")
-	@Override
-	public HttpHeaders getResponseHeaders() {
-		return getHeaders();
-	}
-
-	/**
 	 * Return the HTTP method for the failed request.
 	 */
 	public String getHttpMethod() {

@@ -17,8 +17,6 @@
 package org.springframework.http;
 
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
@@ -35,17 +33,13 @@ import static org.springframework.http.ContentDisposition.parse;
  */
 class ContentDispositionTests {
 
-	private static final DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
-
-	@SuppressWarnings("deprecation")
 	@Test
 	void parseFilenameQuoted() {
-		assertThat(parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123"))
+		assertThat(parse("form-data; name=\"foo\"; filename=\"foo.txt\""))
 				.isEqualTo(ContentDisposition.formData()
 						.name("foo")
 						.filename("foo.txt")
-						.size(123L)
 						.build());
 	}
 
@@ -177,49 +171,12 @@ class ContentDispositionTests {
 		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"D:\\\\foo\\\\bar.txt\"");
 	}
 
-
-	@SuppressWarnings("deprecation")
 	@Test
 	void parseWithExtraSemicolons() {
-		assertThat(parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123"))
+		assertThat(parse("form-data; name=\"foo\";; ; filename=\"foo.txt\";"))
 				.isEqualTo(ContentDisposition.formData()
 						.name("foo")
 						.filename("foo.txt")
-						.size(123L)
-						.build());
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	void parseDates() {
-		ZonedDateTime creationTime = ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter);
-		ZonedDateTime modificationTime = ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter);
-		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
-
-		assertThat(
-				parse("attachment; " +
-						"creation-date=\"" + creationTime.format(formatter) + "\"; " +
-						"modification-date=\"" + modificationTime.format(formatter) + "\"; " +
-						"read-date=\"" + readTime.format(formatter) + "\"")).isEqualTo(
-				ContentDisposition.attachment()
-						.creationDate(creationTime)
-						.modificationDate(modificationTime)
-						.readDate(readTime)
-						.build());
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	void parseIgnoresInvalidDates() {
-		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
-
-		assertThat(
-				parse("attachment; " +
-						"creation-date=\"-1\"; " +
-						"modification-date=\"-1\"; " +
-						"read-date=\"" + readTime.format(formatter) + "\"")).isEqualTo(
-				ContentDisposition.attachment()
-						.readDate(readTime)
 						.build());
 	}
 
@@ -238,16 +195,14 @@ class ContentDispositionTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse("foo;bar"));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	void format() {
 		assertThat(
 				ContentDisposition.formData()
 						.name("foo")
 						.filename("foo.txt")
-						.size(123L)
 						.build().toString())
-				.isEqualTo("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123");
+				.isEqualTo("form-data; name=\"foo\"; filename=\"foo.txt\"");
 	}
 
 	@Test

@@ -168,14 +168,4 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 		return headers;
 	}
 
-	/**
-	 * Delegates to {@link #getHeaders()}.
-	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
-	 */
-	@Deprecated(since = "6.0")
-	@Override
-	public HttpHeaders getResponseHeaders() {
-		return getHeaders();
-	}
-
 }

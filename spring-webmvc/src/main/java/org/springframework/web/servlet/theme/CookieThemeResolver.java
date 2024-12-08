@@ -39,9 +39,10 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 17.06.2003
  * @see #setThemeName
- * @deprecated as of 6.0 in favor of using CSS, without direct replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement for removal in 7.1
  */
-@Deprecated(since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class CookieThemeResolver extends CookieGenerator implements ThemeResolver {
 
 	/**

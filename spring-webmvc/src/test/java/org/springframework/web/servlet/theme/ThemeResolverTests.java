@@ -66,6 +66,7 @@ public class ThemeResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void cookieThemeResolver() {
 		internalTest(new CookieThemeResolver(), true, AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
 	}
