@@ -524,6 +524,9 @@ public abstract class JdbcUtils {
 			if (Character.isUpperCase(c)) {
 				result.append('_').append(Character.toLowerCase(c));
 			}
+			else if (Character.isDigit(c) && !Character.isDigit(name.charAt(i - 1))) {
+				result.append('_').append(c);
+			}
 			else {
 				result.append(c);
 			}
