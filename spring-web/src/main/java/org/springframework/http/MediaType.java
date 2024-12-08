@@ -58,7 +58,7 @@ public class MediaType extends MimeType implements Serializable {
 	private static final long serialVersionUID = 2069937152339670231L;
 
 	/**
-	 * Public constant media type that includes all media ranges (i.e. "&#42;/&#42;").
+	 * Media type for "&#42;/&#42;", including all media ranges.
 	 */
 	public static final MediaType ALL;
 
@@ -68,7 +68,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String ALL_VALUE = "*/*";
 
 	/**
-	 *  Public constant media type for {@code application/atom+xml}.
+	 * Media type for {@code application/atom+xml}.
 	 */
 	public static final MediaType APPLICATION_ATOM_XML;
 
@@ -78,7 +78,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
 
 	/**
-	 * Public constant media type for {@code application/cbor}.
+	 * Media type for {@code application/cbor}.
 	 * @since 5.2
 	 */
 	public static final MediaType APPLICATION_CBOR;
@@ -90,7 +90,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_CBOR_VALUE = "application/cbor";
 
 	/**
-	 * Public constant media type for {@code application/x-www-form-urlencoded}.
+	 * Media type for {@code application/x-www-form-urlencoded}.
 	 */
 	public static final MediaType APPLICATION_FORM_URLENCODED;
 
@@ -100,7 +100,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
 
 	/**
-	 * Public constant media type for {@code application/graphql-response+json}.
+	 * Media type for {@code application/graphql-response+json}.
 	 * @since 6.0.3
 	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
 	 */
@@ -114,7 +114,7 @@ public class MediaType extends MimeType implements Serializable {
 
 
 	/**
-	 * Public constant media type for {@code application/json}.
+	 * Media type for {@code application/json}.
 	 */
 	public static final MediaType APPLICATION_JSON;
 
@@ -125,7 +125,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_JSON_VALUE = "application/json";
 
 	/**
-	 * Public constant media type for {@code application/json;charset=UTF-8}.
+	 * Media type for {@code application/json;charset=UTF-8}.
 	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_JSON}
 	 * since major browsers like Chrome
 	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
@@ -147,7 +147,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
-	 * Public constant media type for {@code application/octet-stream}.
+	 * Media type for {@code application/octet-stream}.
 	 */
 	public static final MediaType APPLICATION_OCTET_STREAM;
 
@@ -157,7 +157,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
 
 	/**
-	 * Public constant media type for {@code application/pdf}.
+	 * Media type for {@code application/pdf}.
 	 * @since 4.3
 	 */
 	public static final MediaType APPLICATION_PDF;
@@ -169,7 +169,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PDF_VALUE = "application/pdf";
 
 	/**
-	 * Public constant media type for {@code application/problem+json}.
+	 * Media type for {@code application/problem+json}.
 	 * @since 5.0
 	 * @see <a href="https://www.iana.org/assignments/media-types/application/problem+json">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
@@ -183,7 +183,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
 
 	/**
-	 * Public constant media type for {@code application/problem+json}.
+	 * Media type for {@code application/problem+json}.
 	 * @since 5.0
 	 * @see <a href="https://www.iana.org/assignments/media-types/application/problem+json">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
@@ -209,7 +209,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
 
 	/**
-	 * Public constant media type for {@code application/problem+xml}.
+	 * Media type for {@code application/problem+xml}.
 	 * @since 5.0
 	 * @see <a href="https://www.iana.org/assignments/media-types/application/problem+xml">
 	 *     Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
@@ -223,7 +223,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	/**
-	 * Public constant media type for {@code application/x-protobuf}.
+	 * Media type for {@code application/x-protobuf}.
 	 * @since 6.0
 	 */
 	public static final MediaType APPLICATION_PROTOBUF;
@@ -235,7 +235,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PROTOBUF_VALUE = "application/x-protobuf";
 
 	/**
-	 * Public constant media type for {@code application/rss+xml}.
+	 * Media type for {@code application/rss+xml}.
 	 * @since 4.3.6
 	 */
 	public static final MediaType APPLICATION_RSS_XML;
@@ -247,7 +247,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
 
 	/**
-	 * Public constant media type for {@code application/x-ndjson}.
+	 * Media type for {@code application/x-ndjson}.
 	 * @since 5.3
 	 */
 	public static final MediaType APPLICATION_NDJSON;
@@ -259,7 +259,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_NDJSON_VALUE = "application/x-ndjson";
 
 	/**
-	 * Public constant media type for {@code application/stream+json}.
+	 * Media type for {@code application/stream+json}.
 	 * @since 5.0
 	 * @deprecated as of 5.3, see notice on {@link #APPLICATION_STREAM_JSON_VALUE}.
 	 */
@@ -279,7 +279,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
 
 	/**
-	 * Public constant media type for {@code application/xhtml+xml}.
+	 * Media type for {@code application/xhtml+xml}.
 	 */
 	public static final MediaType APPLICATION_XHTML_XML;
 
@@ -289,7 +289,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
 
 	/**
-	 * Public constant media type for {@code application/xml}.
+	 * Media type for {@code application/xml}.
 	 */
 	public static final MediaType APPLICATION_XML;
 
@@ -299,7 +299,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_XML_VALUE = "application/xml";
 
 	/**
-	 * Public constant media type for {@code application/yaml}.
+	 * Media type for {@code application/yaml}.
 	 * @since 6.2
 	 */
 	public static final MediaType APPLICATION_YAML;
@@ -311,7 +311,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_YAML_VALUE = "application/yaml";
 
 	/**
-	 * Public constant media type for {@code image/gif}.
+	 * Media type for {@code image/gif}.
 	 */
 	public static final MediaType IMAGE_GIF;
 
@@ -321,7 +321,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String IMAGE_GIF_VALUE = "image/gif";
 
 	/**
-	 * Public constant media type for {@code image/jpeg}.
+	 * Media type for {@code image/jpeg}.
 	 */
 	public static final MediaType IMAGE_JPEG;
 
@@ -331,7 +331,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String IMAGE_JPEG_VALUE = "image/jpeg";
 
 	/**
-	 * Public constant media type for {@code image/png}.
+	 * Media type for {@code image/png}.
 	 */
 	public static final MediaType IMAGE_PNG;
 
@@ -341,7 +341,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String IMAGE_PNG_VALUE = "image/png";
 
 	/**
-	 * Public constant media type for {@code multipart/form-data}.
+	 * Media type for {@code multipart/form-data}.
 	 */
 	public static final MediaType MULTIPART_FORM_DATA;
 
@@ -351,7 +351,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
 
 	/**
-	 * Public constant media type for {@code multipart/mixed}.
+	 * Media type for {@code multipart/mixed}.
 	 * @since 5.2
 	 */
 	public static final MediaType MULTIPART_MIXED;
@@ -363,7 +363,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
 
 	/**
-	 * Public constant media type for {@code multipart/related}.
+	 * Media type for {@code multipart/related}.
 	 * @since 5.2.5
 	 */
 	public static final MediaType MULTIPART_RELATED;
@@ -375,7 +375,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_RELATED_VALUE = "multipart/related";
 
 	/**
-	 * Public constant media type for {@code text/event-stream}.
+	 * Media type for {@code text/event-stream}.
 	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
@@ -388,7 +388,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
 
 	/**
-	 * Public constant media type for {@code text/html}.
+	 * Media type for {@code text/html}.
 	 */
 	public static final MediaType TEXT_HTML;
 
@@ -398,7 +398,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String TEXT_HTML_VALUE = "text/html";
 
 	/**
-	 * Public constant media type for {@code text/markdown}.
+	 * Media type for {@code text/markdown}.
 	 * @since 4.3
 	 */
 	public static final MediaType TEXT_MARKDOWN;
@@ -410,7 +410,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String TEXT_MARKDOWN_VALUE = "text/markdown";
 
 	/**
-	 * Public constant media type for {@code text/plain}.
+	 * Media type for {@code text/plain}.
 	 */
 	public static final MediaType TEXT_PLAIN;
 
@@ -420,7 +420,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String TEXT_PLAIN_VALUE = "text/plain";
 
 	/**
-	 * Public constant media type for {@code text/xml}.
+	 * Media type for {@code text/xml}.
 	 */
 	public static final MediaType TEXT_XML;
 
