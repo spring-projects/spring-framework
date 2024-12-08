@@ -22,9 +22,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -179,6 +183,26 @@ class ResourceRegionHttpMessageConverterTests {
 		assertThat(ranges[13]).isEqualTo("Content-Type: text/plain");
 		assertThat(ranges[14]).isEqualTo("Content-Range: bytes 20-29/39");
 		assertThat(ranges[15]).isEqualTo("t resource");
+	}
+
+	@Test
+	void testSingleResourceRegionSupportsRepeatableWrites() {
+		ResourceRegion region = mock(ResourceRegion.class);
+		assertThat(converter.supportsRepeatableWrites(region)).isTrue();
+	}
+
+	@ParameterizedTest
+	@MethodSource("regionCollections")
+	void testCollectionOfResourceRegionSupportsRepeatableWrites(Object regionCollection, boolean expected) {
+		assertThat(converter.supportsRepeatableWrites(regionCollection)).isEqualTo(expected);
+	}
+
+	static Stream<Arguments> regionCollections() {
+		return Stream.of(
+				Arguments.of(Collections.emptyList(), true),
+				Arguments.of(Collections.singletonList(mock(ResourceRegion.class)), true),
+				Arguments.of(List.of(mock(ResourceRegion.class), mock(ResourceRegion.class)), true)
+		);
 	}
 
 	@Test // SPR-15041

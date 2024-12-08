@@ -140,19 +140,15 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 	@Override
 	protected boolean supportsRepeatableWrites(Object object) {
-		if (object instanceof ResourceRegion resourceRegion) {
-			return supportsRepeatableWrites(resourceRegion);
-		}
-		else {
-			@SuppressWarnings("unchecked")
-			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
-			for (ResourceRegion region : regions) {
-				if (!supportsRepeatableWrites(region)) {
-					return false;
-				}
-			}
-			return true;
-		}
+		return (object instanceof ResourceRegion resourceRegion) ?
+				supportsRepeatableWrites(resourceRegion) :
+				supportsRepeatableWritesInRegionCollection(object);
+	}
+
+	private boolean supportsRepeatableWritesInRegionCollection(Object object) {
+		@SuppressWarnings("unchecked")
+		Collection<ResourceRegion> resourceRegions = (Collection<ResourceRegion>) object;
+		return resourceRegions.stream().allMatch(this::supportsRepeatableWrites);
 	}
 
 	private boolean supportsRepeatableWrites(ResourceRegion region) {
