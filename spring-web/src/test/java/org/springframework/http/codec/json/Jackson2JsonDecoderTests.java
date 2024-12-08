@@ -53,7 +53,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
@@ -77,11 +76,9 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 	@Override
 	@Test
-	@SuppressWarnings("deprecation")
 	public void canDecode() {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_NDJSON)).isTrue();
-		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_STREAM_JSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
 
 		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isFalse();
