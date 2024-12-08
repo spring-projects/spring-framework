@@ -20,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
 
 /**
  * Tests for {@link MockitoBean @MockitoBean} where the mocked interface has an
@@ -56,7 +56,7 @@ public class MockitoBeanAndAsyncInterfaceMethodIntegrationTests {
 	@Test
 	void mockedMethodsAreNotAsync() throws Exception {
 		assertThat(AopUtils.isAopProxy(transformer)).as("is Spring AOP proxy").isFalse();
-		assertThat(Mockito.mockingDetails(transformer).isMock()).as("is Mockito mock").isTrue();
+		assertIsMock(transformer);
 
 		given(transformer.transform("foo")).willReturn(completedFuture("bar"));
 		assertThat(service.transform("foo")).isEqualTo("result: bar");

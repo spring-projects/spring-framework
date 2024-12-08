@@ -21,28 +21,31 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.example.ExampleService;
+import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsSpy;
 
 /**
- * Integration tests for {@link MockitoBean @MockitoBean} where duplicate mocks
- * are created for the same nonexistent type.
+ * Integration tests for duplicate {@link MockitoSpyBean @MockitoSpyBean}
+ * declarations for the same target bean, selected by-type.
  *
  * @author Sam Brannen
  * @since 6.2.1
- * @see <a href="https://github.com/spring-projects/spring-framework/issues/34025">gh-34025</a>
- * @see MockitoSpyBeanDuplicateTypeIntegrationTests
+ * @see MockitoBeanDuplicateTypeIntegrationTests
  * @see MockitoSpyBeanDuplicateTypeAndNameIntegrationTests
  */
 @SpringJUnitConfig
-public class MockitoBeanDuplicateTypeIntegrationTests {
+public class MockitoSpyBeanDuplicateTypeIntegrationTests {
 
-	@MockitoBean
+	@MockitoSpyBean
 	ExampleService service1;
 
-	@MockitoBean
+	@MockitoSpyBean
 	ExampleService service2;
 
 	@Autowired
@@ -50,9 +53,21 @@ public class MockitoBeanDuplicateTypeIntegrationTests {
 
 
 	@Test
-	void duplicateMocksShouldHaveBeenCreated() {
-		assertThat(service1).isNotSameAs(service2);
-		assertThat(services).hasSize(2);
+	void test() {
+		assertThat(service1).isSameAs(service2);
+		assertThat(services).containsExactly(service1);
+
+		assertIsSpy(service1, "service1");
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class Config {
+
+		@Bean
+		ExampleService exampleService() {
+			return new RealExampleService("@Bean");
+		}
 	}
 
 }
