@@ -166,6 +166,14 @@ public enum MemberCategory {
 	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
-	DECLARED_CLASSES
+	DECLARED_CLASSES,
+
+	/**
+	 * A category that represents the need for
+	 * {@link sun.misc.Unsafe#allocateInstance(Class) unsafe allocation}
+	 * for this type.
+	 * @since 6.2.1
+	 */
+	UNSAFE_ALLOCATED
 
 }

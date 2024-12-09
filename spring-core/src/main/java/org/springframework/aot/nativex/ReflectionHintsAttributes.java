@@ -129,6 +129,9 @@ class ReflectionHintsAttributes {
 						case INVOKE_PUBLIC_METHODS -> attributes.put("allPublicMethods", true);
 						case INVOKE_DECLARED_METHODS ->
 								attributes.put("allDeclaredMethods", true);
+						case PUBLIC_CLASSES -> attributes.put("allPublicClasses", true);
+						case DECLARED_CLASSES -> attributes.put("allDeclaredClasses", true);
+						case UNSAFE_ALLOCATED -> attributes.put("unsafeAllocated", true);
 					}
 				}
 		);

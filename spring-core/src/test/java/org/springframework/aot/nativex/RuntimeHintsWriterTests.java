@@ -84,7 +84,8 @@ class RuntimeHintsWriterTests {
 					.onReachableType(String.class)
 					.withMembers(MemberCategory.INVOKE_PUBLIC_FIELDS, MemberCategory.INVOKE_DECLARED_FIELDS,
 							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS)
+							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
+							MemberCategory.UNSAFE_ALLOCATED)
 					.withField("DEFAULT_CHARSET")
 					.withField("defaultCharset")
 					.withField("aScore")
@@ -101,6 +102,7 @@ class RuntimeHintsWriterTests {
 							"allDeclaredConstructors": true,
 							"allPublicMethods": true,
 							"allDeclaredMethods": true,
+							"unsafeAllocated": true,
 							"fields": [
 								{ "name": "aScore" },
 								{ "name": "DEFAULT_CHARSET" },
