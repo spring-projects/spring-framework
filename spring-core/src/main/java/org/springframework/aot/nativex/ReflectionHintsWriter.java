@@ -124,6 +124,7 @@ class ReflectionHintsWriter {
 								attributes.put("allDeclaredMethods", true);
 						case PUBLIC_CLASSES -> attributes.put("allPublicClasses", true);
 						case DECLARED_CLASSES -> attributes.put("allDeclaredClasses", true);
+						case UNSAFE_ALLOCATED -> attributes.put("unsafeAllocated", true);
 					}
 				}
 		);

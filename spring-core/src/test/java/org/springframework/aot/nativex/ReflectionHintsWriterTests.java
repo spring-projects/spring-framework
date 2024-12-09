@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ class ReflectionHintsWriterTests {
 						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
-						MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
+						MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES, MemberCategory.UNSAFE_ALLOCATED)
 				.withField("DEFAULT_CHARSET")
 				.withField("defaultCharset")
 				.withField("aScore")
@@ -83,6 +83,7 @@ class ReflectionHintsWriterTests {
 						"allDeclaredMethods": true,
 						"allPublicClasses": true,
 						"allDeclaredClasses": true,
+						"unsafeAllocated": true,
 						"fields": [
 							{ "name": "aScore" },
 							{ "name": "DEFAULT_CHARSET" },

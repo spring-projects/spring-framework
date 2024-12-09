@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,14 @@ public enum MemberCategory {
 	 * reflection for inner classes but rather makes sure they are available
 	 * via a call to {@link Class#getDeclaredClasses}.
 	 */
-	DECLARED_CLASSES
+	DECLARED_CLASSES,
+
+	/**
+	 * A category that represents the need for
+	 * {@link sun.misc.Unsafe#allocateInstance(Class) unsafe allocation}
+	 * for this type.
+	 * @since 6.2.1
+	 */
+	UNSAFE_ALLOCATED
 
 }
