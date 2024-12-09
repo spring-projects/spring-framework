@@ -19,18 +19,20 @@ package org.springframework.test.context.bean.override;
 import java.util.Collections;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyBeanOverrideHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link BeanOverrideContextCustomizerFactory}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
+ * @since 6.2
  */
 class BeanOverrideContextCustomizerFactoryTests {
 
@@ -65,6 +67,15 @@ class BeanOverrideContextCustomizerFactoryTests {
 				.hasSize(2);
 	}
 
+	@Test  // gh-34054
+	void failsWithDuplicateBeanOverrides() {
+		Class<?> testClass = DuplicateOverridesTestCase.class;
+		assertThatIllegalStateException()
+				.isThrownBy(() -> createContextCustomizer(testClass))
+				.withMessageStartingWith("Duplicate BeanOverrideHandler discovered in test class " + testClass.getName())
+				.withMessageContaining("DummyBeanOverrideHandler");
+	}
+
 
 	private Consumer<BeanOverrideHandler> dummyHandler(@Nullable String beanName, Class<?> beanType) {
 		return dummyHandler(beanName, beanType, BeanOverrideStrategy.REPLACE);
@@ -80,15 +91,15 @@ class BeanOverrideContextCustomizerFactoryTests {
 	}
 
 	@Nullable
-	BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass) {
+	private BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass) {
 		return this.factory.createContextCustomizer(testClass, Collections.emptyList());
 	}
+
 
 	static class Test1 {
 
 		@DummyBean
 		private String descriptor;
-
 	}
 
 	static class Test2 {
@@ -96,17 +107,25 @@ class BeanOverrideContextCustomizerFactoryTests {
 		@DummyBean
 		private String name;
 
-		@Nested
+		// @Nested
 		class Orange {
 		}
 
-		@Nested
+		// @Nested
 		class Green {
 
 			@DummyBean(beanName = "counterBean")
 			private Integer counter;
-
 		}
+	}
+
+	static class DuplicateOverridesTestCase {
+
+		@DummyBean(beanName = "text")
+		String text1;
+
+		@DummyBean(beanName = "text")
+		String text2;
 	}
 
 }

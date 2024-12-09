@@ -20,6 +20,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,9 +46,6 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 	@MockitoSpyBean("field1")
 	ExampleService field;
 
-	@MockitoSpyBean("field1")
-	ExampleService renamed1;
-
 
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
@@ -58,44 +57,36 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 		assertThat(field.greeting()).isEqualTo("bean1");
 	}
 
-	@Test
-	void renamedFieldHasOverride(ApplicationContext ctx) {
-		assertThat(ctx.getBean("field1"))
-				.isInstanceOf(ExampleService.class)
-				.satisfies(MockitoAssertions::assertIsSpy)
-				.isSameAs(renamed1);
-
-		assertThat(renamed1.greeting()).isEqualTo("bean1");
-	}
 
 	@Nested
 	@DisplayName("With @MockitoSpyBean in enclosing class and in @Nested class")
 	public class MockitoSpyBeanNestedTests {
 
+		@Autowired
+		@Qualifier("field1")
+		ExampleService localField;
+
 		@MockitoSpyBean("field2")
 		ExampleService nestedField;
 
-		@MockitoSpyBean("field2")
-		ExampleService renamed2;
-
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
+			assertThat(ctx.getBean("field1"))
+					.isInstanceOf(ExampleService.class)
+					.satisfies(MockitoAssertions::assertIsSpy)
+					.isSameAs(localField);
+
+			assertThat(localField.greeting()).isEqualTo("bean1");
+		}
+
+		@Test
+		void nestedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("field2"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(MockitoAssertions::assertIsSpy)
 					.isSameAs(nestedField);
 
 			assertThat(nestedField.greeting()).isEqualTo("bean2");
-		}
-
-		@Test
-		void renamedFieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("field2"))
-					.isInstanceOf(ExampleService.class)
-					.satisfies(MockitoAssertions::assertIsSpy)
-					.isSameAs(renamed2);
-
-			assertThat(renamed2.greeting()).isEqualTo("bean2");
 		}
 	}
 
