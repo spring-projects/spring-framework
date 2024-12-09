@@ -40,9 +40,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 	@TestBean(name = "field")
 	String field;
 
-	@TestBean(name = "field")
-	String renamed;
-
 	@TestBean(name = "methodRenamed1", methodName = "field")
 	String methodRenamed1;
 
@@ -61,12 +58,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 	}
 
 	@Test
-	void renamedFieldHasOverride(ApplicationContext ctx) {
-		assertThat(ctx.getBean("field")).as("applicationContext").isEqualTo("fieldOverride");
-		assertThat(renamed).as("injection point").isEqualTo("fieldOverride");
-	}
-
-	@Test
 	void fieldWithMethodNameHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("methodRenamed1")).as("applicationContext").isEqualTo("fieldOverride");
 		assertThat(methodRenamed1).as("injection point").isEqualTo("fieldOverride");
@@ -80,9 +71,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 		@TestBean(name = "nestedField")
 		String nestedField;
 
-		@TestBean(name = "nestedField")
-		String renamed2;
-
 		@TestBean(name = "methodRenamed2", methodName = "nestedField")
 		String methodRenamed2;
 
@@ -91,12 +79,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 		void fieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("field")).as("applicationContext").isEqualTo("fieldOverride");
 			assertThat(field).as("injection point").isEqualTo("fieldOverride");
-		}
-
-		@Test
-		void renamedFieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("field")).as("applicationContext").isEqualTo("fieldOverride");
-			assertThat(renamed).as("injection point").isEqualTo("fieldOverride");
 		}
 
 		@Test
@@ -109,12 +91,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 		void nestedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
 			assertThat(nestedField).isEqualTo("nestedFieldOverride");
-		}
-
-		@Test
-		void nestedRenamedFieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
-			assertThat(renamed2).isEqualTo("nestedFieldOverride");
 		}
 
 		@Test
@@ -134,12 +110,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 			}
 
 			@Test
-			void renamedFieldHasOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("field")).as("applicationContext").isEqualTo("fieldOverride");
-				assertThat(renamed).as("injection point").isEqualTo("fieldOverride");
-			}
-
-			@Test
 			void fieldWithMethodNameHasOverride(ApplicationContext ctx) {
 				assertThat(ctx.getBean("methodRenamed1")).as("applicationContext").isEqualTo("fieldOverride");
 				assertThat(methodRenamed1).as("injection point").isEqualTo("fieldOverride");
@@ -149,12 +119,6 @@ public class TestBeanForByNameLookupIntegrationTests {
 			void nestedFieldHasOverride(ApplicationContext ctx) {
 				assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
 				assertThat(nestedField).isEqualTo("nestedFieldOverride");
-			}
-
-			@Test
-			void nestedRenamedFieldHasOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
-				assertThat(renamed2).isEqualTo("nestedFieldOverride");
 			}
 
 			@Test
@@ -170,25 +134,25 @@ public class TestBeanForByNameLookupIntegrationTests {
 	public class TestBeanFactoryMethodInEnclosingClassTests {
 
 		@TestBean(methodName = "nestedField", name = "nestedField")
-		String nestedField2;
+		String nestedField;
 
 		@Test
 		void nestedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
-			assertThat(nestedField2).isEqualTo("nestedFieldOverride");
+			assertThat(nestedField).isEqualTo("nestedFieldOverride");
 		}
 
 		@Nested
 		@DisplayName("With factory method in the enclosing class of the enclosing class")
 		public class TestBeanFactoryMethodInEnclosingClassLevel2Tests {
 
-			@TestBean(methodName = "nestedField", name = "nestedField")
-			String nestedField2;
+			@TestBean(methodName = "nestedField", name = "nestedNestedField")
+			String nestedNestedField;
 
 			@Test
 			void nestedFieldHasOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
-				assertThat(nestedField2).isEqualTo("nestedFieldOverride");
+				assertThat(ctx.getBean("nestedNestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
+				assertThat(nestedNestedField).isEqualTo("nestedFieldOverride");
 			}
 		}
 	}

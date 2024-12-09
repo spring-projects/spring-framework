@@ -45,9 +45,6 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 	@MockitoBean("field")
 	ExampleService field;
 
-	@MockitoBean("field")
-	ExampleService renamed;
-
 	@MockitoBean("nonExistingBean")
 	ExampleService nonExisting;
 
@@ -57,11 +54,9 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
 				.satisfies(MockitoAssertions::assertIsMock)
-				.isSameAs(field)
-				.isSameAs(renamed);
+				.isSameAs(field);
 
 		assertThat(field.greeting()).as("mocked greeting").isNull();
-		assertThat(renamed.greeting()).as("mocked greeting").isNull();
 	}
 
 	@Test
@@ -84,18 +79,11 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 		ExampleService localField;
 
 		@Autowired
-		@Qualifier("field")
-		ExampleService localRenamed;
-
-		@Autowired
 		@Qualifier("nonExistingBean")
 		ExampleService localNonExisting;
 
 		@MockitoBean("nestedField")
 		ExampleService nestedField;
-
-		@MockitoBean("nestedField")
-		ExampleService nestedRenamed;
 
 		@MockitoBean("nestedNonExistingBean")
 		ExampleService nestedNonExisting;
@@ -106,11 +94,9 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 			assertThat(ctx.getBean("field"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(MockitoAssertions::assertIsMock)
-					.isSameAs(localField)
-					.isSameAs(localRenamed);
+					.isSameAs(localField);
 
 			assertThat(localField.greeting()).as("mocked greeting").isNull();
-			assertThat(localRenamed.greeting()).as("mocked greeting").isNull();
 		}
 
 		@Test
@@ -128,8 +114,7 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(MockitoAssertions::assertIsMock)
-					.isSameAs(nestedField)
-					.isSameAs(nestedRenamed);
+					.isSameAs(nestedField);
 		}
 
 		@Test

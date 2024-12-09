@@ -46,9 +46,6 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 	@MockitoSpyBean("field1")
 	ExampleService field;
 
-	@MockitoSpyBean("field1")
-	ExampleService renamed;
-
 
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
@@ -60,15 +57,6 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 		assertThat(field.greeting()).isEqualTo("bean1");
 	}
 
-	@Test
-	void renamedFieldHasOverride(ApplicationContext ctx) {
-		assertThat(ctx.getBean("field1"))
-				.isInstanceOf(ExampleService.class)
-				.satisfies(MockitoAssertions::assertIsSpy)
-				.isSameAs(renamed);
-
-		assertThat(renamed.greeting()).isEqualTo("bean1");
-	}
 
 	@Nested
 	@DisplayName("With @MockitoSpyBean in enclosing class and in @Nested class")
@@ -78,15 +66,8 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 		@Qualifier("field1")
 		ExampleService localField;
 
-		@Autowired
-		@Qualifier("field1")
-		ExampleService localRenamed;
-
 		@MockitoSpyBean("field2")
 		ExampleService nestedField;
-
-		@MockitoSpyBean("field2")
-		ExampleService nestedRenamed;
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
@@ -99,16 +80,6 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 		}
 
 		@Test
-		void renamedFieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("field1"))
-					.isInstanceOf(ExampleService.class)
-					.satisfies(MockitoAssertions::assertIsSpy)
-					.isSameAs(localRenamed);
-
-			assertThat(localRenamed.greeting()).isEqualTo("bean1");
-		}
-
-		@Test
 		void nestedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("field2"))
 					.isInstanceOf(ExampleService.class)
@@ -116,16 +87,6 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 					.isSameAs(nestedField);
 
 			assertThat(nestedField.greeting()).isEqualTo("bean2");
-		}
-
-		@Test
-		void nestedRenamedFieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("field2"))
-					.isInstanceOf(ExampleService.class)
-					.satisfies(MockitoAssertions::assertIsSpy)
-					.isSameAs(nestedRenamed);
-
-			assertThat(nestedRenamed.greeting()).isEqualTo("bean2");
 		}
 	}
 

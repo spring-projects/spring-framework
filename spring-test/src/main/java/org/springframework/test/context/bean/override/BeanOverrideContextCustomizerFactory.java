@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.TestContextAnnotationUtils;
+import org.springframework.util.Assert;
 
 /**
  * {@link ContextCustomizerFactory} implementation that provides support for
@@ -51,10 +52,13 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	}
 
 	private void findBeanOverrideHandler(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
-		handlers.addAll(BeanOverrideHandler.forTestClass(testClass));
 		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
 			findBeanOverrideHandler(testClass.getEnclosingClass(), handlers);
 		}
+		BeanOverrideHandler.forTestClass(testClass).forEach(handler ->
+				Assert.state(handlers.add(handler), () ->
+						"Duplicate BeanOverrideHandler discovered in test class %s: %s"
+							.formatted(testClass.getName(), handler)));
 	}
 
 }
