@@ -25,25 +25,26 @@ import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
 
 /**
  * Integration tests for {@link MockitoBean @MockitoBean} where duplicate mocks
- * are created for the same nonexistent type.
+ * are created for the same nonexistent type, selected by-type.
  *
  * @author Sam Brannen
  * @since 6.2.1
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/34025">gh-34025</a>
+ * @see MockitoBeanDuplicateTypeReplacementIntegrationTests
  * @see MockitoSpyBeanDuplicateTypeIntegrationTests
- * @see MockitoSpyBeanDuplicateTypeAndNameIntegrationTests
  */
 @SpringJUnitConfig
-public class MockitoBeanDuplicateTypeIntegrationTests {
+public class MockitoBeanDuplicateTypeCreationIntegrationTests {
 
 	@MockitoBean
-	ExampleService service1;
+	ExampleService mock1;
 
 	@MockitoBean
-	ExampleService service2;
+	ExampleService mock2;
 
 	@Autowired
 	List<ExampleService> services;
@@ -51,8 +52,10 @@ public class MockitoBeanDuplicateTypeIntegrationTests {
 
 	@Test
 	void duplicateMocksShouldHaveBeenCreated() {
-		assertThat(service1).isNotSameAs(service2);
-		assertThat(services).hasSize(2);
+		assertThat(services).containsExactly(mock1, mock2);
+		assertThat(mock1).isNotSameAs(mock2);
+		assertIsMock(mock1);
+		assertIsMock(mock2);
 	}
 
 }
