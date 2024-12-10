@@ -1387,6 +1387,30 @@ class ResolvableTypeTests {
 		assertThat(type.hasUnresolvableGenerics()).isFalse();
 	}
 
+	@Test  // gh-33932
+	void recursiveType() {
+		assertThat(ResolvableType.forClass(RecursiveMap.class)).isEqualTo(
+				ResolvableType.forClass(RecursiveMap.class));
+
+		ResolvableType resolvableType1 = ResolvableType.forClassWithGenerics(Map.class,
+				String.class, RecursiveMap.class);
+		ResolvableType resolvableType2 = ResolvableType.forClassWithGenerics(Map.class,
+				String.class, RecursiveMap.class);
+		assertThat(resolvableType1).isEqualTo(resolvableType2);
+	}
+
+	@Test  // gh-33932
+	void recursiveTypeWithInterface() {
+		assertThat(ResolvableType.forClass(RecursiveMapWithInterface.class)).isEqualTo(
+				ResolvableType.forClass(RecursiveMapWithInterface.class));
+
+		ResolvableType resolvableType1 = ResolvableType.forClassWithGenerics(Map.class,
+				String.class, RecursiveMapWithInterface.class);
+		ResolvableType resolvableType2 = ResolvableType.forClassWithGenerics(Map.class,
+				String.class, RecursiveMapWithInterface.class);
+		assertThat(resolvableType1).isEqualTo(resolvableType2);
+	}
+
 	@Test
 	void spr11219() throws Exception {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
@@ -1833,6 +1857,16 @@ class ResolvableTypeTests {
 		@Override
 		public void doA() {
 		}
+	}
+
+
+	@SuppressWarnings("serial")
+	static class RecursiveMap extends HashMap<String, RecursiveMap> {
+	}
+
+	@SuppressWarnings("serial")
+	static class RecursiveMapWithInterface extends HashMap<String, RecursiveMapWithInterface>
+			implements Map<String, RecursiveMapWithInterface> {
 	}
 
 
