@@ -34,7 +34,6 @@ import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Contextual descriptor about a type to convert from or to.
@@ -501,16 +500,7 @@ public class TypeDescriptor implements Serializable {
 		if (!annotationsMatch(otherDesc)) {
 			return false;
 		}
-		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), otherDesc.getElementTypeDescriptor());
-		}
-		else if (isMap()) {
-			return (ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), otherDesc.getMapKeyTypeDescriptor()) &&
-					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), otherDesc.getMapValueTypeDescriptor()));
-		}
-		else {
-			return Arrays.equals(getResolvableType().getGenerics(), otherDesc.getResolvableType().getGenerics());
-		}
+		return Arrays.equals(getResolvableType().getGenerics(), otherDesc.getResolvableType().getGenerics());
 	}
 
 	private boolean annotationsMatch(TypeDescriptor otherDesc) {
