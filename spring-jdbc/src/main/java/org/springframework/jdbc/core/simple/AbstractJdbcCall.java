@@ -249,14 +249,16 @@ public abstract class AbstractJdbcCall {
 	 * @param parameter the {@link SqlParameter} to add
 	 */
 	public void addDeclaredParameter(SqlParameter parameter) {
-		Assert.notNull(parameter, "The supplied parameter must not be null");
-		if (!StringUtils.hasText(parameter.getName())) {
-			throw new InvalidDataAccessApiUsageException(
-					"You must specify a parameter name when declaring parameters for \"" + getProcedureName() + "\"");
-		}
-		this.declaredParameters.add(parameter);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Added declared parameter for [" + getProcedureName() + "]: " + parameter.getName());
+		if(!isCompiled()) {
+			Assert.notNull(parameter, "The supplied parameter must not be null");
+			if (!StringUtils.hasText(parameter.getName())) {
+				throw new InvalidDataAccessApiUsageException(
+						"You must specify a parameter name when declaring parameters for \"" + getProcedureName() + "\"");
+			}
+			this.declaredParameters.add(parameter);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Added declared parameter for [" + getProcedureName() + "]: " + parameter.getName());
+			}
 		}
 	}
 
@@ -266,9 +268,11 @@ public abstract class AbstractJdbcCall {
 	 * @param rowMapper the RowMapper implementation to use
 	 */
 	public void addDeclaredRowMapper(String parameterName, RowMapper<?> rowMapper) {
-		this.declaredRowMappers.put(parameterName, rowMapper);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
+		if(!isCompiled()) {
+			this.declaredRowMappers.put(parameterName, rowMapper);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
+			}
 		}
 	}
 
