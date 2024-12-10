@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,22 @@ public class BeanDefinitionOverrideException extends BeanDefinitionStoreExceptio
 		super(beanDefinition.getResourceDescription(), beanName,
 				"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
 				"' since there is already [" + existingDefinition + "] bound.");
+		this.beanDefinition = beanDefinition;
+		this.existingDefinition = existingDefinition;
+	}
+
+	/**
+	 * Create a new BeanDefinitionOverrideException for the given new and existing definition.
+	 * @param beanName the name of the bean
+	 * @param beanDefinition the newly registered bean definition
+	 * @param existingDefinition the existing bean definition for the same name
+	 * @param msg the detail message to include
+	 * @since 6.2.1
+	 */
+	public BeanDefinitionOverrideException(
+			String beanName, BeanDefinition beanDefinition, BeanDefinition existingDefinition, String msg) {
+
+		super(beanDefinition.getResourceDescription(), beanName, msg);
 		this.beanDefinition = beanDefinition;
 		this.existingDefinition = existingDefinition;
 	}

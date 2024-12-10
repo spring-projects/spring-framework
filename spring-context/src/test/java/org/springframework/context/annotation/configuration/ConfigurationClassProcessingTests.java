@@ -110,7 +110,7 @@ class ConfigurationClassProcessingTests {
 
 	private void aliasesAreRespected(Class<?> testClass, Supplier<TestBean> testBeanSupplier, String beanName) {
 		TestBean testBean = testBeanSupplier.get();
-		BeanFactory factory = initBeanFactory(testClass);
+		BeanFactory factory = initBeanFactory(false, testClass);
 
 		assertThat(factory.getBean(beanName)).isSameAs(testBean);
 		Arrays.stream(factory.getAliases(beanName)).map(factory::getBean).forEach(alias -> assertThat(alias).isSameAs(testBean));
@@ -141,30 +141,30 @@ class ConfigurationClassProcessingTests {
 	@Test
 	void finalBeanMethod() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
-				initBeanFactory(ConfigWithFinalBean.class));
+				initBeanFactory(false, ConfigWithFinalBean.class));
 	}
 
 	@Test
 	void finalBeanMethodWithoutProxy() {
-		initBeanFactory(ConfigWithFinalBeanWithoutProxy.class);
+		initBeanFactory(false, ConfigWithFinalBeanWithoutProxy.class);
 	}
 
 	@Test  // gh-31007
 	void voidBeanMethod() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
-				initBeanFactory(ConfigWithVoidBean.class));
+				initBeanFactory(false, ConfigWithVoidBean.class));
 	}
 
 	@Test
 	void simplestPossibleConfig() {
-		BeanFactory factory = initBeanFactory(SimplestPossibleConfig.class);
+		BeanFactory factory = initBeanFactory(false, SimplestPossibleConfig.class);
 		String stringBean = factory.getBean("stringBean", String.class);
 		assertThat(stringBean).isEqualTo("foo");
 	}
 
 	@Test
 	void configWithObjectReturnType() {
-		BeanFactory factory = initBeanFactory(ConfigWithNonSpecificReturnTypes.class);
+		BeanFactory factory = initBeanFactory(false, ConfigWithNonSpecificReturnTypes.class);
 		assertThat(factory.getType("stringBean")).isEqualTo(Object.class);
 		assertThat(factory.isTypeMatch("stringBean", String.class)).isFalse();
 		String stringBean = factory.getBean("stringBean", String.class);
@@ -173,7 +173,7 @@ class ConfigurationClassProcessingTests {
 
 	@Test
 	void configWithFactoryBeanReturnType() {
-		ListableBeanFactory factory = initBeanFactory(ConfigWithNonSpecificReturnTypes.class);
+		ListableBeanFactory factory = initBeanFactory(false, ConfigWithNonSpecificReturnTypes.class);
 		assertThat(factory.getType("factoryBean")).isEqualTo(List.class);
 		assertThat(factory.isTypeMatch("factoryBean", List.class)).isTrue();
 		assertThat(factory.getType("&factoryBean")).isEqualTo(FactoryBean.class);
@@ -201,7 +201,7 @@ class ConfigurationClassProcessingTests {
 
 	@Test
 	void configurationWithPrototypeScopedBeans() {
-		BeanFactory factory = initBeanFactory(ConfigWithPrototypeBean.class);
+		BeanFactory factory = initBeanFactory(false, ConfigWithPrototypeBean.class);
 
 		TestBean foo = factory.getBean("foo", TestBean.class);
 		ITestBean bar = factory.getBean("bar", ITestBean.class);
@@ -213,7 +213,7 @@ class ConfigurationClassProcessingTests {
 
 	@Test
 	void configurationWithNullReference() {
-		BeanFactory factory = initBeanFactory(ConfigWithNullReference.class);
+		BeanFactory factory = initBeanFactory(false, ConfigWithNullReference.class);
 
 		TestBean foo = factory.getBean("foo", TestBean.class);
 		assertThat(factory.getBean("bar")).isEqualTo(null);
@@ -223,7 +223,15 @@ class ConfigurationClassProcessingTests {
 	@Test  // gh-33330
 	void configurationWithMethodNameMismatch() {
 		assertThatExceptionOfType(BeanDefinitionOverrideException.class)
-				.isThrownBy(() -> initBeanFactory(ConfigWithMethodNameMismatch.class));
+				.isThrownBy(() -> initBeanFactory(false, ConfigWithMethodNameMismatch.class));
+	}
+
+	@Test  // gh-33920
+	void configurationWithMethodNameMismatchAndOverridingAllowed() {
+		BeanFactory factory = initBeanFactory(true, ConfigWithMethodNameMismatch.class);
+
+		SpousyTestBean foo = factory.getBean("foo", SpousyTestBean.class);
+		assertThat(foo.getName()).isEqualTo("foo1");
 	}
 
 	@Test
@@ -353,13 +361,13 @@ class ConfigurationClassProcessingTests {
 	 * When complete, the factory is ready to service requests for any {@link Bean} methods
 	 * declared by {@code configClasses}.
 	 */
-	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
+	private DefaultListableBeanFactory initBeanFactory(boolean allowOverriding, Class<?>... configClasses) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		for (Class<?> configClass : configClasses) {
 			String configBeanName = configClass.getName();
 			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
 		}
-		factory.setAllowBeanDefinitionOverriding(false);
+		factory.setAllowBeanDefinitionOverriding(allowOverriding);
 		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
 		ccpp.postProcessBeanDefinitionRegistry(factory);
 		ccpp.postProcessBeanFactory(factory);
@@ -537,12 +545,12 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithMethodNameMismatch {
 
-		@Bean(name = "foo") public TestBean foo() {
-			return new SpousyTestBean("foo");
+		@Bean(name = "foo") public TestBean foo1() {
+			return new SpousyTestBean("foo1");
 		}
 
-		@Bean(name = "foo") public TestBean fooX() {
-			return new SpousyTestBean("fooX");
+		@Bean(name = "foo") public TestBean foo2() {
+			return new SpousyTestBean("foo2");
 		}
 	}
 

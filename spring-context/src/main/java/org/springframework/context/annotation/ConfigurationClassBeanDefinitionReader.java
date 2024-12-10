@@ -36,10 +36,10 @@ import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
@@ -297,13 +297,21 @@ class ConfigurationClassBeanDefinitionReader {
 			return false;
 		}
 		BeanDefinition existingBeanDef = this.registry.getBeanDefinition(beanName);
+		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 
 		// If the bean method is an overloaded case on the same configuration class,
 		// preserve the existing bean definition and mark it as overloaded.
 		if (existingBeanDef instanceof ConfigurationClassBeanDefinition ccbd) {
-			if (ccbd.getMetadata().getClassName().equals(beanMethod.getConfigurationClass().getMetadata().getClassName()) &&
-					ccbd.getFactoryMethodMetadata().getMethodName().equals(beanMethod.getMetadata().getMethodName())) {
-				ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
+			if (ccbd.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
+				if (ccbd.getFactoryMethodMetadata().getMethodName().equals(beanMethod.getMetadata().getMethodName())) {
+					ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
+				}
+				else if (!this.registry.isBeanDefinitionOverridable(beanName)) {
+					throw new BeanDefinitionOverrideException(beanName,
+							new ConfigurationClassBeanDefinition(configClass, beanMethod.getMetadata(), beanName),
+							existingBeanDef,
+							"@Bean method override with same bean name but different method name: " + existingBeanDef);
+				}
 				return true;
 			}
 			else {
@@ -329,9 +337,11 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// At this point, it's a top-level override (probably XML), just having been parsed
 		// before configuration class processing kicks in...
-		if (this.registry instanceof DefaultListableBeanFactory dlbf && !dlbf.isBeanDefinitionOverridable(beanName)) {
-			throw new BeanDefinitionStoreException(beanMethod.getConfigurationClass().getResource().getDescription(),
-					beanName, "@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
+		if (!this.registry.isBeanDefinitionOverridable(beanName)) {
+			throw new BeanDefinitionOverrideException(beanName,
+					new ConfigurationClassBeanDefinition(configClass, beanMethod.getMetadata(), beanName),
+					existingBeanDef,
+					"@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Skipping bean definition for %s: a definition for bean '%s' " +

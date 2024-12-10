@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.validation.beanvalidation;
 
 import jakarta.validation.ValidationException;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
@@ -39,7 +40,13 @@ public class OptionalValidatorFactoryBean extends LocalValidatorFactoryBean {
 			super.afterPropertiesSet();
 		}
 		catch (ValidationException ex) {
-			LogFactory.getLog(getClass()).debug("Failed to set up a Bean Validation provider", ex);
+			Log logger = LogFactory.getLog(getClass());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to set up a Bean Validation provider", ex);
+			}
+			else if (logger.isInfoEnabled()) {
+				logger.info("Failed to set up a Bean Validation provider: " + ex);
+			}
 		}
 	}
 
