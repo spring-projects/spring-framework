@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.codec;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -124,38 +123,19 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 			ServerSentEvent<?> sse = (element instanceof ServerSentEvent<?> serverSentEvent ?
 					serverSentEvent : ServerSentEvent.builder().data(element).build());
 
-			StringBuilder sb = new StringBuilder();
-			String id = sse.id();
-			String event = sse.event();
-			Duration retry = sse.retry();
-			String comment = sse.comment();
+			String sseText = sse.format();
 			Object data = sse.data();
-			if (id != null) {
-				writeField("id", id, sb);
-			}
-			if (event != null) {
-				writeField("event", event, sb);
-			}
-			if (retry != null) {
-				writeField("retry", retry.toMillis(), sb);
-			}
-			if (comment != null) {
-				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append('\n');
-			}
-			if (data != null) {
-				sb.append("data:");
-			}
 
 			Flux<DataBuffer> result;
 			if (data == null) {
-				result = Flux.just(encodeText(sb + "\n", mediaType, factory));
+				result = Flux.just(encodeText(sseText + "\n", mediaType, factory));
 			}
 			else if (data instanceof String text) {
 				text = StringUtils.replace(text, "\n", "\ndata:");
-				result = Flux.just(encodeText(sb + text + "\n\n", mediaType, factory));
+				result = Flux.just(encodeText(sseText + text + "\n\n", mediaType, factory));
 			}
 			else {
-				result = encodeEvent(sb, data, dataType, mediaType, factory, hints);
+				result = encodeEvent(sseText, data, dataType, mediaType, factory, hints);
 			}
 
 			return result.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
@@ -163,7 +143,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeEvent(StringBuilder eventContent, T data, ResolvableType dataType,
+	private <T> Flux<DataBuffer> encodeEvent(CharSequence sseText, T data, ResolvableType dataType,
 			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
 		if (this.encoder == null) {
@@ -171,16 +151,12 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		}
 
 		return Flux.defer(() -> {
-			DataBuffer startBuffer = encodeText(eventContent, mediaType, factory);
+			DataBuffer startBuffer = encodeText(sseText, mediaType, factory);
 			DataBuffer endBuffer = encodeText("\n\n", mediaType, factory);
 			DataBuffer dataBuffer = ((Encoder<T>) this.encoder).encodeValue(data, factory, dataType, mediaType, hints);
 			Hints.touchDataBuffer(dataBuffer, hints, logger);
 			return Flux.just(startBuffer, dataBuffer, endBuffer);
 		});
-	}
-
-	private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
-		sb.append(fieldName).append(':').append(fieldValue).append('\n');
 	}
 
 	private DataBuffer encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
