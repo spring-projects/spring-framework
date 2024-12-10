@@ -34,7 +34,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
@@ -99,27 +101,11 @@ public class FragmentViewResolutionResultHandlerTests {
 	}
 
 	@Test
-	void renderSse() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/")
-				.accept(MediaType.TEXT_EVENT_STREAM)
-				.acceptLanguageAsLocales(Locale.ENGLISH)
-				.build();
+	void renderFragmentStream() {
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(request);
-		MockServerHttpResponse response = exchange.getResponse();
-
-		HandlerResult result = new HandlerResult(
-				new Handler(),
-				Flux.just(fragment1, fragment2).subscribeOn(Schedulers.boundedElastic()),
+		testSse(Flux.just(fragment1, fragment2),
 				on(Handler.class).resolveReturnType(Flux.class, Fragment.class),
-				new BindingContext());
-
-		String body = initHandler().handleResult(exchange, result)
-				.then(Mono.defer(response::getBodyAsString))
-				.block(Duration.ofSeconds(60));
-
-		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_EVENT_STREAM);
-		assertThat(body).isEqualTo("""
+				"""
 				event:fragment1
 				data:<p>
 				data:	Hello Foo
@@ -131,6 +117,55 @@ public class FragmentViewResolutionResultHandlerTests {
 				data:</p>
 
 				""");
+	}
+
+	@Test
+	void renderServerSentEventFragmentStream() {
+
+		ServerSentEvent<Fragment> event1 = ServerSentEvent.builder(fragment1).id("id1").event("event1").build();
+		ServerSentEvent<Fragment> event2 = ServerSentEvent.builder(fragment2).id("id2").event("event2").build();
+
+		MethodParameter returnType = on(Handler.class).resolveReturnType(
+				Flux.class, ResolvableType.forClassWithGenerics(ServerSentEvent.class, Fragment.class));
+
+		testSse(Flux.just(event1, event2), returnType,
+				"""
+				id:id1
+				event:event1
+				data:<p>
+				data:	Hello Foo
+				data:</p>
+
+				id:id2
+				event:event2
+				data:<p>
+				data:	Hello Bar
+				data:</p>
+
+				""");
+	}
+
+	private void testSse(Flux<?> dataFlux, MethodParameter returnType, String output) {
+		MockServerHttpRequest request = MockServerHttpRequest.get("/")
+				.accept(MediaType.TEXT_EVENT_STREAM)
+				.acceptLanguageAsLocales(Locale.ENGLISH)
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerHttpResponse response = exchange.getResponse();
+
+		HandlerResult result = new HandlerResult(
+				new Handler(),
+				dataFlux.subscribeOn(Schedulers.boundedElastic()),
+				returnType,
+				new BindingContext());
+
+		String body = initHandler().handleResult(exchange, result)
+				.then(Mono.defer(response::getBodyAsString))
+				.block(Duration.ofSeconds(60));
+
+		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_EVENT_STREAM);
+		assertThat(body).isEqualTo(output);
 	}
 
 	private ViewResolutionResultHandler initHandler() {
@@ -154,6 +189,8 @@ public class FragmentViewResolutionResultHandlerTests {
 		FragmentsRendering render() { return null; }
 
 		Flux<Fragment> renderFlux() { return null; }
+
+		Flux<ServerSentEvent<Fragment>> renderSseFlux() { return null; }
 
 		List<Fragment> renderList() { return null; }
 
