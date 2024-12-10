@@ -202,7 +202,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@Override
 	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
-		if (this.notModified) {
+		if (isNotModified()) {
 			return true;
 		}
 
@@ -213,6 +213,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 		// Evaluate conditions in order of precedence.
 		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
+
+		// 1) If-Match
 		if (validateIfMatch(etag)) {
 			updateResponseStateChanging(etag, lastModifiedTimestamp);
 			return this.notModified;
