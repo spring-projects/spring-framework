@@ -537,4 +537,22 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		initiateShutdown();
 	}
 
+	/**
+	 * Whether this executor is using virtual threads.
+	 * @return {@code true} if using virtual threads
+	 * @since 6.2.1
+	 */
+	public boolean isVirtualThreads() {
+		return this.virtualThreads;
+	}
+
+	/**
+	 * Executor beanName.
+	 * @return the executor beanName
+	 * @since 6.2.1
+	 */
+	@Nullable
+	public String getBeanName() {
+		return this.beanName;
+	}
 }
