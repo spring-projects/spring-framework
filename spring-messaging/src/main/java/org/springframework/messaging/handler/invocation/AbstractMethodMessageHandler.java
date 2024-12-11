@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -573,7 +573,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (returnValue != null && this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
 				CompletableFuture<?> future = this.returnValueHandlers.toCompletableFuture(returnValue, returnType);
 				if (future != null) {
-					future.whenComplete(new ReturnValueListenableFutureCallback(invocable, message));
+					future.whenComplete(new ReturnValueCallback(invocable, message));
 				}
 			}
 			else {
@@ -704,13 +704,13 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 
-	private class ReturnValueListenableFutureCallback implements BiConsumer<Object, Throwable> {
+	private class ReturnValueCallback implements BiConsumer<Object, Throwable> {
 
 		private final InvocableHandlerMethod handlerMethod;
 
 		private final Message<?> message;
 
-		public ReturnValueListenableFutureCallback(InvocableHandlerMethod handlerMethod, Message<?> message) {
+		public ReturnValueCallback(InvocableHandlerMethod handlerMethod, Message<?> message) {
 			this.handlerMethod = handlerMethod;
 			this.message = message;
 		}

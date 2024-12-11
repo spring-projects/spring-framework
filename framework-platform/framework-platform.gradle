@@ -7,7 +7,7 @@ javaPlatform {
 }
 
 dependencies {
-	api(platform("com.fasterxml.jackson:jackson-bom:2.18.1"))
+	api(platform("com.fasterxml.jackson:jackson-bom:2.18.2"))
 	api(platform("io.micrometer:micrometer-bom:1.14.2"))
 	api(platform("io.netty:netty-bom:4.1.115.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
@@ -53,7 +53,7 @@ dependencies {
 		api("io.r2dbc:r2dbc-h2:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi-test:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
-		api("io.reactivex.rxjava3:rxjava:3.1.9")
+		api("io.reactivex.rxjava3:rxjava:3.1.10")
 		api("io.smallrye.reactive:mutiny:1.10.0")
 		api("io.undertow:undertow-core:2.3.18.Final")
 		api("io.undertow:undertow-servlet:2.3.18.Final")
