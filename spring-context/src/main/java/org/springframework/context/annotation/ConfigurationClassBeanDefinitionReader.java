@@ -222,13 +222,12 @@ class ConfigurationClassBeanDefinitionReader {
 			else {
 				beanDef.setBeanClassName(configClass.getMetadata().getClassName());
 			}
-			beanDef.setUniqueFactoryMethodName(methodName);
 		}
 		else {
 			// instance @Bean method
 			beanDef.setFactoryBeanName(configClass.getBeanName());
-			beanDef.setUniqueFactoryMethodName(methodName);
 		}
+		beanDef.setUniqueFactoryMethodName(methodName);
 
 		if (metadata instanceof StandardMethodMetadata smm &&
 				configClass.getMetadata() instanceof StandardAnnotationMetadata sam) {
