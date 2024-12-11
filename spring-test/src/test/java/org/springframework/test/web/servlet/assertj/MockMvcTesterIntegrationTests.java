@@ -67,6 +67,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.WebApplicationContext;
@@ -597,6 +598,13 @@ public class MockMvcTesterIntegrationTests {
 		}
 
 		@Test
+		void assertErrorMessageWithUnresolvedException() {
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(mvc.get().uri("/error/message")).hasErrorMessage("invalid"))
+					.withMessageContainingAll("[Servlet error message]", "invalid", "expected error message");
+		}
+
+		@Test
 		void assertRequestWithUnresolvedException() {
 			testAssertionFailureWithUnresolvableException(
 					result -> assertThat(result).request());
@@ -798,6 +806,13 @@ public class MockMvcTesterIntegrationTests {
 		public String validation(@PathVariable @Size(max = 4) String id) {
 			return "Hello " + id;
 		}
+
+		@GetMapping("/error/message")
+		@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "expected error message")
+		public void errorMessage() {
+
+		}
+
 	}
 
 }
