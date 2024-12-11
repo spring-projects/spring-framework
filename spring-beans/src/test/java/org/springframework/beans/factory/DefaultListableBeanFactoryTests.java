@@ -885,10 +885,15 @@ class DefaultListableBeanFactoryTests {
 	@Test
 	void beanDefinitionOverriding() {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		// Override "test" bean definition.
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		// Temporary "test2" alias for nonexistent bean.
 		lbf.registerAlias("otherTest", "test2");
+		// Reassign "test2" alias to "test".
 		lbf.registerAlias("test", "test2");
+		// Assign "testX" alias to "test" as well.
 		lbf.registerAlias("test", "testX");
+		// Register new "testX" bean definition which also removes the "testX" alias for "test".
 		lbf.registerBeanDefinition("testX", new RootBeanDefinition(TestBean.class));
 
 		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
