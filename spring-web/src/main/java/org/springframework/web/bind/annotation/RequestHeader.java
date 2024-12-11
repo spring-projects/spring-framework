@@ -47,16 +47,16 @@ import org.springframework.core.annotation.AliasFor;
 public @interface RequestHeader {
 
 	/**
-	 * Alias for {@link #name}.
+	 * Alias for {@link #value}.
 	 */
-	@AliasFor("name")
+	@AliasFor("value")
 	String value() default "";
 
 	/**
 	 * The name of the request header to bind to.
 	 * @since 4.2
 	 */
-	@AliasFor("value")
+	@AliasFor("name")
 	String name() default "";
 
 	/**
