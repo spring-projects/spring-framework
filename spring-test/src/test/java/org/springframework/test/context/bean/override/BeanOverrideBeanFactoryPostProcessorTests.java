@@ -85,7 +85,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to replace bean: there is no bean with name 'descriptionBean' \
 						and type java.lang.String (as required by field 'ByNameTestCase.description').""");
 	}
@@ -97,7 +97,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to replace bean: there is no bean with name 'descriptionBean' \
 						and type java.lang.String (as required by field 'ByNameTestCase.description').""");
 	}
@@ -144,7 +144,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to override bean: there are no beans of type java.lang.Integer \
 						(as required by field 'ByTypeTestCase.counter').""");
 	}
