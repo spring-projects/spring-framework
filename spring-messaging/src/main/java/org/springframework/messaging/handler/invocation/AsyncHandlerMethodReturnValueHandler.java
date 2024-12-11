@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import org.springframework.lang.Nullable;
 /**
  * An extension of {@link HandlerMethodReturnValueHandler} for handling async,
  * Future-like return value types that support success and error callbacks.
- * Essentially anything that can be adapted to a
- * {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}.
  *
  * <p>Implementations should consider extending the convenient base class
  * {@link AbstractAsyncReturnValueHandler}.
@@ -71,6 +69,7 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	@Nullable
 	default org.springframework.util.concurrent.ListenableFuture<?> toListenableFuture(
 			Object returnValue, MethodParameter returnType) {
+
 		CompletableFuture<?> result = toCompletableFuture(returnValue, returnType);
 		return (result != null ?
 				new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(result) :

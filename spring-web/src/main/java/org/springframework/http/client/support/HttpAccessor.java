@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public abstract class HttpAccessor {
 	 * @see #createRequest(URI, HttpMethod)
 	 * @see SimpleClientHttpRequestFactory
 	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
+	 * @see org.springframework.http.client.JdkClientHttpRequestFactory
 	 */
 	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
