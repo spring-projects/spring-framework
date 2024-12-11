@@ -148,7 +148,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 
 	public ResourceHttpRequestHandler() {
-		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
+		super(HttpMethod.GET.name(), HttpMethod.QUERY.name(), HttpMethod.HEAD.name());
 	}
 
 

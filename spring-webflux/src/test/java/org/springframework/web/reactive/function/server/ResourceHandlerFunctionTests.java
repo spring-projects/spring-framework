@@ -141,7 +141,7 @@ class ResourceHandlerFunctionTests {
 		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 		Mono<Void> result = responseMono.flatMap(response -> {
 			assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
-			assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
+			assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.QUERY));
 			return response.writeTo(exchange, context);
 		});
 
@@ -150,7 +150,7 @@ class ResourceHandlerFunctionTests {
 				.expectComplete()
 				.verify();
 		assertThat(mockResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(mockResponse.getHeaders().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
+		assertThat(mockResponse.getHeaders().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.QUERY));
 
 		StepVerifier.create(mockResponse.getBody()).expectComplete().verify();
 	}

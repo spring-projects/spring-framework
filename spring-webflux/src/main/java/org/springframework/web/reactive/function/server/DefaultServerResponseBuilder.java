@@ -293,7 +293,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
-		private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
+		private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
 
 		private final HttpStatusCode statusCode;
 
