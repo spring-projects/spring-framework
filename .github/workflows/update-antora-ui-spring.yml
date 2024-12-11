@@ -13,6 +13,7 @@ permissions:
 jobs:
   update-antora-ui-spring:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'spring-projects'
     name: Update on Supported Branches
     strategy:
       matrix:
@@ -26,6 +27,7 @@ jobs:
           antora-file-path: 'framework-docs/antora-playbook.yml'
   update-antora-ui-spring-docs-build:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'spring-projects'
     name: Update on docs-build
     steps:
       - uses: spring-io/spring-doc-actions/update-antora-spring-ui@5a57bcc6a0da2a1474136cf29571b277850432bc
