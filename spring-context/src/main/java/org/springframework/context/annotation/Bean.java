@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.annotation.AliasFor;
 
@@ -202,6 +203,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 3.0
  * @see Configuration
  * @see Scope
@@ -242,6 +244,10 @@ public @interface Bean {
 	 * Is this bean a candidate for getting autowired into some other bean at all?
 	 * <p>Default is {@code true}; set this to {@code false} for internal delegates
 	 * that are not meant to get in the way of beans of the same type in other places.
+	 * <p>NOTE: if this is set to {@code false}, bean is excluded when autowiring
+	 * arrays, collections, maps, or ObjectProvider streams, use
+	 * {@link ListableBeanFactory#getBeansOfType(Class)}
+	 * if you want to get all beans of the same type.
 	 * @since 5.1
 	 * @see #defaultCandidate()
 	 */
@@ -253,6 +259,10 @@ public @interface Bean {
 	 * <p>Default is {@code true}; set this to {@code false} for restricted delegates
 	 * that are supposed to be injectable in certain areas but are not meant to get
 	 * in the way of beans of the same type in other places.
+	 * <p>NOTE: if this is set to {@code false}, bean is excluded when autowiring
+	 * arrays, collections, maps, or ObjectProvider streams, use
+	 * {@link ListableBeanFactory#getBeansOfType(Class)}
+	 * if you want to get all beans of the same type.
 	 * <p>This is a variation of {@link #autowireCandidate()} which does not disable
 	 * injection in general, just enforces an additional indication such as a qualifier.
 	 * @since 6.2
