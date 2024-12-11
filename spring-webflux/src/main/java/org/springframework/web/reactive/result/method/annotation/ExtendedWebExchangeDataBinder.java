@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -57,7 +58,11 @@ public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 				List<String> values = entry.getValue();
 				if (!CollectionUtils.isEmpty(values)) {
-					String name = entry.getKey().replace("-", "");
+					// For constructor args with @BindParam mapped to the actual header name
+					String name = entry.getKey();
+					addValueIfNotPresent(map, "Header", name, (values.size() == 1 ? values.get(0) : values));
+					// Also adapt to Java conventions for setters
+					name = StringUtils.uncapitalize(entry.getKey().replace("-", ""));
 					addValueIfNotPresent(map, "Header", name, (values.size() == 1 ? values.get(0) : values));
 				}
 			}

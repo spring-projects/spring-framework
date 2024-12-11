@@ -156,6 +156,9 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 				if (uriVars != null) {
 					value = uriVars.get(name);
 				}
+				if (value == null && getRequest() instanceof HttpServletRequest httpServletRequest) {
+					value = getHeaderValue(httpServletRequest, name);
+				}
 			}
 			return value;
 		}
@@ -166,6 +169,13 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 			Map<String, String> uriVars = getUriVars(getRequest());
 			if (uriVars != null) {
 				set.addAll(uriVars.keySet());
+			}
+			if (request instanceof HttpServletRequest httpServletRequest) {
+				Enumeration<String> enumeration = httpServletRequest.getHeaderNames();
+				while (enumeration.hasMoreElements()) {
+					String headerName = enumeration.nextElement();
+					set.add(headerName.replaceAll("-", ""));
+				}
 			}
 			return set;
 		}

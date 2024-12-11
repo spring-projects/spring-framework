@@ -27,10 +27,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.BindParam;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -129,7 +131,7 @@ class InitBinderBindingContextTests {
 	}
 
 	@Test
-	void bindUriVariablesAndHeaders() throws Exception {
+	void bindUriVariablesAndHeadersViaSetters() throws Exception {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
 				.header("Some-Int-Array", "1")
@@ -151,6 +153,31 @@ class InitBinderBindingContextTests {
 		assertThat(target.getName()).isEqualTo("John");
 		assertThat(target.getAge()).isEqualTo(25);
 		assertThat(target.getSomeIntArray()).containsExactly(1, 2);
+	}
+
+	@Test
+	void bindUriVariablesAndHeadersViaConstructor() throws Exception {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header("Some-Int-Array", "1")
+				.header("Some-Int-Array", "2")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "John", "age", "25"));
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		WebExchangeDataBinder binder = context.createDataBinder(exchange, null, "dataBean", null);
+		binder.setTargetType(ResolvableType.forClass(DataBean.class));
+		binder.construct(exchange).block();
+
+		DataBean bean = (DataBean) binder.getTarget();
+
+		assertThat(bean.name()).isEqualTo("John");
+		assertThat(bean.age()).isEqualTo(25);
+		assertThat(bean.someIntArray()).containsExactly(1, 2);
 	}
 
 	@Test
@@ -210,6 +237,10 @@ class InitBinderBindingContextTests {
 		public void initBinderTypeConversion(WebDataBinder dataBinder, @RequestParam int requestParam) {
 			dataBinder.setDisallowedFields("requestParam-" + requestParam);
 		}
+	}
+
+
+	private record DataBean(String name, int age, @BindParam("Some-Int-Array") Integer[] someIntArray) {
 	}
 
 }
