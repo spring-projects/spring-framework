@@ -24,8 +24,6 @@ import org.springframework.lang.Nullable;
 /**
  * An extension of {@link HandlerMethodReturnValueHandler} for handling async,
  * Future-like return value types that support success and error callbacks.
- * Essentially anything that can be adapted to a
- * {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}.
  *
  * <p>Implementations should consider extending the convenient base class
  * {@link AbstractAsyncReturnValueHandler}.

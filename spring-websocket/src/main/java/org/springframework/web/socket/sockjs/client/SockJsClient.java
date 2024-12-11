@@ -116,10 +116,10 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 
 	/**
-	 * The names of HTTP headers that should be copied from the handshake headers
-	 * of each call to {@link SockJsClient#doHandshake(WebSocketHandler, WebSocketHttpHeaders, URI)}
-	 * and also used with other HTTP requests issued as part of that SockJS
-	 * connection, for example, the initial info request, XHR send or receive requests.
+	 * The names of HTTP headers that should be copied from the handshake headers of each
+	 * call to {@link SockJsClient#execute(WebSocketHandler, WebSocketHttpHeaders, URI)}
+	 * and also used with other HTTP requests issued as part of that SockJS connection,
+	 * for example, the initial info request, XHR send or receive requests.
 	 * <p>By default if this property is not set, all handshake headers are also
 	 * used for other HTTP requests. Set it if you want only a subset of handshake
 	 * headers (for example, auth headers) to be used for other HTTP requests.
