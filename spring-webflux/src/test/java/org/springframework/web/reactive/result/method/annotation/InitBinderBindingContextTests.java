@@ -202,6 +202,24 @@ class InitBinderBindingContextTests {
 		assertThat(target.getAge()).isEqualTo(25);
 	}
 
+	@Test
+	void headerPredicate() throws Exception {
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header("Priority", "u1")
+				.header("Some-Int-Array", "1")
+				.header("Another-Int-Array", "1")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));
+
+		Map<String, Object> map = binder.getValuesToBind(exchange).block();
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(Map.of("someIntArray", "1", "Some-Int-Array", "1"));
+	}
+
 	private BindingContext createBindingContext(String methodName, Class<?>... parameterTypes) throws Exception {
 		Object handler = new InitBinderHandler();
 		Method method = handler.getClass().getMethod(methodName, parameterTypes);

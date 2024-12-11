@@ -18,6 +18,8 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
@@ -41,9 +43,37 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 
+	private static final Set<String> FILTERED_HEADER_NAMES = Set.of("Priority");
+
+
+	private Predicate<String> headerPredicate = name -> !FILTERED_HEADER_NAMES.contains(name);
+
 
 	public ExtendedWebExchangeDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
+	}
+
+
+	/**
+	 * Add a Predicate that filters the header names to use for data binding.
+	 * Multiple predicates are combined with {@code AND}.
+	 * @param headerPredicate the predicate to add
+	 * @since 6.2.1
+	 */
+	public void addHeaderPredicate(Predicate<String> headerPredicate) {
+		this.headerPredicate = this.headerPredicate.and(headerPredicate);
+	}
+
+	/**
+	 * Set the Predicate that filters the header names to use for data binding.
+	 * <p>Note that this method resets any previous predicates that may have been
+	 * set, including headers excluded by default such as the RFC 9218 defined
+	 * "Priority" header.
+	 * @param headerPredicate the predicate to add
+	 * @since 6.2.1
+	 */
+	public void setHeaderPredicate(Predicate<String> headerPredicate) {
+		this.headerPredicate = headerPredicate;
 	}
 
 
@@ -56,10 +86,13 @@ public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 			}
 			HttpHeaders headers = exchange.getRequest().getHeaders();
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+				String name = entry.getKey();
+				if (!this.headerPredicate.test(entry.getKey())) {
+					continue;
+				}
 				List<String> values = entry.getValue();
 				if (!CollectionUtils.isEmpty(values)) {
 					// For constructor args with @BindParam mapped to the actual header name
-					String name = entry.getKey();
 					addValueIfNotPresent(map, "Header", name, (values.size() == 1 ? values.get(0) : values));
 					// Also adapt to Java conventions for setters
 					name = StringUtils.uncapitalize(entry.getKey().replace("-", ""));

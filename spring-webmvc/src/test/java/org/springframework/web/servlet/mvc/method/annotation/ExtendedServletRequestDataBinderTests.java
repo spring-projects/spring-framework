@@ -18,9 +18,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
 
+import jakarta.servlet.ServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -103,6 +105,22 @@ class ExtendedServletRequestDataBinderTests {
 	}
 
 	@Test
+	void headerPredicate() {
+		TestBinder binder = new TestBinder();
+		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		request.addHeader("Priority", "u1");
+		request.addHeader("Some-Int-Array", "1");
+		request.addHeader("Another-Int-Array", "1");
+
+		binder.addBindValues(mpvs, request);
+
+		assertThat(mpvs.size()).isEqualTo(1);
+		assertThat(mpvs.get("someIntArray")).isEqualTo("1");
+	}
+
+	@Test
 	void noUriTemplateVars() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
@@ -114,6 +132,19 @@ class ExtendedServletRequestDataBinderTests {
 
 
 	private record DataBean(String name, int age, @BindParam("Some-Int-Array") Integer[] someIntArray) {
+	}
+
+
+	private static class TestBinder extends ExtendedServletRequestDataBinder {
+
+		public TestBinder() {
+			super(null);
+		}
+
+		@Override
+		public void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
+			super.addBindValues(mpvs, request);
+		}
 	}
 
 }
