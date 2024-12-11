@@ -110,6 +110,13 @@ public class AbstractMockHttpServletResponseAssertTests {
 				.withMessageContainingAll("Redirected URL", redirectedUrl, "another");
 	}
 
+	@Test
+	void hasServletErrorMessage() throws Exception{
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.sendError(403, "expected error message");
+		assertThat(fromResponse(response)).hasErrorMessage("expected error message");
+	}
+
 
 	private MockHttpServletResponse createResponse(String body) {
 		try {
