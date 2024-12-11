@@ -20,18 +20,25 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.BindParam;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -123,6 +130,95 @@ class InitBinderBindingContextTests {
 		assertThat(dataBinder.getDisallowedFields()[0]).isEqualToIgnoringCase("requestParam-22");
 	}
 
+	@Test
+	void bindUriVariablesAndHeadersViaSetters() throws Exception {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header("Some-Int-Array", "1")
+				.header("Some-Int-Array", "2")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "John", "age", "25"));
+
+		TestBean target = new TestBean();
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		WebExchangeDataBinder binder = context.createDataBinder(exchange, target, "testBean", null);
+
+		binder.bind(exchange).block();
+
+		assertThat(target.getName()).isEqualTo("John");
+		assertThat(target.getAge()).isEqualTo(25);
+		assertThat(target.getSomeIntArray()).containsExactly(1, 2);
+	}
+
+	@Test
+	void bindUriVariablesAndHeadersViaConstructor() throws Exception {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header("Some-Int-Array", "1")
+				.header("Some-Int-Array", "2")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "John", "age", "25"));
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		WebExchangeDataBinder binder = context.createDataBinder(exchange, null, "dataBean", null);
+		binder.setTargetType(ResolvableType.forClass(DataBean.class));
+		binder.construct(exchange).block();
+
+		DataBean bean = (DataBean) binder.getTarget();
+
+		assertThat(bean.name()).isEqualTo("John");
+		assertThat(bean.age()).isEqualTo(25);
+		assertThat(bean.someIntArray()).containsExactly(1, 2);
+	}
+
+	@Test
+	void bindUriVarsAndHeadersAddedConditionally() throws Exception {
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/path")
+				.header("name", "Johnny")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body("name=John&age=25");
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("age", "26"));
+
+		TestBean target = new TestBean();
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		WebExchangeDataBinder binder = context.createDataBinder(exchange, target, "testBean", null);
+
+		binder.bind(exchange).block();
+
+		assertThat(target.getName()).isEqualTo("John");
+		assertThat(target.getAge()).isEqualTo(25);
+	}
+
+	@Test
+	void headerPredicate() throws Exception {
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header("Priority", "u1")
+				.header("Some-Int-Array", "1")
+				.header("Another-Int-Array", "1")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));
+
+		Map<String, Object> map = binder.getValuesToBind(exchange).block();
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(Map.of("someIntArray", "1", "Some-Int-Array", "1"));
+	}
 
 	private BindingContext createBindingContext(String methodName, Class<?>... parameterTypes) throws Exception {
 		Object handler = new InitBinderHandler();
@@ -159,6 +255,10 @@ class InitBinderBindingContextTests {
 		public void initBinderTypeConversion(WebDataBinder dataBinder, @RequestParam int requestParam) {
 			dataBinder.setDisallowedFields("requestParam-" + requestParam);
 		}
+	}
+
+
+	private record DataBean(String name, int age, @BindParam("Some-Int-Array") Integer[] someIntArray) {
 	}
 
 }
