@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,16 +62,9 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	/**
 	 * Indicate whether this request factory should buffer the
 	 * {@linkplain ClientHttpRequest#getBody() request body} internally.
-	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT,
-	 * it is recommended to change this property to {@code false}, so as not to run
-	 * out of memory. This will result in a {@link ClientHttpRequest} that either
-	 * streams directly to the underlying {@link HttpURLConnection} (if the
-	 * {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length}
-	 * is known in advance), or that will use "Chunked transfer encoding"
-	 * (if the {@code Content-Length} is not known in advance).
 	 * @see #setChunkSize(int)
-	 * @see HttpURLConnection#setFixedLengthStreamingMode(int)
-	 * @deprecated since 6.1 requests are never buffered, as if this property is {@code false}
+	 * @deprecated since 6.1 requests are never buffered,
+	 * as if this property is {@code false}
 	 */
 	@Deprecated(since = "6.1", forRemoval = true)
 	public void setBufferRequestBody(boolean bufferRequestBody) {
