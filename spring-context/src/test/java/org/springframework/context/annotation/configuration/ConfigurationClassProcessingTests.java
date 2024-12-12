@@ -542,7 +542,7 @@ class ConfigurationClassProcessingTests {
 	}
 
 
-	@Configuration
+	@Configuration(enforceUniqueMethods = false)
 	static class ConfigWithMethodNameMismatch {
 
 		@Bean(name = "foo") public TestBean foo1() {
