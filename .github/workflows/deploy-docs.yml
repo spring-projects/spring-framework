@@ -15,7 +15,7 @@ permissions:
 jobs:
   build:
     name: Dispatch docs deployment
-    if: github.repository_owner == 'spring-projects'
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
