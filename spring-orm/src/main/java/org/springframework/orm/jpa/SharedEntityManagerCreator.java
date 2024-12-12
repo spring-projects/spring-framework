@@ -186,7 +186,7 @@ public abstract class SharedEntityManagerCreator {
 	@SuppressWarnings("serial")
 	private static class SharedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
-		private final Log logger = LogFactory.getLog(getClass());
+		private static final Log logger = LogFactory.getLog(SharedEntityManagerInvocationHandler.class);
 
 		private final EntityManagerFactory targetFactory;
 
