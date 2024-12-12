@@ -79,6 +79,7 @@ configure([rootProject] + javaProjects) { project ->
 		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 		testRuntimeOnly("org.junit.platform:junit-platform-suite-engine")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
