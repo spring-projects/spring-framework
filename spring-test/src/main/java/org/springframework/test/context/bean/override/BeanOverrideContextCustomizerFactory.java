@@ -44,16 +44,16 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 			List<ContextConfigurationAttributes> configAttributes) {
 
 		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>();
-		findBeanOverrideHandler(testClass, handlers);
+		findBeanOverrideHandlers(testClass, handlers);
 		if (handlers.isEmpty()) {
 			return null;
 		}
 		return new BeanOverrideContextCustomizer(handlers);
 	}
 
-	private void findBeanOverrideHandler(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
+	private void findBeanOverrideHandlers(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
 		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
-			findBeanOverrideHandler(testClass.getEnclosingClass(), handlers);
+			findBeanOverrideHandlers(testClass.getEnclosingClass(), handlers);
 		}
 		BeanOverrideHandler.forTestClass(testClass).forEach(handler ->
 				Assert.state(handlers.add(handler), () ->
