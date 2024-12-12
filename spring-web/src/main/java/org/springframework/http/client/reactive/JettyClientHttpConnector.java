@@ -28,6 +28,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.JettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.support.DefaultHttpCookieParser;
+import org.springframework.http.support.HttpCookieParser;
 import org.springframework.util.Assert;
 
 /**
@@ -42,6 +44,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	private final HttpClient httpClient;
 
 	private JettyDataBufferFactory bufferFactory = new JettyDataBufferFactory();
+
+	private HttpCookieParser httpCookieParser = new DefaultHttpCookieParser();
 
 
 	/**
@@ -83,6 +87,12 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		this.bufferFactory = bufferFactory;
 	}
 
+	/**
+	 * Set the cookie parser to use.
+	 */
+	public void setHttpCookieParser(HttpCookieParser httpCookieParser) {
+		this.httpCookieParser = httpCookieParser;
+	}
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -111,7 +121,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		return Mono.fromDirect(request.toReactiveRequest()
 				.response((reactiveResponse, chunkPublisher) -> {
 					Flux<DataBuffer> content = Flux.from(chunkPublisher).map(this.bufferFactory::wrap);
-					return Mono.just(new JettyClientHttpResponse(reactiveResponse, content));
+					return Mono.just(new JettyClientHttpResponse(reactiveResponse, content, this.httpCookieParser));
 				}));
 	}
 

@@ -16,20 +16,17 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.HttpCookie;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.support.HttpCookieParser;
 import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,14 +42,11 @@ import org.springframework.util.MultiValueMap;
  */
 class JettyClientHttpResponse extends AbstractClientHttpResponse {
 
-	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
-
-
-	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Flux<DataBuffer> content) {
+	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Flux<DataBuffer> content, HttpCookieParser httpCookieParser) {
 
 		super(HttpStatusCode.valueOf(reactiveResponse.getStatus()),
 				adaptHeaders(reactiveResponse),
-				adaptCookies(reactiveResponse),
+				adaptCookies(reactiveResponse, httpCookieParser),
 				content);
 	}
 
@@ -60,26 +54,14 @@ class JettyClientHttpResponse extends AbstractClientHttpResponse {
 		MultiValueMap<String, String> headers = new JettyHeadersAdapter(response.getHeaders());
 		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
-	private static MultiValueMap<String, ResponseCookie> adaptCookies(ReactiveResponse response) {
-		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
+	private static MultiValueMap<String, ResponseCookie> adaptCookies(ReactiveResponse response, HttpCookieParser httpCookieParser) {
 		List<HttpField> cookieHeaders = response.getHeaders().getFields(HttpHeaders.SET_COOKIE);
-		cookieHeaders.forEach(header ->
-					HttpCookie.parse(header.getValue()).forEach(cookie -> result.add(cookie.getName(),
-							ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
-									.domain(cookie.getDomain())
-									.path(cookie.getPath())
-									.maxAge(cookie.getMaxAge())
-									.secure(cookie.getSecure())
-									.httpOnly(cookie.isHttpOnly())
-									.sameSite(parseSameSite(header.getValue()))
-									.build()))
-			);
+		MultiValueMap<String, ResponseCookie> result = cookieHeaders.stream()
+				.flatMap(header -> httpCookieParser.parse(header.getValue()))
+				.collect(LinkedMultiValueMap::new,
+						(cookies, cookie) -> cookies.add(cookie.getName(), cookie),
+						LinkedMultiValueMap::addAll);
 		return CollectionUtils.unmodifiableMultiValueMap(result);
-	}
-
-	private static @Nullable String parseSameSite(String headerValue) {
-		Matcher matcher = SAME_SITE_PATTERN.matcher(headerValue);
-		return (matcher.matches() ? matcher.group(1) : null);
 	}
 
 }
