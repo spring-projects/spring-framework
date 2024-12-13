@@ -60,16 +60,8 @@ class WildcardPathElement extends PathElement {
 				return true;
 			}
 			else {
-				if (pathIndex == matchingContext.pathLength) {
-					// and the path data has run out too
-					return true;
-				}
-				else {
-					return (matchingContext.isMatchOptionalTrailingSeparator() &&  // if optional slash is on...
-							segmentData != null && !segmentData.isEmpty() &&  // and there is at least one character to match the *...
-							(pathIndex + 1) == matchingContext.pathLength &&   // and the next path element is the end of the candidate...
-							matchingContext.isSeparator(pathIndex));  // and the final element is a separator
-				}
+				// and the path data has run out too
+				return (pathIndex == matchingContext.pathLength);
 			}
 		}
 		else {

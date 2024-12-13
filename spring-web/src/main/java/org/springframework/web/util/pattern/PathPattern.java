@@ -112,9 +112,6 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** The options to use to parse a pattern. */
 	private final PathContainer.Options pathOptions;
 
-	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully. */
-	private final boolean matchOptionalTrailingSeparator;
-
 	/** Will this match candidates in a case-sensitive way? (case sensitivity  at parse time). */
 	private final boolean caseSensitive;
 
@@ -152,12 +149,10 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean catchAll = false;
 
 
-	@SuppressWarnings("deprecation")
 	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head) {
 		this.patternString = patternText;
 		this.parser = parser;
 		this.pathOptions = parser.getPathOptions();
-		this.matchOptionalTrailingSeparator = parser.isMatchOptionalTrailingSeparator();
 		this.caseSensitive = parser.isCaseSensitive();
 		this.head = head;
 
@@ -202,8 +197,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matches(PathContainer pathContainer) {
 		if (this.head == null) {
-			return !hasLength(pathContainer) ||
-				(this.matchOptionalTrailingSeparator && pathContainerIsJustSeparator(pathContainer));
+			return !hasLength(pathContainer);
 		}
 		else if (!hasLength(pathContainer)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
@@ -226,9 +220,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	@Nullable
 	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
 		if (this.head == null) {
-			return (hasLength(pathContainer) &&
-					!(this.matchOptionalTrailingSeparator && pathContainerIsJustSeparator(pathContainer)) ?
-					null : PathMatchInfo.EMPTY);
+			return (hasLength(pathContainer) && !pathContainerIsJustSeparator(pathContainer) ? null : PathMatchInfo.EMPTY);
 		}
 		else if (!hasLength(pathContainer)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
@@ -647,7 +639,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * candidate currently being considered for a match but also some accumulators for
 	 * extracted variables.
 	 */
-	class MatchingContext {
+	static class MatchingContext {
 
 		final PathContainer candidate;
 
@@ -679,10 +671,6 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		public void setMatchAllowExtraPath() {
 			this.determineRemainingPath = true;
-		}
-
-		public boolean isMatchOptionalTrailingSeparator() {
-			return matchOptionalTrailingSeparator;
 		}
 
 		public void set(String key, String value, MultiValueMap<String,String> parameters) {
