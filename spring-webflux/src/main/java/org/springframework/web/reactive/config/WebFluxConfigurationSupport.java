@@ -154,13 +154,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		return mapping;
 	}
 
-	@SuppressWarnings("deprecation")
 	private void configureAbstractHandlerMapping(AbstractHandlerMapping mapping, PathMatchConfigurer configurer) {
 		mapping.setCorsConfigurations(getCorsConfigurations());
-		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
-		if (useTrailingSlashMatch != null) {
-			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
-		}
 		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
 		if (useCaseSensitiveMatch != null) {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);

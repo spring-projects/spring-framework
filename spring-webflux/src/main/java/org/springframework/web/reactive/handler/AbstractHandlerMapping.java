@@ -86,24 +86,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Shortcut method for setting the same property on the underlying pattern
-	 * parser in use. For more details see:
-	 * <ul>
-	 * <li>{@link #getPathPatternParser()} -- the underlying pattern parser
-	 * <li>{@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)} --
-	 * the trailing slash option, including its default value.
-	 * </ul>
-	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
-	 * order to support the deprecation of the property.
-	 * @deprecated as of 6.0, see
-	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
-	 */
-	@Deprecated(since = "6.0")
-	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
-		this.patternParser.setMatchOptionalTrailingSeparator(trailingSlashMatch);
-	}
-
-	/**
 	 * Return the {@link PathPatternParser} instance that is used for
 	 * {@link #setCorsConfigurations(Map) CORS configuration checks}.
 	 * Subclasses can also use this pattern parser for their own request

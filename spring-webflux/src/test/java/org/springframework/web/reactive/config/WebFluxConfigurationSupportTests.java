@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Collections;
@@ -48,7 +47,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,9 +69,7 @@ import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,7 +83,6 @@ import static org.springframework.http.MediaType.APPLICATION_PROTOBUF;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
-import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Tests for {@link WebFluxConfigurationSupport}.
@@ -95,31 +90,6 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  * @author Rossen Stoyanchev
  */
 class WebFluxConfigurationSupportTests {
-
-	@Test
-	void requestMappingHandlerMapping() {
-		ApplicationContext context = loadConfig(WebFluxConfig.class);
-		Field field = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSeparator");
-		assertThat(field).isNotNull();
-		ReflectionUtils.makeAccessible(field);
-
-		String name = "requestMappingHandlerMapping";
-		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
-		assertThat(mapping).isNotNull();
-
-		assertThat(mapping.getOrder()).isEqualTo(0);
-
-		PathPatternParser patternParser = mapping.getPathPatternParser();
-		assertThat(patternParser).hasFieldOrPropertyWithValue("matchOptionalTrailingSeparator", false);
-
-		name = "webFluxContentTypeResolver";
-		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
-		assertThat(mapping.getContentTypeResolver()).isSameAs(resolver);
-
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON));
-		assertThat(resolver.resolveMediaTypes(exchange))
-				.isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
-	}
 
 	@Test
 	void customPathMatchConfig() {
