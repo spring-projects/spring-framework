@@ -180,7 +180,7 @@ public final class GenericTypeResolver {
 								generics[i] = resolvedTypeArgument;
 							}
 							else {
-								generics[i] = ResolvableType.forType(typeArgument);
+								generics[i] = ResolvableType.forType(typeArgument).resolveType();
 							}
 						}
 						else if (typeArgument instanceof ParameterizedType) {
