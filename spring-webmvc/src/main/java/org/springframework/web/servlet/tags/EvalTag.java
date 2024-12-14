@@ -259,7 +259,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 				return null;
 			}
 			try {
-				return this.elContext.getELResolver().getValue(this.elContext, name, null);
+				return this.elContext.getELResolver().getValue(this.elContext, null, name);
 			}
 			catch (Exception ex) {
 				throw new AccessException(

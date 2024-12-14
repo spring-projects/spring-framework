@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
 import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +39,12 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 /**
  * @author Keith Donald
@@ -52,11 +60,18 @@ class EvalTagTests extends AbstractTagTests {
 	void setup() {
 		LocaleContextHolder.setDefaultLocale(Locale.UK);
 
-		context = createPageContext();
+		context = spy(createPageContext());
+		ELContext elContext = mock();
+		ELResolver elResolver = mock();
+		given(elResolver.getValue(same(elContext), isNull(), eq("pageContext"))).willReturn(context);
+		given(elContext.getELResolver()).willReturn(elResolver);
+		given(context.getELContext()).willReturn(elContext);
+
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		context.getRequest().setAttribute("org.springframework.core.convert.ConversionService", factory.getObject());
 		context.getRequest().setAttribute("bean", new Bean());
+
 		tag = new EvalTag();
 		tag.setPageContext(context);
 	}
@@ -181,6 +196,15 @@ class EvalTagTests extends AbstractTagTests {
 		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("value");
 	}
 
+	@Test
+	void resolveImplicitVariable() throws Exception {
+		tag.setExpression("pageContext.getClass().getSimpleName()");
+		int action = tag.doStartTag();
+		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		action = tag.doEndTag();
+		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("MockPageContext");
+	}
 
 
 	public static class Bean {
