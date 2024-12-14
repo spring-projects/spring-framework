@@ -39,12 +39,11 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 /**
  * @author Keith Donald
@@ -60,15 +59,9 @@ class EvalTagTests extends AbstractTagTests {
 	void setup() {
 		LocaleContextHolder.setDefaultLocale(Locale.UK);
 
-		context = spy(createPageContext());
-		ELContext elContext = mock();
-		ELResolver elResolver = mock();
-		given(elResolver.getValue(same(elContext), isNull(), eq("pageContext"))).willReturn(context);
-		given(elContext.getELResolver()).willReturn(elResolver);
-		given(context.getELContext()).willReturn(elContext);
-
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
+		context = createPageContext();
 		context.getRequest().setAttribute("org.springframework.core.convert.ConversionService", factory.getObject());
 		context.getRequest().setAttribute("bean", new Bean());
 
@@ -198,12 +191,18 @@ class EvalTagTests extends AbstractTagTests {
 
 	@Test
 	void resolveImplicitVariable() throws Exception {
+		ELContext elContext = mock();
+		ELResolver elResolver = mock();
+		given(elContext.getELResolver()).willReturn(elResolver);
+		given(elResolver.getValue(any(ELContext.class), isNull(), eq("pageContext"))).willReturn(context);
+		((ExtendedMockPageContext) context).setELContext(elContext);
+
 		tag.setExpression("pageContext.getClass().getSimpleName()");
 		int action = tag.doStartTag();
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
 		action = tag.doEndTag();
 		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
-		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("MockPageContext");
+		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("ExtendedMockPageContext");
 	}
 
 
