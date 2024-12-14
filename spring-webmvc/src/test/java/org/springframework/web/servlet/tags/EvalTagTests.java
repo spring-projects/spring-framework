@@ -28,7 +28,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.mockito.ArgumentMatchers;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
@@ -43,9 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Keith Donald
@@ -62,16 +61,17 @@ class EvalTagTests extends AbstractTagTests {
 		LocaleContextHolder.setDefaultLocale(Locale.UK);
 
 		context = spy(createPageContext());
-		final ELContext elContext = mock(ELContext.class);
-		final ELResolver elResolver = when(mock(ELResolver.class).getValue(same(elContext), isNull(), eq("pageContext")))
-				.thenReturn(context)
-				.getMock();
-		when(elContext.getELResolver()).thenReturn(elResolver);
-		when(context.getELContext()).thenReturn(elContext);
+		ELContext elContext = mock();
+		ELResolver elResolver = mock();
+		given(elResolver.getValue(same(elContext), isNull(), eq("pageContext"))).willReturn(context);
+		given(elContext.getELResolver()).willReturn(elResolver);
+		given(context.getELContext()).willReturn(elContext);
+
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		context.getRequest().setAttribute("org.springframework.core.convert.ConversionService", factory.getObject());
 		context.getRequest().setAttribute("bean", new Bean());
+
 		tag = new EvalTag();
 		tag.setPageContext(context);
 	}
@@ -205,6 +205,7 @@ class EvalTagTests extends AbstractTagTests {
 		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
 		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("MockPageContext");
 	}
+
 
 	public static class Bean {
 
