@@ -52,7 +52,7 @@ dependencies {
 	testImplementation("org.apache.tomcat.embed:tomcat-embed-core")
 	testImplementation("org.eclipse.jetty:jetty-reactive-httpclient")
 	testImplementation("org.eclipse.jetty:jetty-server")
-	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")

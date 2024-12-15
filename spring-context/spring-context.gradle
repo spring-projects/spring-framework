@@ -26,7 +26,7 @@ dependencies {
 	optional("org.apache-extras.beanshell:bsh")
 	optional("org.aspectj:aspectjweaver")
 	optional("org.crac:crac")
-	optional("org.hibernate:hibernate-validator")
+	optional("org.hibernate.validator:hibernate-validator")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")

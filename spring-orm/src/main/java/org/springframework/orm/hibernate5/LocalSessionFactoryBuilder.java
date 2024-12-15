@@ -286,18 +286,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	}
 
 	/**
-	 * Add the given annotated classes in a batch.
-	 * @see #addAnnotatedClass
-	 * @see #scanPackages
-	 */
-	public LocalSessionFactoryBuilder addAnnotatedClasses(Class<?>... annotatedClasses) {
-		for (Class<?> annotatedClass : annotatedClasses) {
-			addAnnotatedClass(annotatedClass);
-		}
-		return this;
-	}
-
-	/**
 	 * Add the given annotated packages in a batch.
 	 * @see #addPackage
 	 * @see #scanPackages
