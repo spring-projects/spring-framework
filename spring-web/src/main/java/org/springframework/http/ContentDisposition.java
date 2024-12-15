@@ -19,7 +19,6 @@ package org.springframework.http;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.BitSet;
@@ -256,10 +255,6 @@ public final class ContentDisposition {
 		String name = null;
 		String filename = null;
 		Charset charset = null;
-		Long size = null;
-		ZonedDateTime creationDate = null;
-		ZonedDateTime modificationDate = null;
-		ZonedDateTime readDate = null;
 		for (int i = 1; i < parts.size(); i++) {
 			String part = parts.get(i);
 			int eqIndex = part.indexOf('=');
