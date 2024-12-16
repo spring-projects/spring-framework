@@ -100,7 +100,7 @@ configure([rootProject] + javaProjects) { project ->
 			// TODO Uncomment link to JUnit 5 docs once we execute Gradle with Java 18+.
 			// See https://github.com/spring-projects/spring-framework/issues/27497
 			//
-			// "https://junit.org/junit5/docs/5.11.3/api/",
+			// "https://junit.org/junit5/docs/5.11.4/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
