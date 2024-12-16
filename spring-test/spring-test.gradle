@@ -77,8 +77,8 @@ dependencies {
 	}
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("org.easymock:easymock")
-	testImplementation("org.hibernate:hibernate-core")
-	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hibernate.orm:hibernate-core")
+	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.junit.platform:junit-platform-testkit")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")

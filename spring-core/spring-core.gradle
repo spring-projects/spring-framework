@@ -70,7 +70,7 @@ dependencies {
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
-	api(project(":spring-jcl"))
+	api("commons-logging:commons-logging")
 	compileOnly("io.projectreactor.tools:blockhound")
 	compileOnly("org.graalvm.sdk:graal-sdk")
 	optional("io.micrometer:context-propagation")

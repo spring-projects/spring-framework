@@ -59,7 +59,7 @@ dependencies {
 	testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.mozilla:rhino")
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")

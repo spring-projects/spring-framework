@@ -19,8 +19,9 @@ package org.springframework.test.context.bean.override.mockito;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBeanForByNameLookupIntegrationTests.Config;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.mockito.MockitoAssertions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,80 +37,70 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for {@link MockitoSpyBean} that use by-name lookup.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  */
 @SpringJUnitConfig(Config.class)
 public class MockitoSpyBeanForByNameLookupIntegrationTests {
 
-	@MockitoSpyBean("field")
+	@MockitoSpyBean("field1")
 	ExampleService field;
-
-	@MockitoSpyBean("nestedField")
-	ExampleService nestedField;
-
-	@MockitoSpyBean("field")
-	ExampleService renamed1;
-
-	@MockitoSpyBean("nestedField")
-	ExampleService renamed2;
 
 
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
-		assertThat(ctx.getBean("field"))
+		assertThat(ctx.getBean("field1"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
-				.isSameAs(this.field);
+				.satisfies(MockitoAssertions::assertIsSpy)
+				.isSameAs(field);
 
-		assertThat(this.field.greeting()).isEqualTo("Hello Field");
+		assertThat(field.greeting()).isEqualTo("bean1");
 	}
 
-	@Test
-	void renamedFieldHasOverride(ApplicationContext ctx) {
-		assertThat(ctx.getBean("field"))
-				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
-				.isSameAs(this.renamed1);
-
-		assertThat(this.renamed1.greeting()).isEqualTo("Hello Field");
-	}
 
 	@Nested
-	@DisplayName("With @MockitoSpyBean in enclosing class")
+	@DisplayName("With @MockitoSpyBean in enclosing class and in @Nested class")
 	public class MockitoSpyBeanNestedTests {
+
+		@Autowired
+		@Qualifier("field1")
+		ExampleService localField;
+
+		@MockitoSpyBean("field2")
+		ExampleService nestedField;
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("nestedField"))
+			assertThat(ctx.getBean("field1"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
-					.isSameAs(nestedField);
+					.satisfies(MockitoAssertions::assertIsSpy)
+					.isSameAs(localField);
 
-			assertThat(nestedField.greeting()).isEqualTo("Hello Nested Field");
+			assertThat(localField.greeting()).isEqualTo("bean1");
 		}
 
 		@Test
-		void renamedFieldHasOverride(ApplicationContext ctx) {
-			assertThat(ctx.getBean("nestedField"))
+		void nestedFieldHasOverride(ApplicationContext ctx) {
+			assertThat(ctx.getBean("field2"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
-					.isSameAs(renamed2);
+					.satisfies(MockitoAssertions::assertIsSpy)
+					.isSameAs(nestedField);
 
-			assertThat(renamed2.greeting()).isEqualTo("Hello Nested Field");
+			assertThat(nestedField.greeting()).isEqualTo("bean2");
 		}
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
-		@Bean("field")
+		@Bean("field1")
 		ExampleService bean1() {
-			return new RealExampleService("Hello Field");
+			return new RealExampleService("bean1");
 		}
 
-		@Bean("nestedField")
+		@Bean("field2")
 		ExampleService bean2() {
-			return new RealExampleService("Hello Nested Field");
+			return new RealExampleService("bean2");
 		}
 	}
 

@@ -17,8 +17,6 @@
 package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.MockingDetails;
-import org.mockito.mock.MockCreationSettings;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +32,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mockingDetails;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
+import static org.springframework.test.mockito.MockitoAssertions.assertMockName;
 
 /**
  * Tests that {@link MockitoBean @MockitoBean} can be used to mock a bean when
@@ -60,10 +59,8 @@ class MockitoBeanWithMultipleExistingBeansAndExplicitQualifierIntegrationTests {
 
 	@Test
 	void test() {
-		MockingDetails mockingDetails = mockingDetails(mock);
-		MockCreationSettings<?> mockSettings = mockingDetails.getMockCreationSettings();
-		assertThat(mockingDetails.isMock()).as("is mock").isTrue();
-		assertThat(mockSettings.getMockName()).as("mock name").hasToString("stringService");
+		assertIsMock(mock);
+		assertMockName(mock, "stringService");
 
 		given(mock.greeting()).willReturn("mocked");
 		assertThat(caller.sayGreeting()).isEqualTo("I say mocked 123");

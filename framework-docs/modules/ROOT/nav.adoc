@@ -101,7 +101,6 @@
 *** xref:core/aop-api/extensibility.adoc[]
 ** xref:core/null-safety.adoc[]
 ** xref:core/databuffer-codec.adoc[]
-** xref:core/spring-jcl.adoc[]
 ** xref:core/aot.adoc[]
 ** xref:core/appendix.adoc[]
 *** xref:core/appendix/xsd-schemas.adoc[]

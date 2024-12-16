@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.annotation;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -63,8 +64,13 @@ class MapMethodProcessorTests {
 	void supportsParameter() {
 		assertThat(this.processor.supportsParameter(
 				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class))).isTrue();
+
 		assertThat(this.processor.supportsParameter(
 				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class))).isFalse();
+
+		// gh-33160
+		assertThat(this.processor.supportsParameter(
+				ResolvableMethod.on(getClass()).argTypes(ExtendedMap.class).build().arg(ExtendedMap.class))).isFalse();
 	}
 
 	@Test
@@ -98,6 +104,17 @@ class MapMethodProcessorTests {
 			@RequestBody Map<String, Object> annotMap) {
 
 		return null;
+	}
+
+
+	@SuppressWarnings("unused")
+	private Map<String, Object> handle(ExtendedMap extendedMap) {
+		return null;
+	}
+
+
+	@SuppressWarnings("serial")
+	private static final class ExtendedMap extends HashMap<String, Object> {
 	}
 
 }

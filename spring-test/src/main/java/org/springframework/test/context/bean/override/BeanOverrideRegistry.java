@@ -17,8 +17,13 @@
 package org.springframework.test.context.bean.override;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -37,9 +42,12 @@ import org.springframework.util.StringUtils;
  */
 class BeanOverrideRegistry {
 
-	private final Map<BeanOverrideHandler, String> handlerToBeanNameMap = new HashMap<>();
+	private static final Log logger = LogFactory.getLog(BeanOverrideRegistry.class);
 
-	private final Map<String, BeanOverrideHandler> wrappingBeanOverrideHandlers = new HashMap<>();
+
+	private final Map<BeanOverrideHandler, String> handlerToBeanNameMap = new LinkedHashMap<>();
+
+	private final Map<String, BeanOverrideHandler> wrappingBeanOverrideHandlers = new LinkedHashMap<>();
 
 	private final ConfigurableBeanFactory beanFactory;
 
@@ -57,7 +65,25 @@ class BeanOverrideRegistry {
 	 * bean via {@link #wrapBeanIfNecessary(Object, String)}.
 	 */
 	void registerBeanOverrideHandler(BeanOverrideHandler handler, String beanName) {
+		Assert.state(!this.handlerToBeanNameMap.containsKey(handler), () ->
+				"Cannot register BeanOverrideHandler for bean with name '%s'; detected multiple registrations for %s"
+					.formatted(beanName, handler));
+
+		// Check if beanName was already registered, before adding the new mapping.
+		boolean beanNameAlreadyRegistered = this.handlerToBeanNameMap.containsValue(beanName);
+		// Add new mapping before potentially logging a warning, to ensure that
+		// the current handler is logged as well.
 		this.handlerToBeanNameMap.put(handler, beanName);
+
+		if (beanNameAlreadyRegistered && logger.isWarnEnabled()) {
+			List<BeanOverrideHandler> competingHandlers = this.handlerToBeanNameMap.entrySet().stream()
+					.filter(entry -> entry.getValue().equals(beanName))
+					.map(Entry::getKey)
+					.toList();
+			logger.warn("Bean with name '%s' was overridden by multiple handlers: %s"
+					.formatted(beanName, competingHandlers));
+		}
+
 		if (handler.getStrategy() == BeanOverrideStrategy.WRAP) {
 			this.wrappingBeanOverrideHandlers.put(beanName, handler);
 		}

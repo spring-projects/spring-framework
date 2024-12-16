@@ -74,8 +74,8 @@ public class HeadersAdapterBenchmark {
 		public MultiValueMap<String, String> headers;
 		public Function<MultiValueMap<String, String>, Set<Map.Entry<String, List<String>>>> entriesProvider;
 
-		//Uncomment the following line and comment the similar line for setupImplementationBaseline below
-		//to benchmark current implementations
+		// Uncomment the following line and comment the similar line for setupImplementationBaseline below
+		// to benchmark current implementations
 		@Setup(Level.Trial)
 		public void initImplementationNew() {
 			this.entriesProvider = map -> new HttpHeaders(map).headerSet();
@@ -85,7 +85,7 @@ public class HeadersAdapterBenchmark {
 				case "HttpComponents" -> new HttpComponentsHeadersAdapter(new HttpGet("https://example.com"));
 				case "Netty5" -> new Netty5HeadersAdapter(io.netty5.handler.codec.http.headers.HttpHeaders.newHeaders());
 				case "Jetty" -> new JettyHeadersAdapter(HttpFields.build());
-				//FIXME tomcat/undertow implementations (in another package)
+				// FIXME tomcat/undertow implementations (in another package)
 //				case "Tomcat" -> new TomcatHeadersAdapter(new MimeHeaders());
 //				case "Undertow" -> new UndertowHeadersAdapter(new HeaderMap());
 				default -> throw new IllegalArgumentException("Unsupported implementation: " + this.implementation);
@@ -93,8 +93,8 @@ public class HeadersAdapterBenchmark {
 			initHeaders();
 		}
 
-		//Uncomment the following line and comment the similar line for setupImplementationNew above
-		//to benchmark old implementations
+		// Uncomment the following line and comment the similar line for setupImplementationNew above
+		// to benchmark old implementations
 //		@Setup(Level.Trial)
 		public void setupImplementationBaseline() {
 			this.entriesProvider = MultiValueMap::entrySet;

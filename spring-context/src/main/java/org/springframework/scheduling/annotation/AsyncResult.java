@@ -27,11 +27,6 @@ import org.springframework.lang.Nullable;
  * A pass-through {@code Future} handle that can be used for method signatures
  * which are declared with a {@code Future} return type for asynchronous execution.
  *
- * <p>As of Spring 4.1, this class implements {@code ListenableFuture}, not just
- * plain {@link java.util.concurrent.Future}, along with the corresponding support
- * in {@code @Async} processing. As of 7.0, this will be turned back to a plain
- * {@code Future} in order to focus on compatibility with existing common usage.
- *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
@@ -121,22 +116,6 @@ public class AsyncResult<V> implements Future<V> {
 	 */
 	public static <V> Future<V> forExecutionException(Throwable ex) {
 		return new AsyncResult<>(null, ex);
-	}
-
-	/**
-	 * Determine the exposed exception: either the cause of a given
-	 * {@link ExecutionException}, or the original exception as-is.
-	 * @param original the original as given to {@link #forExecutionException}
-	 * @return the exposed exception
-	 */
-	private static Throwable exposedException(Throwable original) {
-		if (original instanceof ExecutionException) {
-			Throwable cause = original.getCause();
-			if (cause != null) {
-				return cause;
-			}
-		}
-		return original;
 	}
 
 }

@@ -65,10 +65,6 @@
 	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle"/>
 	<suppress files="SpelReproTests" checks="InterfaceIsType"/>
 
-	<!-- spring-jcl -->
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="Header|SpringNoThis|IllegalImport"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
-
 	<!-- spring-jdbc -->
 	<suppress files="ResultSetWrappingSqlRowSet" checks="JavadocStyle"/>
 

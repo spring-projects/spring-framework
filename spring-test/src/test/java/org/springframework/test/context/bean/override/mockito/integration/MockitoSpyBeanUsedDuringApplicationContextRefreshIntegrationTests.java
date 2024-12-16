@@ -18,7 +18,6 @@ package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,9 +28,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.BDDMockito.then;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsSpy;
 
 /**
  * Integration tests for {@link MockitoSpyBean @MockitoSpyBean} used during
@@ -57,7 +56,8 @@ class MockitoSpyBeanUsedDuringApplicationContextRefreshIntegrationTests {
 
 	@Test
 	void test() {
-		assertThat(Mockito.mockingDetails(eventProcessor).isSpy()).as("isSpy").isTrue();
+		assertIsSpy(eventProcessor);
+
 		// Ensure that the spy was invoked during ApplicationContext refresh
 		// and has not been reset in the interim.
 		then(eventProcessor).should().process(same(contextRefreshedEvent));

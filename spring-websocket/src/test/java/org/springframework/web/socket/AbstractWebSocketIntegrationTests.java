@@ -155,7 +155,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	private static class JettyHandshakeHandler extends DefaultHandshakeHandler {
+	static class JettyHandshakeHandler extends DefaultHandshakeHandler {
 
 		public JettyHandshakeHandler() {
 			super(new JettyRequestUpgradeStrategy());
@@ -163,7 +163,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	private static class StandardHandshakeHandler extends DefaultHandshakeHandler {
+	static class StandardHandshakeHandler extends DefaultHandshakeHandler {
 
 		public StandardHandshakeHandler() {
 			super(new StandardWebSocketUpgradeStrategy());

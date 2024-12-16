@@ -41,6 +41,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ConcurrentModel;
@@ -84,6 +85,9 @@ class ViewResolutionResultHandlerTests {
 
 		testSupports(on(Handler.class).resolveReturnType(FragmentsRendering.class));
 		testSupports(on(Handler.class).resolveReturnType(Flux.class, Fragment.class));
+		testSupports(on(Handler.class).resolveReturnType(
+				Flux.class, ResolvableType.forClassWithGenerics(ServerSentEvent.class, Fragment.class)));
+
 		testSupports(on(Handler.class).resolveReturnType(List.class, Fragment.class));
 		testSupports(on(Handler.class).resolveReturnType(
 				Mono.class, ResolvableType.forClassWithGenerics(List.class, Fragment.class)));
@@ -457,6 +461,7 @@ class ViewResolutionResultHandlerTests {
 
 		FragmentsRendering fragmentsRendering() { return null; }
 		Flux<Fragment> fragmentFlux() { return null; }
+		Flux<ServerSentEvent<Fragment>> fragmentServerSentEventFlux() { return null; }
 		Mono<List<Fragment>> monoFragmentList() { return null; }
 		List<Fragment> fragmentList() { return null; }
 

@@ -51,7 +51,9 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * unique set of metadata used to identify the bean to override. Overridden
  * {@code equals()} and {@code hashCode()} methods should also delegate to the
  * {@code super} implementations in this class in order to support the basic
- * metadata used by all bean overrides.
+ * metadata used by all bean overrides. In addition, it is recommended that
+ * implementations override {@code toString()} to include all relevant metadata
+ * in order to enhance diagnostics.
  *
  * <p>Concrete implementations of {@code BeanOverrideHandler} can store additional
  * metadata to use during override {@linkplain #createOverrideInstance instance
@@ -93,9 +95,11 @@ public abstract class BeanOverrideHandler {
 	/**
 	 * Process the given {@code testClass} and build the corresponding
 	 * {@code BeanOverrideHandler} list derived from {@link BeanOverride @BeanOverride}
-	 * fields in the test class, its type hierarchy, and its enclosing class hierarchy.
+	 * fields in the test class and its type hierarchy.
+	 * <p>This method does not search the enclosing class hierarchy.
 	 * @param testClass the test class to process
 	 * @return a list of bean override handlers
+	 * @see org.springframework.test.context.TestContextAnnotationUtils#searchEnclosingClass(Class)
 	 */
 	public static List<BeanOverrideHandler> forTestClass(Class<?> testClass) {
 		List<BeanOverrideHandler> handlers = new LinkedList<>();

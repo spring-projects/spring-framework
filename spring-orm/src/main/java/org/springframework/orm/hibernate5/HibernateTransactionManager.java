@@ -771,10 +771,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Disconnect a pre-existing Hibernate Session on transaction completion,
 	 * returning its database connection but preserving its entity state.
-	 * <p>The default implementation calls the equivalent of {@link Session#disconnect()}.
-	 * Subclasses may override this with a no-op or with fine-tuned disconnection logic.
+	 * <p>The default implementation triggers a manual disconnect. Subclasses
+	 * may override this with a no-op or with fine-tuned disconnection logic.
 	 * @param session the Hibernate Session to disconnect
-	 * @see Session#disconnect()
 	 */
 	protected void disconnectOnCompletion(Session session) {
 		if (session instanceof SessionImplementor sessionImpl) {
