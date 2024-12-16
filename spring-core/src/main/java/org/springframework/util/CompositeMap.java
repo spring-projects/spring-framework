@@ -56,7 +56,6 @@ final class CompositeMap<K, V> implements Map<K, V> {
 	CompositeMap(Map<K, V> first, Map<K, V> second,
 			@Nullable BiFunction<K, V, V> putFunction,
 			@Nullable Consumer<Map<K,V>> putAllFunction) {
-
 		Assert.notNull(first, "First must not be null");
 		Assert.notNull(second, "Second must not be null");
 		this.first = first;
@@ -81,9 +80,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 		if (this.first.containsKey(key)) {
 			return true;
 		}
-		else {
-			return this.second.containsKey(key);
-		}
+		return this.second.containsKey(key);
 	}
 
 	@Override
@@ -91,9 +88,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 		if (this.first.containsValue(value)) {
 			return true;
 		}
-		else {
-			return this.second.containsValue(value);
-		}
+		return this.second.containsValue(value);
 	}
 
 	@Override
@@ -103,9 +98,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 		if (firstResult != null) {
 			return firstResult;
 		}
-		else {
-			return this.second.get(key);
-		}
+		return this.second.get(key);
 	}
 
 	@Override
@@ -114,9 +107,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 		if (this.putFunction == null) {
 			throw new UnsupportedOperationException();
 		}
-		else {
-			return this.putFunction.apply(key, value);
-		}
+		return this.putFunction.apply(key, value);
 	}
 
 	@Override
@@ -127,9 +118,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 		if (firstResult != null) {
 			return firstResult;
 		}
-		else {
-			return secondResult;
-		}
+		return secondResult;
 	}
 
 	@Override
