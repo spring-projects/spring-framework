@@ -240,10 +240,7 @@ public class DelegatingWebMvcConfigurationTests {
 			@Override
 			@SuppressWarnings("deprecation")
 			public void configurePathMatch(PathMatchConfigurer configurer) {
-				configurer.setUseRegisteredSuffixPatternMatch(true)
-						.setUseTrailingSlashMatch(false)
-						.setUrlPathHelper(pathHelper)
-						.setPathMatcher(pathMatcher);
+				configurer.setUrlPathHelper(pathHelper).setPathMatcher(pathMatcher);
 			}
 			@Override
 			public void addViewControllers(ViewControllerRegistry registry) {
@@ -272,9 +269,6 @@ public class DelegatingWebMvcConfigurationTests {
 				webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
-		assertThat(annotationsMapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(annotationsMapping.useSuffixPatternMatch()).isTrue();
-		assertThat(annotationsMapping.useTrailingSlashMatch()).isFalse();
 		configAssertion.accept(annotationsMapping.getUrlPathHelper(), annotationsMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) webMvcConfig.viewControllerHandlerMapping(

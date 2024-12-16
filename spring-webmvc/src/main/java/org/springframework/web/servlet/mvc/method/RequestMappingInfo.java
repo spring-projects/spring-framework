@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.util.List;
 import java.util.Set;
 
 import jakarta.servlet.ServletRequest;
@@ -40,7 +39,6 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
@@ -702,7 +700,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public RequestMappingInfo build() {
 
 			PathPatternsRequestCondition pathPatternsCondition = null;
@@ -718,10 +715,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			else {
 				patternsCondition = (ObjectUtils.isEmpty(this.paths) ?
 						EMPTY_PATTERNS :
-						new PatternsRequestCondition(
-								this.paths, null, this.options.pathMatcher,
-								this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
-								this.options.getFileExtensions()));
+						new PatternsRequestCondition(this.paths, null, this.options.pathMatcher));
 			}
 
 			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
@@ -783,7 +777,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public Builder paths(String... paths) {
 			PathPatternParser parser = this.options.getPatternParserToUse();
 
@@ -794,10 +787,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			else {
 				this.patternsCondition = (ObjectUtils.isEmpty(paths) ?
 						EMPTY_PATTERNS :
-						new PatternsRequestCondition(
-								paths, null, this.options.getPathMatcher(),
-								this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
-								this.options.getFileExtensions()));
+						new PatternsRequestCondition(paths, null, this.options.getPathMatcher()));
 			}
 			return this;
 		}
@@ -876,7 +866,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public static class BuilderConfiguration {
 
-		private static PathPatternParser defaultPatternParser = new PathPatternParser();
+		private static final PathPatternParser defaultPatternParser = new PathPatternParser();
 
 
 		@Nullable
@@ -884,12 +874,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		@Nullable
 		private PathMatcher pathMatcher;
-
-		private boolean trailingSlashMatch = false;
-
-		private boolean suffixPatternMatch = false;
-
-		private boolean registeredSuffixPatternMatch = false;
 
 		@Nullable
 		private ContentNegotiationManager contentNegotiationManager;
@@ -900,7 +884,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@link AbstractHandlerMapping#setPatternParser(PathPatternParser)}.
 		 * <p><strong>Note:</strong> This property is mutually exclusive with
 		 * {@link #setPathMatcher(PathMatcher)}.
-		 * <p>By default this is not set, but {@link RequestMappingInfo.Builder}
+		 * <p>By default, this is not set, but {@link RequestMappingInfo.Builder}
 		 * defaults to using {@link PathPatternParser} unless
 		 * {@link #setPathMatcher(PathMatcher)} is explicitly set.
 		 * @since 5.3
@@ -944,7 +928,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		/**
 		 * Set a custom PathMatcher to use for the PatternsRequestCondition.
-		 * <p>By default this is not set. You must set it explicitly if you want
+		 * <p>By default, this is not set. You must set it explicitly if you want
 		 * {@link PathMatcher} to be used, or otherwise {@link RequestMappingInfo}
 		 * defaults to using {@link PathPatternParser}.
 		 */
@@ -975,96 +959,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		/**
-		 * Set whether to apply trailing slash matching in PatternsRequestCondition.
-		 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
-		 * order to support the deprecation of the property.
-		 * @deprecated as of 6.0, see
-		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
-		 */
-		@Deprecated(since = "6.0")
-		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
-			this.trailingSlashMatch = trailingSlashMatch;
-		}
-
-		/**
-		 * Return whether to apply trailing slash matching in PatternsRequestCondition.
-		 * @deprecated as of 6.0 together with {@link #setTrailingSlashMatch(boolean)}
-		 */
-		@Deprecated(since = "6.0")
-		public boolean useTrailingSlashMatch() {
-			return this.trailingSlashMatch;
-		}
-
-		/**
-		 * Set whether to apply suffix pattern matching in PatternsRequestCondition.
-		 * <p>By default this is set to 'false'.
-		 * @see #setRegisteredSuffixPatternMatch(boolean)
-		 * @deprecated as of 5.2.4. See deprecation note on
-		 * {@link RequestMappingHandlerMapping#setUseSuffixPatternMatch(boolean)}.
-		 */
-		@Deprecated
-		public void setSuffixPatternMatch(boolean suffixPatternMatch) {
-			this.suffixPatternMatch = suffixPatternMatch;
-		}
-
-		/**
-		 * Return whether to apply suffix pattern matching in PatternsRequestCondition.
-		 * @deprecated as of 5.2.4. See deprecation note on
-		 * {@link RequestMappingHandlerMapping#setUseSuffixPatternMatch(boolean)}.
-		 */
-		@Deprecated
-		public boolean useSuffixPatternMatch() {
-			return this.suffixPatternMatch;
-		}
-
-		/**
-		 * Set whether suffix pattern matching should be restricted to registered
-		 * file extensions only. Setting this property also sets
-		 * {@code suffixPatternMatch=true} and requires that a
-		 * {@link #setContentNegotiationManager} is also configured in order to
-		 * obtain the registered file extensions.
-		 * @deprecated as of 5.2.4. See class-level note in
-		 * {@link RequestMappingHandlerMapping} on the deprecation of path
-		 * extension config options.
-		 */
-		@Deprecated
-		public void setRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {
-			this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-			this.suffixPatternMatch = (registeredSuffixPatternMatch || this.suffixPatternMatch);
-		}
-
-		/**
-		 * Return whether suffix pattern matching should be restricted to registered
-		 * file extensions only.
-		 * @deprecated as of 5.2.4. See class-level note in
-		 * {@link RequestMappingHandlerMapping} on the deprecation of path
-		 * extension config options.
-		 */
-		@Deprecated
-		public boolean useRegisteredSuffixPatternMatch() {
-			return this.registeredSuffixPatternMatch;
-		}
-
-		/**
-		 * Return the file extensions to use for suffix pattern matching. If
-		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
-		 * from the configured {@code contentNegotiationManager}.
-		 * @deprecated as of 5.2.4. See class-level note in
-		 * {@link RequestMappingHandlerMapping} on the deprecation of path
-		 * extension config options.
-		 */
-		@Nullable
-		@Deprecated
-		public List<String> getFileExtensions() {
-			if (useRegisteredSuffixPatternMatch() && this.contentNegotiationManager != null) {
-				return this.contentNegotiationManager.getAllFileExtensions();
-			}
-			return null;
-		}
-
-		/**
 		 * Set the ContentNegotiationManager to use for the ProducesRequestCondition.
-		 * <p>By default this is not set.
+		 * <p>By default, this is not set.
 		 */
 		public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 			this.contentNegotiationManager = contentNegotiationManager;

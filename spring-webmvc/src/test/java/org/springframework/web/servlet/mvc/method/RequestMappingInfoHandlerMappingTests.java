@@ -616,15 +616,12 @@ class RequestMappingInfoHandlerMappingTests {
 			}
 		}
 
-		@SuppressWarnings("deprecation")
 		private RequestMappingInfo.BuilderConfiguration getBuilderConfig() {
 			RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 			if (getPatternParser() != null) {
 				config.setPatternParser(getPatternParser());
 			}
 			else {
-				config.setSuffixPatternMatch(true);
-				config.setRegisteredSuffixPatternMatch(true);
 				config.setPathMatcher(getPathMatcher());
 			}
 			return config;

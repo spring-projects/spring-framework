@@ -149,10 +149,8 @@ class ResourceHttpRequestHandlerTests {
 		}
 
 		@Test  // SPR-14577
-		@SuppressWarnings("deprecation")
 		void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 			ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
-			factory.setFavorPathExtension(false);
 			factory.afterPropertiesSet();
 			ContentNegotiationManager manager = factory.getObject();
 

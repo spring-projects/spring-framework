@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.Collections;
-
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
@@ -112,88 +110,6 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void matchSuffixPattern() {
-		MockHttpServletRequest request = initRequest("/foo.html");
-
-		boolean useSuffixPatternMatch = true;
-		PatternsRequestCondition condition =
-				new PatternsRequestCondition(new String[] {"/{foo}"}, null, null, useSuffixPatternMatch, true);
-		PatternsRequestCondition match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).containsExactly("/{foo}.*");
-
-		useSuffixPatternMatch = false;
-		condition = new PatternsRequestCondition(
-				new String[] {"/{foo}"}, null, null, useSuffixPatternMatch, false);
-		match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).containsExactly("/{foo}");
-	}
-
-	@Test // SPR-8410
-	@SuppressWarnings("deprecation")
-	void matchSuffixPatternUsingFileExtensions() {
-		PatternsRequestCondition condition = new PatternsRequestCondition(
-				new String[] {"/jobs/{jobName}"}, null, null, true, false, Collections.singletonList("json"));
-
-		MockHttpServletRequest request = initRequest("/jobs/my.job");
-		PatternsRequestCondition match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).containsExactly("/jobs/{jobName}");
-
-		request = initRequest("/jobs/my.job.json");
-		match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).containsExactly("/jobs/{jobName}.json");
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void matchSuffixPatternUsingFileExtensions2() {
-		PatternsRequestCondition condition1 = new PatternsRequestCondition(
-				new String[] {"/prefix"}, null, null, true, false, Collections.singletonList("json"));
-
-		PatternsRequestCondition condition2 = new PatternsRequestCondition(
-				new String[] {"/suffix"}, null, null, true, false, null);
-
-		PatternsRequestCondition combined = condition1.combine(condition2);
-
-		MockHttpServletRequest request = initRequest("/prefix/suffix.json");
-		PatternsRequestCondition match = combined.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-	}
-
-	@Test
-	void matchTrailingSlash() {
-		MockHttpServletRequest request = initRequest("/foo/");
-
-		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
-		PatternsRequestCondition match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).containsExactly("/foo/");
-
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, true, null);
-		match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns()).first(STRING)
-				.as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)")
-				.isEqualTo("/foo/");
-
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, false, null);
-		match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNull();
-	}
-
-	@Test
 	void matchPatternContainsExtension() {
 		MockHttpServletRequest request = initRequest("/foo.html");
 		PatternsRequestCondition match = new PatternsRequestCondition("/foo.jpg").getMatchingCondition(request);
@@ -203,11 +119,7 @@ class PatternsRequestConditionTests {
 
 	@Test // gh-22543
 	void matchWithEmptyPatterns() {
-		PatternsRequestCondition condition = new PatternsRequestCondition();
-		assertThat(condition.getMatchingCondition(initRequest(""))).isNotNull();
-		assertThat(condition.getMatchingCondition(initRequest("/anything"))).isNull();
-
-		condition = condition.combine(new PatternsRequestCondition());
+		PatternsRequestCondition condition = new PatternsRequestCondition().combine(new PatternsRequestCondition());
 		assertThat(condition.getMatchingCondition(initRequest(""))).isNotNull();
 		assertThat(condition.getMatchingCondition(initRequest("/anything"))).isNull();
 	}

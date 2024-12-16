@@ -23,8 +23,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -35,7 +33,6 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -100,74 +97,6 @@ class RequestMappingHandlerMappingTests {
 
 		mapping.afterPropertiesSet();
 		assertThat(mapping.getBuilderConfiguration()).isNotNull().isNotSameAs(config);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void useRegisteredSuffixPatternMatch() {
-		RequestMappingHandlerMapping mapping = createMapping();
-
-		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy =
-				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
-		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
-
-		mapping.setContentNegotiationManager(manager);
-		mapping.setUseRegisteredSuffixPatternMatch(true);
-		mapping.afterPropertiesSet();
-
-		assertThat(mapping.useSuffixPatternMatch()).isTrue();
-		assertThat(mapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(mapping.getFileExtensions()).isEqualTo(Collections.singletonList("json"));
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void useRegisteredSuffixPatternMatchInitialization() {
-		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy =
-				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
-		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
-
-		final Set<String> extensions = new HashSet<>();
-
-		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping() {
-			@Override
-			protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-				extensions.addAll(getFileExtensions());
-				return super.getMappingForMethod(method, handlerType);
-			}
-		};
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.registerSingleton("testController", ComposedAnnotationController.class);
-		wac.refresh();
-
-		mapping.setContentNegotiationManager(manager);
-		mapping.setUseRegisteredSuffixPatternMatch(true);
-		mapping.setApplicationContext(wac);
-		mapping.afterPropertiesSet();
-
-		assertThat(extensions).containsOnly("json");
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void suffixPatternMatchSettings() {
-		RequestMappingHandlerMapping mapping = createMapping();
-
-		assertThat(mapping.useSuffixPatternMatch()).isFalse();
-		assertThat(mapping.useRegisteredSuffixPatternMatch()).isFalse();
-
-		mapping.setUseRegisteredSuffixPatternMatch(false);
-		assertThat(mapping.useSuffixPatternMatch())
-				.as("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch")
-				.isFalse();
-
-		mapping.setUseRegisteredSuffixPatternMatch(true);
-		assertThat(mapping.useSuffixPatternMatch())
-				.as("'true' registeredSuffixPatternMatch should enable suffixPatternMatch")
-				.isTrue();
 	}
 
 	@PathPatternsParameterizedTest

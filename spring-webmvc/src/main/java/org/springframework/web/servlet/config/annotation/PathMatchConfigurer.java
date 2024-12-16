@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -50,16 +49,7 @@ public class PathMatchConfigurer {
 	private PathPatternParser patternParser;
 
 	@Nullable
-	private Boolean trailingSlashMatch;
-
-	@Nullable
 	private Map<String, Predicate<Class<?>>> pathPrefixes;
-
-	@Nullable
-	private Boolean suffixPatternMatch;
-
-	@Nullable
-	private Boolean registeredSuffixPatternMatch;
 
 	@Nullable
 	private UrlPathHelper urlPathHelper;
@@ -84,8 +74,6 @@ public class PathMatchConfigurer {
 	 * <p><strong>Note:</strong> This property is mutually exclusive with the
 	 * following other, {@code AntPathMatcher} related properties:
 	 * <ul>
-	 * <li>{@link #setUseSuffixPatternMatch(Boolean)}
-	 * <li>{@link #setUseRegisteredSuffixPatternMatch(Boolean)}
 	 * <li>{@link #setUrlPathHelper(UrlPathHelper)}
 	 * <li>{@link #setPathMatcher(PathMatcher)}
 	 * </ul>
@@ -100,20 +88,6 @@ public class PathMatchConfigurer {
 	public PathMatchConfigurer setPatternParser(@Nullable PathPatternParser patternParser) {
 		this.patternParser = patternParser;
 		this.preferPathMatcher = (patternParser == null);
-		return this;
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
-	 * order to support the deprecation of the property.
-	 * @deprecated as of 6.0, see
-	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
-	 */
-	@Deprecated(since = "6.0")
-	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
-		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
 	}
 
@@ -133,49 +107,6 @@ public class PathMatchConfigurer {
 			this.pathPrefixes = new LinkedHashMap<>();
 		}
 		this.pathPrefixes.put(prefix, predicate);
-		return this;
-	}
-
-	/**
-	 * Whether to use suffix pattern match (".*") when matching patterns to
-	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p><strong>Note:</strong> This property is mutually exclusive with
-	 * {@link #setPatternParser(PathPatternParser)}. If set, it enables use of
-	 * String path matching, unless a {@code PathPatternParser} is also
-	 * explicitly set in which case this property is ignored.
-	 * <p>By default this is set to {@code false}.
-	 * @deprecated as of 5.2.4. See class-level note in
-	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options. As there is no replacement for this method, in 5.2.x it is
-	 * necessary to set it to {@code false}. In 5.3 the default changes to
-	 * {@code false} and use of this property becomes unnecessary.
-	 */
-	@Deprecated
-	public PathMatchConfigurer setUseSuffixPatternMatch(@Nullable Boolean suffixPatternMatch) {
-		this.suffixPatternMatch = suffixPatternMatch;
-		this.preferPathMatcher |= (suffixPatternMatch != null && suffixPatternMatch);
-		return this;
-	}
-
-	/**
-	 * Whether suffix pattern matching should work only against path extensions
-	 * explicitly registered when you
-	 * {@link WebMvcConfigurer#configureContentNegotiation configure content
-	 * negotiation}. This is generally recommended to reduce ambiguity and to
-	 * avoid issues such as when a "." appears in the path for other reasons.
-	 * <p><strong>Note:</strong> This property is mutually exclusive with
-	 * {@link #setPatternParser(PathPatternParser)}. If set, it enables use of
-	 * String path matching, unless a {@code PathPatternParser} is also
-	 * explicitly set in which case this property is ignored.
-	 * <p>By default this is set to "false".
-	 * @deprecated as of 5.2.4. See class-level note in
-	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options.
-	 */
-	@Deprecated
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(@Nullable Boolean registeredSuffixPatternMatch) {
-		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-		this.preferPathMatcher |= (registeredSuffixPatternMatch != null && registeredSuffixPatternMatch);
 		return this;
 	}
 
@@ -233,36 +164,8 @@ public class PathMatchConfigurer {
 	}
 
 	@Nullable
-	@Deprecated
-	public Boolean isUseTrailingSlashMatch() {
-		return this.trailingSlashMatch;
-	}
-
-	@Nullable
 	protected Map<String, Predicate<Class<?>>> getPathPrefixes() {
 		return this.pathPrefixes;
-	}
-
-	/**
-	 * Whether to use registered suffixes for pattern matching.
-	 * @deprecated as of 5.2.4, see deprecation note on
-	 * {@link #setUseRegisteredSuffixPatternMatch(Boolean)}.
-	 */
-	@Nullable
-	@Deprecated
-	public Boolean isUseRegisteredSuffixPatternMatch() {
-		return this.registeredSuffixPatternMatch;
-	}
-
-	/**
-	 * Whether to use registered suffixes for pattern matching.
-	 * @deprecated as of 5.2.4, see deprecation note on
-	 * {@link #setUseSuffixPatternMatch(Boolean)}.
-	 */
-	@Nullable
-	@Deprecated
-	public Boolean isUseSuffixPatternMatch() {
-		return this.suffixPatternMatch;
 	}
 
 	@Nullable

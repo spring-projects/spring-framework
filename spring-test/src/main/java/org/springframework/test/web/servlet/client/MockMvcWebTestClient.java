@@ -371,16 +371,6 @@ public interface MockMvcWebTestClient {
 		ControllerSpec patternParser(PathPatternParser parser);
 
 		/**
-		 * Whether to match trailing slashes.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setUseTrailingSlashPatternMatch(boolean)}.
-		 * @deprecated as of 6.0, see
-		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
-		 */
-		@Deprecated(since = "6.0")
-		ControllerSpec useTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch);
-
-		/**
 		 * Configure placeholder values to use.
 		 * <p>This is delegated to
 		 * {@link StandaloneMockMvcBuilder#addPlaceholderValue(String, String)}.

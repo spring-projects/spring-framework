@@ -409,21 +409,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
 		Object source = context.extractSource(element);
 		if (pathMatchingElement != null) {
-			if (pathMatchingElement.hasAttribute("trailing-slash")) {
-				boolean useTrailingSlashMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("trailing-slash"));
-				handlerMappingDef.getPropertyValues().add("useTrailingSlashMatch", useTrailingSlashMatch);
-			}
 			boolean preferPathMatcher = false;
-			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
-				boolean useSuffixPatternMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("suffix-pattern"));
-				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
-				preferPathMatcher |= useSuffixPatternMatch;
-			}
-			if (pathMatchingElement.hasAttribute("registered-suffixes-only")) {
-				boolean useRegisteredSuffixPatternMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("registered-suffixes-only"));
-				handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch", useRegisteredSuffixPatternMatch);
-				preferPathMatcher |= useRegisteredSuffixPatternMatch;
-			}
 
 			RuntimeBeanReference pathHelperRef = null;
 			if (pathMatchingElement.hasAttribute("path-helper")) {

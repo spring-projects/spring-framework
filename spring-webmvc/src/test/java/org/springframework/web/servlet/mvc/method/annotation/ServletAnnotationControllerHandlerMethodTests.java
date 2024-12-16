@@ -178,15 +178,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	@PathPatternsParameterizedTest
 	void emptyValueMapping(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(ControllerWithEmptyValueMapping.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				// UrlPathHelper returns "/" for "",
-				// so either the mapping has to be "/" or trailingSlashMatch must be on
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useTrailingSlashMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-		});
+		initDispatcherServlet(ControllerWithEmptyValueMapping.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/foo");
@@ -207,15 +199,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	@PathPatternsParameterizedTest
 	void errorThrownFromHandlerMethod(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(ControllerWithErrorThrown.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				// UrlPathHelper returns "/" for "",
-				// so either the mapping has to be "/" or trailingSlashMatch must be on
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useTrailingSlashMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-		});
+		initDispatcherServlet(ControllerWithErrorThrown.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/foo");
@@ -514,13 +498,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	@PathPatternsParameterizedTest
 	void adaptedHandleMethods(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(MyAdaptedController.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-		});
+		initDispatcherServlet(MyAdaptedController.class, usePathPatterns);
 		doTestAdaptedHandleMethods(usePathPatterns);
 	}
 
@@ -559,12 +537,6 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		request.addParameter("age", "2");
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-
-		if (!usePathPatterns) {
-			// This depends on suffix pattern matching and has different outcomes otherwise,
-			// for example, 404 vs another method matching, depending on the test case.
-			assertThat(response.getContentAsString()).isEqualTo("test-name1-2");
-		}
 
 		request = new MockHttpServletRequest("GET", "/myPath4.do");
 		request.addParameter("param1", "value1");
@@ -787,13 +759,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	@PathPatternsParameterizedTest
 	void relativePathDispatchingController(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(MyRelativePathDispatchingController.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-		});
+		initDispatcherServlet(MyRelativePathDispatchingController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myHandle");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -809,22 +775,11 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("myLangView");
-
-		request = new MockHttpServletRequest("GET", "/myApp/surprise.do");
-		response = new MockHttpServletResponse();
-		getServlet().service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo(!usePathPatterns ? "mySurpriseView" : "myView");
 	}
 
 	@PathPatternsParameterizedTest
 	void relativeMethodPathDispatchingController(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(MyRelativeMethodPathDispatchingController.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-		});
+		initDispatcherServlet(MyRelativeMethodPathDispatchingController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myHandle");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -845,15 +800,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 
-		if (!usePathPatterns) {
-			assertThat(response.getStatus()).isEqualTo(200);
-			assertThat(response.getContentAsString()).isEqualTo("mySurpriseView");
-		}
-		else {
-			assertThat(response.getStatus())
-					.as("Suffixes pattern matching should not work with PathPattern's")
-					.isEqualTo(404);
-		}
+		assertThat(response.getStatus()).as("Suffixes pattern matching is not supported").isEqualTo(404);
 	}
 
 	@PathPatternsParameterizedTest
@@ -1774,108 +1721,6 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(response.getStatus()).as("Wrong status code").isEqualTo(MockHttpServletResponse.SC_CREATED);
 		assertThat(response.getHeaderNames().size()).as("Wrong number of headers").isEqualTo(0);
 		assertThat(response.getContentLength()).as("Expected an empty content").isEqualTo(0);
-	}
-
-	@PathPatternsParameterizedTest
-	@SuppressWarnings("deprecation")
-	void responseBodyAsHtml(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				// `useSuffixPatternMatch` is not allowed with PathPattern's
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-
-			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
-			factoryBean.setFavorPathExtension(true);
-			factoryBean.afterPropertiesSet();
-
-			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
-			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
-			wac.registerBeanDefinition("handlerAdapter", adapterDef);
-		});
-
-		byte[] content = "alert('boo')".getBytes(StandardCharsets.ISO_8859_1);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a1.html");
-		request.setContent(content);
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
-		getServlet().service(request, response);
-
-		if (!usePathPatterns) {
-			assertThat(response.getStatus()).isEqualTo(200);
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
-			assertThat(response.getHeader("Content-Disposition")).isEqualTo("inline;filename=f.txt");
-			assertThat(response.getContentAsByteArray()).isEqualTo(content);
-		}
-		else {
-			assertThat(response.getStatus())
-					.as("Suffixes pattern matching should not work with PathPattern's")
-					.isEqualTo(404);
-		}
-	}
-
-	@PathPatternsParameterizedTest
-	@SuppressWarnings("deprecation")
-	void responseBodyAsHtmlWithSuffixPresent(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
-			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
-			factoryBean.setFavorPathExtension(true);
-			factoryBean.afterPropertiesSet();
-			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
-			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
-			wac.registerBeanDefinition("handlerAdapter", adapterDef);
-		});
-
-		byte[] content = "alert('boo')".getBytes(StandardCharsets.ISO_8859_1);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a2.html");
-		request.setContent(content);
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
-		getServlet().service(request, response);
-
-		assertThat(response.getStatus()).isEqualTo(200);
-		assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
-		assertThat(response.getHeader("Content-Disposition")).isNull();
-		assertThat(response.getContentAsByteArray()).isEqualTo(content);
-	}
-
-	@PathPatternsParameterizedTest
-	void responseBodyAsHtmlWithProducesCondition(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
-			if (!usePathPatterns) {
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("useSuffixPatternMatch", true);
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-			}
-
-			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
-			factoryBean.afterPropertiesSet();
-
-			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
-			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
-			wac.registerBeanDefinition("handlerAdapter", adapterDef);
-		});
-
-		byte[] content = "alert('boo')".getBytes(StandardCharsets.ISO_8859_1);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a3.html");
-		request.setContent(content);
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
-		getServlet().service(request, response);
-
-		if (!usePathPatterns) {
-			assertThat(response.getStatus()).isEqualTo(200);
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
-			assertThat(response.getHeader("Content-Disposition")).isNull();
-			assertThat(response.getContentAsByteArray()).isEqualTo(content);
-		}
-		else {
-			assertThat(response.getStatus())
-					.as("Suffixes pattern matching should not work with PathPattern's")
-					.isEqualTo(404);
-		}
 	}
 
 	@PathPatternsParameterizedTest
@@ -3052,7 +2897,6 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	static class TestViewResolver implements ViewResolver {
 
-		@SuppressWarnings("deprecation")
 		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return (model, request, response) -> {
@@ -4018,16 +3862,6 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@RequestMapping(path = "/a1", method = RequestMethod.GET)
 		public String a1(@RequestBody String body) {
-			return body;
-		}
-
-		@RequestMapping(path = "/a2.html", method = RequestMethod.GET)
-		public String a2(@RequestBody String body) {
-			return body;
-		}
-
-		@RequestMapping(path = "/a3", method = RequestMethod.GET, produces = "text/html")
-		public String a3(@RequestBody String body) throws IOException {
 			return body;
 		}
 
