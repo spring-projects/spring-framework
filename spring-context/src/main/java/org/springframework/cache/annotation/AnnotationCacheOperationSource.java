@@ -49,7 +49,6 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 
 	private boolean publicMethodsOnly = true;
 
-
 	/**
 	 * Create a default AnnotationCacheOperationSource, supporting public methods
 	 * that carry the {@code Cacheable} and {@code CacheEvict} annotations.
@@ -98,7 +97,6 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		this.annotationParsers = annotationParsers;
 	}
 
-
 	/**
 	 * Set whether cacheable methods are expected to be public.
 	 * <p>The default is {@code true}.
@@ -107,7 +105,6 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	public void setPublicMethodsOnly(boolean publicMethodsOnly) {
 		this.publicMethodsOnly = publicMethodsOnly;
 	}
-
 
 	@Override
 	public boolean isCandidateClass(Class<?> targetClass) {
@@ -145,16 +142,17 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		Collection<CacheOperation> ops = null;
 		for (CacheAnnotationParser parser : this.annotationParsers) {
 			Collection<CacheOperation> annOps = provider.getCacheOperations(parser);
-			if (annOps != null) {
-				if (ops == null) {
-					ops = annOps;
-				}
-				else {
-					Collection<CacheOperation> combined = new ArrayList<>(ops.size() + annOps.size());
-					combined.addAll(ops);
-					combined.addAll(annOps);
-					ops = combined;
-				}
+			if (annOps == null) {
+				continue;
+			}
+			if (ops == null) {
+				ops = annOps;
+			}
+			else {
+				Collection<CacheOperation> combined = new ArrayList<>(ops.size() + annOps.size());
+				combined.addAll(ops);
+				combined.addAll(annOps);
+				ops = combined;
 			}
 		}
 		return ops;
@@ -168,7 +166,6 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	protected boolean allowPublicMethodsOnly() {
 		return this.publicMethodsOnly;
 	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -197,6 +194,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		 */
 		@Nullable
 		Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser);
+		
 	}
 
 }
