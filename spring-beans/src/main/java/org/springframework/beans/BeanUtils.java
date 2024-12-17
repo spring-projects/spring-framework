@@ -340,10 +340,9 @@ public abstract class BeanUtils {
 			return clazz.getDeclaredMethod(methodName, paramTypes);
 		}
 		catch (NoSuchMethodException ex) {
-			if (clazz.getSuperclass() != null) {
-				return findDeclaredMethod(clazz.getSuperclass(), methodName, paramTypes);
-			}
-			return null;
+			return Optional.ofNullable(clazz.getSuperclass())
+				.map(superClass -> findDeclaredMethod(superClass.getSuperclass(), methodName, paramTypes))
+				.orElse(null)
 		}
 	}
 
@@ -365,7 +364,7 @@ public abstract class BeanUtils {
 	@Nullable
 	public static Method findMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
-
+		
 		Method targetMethod = findMethodWithMinimalParameters(clazz.getMethods(), methodName);
 		if (targetMethod == null) {
 			targetMethod = findDeclaredMethodWithMinimalParameters(clazz, methodName);
@@ -412,21 +411,22 @@ public abstract class BeanUtils {
 		Method targetMethod = null;
 		int numMethodsFoundWithCurrentMinimumArgs = 0;
 		for (Method method : methods) {
-			if (method.getName().equals(methodName)) {
-				int numParams = method.getParameterCount();
-				if (targetMethod == null || numParams < targetMethod.getParameterCount()) {
+			if (!method.getName().equals(methodName)) {
+				continue;
+			}
+			int numParams = method.getParameterCount();
+			if (targetMethod == null || numParams < targetMethod.getParameterCount()) {
+				targetMethod = method;
+				numMethodsFoundWithCurrentMinimumArgs = 1;
+			}
+			else if (!method.isBridge() && targetMethod.getParameterCount() == numParams) {
+				if (targetMethod.isBridge()) {
+					// Prefer regular method over bridge...
 					targetMethod = method;
-					numMethodsFoundWithCurrentMinimumArgs = 1;
 				}
-				else if (!method.isBridge() && targetMethod.getParameterCount() == numParams) {
-					if (targetMethod.isBridge()) {
-						// Prefer regular method over bridge...
-						targetMethod = method;
-					}
-					else {
-						// Additional candidate with same length
-						numMethodsFoundWithCurrentMinimumArgs++;
-					}
+				else {
+					// Additional candidate with same length
+					numMethodsFoundWithCurrentMinimumArgs++;
 				}
 			}
 		}
@@ -492,7 +492,6 @@ public abstract class BeanUtils {
 			return findMethod(clazz, methodName, parameterTypes);
 		}
 	}
-
 
 	/**
 	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given class.
@@ -632,9 +631,7 @@ public abstract class BeanUtils {
 		if (pd instanceof GenericTypeAwarePropertyDescriptor gpd) {
 			return gpd.hasUniqueWriteMethod();
 		}
-		else {
-			return (pd.getWriteMethod() != null);
-		}
+		return (pd.getWriteMethod() != null);
 	}
 
 	/**
@@ -647,11 +644,9 @@ public abstract class BeanUtils {
 		if (pd instanceof GenericTypeAwarePropertyDescriptor gpd) {
 			return new MethodParameter(gpd.getWriteMethodParameter());
 		}
-		else {
-			Method writeMethod = pd.getWriteMethod();
-			Assert.state(writeMethod != null, "No write method available");
-			return new MethodParameter(writeMethod, 0);
-		}
+		Method writeMethod = pd.getWriteMethod();
+		Assert.state(writeMethod != null, "No write method available");
+		return new MethodParameter(writeMethod, 0);
 	}
 
 	/**
@@ -709,7 +704,6 @@ public abstract class BeanUtils {
 	public static boolean isSimpleValueType(Class<?> type) {
 		return ClassUtils.isSimpleValueType(type);
 	}
-
 
 	/**
 	 * Copy the property values of the given source bean into the target bean.
@@ -826,21 +820,23 @@ public abstract class BeanUtils {
 			if (writeMethod != null && (ignoredProps == null || !ignoredProps.contains(targetPd.getName()))) {
 				PropertyDescriptor sourcePd = (sourceResults != null ?
 						sourceResults.getPropertyDescriptor(targetPd.getName()) : targetPd);
-				if (sourcePd != null) {
-					Method readMethod = sourcePd.getReadMethod();
-					if (readMethod != null) {
-						if (isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
-							try {
-								ReflectionUtils.makeAccessible(readMethod);
-								Object value = readMethod.invoke(source);
-								ReflectionUtils.makeAccessible(writeMethod);
-								writeMethod.invoke(target, value);
-							}
-							catch (Throwable ex) {
-								throw new FatalBeanException(
-										"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
-							}
-						}
+				if (sourcePd == null) {
+					continue;
+				}
+				Method readMethod = sourcePd.getReadMethod();
+				if (readMethod == null) {
+					continue;
+				}
+				if (isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
+					try {
+						ReflectionUtils.makeAccessible(readMethod);
+						Object value = readMethod.invoke(source);
+						ReflectionUtils.makeAccessible(writeMethod);
+						writeMethod.invoke(target, value);
+					}
+					catch (Throwable ex) {
+						throw new FatalBeanException(
+								"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
 					}
 				}
 			}
