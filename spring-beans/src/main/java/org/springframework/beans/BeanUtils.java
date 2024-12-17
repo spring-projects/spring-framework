@@ -342,7 +342,7 @@ public abstract class BeanUtils {
 		catch (NoSuchMethodException ex) {
 			return Optional.ofNullable(clazz.getSuperclass())
 				.map(superClass -> findDeclaredMethod(superClass.getSuperclass(), methodName, paramTypes))
-				.orElse(null)
+				.orElse(null);
 		}
 	}
 
