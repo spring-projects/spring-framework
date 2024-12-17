@@ -66,8 +66,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Nullable
 	private Object rootHandler;
 
-	private boolean useTrailingSlashMatch = false;
-
 	private boolean lazyInitHandlers = false;
 
 	private final Map<String, Object> handlerMap = new LinkedHashMap<>();
@@ -99,28 +97,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Nullable
 	public Object getRootHandler() {
 		return this.rootHandler;
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 * If enabled a URL pattern such as "/users" also matches to "/users/".
-	 * <p>The default value is {@code false}.
-	 * @deprecated as of 6.0, see
-	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
-	 */
-	@Deprecated(since = "6.0")
-	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
-		this.useTrailingSlashMatch = useTrailingSlashMatch;
-		if (getPatternParser() != null) {
-			getPatternParser().setMatchOptionalTrailingSeparator(useTrailingSlashMatch);
-		}
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 */
-	public boolean useTrailingSlashMatch() {
-		return this.useTrailingSlashMatch;
 	}
 
 	/**
@@ -360,11 +336,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			if (getPathMatcher().match(registeredPattern, lookupPath)) {
 				matchingPatterns.add(registeredPattern);
 			}
-			else if (useTrailingSlashMatch()) {
-				if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", lookupPath)) {
-					matchingPatterns.add(registeredPattern + "/");
-				}
-			}
 		}
 
 		String bestMatch = null;
@@ -494,11 +465,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		String lookupPath = UrlPathHelper.getResolvedLookupPath(request);
 		if (getPathMatcher().match(pattern, lookupPath)) {
 			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
-		}
-		else if (useTrailingSlashMatch()) {
-			if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
-				return new RequestMatchResult(pattern + "/", lookupPath, getPathMatcher());
-			}
 		}
 		return null;
 	}

@@ -118,12 +118,12 @@ See the sections on xref:web/webmvc-cors.adoc[CORS] and the xref:web/webmvc-cors
 [.small]#xref:web/webflux/reactive-spring.adoc#filters.url-handler[See equivalent in the Reactive stack]#
 
 In previous Spring Framework versions, Spring MVC could be configured to ignore trailing slashes in URL paths
-when mapping incoming requests on controller methods. This could be done by enabling the `setUseTrailingSlashMatch`
-option on the `PathMatchConfigurer`. This means that sending a "GET /home/" request would be handled by a controller
-method annotated with `@GetMapping("/home")`.
+when mapping incoming requests on controller methods. This means that sending a "GET /home/" request would be
+handled by a controller method annotated with `@GetMapping("/home")`.
 
-This option has been retired, but applications are still expected to handle such requests in a safe way.
-The `UrlHandlerFilter` Servlet filter has been designed for this purpose. It can be configured to:
+This option was deprecated in 6.0 and removed in 7.0, but applications are still expected to handle such
+requests in a safe way. The `UrlHandlerFilter` Servlet filter has been designed for this purpose.
+It can be configured to:
 
 * respond with an HTTP redirect status when receiving URLs with trailing slashes, sending browsers to the non-trailing slash URL variant.
 * wrap the request to act as if the request was sent without a trailing slash and continue the processing of the request.
