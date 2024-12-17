@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<bean id="patternParser" class="org.springframework.web.util.pattern.PathPatternParser"/>
+
+	<mvc:annotation-driven>
+		<mvc:path-matching pattern-parser="patternParser"/>
+	</mvc:annotation-driven>
+
+	<mvc:view-controller path="/foo"/>
+	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/"/>
+
+</beans>

@@ -92,7 +92,6 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		registerUrlProvider(context, source);
 
-		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, context, source);
 		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, context, source);
 
 		String resourceHandlerName = registerResourceHandler(context, element, pathHelperRef, source);
@@ -111,8 +110,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
-		handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef).add("urlPathHelper", pathHelperRef);
+		handlerMappingDef.getPropertyValues().add("urlMap", urlMap).add("urlPathHelper", pathHelperRef);
+		MvcNamespaceUtils.configurePathMatching(handlerMappingDef, context, source);
 
 		String orderValue = element.getAttribute("order");
 		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
