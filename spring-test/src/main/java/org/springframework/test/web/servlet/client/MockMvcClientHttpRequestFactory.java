@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.client;
+package org.springframework.test.web.servlet.client;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +34,6 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -45,16 +44,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * A {@link ClientHttpRequestFactory} for requests executed via {@link MockMvc}.
  *
  * @author Rossen Stoyanchev
- * @since 3.2
- * @deprecated in favor of {@link RestTestClient#bindTo(MockMvc)}
+ * @author Rob Worsnop
+ * @since 7.0
  */
-@Deprecated(since = "7.0")
-public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory {
+class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private final MockMvc mockMvc;
 
 
-	public MockMvcClientHttpRequestFactory(MockMvc mockMvc) {
+	MockMvcClientHttpRequestFactory(MockMvc mockMvc) {
 		Assert.notNull(mockMvc, "MockMvc must not be null");
 		this.mockMvc = mockMvc;
 	}

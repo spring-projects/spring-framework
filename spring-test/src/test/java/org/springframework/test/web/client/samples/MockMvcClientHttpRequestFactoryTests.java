@@ -55,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
+@SuppressWarnings("deprecation")
 public class MockMvcClientHttpRequestFactoryTests {
 
 	@Autowired
