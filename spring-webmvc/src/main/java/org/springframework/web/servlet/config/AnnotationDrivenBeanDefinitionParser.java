@@ -407,16 +407,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			RootBeanDefinition handlerMappingDef, Element element, ParserContext context) {
 
 		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
+		Object source = context.extractSource(element);
 		if (pathMatchingElement != null) {
-			Object source = context.extractSource(element);
-
 			if (pathMatchingElement.hasAttribute("trailing-slash")) {
 				boolean useTrailingSlashMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("trailing-slash"));
 				handlerMappingDef.getPropertyValues().add("useTrailingSlashMatch", useTrailingSlashMatch);
 			}
-
 			boolean preferPathMatcher = false;
-
 			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
 				boolean useSuffixPatternMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("suffix-pattern"));
 				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
@@ -441,12 +438,20 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				pathMatcherRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
 				preferPathMatcher = true;
 			}
-			pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(pathMatcherRef, context, source);
-			handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
-
 			if (preferPathMatcher) {
+				pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(pathMatcherRef, context, source);
+				handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
 				handlerMappingDef.getPropertyValues().add("patternParser", null);
 			}
+			else if (pathMatchingElement.hasAttribute("pattern-parser")) {
+				RuntimeBeanReference patternParserRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("pattern-parser"));
+				patternParserRef = MvcNamespaceUtils.registerPatternParser(patternParserRef, context, source);
+				handlerMappingDef.getPropertyValues().add("patternParser", patternParserRef);
+			}
+		}
+		else {
+			RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, context, source);
+			handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
 		}
 
 	}

@@ -89,6 +89,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(hm.useRegisteredSuffixPatternMatch()).isTrue();
 		assertThat(hm.getUrlPathHelper()).isInstanceOf(TestPathHelper.class);
 		assertThat(hm.getPathMatcher()).isInstanceOf(TestPathMatcher.class);
+		assertThat(hm.getPatternParser()).isNull();
 		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
 		assertThat(fileExtensions).containsExactly("xml");
 	}

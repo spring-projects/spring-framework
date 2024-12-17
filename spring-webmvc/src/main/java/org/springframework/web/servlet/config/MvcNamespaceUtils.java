@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -39,6 +41,7 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Convenience methods for use in MVC namespace BeanDefinitionParsers.
@@ -63,6 +66,8 @@ public abstract class MvcNamespaceUtils {
 	private static final String URL_PATH_HELPER_BEAN_NAME = "mvcUrlPathHelper";
 
 	private static final String PATH_MATCHER_BEAN_NAME = "mvcPathMatcher";
+
+	private static final String PATTERN_PARSER_BEAN_NAME = "mvcPatternParser";
 
 	private static final String CORS_CONFIGURATION_BEAN_NAME = "mvcCorsConfigurations";
 
@@ -106,6 +111,18 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
+	 * Return the {@link PathMatcher} bean definition if it has been registered
+	 * in the context as an alias with its well-known name, or {@code null}.
+	 */
+	@Nullable
+	static RuntimeBeanReference getCustomPathMatcher(ParserContext context) {
+		if(context.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
+			return new RuntimeBeanReference(PATH_MATCHER_BEAN_NAME);
+		}
+		return null;
+	}
+
+	/**
 	 * Adds an alias to an existing well-known name or registers a new instance of a {@link PathMatcher}
 	 * under that well-known name, unless already registered.
 	 * @return a RuntimeBeanReference to this {@link PathMatcher} instance
@@ -116,6 +133,9 @@ public abstract class MvcNamespaceUtils {
 		if (pathMatcherRef != null) {
 			if (context.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
 				context.getRegistry().removeAlias(PATH_MATCHER_BEAN_NAME);
+			}
+			if (context.getRegistry().containsBeanDefinition(PATH_MATCHER_BEAN_NAME)) {
+				context.getRegistry().removeBeanDefinition(PATH_MATCHER_BEAN_NAME);
 			}
 			context.getRegistry().registerAlias(pathMatcherRef.getBeanName(), PATH_MATCHER_BEAN_NAME);
 		}
@@ -131,6 +151,60 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
+	 * Return the {@link PathPatternParser} bean definition if it has been registered
+	 * in the context as an alias with its well-known name, or {@code null}.
+	 */
+	@Nullable
+	static RuntimeBeanReference getCustomPatternParser(ParserContext context) {
+		if (context.getRegistry().isAlias(PATTERN_PARSER_BEAN_NAME)) {
+			return new RuntimeBeanReference(PATTERN_PARSER_BEAN_NAME);
+		}
+		return null;
+	}
+
+	/**
+	 * Adds an alias to an existing well-known name or registers a new instance of a {@link PathPatternParser}
+	 * under that well-known name, unless already registered.
+	 * @return a RuntimeBeanReference to this {@link PathPatternParser} instance
+	 */
+	public static RuntimeBeanReference registerPatternParser(@Nullable RuntimeBeanReference patternParserRef,
+			ParserContext context, @Nullable Object source) {
+		if (patternParserRef != null) {
+			if (context.getRegistry().isAlias(PATTERN_PARSER_BEAN_NAME)) {
+				context.getRegistry().removeAlias(PATTERN_PARSER_BEAN_NAME);
+			}
+			context.getRegistry().registerAlias(patternParserRef.getBeanName(), PATTERN_PARSER_BEAN_NAME);
+		}
+		else if (!context.getRegistry().isAlias(PATTERN_PARSER_BEAN_NAME) &&
+				!context.getRegistry().containsBeanDefinition(PATTERN_PARSER_BEAN_NAME)) {
+			RootBeanDefinition pathMatcherDef = new RootBeanDefinition(PathPatternParser.class);
+			pathMatcherDef.setSource(source);
+			pathMatcherDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			context.getRegistry().registerBeanDefinition(PATTERN_PARSER_BEAN_NAME, pathMatcherDef);
+			context.registerComponent(new BeanComponentDefinition(pathMatcherDef, PATTERN_PARSER_BEAN_NAME));
+		}
+		return new RuntimeBeanReference(PATTERN_PARSER_BEAN_NAME);
+	}
+
+	static void configurePathMatching(RootBeanDefinition handlerMappingDef, ParserContext context, @Nullable Object source) {
+		Assert.isTrue(AbstractHandlerMapping.class.isAssignableFrom(handlerMappingDef.getBeanClass()),
+				() -> "Handler mapping type [" + handlerMappingDef.getTargetType() + "] not supported");
+		RuntimeBeanReference customPathMatcherRef = MvcNamespaceUtils.getCustomPathMatcher(context);
+		RuntimeBeanReference customPatternParserRef = MvcNamespaceUtils.getCustomPatternParser(context);
+		if (customPathMatcherRef != null) {
+			handlerMappingDef.getPropertyValues().add("pathMatcher", customPathMatcherRef)
+					.add("patternParser", null);
+		}
+		else if (customPatternParserRef != null) {
+			handlerMappingDef.getPropertyValues().add("patternParser", customPatternParserRef);
+		}
+		else {
+			handlerMappingDef.getPropertyValues().add("pathMatcher",
+					MvcNamespaceUtils.registerPathMatcher(null, context, source));
+		}
+	}
+
+	/**
 	 * Registers an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
@@ -142,6 +216,7 @@ public abstract class MvcNamespaceUtils {
 			mappingDef.getPropertyValues().add("order", 2);	// consistent with WebMvcConfigurationSupport
 			RuntimeBeanReference corsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
 			mappingDef.getPropertyValues().add("corsConfigurations", corsRef);
+			configurePathMatching(mappingDef, context, source);
 			context.getRegistry().registerBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME, mappingDef);
 			context.registerComponent(new BeanComponentDefinition(mappingDef, BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME));
 		}
