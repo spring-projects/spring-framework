@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 		beanDef.setSource(source);
 		beanDef.getPropertyValues().add("order", "1");
-		beanDef.getPropertyValues().add("pathMatcher", MvcNamespaceUtils.registerPathMatcher(null, context, source));
+		MvcNamespaceUtils.configurePathMatching(beanDef, context, source);
 		beanDef.getPropertyValues().add("urlPathHelper", MvcNamespaceUtils.registerUrlPathHelper(null, context, source));
 		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
 		beanDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);

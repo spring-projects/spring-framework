@@ -89,7 +89,14 @@
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	The bean name of the PathMatcher implementation to use for matching URL paths against registered URL patterns.
-	Default is AntPathMatcher.
+	If no bean is provided, the PathPatternParser will be used instead.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="pattern-parser" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The bean name of the PathPatternParser instance to use for matching URL paths against registered URL patterns.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
