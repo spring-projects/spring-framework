@@ -28,6 +28,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 
+import org.springframework.http.support.DefaultHttpCookieParser;
+import org.springframework.http.support.HttpCookieParser;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -49,6 +51,8 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	private final HttpClient httpClient;
 
 	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
+
+	private HttpCookieParser httpCookieParser = new DefaultHttpCookieParser();
 
 	@Nullable
 	private Duration readTimeout;
@@ -106,6 +110,16 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 		this.readTimeout = readTimeout;
 	}
 
+	/**
+	 * Set the {@code HttpCookieParser} to be used in response parsing.
+	 * <p>Default is {@code DefaultHttpCookieParser} based on {@code java.net.HttpCookie} capabilities</p>
+	 * @param httpCookieParser
+	 */
+	public void setHttpCookieParser(HttpCookieParser httpCookieParser) {
+		Assert.notNull(readTimeout, "httpCookieParser is required");
+		this.httpCookieParser = httpCookieParser;
+	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(
@@ -121,7 +135,7 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 					this.httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofPublisher());
 
 			return Mono.fromCompletionStage(future)
-					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory));
+					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory, this.httpCookieParser));
 		}));
 	}
 
