@@ -430,7 +430,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public ContentNegotiationManager mvcContentNegotiationManager() {
 		if (this.contentNegotiationManager == null) {
-			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer(this.servletContext);
+			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer();
 			configurer.mediaTypes(getDefaultMediaTypes());
 			configureContentNegotiation(configurer);
 			this.contentNegotiationManager = configurer.buildContentNegotiationManager();

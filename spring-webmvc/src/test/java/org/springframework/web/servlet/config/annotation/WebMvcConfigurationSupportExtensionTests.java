@@ -75,7 +75,6 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -264,7 +263,6 @@ class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void contentNegotiation() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
@@ -287,11 +285,7 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		request = new MockHttpServletRequest("GET", "/resources/foo.gif");
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
-
 		assertThat(chain).isNotNull();
-		ResourceHttpRequestHandler handler = (ResourceHttpRequestHandler) chain.getHandler();
-		assertThat(handler).isNotNull();
-		assertThat(handler.getContentNegotiationManager()).isSameAs(manager);
 	}
 
 	@Test

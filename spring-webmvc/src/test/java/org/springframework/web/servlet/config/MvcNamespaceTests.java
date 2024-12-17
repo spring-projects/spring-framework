@@ -380,7 +380,6 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 
@@ -389,10 +388,6 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
-
-		ResourceHttpRequestHandler handler = appContext.getBean(ResourceHttpRequestHandler.class);
-		assertThat(handler).isNotNull();
-		assertThat(handler.getContentNegotiationManager()).isSameAs(manager);
 
 		SimpleUrlHandlerMapping resourceMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertThat(resourceMapping).isNotNull();

@@ -3,8 +3,7 @@
  *
  * <p>{@link org.springframework.web.accept.ContentNegotiationStrategy} is the main
  * abstraction for determining requested {@linkplain org.springframework.http.MediaType media types}
- * with implementations based on
- * {@linkplain org.springframework.web.accept.PathExtensionContentNegotiationStrategy path extensions}, a
+ * with implementations based on a
  * {@linkplain org.springframework.web.accept.ParameterContentNegotiationStrategy a request parameter}, the
  * {@linkplain org.springframework.web.accept.HeaderContentNegotiationStrategy 'Accept' header}, or a
  * {@linkplain org.springframework.web.accept.FixedContentNegotiationStrategy default content type}.

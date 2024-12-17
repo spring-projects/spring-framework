@@ -55,13 +55,6 @@ import org.springframework.web.accept.ParameterContentNegotiationStrategy;
  * <td>Off</td>
  * </tr>
  * <tr>
- * <td>{@link #favorPathExtension}</td>
- * <td>false (as of 5.3)</td>
- * <td>{@link org.springframework.web.accept.PathExtensionContentNegotiationStrategy
- * PathExtensionContentNegotiationStrategy}</td>
- * <td>Off</td>
- * </tr>
- * <tr>
  * <td>{@link #ignoreAcceptHeader}</td>
  * <td>false</td>
  * <td>{@link HeaderContentNegotiationStrategy}</td>
@@ -84,13 +77,6 @@ import org.springframework.web.accept.ParameterContentNegotiationStrategy;
  * <p>As of 5.0 you can set the exact strategies to use via
  * {@link #strategies(List)}.
  *
- * <p><strong>Note:</strong> if you must use URL-based content type resolution,
- * the use of a query parameter is simpler and preferable to the use of a path
- * extension since the latter can cause issues with URI variables, path
- * parameters, and URI decoding. Consider setting {@link #favorPathExtension}
- * to {@literal false} or otherwise set the strategies to use explicitly via
- * {@link #strategies(List)}.
- *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
@@ -99,16 +85,6 @@ public class ContentNegotiationConfigurer {
 	private final ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 
 	private final Map<String, MediaType> mediaTypes = new HashMap<>();
-
-
-	/**
-	 * Class constructor with {@link jakarta.servlet.ServletContext}.
-	 */
-	public ContentNegotiationConfigurer(@Nullable ServletContext servletContext) {
-		if (servletContext != null) {
-			this.factory.setServletContext(servletContext);
-		}
-	}
 
 
 	/**
@@ -141,20 +117,6 @@ public class ContentNegotiationConfigurer {
 	 */
 	public ContentNegotiationConfigurer parameterName(String parameterName) {
 		this.factory.setParameterName(parameterName);
-		return this;
-	}
-
-	/**
-	 * Whether the path extension in the URL path should be used to determine
-	 * the requested media type.
-	 * <p>By default this is set to {@code false} in which case path extensions
-	 * have no impact on content negotiation.
-	 * @deprecated as of 5.2.4. See deprecation note on
-	 * {@link ContentNegotiationManagerFactoryBean#setFavorPathExtension(boolean)}.
-	 */
-	@Deprecated
-	public ContentNegotiationConfigurer favorPathExtension(boolean favorPathExtension) {
-		this.factory.setFavorPathExtension(favorPathExtension);
 		return this;
 	}
 
@@ -202,37 +164,11 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * Whether to ignore requests with path extension that cannot be resolved
-	 * to any media type. Setting this to {@code false} will result in an
-	 * {@code HttpMediaTypeNotAcceptableException} if there is no match.
-	 * <p>By default this is set to {@code true}.
-	 * @deprecated as of 5.2.4. See deprecation note on
-	 * {@link ContentNegotiationManagerFactoryBean#setIgnoreUnknownPathExtensions(boolean)}.
-	 */
-	@Deprecated
-	public ContentNegotiationConfigurer ignoreUnknownPathExtensions(boolean ignore) {
-		this.factory.setIgnoreUnknownPathExtensions(ignore);
-		return this;
-	}
-
-	/**
-	 * When {@link #favorPathExtension} is set, this property determines whether
-	 * to allow use of JAF (Java Activation Framework) to resolve a path
-	 * extension to a specific MediaType.
-	 * @deprecated as of 5.0, in favor of {@link #useRegisteredExtensionsOnly(boolean)}
-	 * which has reverse behavior
-	 */
-	@Deprecated
-	public ContentNegotiationConfigurer useJaf(boolean useJaf) {
-		return this.useRegisteredExtensionsOnly(!useJaf);
-	}
-
-	/**
-	 * When {@link #favorPathExtension favorPathExtension} is set, this
+	 * When {@link #favorParameter(boolean)} is set, this
 	 * property determines whether to use only registered {@code MediaType} mappings
 	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use defaults if available.
+	 * <p>By default, this is not set in which case
+	 * {@code ParameterContentNegotiationStrategy} will use defaults if available.
 	 */
 	public ContentNegotiationConfigurer useRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
 		this.factory.setUseRegisteredExtensionsOnly(useRegisteredExtensionsOnly);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,6 @@ public class ResourceHandlerRegistry {
 	private final ApplicationContext applicationContext;
 
 	@Nullable
-	private final ContentNegotiationManager contentNegotiationManager;
-
-	@Nullable
 	private final UrlPathHelper pathHelper;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
@@ -111,7 +108,6 @@ public class ResourceHandlerRegistry {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;
 		this.servletContext = servletContext;
-		this.contentNegotiationManager = contentNegotiationManager;
 		this.pathHelper = pathHelper;
 	}
 
@@ -173,14 +169,10 @@ public class ResourceHandlerRegistry {
 		return new SimpleUrlHandlerMapping(urlMap, this.order);
 	}
 
-	@SuppressWarnings("deprecation")
 	private ResourceHttpRequestHandler getRequestHandler(ResourceHandlerRegistration registration) {
 		ResourceHttpRequestHandler handler = registration.getRequestHandler();
 		if (this.pathHelper != null) {
 			handler.setUrlPathHelper(this.pathHelper);
-		}
-		if (this.contentNegotiationManager != null) {
-			handler.setContentNegotiationManager(this.contentNegotiationManager);
 		}
 		handler.setServletContext(this.servletContext);
 		handler.setApplicationContext(this.applicationContext);

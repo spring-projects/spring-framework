@@ -281,31 +281,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Configure a {@code ContentNegotiationManager} to help determine the
-	 * media types for resources being served. If the manager contains a path
-	 * extension strategy it will be checked for registered file extension.
-	 * @since 4.3
-	 * @deprecated as of 5.2.4 in favor of using {@link #setMediaTypes(Map)}
-	 * with mappings possibly obtained from
-	 * {@link ContentNegotiationManager#getMediaTypeMappings()}.
-	 */
-	@Deprecated
-	public void setContentNegotiationManager(@Nullable ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
-	}
-
-	/**
-	 * Return the configured content negotiation manager.
-	 * @since 4.3
-	 * @deprecated as of 5.2.4
-	 */
-	@Nullable
-	@Deprecated
-	public ContentNegotiationManager getContentNegotiationManager() {
-		return this.contentNegotiationManager;
-	}
-
-	/**
 	 * Add mappings between file extensions, extracted from the filename of a
 	 * static {@link Resource}, and corresponding media type to set on the
 	 * response.
@@ -459,18 +434,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (this.resourceRegionHttpMessageConverter == null) {
 			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
-
-		ContentNegotiationManager manager = getContentNegotiationManager();
-		if (manager != null) {
-			setMediaTypes(manager.getMediaTypeMappings());
-		}
-
-		@SuppressWarnings("deprecation")
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy =
-				initContentNegotiationStrategy();
-		if (strategy != null) {
-			setMediaTypes(strategy.getMediaTypes());
-		}
 	}
 
 	private void resolveResourceLocations() {
@@ -544,21 +507,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Initialize the strategy to use to determine the media type for a resource.
-	 * @deprecated as of 5.2.4 this method returns {@code null}, and if a
-	 * subclass returns an actual instance, the instance is used only as a
-	 * source of media type mappings, if it contains any. Please, use
-	 * {@link #setMediaTypes(Map)} instead, or if you need to change behavior,
-	 * you can override {@link #getMediaType(HttpServletRequest, Resource)}.
-	 */
-	@Nullable
-	@Deprecated
-	@SuppressWarnings("deprecation")
-	protected org.springframework.web.accept.PathExtensionContentNegotiationStrategy initContentNegotiationStrategy() {
-		return null;
 	}
 
 

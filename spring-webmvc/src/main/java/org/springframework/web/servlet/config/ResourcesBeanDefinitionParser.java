@@ -188,11 +188,6 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			parseResourceChain(resourceHandlerDef, context, resourceChainElement, source);
 		}
 
-		Object manager = MvcNamespaceUtils.getContentNegotiationManager(context);
-		if (manager != null) {
-			values.add("contentNegotiationManager", manager);
-		}
-
 		String beanName = context.getReaderContext().generateBeanName(resourceHandlerDef);
 		context.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
 		context.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));

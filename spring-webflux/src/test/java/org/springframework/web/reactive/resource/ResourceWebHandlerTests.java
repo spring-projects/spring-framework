@@ -176,8 +176,7 @@ class ResourceWebHandlerTests {
 			assertResponseBody(exchange, "foo bar foo bar foo bar");
 		}
 
-		@Test
-			// SPR-14577
+		@Test // SPR-14577
 		void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 			List<Resource> paths = List.of(new ClassPathResource("test/", getClass()));
 			ResourceWebHandler handler = new ResourceWebHandler();
