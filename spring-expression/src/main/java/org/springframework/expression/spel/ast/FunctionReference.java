@@ -229,8 +229,9 @@ public class FunctionReference extends SpelNodeImpl {
 		ReflectionHelper.convertAllMethodHandleArguments(converter, functionArgs, methodHandle, varArgPosition);
 
 		if (isSuspectedVarargs) {
-			if (declaredParamCount == 1) {
-				// We only repackage the varargs if it is the ONLY argument -- for example,
+			if (declaredParamCount == 1 && !methodHandle.isVarargsCollector()) {
+				// We only repackage the arguments if the MethodHandle accepts a single
+				// argument AND the MethodHandle is not a "varargs collector" -- for example,
 				// when we are dealing with a bound MethodHandle.
 				functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
 						methodHandle.type().parameterArray(), functionArgs);
