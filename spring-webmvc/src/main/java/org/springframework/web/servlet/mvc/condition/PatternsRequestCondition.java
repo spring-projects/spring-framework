@@ -48,7 +48,11 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+ * for use at runtime in web modules in favor of parsed patterns with
+ * {@link PathPatternParser}.
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
 	private static final Set<String> EMPTY_PATH_PATTERN = Collections.singleton("");

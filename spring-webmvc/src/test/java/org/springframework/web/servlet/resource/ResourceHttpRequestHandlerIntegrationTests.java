@@ -229,6 +229,7 @@ class ResourceHttpRequestHandlerIntegrationTests {
 
 	static class DecodingUrlPathHelperConfig implements WebMvcConfigurer {
 
+		@SuppressWarnings("removal")
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			UrlPathHelper helper = new UrlPathHelper();
@@ -240,6 +241,7 @@ class ResourceHttpRequestHandlerIntegrationTests {
 
 	static class NonDecodingUrlPathHelperConfig implements WebMvcConfigurer {
 
+		@SuppressWarnings("removal")
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			UrlPathHelper helper = new UrlPathHelper();

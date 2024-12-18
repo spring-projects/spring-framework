@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 		this.parser = delegate.getPatternParser();
 	}
 
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Override
 	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		PathPattern pathPattern = this.pathPatternCache.computeIfAbsent(pattern, value -> {

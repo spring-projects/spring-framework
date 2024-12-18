@@ -100,7 +100,10 @@ public class ResourceHandlerRegistry {
 	 * {@link #ResourceHandlerRegistry(ApplicationContext, ServletContext, ContentNegotiationManager)}
 	 * that also accepts the {@link UrlPathHelper} used for mapping requests to static resources.
 	 * @since 4.3.13
+	 * @deprecated in favor of
+	 * {@link #ResourceHandlerRegistry(ApplicationContext, ServletContext, ContentNegotiationManager)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
 			@Nullable ContentNegotiationManager contentNegotiationManager, @Nullable UrlPathHelper pathHelper) {
 
@@ -167,6 +170,7 @@ public class ResourceHandlerRegistry {
 		return new SimpleUrlHandlerMapping(urlMap, this.order);
 	}
 
+	@SuppressWarnings("removal")
 	private ResourceHttpRequestHandler getRequestHandler(ResourceHandlerRegistration registration) {
 		ResourceHttpRequestHandler handler = registration.getRequestHandler();
 		if (this.pathHelper != null) {

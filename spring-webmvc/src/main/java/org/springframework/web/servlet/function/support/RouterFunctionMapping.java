@@ -222,6 +222,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);
 	}
 
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Override
 	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		throw new UnsupportedOperationException("This HandlerMapping uses PathPatterns");

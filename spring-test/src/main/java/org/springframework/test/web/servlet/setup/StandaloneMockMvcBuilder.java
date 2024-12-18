@@ -37,6 +37,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
@@ -297,9 +298,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	/**
-	 * Enable URL path matching with parsed
-	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}
-	 * instead of String pattern matching with a {@link org.springframework.util.PathMatcher}.
+	 * Configure the parser to use for
+	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}.
+	 * <p>By default, this is a default instance of {@link PathPatternParser}.
 	 * @param parser the parser to use
 	 * @since 5.3
 	 */
@@ -313,7 +314,11 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * Set if ";" (semicolon) content should be stripped from the request URI. The value,
 	 * if provided, is in turn set on
 	 * {@link org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public StandaloneMockMvcBuilder setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.removeSemicolonContent = removeSemicolonContent;
 		return this;
@@ -428,6 +433,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/** Using the MVC Java configuration as the starting point for the "standalone" setup. */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
+		@SuppressWarnings("removal")
 		public RequestMappingHandlerMapping getHandlerMapping(
 				FormattingConversionService mvcConversionService,
 				ResourceUrlProvider mvcResourceUrlProvider) {

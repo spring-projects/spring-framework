@@ -33,10 +33,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.server.PathContainer;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given
@@ -111,7 +113,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * static resources. This helps to derive information about the lookup path
 	 * such as whether it is decoded or not.
 	 * @since 4.3.13
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
@@ -119,7 +125,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	/**
 	 * The configured {@link UrlPathHelper}.
 	 * @since 4.3.13
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}

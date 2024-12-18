@@ -230,15 +230,15 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(resolver.getErrorResponseInterceptors()).containsExactly(interceptor);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
-	@SuppressWarnings("deprecation")
 	public void configurePathMatcher() {
 		PathMatcher pathMatcher = mock();
 		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
-			@SuppressWarnings("deprecation")
+			@SuppressWarnings("removal")
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setUrlPathHelper(pathHelper).setPathMatcher(pathMatcher);
 			}
@@ -293,6 +293,7 @@ public class DelegatingWebMvcConfigurationTests {
 		configAssertion.accept(webMvcConfig.mvcUrlPathHelper(), webMvcConfig.mvcPathMatcher());
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void configurePathPatternParser() {
 		PathPatternParser patternParser = new PathPatternParser();
@@ -300,6 +301,7 @@ public class DelegatingWebMvcConfigurationTests {
 		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
+			@SuppressWarnings("removal")
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setPatternParser(patternParser)

@@ -188,9 +188,9 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	}
 
 	/**
-	 * Enable URL path matching with parsed
-	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}
-	 * instead of String pattern matching with a {@link org.springframework.util.PathMatcher}.
+	 * Configure the parser to use for
+	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}.
+	 * <p>By default, this is a default instance of {@link PathPatternParser}.
 	 * @param parser the parser to use
 	 */
 	public RouterFunctionMockMvcBuilder setPatternParser(@Nullable PathPatternParser parser) {

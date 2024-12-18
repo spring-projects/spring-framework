@@ -179,6 +179,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath(boolean)
 	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "6.0")
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
@@ -194,6 +195,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode(boolean)
 	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "6.0")
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
@@ -209,6 +211,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
 	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "6.0")
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
@@ -221,7 +224,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Configure the UrlPathHelper to use for resolution of lookup paths.
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
@@ -232,7 +240,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the {@link #setUrlPathHelper configured} {@code UrlPathHelper}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -241,9 +253,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Configure the PathMatcher to use.
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
-	 * <p>By default this is {@link AntPathMatcher}.
+	 * <p>By default, this is {@link AntPathMatcher}.
 	 * @see org.springframework.util.AntPathMatcher
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
@@ -254,7 +271,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the {@link #setPathMatcher configured} {@code PathMatcher}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
@@ -311,6 +332,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 4.2
 	 * @see #setCorsProcessor(CorsProcessor)
 	 */
+	@SuppressWarnings("removal")
 	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
 		if (CollectionUtils.isEmpty(corsConfigurations)) {
 			this.corsConfigurationSource = null;
@@ -339,6 +361,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.1
 	 * @see #setCorsProcessor(CorsProcessor)
 	 */
+	@SuppressWarnings("removal")
 	public void setCorsConfigurationSource(CorsConfigurationSource source) {
 		Assert.notNull(source, "CorsConfigurationSource must not be null");
 		this.corsConfigurationSource = source;

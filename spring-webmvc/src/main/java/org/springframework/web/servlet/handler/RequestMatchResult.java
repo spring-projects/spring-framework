@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.PathContainer;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Container for the result from request pattern matching via
@@ -71,7 +73,11 @@ public class RequestMatchResult {
 	 * @param pattern the pattern that was matched, possibly with a '/' appended
 	 * @param lookupPath the mapping path
 	 * @param pathMatcher the PathMatcher instance used for the match
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestMatchResult(String pattern, String lookupPath, PathMatcher pathMatcher) {
 		Assert.hasText(pattern, "'matchingPattern' is required");
 		Assert.hasText(lookupPath, "'lookupPath' is required");
@@ -87,7 +93,7 @@ public class RequestMatchResult {
 
 	/**
 	 * Extract URI template variables from the matching pattern as defined in
-	 * {@link PathMatcher#extractUriTemplateVariables}.
+	 * {@link PathPattern#matchAndExtract(PathContainer)}.
 	 * @return a map with URI template variables
 	 */
 	@SuppressWarnings({"ConstantConditions", "NullAway"})

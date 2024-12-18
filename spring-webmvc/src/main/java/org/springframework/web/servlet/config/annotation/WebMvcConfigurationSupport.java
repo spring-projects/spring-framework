@@ -391,7 +391,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * <p><b>Note:</b> This is only used when parsed patterns are not
 	 * {@link PathMatchConfigurer#setPatternParser enabled}.
 	 * @since 4.1
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Bean
 	public UrlPathHelper mvcUrlPathHelper() {
 		return getPathMatchConfigurer().getUrlPathHelperOrDefault();
@@ -404,7 +409,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * <p><b>Note:</b> This is only used when parsed patterns are not
 	 * {@link PathMatchConfigurer#setPatternParser enabled}.
 	 * @since 4.1
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Bean
 	public PathMatcher mvcPathMatcher() {
 		return getPathMatchConfigurer().getPathMatcherOrDefault();
@@ -474,6 +484,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		return mapping;
 	}
 
+	@SuppressWarnings("removal")
 	private void initHandlerMapping(
 			@Nullable AbstractHandlerMapping mapping, FormattingConversionService conversionService,
 			ResourceUrlProvider resourceUrlProvider) {
@@ -554,6 +565,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * resource handlers. To configure resource handling, override
 	 * {@link #addResourceHandlers}.
 	 */
+	@SuppressWarnings("removal")
 	@Bean
 	public @Nullable HandlerMapping resourceHandlerMapping(
 			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager,
@@ -585,6 +597,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * A {@link ResourceUrlProvider} bean for use with the MVC dispatcher.
 	 * @since 4.1
 	 */
+	@SuppressWarnings("removal")
 	@Bean
 	public ResourceUrlProvider mvcResourceUrlProvider() {
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();

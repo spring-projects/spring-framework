@@ -65,12 +65,6 @@ public class PathMatchConfigurer {
 	 * Set the {@link PathPatternParser} to parse {@link PathPattern patterns}
 	 * with for URL path matching. Parsed patterns provide a more modern and
 	 * efficient alternative to String path matching via {@link AntPathMatcher}.
-	 * <p><strong>Note:</strong> This property is mutually exclusive with the
-	 * following other, {@code AntPathMatcher} related properties:
-	 * <ul>
-	 * <li>{@link #setUrlPathHelper(UrlPathHelper)}
-	 * <li>{@link #setPathMatcher(PathMatcher)}
-	 * </ul>
 	 * <p>By default, as of 6.0, a {@link PathPatternParser} with default
 	 * settings is used, which enables parsed {@link PathPattern patterns}.
 	 * Set this property to {@code null} to fall back on String path matching via
@@ -110,9 +104,13 @@ public class PathMatchConfigurer {
 	 * {@link #setPatternParser(PathPatternParser)}. If set, it enables use of
 	 * String path matching, unless a {@code PathPatternParser} is also
 	 * explicitly set in which case this property is ignored.
-	 * <p>By default this is an instance of {@link UrlPathHelper} with default
+	 * <p>By default, this is an instance of {@link UrlPathHelper} with default
 	 * settings.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public PathMatchConfigurer setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 		this.preferPathMatcher = true;
@@ -125,9 +123,12 @@ public class PathMatchConfigurer {
 	 * {@link #setPatternParser(PathPatternParser)}. If set, it enables use of
 	 * String path matching, unless a {@code PathPatternParser} is also
 	 * explicitly set in which case this property is ignored.
-	 * <p>By default this is an instance of {@link AntPathMatcher} with default
+	 * <p>By default, this is an instance of {@link AntPathMatcher} with default
 	 * settings.
+	 * @deprecated use of {@link PathMatcher} is deprecated for use at runtime
+	 * in web modules in favor of parsed patterns with {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		this.preferPathMatcher = true;
@@ -143,7 +144,10 @@ public class PathMatchConfigurer {
 	 * {@link PathMatcher} related option is explicitly set.
 	 * </ul>
 	 * @since 6.0
+	 * @deprecated use of {@link PathMatcher} is deprecated for use at runtime
+	 * in web modules in favor of parsed patterns with {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected boolean preferPathMatcher() {
 		return (this.patternParser == null && this.preferPathMatcher);
 	}
@@ -160,10 +164,12 @@ public class PathMatchConfigurer {
 		return this.pathPrefixes;
 	}
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
@@ -171,7 +177,11 @@ public class PathMatchConfigurer {
 	/**
 	 * Return the configured UrlPathHelper or a default, shared instance otherwise.
 	 * @since 5.3
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected UrlPathHelper getUrlPathHelperOrDefault() {
 		if (this.urlPathHelper != null) {
 			return this.urlPathHelper;
@@ -185,7 +195,10 @@ public class PathMatchConfigurer {
 	/**
 	 * Return the configured PathMatcher or a default, shared instance otherwise.
 	 * @since 5.3
+	 * @deprecated use of {@link PathMatcher} is deprecated for use at runtime
+	 * in web modules in favor of parsed patterns with {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected PathMatcher getPathMatcherOrDefault() {
 		if (this.pathMatcher != null) {
 			return this.pathMatcher;

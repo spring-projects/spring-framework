@@ -138,6 +138,7 @@ class HandlerMappingIntrospectorTests {
 		assertThat(initIntrospector(context).allHandlerMappingsUsePathPatternParser()).isFalse();
 	}
 
+	@SuppressWarnings("removal")
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void getMatchable(boolean usePathPatterns) throws Exception {

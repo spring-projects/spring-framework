@@ -525,6 +525,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Return the request mapping paths that are not patterns.
 	 * @since 5.3
 	 */
+	@SuppressWarnings("removal")
 	protected Set<String> getDirectPaths(T mapping) {
 		Set<String> urls = Collections.emptySet();
 		for (String path : getMappingPathPatterns(mapping)) {

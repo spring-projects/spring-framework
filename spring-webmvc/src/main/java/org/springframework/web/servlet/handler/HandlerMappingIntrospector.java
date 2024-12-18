@@ -570,6 +570,8 @@ public class HandlerMappingIntrospector
 			return this.delegate.getPatternParser();
 		}
 
+		@SuppressWarnings("removal")
+		@Deprecated(since = "7.0", forRemoval = true)
 		@Override
 		public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 			pattern = initFullPathPattern(pattern);

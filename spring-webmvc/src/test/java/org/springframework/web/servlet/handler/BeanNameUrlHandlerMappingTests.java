@@ -116,6 +116,7 @@ class BeanNameUrlHandlerMappingTests {
 		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void requestsWithFullPaths() throws Exception {
 

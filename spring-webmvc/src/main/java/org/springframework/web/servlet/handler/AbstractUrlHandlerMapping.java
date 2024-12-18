@@ -319,6 +319,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @see #exposePathWithinMapping
 	 * @see AntPathMatcher
 	 */
+	@SuppressWarnings("removal")
 	protected @Nullable Object lookupHandler(String lookupPath, HttpServletRequest request) throws Exception {
 		Object handler = getDirectMatch(lookupPath, request);
 		if (handler != null) {
@@ -452,7 +453,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 	}
 
+	@SuppressWarnings("removal")
 	@Override
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
 		String lookupPath = UrlPathHelper.getResolvedLookupPath(request);

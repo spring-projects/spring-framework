@@ -30,6 +30,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("removal")
 class PatternsRequestConditionTests {
 
 	@Test

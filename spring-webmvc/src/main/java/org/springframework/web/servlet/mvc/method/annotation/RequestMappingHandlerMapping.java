@@ -135,7 +135,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void afterPropertiesSet() {
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
@@ -390,6 +390,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 	}
 
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Override
 	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");

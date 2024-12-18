@@ -89,6 +89,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			}
 		}
 
+		@SuppressWarnings("removal")
 		private void initLookupPath(ResourceUrlProvider urlProvider) {
 			this.resourceUrlProvider = urlProvider;
 			if (this.indexLookupPath == null) {

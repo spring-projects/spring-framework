@@ -120,6 +120,7 @@ public class InterceptorRegistryTests {
 		verifyWebInterceptor(interceptors.get(1), this.webInterceptor2);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void addInterceptorsWithCustomPathMatcher() {
 		PathMatcher pathMatcher = mock();

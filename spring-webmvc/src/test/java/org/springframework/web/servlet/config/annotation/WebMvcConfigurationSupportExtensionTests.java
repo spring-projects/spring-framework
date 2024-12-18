@@ -123,6 +123,7 @@ class WebMvcConfigurationSupportExtensionTests {
 		this.config.setServletContext(this.context.getServletContext());
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void handlerMappings() throws Exception {
 		RequestMappingHandlerMapping rmHandlerMapping = this.config.requestMappingHandlerMapping(
@@ -414,6 +415,7 @@ class WebMvcConfigurationSupportExtensionTests {
 			exceptionResolvers.add(0, new ResponseStatusExceptionResolver());
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer.setPathMatcher(new TestPathMatcher());

@@ -593,6 +593,7 @@ class CrossOriginTests {
 			return AnnotationUtils.findAnnotation(beanType, Controller.class) != null;
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 			RequestMapping annotation = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);

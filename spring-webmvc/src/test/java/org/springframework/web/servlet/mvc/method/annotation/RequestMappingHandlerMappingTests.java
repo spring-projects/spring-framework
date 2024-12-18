@@ -143,6 +143,7 @@ class RequestMappingHandlerMappingTests {
 		assertThat(info.getActivePatternsCondition().getMatchingCondition(request)).isNull();
 	}
 
+	@SuppressWarnings("removal")
 	private void initRequestPath(RequestMappingHandlerMapping mapping, MockHttpServletRequest request) {
 		PathPatternParser parser = mapping.getPatternParser();
 		if (parser != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,11 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * parsed {@code PathPatterns} are used instead.
 	 * For further details on that, see {@link #setAllowInitLookupPath(boolean)}.
 	 * <p>By default this is {@link UrlPathHelper#defaultInstance}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
@@ -167,7 +171,11 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * @param allowInitLookupPath whether to disable lazy initialization
 	 * and fail if not already resolved
 	 * @since 5.3
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setAllowInitLookupPath(boolean allowInitLookupPath) {
 		this.allowInitLookupPath = allowInitLookupPath;
 	}
@@ -194,7 +202,11 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * String pattern matching even when a
 	 * {@link ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
 	 * is available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}

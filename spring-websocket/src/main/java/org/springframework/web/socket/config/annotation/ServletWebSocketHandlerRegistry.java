@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,14 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * {@link WebSocketHandlerRegistry} with Spring MVC handler mappings for the
@@ -77,11 +79,16 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	/**
 	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
 	 * used to map handshake requests.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -111,6 +118,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 				.forEach(registration -> registration.setTaskScheduler(scheduler));
 	}
 
+	@SuppressWarnings("removal")
 	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ServletWebSocketHandlerRegistration registration : this.registrations) {

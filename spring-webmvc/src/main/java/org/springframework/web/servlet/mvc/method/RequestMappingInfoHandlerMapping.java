@@ -135,6 +135,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
 		super.handleMatch(info, lookupPath, request);
@@ -180,6 +181,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 	}
 
+	@SuppressWarnings("removal")
 	private void extractMatchDetails(
 			PatternsRequestCondition condition, String lookupPath, HttpServletRequest request) {
 
@@ -203,6 +205,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 	}
 
+	@SuppressWarnings("removal")
 	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(
 			HttpServletRequest request, Map<String, String> uriVariables) {
 

@@ -172,14 +172,22 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * String pattern matching even when a
 	 * {@linkplain ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
 	 * is available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 
 	/**
 	 * Get the {@linkplain #setPathMatcher(PathMatcher) configured} PathMatcher.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}

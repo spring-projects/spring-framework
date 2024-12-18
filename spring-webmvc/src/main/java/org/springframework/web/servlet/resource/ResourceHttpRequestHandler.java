@@ -49,6 +49,7 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.HttpRequestHandler;
@@ -60,6 +61,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * {@code HttpRequestHandler} that serves static resources in an optimized way
@@ -314,7 +316,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * static resources. This helps to derive information about the lookup path
 	 * such as whether it is decoded or not.
 	 * @since 4.3.13
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
@@ -322,7 +328,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * The configured {@link UrlPathHelper}.
 	 * @since 4.3.13
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -477,6 +487,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * resolvers and set its {@code allowedLocations} property (if empty) to
 	 * match the {@link #setLocations locations} configured on this class.
 	 */
+	@SuppressWarnings("removal")
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(getLocations())) {
 			return;

@@ -78,6 +78,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 				.asInstanceOf(BOOLEAN).isTrue();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	public void testPathMatchingConfiguration() {
 		loadBeanDefinitions("mvc-config-path-matching.xml");

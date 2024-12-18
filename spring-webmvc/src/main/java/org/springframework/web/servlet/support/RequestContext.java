@@ -37,6 +37,7 @@ import org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -49,6 +50,7 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Context holder for request-specific state, like current web application context, current locale,
@@ -499,7 +501,11 @@ public class RequestContext {
 	 * Set the UrlPathHelper to use for context path and request URI decoding.
 	 * Can be used to pass a shared UrlPathHelper instance in.
 	 * <p>A default UrlPathHelper is always available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
@@ -509,7 +515,11 @@ public class RequestContext {
 	 * Return the UrlPathHelper used for context path and request URI decoding.
 	 * Can be used to configure the current UrlPathHelper.
 	 * <p>A default UrlPathHelper is always available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}

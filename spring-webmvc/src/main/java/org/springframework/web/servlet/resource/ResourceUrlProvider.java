@@ -75,7 +75,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * Configure a {@code UrlPathHelper} to use in
 	 * {@link #getForRequestUrl(jakarta.servlet.http.HttpServletRequest, String)}
 	 * in order to derive the lookup path for a target request URL path.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
@@ -83,7 +87,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	/**
 	 * Return the configured {@code UrlPathHelper}.
 	 * @since 4.2.8
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -91,14 +99,22 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	/**
 	 * Configure a {@code PathMatcher} to use when comparing target lookup path
 	 * against resource mappings.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 
 	/**
 	 * Return the configured {@code PathMatcher}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
@@ -181,6 +197,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		return (resolvedLookupPath != null ? prefix + resolvedLookupPath + suffix : null);
 	}
 
+	@SuppressWarnings("removal")
 	private int getLookupPathIndex(HttpServletRequest request) {
 		UrlPathHelper pathHelper = getUrlPathHelper();
 		if (request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) == null) {

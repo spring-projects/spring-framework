@@ -65,6 +65,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static final PathPatternsRequestCondition EMPTY_PATH_PATTERNS = new PathPatternsRequestCondition();
 
+	@SuppressWarnings("removal")
 	private static final PatternsRequestCondition EMPTY_PATTERNS = new PatternsRequestCondition();
 
 	private static final RequestMethodsRequestCondition EMPTY_REQUEST_METHODS = new RequestMethodsRequestCondition();
@@ -84,6 +85,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private final @Nullable PathPatternsRequestCondition pathPatternsCondition;
 
+	@SuppressWarnings("removal")
 	private final @Nullable PatternsRequestCondition patternsCondition;
 
 	private final RequestMethodsRequestCondition methodsCondition;
@@ -108,6 +110,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * @deprecated as of 5.3 in favor using {@link RequestMappingInfo.Builder} via
 	 * {@link #paths(String...)}.
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated
 	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
@@ -130,6 +133,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * @deprecated as of 5.3 in favor using {@link RequestMappingInfo.Builder} via
 	 * {@link #paths(String...)}.
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated
 	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
@@ -149,6 +153,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				info.consumesCondition, info.producesCondition, customRequestCondition);
 	}
 
+	@SuppressWarnings("removal")
 	private RequestMappingInfo(@Nullable String name,
 			@Nullable PathPatternsRequestCondition pathPatternsCondition,
 			@Nullable PatternsRequestCondition patternsCondition,
@@ -202,7 +207,12 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * {@link PathMatcher} is in use.
 	 * <p>This is mutually exclusive with {@link #getPathPatternsCondition()}
 	 * such that when one returns {@code null} the other one returns an instance.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	public @Nullable PatternsRequestCondition getPatternsCondition() {
 		return this.patternsCondition;
 	}
@@ -230,6 +240,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * Return the mapping paths that are not patterns.
 	 * @since 5.3
 	 */
+	@SuppressWarnings("removal")
 	public Set<String> getDirectPaths() {
 		RequestCondition<?> condition = getActivePatternsCondition();
 		return (condition instanceof PathPatternsRequestCondition pprc ?
@@ -241,6 +252,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * patterns condition as Strings.
 	 * @since 5.3
 	 */
+	@SuppressWarnings("removal")
 	public Set<String> getPatternValues() {
 		RequestCondition<?> condition = getActivePatternsCondition();
 		return (condition instanceof PathPatternsRequestCondition pprc ?
@@ -251,6 +263,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * Whether the request mapping has an empty URL path mapping.
 	 * @since 6.0.10
 	 */
+	@SuppressWarnings("removal")
 	public boolean isEmptyMapping() {
 		RequestCondition<?> condition = getActivePatternsCondition();
 		return (condition instanceof PathPatternsRequestCondition pprc ?
@@ -324,6 +337,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * <p>Example: combine type- and method-level request mappings.
 	 * @return a new request mapping info instance; never {@code null}
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	public RequestMappingInfo combine(RequestMappingInfo other) {
 		String name = combineNames(other);
@@ -369,6 +383,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * patterns on top.
 	 * @return a new instance in case of a match; or {@code null} otherwise
 	 */
+	@SuppressWarnings("removal")
 	@Override
 	public @Nullable RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(request);
@@ -479,7 +494,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		return this.hashCode;
 	}
 
-	@SuppressWarnings({"ConstantConditions", "NullAway"})
+	@SuppressWarnings({"ConstantConditions", "NullAway", "removal"})
 	private static int calculateHashCode(
 			@Nullable PathPatternsRequestCondition pathPatterns, @Nullable PatternsRequestCondition patterns,
 			RequestMethodsRequestCondition methods, ParamsRequestCondition params, HeadersRequestCondition headers,
@@ -688,6 +703,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			return this;
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public RequestMappingInfo build() {
 
@@ -733,6 +749,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private @Nullable PathPatternsRequestCondition pathPatternsCondition;
 
+		@SuppressWarnings("removal")
 		private @Nullable PatternsRequestCondition patternsCondition;
 
 		private RequestMethodsRequestCondition methodsCondition;
@@ -762,6 +779,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.options = other.options;
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public Builder paths(String... paths) {
 			PathPatternParser parser = this.options.getPatternParserToUse();
@@ -912,14 +930,22 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * <p>By default, this is not set. You must set it explicitly if you want
 		 * {@link PathMatcher} to be used, or otherwise {@link RequestMappingInfo}
 		 * defaults to using {@link PathPatternParser}.
+		 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+		 * for use at runtime in web modules in favor of parsed patterns with
+		 * {@link PathPatternParser}.
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		public void setPathMatcher(@Nullable PathMatcher pathMatcher) {
 			this.pathMatcher = pathMatcher;
 		}
 
 		/**
 		 * Return a custom PathMatcher to use for the PatternsRequestCondition, if any.
+		 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+		 * for use at runtime in web modules in favor of parsed patterns with
+		 * {@link PathPatternParser}.
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		public @Nullable PathMatcher getPathMatcher() {
 			return this.pathMatcher;
 		}

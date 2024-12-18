@@ -48,7 +48,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
  */
 class RequestMappingInfoTests {
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "removal"})
 	static Stream<Named<RequestMappingInfo.Builder>> pathPatternsArguments() {
 		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 		config.setPathMatcher(new AntPathMatcher());
@@ -59,6 +59,7 @@ class RequestMappingInfoTests {
 	}
 
 
+	@SuppressWarnings({"removal", "DataFlowIssue"})
 	@PathPatternsParameterizedTest
 	void createEmpty(RequestMappingInfo.Builder infoBuilder) {
 
@@ -92,6 +93,7 @@ class RequestMappingInfoTests {
 		assertThat(info.getCustomCondition()).isSameAs(result.getCustomCondition());
 	}
 
+	@SuppressWarnings("removal")
 	@Test // gh-31662
 	void pathPatternByDefault() {
 		RequestMappingInfo info = RequestMappingInfo.paths().build();
@@ -319,6 +321,7 @@ class RequestMappingInfoTests {
 		assertThat(match).as("Pre-flight should match the ACCESS_CONTROL_REQUEST_METHOD").isNull();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void mutate() {
 		RequestMappingInfo.BuilderConfiguration options = new RequestMappingInfo.BuilderConfiguration();
