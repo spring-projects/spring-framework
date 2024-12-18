@@ -79,6 +79,8 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	void functionWithVarargs() {
+		// static String varargsFunction(String... strings) -> Arrays.toString(strings)
+
 		evaluate("#varargsFunction()", "[]", String.class);
 		evaluate("#varargsFunction(new String[0])", "[]", String.class);
 		evaluate("#varargsFunction('a')", "[a]", String.class);
@@ -239,6 +241,27 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		// Calling 'public static String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
 		evaluate("#formatObjectVarargs('x -> %s %s %s', T(List).of('a', 'b', 'c'))", expected, String.class);
 		evaluate("#formatObjectVarargs('x -> %s %s %s', {'a', 'b', 'c'})", expected, String.class);
+	}
+
+	@Test  // gh-34109
+	void functionViaMethodHandleForStaticMethodThatAcceptsOnlyVarargs() {
+		// #varargsFunctionHandle: static String varargsFunction(String... strings) -> Arrays.toString(strings)
+
+		evaluate("#varargsFunctionHandle()", "[]", String.class);
+		evaluate("#varargsFunctionHandle(new String[0])", "[]", String.class);
+		evaluate("#varargsFunctionHandle('a')", "[a]", String.class);
+		evaluate("#varargsFunctionHandle('a','b','c')", "[a, b, c]", String.class);
+		evaluate("#varargsFunctionHandle(new String[]{'a','b','c'})", "[a, b, c]", String.class);
+		// Conversion from int to String
+		evaluate("#varargsFunctionHandle(25)", "[25]", String.class);
+		evaluate("#varargsFunctionHandle('b',25)", "[b, 25]", String.class);
+		evaluate("#varargsFunctionHandle(new int[]{1, 2, 3})", "[1, 2, 3]", String.class);
+		// Strings that contain a comma
+		evaluate("#varargsFunctionHandle('a,b')", "[a,b]", String.class);
+		evaluate("#varargsFunctionHandle('a', 'x,y', 'd')", "[a, x,y, d]", String.class);
+		// null values
+		evaluate("#varargsFunctionHandle(null)", "[null]", String.class);
+		evaluate("#varargsFunctionHandle('a',null,'b')", "[a, null, b]", String.class);
 	}
 
 	@Test

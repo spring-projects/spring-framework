@@ -108,10 +108,15 @@ class TestScenarioCreator {
 				"formatObjectVarargs", MethodType.methodType(String.class, String.class, Object[].class));
 		testContext.registerFunction("formatObjectVarargs", formatObjectVarargs);
 
-		// #formatObjectVarargs(format, args...)
+		// #formatPrimitiveVarargs(format, args...)
 		MethodHandle formatPrimitiveVarargs = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
 				"formatPrimitiveVarargs", MethodType.methodType(String.class, String.class, int[].class));
 		testContext.registerFunction("formatPrimitiveVarargs", formatPrimitiveVarargs);
+
+		// #varargsFunctionHandle(args...)
+		MethodHandle varargsFunctionHandle = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"varargsFunction", MethodType.methodType(String.class, String[].class));
+		testContext.registerFunction("varargsFunctionHandle", varargsFunctionHandle);
 
 		// #add(int, int)
 		MethodHandle add = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
