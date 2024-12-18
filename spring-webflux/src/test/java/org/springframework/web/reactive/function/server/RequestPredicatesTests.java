@@ -296,6 +296,7 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(request)).isFalse();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void pathExtension() {
 		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
@@ -319,6 +320,7 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(request)).isFalse();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void pathExtensionPredicate() {
 		List<String> extensions = List.of("foo", "bar");

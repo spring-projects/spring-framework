@@ -270,7 +270,12 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that matches if the request's path has the given extension.
 	 * @param extension the path extension to match against, ignoring case
 	 * @return a predicate that matches if the request's path has the given file extension
+	 * @deprecated without replacement to discourage use of path extensions for request
+	 * mapping and for content negotiation (with similar deprecations and removals already
+	 * applied to annotated controllers). For further context, please read issue
+	 * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24179</a>
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public static RequestPredicate pathExtension(String extension) {
 		Assert.notNull(extension, "'extension' must not be null");
 		return new PathExtensionPredicate(extension);
@@ -282,7 +287,12 @@ public abstract class RequestPredicates {
 	 * @param extensionPredicate the predicate to test against the request path extension
 	 * @return a predicate that matches if the given predicate matches against the request's path
 	 * file extension
+	 * @deprecated without replacement to discourage use of path extensions for request
+	 * mapping and for content negotiation (with similar deprecations and removals already
+	 * applied to annotated controllers). For further context, please read issue
+	 * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24179</a>
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public static RequestPredicate pathExtension(Predicate<String> extensionPredicate) {
 		return new PathExtensionPredicate(extensionPredicate);
 	}
@@ -354,7 +364,12 @@ public abstract class RequestPredicates {
 		 * Receive notification of a path extension predicate.
 		 * @param extension the path extension that makes up the predicate
 		 * @see RequestPredicates#pathExtension(String)
+		 * @deprecated without replacement to discourage use of path extensions for request
+		 * mapping and for content negotiation (with similar deprecations and removals already
+		 * applied to annotated controllers). For further context, please read issue
+		 * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24179</a>
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		void pathExtension(String extension);
 
 		/**
@@ -816,6 +831,7 @@ public abstract class RequestPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	private static class PathExtensionPredicate implements RequestPredicate {
 
 		private final Predicate<String> extensionPredicate;
