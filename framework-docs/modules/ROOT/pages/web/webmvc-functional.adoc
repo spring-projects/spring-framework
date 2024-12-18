@@ -1,6 +1,7 @@
 [[webmvc-fn]]
 = Functional Endpoints
-[.small]#<<web-reactive.adoc#webflux-fn, See equivalent in the Reactive stack>>#
+
+[.small]#xref:web/webflux-functional.adoc[See equivalent in the Reactive stack]#
 
 Spring Web MVC includes WebMvc.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
