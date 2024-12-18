@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.lang.Nullable;
  * @author Costin Leau
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Yong-Hyun Kim
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
@@ -463,6 +464,7 @@ public abstract class ReflectionUtils {
 		if (result == null) {
 			try {
 				Method[] declaredMethods = clazz.getDeclaredMethods();
+				Arrays.sort(declaredMethods, ReflectionUtils::methodDeclaringClassHierarchySorter);
 				List<Method> defaultMethods = findDefaultMethodsOnInterfaces(clazz);
 				if (defaultMethods != null) {
 					result = new Method[declaredMethods.length + defaultMethods.size()];
@@ -484,6 +486,18 @@ public abstract class ReflectionUtils {
 			}
 		}
 		return (result.length == 0 || !defensive) ? result : result.clone();
+	}
+
+	private static int methodDeclaringClassHierarchySorter(Method method1, Method method2) {
+		Class<?> clazz1 = method1.getDeclaringClass();
+		Class<?> clazz2 = method2.getDeclaringClass();
+		if (clazz1 == clazz2) {
+			return 0;
+		}
+		if (clazz1.isAssignableFrom(clazz2)) {
+			return 1;
+		}
+		return -1;
 	}
 
 	@Nullable
