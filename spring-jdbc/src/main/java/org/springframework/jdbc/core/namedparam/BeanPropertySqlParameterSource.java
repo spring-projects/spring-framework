@@ -20,7 +20,6 @@ import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
@@ -90,7 +89,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
-	public @NonNull String[] getParameterNames() {
+	public String[] getParameterNames() {
 		return getReadablePropertyNames();
 	}
 

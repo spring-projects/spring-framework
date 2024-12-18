@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.annotation;
 
-import org.jspecify.annotations.NonNull;
-
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
 
@@ -44,7 +42,7 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	 * respectively.
 	 */
 	@Override
-	public @NonNull String[] selectImports(AdviceMode adviceMode) {
+	public String[] selectImports(AdviceMode adviceMode) {
 		return switch (adviceMode) {
 			case PROXY -> new String[] {ProxyAsyncConfiguration.class.getName()};
 			case ASPECTJ -> new String[] {ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};

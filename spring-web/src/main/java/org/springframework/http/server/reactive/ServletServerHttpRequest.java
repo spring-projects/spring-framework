@@ -35,7 +35,6 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
@@ -214,12 +213,12 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public @NonNull InetSocketAddress getLocalAddress() {
+	public InetSocketAddress getLocalAddress() {
 		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
 	}
 
 	@Override
-	public @NonNull InetSocketAddress getRemoteAddress() {
+	public InetSocketAddress getRemoteAddress() {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 

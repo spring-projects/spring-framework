@@ -29,7 +29,6 @@ import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
@@ -196,7 +195,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	@Override
-	public @NonNull String getPath() {
+	public String getPath() {
 		return this.path.getPath();
 	}
 

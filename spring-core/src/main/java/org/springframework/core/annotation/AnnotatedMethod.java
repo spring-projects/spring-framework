@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.BridgeMethodResolver;
@@ -264,7 +263,7 @@ public class AnnotatedMethod {
 		}
 
 		@Override
-		public @NonNull Method getMethod() {
+		public Method getMethod() {
 			return AnnotatedMethod.this.getBridgedMethod();
 		}
 

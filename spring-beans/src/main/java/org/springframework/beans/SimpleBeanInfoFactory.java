@@ -23,8 +23,6 @@ import java.beans.PropertyDescriptor;
 import java.beans.SimpleBeanInfo;
 import java.util.Collection;
 
-import org.jspecify.annotations.NonNull;
-
 import org.springframework.core.Ordered;
 
 /**
@@ -48,7 +46,7 @@ import org.springframework.core.Ordered;
 class SimpleBeanInfoFactory implements BeanInfoFactory, Ordered {
 
 	@Override
-	public @NonNull BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
+	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		Collection<? extends PropertyDescriptor> pds =
 				PropertyDescriptorUtils.determineBasicProperties(beanClass);
 

@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.jspecify.annotations.NonNull;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 
@@ -76,7 +74,7 @@ public class BeanDefinitionOverrideException extends BeanDefinitionStoreExceptio
 	 * Return the description of the resource that the bean definition came from.
 	 */
 	@Override
-	public @NonNull String getResourceDescription() {
+	public String getResourceDescription() {
 		return String.valueOf(super.getResourceDescription());
 	}
 
@@ -84,7 +82,7 @@ public class BeanDefinitionOverrideException extends BeanDefinitionStoreExceptio
 	 * Return the name of the bean.
 	 */
 	@Override
-	public @NonNull String getBeanName() {
+	public String getBeanName() {
 		return String.valueOf(super.getBeanName());
 	}
 

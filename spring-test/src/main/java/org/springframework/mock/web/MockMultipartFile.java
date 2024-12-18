@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
@@ -109,7 +108,7 @@ public class MockMultipartFile implements MultipartFile {
 	}
 
 	@Override
-	public @NonNull String getOriginalFilename() {
+	public String getOriginalFilename() {
 		return this.originalFilename;
 	}
 

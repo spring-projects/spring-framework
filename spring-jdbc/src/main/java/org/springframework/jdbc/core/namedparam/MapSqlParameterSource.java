@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.jdbc.core.SqlParameterValue;
@@ -174,7 +173,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
-	public @NonNull String[] getParameterNames() {
+	public String[] getParameterNames() {
 		return StringUtils.toStringArray(this.values.keySet());
 	}
 

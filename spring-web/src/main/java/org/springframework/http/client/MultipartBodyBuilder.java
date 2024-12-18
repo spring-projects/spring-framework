@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
@@ -379,7 +378,7 @@ public final class MultipartBodyBuilder {
 		 * Return the element type for the {@code Publisher} body.
 		 */
 		@Override
-		public @NonNull ResolvableType getResolvableType() {
+		public ResolvableType getResolvableType() {
 			return this.resolvableType;
 		}
 	}
