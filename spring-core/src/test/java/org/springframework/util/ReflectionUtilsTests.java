@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Arjen Poutsma
+ * @author Yong-Hyun Kim
  */
 class ReflectionUtilsTests {
 
@@ -231,6 +232,8 @@ class ReflectionUtilsTests {
 		assertThat(ReflectionUtils.findMethod(B.class, "bar", String.class)).isNotNull();
 		assertThat(ReflectionUtils.findMethod(B.class, "foo", Integer.class)).isNotNull();
 		assertThat(ReflectionUtils.findMethod(B.class, "getClass")).isNotNull();
+		assertThat(ReflectionUtils.findMethod(B.class, "baz", String[].class).isBridge()).isFalse();
+		assertThat(ReflectionUtils.findMethod(B.class, "baz", String[].class).isVarArgs()).isTrue();
 	}
 
 	@Test
@@ -381,6 +384,10 @@ class ReflectionUtilsTests {
 		@SuppressWarnings({ "unused", "RedundantThrows" })
 		private void foo(Integer i) throws RemoteException {
 		}
+
+		protected Object baz(String... args) {
+			return "A";
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -395,6 +402,11 @@ class ReflectionUtilsTests {
 				sum += arg;
 			}
 			return sum;
+		}
+
+		@Override
+		protected String baz(String... args) {
+			return "B";
 		}
 	}
 
