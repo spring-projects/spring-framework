@@ -193,7 +193,7 @@ Kotlin::
 [[webtestclient-fn-config]]
 === Bind to Router Function
 
-This setup allows you to test <<web-reactive.adoc#webflux-fn, functional endpoints>> via
+This setup allows you to test xref:web/webflux-functional.adoc[functional endpoints] via
 mock request and response objects, without a running server.
 
 For WebFlux, use the following which delegates to `RouterFunctions.toWebHandler` to
