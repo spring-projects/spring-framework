@@ -110,8 +110,12 @@ annotation in the `org.springframework.lang` package can be used to specify that
 Spring null-safety annotations {spring-framework-api}/lang/Nullable.html[`@Nullable`],
 {spring-framework-api}/lang/NonNull.html[`@NonNull`],
 {spring-framework-api}/lang/NonNullApi.html[`@NonNullApi`], and
-{spring-framework-api}/lang/NonNullFields.html[`@NonNullFields`] in the `org.springframework.lang` package are
-deprecated as of Spring Framework 7 and superseded by JSpecify annotations.
+{spring-framework-api}/lang/NonNullFields.html[`@NonNullFields`] in the `org.springframework.lang` package have been
+introduced in Spring Framework 5 when JSpecify did not exist and the best option was to leverage JSR 305 (a dormant
+but widespread JSR) meta-annotations. They are deprecated as of Spring Framework 7 in favor of
+https://jspecify.dev/docs/start-here/[JSpecify] annotations, which provide significant enhancements such as properly
+defined specifications, a canonical dependency with no split-package issue, better tooling, better Kotlin integration
+and the capability to specify the nullability more precisely for more use cases.
 
 A key difference is that Spring null-safety annotations, following JSR 305 semantics, apply to fields,
 parameters and return values while JSpecify annotations apply to type usages. This subtle difference
