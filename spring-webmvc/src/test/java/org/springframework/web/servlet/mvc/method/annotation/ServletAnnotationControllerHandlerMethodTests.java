@@ -2905,7 +2905,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 					tb = (TestBean) model.get("myCommand");
 				}
 				if (tb.getName() != null && tb.getName().endsWith("myDefaultName")) {
-					assertThat(tb.getDate().getYear()).isEqualTo(107);
+					assertThat(tb.getDate()).hasYear(2007);
 				}
 				Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
 				if (errors == null) {
@@ -2915,8 +2915,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 					throw new IllegalStateException();
 				}
 				if (model.containsKey("ITestBean")) {
-					boolean condition = model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean") instanceof Errors;
-					assertThat(condition).isTrue();
+					assertThat(model.get(BindingResult.MODEL_KEY_PREFIX + "ITestBean")).isInstanceOf(Errors.class);
 				}
 				@SuppressWarnings("unchecked")
 				List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
@@ -2939,8 +2938,8 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		@Override
 		public View resolveViewName(String viewName, Locale locale) {
 			return (model, request, response) -> {
-					request.setAttribute("viewName", viewName);
-					request.getSession().setAttribute("model", model);
+				request.setAttribute("viewName", viewName);
+				request.getSession().setAttribute("model", model);
 			};
 		}
 	}
