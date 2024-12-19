@@ -1,5 +1,6 @@
 [[mvc-cors]]
 = CORS
+
 [.small]#xref:web/webflux-cors.adoc[See equivalent in the Reactive stack]#
 
 Spring MVC lets you handle CORS (Cross-Origin Resource Sharing). This section
