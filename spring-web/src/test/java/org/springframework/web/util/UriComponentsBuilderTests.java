@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,10 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -888,6 +892,39 @@ class UriComponentsBuilderTests {
 				.buildAndExpand(7777, "test")
 				.toUri();
 		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
+	}
+
+	@ParameterizedTest
+	@MethodSource("providePathsForSanitization")
+	void verifySanitizedPath(StringBuilder inputPath, String expected) {
+		assertThat(invokeGetSanitizedPath(inputPath)).isEqualTo(expected);
+	}
+
+	private static Stream<Arguments> providePathsForSanitization() {
+		return Stream.of(
+				Arguments.of(new StringBuilder("https://example.com//path/to//resource"), "https://example.com/path/to/resource"),
+				Arguments.of(new StringBuilder("https://example.com//path"), "https://example.com/path"),
+				Arguments.of(new StringBuilder("example.com//path"), "example.com/path"),
+				Arguments.of(new StringBuilder("example.com//////////////path//to"), "example.com/path/to")
+		);
+	}
+
+	private String invokeGetSanitizedPath(StringBuilder path) {
+		try {
+			Class<?> outerClass = Class.forName("org.springframework.web.util.UriComponentsBuilder");
+
+			Class<?> innerClass = Arrays.stream(outerClass.getDeclaredClasses())
+					.filter(clazz -> clazz.getSimpleName().equals("FullPathComponentBuilder"))
+					.findFirst()
+					.orElseThrow(() -> new ClassNotFoundException("FullPathComponentBuilder not found"));
+
+			Method method = innerClass.getDeclaredMethod("getSanitizedPath", StringBuilder.class);
+			method.setAccessible(true);
+			return (String) method.invoke(null, path);
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Failed to invoke getSanitizedPath", e);
+		}
 	}
 
 }
