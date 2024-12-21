@@ -55,6 +55,14 @@ class JdbcUtilsTests {
 		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("yOUR_nAME")).isEqualTo("yourName");
 		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("a_name")).isEqualTo("AName");
 		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("someone_elses_name")).isEqualTo("someoneElsesName");
+		assertThat(JdbcUtils.convertUnderscoreNameToPropertyName("some_name_with_1_digit")).isEqualTo("someNameWith1Digit");
 	}
 
+	@Test
+	void convertPropertyNameToUnderscoreName() {
+		assertThat(JdbcUtils.convertPropertyNameToUnderscoreName("AName")).isEqualTo("a_name");
+		assertThat(JdbcUtils.convertPropertyNameToUnderscoreName("someoneElsesName")).isEqualTo("someone_elses_name");
+		assertThat(JdbcUtils.convertPropertyNameToUnderscoreName("someNameWith1Digit")).isEqualTo("some_name_with_1_digit");
+		assertThat(JdbcUtils.convertPropertyNameToUnderscoreName("someNameWith12Number")).isEqualTo("some_name_with_12_number");
+	}
 }
