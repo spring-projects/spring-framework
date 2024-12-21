@@ -9,7 +9,7 @@ apply from: "${rootDir}/gradle/publications.gradle"
 
 repositories {
 	maven {
-		url "https://repo.spring.io/release"
+		url = "https://repo.spring.io/release"
 	}
 }
 
@@ -87,7 +87,7 @@ tasks.register('schemaZip', Zip) {
 	archiveClassifier.set("schema")
 	description = "Builds -${archiveClassifier} archive containing all " +
 			"XSDs for deployment at https://springframework.org/schema."
-	duplicatesStrategy DuplicatesStrategy.EXCLUDE
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	moduleProjects.each { module ->
 		def Properties schemas = new Properties();
 
