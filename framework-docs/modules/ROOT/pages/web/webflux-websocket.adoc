@@ -1,5 +1,6 @@
 [[webflux-websocket]]
 = WebSockets
+
 [.small]#xref:web/websocket.adoc[See equivalent in the Servlet stack]#
 
 This part of the reference documentation covers support for reactive-stack WebSocket

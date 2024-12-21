@@ -1,5 +1,6 @@
 [[webflux-fn]]
 = Functional Endpoints
+
 [.small]#xref:web/webmvc-functional.adoc[See equivalent in the Servlet stack]#
 
 Spring WebFlux includes WebFlux.fn, a lightweight functional programming model in which functions
