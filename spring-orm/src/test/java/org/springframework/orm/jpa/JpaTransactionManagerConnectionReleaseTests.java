@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -115,5 +116,32 @@ class JpaTransactionManagerConnectionReleaseTests {
 		InOrder cleanupBeforeRelease = inOrder(jpaDialect);
 		cleanupBeforeRelease.verify(jpaDialect).cleanupTransaction(any());
 		cleanupBeforeRelease.verify(jpaDialect).releaseJdbcConnection(same(connHandle), same(manager));
+	}
+
+	@Test
+	void testConnectionIsNotReleasedIfSesionIsClosing() throws SQLException {
+		given(manager.getTransaction()).willReturn(tx);
+
+		final List<String> l = new ArrayList<>();
+		l.add("test");
+
+		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+
+		Object result = tt.execute(status -> {
+			assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
+			EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+			return l;
+		});
+		assertThat(result).isSameAs(l);
+
+		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+
+		verify(tx).begin();
+		verify(tx).commit();
+
+		verify(jpaDialect).cleanupTransaction(any());
+		verify(jpaDialect, never()).releaseJdbcConnection(any(), any());
 	}
 }

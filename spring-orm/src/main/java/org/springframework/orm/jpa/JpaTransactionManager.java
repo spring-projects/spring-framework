@@ -627,21 +627,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		getJpaDialect().cleanupTransaction(txObject.getTransactionData());
 
-		// Give JpaDialect it's chance to release JDBC connection
-		if (getDataSource() != null && txObject.hasConnectionHolder()) {
-			ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
-			if (conHandle != null) {
-				try {
-					getJpaDialect().releaseJdbcConnection(conHandle,
-							txObject.getEntityManagerHolder().getEntityManager());
-				}
-				catch (Throwable ex) {
-					// Just log it, to keep a transaction-related exception.
-					logger.error("Failed to release JDBC connection after transaction", ex);
-				}
-			}
-		}
-
 		// Remove the entity manager holder from the thread.
 		if (txObject.isNewEntityManagerHolder()) {
 			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
@@ -652,6 +637,20 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 		else {
 			logger.debug("Not closing pre-bound JPA EntityManager after transaction");
+			// Give JpaDialect it's chance to release JDBC connection
+			if (getDataSource() != null && txObject.hasConnectionHolder()) {
+				ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
+				if (conHandle != null) {
+					try {
+						getJpaDialect().releaseJdbcConnection(conHandle,
+								txObject.getEntityManagerHolder().getEntityManager());
+					}
+					catch (Throwable ex) {
+						// Just log it, to keep a transaction-related exception.
+						logger.error("Failed to release JDBC connection after transaction", ex);
+					}
+				}
+			}
 		}
 	}
 
