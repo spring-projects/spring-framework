@@ -624,6 +624,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		if (getDataSource() != null && txObject.hasConnectionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
+
+		getJpaDialect().cleanupTransaction(txObject.getTransactionData());
+
 		// Give JpaDialect it's chance to release JDBC connection
 		if (getDataSource() != null && txObject.hasConnectionHolder()) {
 			ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
@@ -638,8 +641,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				}
 			}
 		}
-
-		getJpaDialect().cleanupTransaction(txObject.getTransactionData());
 
 		// Remove the entity manager holder from the thread.
 		if (txObject.isNewEntityManagerHolder()) {
