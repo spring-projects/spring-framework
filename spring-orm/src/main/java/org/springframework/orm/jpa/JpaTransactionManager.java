@@ -623,6 +623,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		// Remove the JDBC connection holder from the thread, if exposed.
 		if (getDataSource() != null && txObject.hasConnectionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
+		}
+		// Give JpaDialect it's chance to release JDBC connection
+		if (getDataSource() != null && txObject.hasConnectionHolder()) {
 			ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
 			if (conHandle != null) {
 				try {
