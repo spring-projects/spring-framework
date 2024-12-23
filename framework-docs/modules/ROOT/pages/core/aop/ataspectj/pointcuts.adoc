@@ -523,7 +523,7 @@ and where the runtime type of the argument passed has the `@Classified` annotati
 +
 [literal,indent=0,subs="verbatim"]
 ----
-	@args(com.xyz.security.Classified)
+	@execution(* *(..)) && args(arg) && @args(com.xyz.security.Classified)
 ----
 +
 NOTE: You can also use `@args` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
