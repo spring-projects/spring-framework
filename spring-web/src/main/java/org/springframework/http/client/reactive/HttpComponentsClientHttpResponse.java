@@ -70,8 +70,11 @@ class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 		LinkedMultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 
 		CookieSpec cookieSpec = context.getCookieSpec();
-		CookieOrigin cookieOrigin = context.getCookieOrigin();
+		if (cookieSpec == null) {
+			return result;
+		}
 
+		CookieOrigin cookieOrigin = context.getCookieOrigin();
 		Iterator<Header> itr = response.headerIterator(HttpHeaders.SET_COOKIE);
 		while (itr.hasNext()) {
 			Header header = itr.next();

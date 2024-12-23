@@ -39,9 +39,11 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -64,6 +66,7 @@ import static org.junit.jupiter.api.Named.named;
  * Tests for {@link ClientHttpConnector} implementations.
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 class ClientHttpConnectorTests {
 
@@ -196,6 +199,28 @@ class ClientHttpConnectorTests {
 						}
 				)
 				.verifyComplete();
+	}
+
+	@Test
+	void disableCookieWithHttpComponents() {
+		ClientHttpConnector connector = new HttpComponentsClientHttpConnector(
+				HttpAsyncClientBuilder.create().disableCookieManagement().build()
+		);
+
+		prepareResponse(response -> {
+			response.setResponseCode(200);
+			response.addHeader("Set-Cookie", "id=test;");
+		});
+		Mono<ClientHttpResponse> futureResponse =
+				connector.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete);
+		StepVerifier.create(futureResponse)
+				.assertNext(response -> {
+							assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+							assertThat(response.getCookies()).isEmpty();
+						}
+				)
+				.verifyComplete();
+
 	}
 
 	private Buffer randomBody(int size) {
