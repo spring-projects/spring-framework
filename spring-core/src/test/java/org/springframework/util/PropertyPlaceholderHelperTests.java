@@ -153,6 +153,23 @@ class PropertyPlaceholderHelperTests {
 			);
 		}
 
+		@ParameterizedTest(name = "{0} -> {1}")
+		@MethodSource("exactMatchPlaceholders")
+		void placeholdersWithExactMatchAreConsidered(String text, String expected) {
+			Properties properties = new Properties();
+			properties.setProperty("prefix://my-service", "example-service");
+			properties.setProperty("px", "prefix");
+			properties.setProperty("p1", "${prefix://my-service}");
+			assertThat(this.helper.replacePlaceholders(text, properties)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> exactMatchPlaceholders() {
+			return Stream.of(
+					Arguments.of("${prefix://my-service}", "example-service"),
+					Arguments.of("${p1}", "example-service")
+			);
+		}
+
 	}
 
 	PlaceholderResolver mockPlaceholderResolver(String... pairs) {
