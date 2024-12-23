@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
 
 import org.springframework.util.PlaceholderParser.ParsedValue;
 import org.springframework.util.PlaceholderParser.TextPart;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -220,12 +222,37 @@ class PlaceholderParserTests {
 			);
 		}
 
+		@ParameterizedTest(name = "{0} -> {1}")
+		@MethodSource("exactMatchPlaceholders")
+		void placeholdersWithExactMatchAreConsidered(String text, String expected) {
+			Properties properties = new Properties();
+			properties.setProperty("prefix://my-service", "example-service");
+			properties.setProperty("px", "prefix");
+			properties.setProperty("p1", "${prefix://my-service}");
+			assertThat(this.parser.replacePlaceholders(text, properties::getProperty)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> exactMatchPlaceholders() {
+			return Stream.of(
+					Arguments.of("${prefix://my-service}", "example-service"),
+					Arguments.of("${p1}", "example-service")
+			);
+		}
+
+		@Test
+		void parseWithKeyEqualsToText() {
+			PlaceholderResolver resolver = mockPlaceholderResolver("firstName", "Steve");
+			assertThat(this.parser.replacePlaceholders("${firstName}", resolver))
+					.isEqualTo("Steve");
+			verifyPlaceholderResolutions(resolver, "firstName");
+		}
+
 		@Test
 		void parseWithHardcodedFallback() {
 			PlaceholderResolver resolver = mockPlaceholderResolver();
 			assertThat(this.parser.replacePlaceholders("${firstName:Steve}", resolver))
 					.isEqualTo("Steve");
-			verifyPlaceholderResolutions(resolver, "firstName");
+			verifyPlaceholderResolutions(resolver, "firstName:Steve", "firstName");
 		}
 
 		@Test
@@ -233,7 +260,7 @@ class PlaceholderParserTests {
 			PlaceholderResolver resolver = mockPlaceholderResolver("firstName", "John");
 			assertThat(this.parser.replacePlaceholders("${first${invalid:Name}}", resolver))
 					.isEqualTo("John");
-			verifyPlaceholderResolutions(resolver, "invalid", "firstName");
+			verifyPlaceholderResolutions(resolver, "invalid:Name", "invalid", "firstName");
 		}
 
 		@Test
@@ -348,8 +375,9 @@ class PlaceholderParserTests {
 	}
 
 	void verifyPlaceholderResolutions(PlaceholderResolver mock, String... placeholders) {
+		InOrder ordered = inOrder(mock);
 		for (String placeholder : placeholders) {
-			verify(mock).resolvePlaceholder(placeholder);
+			ordered.verify(mock).resolvePlaceholder(placeholder);
 		}
 		verifyNoMoreInteractions(mock);
 	}

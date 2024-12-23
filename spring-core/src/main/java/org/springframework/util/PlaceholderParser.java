@@ -519,7 +519,7 @@ final class PlaceholderParser {
 
 		@Override
 		public String resolve(PartResolutionContext resolutionContext) {
-			String value = resolveRecursively(resolutionContext, this.key);
+			String value = resolveRecursively(resolutionContext);
 			if (value != null) {
 				return value;
 			}
@@ -527,6 +527,17 @@ final class PlaceholderParser {
 				return this.fallback;
 			}
 			return resolutionContext.handleUnresolvablePlaceholder(this.key, text());
+		}
+
+		@Nullable
+		private String resolveRecursively(PartResolutionContext resolutionContext) {
+			if (!this.text().equals(this.key)) {
+				String value = resolveRecursively(resolutionContext, this.text());
+				if (value != null) {
+					return value;
+				}
+			}
+			return resolveRecursively(resolutionContext, this.key);
 		}
 	}
 
