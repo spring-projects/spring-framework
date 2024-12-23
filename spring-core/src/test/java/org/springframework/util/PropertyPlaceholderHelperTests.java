@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,23 @@ class PropertyPlaceholderHelperTests {
 					Arguments.of("${invalid:${one}:${two}}", "1:2"),
 					Arguments.of("${invalid:${also_invalid:test}}", "test"),
 					Arguments.of("${invalid:${also_invalid:${one}}}", "1")
+			);
+		}
+
+		@ParameterizedTest(name = "{0} -> {1}")
+		@MethodSource("exactMatchPlaceholders")
+		void placeholdersWithExactMatchAreConsidered(String text, String expected) {
+			Properties properties = new Properties();
+			properties.setProperty("prefix://my-service", "example-service");
+			properties.setProperty("px", "prefix");
+			properties.setProperty("p1", "${prefix://my-service}");
+			assertThat(this.helper.replacePlaceholders(text, properties)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> exactMatchPlaceholders() {
+			return Stream.of(
+					Arguments.of("${prefix://my-service}", "example-service"),
+					Arguments.of("${p1}", "example-service")
 			);
 		}
 
