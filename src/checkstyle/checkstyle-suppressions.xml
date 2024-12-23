@@ -37,10 +37,12 @@
 	<suppress files="RootBeanDefinition" checks="EqualsHashCode"/>
 
 	<!-- spring-context -->
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]instrument[\\/]" checks="RegexpSinglelineJava" id="packageLevelNullMarkedAnnotation"/>
 	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" id="bannedJUnit3Imports"/>
 
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](asm|cglib|objenesis|javapoet)[\\/]" checks=".*"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]aot[\\/]nativex[\\/]" checks="RegexpSinglelineJava" id="packageLevelNullMarkedAnnotation"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]aot[\\/]nativex[\\/]feature[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](core|util)[\\/](SpringProperties|SystemPropertyUtils)" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>

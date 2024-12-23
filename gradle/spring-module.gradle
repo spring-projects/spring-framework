@@ -117,10 +117,8 @@ tasks.withType(JavaCompile).configureEach {
     options.errorprone {
     	disableAllChecks = true
         option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
-        option("NullAway:AnnotatedPackages", "org.springframework")
-        option("NullAway:UnannotatedSubPackages", "org.springframework.instrument,org.springframework.context.index," +
-				"org.springframework.asm,org.springframework.cglib,org.springframework.objenesis," +
-				"org.springframework.javapoet,org.springframework.aot.nativex.substitution,org.springframework.aot.nativex.feature")
+        // TODO Replace by proper flag when supported, see https://github.com/uber/NullAway/issues/574
+		option("NullAway:AnnotatedPackages", "")
     }
 }
 tasks.compileJava {
