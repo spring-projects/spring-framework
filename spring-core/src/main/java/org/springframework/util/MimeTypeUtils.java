@@ -203,7 +203,6 @@ public abstract class MimeTypeUtils {
 		return cachedMimeTypes.get(mimeType);
 	}
 
-	@SuppressWarnings("NullAway")
 	private static MimeType parseMimeTypeInternal(String mimeType) {
 		int index = mimeType.indexOf(';');
 		String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
