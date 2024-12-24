@@ -526,7 +526,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				for (String method : declaredMethods) {
 					HttpMethod httpMethod = HttpMethod.valueOf(method);
 					result.add(httpMethod);
-					if (httpMethod == HttpMethod.GET) {
+					if (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.QUERY) {
 						result.add(HttpMethod.HEAD);
 					}
 				}

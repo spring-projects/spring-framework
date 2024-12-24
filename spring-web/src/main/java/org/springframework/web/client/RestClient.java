@@ -123,6 +123,12 @@ public interface RestClient {
 	RequestHeadersUriSpec<?> options();
 
 	/**
+	 * Start building an HTTP QUERY request.
+	 * @return a spec for specifying the target URL
+	 */
+	RequestHeadersUriSpec<?> query();
+
+	/**
 	 * Start building a request for the given {@code HttpMethod}.
 	 * @return a spec for specifying the target URL
 	 */

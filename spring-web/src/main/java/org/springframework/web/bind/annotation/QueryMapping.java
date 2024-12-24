@@ -25,33 +25,33 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation for mapping HTTP {@code PATCH} requests onto specific handler
+ * Annotation for mapping HTTP {@code QUERY} requests onto specific handler
  * methods.
  *
- * <p>Specifically, {@code @PatchMapping} is a <em>composed annotation</em> that
- * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.PATCH)}.
+ * <p>Specifically, {@code @QueryMapping} is a <em>composed annotation</em> that
+ * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.QUERY)}.
  *
  * <p><strong>NOTE:</strong> This annotation cannot be used in conjunction with
  * other {@code @RequestMapping} annotations that are declared on the same method.
  * If multiple {@code @RequestMapping} annotations are detected on the same method,
  * a warning will be logged, and only the first mapping will be used. This applies
  * to {@code @RequestMapping} as well as composed {@code @RequestMapping} annotations
- * such as {@code @GetMapping}, {@code @PostMapping}, etc.
+ * such as {@code @GetMapping}, {@code @PutMapping}, etc.
  *
- * @author Sam Brannen
- * @since 4.3
+ * @author Mario Ruiz
+ * @since x.x.x
  * @see GetMapping
- * @see PostMapping
  * @see PutMapping
+ * @see PostMapping
  * @see DeleteMapping
- * @see QueryMapping
+ * @see PatchMapping
  * @see RequestMapping
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@RequestMapping(method = RequestMethod.PATCH)
-public @interface PatchMapping {
+@RequestMapping(method = RequestMethod.QUERY)
+public @interface QueryMapping {
 
 	/**
 	 * Alias for {@link RequestMapping#name}.
