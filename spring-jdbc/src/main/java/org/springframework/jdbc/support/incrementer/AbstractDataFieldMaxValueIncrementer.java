@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Return the data source to retrieve the value from.
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lazy initialization
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -91,7 +91,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Return the name of the sequence/table.
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lazy initialization
 	public String getIncrementerName() {
 		return this.incrementerName;
 	}

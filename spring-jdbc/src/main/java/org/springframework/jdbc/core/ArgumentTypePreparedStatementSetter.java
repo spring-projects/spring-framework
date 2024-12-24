@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,8 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 	 * @param args the arguments to set
 	 * @param argTypes the corresponding SQL types of the arguments
 	 */
-	@SuppressWarnings("NullAway")
 	public ArgumentTypePreparedStatementSetter(@Nullable Object @Nullable [] args, int @Nullable [] argTypes) {
-		if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
-				(args != null && args.length != argTypes.length)) {
+		if ((args == null && argTypes != null) || (args != null && (argTypes == null || args.length != argTypes.length))) {
 			throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
 		}
 		this.args = args;
