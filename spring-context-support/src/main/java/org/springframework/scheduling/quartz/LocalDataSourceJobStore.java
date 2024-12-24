@@ -90,7 +90,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler) throws SchedulerConfigException {
 		// Absolutely needs thread-bound DataSource to initialize.
 		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();

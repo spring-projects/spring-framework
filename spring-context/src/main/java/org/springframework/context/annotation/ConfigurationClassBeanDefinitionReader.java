@@ -291,7 +291,7 @@ class ConfigurationClassBeanDefinitionReader {
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Reflection
 	protected boolean isOverriddenByExistingDefinition(BeanMethod beanMethod, String beanName) {
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return false;

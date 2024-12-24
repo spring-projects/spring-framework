@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public CacheInvocationParameter[] getAllParameters(@Nullable Object... values) {
 		if (this.allParameterDetails.size() != values.length) {
 			throw new IllegalStateException("Values mismatch, operation has " +

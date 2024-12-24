@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 		}
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected CacheManager getDefaultCacheManager() {
 		if (getCacheManager() == null) {
 			Assert.state(this.beanFactory != null, "BeanFactory required for default CacheManager resolution");
@@ -202,7 +202,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected CacheResolver getDefaultCacheResolver() {
 		if (getCacheResolver() == null) {
 			this.cacheResolver = SingletonSupplier.of(new SimpleCacheResolver(getDefaultCacheManager()));
@@ -211,7 +211,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected CacheResolver getDefaultExceptionCacheResolver() {
 		if (getExceptionCacheResolver() == null) {
 			this.exceptionCacheResolver = SingletonSupplier.of(new LazyCacheResolver());

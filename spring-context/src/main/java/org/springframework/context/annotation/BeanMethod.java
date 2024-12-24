@@ -45,7 +45,7 @@ final class BeanMethod extends ConfigurationMethod {
 
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Reflection
 	public void validate(ProblemReporter problemReporter) {
 		if (getMetadata().getAnnotationAttributes(Autowired.class.getName()) != null) {
 			// declared as @Autowired: semantic mismatch since @Bean method arguments are autowired

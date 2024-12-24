@@ -821,12 +821,12 @@ class ConfigurationClassParser {
 					deferredImport.getConfigurationClass());
 		}
 
-		@SuppressWarnings("NullAway")
 		void processGroupImports() {
 			for (DeferredImportSelectorGrouping grouping : this.groupings.values()) {
 				Predicate<String> filter = grouping.getCandidateFilter();
 				grouping.getImports().forEach(entry -> {
 					ConfigurationClass configurationClass = this.configurationClasses.get(entry.getMetadata());
+					Assert.state(configurationClass != null, "ConfigurationClass must not be null");
 					try {
 						processImports(configurationClass, asSourceClass(configurationClass, filter),
 								Collections.singleton(asSourceClass(entry.getImportClassName(), filter)),

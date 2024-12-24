@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public Object generate(Object target, Method method, @Nullable Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
 		if (!(operation instanceof AbstractJCacheKeyOperation)) {

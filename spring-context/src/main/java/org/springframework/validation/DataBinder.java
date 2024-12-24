@@ -669,7 +669,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 	}
 
-	@SuppressWarnings("NullAway")
 	private void assertValidators(@Nullable Validator... validators) {
 		Object target = getTarget();
 		for (Validator validator : validators) {
@@ -728,7 +727,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * {@link #setExcludedValidators(Predicate) exclude predicate}.
 	 * @since 6.1
 	 */
-	@SuppressWarnings("NullAway")
 	public List<Validator> getValidatorsToApply() {
 		return (this.excludedValidators != null ?
 				this.validators.stream().filter(validator -> !this.excludedValidators.test(validator)).toList() :
@@ -1232,7 +1230,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #getBindingErrorProcessor
 	 * @see BindingErrorProcessor#processMissingFieldError
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
 		String[] requiredFields = getRequiredFields();
 		if (!ObjectUtils.isEmpty(requiredFields)) {

@@ -127,7 +127,6 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 		}
 
 		@Override
-		@SuppressWarnings("NullAway")
 		public Object getTarget() {
 			Object cachedTarget = this.cachedTarget;
 			if (cachedTarget != null) {

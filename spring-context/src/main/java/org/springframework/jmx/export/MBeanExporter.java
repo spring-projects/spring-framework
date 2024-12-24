@@ -987,7 +987,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Unregister the configured {@link NotificationListener NotificationListeners}
 	 * from the {@link MBeanServer}.
 	 */
-	@SuppressWarnings("NullAway")
 	private void unregisterNotificationListeners() {
 		if (this.server != null) {
 			this.registeredNotificationListeners.forEach((bean, mappedObjectNames) -> {
