@@ -30,6 +30,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
+import org.springframework.transaction.config.GlobalTransactionalEventErrorHandler;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
@@ -93,8 +94,11 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public static TransactionalEventListenerFactory transactionalEventListenerFactory() {
-		return new RestrictedTransactionalEventListenerFactory();
+	public static TransactionalEventListenerFactory transactionalEventListenerFactory(@Nullable GlobalTransactionalEventErrorHandler errorHandler) {
+		if (errorHandler == null) {
+			return new RestrictedTransactionalEventListenerFactory();
+		}
+		return new RestrictedTransactionalEventListenerFactory(errorHandler);
 	}
 
 }
