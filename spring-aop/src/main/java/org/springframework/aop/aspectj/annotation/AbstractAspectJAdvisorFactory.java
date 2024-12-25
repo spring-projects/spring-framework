@@ -41,7 +41,11 @@ import java.util.StringTokenizer;
  * given AspectJ classes from classes honoring the AspectJ 5 annotation syntax.
  *
  * <p>This class handles annotation parsing and validation functionality.
+ *
+ * <p>抽象AspectJ通知工厂(AbstractAspectJAdvisorFactory)
  * It does not actually generate Spring AOP Advisors, which is deferred to subclasses.
+ * <p>可以创建Spring AOP Advisors的工厂的抽象基类给定AspectJ类，这些类遵循AspectJ 5注释语法。
+ * <p>此类处理注释解析和验证功能。它实际上并没有生成Spring AOP Advisors，它被推迟到子类。
  *
  * @author Rod Johnson
  * @author Adrian Colyer
@@ -61,6 +65,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/**
 	 * Logger available to subclasses.
+	 * <p>可用于子类的日志记录器
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -72,6 +77,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * if it has the @Aspect annotation, and was not compiled by ajc. The reason for this latter test
 	 * is that aspects written in the code-style (AspectJ language) also have the annotation present
 	 * when compiled by ajc with the -1.5 flag, yet they cannot be consumed by Spring AOP.
+	 * <p>我们认为一个AspectJ方面适合Spring AOP系统使用，如果它有@Aspect注释，并且没有被ajc编译。
+	 * 后面这个测试的原因是，用代码风格（AspectJ语言）编写的方面在ajc用-1.5标志编译时也有注释，但是它们不能被Spring AOP使用
 	 */
 	@Override
 	public boolean isAspect(Class<?> clazz) {
@@ -160,7 +167,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/**
 	 * Enum for AspectJ annotation types.
-	 * AspectJ注释类型的枚举
+	 * <p>AspectJ注释类型的枚举
+	 *
 	 * @see AspectJAnnotation#getAnnotationType()
 	 */
 	protected enum AspectJAnnotationType {

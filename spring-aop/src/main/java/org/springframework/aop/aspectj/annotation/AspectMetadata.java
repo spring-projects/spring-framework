@@ -16,20 +16,19 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.TypePatternClassFilter;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.ComposablePointcut;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 
 /**
  * Metadata for an AspectJ aspect class, with an additional Spring AOP pointcut
@@ -38,10 +37,15 @@ import org.springframework.aop.support.ComposablePointcut;
  * <p>Uses AspectJ 5 AJType reflection API, enabling us to work with different
  * AspectJ instantiation models such as "singleton", "pertarget" and "perthis".
  *
+ * <p>元数据方面(AspectMetadata)
+ * <p>AspectJ方面类的元数据，带有额外的Spring AOP切入点对于每一条款。
+ * <p>使用AspectJ 5 AJType反射API，使我们能够使用不同的AspectJ实例化模型,
+ * 如“singleton”、“pertarget”和“perthis”。
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
+ * @since 2.0
  */
 @SuppressWarnings("serial")
 public class AspectMetadata implements Serializable {
@@ -50,18 +54,23 @@ public class AspectMetadata implements Serializable {
 	 * The name of this aspect as defined to Spring (the bean name) -
 	 * allows us to determine if two pieces of advice come from the
 	 * same aspect and hence their relative precedence.
+	 * <p>此方面的名称定义为Spring（bean名称）-
+	 * <p>允许我们确定两条增强器是否来自相同的方面，因此它们的相对优先级
 	 */
 	private final String aspectName;
 
 	/**
 	 * The aspect class, stored separately for re-resolution of the
 	 * corresponding AjType on deserialization.
+	 * <p>切面类, 单独存储以重新解析反序列化对应的AspectJType
 	 */
 	private final Class<?> aspectClass;
 
 	/**
 	 * AspectJ reflection information.
 	 * <p>Re-resolved on deserialization since it isn't serializable itself.
+	 * <p>AspectJ反射信息.
+	 * <p>由于反序列化本身不可序列化, 因此重新解决了反序列化问题
 	 */
 	private transient AjType<?> ajType;
 
@@ -69,14 +78,18 @@ public class AspectMetadata implements Serializable {
 	 * Spring AOP pointcut corresponding to the per clause of the
 	 * aspect. Will be the {@code Pointcut.TRUE} canonical instance in the
 	 * case of a singleton, otherwise an AspectJExpressionPointcut.
+	 * <p>Spring AOP切入点对应于切面
+	 * <p>将是{@code Pointcut.TRUE}规范实例如果是单例，则为AspectJ表达式切入点。
 	 */
 	private final Pointcut perClausePointcut;
 
 
 	/**
 	 * Create a new AspectMetadata instance for the given aspect class.
+	 * <p>为给定的切面类创建一个新的AspectJ元数据实例
+	 *
 	 * @param aspectClass the aspect class
-	 * @param aspectName the name of the aspect
+	 * @param aspectName  the name of the aspect
 	 */
 	public AspectMetadata(Class<?> aspectClass, String aspectName) {
 		this.aspectName = aspectName;

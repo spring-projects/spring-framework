@@ -47,6 +47,14 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  *     pointcut-ref=&quot;getNameCalls&quot;
  *     advice-ref=&quot;getNameCounter&quot;/&gt;</pre>
  *
+ * <p>{@code aop}命名空间的{@code NamespaceHandler}.
+ * <p>提供{@link org.springframework.beans.factory.xml.BeanDefinitionParser} 用于{@code <aop:config>}标签。
+ * {@code config}标签可以包含嵌套{@code pointcut}, {@code advisor} 和 {@code aspect} 标签。
+ * <p>{@code pointcut}标签允许创建命名{@link AspectJExpressionPointcut}bean使用简单的语法：
+ * <p>使用{@code advisor}标签，您可以配置一个{@link org.springframework.aop.Advisor}
+ * 并将其应用于您{@link org.springframework.beans.factory.BeanFactory}中的所有相关bean自动.
+ * {@code advisor}标签支持内联和引用{@link org.springframework.aop.Pointcut Pointcuts}：
+ *
  * @author Rob Harrop
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -58,6 +66,8 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	 * Register the {@link BeanDefinitionParser BeanDefinitionParsers} for the
 	 * '{@code config}', '{@code spring-configured}', '{@code aspectj-autoproxy}'
 	 * and '{@code scoped-proxy}' tags.
+	 * <p>为“{@code config}”、“{@code spring-configured}”、“{@code aspectj-autoproxy}”和“{@code scope -proxy}”
+	 * 标签注册{@link BeanDefinitionParser BeanDefinitionParser}。
 	 */
 	@Override
 	public void init() {

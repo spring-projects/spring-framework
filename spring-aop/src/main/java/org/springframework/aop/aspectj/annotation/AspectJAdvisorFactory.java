@@ -29,6 +29,9 @@ import java.util.List;
  * Interface for factories that can create Spring AOP Advisors from classes
  * annotated with AspectJ annotation syntax.
  *
+ * <p>AspectJ通知工厂(AspectJAdvisorFactory)
+ * <p>可以从类创建Spring AOP Advisors的工厂接口使用AspectJ注释语法进行注释。
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see AspectMetadata
@@ -45,6 +48,10 @@ public interface AspectJAdvisorFactory {
 	 * Will return true for some aspects that Spring AOP cannot process,
 	 * such as those with unsupported instantiation models.
 	 * Use the {@link #validate} method to handle these cases if necessary.
+	 *
+	 * <p>确定给定的类是否是aspect，由AspectJ的{@link org.aspectj.lang.reflect.AjTypeSystem}报告.
+	 * <p>如果假定的方面无效（例如具体方面类的扩展），则返回{@code false}。对于Spring AOP无法处理的某些方面,
+	 * 例如那些不受支持的实例化模型，将返回true。如果需要的话，使用{@link #validate}方法来处理这些情况。
 	 *
 	 * @param clazz the supposed annotation-style AspectJ class
 	 * @return whether this class is recognized by AspectJ as an aspect class
@@ -65,7 +72,7 @@ public interface AspectJAdvisorFactory {
 	/**
 	 * Build Spring AOP Advisors for all annotated At-AspectJ methods
 	 * on the specified aspect instance.
-	 * 为指定方面实例上所有带注释的At AspectJ方法构建Spring AOP 切面。
+	 * 为指定方面实例上所有带注释的At-AspectJ方法构建Spring AOP 切面。
 	 *
 	 * @param aspectInstanceFactory the aspect instance factory
 	 *                              (not the aspect instance itself in order to avoid eager instantiation)
@@ -91,6 +98,7 @@ public interface AspectJAdvisorFactory {
 	/**
 	 * Build a Spring AOP Advice for the given AspectJ advice method.
 	 * 为给定的AspectJ切面方法构建Spring AOP建议。
+	 *
 	 * @param candidateAdviceMethod the candidate advice method
 	 * @param expressionPointcut    the AspectJ expression pointcut
 	 * @param aspectInstanceFactory the aspect instance factory

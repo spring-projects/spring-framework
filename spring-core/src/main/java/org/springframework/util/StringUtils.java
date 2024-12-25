@@ -34,6 +34,13 @@ import java.util.*;
  * classes. It also provides easy-to-use methods to convert between
  * delimited strings, such as CSV strings, and collections and arrays.
  *
+ * <p>字符串工具类(StringUtils)
+ * <p>其他 {@link String} 实用程序方法。
+ * <p>主要用于框架内的内部使用；考虑<a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
+ * 获取更全面的{@code String}实用程序套件。
+ * <p>这个类提供了一些简单的功能由核心Java {@link String} 和{@link StringBuilder}提供类.
+ * 它还提供了易于使用的方法来在分隔字符串，如CSV字符串，以及集合和数组.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -699,6 +706,11 @@ public abstract class StringUtils {
 	 * <p><strong>NOTE</strong> that {@code cleanPath} should not be depended
 	 * upon in a security context. Other mechanisms should be used to prevent
 	 * path-traversal issues.
+	 *
+	 * <p>清理路径(#cleanPath)
+	 * <p>通过抑制“path..”和内部简单点等序列来规范化路径
+	 * <p>结果便于路径比较。对于其他用途，请注意Windows分隔符（“\”）被简单的斜杠取代。
+	 * <p><strong>注意</strong> {@code cleanPath}不应该在安全上下文中被依赖。应该使用其他机制来防止路径遍历问题。
 	 *
 	 * @param path the original path
 	 * @return the normalized path

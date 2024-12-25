@@ -42,6 +42,11 @@ import java.util.Set;
  * collection of framework-specific AOP utility methods which depend
  * on internals of Spring's AOP framework implementation.
  *
+ * <p>AOP支持代码的实用方法。
+ * <p>主要用于Spring的AOP支持中的内部使用。
+ * <p>请参阅{@link org.springframework.aop.framework.AopProxyUtils}以获取
+ * 特定于框架的AOP实用方法的集合，这些方法依赖于Spring AOP框架实现的内部。
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -205,6 +210,8 @@ public abstract class AopUtils {
 	 * Can the given pointcut apply at all on the given class?
 	 * <p>This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
+	 * <p>给定的切入点是否适用于给定的类
+	 * <p>这是一个重要的测试，因为它可以用来优化类的切入点
 	 *
 	 * @param pc          the static or dynamic pointcut to check
 	 * @param targetClass the class to test
@@ -218,8 +225,9 @@ public abstract class AopUtils {
 	 * Can the given pointcut apply at all on the given class?
 	 * <p>This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
-	 * 给定的切入点是否适用于给定的类
-	 * <p> 这是一个重要的测试，因为它可以用来优化类的切入点。
+	 * <p>给定的切入点是否适用于给定的类
+	 * <p>这是一个重要的测试，因为它可以用来优化类的切入点
+	 *
 	 * @param pc               the static or dynamic pointcut to check
 	 * @param targetClass      the class to test
 	 * @param hasIntroductions whether the advisor chain
@@ -267,6 +275,8 @@ public abstract class AopUtils {
 	 * Can the given advisor apply at all on the given class?
 	 * This is an important test as it can be used to optimize
 	 * out an advisor for a class.
+	 * <p>给定的增强可以申请给定的课程吗?
+	 * <p>这是一个重要的测试, 因为它可以用来优化类的通知
 	 *
 	 * @param advisor     the advisor to check
 	 * @param targetClass class we're testing
@@ -281,7 +291,7 @@ public abstract class AopUtils {
 	 * <p>This is an important test as it can be used to optimize out an advisor for a class.
 	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
 	 * 给定的增强可以申请给定的课程吗
-	 * <p> 这是一个重要的测试，因为它可以用来优化一个类的增强。
+	 * <p>这是一个重要的测试，因为它可以用来优化一个类的增强。
 	 * 此版本还考虑了介绍（用于IntroductionAwardMethodMatcher）。
 	 *
 	 * @param advisor          the advisor to check
@@ -306,7 +316,7 @@ public abstract class AopUtils {
 	/**
 	 * Determine the sublist of the {@code candidateAdvisors} list
 	 * that is applicable to the given class.
-	 * 确定适用于给定类的增强列表的子增强列表。
+	 * <p>确定适用于给定类的增强列表的子增强列表。
 	 *
 	 * @param candidateAdvisors the Advisors to evaluate
 	 * @param clazz             the target class

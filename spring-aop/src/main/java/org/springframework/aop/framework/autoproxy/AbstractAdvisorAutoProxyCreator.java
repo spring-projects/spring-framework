@@ -44,6 +44,16 @@ import java.util.List;
  * interface will be considered as unordered; they will appear at the end of the
  * advisor chain in an undefined order.
  *
+ * <p>抽象通知自动代理创建者(抽象顾问自动代理创建者)
+ * <p>为特定bean构建AOP代理的通用自动代理创建器基于检测到的每个bean的通知
+ * <p>子类可以重写{@link #findCandidateAdvisors()}方法返回应用于任何对象的自定义通知列表。
+ * 子类可以还重写继承的{@link #shouldSkip}方法以排除某些自动代理中的对象。
+ * <p>需要订购的通知或增强应注明{@link org.springframework.core.annotation.Order @Order}
+ * 或实施{@link org.springframework.core.Ordered}接口.
+ * 此类排序使用{@link AnnotationAwareOrderComparator}的通知.
+ * 通知是未使用{@code @Order}进行注释，或未实现{@code Ordered}界面将被视为无序的;
+ * 它们将出现在通知链的顺序未定义.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #findCandidateAdvisors
@@ -73,7 +83,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Override
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-
+		// 获取增强器
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -83,7 +93,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 	/**
 	 * Find all eligible Advisors for auto-proxying this class.
-	 * 查找所有符合条件的自动代理此类的增强。
+	 * <p>查找所有符合条件的自动代理此类的增强。
 	 *
 	 * @param beanClass the clazz to find advisors for
 	 * @param beanName  the name of the currently proxied bean
@@ -94,7 +104,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+		// 获取所有增强器
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		// 筛选出符合当前bean的增强器
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
@@ -105,7 +117,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 	/**
 	 * Find all candidate Advisors to use in auto-proxying.
-	 * 查找所有用于自动代理的候选增强
+	 * <p>查找所有用于自动代理的候选增强
 	 * 子类具体实现
 	 *
 	 * @return the List of candidate Advisors
@@ -118,8 +130,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	/**
 	 * Search the given candidate Advisors to find all Advisors that
 	 * can apply to the specified bean.
-	 * 搜索给定的候选增强，以找到可以应用于指定bean的所有增强。
-	 * 对于所有增强器来讲, 并不一定适用当前bean, 要挑选出合适的增强器, 也就是能满足配置的通配符的增强器
+	 * <p>搜索给定的候选增强，以找到可以应用于指定bean的所有增强。
+	 * <p>对于所有增强器来讲, 并不一定适用当前bean, 要挑选出合适的增强器, 也就是能满足配置的通配符的增强器
 	 *
 	 * @param candidateAdvisors the candidate Advisors
 	 * @param beanClass         the target's bean class

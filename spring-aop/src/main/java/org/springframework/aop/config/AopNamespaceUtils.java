@@ -33,6 +33,13 @@ import org.w3c.dom.Element;
  * Callers may request a particular auto-proxy creator and know that creator,
  * <i>or a more capable variant thereof</i>, will be registered as a post-processor.
  *
+ * <p>Aop命名空间Utils(AopNamespaceUtils)
+ * 用于处理内部使用的自动代理创建者注册的实用程序类通过“{@code aop}”命名空间标签。
+ * <p>只应注册一个自动代理创建者，并进行多个配置元素可能希望注册不同的具体实现。
+ * 因此，本课程委托给提供简单升级协议的{@link AopConfigUtils}。
+ * 呼叫者可以请求特定的自动代理创建者并知道该创建者，
+ * <i> 或其更强大的变体</i>将被注册为后处理器。
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -70,14 +77,17 @@ public abstract class AopNamespaceUtils {
 
 	/**
 	 * 注册AnnotationAwareAspectJAutoProxyCreator
-	 * @param parserContext
-	 * @param sourceElement
+	 *
+	 * @param parserContext _
+	 * @param sourceElement _
 	 */
 	public static void registerAspectJAnnotationAutoProxyCreatorIfNecessary(ParserContext parserContext, Element sourceElement) {
 		// 1、注册或升级AnnotationAwareAspectJAutoProxyCreator
-		// 注册或升级AutoProxyCreator定义BeanName为'org.springframework.aop.config.internalAutoProxyCreator'的BeanDefinition
+		// 注册或升级AutoProxyCreator定义BeanName为 org.springframework.aop.config.internalAutoProxyCreator 的BeanDefinition
 		BeanDefinition beanDefinition = AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(
-				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
+				parserContext.getRegistry()
+				, parserContext.extractSource(sourceElement)
+		);
 		// 2、解析子标签 proxy-target-class 和 expose-proxy
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
 		// 3、注册组件并发送组件注册事件
@@ -85,7 +95,8 @@ public abstract class AopNamespaceUtils {
 	}
 
 	/**
-	 * proxy-target-class: Spring AOP 部分使用JDK动态代理或者CGLIB动态代理来为目标方法创建代理(建议尽量使用JDK动态代理)
+	 * <p>必要时使用类代理(useClassProxyingIfNecessary)
+	 * <p>proxy-target-class: Spring AOP 部分使用JDK动态代理或者CGLIB动态代理来为目标方法创建代理(建议尽量使用JDK动态代理)
 	 * 如果被代理的目标对象实现了智少一个接口, 则会使用JDK动态代理. 所有该目标类型实现的接口都将被代理.
 	 * 若该目标对象没有实现任何接口, 则创建一个CGLIB代理. 如果希望强制使用CGLIB代理(例如希望代理目标对象的所有方法, 而不只是实现自接口的方法),
 	 * 那也可以. 但是需要考虑以下两个问题
@@ -102,8 +113,8 @@ public abstract class AopNamespaceUtils {
 	 * expose-proxy：有时候目标对象内部的自我调用将无法实施切面中的增强，可以这样使用：
 	 * <aop:aspectj-autoproxy expose-proxy="true"/>
 	 *
-	 * @param registry
-	 * @param sourceElement
+	 * @param registry      bean定义注册表
+	 * @param sourceElement 元素
 	 */
 	private static void useClassProxyingIfNecessary(BeanDefinitionRegistry registry, @Nullable Element sourceElement) {
 		if (sourceElement != null) {

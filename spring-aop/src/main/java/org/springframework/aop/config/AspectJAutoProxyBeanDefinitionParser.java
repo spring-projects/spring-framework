@@ -16,21 +16,24 @@
 
 package org.springframework.aop.config;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.lang.Nullable;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * {@link BeanDefinitionParser} for the {@code aspectj-autoproxy} tag,
  * enabling the automatic application of @AspectJ-style aspects found in
  * the {@link org.springframework.beans.factory.BeanFactory}.
+ *
+ * <p>AspectJ自动代理Bean定义解析器(AspectJAutoProxyBeanDefinitionParser)
+ * <p>{@code aspectj-autoproxy}标签的{@link BeanDefinitionParser},
+ * 启用在{@link org.springframework.beans.factory.BeanFactory}中找到的@AspectJ-style aspects的自动应用
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -49,8 +52,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void extendBeanDefinition(Element element, ParserContext parserContext) {
-		BeanDefinition beanDef =
-				parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition beanDef = parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		if (element.hasChildNodes()) {
 			addIncludePatterns(element, parserContext, beanDef);
 		}

@@ -66,6 +66,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * <p>The thread context class loader will be used for
 	 * loading the resource.
 	 *
+	 * <p>类路径资源(#ClassPathResource)
 	 * <p>为{@code ClassLoader}的用法创建一个新的{@code ClassPathResource}。前导斜杠将被删除，因为ClassLoader资源访问方法将不接受它。
 	 * <p>线程上下文类加载器将用于加载资源
 	 *
@@ -91,6 +92,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	public ClassPathResource(String path, @Nullable ClassLoader classLoader) {
 		Assert.notNull(path, "Path must not be null");
+		// 文件路径规范化
 		String pathToUse = StringUtils.cleanPath(path);
 		if (pathToUse.startsWith("/")) {
 			pathToUse = pathToUse.substring(1);

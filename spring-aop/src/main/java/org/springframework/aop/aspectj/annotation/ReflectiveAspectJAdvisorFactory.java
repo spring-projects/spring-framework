@@ -45,6 +45,8 @@ import java.util.List;
  * Factory that can create Spring AOP Advisors given AspectJ classes from
  * classes honoring AspectJ's annotation syntax, using reflection to invoke the
  * corresponding advice methods.
+ * <p>反射AspectJ通知工厂(ReflectiveAspectJAdvisorFactory)
+ * <p>工厂可以在给定AspectJ类的情况下创建Spring AOP通知类遵循AspectJ的注释语法，使用反射来调用相应的建议方法.
  *
  * @author Rod Johnson
  * @author Adrian Colyer
@@ -146,6 +148,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		// Find introduction fields.
 		// 获取 DeclareParents注解
+		// DeclareParents主要用于引介增强的注解形式的实现, 而其实现方式与普通增强很类似,只不过使用DeclareParentsAdvisor对功能进行封装
 		for (Field field : aspectClass.getDeclaredFields()) {
 			Advisor advisor = getDeclareParentsAdvisor(field);
 			if (advisor != null) {
@@ -169,8 +172,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * Build a {@link org.springframework.aop.aspectj.DeclareParentsAdvisor}
 	 * for the given introduction field.
 	 * <p>Resulting Advisors will need to be evaluated for targets.
-	 * 为给定的介绍字段构建一个{@link org.springframework.aop.aspectj.DeclareParentsAdvisor}
-	 * <p> 需要对产生的顾问进行目标评估
+	 * <p>为给定的介绍字段构建一个{@link org.springframework.aop.aspectj.DeclareParentsAdvisor}
+	 * <p>需要对产生的通知器进行目标评估
 	 *
 	 * @param introductionField the field to introspect
 	 * @return the Advisor instance, or {@code null} if not an Advisor
@@ -195,7 +198,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	@Override
 	@Nullable
 	public Advisor getAdvisor(Method candidateAdviceMethod, MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrderInAspect, String aspectName) {
-
+		// 验证
 		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
 		// 1. 切点信息的获取  所谓获取切点信息就是指定注解的表达式信息的获取
 		// 例: @Pointcut("execution(* *.*test*(..))")
@@ -208,6 +211,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod, this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
 	}
 
+	/**
+	 * 获取切点信息
+	 *
+	 * @param candidateAdviceMethod
+	 * @param candidateAspectClass
+	 * @return
+	 */
 	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
 		// 获取方法上的注解
@@ -307,6 +317,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * Synthetic advisor that instantiates the aspect.
 	 * Triggered by per-clause pointcut on non-singleton aspect.
 	 * The advice has no effect.
+	 * 实例化方面的合成通知器。由非单例方面的每个子句切入点触发。这个增强没有效果。
 	 */
 	@SuppressWarnings("serial")
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {

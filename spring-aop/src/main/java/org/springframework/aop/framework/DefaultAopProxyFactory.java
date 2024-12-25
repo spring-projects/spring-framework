@@ -38,6 +38,16 @@ import java.lang.reflect.Proxy;
  * <p>In general, specify {@code proxyTargetClass} to enforce a CGLIB proxy,
  * or specify one or more interfaces to use a JDK dynamic proxy.
  *
+ * <p>默认Aop代理工厂(DefaultAopProxyFactory)
+ * <p>默认{@link AopProxyFactory}实现, 创建CGLIB代理或JDK动态代理。
+ * <p>如果给定的以下条件之一为真, 则创建CGLIB代理{@link AdvisedSupport} 实例:
+ * <ul>
+ * <li>已设置{@code optimize} 标志
+ * <li>已设置{@code proxyTargetClass} 标志
+ * <li>未指定代理接口
+ * </ul>
+ * <p>通常, 指定{@code proxyTargetClass}来强制CGLIB代理, 或者指定一个或多个接口来使用JDK动态代理.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
@@ -53,23 +63,24 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	/**
 	 * 创建代理
-	 *
-	 * config.isOptimize()：用来控制通过CGLIB创建的代理是否使用激进的优化策略。除非完全了解AOP代理如何处理优化，否则不推荐用户使用这个设置。
-	 * 目前这个属性仅用于CGLIB代理，对于JDK动态代理（默认代理）无效。
-	 * config.isProxyTargetClass()：这个属性为true时，目标类本身被代理而不是目标类的接口。如果这个属性值被设为true，CGLIB代理将被创建，
+	 * <p>
+	 * config.isOptimize()：用来控制通过CGLIB创建的代理是否使用激进的优化策略。除非完全了解AOP代理如何处理优化, 否则不推荐用户使用这个设置。
+	 * 目前这个属性仅用于CGLIB代理, 对于JDK动态代理（默认代理）无效。
+	 * config.isProxyTargetClass()：这个属性为true时, 目标类本身被代理而不是目标类的接口。如果这个属性值被设为true, CGLIB代理将被创建,
 	 * 设置方式为<aop:aspectj-autoproxy-proxy-target-class="true"/>。
 	 * hasNoUserSuppliedProxyInterfaces(config)：是否存在代理接口。
-	 *
+	 * <p>
 	 * 下面是对JDK与Cglib方式的总结。
-	 * 	如果目标对象实现了接口，默认情况下会采用JDK的动态代理实现AOP。
-	 * 	如果目标对象实现了接口，可以强制使用CGLIB实现AOP。
-	 * 	如果目标对象没有实现接口，必须采用CGLIB库，Spring会自动在JDK动态代理和CGLIB之间转换。
+	 * 如果目标对象实现了接口, 默认情况下会采用JDK的动态代理实现AOP。
+	 * 如果目标对象实现了接口, 可以强制使用CGLIB实现AOP。
+	 * 如果目标对象没有实现接口, 必须采用CGLIB库, Spring会自动在JDK动态代理和CGLIB之间转换。
 	 * 如何强制使用CGLIB实现AOP？
-	 * 	添加CGLIB库，Spring_HOME/cglib/*jar。
-	 * 	在Spring配置文件中加入<aop:aspectj-autoproxyproxy-target-class="true"/>。
-	 * JDK动态代理和CGLIB字节码生成的区别？
-	 * 	JDK动态代理只能对实现了接口的类生成代理，而不能针对类。
-	 * 	CGLIB是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法，因为是继承，所以该类或方法最好不要声明成final。
+	 * 添加CGLIB库, Spring_HOME/cglib/*jar。
+	 * 在Spring配置文件中加入<aop:aspectj-autoproxyproxy-target-class="true"/>。
+	 * JDK动态代理和CGLIB字节码生成的区别?
+	 * JDK动态代理只能对实现了接口的类生成代理, 而不能针对类。
+	 * CGLIB是针对类实现代理, 主要是对指定的类生成一个子类, 覆盖其中的方法, 因为是继承, 所以该类或方法最好不要声明成final。
+	 *
 	 * @param config the AOP configuration in the form of an
 	 *               AdvisedSupport object
 	 * @return

@@ -16,13 +16,15 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
+
 /**
  * Decorator to cause a {@link MetadataAwareAspectInstanceFactory} to instantiate only once.
+ * <p>惰性单例方面实例工厂装饰器(LazySingletonAspectInstanceFactoryDecorator)
+ * <p>装饰器使{@link MetadataAwareAspectInstanceFactory} 只实例化一次。
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -39,6 +41,8 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 	/**
 	 * Create a new lazily initializing decorator for the given AspectInstanceFactory.
+	 * <p>为给定的AspectInstanceFactory创建一个新的惰性初始化装饰器
+	 *
 	 * @param maaif the MetadataAwareAspectInstanceFactory to decorate
 	 */
 	public LazySingletonAspectInstanceFactoryDecorator(MetadataAwareAspectInstanceFactory maaif) {
@@ -55,8 +59,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 			if (mutex == null) {
 				aspectInstance = this.maaif.getAspectInstance();
 				this.materialized = aspectInstance;
-			}
-			else {
+			} else {
 				synchronized (mutex) {
 					aspectInstance = this.materialized;
 					if (aspectInstance == null) {

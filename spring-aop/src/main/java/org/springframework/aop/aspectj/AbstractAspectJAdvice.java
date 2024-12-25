@@ -48,6 +48,9 @@ import java.util.Map;
  * Base class for AOP Alliance {@link org.aopalliance.aop.Advice} classes
  * wrapping an AspectJ aspect or an AspectJ-annotated advice method.
  *
+ * <p>抽象AspectJ增强(AbstractAspectJAdvice)
+ * <p>AOP联盟{@link org.aopalliance.aop.Advice}类的基类包装AspectJ方面或AspectJ注释的建议方法。
+ *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -59,6 +62,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * Key used in ReflectiveMethodInvocation userAttributes map for the current joinpoint.
+	 * 当前连接点的ReflectiveMethodInvocation userAttributes映射中使用的键
 	 */
 	protected static final String JOIN_POINT_KEY = JoinPoint.class.getName();
 
@@ -597,6 +601,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * Invoke the advice method.
+	 * 调用通知方法
 	 *
 	 * @param jpMatch     the JoinPointMatch that matched this execution join point
 	 * @param returnValue the return value from the method execution (may be null)
@@ -606,7 +611,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	protected Object invokeAdviceMethod(@Nullable JoinPointMatch jpMatch, @Nullable Object returnValue, @Nullable Throwable ex)
 			throws Throwable {
-
+		// 用给定参数调用通知方法
 		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, ex));
 	}
 

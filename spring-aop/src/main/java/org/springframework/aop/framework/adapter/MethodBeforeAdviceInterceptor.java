@@ -29,7 +29,10 @@ import java.io.Serializable;
  * Interceptor to wrap a {@link MethodBeforeAdvice}.
  * <p>Used internally by the AOP framework; application developers should not
  * need to use this class directly.
- * 拦截器包装{@link MethodBeforeAdvice}<p> AOP框架内部使用；应用程序开发人员不需要直接使用此类
+ *
+ * <p>通知拦截器之前的方法(MethodBeforeAdviceInterceptor)
+ * <p>拦截器包装{@link MethodBeforeAdvice}
+ * <p> AOP框架内部使用; 应用程序开发人员不需要直接使用此类
  *
  * @author Rod Johnson
  * @see AfterReturningAdviceInterceptor
