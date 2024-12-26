@@ -212,7 +212,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 		return this.actual.getMvcResult().getResolvedException();
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private ModelAndView getModelAndView() {
 		ModelAndView modelAndView = getMvcResult().getModelAndView();
 		Assertions.assertThat(modelAndView).as("ModelAndView").isNotNull();

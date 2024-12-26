@@ -85,7 +85,7 @@ public interface MvcResult {
 	 * {@link #getAsyncResult(long)} to specify the amount of time to wait.
 	 * @throws IllegalStateException if the async result was not set
 	 */
-	Object getAsyncResult();
+	@Nullable Object getAsyncResult();
 
 	/**
 	 * Get the result of async execution and wait if necessary.
@@ -96,6 +96,6 @@ public interface MvcResult {
 	 * 	MockAsyncContext#setTimeout} for more details.
 	 * @throws IllegalStateException if the async result was not set
 	 */
-	Object getAsyncResult(long timeToWait);
+	@Nullable Object getAsyncResult(long timeToWait);
 
 }

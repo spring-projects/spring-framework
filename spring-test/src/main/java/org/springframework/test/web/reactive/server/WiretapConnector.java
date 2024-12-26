@@ -62,7 +62,7 @@ class WiretapConnector implements ClientHttpConnector {
 
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
@@ -180,7 +180,7 @@ class WiretapConnector implements ClientHttpConnector {
 			return this.publisherNested;
 		}
 
-		@SuppressWarnings("NullAway")
+		@SuppressWarnings("NullAway") // Dataflow analysis limitation
 		public Mono<byte[]> getContent() {
 			return Mono.defer(() -> {
 				if (this.content.scan(Scannable.Attr.TERMINATED) == Boolean.TRUE) {

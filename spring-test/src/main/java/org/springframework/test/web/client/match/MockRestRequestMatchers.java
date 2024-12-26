@@ -159,7 +159,7 @@ public abstract class MockRestRequestMatchers {
 	 * @see #queryParam(String, String...)
 	 */
 	@SafeVarargs
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static RequestMatcher queryParam(String name, Matcher<? super String>... matchers) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
@@ -187,7 +187,7 @@ public abstract class MockRestRequestMatchers {
 	 * @see #queryParamList(String, Matcher)
 	 * @see #queryParam(String, Matcher...)
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static RequestMatcher queryParam(String name, String... expectedValues) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);

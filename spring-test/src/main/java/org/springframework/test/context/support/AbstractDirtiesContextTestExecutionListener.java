@@ -84,7 +84,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 	 * @since 4.2
 	 * @see #dirtyContext
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void beforeOrAfterTestMethod(TestContext testContext, MethodMode requiredMethodMode,
 			ClassMode requiredClassMode) throws Exception {
 
@@ -136,7 +136,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 	 * @since 4.2
 	 * @see #dirtyContext
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void beforeOrAfterTestClass(TestContext testContext, ClassMode requiredClassMode) throws Exception {
 		Assert.notNull(testContext, "TestContext must not be null");
 		Assert.notNull(requiredClassMode, "requiredClassMode must not be null");

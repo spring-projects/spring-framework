@@ -103,7 +103,6 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	}
 
 
-	@SuppressWarnings("NullAway")
 	private MediaType parseMediaType(String value) {
 		try {
 			return MediaType.parseMediaType(value);

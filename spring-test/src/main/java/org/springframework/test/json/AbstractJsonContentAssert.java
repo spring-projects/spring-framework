@@ -489,7 +489,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 		return (this.actual != null ? this.actual.getJson() : null);
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private String toNonNullJsonString() {
 		String jsonString = toJsonString();
 		Assertions.assertThat(jsonString).as("JSON content").isNotNull();

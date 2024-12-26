@@ -292,12 +292,12 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 		}
 
 		@Override
-		public Object getAsyncResult() {
+		public @Nullable Object getAsyncResult() {
 			return this.mvcResult.getAsyncResult();
 		}
 
 		@Override
-		public Object getAsyncResult(long timeToWait) {
+		public @Nullable Object getAsyncResult(long timeToWait) {
 			return this.mvcResult.getAsyncResult(timeToWait);
 		}
 

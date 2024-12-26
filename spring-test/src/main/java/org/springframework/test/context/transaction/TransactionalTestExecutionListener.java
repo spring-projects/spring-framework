@@ -194,7 +194,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public void beforeTestMethod(final TestContext testContext) throws Exception {
 		Method testMethod = testContext.getTestMethod();
 		Class<?> testClass = testContext.getTestClass();

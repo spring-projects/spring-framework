@@ -134,7 +134,7 @@ public abstract class TestPropertySourceUtils {
 		return mergedAttributes;
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private static boolean duplicationDetected(TestPropertySourceAttributes currentAttributes,
 			@Nullable TestPropertySourceAttributes previousAttributes) {
 
