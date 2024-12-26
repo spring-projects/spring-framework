@@ -319,7 +319,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object array is {@code null} or contains no elements
 	 */
 	@Contract("null, _ -> fail")
-	public static void notEmpty(Object @Nullable [] array, String message) {
+	public static void notEmpty(@Nullable Object @Nullable [] array, String message) {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(message);
 		}
