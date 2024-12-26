@@ -323,7 +323,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @see #initConnection()
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lazy initialization
 	protected Connection getConnection() throws JMSException {
 		this.connectionLock.lock();
 		try {

@@ -289,7 +289,7 @@ public abstract class CollectionUtils {
 	 * or {@code null} if none or more than one such value found
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> @Nullable T findValueOfType(Collection<?> collection, @Nullable Class<T> type) {
+	public static <T> @Nullable T findValueOfType(@Nullable Collection<?> collection, @Nullable Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
 		}

@@ -215,7 +215,6 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * Return this resource holder's Session of the given type
 	 * for the given connection, or {@code null} if none.
 	 */
-	@SuppressWarnings("NullAway")
 	public <S extends Session> @Nullable S getSession(Class<S> sessionType, @Nullable Connection connection) {
 		Deque<Session> sessions =
 				(connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);

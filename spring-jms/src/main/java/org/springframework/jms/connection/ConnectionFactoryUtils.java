@@ -274,7 +274,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static @Nullable Session doGetTransactionalSession(
 			ConnectionFactory connectionFactory, ResourceFactory resourceFactory, boolean startConnection)
 			throws JMSException {

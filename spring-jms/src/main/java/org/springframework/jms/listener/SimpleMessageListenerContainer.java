@@ -312,7 +312,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #executeListener
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	protected MessageConsumer createListenerConsumer(final Session session) throws JMSException {
 		Destination destination = getDestination();
 		if (destination == null) {
@@ -341,7 +341,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @see #executeListener
 	 * @see #setExposeListenerSession
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void processMessage(Message message, Session session) {
 		ConnectionFactory connectionFactory = getConnectionFactory();
 		boolean exposeResource = (connectionFactory != null && isExposeListenerSession());
