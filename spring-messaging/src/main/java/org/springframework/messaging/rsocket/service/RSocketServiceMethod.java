@@ -90,7 +90,7 @@ final class RSocketServiceMethod {
 		return parameters;
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private static @Nullable String initRoute(
 			Method method, Class<?> containingClass, RSocketStrategies strategies,
 			@Nullable StringValueResolver embeddedValueResolver) {

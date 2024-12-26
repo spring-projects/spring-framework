@@ -514,12 +514,13 @@ public abstract class AbstractMethodMessageHandler<T>
 		handleMatch(bestMatch.mapping, bestMatch.handlerMethod, lookupDestination, message);
 	}
 
-	@SuppressWarnings("NullAway")
 	private void addMatchesToCollection(Collection<T> mappingsToCheck, Message<?> message, List<Match> matches) {
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);
 			if (match != null) {
-				matches.add(new Match(match, this.handlerMethods.get(mapping)));
+				HandlerMethod handlerMethod = this.handlerMethods.get(mapping);
+				Assert.state(handlerMethod != null, "HandlerMethod must not be null");
+				matches.add(new Match(match, handlerMethod));
 			}
 		}
 	}

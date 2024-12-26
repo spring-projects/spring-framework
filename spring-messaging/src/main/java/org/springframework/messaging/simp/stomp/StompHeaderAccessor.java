@@ -236,7 +236,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		return (SimpMessageType.HEARTBEAT == getMessageType());
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public long[] getHeartbeat() {
 		String rawValue = getFirstNativeHeader(STOMP_HEARTBEAT_HEADER);
 		int pos = (rawValue != null ? rawValue.indexOf(',') : -1);
