@@ -570,7 +570,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 				for (PointcutParameter parameter : parameterBindings) {
 					String name = parameter.getName();
 					Integer index = this.argumentBindings.get(name);
-					Assert.notNull(index, "Index must not be null");
+					Assert.state(index != null, "Index must not be null");
 					adviceInvocationArgs[index] = parameter.getBinding();
 					numBound++;
 				}
@@ -578,14 +578,14 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			// binding from returning clause
 			if (this.returningName != null) {
 				Integer index = this.argumentBindings.get(this.returningName);
-				Assert.notNull(index, "Index must not be null");
+				Assert.state(index != null, "Index must not be null");
 				adviceInvocationArgs[index] = returnValue;
 				numBound++;
 			}
 			// binding from thrown exception
 			if (this.throwingName != null) {
 				Integer index = this.argumentBindings.get(this.throwingName);
-				Assert.notNull(index, "Index must not be null");
+				Assert.state(index != null, "Index must not be null");
 				adviceInvocationArgs[index] = ex;
 				numBound++;
 			}

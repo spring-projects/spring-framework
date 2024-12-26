@@ -157,7 +157,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			}
 			else {
 				MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
-				Assert.notNull(factory, "Factory must not be null");
+				Assert.state(factory != null, "Factory must not be null");
 				advisors.addAll(this.advisorFactory.getAdvisors(factory));
 			}
 		}
