@@ -62,7 +62,7 @@ abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequ
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	protected final ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null && this.bodyStream != null) {
 			this.body = outputStream -> this.bodyStream.writeTo(outputStream);

@@ -94,7 +94,6 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 
 	@Override
-	@SuppressWarnings("NullAway")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		CompletableFuture<HttpResponse<InputStream>> responseFuture = null;
 		try {
@@ -133,7 +132,8 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 				throw ioEx;
 			}
 			else {
-				throw new IOException(cause.getMessage(), cause);
+				String message = (cause == null ? null : cause.getMessage());
+				throw (message == null ? new IOException(cause) : new IOException(message, cause));
 			}
 		}
 	}

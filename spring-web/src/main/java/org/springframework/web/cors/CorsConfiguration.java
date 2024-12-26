@@ -162,7 +162,7 @@ public class CorsConfiguration {
 	/**
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void addAllowedOrigin(@Nullable String origin) {
 		if (origin == null) {
 			return;
@@ -235,7 +235,7 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOriginPatterns} for adding one origin at a time.
 	 * @since 5.3
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
 		if (originPattern == null) {
 			return;

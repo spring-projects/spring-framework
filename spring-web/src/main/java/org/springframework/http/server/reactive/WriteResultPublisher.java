@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@SuppressWarnings("NullAway")
+@SuppressWarnings("NullAway") // Dataflow analysis limitation
 class WriteResultPublisher implements Publisher<Void> {
 
 	/**

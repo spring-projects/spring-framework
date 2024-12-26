@@ -135,7 +135,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				});
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private @Nullable Object buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
 			Map<String, Object> hints) {
 

@@ -189,7 +189,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Not null assertion performed in StreamUtils#copyRange
 	private void writeResourceRegionCollection(Collection<ResourceRegion> resourceRegions,
 			HttpOutputMessage outputMessage) throws IOException {
 

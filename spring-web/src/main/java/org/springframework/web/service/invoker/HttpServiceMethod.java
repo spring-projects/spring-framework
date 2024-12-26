@@ -236,7 +236,7 @@ final class HttpServiceMethod {
 			return null;
 		}
 
-		@SuppressWarnings("NullAway")
+		@SuppressWarnings("NullAway") // Dataflow analysis limitation
 		private static @Nullable String initUrl(
 				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
 				@Nullable StringValueResolver embeddedValueResolver) {

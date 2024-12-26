@@ -49,7 +49,6 @@ import org.springframework.http.HttpHeaders;
  * @author Arjen Poutsma
  * @since 5.3
  */
-@SuppressWarnings("NullAway")
 final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 	private static final byte CR = '\r';
@@ -117,12 +116,14 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void hookOnNext(DataBuffer value) {
 		this.requestOutstanding.set(false);
 		this.state.get().onNext(value);
 	}
 
 	@Override
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void hookOnComplete() {
 		this.state.get().onComplete();
 	}

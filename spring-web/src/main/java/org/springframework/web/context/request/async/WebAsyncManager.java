@@ -298,7 +298,7 @@ public final class WebAsyncManager {
 	 * via {@link #getConcurrentResultContext()}
 	 * @throws Exception if concurrent processing failed to start
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void startCallableProcessing(final WebAsyncTask<?> webAsyncTask, Object... processingContext)
 			throws Exception {
 
@@ -419,7 +419,7 @@ public final class WebAsyncManager {
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void startDeferredResultProcessing(
 			final DeferredResult<?> deferredResult, Object... processingContext) throws Exception {
 

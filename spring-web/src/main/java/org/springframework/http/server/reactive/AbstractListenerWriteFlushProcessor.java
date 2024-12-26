@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * @since 5.0
  * @param <T> the type of element signaled to the {@link Subscriber}
  */
-@SuppressWarnings("NullAway")
+@SuppressWarnings("NullAway") // Dataflow analysis limitation
 public abstract class AbstractListenerWriteFlushProcessor<T> implements Processor<Publisher<? extends T>, Void> {
 
 	/**

@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @since 5.0
  * @param <T> the type of element signaled to the {@link Subscriber}
  */
-@SuppressWarnings("NullAway")
+@SuppressWarnings("NullAway") // Dataflow analysis limitation
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
 	/**
