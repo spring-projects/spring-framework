@@ -166,7 +166,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//	    | (DEFAULT^ logicalOrExpression)
 	//	    | (QMARK^ expression COLON! expression)
 	//      | (ELVIS^ expression))?;
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Not null assertion performed in SpelNodeImpl constructor
 	private @Nullable SpelNodeImpl eatExpression() {
 		SpelNodeImpl expr = eatLogicalOrExpression();
 		Token t = peekToken();
@@ -273,7 +273,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	//sumExpression: productExpression ( (PLUS^ | MINUS^) productExpression)*;
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Not null assertion performed in SpelNodeImpl constructor
 	private @Nullable SpelNodeImpl eatSumExpression() {
 		SpelNodeImpl expr = eatProductExpression();
 		while (peekToken(TokenKind.PLUS, TokenKind.MINUS, TokenKind.INC)) {
@@ -311,7 +311,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	// powerExpr  : unaryExpression (POWER^ unaryExpression)? (INC || DEC) ;
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Not null assertion performed in SpelNodeImpl constructor
 	private @Nullable SpelNodeImpl eatPowerIncDecExpression() {
 		SpelNodeImpl expr = eatUnaryExpression();
 		if (peekToken(TokenKind.POWER)) {
@@ -331,7 +331,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	// unaryExpression: (PLUS^ | MINUS^ | BANG^ | INC^ | DEC^) unaryExpression | primaryExpression ;
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Not null assertion performed in SpelNodeImpl constructor
 	private @Nullable SpelNodeImpl eatUnaryExpression() {
 		if (peekToken(TokenKind.NOT, TokenKind.PLUS, TokenKind.MINUS)) {
 			Token t = takeToken();

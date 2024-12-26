@@ -154,7 +154,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		Assert.state(target != null, "Target must not be null");
 		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
@@ -507,7 +507,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * <p>Note: An optimized accessor is currently only usable for read attempts.
 	 * Do not call this method if you need a read-write accessor.
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public PropertyAccessor createOptimalAccessor(EvaluationContext context, @Nullable Object target, String name) {
 		// Don't be clever for arrays or a null target...
 		if (target == null) {

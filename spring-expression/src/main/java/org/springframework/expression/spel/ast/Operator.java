@@ -351,7 +351,7 @@ public abstract class Operator extends SpelNodeImpl {
 		 * @param rightActualDescriptor the dynamic/runtime right object descriptor
 		 * @return a DescriptorComparison object indicating the type of compatibility, if any
 		 */
-		@SuppressWarnings("NullAway")
+		@SuppressWarnings("NullAway") // Dataflow analysis limitation
 		public static DescriptorComparison checkNumericCompatibility(
 				@Nullable String leftDeclaredDescriptor, @Nullable String rightDeclaredDescriptor,
 				@Nullable String leftActualDescriptor, @Nullable String rightActualDescriptor) {

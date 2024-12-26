@@ -174,7 +174,6 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @throws EvaluationException if there is any problem invoking the method
 	 * @since 6.1
 	 */
-	@SuppressWarnings("NullAway") // TODO Remove when NullAway 0.12.2 is released, see https://github.com/uber/NullAway/pull/1089
 	private TypedValue executeFunctionViaMethodHandle(ExpressionState state, MethodHandle methodHandle) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
 		MethodType declaredParams = methodHandle.type();
