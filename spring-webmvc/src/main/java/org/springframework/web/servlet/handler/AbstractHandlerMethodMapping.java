@@ -436,7 +436,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, request);

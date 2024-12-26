@@ -271,7 +271,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @return a matching handler, or {@code null} if not found
 	 * @since 5.3
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected @Nullable Object lookupHandler(
 			RequestPath path, String lookupPath, HttpServletRequest request) throws Exception {
 

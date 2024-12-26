@@ -233,7 +233,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param lookupPath the lookup path to check
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public final @Nullable String getForLookupPath(String lookupPath) {
 		// Clean duplicate slashes or pathWithinPattern won't match lookupPath
 		String previous;
