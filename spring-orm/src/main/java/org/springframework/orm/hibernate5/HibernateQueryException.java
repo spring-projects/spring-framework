@@ -39,9 +39,9 @@ public class HibernateQueryException extends InvalidDataAccessResourceUsageExcep
 	/**
 	 * Return the HQL query string that was invalid.
 	 */
-	@SuppressWarnings("NullAway")
 	public @Nullable String getQueryString() {
-		return ((QueryException) getCause()).getQueryString();
+		QueryException cause = (QueryException) getCause();
+		return cause == null ? null : cause.getQueryString();
 	}
 
 }

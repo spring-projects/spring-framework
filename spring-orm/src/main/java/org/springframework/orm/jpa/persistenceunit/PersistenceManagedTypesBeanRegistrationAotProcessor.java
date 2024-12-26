@@ -238,13 +238,13 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
-		@SuppressWarnings("NullAway")
+		@SuppressWarnings("NullAway") // Not null assertion performed in ReflectionHints.registerType
 		private void registerForReflection(ReflectionHints reflection, @Nullable Annotation annotation, String attribute) {
 			if (annotation == null) {
 				return;
 			}
-			Class<?> embeddableInstantiatorClass = (Class<?>) AnnotationUtils.getAnnotationAttributes(annotation).get(attribute);
-			reflection.registerType(embeddableInstantiatorClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			Class<?> type = (Class<?>) AnnotationUtils.getAnnotationAttributes(annotation).get(attribute);
+			reflection.registerType(type, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		}
 	}
 }
