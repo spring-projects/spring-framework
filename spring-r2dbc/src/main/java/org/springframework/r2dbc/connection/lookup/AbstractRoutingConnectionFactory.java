@@ -138,7 +138,6 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * @see #setTargetConnectionFactories(Map)
 	 * @see #setDefaultTargetConnectionFactory(Object)
 	 */
-	@SuppressWarnings("NullAway")
 	public void initialize() {
 		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
 
@@ -217,7 +216,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * per {@link #determineCurrentLookupKey()}
 	 * @see #determineCurrentLookupKey()
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	protected Mono<ConnectionFactory> determineTargetConnectionFactory() {
 		Assert.state(this.resolvedConnectionFactories != null, "ConnectionFactory router not initialized");
 
