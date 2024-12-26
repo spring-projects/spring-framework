@@ -84,7 +84,6 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
 	 */
-	@SuppressWarnings("NullAway")
 	public List<Advisor> buildAspectJAdvisors() {
 		List<String> aspectNames = this.aspectBeanNames;
 
@@ -158,6 +157,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			}
 			else {
 				MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
+				Assert.notNull(factory, "Factory must not be null");
 				advisors.addAll(this.advisorFactory.getAdvisors(factory));
 			}
 		}

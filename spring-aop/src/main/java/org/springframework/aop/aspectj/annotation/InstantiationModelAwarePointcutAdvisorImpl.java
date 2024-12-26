@@ -75,9 +75,11 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	private @Nullable Advice instantiatedAdvice;
 
-	private @Nullable Boolean isBeforeAdvice;
+	@SuppressWarnings("NullAway.Init")
+	private Boolean isBeforeAdvice;
 
-	private @Nullable Boolean isAfterAdvice;
+	@SuppressWarnings("NullAway.Init")
+	private Boolean isAfterAdvice;
 
 
 	public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
@@ -192,7 +194,6 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public boolean isBeforeAdvice() {
 		if (this.isBeforeAdvice == null) {
 			determineAdviceType();
@@ -201,7 +202,6 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public boolean isAfterAdvice() {
 		if (this.isAfterAdvice == null) {
 			determineAdviceType();
