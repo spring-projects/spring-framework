@@ -64,7 +64,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void onOpen(Session session, EndpointConfig config) {
 		this.delegateSession = this.sessionFactory.apply(session);
 		Assert.state(this.delegateSession != null, "No delegate session");

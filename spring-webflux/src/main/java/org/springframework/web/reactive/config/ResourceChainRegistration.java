@@ -65,7 +65,7 @@ public class ResourceChainRegistration {
 		this(cacheResources, cacheResources ? new ConcurrentMapCache(DEFAULT_CACHE_NAME) : null);
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public ResourceChainRegistration(boolean cacheResources, @Nullable Cache cache) {
 		Assert.isTrue(!cacheResources || cache != null, "'cache' is required when cacheResources=true");
 		if (cacheResources) {

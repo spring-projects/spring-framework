@@ -91,7 +91,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 
 	@Override
-	@SuppressWarnings("NullAway") // TODO NullAway bug potentially due to the recursive generic type
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public ServerResponse.BodyBuilder header(String headerName, @Nullable String... headerValues) {
 		Assert.notNull(headerName, "HeaderName must not be null");
 		for (String headerValue : headerValues) {

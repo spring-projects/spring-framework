@@ -408,7 +408,7 @@ class ControllerMethodResolver {
 	 * @param handlerMethod the controller method that raised the exception,
 	 *        or if {@code null}, check only {@code @ControllerAdvice} classes.
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public @Nullable InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, ServerWebExchange exchange, @Nullable HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);

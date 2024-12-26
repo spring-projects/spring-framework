@@ -323,7 +323,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * @param mediaTypes media type mappings
 	 * @since 5.3.2
 	 */
-	@SuppressWarnings("NullAway")
 	public void setMediaTypes(Map<String, MediaType> mediaTypes) {
 		if (this.mediaTypes == null) {
 			this.mediaTypes = new HashMap<>(mediaTypes.size());
@@ -474,7 +473,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				});
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	protected Mono<Resource> getResource(ServerWebExchange exchange) {
 		String rawPath = getResourcePath(exchange);
 		String path = processPath(rawPath);
