@@ -696,7 +696,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
 		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(
 				new DescriptiveResource("Groovy"));

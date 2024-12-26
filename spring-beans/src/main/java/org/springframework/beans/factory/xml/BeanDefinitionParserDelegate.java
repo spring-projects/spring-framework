@@ -407,7 +407,6 @@ public class BeanDefinitionParserDelegate {
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
-	@SuppressWarnings("NullAway")
 	public @Nullable BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
@@ -457,7 +456,8 @@ public class BeanDefinitionParserDelegate {
 					}
 				}
 				catch (Exception ex) {
-					error(ex.getMessage(), ele);
+					String message = ex.getMessage();
+					error(message == null ? "" : message, ele);
 					return null;
 				}
 			}

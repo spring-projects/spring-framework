@@ -89,13 +89,15 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 	private @Nullable BeanWrapper targetBeanWrapper;
 
-	private @Nullable String targetBeanName;
+	@SuppressWarnings("NullAway.Init")
+	private String targetBeanName;
 
 	private @Nullable String propertyPath;
 
 	private @Nullable Class<?> resultType;
 
-	private @Nullable String beanName;
+	@SuppressWarnings("NullAway.Init")
+	private String beanName;
 
 	private @Nullable BeanFactory beanFactory;
 
@@ -156,7 +158,6 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 

@@ -72,7 +72,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	 * Match the given dependency type with its generic type information against the given
 	 * candidate bean definition.
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
 		if (dependencyType.getType() instanceof Class) {

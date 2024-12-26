@@ -98,7 +98,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private boolean configValueEditorsActive = false;
 
-	private @Nullable Map<Class<?>, PropertyEditor> defaultEditors;
+	@SuppressWarnings("NullAway.Init")
+	private Map<Class<?>, PropertyEditor> defaultEditors;
 
 	private @Nullable Map<Class<?>, PropertyEditor> overriddenDefaultEditors;
 
@@ -171,7 +172,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the default editor, or {@code null} if none found
 	 * @see #registerDefaultEditors
 	 */
-	@SuppressWarnings("NullAway")
 	public @Nullable PropertyEditor getDefaultEditor(Class<?> requiredType) {
 		if (!this.defaultEditorsActive) {
 			return null;
