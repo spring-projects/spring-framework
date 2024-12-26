@@ -16,19 +16,18 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * {@code EntityResolver} implementation that tries to resolve entity references
@@ -46,10 +45,17 @@ import org.springframework.lang.Nullable;
  * file in the current system root, i.e. the JVM working directory,
  * will be interpreted relative to the application context too.
  *
+ * <p>资源实体解析器(ResourceEntityResolver)
+ * <p>{@code EntityResolver}实现试图通过{@link org.springframework.core.io.ResourceLoader}。
+ * (通常，相对于{@code ApplicationContext}的资源库),如果适用的话。扩展{@link DelegatingEntityResolver}来提供DTD和XSD查找。
+ * <p>允许使用标准XML实体将XML片段包含到应用程序上下文定义中，例如将大型XML文件拆分为各个模块。
+ * 通常，包含路径可以相对于应用程序上下文的资源库，而不是相对于JVM工作目录（XML解析器的默认值）。
+ * <p>注意：除了相对路径之外，每个指定当前系统根目录（即JVM工作目录）中的文件的URL也将相对于应用程序上下文进行解释。
+ *
  * @author Juergen Hoeller
- * @since 31.07.2003
  * @see org.springframework.core.io.ResourceLoader
  * @see org.springframework.context.ApplicationContext
+ * @since 31.07.2003
  */
 public class ResourceEntityResolver extends DelegatingEntityResolver {
 
@@ -61,8 +67,12 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	/**
 	 * Create a ResourceEntityResolver for the specified ResourceLoader
 	 * (usually, an ApplicationContext).
+	 *
+	 * <p>资源实体解析器(ResourceEntityResolver)
+	 * <p>为指定的资源加载器(ResourceLoader)(通常是ApplicationContext)创建资源实体解析器(ResourceEntityResolver)
+	 *
 	 * @param resourceLoader the ResourceLoader (or ApplicationContext)
-	 * to load XML entity includes with
+	 *                       to load XML entity includes with
 	 */
 	public ResourceEntityResolver(ResourceLoader resourceLoader) {
 		super(resourceLoader.getClassLoader());
@@ -87,8 +97,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				if (givenUrl.startsWith(systemRootUrl)) {
 					resourcePath = givenUrl.substring(systemRootUrl.length());
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				// Typically a MalformedURLException or AccessControlException.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not resolve XML entity [" + systemId + "] against system root URL", ex);
@@ -107,8 +116,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found XML entity [" + systemId + "]: " + resource);
 				}
-			}
-			else if (systemId.endsWith(DTD_SUFFIX) || systemId.endsWith(XSD_SUFFIX)) {
+			} else if (systemId.endsWith(DTD_SUFFIX) || systemId.endsWith(XSD_SUFFIX)) {
 				// External dtd/xsd lookup via https even for canonical http declaration
 				String url = systemId;
 				if (url.startsWith("http:")) {
@@ -118,8 +126,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 					source = new InputSource(new URL(url).openStream());
 					source.setPublicId(publicId);
 					source.setSystemId(systemId);
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not resolve XML entity [" + systemId + "] through URL [" + url + "]", ex);
 					}

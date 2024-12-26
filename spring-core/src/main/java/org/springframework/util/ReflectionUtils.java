@@ -192,6 +192,10 @@ public abstract class ReflectionUtils {
 	 * if necessary. The {@code setAccessible(true)} method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM
 	 * SecurityManager (if active).
+	 *
+	 * <p>使给定的构造函数可访问，必要时显式地将其设置为可访问。{@code setAccessible(true)}方法只在实际需要时调用，
+	 * 以避免与JVM SecurityManager（如果激活）发生不必要的冲突。
+	 *
 	 * @param ctor the constructor to make accessible
 	 * @see java.lang.reflect.Constructor#setAccessible
 	 */

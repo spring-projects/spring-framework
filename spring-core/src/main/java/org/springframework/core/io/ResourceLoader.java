@@ -31,17 +31,25 @@ import org.springframework.util.ResourceUtils;
  * <p>Bean properties of type {@code Resource} and {@code Resource[]} can be populated
  * from Strings when running in an ApplicationContext, using the particular
  * context's resource loading strategy.
+ * <p>资源加载器(ResourceLoader)
+ * <p>加载资源（例如，类路径或文件系统资源）的策略接口。一个{@link org.springframework.context.ApplicationContext}来提供此功能
+ * 以及扩展的{@link org.springframework.core.io.support.ResourcePatternResolver}的支持。
+ * <p>{@link DefaultResourceLoader}是一个独立的实现，可以在ApplicationContext之外使用，也可以被{@link ResourceEditor}使用。
+ * <p>类型为{@code Resource}和{@code Resource[]}的Bean属性可以在ApplicationContext中运行时使用特定上下文的资源加载策略从字符串中填充。
  *
  * @author Juergen Hoeller
- * @since 10.03.2004
  * @see Resource
  * @see org.springframework.core.io.support.ResourcePatternResolver
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
+ * @since 10.03.2004
  */
 public interface ResourceLoader {
 
-	/** Pseudo URL prefix for loading from the class path: "classpath:". */
+	/**
+	 * Pseudo URL prefix for loading from the class path: "classpath:".
+	 * <p>从类路径加载的伪URL前缀：“ classpath:”。
+	 */
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
 
 
@@ -58,6 +66,7 @@ public interface ResourceLoader {
 	 * </ul>
 	 * <p>Note that a {@code Resource} handle does not imply an existing resource;
 	 * you need to invoke {@link Resource#exists} to check for existence.
+	 *
 	 * @param location the resource location
 	 * @return a corresponding {@code Resource} handle (never {@code null})
 	 * @see #CLASSPATH_URL_PREFIX
@@ -71,6 +80,7 @@ public interface ResourceLoader {
 	 * <p>Clients which need to access the {@code ClassLoader} directly can do so
 	 * in a uniform manner with the {@code ResourceLoader}, rather than relying
 	 * on the thread context {@code ClassLoader}.
+	 *
 	 * @return the {@code ClassLoader}
 	 * (only {@code null} if even the system {@code ClassLoader} isn't accessible)
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()

@@ -95,6 +95,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * <p>Opens a DOM Document; then initializes the default settings
 	 * specified at the {@code <beans/>} level; then parses the contained bean definitions.
 	 *
+	 * <p>注册bean定义
 	 * <p>该实现根据“spring-beans”XSD（历史上称为DTD）解析bean定义。
 	 * <p>打开一个DOM文档；然后初始化在{@code <beans>}级别指定的默认设置；然后解析包含的bean定义。
 	 */

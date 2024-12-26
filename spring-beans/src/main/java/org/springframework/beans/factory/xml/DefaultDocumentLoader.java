@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import com.sun.org.apache.xalan.internal.xsltc.DOM;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
@@ -70,6 +69,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 	/**
 	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured XML parser.
+	 *
+	 * <p>加载文件(loadDocument)
 	 * <p>使用标准JAXP配置的XML解析器在提供的｛@link InputSource｝处加载｛@linkDocument｝
 	 */
 	@Override
@@ -79,13 +80,16 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
+		// 创建文档生成器
 		DocumentBuilder builder = createDocumentBuilder(factory, entityResolver, errorHandler);
+		// 解析文件
 		return builder.parse(inputSource);
 	}
 
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
-	 * <p>创建文档生成器工厂
+	 *
+	 * <p>创建文档生成器工厂(createDocumentBuilderFactory)
 	 *
 	 * @param validationMode 验证模式 the type of validation: {@link XmlValidationModeDetector#VALIDATION_DTD DTD}
 	 *                       or {@link XmlValidationModeDetector#VALIDATION_XSD XSD})
@@ -132,6 +136,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * Create a JAXP DocumentBuilder that this bean definition reader
 	 * will use for parsing XML documents. Can be overridden in subclasses,
 	 * adding further initialization of the builder.
+	 *
+	 * <p>创建文档生成器(createDocumentBuilder)
 	 * <p>创建一个JAXP DocumentBuilder，该bean定义读取器将用于解析XML文档。可以在子类中重写，添加生成器的进一步初始化
 	 *
 	 * @param factory        the JAXP DocumentBuilderFactory that the DocumentBuilder

@@ -312,6 +312,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	protected EntityResolver getEntityResolver() {
 		if (this.entityResolver == null) {
 			// Determine default EntityResolver to use.
+			// 确定要使用的默认实体解析器(EntityResolver)
 			ResourceLoader resourceLoader = getResourceLoader();
 			if (resourceLoader != null) {
 				this.entityResolver = new ResourceEntityResolver(resourceLoader);
@@ -426,7 +427,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public int loadBeanDefinitions(InputSource inputSource, @Nullable String resourceDescription)
 			throws BeanDefinitionStoreException {
-
 		return doLoadBeanDefinitions(inputSource, new DescriptiveResource(resourceDescription));
 	}
 
@@ -443,7 +443,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #registerBeanDefinitions
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource) throws BeanDefinitionStoreException {
-
 		try {
 			// 加载XML文件 获取Doc
 			Document doc = doLoadDocument(inputSource, resource);
@@ -470,6 +469,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Actually load the specified document using the configured DocumentLoader.
+	 *
+	 * <p>加载文件(doLoadDocument)
 	 * <p>使用配置的DocumentLoader实际加载指定的文档
 	 *
 	 * @param inputSource the SAX InputSource to read from

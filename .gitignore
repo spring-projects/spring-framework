@@ -50,3 +50,4 @@ atlassian-ide-plugin.xml
 
 cached-antora-playbook.yml
 /my-spring-test/build/
+gradle-wrapper.jar
