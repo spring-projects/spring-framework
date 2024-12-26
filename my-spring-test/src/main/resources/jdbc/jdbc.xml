@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://rm-bp1nyxlpt25ka0nru1o.rwlb.rds.aliyuncs.com:3306/spring"/>
+		<property name="username" value="root"/>
+		<property name="password" value="SUsu0120"/>
+		<!-- 连接池启动时的初始值 -->
+		<property name="initialSize" value="1"/>
+		<!-- 连接池最大连接数 -->
+		<property name="maxTotal" value="10"/>
+		<!-- 连接池最大空闲连接数 -->
+		<property name="maxIdle" value="2"/>
+		<!-- 连接池最小空闲连接数 -->
+		<property name="minIdle" value="1"/>
+	</bean>
+
+	<bean id="userService" class="org.springframework.jdbc.service.impl.UserServiceImpl">
+		<!-- 向属性dataSource注入数据源 -->
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+</beans>

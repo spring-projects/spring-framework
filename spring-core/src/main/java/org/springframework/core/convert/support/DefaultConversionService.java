@@ -16,14 +16,14 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.lang.Nullable;
+
 import java.nio.charset.Charset;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
-
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.lang.Nullable;
 
 /**
  * A specialization of {@link GenericConversionService} configured by default
@@ -32,6 +32,11 @@ import org.springframework.lang.Nullable;
  * <p>Designed for direct instantiation but also exposes the static
  * {@link #addDefaultConverters(ConverterRegistry)} utility method for ad-hoc
  * use against any {@code ConverterRegistry} instance.
+ *
+ * <p>默认转换服务(DefaultConversionService)
+ * <p>默认配置的{@link GenericConversionService}的专门化转换器适用于大多数环境。
+ * <p>设计用于直接实例化，但也暴露了静态{@link #addDefaultConverters(ConverterRegistry)}用于ad-hoc的实用方法
+ * 对任何｛@code ConverterRegistry｝实例使用。
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -47,6 +52,8 @@ public class DefaultConversionService extends GenericConversionService {
 	/**
 	 * Create a new {@code DefaultConversionService} with the set of
 	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
+	 * <p>使用以下集合创建新的{@code DefaultConversionService}
+	 * {@linkplain DefaultConversionService#addDefaultConverters（ConverterRegistry）默认转换器}。
 	 */
 	public DefaultConversionService() {
 		addDefaultConverters(this);
@@ -61,6 +68,13 @@ public class DefaultConversionService extends GenericConversionService {
 	 * This accessor is only meant as a fallback for code paths which
 	 * need simple type coercion but cannot access a longer-lived
 	 * {@code ConversionService} instance any other way.
+	 *
+	 * <p>获取共享实例
+	 * <p>返回一个共享的默认{@code ConversionService} 实例，惰性地建造它曾经需要。
+	 * <p><b>NOTE:</b>我们强烈建议构建个人｛@code ConversionService｝实例用于自定义。
+	 * 此访问器仅用作以下代码路径的回退需要简单的类型强制，但无法访问寿命更长的类型
+	 * {@code ConversionService}实例，以任何其他方式。
+	 *
 	 * @return the shared {@code ConversionService} instance (never {@code null})
 	 * @since 4.3.5
 	 */
@@ -80,8 +94,10 @@ public class DefaultConversionService extends GenericConversionService {
 
 	/**
 	 * Add converters appropriate for most environments.
+	 * <p>添加适用于大多数环境的转换器
+	 *
 	 * @param converterRegistry the registry of converters to add to
-	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
+	 *                          (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 */
 	public static void addDefaultConverters(ConverterRegistry converterRegistry) {
@@ -101,8 +117,10 @@ public class DefaultConversionService extends GenericConversionService {
 
 	/**
 	 * Add common collection converters.
+	 * <p>添加适用于大多数环境的转换器
+	 *
 	 * @param converterRegistry the registry of converters to add to
-	 * (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
+	 *                          (must also be castable to ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
 	 * @since 4.2.3
 	 */
