@@ -178,7 +178,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
-	private @Nullable List<PropertySourceDescriptor> propertySourceDescriptors;
+	@SuppressWarnings("NullAway.Init")
+	private List<PropertySourceDescriptor> propertySourceDescriptors;
 
 
 	@Override
@@ -319,7 +320,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // Lazy initialization
 	public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
 		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
