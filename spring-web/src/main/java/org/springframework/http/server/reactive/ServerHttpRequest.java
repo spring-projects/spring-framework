@@ -164,7 +164,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * Manipulate request headers. The provided {@code HttpHeaders} contains
 		 * current request headers, so that the {@code Consumer} can
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} or
-		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * {@linkplain HttpHeaders#remove(String) remove} existing values, or
 		 * use any other {@link HttpHeaders} methods.
 		 * @see #header(String, String...)
 		 */

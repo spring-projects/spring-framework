@@ -239,7 +239,7 @@ public interface ErrorResponse {
 		/**
 		 * Manipulate this response's headers with the given consumer. This is
 		 * useful to {@linkplain HttpHeaders#set(String, String) overwrite} or
-		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * {@linkplain HttpHeaders#remove(String) remove} existing values, or
 		 * use any other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return the same builder instance
