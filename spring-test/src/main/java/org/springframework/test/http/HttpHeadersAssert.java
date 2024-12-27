@@ -23,13 +23,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.assertj.core.api.AbstractCollectionAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ObjectAssert;
-import org.assertj.core.presentation.Representation;
-import org.assertj.core.presentation.StandardRepresentation;
 
 import org.springframework.http.HttpHeaders;
 
@@ -38,6 +37,7 @@ import org.springframework.http.HttpHeaders;
  * {@link HttpHeaders}.
  *
  * @author Stephane Nicoll
+ * @author Simon Baslé
  * @since 6.2
  */
 public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, HttpHeaders> {
@@ -50,15 +50,6 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	public HttpHeadersAssert(HttpHeaders actual) {
 		super(actual, HttpHeadersAssert.class);
 		as("HTTP headers");
-		withRepresentation(new Representation() {
-			@Override
-			public String toStringOf(Object object) {
-				if (object instanceof HttpHeaders headers) {
-					return headers.toString();
-				}
-				return StandardRepresentation.STANDARD_REPRESENTATION.toStringOf(object);
-			}
-		});
 		this.namesAssert = Assertions.assertThat(actual.headerNames())
 				.as("HTTP header names");
 	}
@@ -127,7 +118,23 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
-	 * {@code name} and {@link String} {@code value}.
+	 * {@code name} that satisfies the given {@code valueRequirements}.
+	 * @param name the name of an HTTP header that should not be present
+	 * @param valueRequirements the group of assertions to run against the
+	 * values of the header with the given name
+	 */
+	@SuppressWarnings("unchecked")
+	public HttpHeadersAssert hasHeaderSatisfying(String name, Consumer<List<String>> valueRequirements) {
+		containsHeader(name);
+		Assertions.assertThat(this.actual.get(name))
+				.as("check primary value for HTTP header '%s'", name)
+				.satisfies(values -> valueRequirements.accept((List<String>) values));
+		return this.myself;
+	}
+
+	/**
+	 * Verify that the actual HTTP headers contain a header with the given
+	 * {@code name} and {@link String} primary {@code value}.
 	 * @param name the name of the cookie
 	 * @param value the expected value of the header
 	 */
@@ -141,7 +148,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
-	 * {@code name} and {@link Long} {@code value}.
+	 * {@code name} and {@link Long} primary {@code value}.
 	 * @param name the name of the cookie
 	 * @param value the expected value of the header
 	 */
@@ -155,7 +162,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
-	 * {@code name} and {@link Instant} {@code value}.
+	 * {@code name} and {@link Instant} primary {@code value}.
 	 * @param name the name of the cookie
 	 * @param value the expected value of the header
 	 */
@@ -166,6 +173,46 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 				.isCloseTo(ZonedDateTime.ofInstant(value, GMT), Assertions.within(999, ChronoUnit.MILLIS));
 		return this.myself;
 	}
+
+	/**
+	 * Verify that the actual HTTP headers contain a header with the given
+	 * {@code name} and {@link String} primary {@code value}.
+	 * <p>This assertion fails if the header has secondary values.
+	 * @param name the name of the cookie
+	 * @param value the expected only value of the header
+	 * @since 7.0
+	 */
+	public HttpHeadersAssert hasSingleValue(String name, String value) {
+		doesNotHaveSecondaryValues(name);
+		return hasValue(name, value);
+	}
+
+	/**
+	 * Verify that the actual HTTP headers contain a header with the given
+	 * {@code name} and {@link Long} primary {@code value}.
+	 * <p>This assertion fails if the header has secondary values.
+	 * @param name the name of the cookie
+	 * @param value the expected value of the header
+	 * @since 7.0
+	 */
+	public HttpHeadersAssert hasSingleValue(String name, long value) {
+		doesNotHaveSecondaryValues(name);
+		return hasValue(name, value);
+	}
+
+	/**
+	 * Verify that the actual HTTP headers contain a header with the given
+	 * {@code name} and {@link Instant} primary {@code value}.
+	 * <p>This assertion fails if the header has secondary values.
+	 * @param name the name of the cookie
+	 * @param value the expected value of the header
+	 * @since 7.0
+	 */
+	public HttpHeadersAssert hasSingleValue(String name, Instant value) {
+		doesNotHaveSecondaryValues(name);
+		return hasValue(name, value);
+	}
+
 
 	/**
 	 * Verify that the given header has a full list of values exactly equal to
@@ -224,80 +271,13 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 */
 	public HttpHeadersAssert hasSize(int expected) {
 		this.namesAssert
-				.as("check headers have size '%i'", expected)
+				.as("check headers have size '%s'", expected)
 				.hasSize(expected);
 		return this.myself;
 	}
 
 	/**
-	 * Verify that the number of headers present is strictly greater than the
-	 * given boundary, when considering header names in a case-insensitive
-	 * manner.
-	 * @param boundary the given value to compare actual header size to
-	 */
-	public HttpHeadersAssert hasSizeGreaterThan(int boundary) {
-		this.namesAssert
-				.as("check headers have size > '%i'", boundary)
-				.hasSizeGreaterThan(boundary);
-		return this.myself;
-	}
-
-	/**
-	 * Verify that the number of headers present is greater or equal to the
-	 * given boundary, when considering header names in a case-insensitive
-	 * manner.
-	 * @param boundary the given value to compare actual header size to
-	 */
-	public HttpHeadersAssert hasSizeGreaterThanOrEqualTo(int boundary) {
-		this.namesAssert
-				.as("check headers have size >= '%i'", boundary)
-				.hasSizeGreaterThanOrEqualTo(boundary);
-		return this.myself;
-	}
-
-	/**
-	 * Verify that the number of headers present is strictly less than the
-	 * given boundary, when considering header names in a case-insensitive
-	 * manner.
-	 * @param boundary the given value to compare actual header size to
-	 */
-	public HttpHeadersAssert hasSizeLessThan(int boundary) {
-		this.namesAssert
-				.as("check headers have size < '%i'", boundary)
-				.hasSizeLessThan(boundary);
-		return this.myself;
-	}
-
-	/**
-	 * Verify that the number of headers present is less than or equal to the
-	 * given boundary, when considering header names in a case-insensitive
-	 * manner.
-	 * @param boundary the given value to compare actual header size to
-	 */
-	public HttpHeadersAssert hasSizeLessThanOrEqualTo(int boundary) {
-		this.namesAssert
-				.as("check headers have size <= '%i'", boundary)
-				.hasSizeLessThanOrEqualTo(boundary);
-		return this.myself;
-	}
-
-	/**
-	 * Verify that the number of headers present is between the given boundaries
-	 * (inclusive), when considering header names in a case-insensitive manner.
-	 * @param lowerBoundary the lower boundary compared to which actual size
-	 * should be greater than or equal to
-	 * @param higherBoundary the higher boundary compared to which actual size
-	 * should be less than or equal to
-	 */
-	public HttpHeadersAssert hasSizeBetween(int lowerBoundary, int higherBoundary) {
-		this.namesAssert
-				.as("check headers have size between '%i' and '%i'", lowerBoundary, higherBoundary)
-				.hasSizeBetween(lowerBoundary, higherBoundary);
-		return this.myself;
-	}
-
-	/**
-	 * Verify that the number actual headers is the same as in the given
+	 * Verify that the number of actual headers is the same as in the given
 	 * {@code HttpHeaders}.
 	 * @param other the {@code HttpHeaders} to compare size with
 	 * @since 7.0
@@ -308,4 +288,17 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 				.hasSize(other.size());
 		return this.myself;
 	}
+
+
+	private HttpHeadersAssert doesNotHaveSecondaryValues(String name) {
+		containsHeader(name);
+		List<String> values = this.actual.get(name);
+		int size = (values != null) ? values.size() : 0;
+		Assertions.assertThat(size)
+				.withFailMessage("Expected HTTP header '%s' to be present " +
+						"without secondary values, but found <%s> secondary values", name, size - 1)
+				.isOne();
+		return this.myself;
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1921,12 +1921,14 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Get the list of values associated with the given header name.
+	 * Get the list of values associated with the given header name, or null.
+	 * <p>To ensure support for double-quoted values, see also
+	 * {@link #getValuesAsList(String)}.
 	 * @param headerName the header name
 	 * @since 7.0
+	 * @see #getValuesAsList(String)
 	 */
-	@Nullable
-	public List<String> get(String headerName) {
+	public @Nullable List<String> get(String headerName) {
 		return this.headers.get(headerName);
 	}
 
