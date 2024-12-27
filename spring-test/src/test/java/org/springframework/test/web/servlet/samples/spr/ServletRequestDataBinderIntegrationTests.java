@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.samples.spr;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
@@ -57,7 +56,6 @@ class ServletRequestDataBinderIntegrationTests {
 				.andExpect(content().string("valueB"));
 	}
 
-	@Disabled("see gh-34121")
 	@Test // gh-34121
 	void postArrayWithEmptyIndex(WebApplicationContext wac) throws Exception {
 		MockMvc mockMvc = webAppContextSetup(wac).build();
@@ -88,7 +86,6 @@ class ServletRequestDataBinderIntegrationTests {
 				.andExpect(content().string("valueB"));
 	}
 
-	@Disabled("see gh-34121")
 	@Test // gh-34121
 	void postListWithEmptyIndex(WebApplicationContext wac) throws Exception {
 		MockMvc mockMvc = webAppContextSetup(wac).build();
