@@ -91,6 +91,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 * Verify that the actual HTTP headers contain only the headers with the
 	 * given {@code names}, in any order and in a case-insensitive manner.
 	 * @param names the names of expected HTTP headers
+	 * @since 7.0
 	 */
 	public HttpHeadersAssert containsOnlyHeaders(String... names) {
 		this.namesAssert
@@ -170,6 +171,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 * the given list of values, and in the same order.
 	 * @param name the considered header name (case-insensitive)
 	 * @param values the exhaustive list of expected values
+	 * @since 7.0
 	 */
 	public HttpHeadersAssert hasExactlyValues(String name, List<String> values) {
 		containsHeader(name);
@@ -184,6 +186,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 * the given list of values, in any order.
 	 * @param name the considered header name (case-insensitive)
 	 * @param values the exhaustive list of expected values
+	 * @since 7.0
 	 */
 	public HttpHeadersAssert hasExactlyValuesInAnyOrder(String name, List<String> values) {
 		containsHeader(name);
@@ -296,6 +299,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 * Verify that the number actual headers is the same as in the given
 	 * {@code HttpHeaders}.
 	 * @param other the {@code HttpHeaders} to compare size with
+	 * @since 7.0
 	 */
 	public HttpHeadersAssert hasSameSizeAs(HttpHeaders other) {
 		this.namesAssert

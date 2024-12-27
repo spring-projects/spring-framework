@@ -496,7 +496,7 @@ public class HttpHeaders implements Serializable {
 	 * Get the list of header values for the given header name, if any.
 	 * @param headerName the header name
 	 * @return the list of header values, or an empty list
-	 * @since 5.2
+	 * @since 7.0
 	 */
 	public List<String> getOrEmpty(String headerName) {
 		return getOrDefault(headerName, Collections.emptyList());
@@ -508,6 +508,7 @@ public class HttpHeaders implements Serializable {
 	 * @param headerName the header name
 	 * @param defaultValue the fallback list if header is not present
 	 * @return the list of header values, or a default list of values
+	 * @since 7.0
 	 */
 	public List<String> getOrDefault(String headerName, List<String> defaultValue) {
 		List<String> values = get(headerName);
@@ -1796,6 +1797,7 @@ public class HttpHeaders implements Serializable {
 	 * values of each individual header name instead.
 	 * @param headers the headers to add
 	 * @see #putAll(HttpHeaders)
+	 * @since 7.0
 	 */
 	public void addAll(HttpHeaders headers) {
 		this.headers.addAll(headers.headers);
@@ -1866,6 +1868,7 @@ public class HttpHeaders implements Serializable {
 	 * @deprecated This method is provided for backward compatibility with APIs
 	 * that would only accept maps. Generally avoid using HttpHeaders as a Map
 	 * or MultiValueMap.
+	 * @since 7.0
 	 */
 	@Deprecated
 	public MultiValueMap<String, String> asMultiValueMap() {
@@ -1920,6 +1923,7 @@ public class HttpHeaders implements Serializable {
 	/**
 	 * Get the list of values associated with the given header name.
 	 * @param headerName the header name
+	 * @since 7.0
 	 */
 	@Nullable
 	public List<String> get(String headerName) {
@@ -1953,6 +1957,7 @@ public class HttpHeaders implements Serializable {
 	 * Put all the entries from the given HttpHeaders into this HttpHeaders.
 	 * @param headers the given headers
 	 * @see #put(String, List)
+	 * @since 7.0
 	 */
 	public void putAll(HttpHeaders headers) {
 		this.headers.putAll(headers.headers);
@@ -1973,6 +1978,7 @@ public class HttpHeaders implements Serializable {
 	 * value list or {@code null} if that header wasn't present.
 	 * @param key the name of the header to remove
 	 * @return the value list associated with the removed header name
+	 * @since 7.0
 	 */
 	public @Nullable List<String> remove(String key) {
 		return this.headers.remove(key);

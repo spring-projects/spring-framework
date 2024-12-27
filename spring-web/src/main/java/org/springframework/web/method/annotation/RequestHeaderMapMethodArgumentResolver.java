@@ -85,7 +85,7 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 		}
 	}
 
-	void copyHeaderValues(NativeWebRequest webRequest, BiConsumer<String, String> consumer) {
+	private void copyHeaderValues(NativeWebRequest webRequest, BiConsumer<String, String> consumer) {
 		for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 			String headerName = iterator.next();
 			String[] headerValues = webRequest.getHeaderValues(headerName);
