@@ -1796,8 +1796,8 @@ public class HttpHeaders implements Serializable {
 	 * introduced. See {@link #putAll(HttpHeaders)} to replace the list of
 	 * values of each individual header name instead.
 	 * @param headers the headers to add
-	 * @see #putAll(HttpHeaders)
 	 * @since 7.0
+	 * @see #putAll(HttpHeaders)
 	 */
 	public void addAll(HttpHeaders headers) {
 		this.headers.addAll(headers.headers);
@@ -1865,10 +1865,10 @@ public class HttpHeaders implements Serializable {
 	 * of a header name can surface depending on letter casing but each such
 	 * entry has the full {@code List} of values.
 	 * @return a MultiValueMap representation of these headers
+	 * @since 7.0
 	 * @deprecated This method is provided for backward compatibility with APIs
 	 * that would only accept maps. Generally avoid using HttpHeaders as a Map
 	 * or MultiValueMap.
-	 * @since 7.0
 	 */
 	@Deprecated
 	public MultiValueMap<String, String> asMultiValueMap() {
@@ -1956,8 +1956,8 @@ public class HttpHeaders implements Serializable {
 	/**
 	 * Put all the entries from the given HttpHeaders into this HttpHeaders.
 	 * @param headers the given headers
-	 * @see #put(String, List)
 	 * @since 7.0
+	 * @see #put(String, List)
 	 */
 	public void putAll(HttpHeaders headers) {
 		this.headers.putAll(headers.headers);
