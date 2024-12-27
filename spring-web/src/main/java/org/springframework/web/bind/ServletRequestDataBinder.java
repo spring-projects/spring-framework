@@ -241,6 +241,10 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 		protected @Nullable Object getRequestParameter(String name, Class<?> type) {
 			Object value = this.request.getParameterValues(name);
+			if (value == null && !name.endsWith ("[]") &&
+					(List.class.isAssignableFrom(type) || type.isArray())) {
+				value = this.request.getParameterValues(name + "[]");
+			}
 			return (ObjectUtils.isArray(value) && Array.getLength(value) == 1 ? Array.get(value, 0) : value);
 		}
 

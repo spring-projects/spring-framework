@@ -94,6 +94,32 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
+	public void testFieldWithArrayIndex() {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+		binder.setIgnoreUnknownFields(false);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray[0]", "ONE");
+		request.addParameter("stringArray[1]", "TWO");
+		binder.bind(request);
+		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
+	}
+
+	@Test
+	public void testFieldWithEmptyArrayIndex() {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+		binder.setIgnoreUnknownFields(false);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray[]", "ONE");
+		request.addParameter("stringArray[]", "TWO");
+		binder.bind(request);
+		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
+	}
+
+	@Test
 	void testFieldDefault() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
