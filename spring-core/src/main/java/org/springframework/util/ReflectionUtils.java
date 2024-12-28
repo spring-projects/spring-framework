@@ -709,7 +709,11 @@ public abstract class ReflectionUtils {
 	public static void doWithFields(Class<?> clazz, FieldCallback fc, @Nullable FieldFilter ff) {
 		// Keep backing up the inheritance hierarchy.
 		Class<?> targetClass = clazz;
+		Set<Class<?>> visitedClasses = new HashSet<>();
 		do {
+			if (!visitedClasses.add(targetClass)) {
+				break; // Avoid infinite recursion
+			}
 			Field[] fields = getDeclaredFields(targetClass);
 			for (Field field : fields) {
 				if (ff != null && !ff.matches(field)) {
