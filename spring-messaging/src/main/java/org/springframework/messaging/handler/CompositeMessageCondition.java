@@ -98,7 +98,7 @@ public class CompositeMessageCondition implements MessageCondition<CompositeMess
 		checkCompatible(other);
 		List<MessageCondition<?>> otherConditions = other.getMessageConditions();
 		for (int i = 0; i < this.messageConditions.size(); i++) {
-			int result = compare (this.messageConditions.get(i), otherConditions.get(i), message);
+			int result = compare(this.messageConditions.get(i), otherConditions.get(i), message);
 			if (result != 0) {
 				return result;
 			}
