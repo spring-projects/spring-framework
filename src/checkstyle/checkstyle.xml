@@ -181,6 +181,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
 
 		<!-- Whitespace -->
+		<module name="com.puppycrawl.tools.checkstyle.checks.whitespace.MethodParamPadCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.whitespace.SingleSpaceSeparatorCheck"/>
 
 		<!-- Miscellaneous -->

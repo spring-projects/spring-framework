@@ -2214,7 +2214,7 @@ public class HttpHeaders implements Serializable {
 		private final MultiValueMap<String, String> headers;
 		private final Iterator<String> namesIterator;
 
-		public HeaderNamesIterator (MultiValueMap<String, String> headers, Map<String, Object> caseInsensitiveNames) {
+		public HeaderNamesIterator(MultiValueMap<String, String> headers, Map<String, Object> caseInsensitiveNames) {
 			this.headers = headers;
 			this.namesIterator = caseInsensitiveNames.keySet().iterator();
 			this.currentName = null;

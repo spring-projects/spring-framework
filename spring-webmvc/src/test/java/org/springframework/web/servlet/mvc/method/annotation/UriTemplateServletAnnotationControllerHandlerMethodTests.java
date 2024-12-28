@@ -657,7 +657,7 @@ class UriTemplateServletAnnotationControllerHandlerMethodTests extends AbstractS
 
 		@Override
 		public View resolveViewName(final String viewName, Locale locale) {
-			return new AbstractView () {
+			return new AbstractView() {
 				@Override
 				public String getContentType() {
 					return null;
