@@ -1,9 +1,7 @@
 /**
  * This package provides JCA-based endpoint management for JMS message listeners.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.jms.listener.endpoint;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

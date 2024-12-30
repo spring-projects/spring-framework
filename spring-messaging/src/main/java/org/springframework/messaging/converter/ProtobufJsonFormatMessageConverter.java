@@ -18,8 +18,7 @@ package org.springframework.messaging.converter;
 
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.util.JsonFormat;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Subclass of {@link ProtobufMessageConverter} for use with the official
@@ -52,7 +51,7 @@ public class ProtobufJsonFormatMessageConverter extends ProtobufMessageConverter
 	 * JsonFormat.Printer}, and a default instance of {@link ExtensionRegistry}.
 	 */
 	public ProtobufJsonFormatMessageConverter(
-			@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
+			JsonFormat.@Nullable Parser parser, JsonFormat.@Nullable Printer printer) {
 
 		this(parser, printer, null);
 	}
@@ -62,8 +61,8 @@ public class ProtobufJsonFormatMessageConverter extends ProtobufMessageConverter
 	 * JsonFormat.Parser}, {@link com.google.protobuf.util.JsonFormat.Printer
 	 * JsonFormat.Printer}, and {@link ExtensionRegistry}.
 	 */
-	public ProtobufJsonFormatMessageConverter(@Nullable JsonFormat.Parser parser,
-			@Nullable JsonFormat.Printer printer, @Nullable ExtensionRegistry extensionRegistry) {
+	public ProtobufJsonFormatMessageConverter(JsonFormat.@Nullable Parser parser,
+			JsonFormat.@Nullable Printer printer, @Nullable ExtensionRegistry extensionRegistry) {
 
 		super(new ProtobufJavaUtilSupport(parser, printer), extensionRegistry);
 	}

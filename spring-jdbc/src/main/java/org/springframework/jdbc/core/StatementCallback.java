@@ -19,8 +19,9 @@ package org.springframework.jdbc.core;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface for code that operates on a JDBC Statement.
@@ -67,7 +68,6 @@ public interface StatementCallback<T> {
 	 * @see JdbcTemplate#queryForObject(String, Class)
 	 * @see JdbcTemplate#queryForRowSet(String)
 	 */
-	@Nullable
-	T doInStatement(Statement stmt) throws SQLException, DataAccessException;
+	@Nullable T doInStatement(Statement stmt) throws SQLException, DataAccessException;
 
 }

@@ -22,7 +22,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -48,8 +49,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	private static final String UNKNOWN = "unknown";
 
-	@Nullable
-	private final Class<? extends Annotation> annotationType;
+	private final @Nullable Class<? extends Annotation> annotationType;
 
 	final String displayName;
 
@@ -147,8 +147,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private static Class<? extends Annotation> getAnnotationType(String annotationType, @Nullable ClassLoader classLoader) {
+	private static @Nullable Class<? extends Annotation> getAnnotationType(String annotationType, @Nullable ClassLoader classLoader) {
 		if (classLoader != null) {
 			try {
 				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
@@ -166,8 +165,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * @return the annotation type, or {@code null} if unknown
 	 * @since 4.2
 	 */
-	@Nullable
-	public Class<? extends Annotation> annotationType() {
+	public @Nullable Class<? extends Annotation> annotationType() {
 		return this.annotationType;
 	}
 
@@ -412,8 +410,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * to the {@link #AnnotationAttributes(Map)} constructor.
 	 * @param map original source of annotation attribute <em>key-value</em> pairs
 	 */
-	@Nullable
-	public static AnnotationAttributes fromMap(@Nullable Map<String, Object> map) {
+	public static @Nullable AnnotationAttributes fromMap(@Nullable Map<String, Object> map) {
 		if (map == null) {
 			return null;
 		}

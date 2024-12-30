@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.GeneratedClass;
@@ -86,7 +87,6 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -171,11 +171,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
-	@Nullable
-	private ConfigurableListableBeanFactory beanFactory;
+	private @Nullable ConfigurableListableBeanFactory beanFactory;
 
-	@Nullable
-	private MetadataReaderFactory metadataReaderFactory;
+	private @Nullable MetadataReaderFactory metadataReaderFactory;
 
 	private final Set<String> lookupMethodsChecked = ConcurrentHashMap.newKeySet(256);
 
@@ -301,8 +299,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
-	@Nullable
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
@@ -321,8 +318,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		return (Collection) metadata.getInjectedElements(propertyValues);
 	}
 
-	@Nullable
-	private AutowireCandidateResolver getAutowireCandidateResolver() {
+	private @Nullable AutowireCandidateResolver getAutowireCandidateResolver() {
 		if (this.beanFactory instanceof DefaultListableBeanFactory lbf) {
 			return lbf.getAutowireCandidateResolver();
 		}
@@ -350,8 +346,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
-	@Nullable
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
+	public Constructor<?> @Nullable [] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
 		checkLookupMethods(beanClass, beanName);
@@ -612,8 +607,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		return InjectionMetadata.forElements(elements, clazz);
 	}
 
-	@Nullable
-	private MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject ao) {
+	private @Nullable MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject ao) {
 		MergedAnnotations annotations = MergedAnnotations.from(ao);
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
 			MergedAnnotation<?> annotation = annotations.get(type);
@@ -698,8 +692,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * Resolve the specified cached method argument or field value.
 	 */
-	@Nullable
-	private Object resolveCachedArgument(@Nullable String beanName, @Nullable Object cachedArgument) {
+	private @Nullable Object resolveCachedArgument(@Nullable String beanName, @Nullable Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor descriptor) {
 			Assert.state(this.beanFactory != null, "No BeanFactory available");
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
@@ -731,8 +724,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private volatile boolean cached;
 
-		@Nullable
-		private volatile Object cachedFieldValue;
+		private volatile @Nullable Object cachedFieldValue;
 
 		public AutowiredFieldElement(Field field, boolean required) {
 			super(field, null, required);
@@ -762,8 +754,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 		}
 
-		@Nullable
-		private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
+		private @Nullable Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
 			DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
 			desc.setContainingClass(bean.getClass());
 			Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
@@ -809,8 +800,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private volatile boolean cached;
 
-		@Nullable
-		private volatile Object[] cachedMethodArguments;
+		private volatile Object @Nullable [] cachedMethodArguments;
 
 		public AutowiredMethodElement(Method method, boolean required, @Nullable PropertyDescriptor pd) {
 			super(method, pd, required);
@@ -848,8 +838,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 		}
 
-		@Nullable
-		private Object[] resolveCachedArguments(@Nullable String beanName, @Nullable Object[] cachedMethodArguments) {
+		private Object @Nullable [] resolveCachedArguments(@Nullable String beanName, Object @Nullable [] cachedMethodArguments) {
 			if (cachedMethodArguments == null) {
 				return null;
 			}
@@ -860,8 +849,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			return arguments;
 		}
 
-		@Nullable
-		private Object[] resolveMethodArguments(Method method, Object bean, @Nullable String beanName) {
+		private Object @Nullable [] resolveMethodArguments(Method method, Object bean, @Nullable String beanName) {
 			int argumentCount = method.getParameterCount();
 			Object[] arguments = new Object[argumentCount];
 			DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
@@ -949,8 +937,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private final Collection<AutowiredElement> autowiredElements;
 
-		@Nullable
-		private final AutowireCandidateResolver candidateResolver;
+		private final @Nullable AutowireCandidateResolver candidateResolver;
 
 		AotContribution(Class<?> target, Collection<AutowiredElement> autowiredElements,
 				@Nullable AutowireCandidateResolver candidateResolver) {

@@ -28,6 +28,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -35,7 +37,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -76,8 +77,7 @@ public abstract class BeanOverrideHandler {
 
 	private final ResolvableType beanType;
 
-	@Nullable
-	private final String beanName;
+	private final @Nullable String beanName;
 
 	private final BeanOverrideStrategy strategy;
 
@@ -145,8 +145,7 @@ public abstract class BeanOverrideHandler {
 	 * Get the bean name to override, or {@code null} to look for a single
 	 * matching bean of type {@link #getBeanType()}.
 	 */
-	@Nullable
-	public final String getBeanName() {
+	public final @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

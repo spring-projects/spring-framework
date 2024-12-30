@@ -20,11 +20,12 @@ import java.net.URI;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 
 /**
  * Representation of a complete RFC 9457 error response including status,
@@ -109,8 +110,7 @@ public interface ErrorResponse {
 	 * through a {@link MessageSource}. The arguments are expanded
 	 * into placeholders of the message value, for example, "Invalid content type {0}".
 	 */
-	@Nullable
-	default Object[] getDetailMessageArguments() {
+	default Object @Nullable [] getDetailMessageArguments() {
 		return null;
 	}
 
@@ -123,8 +123,7 @@ public interface ErrorResponse {
 	 * @param messageSource the {@code MessageSource} to use for the lookup
 	 * @param locale the {@code Locale} to use for the lookup
 	 */
-	@Nullable
-	default Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
+	default Object @Nullable [] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
 		return getDetailMessageArguments();
 	}
 
@@ -240,7 +239,7 @@ public interface ErrorResponse {
 		/**
 		 * Manipulate this response's headers with the given consumer. This is
 		 * useful to {@linkplain HttpHeaders#set(String, String) overwrite} or
-		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * {@linkplain HttpHeaders#remove(String) remove} existing values, or
 		 * use any other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return the same builder instance

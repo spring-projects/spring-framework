@@ -333,6 +333,7 @@ class CoRouterFunctionDslTests {
 				null
 			}
 		}
+		@Suppress("DEPRECATION")
 		GET(pathExtension { it == "properties" }) {
 			ok().bodyValueAndAwait("foo=bar")
 		}

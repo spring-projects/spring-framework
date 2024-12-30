@@ -26,9 +26,8 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 
 import io.r2dbc.spi.Statement;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -178,8 +177,7 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		 * @return the value of this binding
 		 * (can be {@code null} if this is a {@code NULL} binding)
 		 */
-		@Nullable
-		public abstract Object getValue();
+		public abstract @Nullable Object getValue();
 
 		/**
 		 * Apply the binding to a {@link BindTarget}.
@@ -207,7 +205,6 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		}
 
 		@Override
-		@NonNull
 		public Object getValue() {
 			return this.value;
 		}
@@ -237,8 +234,7 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		}
 
 		@Override
-		@Nullable
-		public Object getValue() {
+		public @Nullable Object getValue() {
 			return null;
 		}
 

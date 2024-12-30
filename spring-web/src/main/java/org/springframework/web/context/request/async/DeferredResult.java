@@ -23,8 +23,8 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -59,25 +59,19 @@ public class DeferredResult<T> {
 	private static final Log logger = LogFactory.getLog(DeferredResult.class);
 
 
-	@Nullable
-	private final Long timeoutValue;
+	private final @Nullable Long timeoutValue;
 
 	private final Supplier<?> timeoutResult;
 
-	@Nullable
-	private Runnable timeoutCallback;
+	private @Nullable Runnable timeoutCallback;
 
-	@Nullable
-	private Consumer<Throwable> errorCallback;
+	private @Nullable Consumer<Throwable> errorCallback;
 
-	@Nullable
-	private Runnable completionCallback;
+	private @Nullable Runnable completionCallback;
 
-	@Nullable
-	private DeferredResultHandler resultHandler;
+	private @Nullable DeferredResultHandler resultHandler;
 
-	@Nullable
-	private volatile Object result = RESULT_NONE;
+	private volatile @Nullable Object result = RESULT_NONE;
 
 	private volatile boolean expired;
 
@@ -149,8 +143,7 @@ public class DeferredResult<T> {
 	 * to check if there is a result prior to calling this method.
 	 * @since 4.0
 	 */
-	@Nullable
-	public Object getResult() {
+	public @Nullable Object getResult() {
 		Object resultToCheck = this.result;
 		return (resultToCheck != RESULT_NONE ? resultToCheck : null);
 	}
@@ -158,8 +151,7 @@ public class DeferredResult<T> {
 	/**
 	 * Return the configured timeout value in milliseconds.
 	 */
-	@Nullable
-	final Long getTimeoutValue() {
+	final @Nullable Long getTimeoutValue() {
 		return this.timeoutValue;
 	}
 

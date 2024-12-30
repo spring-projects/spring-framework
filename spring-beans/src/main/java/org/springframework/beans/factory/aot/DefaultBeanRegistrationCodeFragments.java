@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
@@ -40,7 +42,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.SingletonSupplier;
@@ -176,8 +177,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 				.generateCode(beanDefinition);
 	}
 
-	@Nullable
-	protected CodeBlock generateValueCode(GenerationContext generationContext, String name, Object value) {
+	protected @Nullable CodeBlock generateValueCode(GenerationContext generationContext, String name, Object value) {
 		RegisteredBean innerRegisteredBean = getInnerRegisteredBean(value);
 		if (innerRegisteredBean != null) {
 			BeanDefinitionMethodGenerator methodGenerator = this.beanDefinitionMethodGeneratorFactory
@@ -190,8 +190,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		return null;
 	}
 
-	@Nullable
-	private RegisteredBean getInnerRegisteredBean(Object value) {
+	private @Nullable RegisteredBean getInnerRegisteredBean(Object value) {
 		if (value instanceof BeanDefinitionHolder beanDefinitionHolder) {
 			return RegisteredBean.ofInnerBean(this.registeredBean, beanDefinitionHolder);
 		}

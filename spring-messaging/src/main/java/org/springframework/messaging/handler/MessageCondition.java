@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.handler;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 
 /**
@@ -47,8 +48,7 @@ public interface MessageCondition<T> {
 	 * condition with sorted, matching patterns only.
 	 * @return a condition instance in case of a match; or {@code null} if there is no match.
 	 */
-	@Nullable
-	T getMatchingCondition(Message<?> message);
+	@Nullable T getMatchingCondition(Message<?> message);
 
 	/**
 	 * Compare this condition to another in the context of a specific message.

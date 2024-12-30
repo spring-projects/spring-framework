@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented for retrieving values for more complex database-specific

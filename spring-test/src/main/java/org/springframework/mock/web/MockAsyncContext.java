@@ -29,9 +29,9 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
@@ -45,13 +45,11 @@ public class MockAsyncContext implements AsyncContext {
 
 	private final HttpServletRequest request;
 
-	@Nullable
-	private final HttpServletResponse response;
+	private final @Nullable HttpServletResponse response;
 
 	private final List<AsyncListener> listeners = new ArrayList<>();
 
-	@Nullable
-	private String dispatchedPath;
+	private @Nullable String dispatchedPath;
 
 	private long timeout = 10 * 1000L;
 
@@ -82,8 +80,7 @@ public class MockAsyncContext implements AsyncContext {
 	}
 
 	@Override
-	@Nullable
-	public ServletResponse getResponse() {
+	public @Nullable ServletResponse getResponse() {
 		return this.response;
 	}
 
@@ -110,8 +107,7 @@ public class MockAsyncContext implements AsyncContext {
 		}
 	}
 
-	@Nullable
-	public String getDispatchedPath() {
+	public @Nullable String getDispatchedPath() {
 		return this.dispatchedPath;
 	}
 

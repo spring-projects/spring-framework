@@ -19,10 +19,10 @@ package org.springframework.web.servlet.handler;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.lang.Nullable;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;

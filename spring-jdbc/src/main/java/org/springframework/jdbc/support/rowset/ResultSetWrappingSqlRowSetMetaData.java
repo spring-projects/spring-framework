@@ -19,8 +19,9 @@ package org.springframework.jdbc.support.rowset;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.lang.Nullable;
 
 /**
  * The default implementation of Spring's {@link SqlRowSetMetaData} interface, wrapping a
@@ -38,8 +39,7 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 
 	private final ResultSetMetaData resultSetMetaData;
 
-	@Nullable
-	private String[] columnNames;
+	private String @Nullable [] columnNames;
 
 
 	/**

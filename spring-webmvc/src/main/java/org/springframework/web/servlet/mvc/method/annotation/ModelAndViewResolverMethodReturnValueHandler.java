@@ -19,8 +19,9 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -55,8 +56,7 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  */
 public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@Nullable
-	private final List<ModelAndViewResolver> mavResolvers;
+	private final @Nullable List<ModelAndViewResolver> mavResolvers;
 
 	private final ModelAttributeMethodProcessor modelAttributeProcessor =
 			new ServletModelAttributeMethodProcessor(true);

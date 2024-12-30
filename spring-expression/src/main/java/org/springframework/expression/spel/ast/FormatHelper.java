@@ -19,8 +19,9 @@ package org.springframework.expression.spel.ast;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.

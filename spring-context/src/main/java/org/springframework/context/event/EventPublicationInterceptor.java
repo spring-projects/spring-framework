@@ -20,12 +20,12 @@ import java.lang.reflect.Constructor;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,11 +50,9 @@ import org.springframework.util.Assert;
 public class EventPublicationInterceptor
 		implements MethodInterceptor, ApplicationEventPublisherAware, InitializingBean {
 
-	@Nullable
-	private Constructor<?> applicationEventClassConstructor;
+	private @Nullable Constructor<?> applicationEventClassConstructor;
 
-	@Nullable
-	private ApplicationEventPublisher applicationEventPublisher;
+	private @Nullable ApplicationEventPublisher applicationEventPublisher;
 
 
 	/**
@@ -94,8 +92,7 @@ public class EventPublicationInterceptor
 
 
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 		Object retVal = invocation.proceed();
 
 		Assert.state(this.applicationEventClassConstructor != null, "No ApplicationEvent class set");

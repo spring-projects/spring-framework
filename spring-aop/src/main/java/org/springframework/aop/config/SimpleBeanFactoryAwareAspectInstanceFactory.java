@@ -16,12 +16,13 @@
 
 package org.springframework.aop.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.aspectj.AspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -35,11 +36,9 @@ import org.springframework.util.ClassUtils;
  */
 public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware {
 
-	@Nullable
-	private String aspectBeanName;
+	private @Nullable String aspectBeanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**
@@ -69,8 +68,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getAspectClassLoader() {
+	public @Nullable ClassLoader getAspectClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
 			return cbf.getBeanClassLoader();
 		}

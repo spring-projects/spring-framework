@@ -19,7 +19,8 @@ package org.springframework.web.socket;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -152,8 +153,7 @@ public final class CloseStatus implements Serializable {
 
 	private final int code;
 
-	@Nullable
-	private final String reason;
+	private final @Nullable String reason;
 
 
 	/**
@@ -186,8 +186,7 @@ public final class CloseStatus implements Serializable {
 	/**
 	 * Return the reason, or {@code null} if none.
 	 */
-	@Nullable
-	public String getReason() {
+	public @Nullable String getReason() {
 		return this.reason;
 	}
 

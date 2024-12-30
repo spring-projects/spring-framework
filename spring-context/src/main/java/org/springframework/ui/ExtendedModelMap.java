@@ -19,7 +19,7 @@ package org.springframework.ui;
 import java.util.Collection;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Subclass of {@link ModelMap} that implements the {@link Model} interface.

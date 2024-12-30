@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,7 +37,6 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
@@ -166,9 +166,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		}
 	}
 
-	@Nullable
 	@SuppressWarnings("unchecked")
-	private <T> Encoder<T> getEncoder(ResolvableType elementType, @Nullable MimeType mimeType) {
+	private <T> @Nullable Encoder<T> getEncoder(ResolvableType elementType, @Nullable MimeType mimeType) {
 		for (Encoder<?> encoder : getEncoders()) {
 			if (encoder.canEncode(elementType, mimeType)) {
 				return (Encoder<T>) encoder;

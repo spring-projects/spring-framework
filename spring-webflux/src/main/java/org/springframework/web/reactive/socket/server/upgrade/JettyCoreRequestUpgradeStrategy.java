@@ -28,6 +28,7 @@ import org.eclipse.jetty.websocket.api.Configurable;
 import org.eclipse.jetty.websocket.api.exceptions.WebSocketException;
 import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
 import org.eclipse.jetty.websocket.server.WebSocketCreator;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -35,7 +36,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
@@ -53,11 +53,9 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	@Nullable
-	private Consumer<Configurable> webSocketConfigurer;
+	private @Nullable Consumer<Configurable> webSocketConfigurer;
 
-	@Nullable
-	private ServerWebSocketContainer serverContainer;
+	private @Nullable ServerWebSocketContainer serverContainer;
 
 	/**
 	 * Add a callback to configure WebSocket server parameters on

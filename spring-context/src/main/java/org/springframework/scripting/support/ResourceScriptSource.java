@@ -22,10 +22,10 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -129,8 +129,7 @@ public class ResourceScriptSource implements ScriptSource {
 	}
 
 	@Override
-	@Nullable
-	public String suggestedClassName() {
+	public @Nullable String suggestedClassName() {
 		String filename = getResource().getFilename();
 		return (filename != null ? StringUtils.stripFilenameExtension(filename) : null);
 	}

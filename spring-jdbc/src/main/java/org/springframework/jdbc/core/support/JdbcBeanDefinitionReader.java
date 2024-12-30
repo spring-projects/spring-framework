@@ -20,9 +20,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -49,8 +50,7 @@ public class JdbcBeanDefinitionReader {
 
 	private final org.springframework.beans.factory.support.PropertiesBeanDefinitionReader propReader;
 
-	@Nullable
-	private JdbcTemplate jdbcTemplate;
+	private @Nullable JdbcTemplate jdbcTemplate;
 
 
 	/**

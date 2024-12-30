@@ -26,7 +26,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -136,8 +137,7 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 
 		private final AtomicReference<Object> parkedThread = new AtomicReference<>();
 
-		@Nullable
-		private volatile Throwable error;
+		private volatile @Nullable Throwable error;
 
 		private long produced;
 

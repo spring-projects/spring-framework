@@ -19,8 +19,9 @@ package org.springframework.test.web.client;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +39,7 @@ import org.springframework.util.Assert;
 public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
 
 	/** Expectations in the order of declaration (count may be > 1). */
-	@Nullable
-	private Iterator<RequestExpectation> expectationIterator;
+	private @Nullable Iterator<RequestExpectation> expectationIterator;
 
 	/** Track expectations that have a remaining count. */
 	private final RequestExpectationGroup repeatExpectations = new RequestExpectationGroup();

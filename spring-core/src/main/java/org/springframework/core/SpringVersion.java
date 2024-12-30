@@ -16,7 +16,7 @@
 
 package org.springframework.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Class that exposes the Spring version. Fetches the
@@ -42,8 +42,7 @@ public final class SpringVersion {
 	 * or {@code null} if it cannot be determined.
 	 * @see Package#getImplementationVersion()
 	 */
-	@Nullable
-	public static String getVersion() {
+	public static @Nullable String getVersion() {
 		Package pkg = SpringVersion.class.getPackage();
 		return (pkg != null ? pkg.getImplementationVersion() : null);
 	}

@@ -17,8 +17,7 @@
 package org.springframework.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Extension of the AOP Alliance {@link org.aopalliance.intercept.MethodInvocation}
@@ -83,7 +82,6 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	 * @return the value of the attribute, or {@code null} if not set
 	 * @see #setUserAttribute
 	 */
-	@Nullable
-	Object getUserAttribute(String key);
+	@Nullable Object getUserAttribute(String key);
 
 }

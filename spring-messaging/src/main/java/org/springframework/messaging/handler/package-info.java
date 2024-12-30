@@ -1,9 +1,7 @@
 /**
  * Basic abstractions for working with message handler methods.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.messaging.handler;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

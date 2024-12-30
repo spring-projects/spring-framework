@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * Context that holds information for metadata collection regarding
@@ -49,8 +49,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 
 	private final Map<String, Object> attributes;
 
-	@Nullable
-	private String pathPattern;
+	private @Nullable String pathPattern;
 
 	private boolean connectionAborted;
 
@@ -84,8 +83,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 * <p>Path patterns must have a low cardinality for the entire application.
 	 * @return the path pattern, or {@code null} if none found
 	 */
-	@Nullable
-	public String getPathPattern() {
+	public @Nullable String getPathPattern() {
 		return this.pathPattern;
 	}
 

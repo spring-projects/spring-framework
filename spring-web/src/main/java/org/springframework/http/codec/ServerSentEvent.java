@@ -18,7 +18,8 @@ package org.springframework.http.codec;
 
 import java.time.Duration;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -36,20 +37,15 @@ import org.springframework.util.StringUtils;
  */
 public final class ServerSentEvent<T> {
 
-	@Nullable
-	private final String id;
+	private final @Nullable String id;
 
-	@Nullable
-	private final String event;
+	private final @Nullable String event;
 
-	@Nullable
-	private final Duration retry;
+	private final @Nullable Duration retry;
 
-	@Nullable
-	private final String comment;
+	private final @Nullable String comment;
 
-	@Nullable
-	private final T data;
+	private final @Nullable T data;
 
 
 	private ServerSentEvent(@Nullable String id, @Nullable String event, @Nullable Duration retry,
@@ -66,40 +62,35 @@ public final class ServerSentEvent<T> {
 	/**
 	 * Return the {@code id} field of this event, if available.
 	 */
-	@Nullable
-	public String id() {
+	public @Nullable String id() {
 		return this.id;
 	}
 
 	/**
 	 * Return the {@code event} field of this event, if available.
 	 */
-	@Nullable
-	public String event() {
+	public @Nullable String event() {
 		return this.event;
 	}
 
 	/**
 	 * Return the {@code retry} field of this event, if available.
 	 */
-	@Nullable
-	public Duration retry() {
+	public @Nullable Duration retry() {
 		return this.retry;
 	}
 
 	/**
 	 * Return the comment of this event, if available.
 	 */
-	@Nullable
-	public String comment() {
+	public @Nullable String comment() {
 		return this.comment;
 	}
 
 	/**
 	 * Return the {@code data} field of this event, if available.
 	 */
-	@Nullable
-	public T data() {
+	public @Nullable T data() {
 		return this.data;
 	}
 
@@ -229,20 +220,15 @@ public final class ServerSentEvent<T> {
 
 	private static class BuilderImpl<T> implements Builder<T> {
 
-		@Nullable
-		private String id;
+		private @Nullable String id;
 
-		@Nullable
-		private String event;
+		private @Nullable String event;
 
-		@Nullable
-		private Duration retry;
+		private @Nullable Duration retry;
 
-		@Nullable
-		private String comment;
+		private @Nullable String comment;
 
-		@Nullable
-		private T data;
+		private @Nullable T data;
 
 		public BuilderImpl() {
 		}

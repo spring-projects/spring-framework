@@ -16,7 +16,7 @@
 
 package org.springframework.cache.interceptor;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Class describing a cache 'cacheable' operation.
@@ -28,8 +28,7 @@ import org.springframework.lang.Nullable;
  */
 public class CacheableOperation extends CacheOperation {
 
-	@Nullable
-	private final String unless;
+	private final @Nullable String unless;
 
 	private final boolean sync;
 
@@ -45,8 +44,7 @@ public class CacheableOperation extends CacheOperation {
 	}
 
 
-	@Nullable
-	public String getUnless() {
+	public @Nullable String getUnless() {
 		return this.unless;
 	}
 
@@ -61,8 +59,7 @@ public class CacheableOperation extends CacheOperation {
 	 */
 	public static class Builder extends CacheOperation.Builder {
 
-		@Nullable
-		private String unless;
+		private @Nullable String unless;
 
 		private boolean sync;
 

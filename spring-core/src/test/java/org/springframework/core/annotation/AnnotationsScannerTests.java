@@ -29,11 +29,11 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -469,15 +469,13 @@ class AnnotationsScannerTests {
 				new AnnotationsProcessor<Object, String>() {
 
 					@Override
-					@Nullable
 					public String doWithAggregate(Object context, int aggregateIndex) {
 						return "";
 					}
 
 					@Override
-					@Nullable
 					public String doWithAnnotations(Object context, int aggregateIndex,
-							Object source, Annotation[] annotations) {
+							@Nullable Object source, Annotation[] annotations) {
 						throw new IllegalStateException("Should not call");
 					}
 
@@ -503,15 +501,13 @@ class AnnotationsScannerTests {
 				new AnnotationsProcessor<Object, String>() {
 
 					@Override
-					@Nullable
 					public String doWithAnnotations(Object context, int aggregateIndex,
-							Object source, Annotation[] annotations) {
+							@Nullable Object source, Annotation[] annotations) {
 						return "K";
 					}
 
 					@Override
-					@Nullable
-					public String finish(String result) {
+					public String finish(@Nullable String result) {
 						return "O" + result;
 					}
 
@@ -793,13 +789,11 @@ class AnnotationsScannerTests {
 
 	interface IgnorableOverrideInterface1 {
 
-		@Nullable
 		void method();
 	}
 
 	interface IgnorableOverrideInterface2 {
 
-		@Nullable
 		void method();
 	}
 

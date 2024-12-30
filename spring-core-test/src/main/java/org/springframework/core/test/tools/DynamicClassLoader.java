@@ -29,7 +29,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -52,8 +53,7 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private final Map<String, DynamicResourceFileObject> dynamicResourceFiles;
 
-	@Nullable
-	private final Method defineClassMethod;
+	private final @Nullable Method defineClassMethod;
 
 
 	public DynamicClassLoader(ClassLoader parent, ClassFiles classFiles, ResourceFiles resourceFiles,
@@ -89,8 +89,7 @@ public class DynamicClassLoader extends ClassLoader {
 		return (clazz != null ? clazz : super.findClass(name));
 	}
 
-	@Nullable
-	private Class<?> defineClass(String name, @Nullable byte[] bytes) {
+	private @Nullable Class<?> defineClass(String name, byte @Nullable [] bytes) {
 		if (bytes == null) {
 			return null;
 		}
@@ -111,8 +110,7 @@ public class DynamicClassLoader extends ClassLoader {
 	}
 
 	@Override
-	@Nullable
-	protected URL findResource(String name) {
+	protected @Nullable URL findResource(String name) {
 		if (name.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
 			String className = ClassUtils.convertResourcePathToClassName(name.substring(0,
 					name.length() - ClassUtils.CLASS_FILE_SUFFIX.length()));
@@ -132,8 +130,7 @@ public class DynamicClassLoader extends ClassLoader {
 		return super.findResource(name);
 	}
 
-	@Nullable
-	private byte[] findClassBytes(String name) {
+	private byte @Nullable [] findClassBytes(String name) {
 		ClassFile classFile = this.classFiles.get(name);
 		if (classFile != null) {
 			return classFile.getContent();
@@ -162,8 +159,7 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private static class SingletonEnumeration<E> implements Enumeration<E> {
 
-		@Nullable
-		private E element;
+		private @Nullable E element;
 
 
 		SingletonEnumeration(@Nullable E element) {
@@ -177,8 +173,7 @@ public class DynamicClassLoader extends ClassLoader {
 		}
 
 		@Override
-		@Nullable
-		public E nextElement() {
+		public @Nullable E nextElement() {
 			E next = this.element;
 			this.element = null;
 			return next;

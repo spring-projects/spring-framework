@@ -19,10 +19,10 @@ package org.springframework.web.socket.server.standard;
 import jakarta.servlet.ServletContext;
 import jakarta.websocket.WebSocketContainer;
 import jakarta.websocket.server.ServerContainer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
@@ -47,63 +47,53 @@ import org.springframework.web.context.ServletContextAware;
 public class ServletServerContainerFactoryBean
 		implements FactoryBean<WebSocketContainer>, ServletContextAware, InitializingBean {
 
-	@Nullable
-	private Long asyncSendTimeout;
+	private @Nullable Long asyncSendTimeout;
 
-	@Nullable
-	private Long maxSessionIdleTimeout;
+	private @Nullable Long maxSessionIdleTimeout;
 
-	@Nullable
-	private Integer maxTextMessageBufferSize;
+	private @Nullable Integer maxTextMessageBufferSize;
 
-	@Nullable
-	private Integer maxBinaryMessageBufferSize;
+	private @Nullable Integer maxBinaryMessageBufferSize;
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private ServerContainer serverContainer;
+	private @Nullable ServerContainer serverContainer;
 
 
-	public void setAsyncSendTimeout(Long timeoutInMillis) {
+	public void setAsyncSendTimeout(@Nullable Long timeoutInMillis) {
 		this.asyncSendTimeout = timeoutInMillis;
 	}
 
-	@Nullable
-	public Long getAsyncSendTimeout() {
+	public @Nullable Long getAsyncSendTimeout() {
 		return this.asyncSendTimeout;
 	}
 
-	public void setMaxSessionIdleTimeout(Long timeoutInMillis) {
+	public void setMaxSessionIdleTimeout(@Nullable Long timeoutInMillis) {
 		this.maxSessionIdleTimeout = timeoutInMillis;
 	}
 
-	@Nullable
-	public Long getMaxSessionIdleTimeout() {
+	public @Nullable Long getMaxSessionIdleTimeout() {
 		return this.maxSessionIdleTimeout;
 	}
 
-	public void setMaxTextMessageBufferSize(Integer bufferSize) {
+	public void setMaxTextMessageBufferSize(@Nullable Integer bufferSize) {
 		this.maxTextMessageBufferSize = bufferSize;
 	}
 
-	@Nullable
-	public Integer getMaxTextMessageBufferSize() {
+	public @Nullable Integer getMaxTextMessageBufferSize() {
 		return this.maxTextMessageBufferSize;
 	}
 
-	public void setMaxBinaryMessageBufferSize(Integer bufferSize) {
+	public void setMaxBinaryMessageBufferSize(@Nullable Integer bufferSize) {
 		this.maxBinaryMessageBufferSize = bufferSize;
 	}
 
-	@Nullable
-	public Integer getMaxBinaryMessageBufferSize() {
+	public @Nullable Integer getMaxBinaryMessageBufferSize() {
 		return this.maxBinaryMessageBufferSize;
 	}
 
 	@Override
-	public void setServletContext(ServletContext servletContext) {
+	public void setServletContext(@Nullable ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
@@ -133,8 +123,7 @@ public class ServletServerContainerFactoryBean
 
 
 	@Override
-	@Nullable
-	public ServerContainer getObject() {
+	public @Nullable ServerContainer getObject() {
 		return this.serverContainer;
 	}
 

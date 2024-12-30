@@ -45,13 +45,13 @@ import io.r2dbc.spi.Statement;
 import io.r2dbc.spi.Wrapped;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
@@ -82,8 +82,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 
 	private final ExecuteFunction executeFunction;
 
-	@Nullable
-	private final NamedParameterExpander namedParameterExpander;
+	private final @Nullable NamedParameterExpander namedParameterExpander;
 
 
 	DefaultDatabaseClient(BindMarkersFactory bindMarkersFactory, ConnectionFactory connectionFactory,
@@ -208,8 +207,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 	 * @return the SQL string, or {@code null}
 	 * @see SqlProvider
 	 */
-	@Nullable
-	private static String getSql(Object object) {
+	private static @Nullable String getSql(Object object) {
 		if (object instanceof SqlProvider sqlProvider) {
 			return sqlProvider.getSql();
 		}
@@ -475,8 +473,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			return new MapBindParameterSource(namedBindings);
 		}
 
-		@Nullable
-		private Parameter getParameter(Map<String, Parameter> remainderByName,
+		private @Nullable Parameter getParameter(Map<String, Parameter> remainderByName,
 				Map<Integer, Parameter> remainderByIndex, List<String> parameterNames, String parameterName) {
 
 			if (this.byName.containsKey(parameterName)) {
@@ -530,8 +527,7 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			return switch (method.getName()) {
 				// Only consider equal when proxies are identical.
 				case "equals" -> proxy == args[0];

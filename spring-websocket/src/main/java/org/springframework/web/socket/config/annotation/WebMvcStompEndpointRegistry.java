@@ -21,11 +21,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
@@ -35,6 +37,7 @@ import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A registry for STOMP over WebSocket endpoints that maps the endpoints with a
@@ -52,8 +55,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private int order = 1;
 
-	@Nullable
-	private UrlPathHelper urlPathHelper;
+	private @Nullable UrlPathHelper urlPathHelper;
 
 	private final SubProtocolWebSocketHandler subProtocolWebSocketHandler;
 
@@ -125,14 +127,19 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	/**
 	 * Set the UrlPathHelper to configure on the {@code HandlerMapping}
 	 * used to map handshake requests.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Override
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
-	@Nullable
-	protected UrlPathHelper getUrlPathHelper() {
+	@Deprecated(since = "7.0", forRemoval = true)
+	protected @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
@@ -159,6 +166,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	/**
 	 * Return a handler mapping with the mapped ViewControllers.
 	 */
+	@SuppressWarnings("removal")
 	public AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (WebMvcStompWebSocketEndpointRegistration registration : this.registrations) {

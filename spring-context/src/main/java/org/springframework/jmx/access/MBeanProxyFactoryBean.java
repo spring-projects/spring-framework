@@ -16,12 +16,13 @@
 
 package org.springframework.jmx.access;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -49,14 +50,11 @@ import org.springframework.util.ClassUtils;
 public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
 
-	@Nullable
-	private Class<?> proxyInterface;
+	private @Nullable Class<?> proxyInterface;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private Object mbeanProxy;
+	private @Nullable Object mbeanProxy;
 
 
 	/**
@@ -102,14 +100,12 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 
 
 	@Override
-	@Nullable
-	public Object getObject() {
+	public @Nullable Object getObject() {
 		return this.mbeanProxy;
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		return this.proxyInterface;
 	}
 

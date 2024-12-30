@@ -16,9 +16,10 @@
 
 package org.springframework.web.context.request;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract {@link Scope} implementation that reads from a particular scope
@@ -57,8 +58,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 	}
 
 	@Override
-	@Nullable
-	public Object remove(String name) {
+	public @Nullable Object remove(String name) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
 		if (scopedObject != null) {
@@ -77,8 +77,7 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 	}
 
 	@Override
-	@Nullable
-	public Object resolveContextualObject(String key) {
+	public @Nullable Object resolveContextualObject(String key) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		return attributes.resolveReference(key);
 	}

@@ -6,12 +6,7 @@
 		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
-        <mvc:path-matching
-                suffix-pattern="true"
-                trailing-slash="false"
-                registered-suffixes-only="true"
-                path-helper="pathHelper"
-                path-matcher="pathMatcher" />
+        <mvc:path-matching path-helper="pathHelper" path-matcher="pathMatcher" />
     </mvc:annotation-driven>
 
     <bean id="pathMatcher" class="org.springframework.web.servlet.config.TestPathMatcher" />

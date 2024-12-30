@@ -24,8 +24,8 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,14 +42,11 @@ import org.springframework.util.Assert;
  */
 public class PassThroughFilterChain implements FilterChain {
 
-	@Nullable
-	private Filter filter;
+	private @Nullable Filter filter;
 
-	@Nullable
-	private FilterChain nextFilterChain;
+	private @Nullable FilterChain nextFilterChain;
 
-	@Nullable
-	private Servlet servlet;
+	private @Nullable Servlet servlet;
 
 
 	/**

@@ -21,13 +21,13 @@ import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -51,14 +51,11 @@ import org.springframework.util.ErrorHandler;
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
-	@Nullable
-	private Executor taskExecutor;
+	private @Nullable Executor taskExecutor;
 
-	@Nullable
-	private ErrorHandler errorHandler;
+	private @Nullable ErrorHandler errorHandler;
 
-	@Nullable
-	private volatile Log lazyLogger;
+	private volatile @Nullable Log lazyLogger;
 
 
 	/**
@@ -100,8 +97,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * Return the current task executor for this multicaster.
 	 * @since 2.0
 	 */
-	@Nullable
-	protected Executor getTaskExecutor() {
+	protected @Nullable Executor getTaskExecutor() {
 		return this.taskExecutor;
 	}
 
@@ -128,8 +124,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * Return the current error handler for this multicaster.
 	 * @since 4.1
 	 */
-	@Nullable
-	protected ErrorHandler getErrorHandler() {
+	protected @Nullable ErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
 

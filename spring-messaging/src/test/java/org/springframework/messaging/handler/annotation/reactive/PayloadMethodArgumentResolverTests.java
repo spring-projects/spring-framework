@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -35,7 +36,6 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -160,8 +160,7 @@ class PayloadMethodArgumentResolverTests {
 
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <T> T resolveValue(MethodParameter param, Publisher<DataBuffer> content, Validator validator) {
+	private <T> @Nullable T resolveValue(MethodParameter param, Publisher<DataBuffer> content, Validator validator) {
 
 		Message<?> message = new GenericMessage<>(content,
 				Collections.singletonMap(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN));

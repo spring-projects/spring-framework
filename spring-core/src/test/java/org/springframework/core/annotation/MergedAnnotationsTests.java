@@ -36,6 +36,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import jakarta.annotation.Resource;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +50,6 @@ import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.testfixture.stereotype.Indexed;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
@@ -2875,8 +2875,7 @@ class MergedAnnotationsTests {
 
 	interface NullableAnnotatedInterface {
 
-		@Nullable
-		void fromInterfaceImplementedByRoot();
+		@Nullable String fromInterfaceImplementedByRoot();
 	}
 
 	static class Root implements AnnotatedInterface {

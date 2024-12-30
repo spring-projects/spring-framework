@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,7 +40,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
@@ -86,16 +86,13 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	private final List<Decoder<?>> decoders = new ArrayList<>();
 
-	@Nullable
-	private Validator validator;
+	private @Nullable Validator validator;
 
-	@Nullable
-	private RouteMatcher routeMatcher;
+	private @Nullable RouteMatcher routeMatcher;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
-	@Nullable
-	private StringValueResolver valueResolver;
+	private @Nullable StringValueResolver valueResolver;
 
 
 	public MessageMappingMessageHandler() {
@@ -130,8 +127,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	/**
 	 * Return the configured Validator instance.
 	 */
-	@Nullable
-	public Validator getValidator() {
+	public @Nullable Validator getValidator() {
 		return this.validator;
 	}
 
@@ -151,8 +147,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * Return the {@code RouteMatcher} used to map messages to handlers.
 	 * May be {@code null} before the component is initialized.
 	 */
-	@Nullable
-	public RouteMatcher getRouteMatcher() {
+	public @Nullable RouteMatcher getRouteMatcher() {
 		return this.routeMatcher;
 	}
 
@@ -272,8 +267,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	@Override
-	@Nullable
-	protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {
+	protected @Nullable CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {
 		CompositeMessageCondition methodCondition = getCondition(method);
 		if (methodCondition != null) {
 			CompositeMessageCondition typeCondition = getCondition(handlerType);
@@ -289,8 +283,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * @param element the element to check
 	 * @return the condition, or {@code null}
 	 */
-	@Nullable
-	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
+	protected @Nullable CompositeMessageCondition getCondition(AnnotatedElement element) {
 		MessageMapping ann = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
 		if (ann == null || ann.value().length == 0) {
 			return null;
@@ -326,15 +319,13 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	@Override
-	@Nullable
-	protected RouteMatcher.Route getDestination(Message<?> message) {
+	protected RouteMatcher.@Nullable Route getDestination(Message<?> message) {
 		return (RouteMatcher.Route) message.getHeaders()
 				.get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
 	}
 
 	@Override
-	@Nullable
-	protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {
+	protected @Nullable CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {
 		return mapping.getMatchingCondition(message);
 	}
 

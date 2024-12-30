@@ -17,10 +17,10 @@
 package org.springframework.web.context.request;
 
 import jakarta.faces.context.FacesContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -100,8 +100,7 @@ public abstract class RequestContextHolder {
 	 * @return the RequestAttributes currently bound to the thread,
 	 * or {@code null} if none bound
 	 */
-	@Nullable
-	public static RequestAttributes getRequestAttributes() {
+	public static @Nullable RequestAttributes getRequestAttributes() {
 		RequestAttributes attributes = requestAttributesHolder.get();
 		if (attributes == null) {
 			attributes = inheritableRequestAttributesHolder.get();
@@ -145,8 +144,7 @@ public abstract class RequestContextHolder {
  	 */
 	private static class FacesRequestAttributesFactory {
 
-		@Nullable
-		public static RequestAttributes getFacesRequestAttributes() {
+		public static @Nullable RequestAttributes getFacesRequestAttributes() {
 			try {
 				FacesContext facesContext = FacesContext.getCurrentInstance();
 				return (facesContext != null ? new FacesRequestAttributes(facesContext) : null);

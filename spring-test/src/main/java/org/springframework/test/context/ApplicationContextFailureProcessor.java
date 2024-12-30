@@ -16,8 +16,9 @@
 
 package org.springframework.test.context;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy for components that process failures related to application contexts

@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -46,8 +47,7 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
-	@Nullable
-	private String parentName;
+	private @Nullable String parentName;
 
 
 	/**
@@ -136,8 +136,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	@Nullable
-	public String getParentName() {
+	public @Nullable String getParentName() {
 		return this.parentName;
 	}
 

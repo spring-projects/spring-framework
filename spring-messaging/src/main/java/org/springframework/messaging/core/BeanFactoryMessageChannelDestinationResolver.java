@@ -16,10 +16,11 @@
 
 package org.springframework.messaging.core;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
@@ -34,8 +35,7 @@ import org.springframework.util.Assert;
 public class BeanFactoryMessageChannelDestinationResolver
 		implements DestinationResolver<MessageChannel>, BeanFactoryAware {
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**

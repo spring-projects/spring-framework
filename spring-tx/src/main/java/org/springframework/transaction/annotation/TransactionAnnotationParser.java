@@ -18,7 +18,8 @@ package org.springframework.transaction.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
 /**
@@ -66,7 +67,6 @@ public interface TransactionAnnotationParser {
 	 * @return the configured transaction attribute, or {@code null} if none found
 	 * @see AnnotationTransactionAttributeSource#determineTransactionAttribute
 	 */
-	@Nullable
-	TransactionAttribute parseTransactionAnnotation(AnnotatedElement element);
+	@Nullable TransactionAttribute parseTransactionAnnotation(AnnotatedElement element);
 
 }

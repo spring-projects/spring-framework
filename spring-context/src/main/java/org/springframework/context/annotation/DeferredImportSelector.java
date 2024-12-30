@@ -16,8 +16,9 @@
 
 package org.springframework.context.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 
 /**
  * A variation of {@link ImportSelector} that runs after all {@code @Configuration} beans
@@ -43,8 +44,7 @@ public interface DeferredImportSelector extends ImportSelector {
 	 * @return the import group class, or {@code null} if none
 	 * @since 5.0
 	 */
-	@Nullable
-	default Class<? extends Group> getImportGroup() {
+	default @Nullable Class<? extends Group> getImportGroup() {
 		return null;
 	}
 

@@ -16,8 +16,9 @@
 
 package org.springframework.test.context.cache;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.MergedContextConfiguration;
 
@@ -95,8 +96,7 @@ public interface ContextCache {
 	 * if not found in the cache
 	 * @see #remove
 	 */
-	@Nullable
-	ApplicationContext get(MergedContextConfiguration key);
+	@Nullable ApplicationContext get(MergedContextConfiguration key);
 
 	/**
 	 * Explicitly add an {@code ApplicationContext} instance to the cache

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -33,7 +35,6 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -144,18 +145,15 @@ class ConditionEvaluator {
 	 */
 	private static class ConditionContextImpl implements ConditionContext {
 
-		@Nullable
-		private final BeanDefinitionRegistry registry;
+		private final @Nullable BeanDefinitionRegistry registry;
 
-		@Nullable
-		private final ConfigurableListableBeanFactory beanFactory;
+		private final @Nullable ConfigurableListableBeanFactory beanFactory;
 
 		private final Environment environment;
 
 		private final ResourceLoader resourceLoader;
 
-		@Nullable
-		private final ClassLoader classLoader;
+		private final @Nullable ClassLoader classLoader;
 
 		public ConditionContextImpl(@Nullable BeanDefinitionRegistry registry,
 				@Nullable Environment environment, @Nullable ResourceLoader resourceLoader) {
@@ -167,8 +165,7 @@ class ConditionEvaluator {
 			this.classLoader = deduceClassLoader(resourceLoader, this.beanFactory);
 		}
 
-		@Nullable
-		private static ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
+		private static @Nullable ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof ConfigurableListableBeanFactory configurableListableBeanFactory) {
 				return configurableListableBeanFactory;
 			}
@@ -192,8 +189,7 @@ class ConditionEvaluator {
 			return new DefaultResourceLoader();
 		}
 
-		@Nullable
-		private static ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
+		private static @Nullable ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
 				@Nullable ConfigurableListableBeanFactory beanFactory) {
 
 			if (resourceLoader != null) {
@@ -215,8 +211,7 @@ class ConditionEvaluator {
 		}
 
 		@Override
-		@Nullable
-		public ConfigurableListableBeanFactory getBeanFactory() {
+		public @Nullable ConfigurableListableBeanFactory getBeanFactory() {
 			return this.beanFactory;
 		}
 
@@ -231,8 +226,7 @@ class ConditionEvaluator {
 		}
 
 		@Override
-		@Nullable
-		public ClassLoader getClassLoader() {
+		public @Nullable ClassLoader getClassLoader() {
 			return this.classLoader;
 		}
 	}

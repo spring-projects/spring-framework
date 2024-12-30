@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,11 +34,11 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
 
-	@Nullable
+	@SuppressWarnings("NullAway.Init")
 	private DataSource dataSource;
 
 	/** The name of the sequence/table containing the sequence. */
-	@Nullable
+	@SuppressWarnings("NullAway.Init")
 	private String incrementerName;
 
 	/** The length to which a string result should be pre-pended with zeroes. */
@@ -77,7 +76,6 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Return the data source to retrieve the value from.
 	 */
-	@SuppressWarnings("NullAway")
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -92,7 +90,6 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Return the name of the sequence/table.
 	 */
-	@SuppressWarnings("NullAway")
 	public String getIncrementerName() {
 		return this.incrementerName;
 	}

@@ -26,11 +26,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
@@ -79,8 +79,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private BootstrapContext bootstrapContext;
+	private @Nullable BootstrapContext bootstrapContext;
 
 
 	@Override
@@ -533,8 +532,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @throws IllegalArgumentException if supplied configuration attributes are
 	 * {@code null} or <em>empty</em>
 	 */
-	@Nullable
-	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
+	protected @Nullable Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notNull(configAttributesList, "ContextConfigurationAttributes list must not be null");

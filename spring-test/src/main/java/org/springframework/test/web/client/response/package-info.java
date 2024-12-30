@@ -4,9 +4,7 @@
  * {@link org.springframework.test.web.client.response.MockRestResponseCreators}
  * to gain access to instances of those implementations.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.web.client.response;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

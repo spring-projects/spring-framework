@@ -25,6 +25,7 @@ import jakarta.servlet.ServletException;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConversionNotSupportedException;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -72,11 +72,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Nullable
-	private final ConfigurableBeanFactory configurableBeanFactory;
+	private final @Nullable ConfigurableBeanFactory configurableBeanFactory;
 
-	@Nullable
-	private final BeanExpressionContext expressionContext;
+	private final @Nullable BeanExpressionContext expressionContext;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
@@ -100,8 +98,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
-	@Nullable
-	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+	public final @Nullable Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
@@ -194,8 +191,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * Resolve the given annotation-specified value,
 	 * potentially containing placeholders and expressions.
 	 */
-	@Nullable
-	private Object resolveEmbeddedValuesAndExpressions(String value) {
+	private @Nullable Object resolveEmbeddedValuesAndExpressions(String value) {
 		if (this.configurableBeanFactory == null || this.expressionContext == null) {
 			return value;
 		}
@@ -216,8 +212,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @return the resolved argument (may be {@code null})
 	 * @throws Exception in case of errors
 	 */
-	@Nullable
-	protected abstract Object resolveName(String name, MethodParameter parameter, NativeWebRequest request)
+	protected abstract @Nullable Object resolveName(String name, MethodParameter parameter, NativeWebRequest request)
 			throws Exception;
 
 	/**
@@ -261,8 +256,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	/**
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an exception for other primitives.
 	 */
-	@Nullable
-	private Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
+	private @Nullable Object handleNullValue(String name, @Nullable Object value, Class<?> paramType) {
 		if (value == null) {
 			if (paramType == boolean.class) {
 				return Boolean.FALSE;
@@ -276,8 +270,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		return value;
 	}
 
-	@Nullable
-	private static Object convertIfNecessary(
+	private static @Nullable Object convertIfNecessary(
 			MethodParameter parameter, NativeWebRequest webRequest, WebDataBinderFactory binderFactory,
 			NamedValueInfo namedValueInfo, @Nullable Object arg) throws Exception {
 
@@ -325,8 +318,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		private final boolean required;
 
-		@Nullable
-		private final String defaultValue;
+		private final @Nullable String defaultValue;
 
 		public NamedValueInfo(String name, boolean required, @Nullable String defaultValue) {
 			this.name = name;

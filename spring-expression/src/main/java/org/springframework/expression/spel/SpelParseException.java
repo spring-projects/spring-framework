@@ -16,8 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.expression.ParseException;
-import org.springframework.lang.Nullable;
 
 /**
  * Root exception for Spring EL related exceptions. Rather than holding a hard coded

@@ -24,13 +24,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -47,34 +47,25 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class<?> beanClass;
 
-	@Nullable
-	private final Method readMethod;
+	private final @Nullable Method readMethod;
 
-	@Nullable
-	private final Method writeMethod;
+	private final @Nullable Method writeMethod;
 
-	@Nullable
-	private Set<Method> ambiguousWriteMethods;
+	private @Nullable Set<Method> ambiguousWriteMethods;
 
 	private volatile boolean ambiguousWriteMethodsLogged;
 
-	@Nullable
-	private MethodParameter writeMethodParameter;
+	private @Nullable MethodParameter writeMethodParameter;
 
-	@Nullable
-	private volatile ResolvableType writeMethodType;
+	private volatile @Nullable ResolvableType writeMethodType;
 
-	@Nullable
-	private ResolvableType readMethodType;
+	private @Nullable ResolvableType readMethodType;
 
-	@Nullable
-	private volatile TypeDescriptor typeDescriptor;
+	private volatile @Nullable TypeDescriptor typeDescriptor;
 
-	@Nullable
-	private Class<?> propertyType;
+	private @Nullable Class<?> propertyType;
 
-	@Nullable
-	private final Class<?> propertyEditorClass;
+	private final @Nullable Class<?> propertyEditorClass;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
@@ -136,14 +127,12 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
-	@Nullable
-	public Method getReadMethod() {
+	public @Nullable Method getReadMethod() {
 		return this.readMethod;
 	}
 
 	@Override
-	@Nullable
-	public Method getWriteMethod() {
+	public @Nullable Method getWriteMethod() {
 		return this.writeMethod;
 	}
 
@@ -158,8 +147,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		return this.writeMethod;
 	}
 
-	@Nullable
-	public Method getWriteMethodFallback(@Nullable Class<?> valueType) {
+	public @Nullable Method getWriteMethodFallback(@Nullable Class<?> valueType) {
 		if (this.ambiguousWriteMethods != null) {
 			for (Method method : this.ambiguousWriteMethods) {
 				Class<?> paramType = method.getParameterTypes()[0];
@@ -171,8 +159,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		return null;
 	}
 
-	@Nullable
-	public Method getUniqueWriteMethodFallback() {
+	public @Nullable Method getUniqueWriteMethodFallback() {
 		if (this.ambiguousWriteMethods != null && this.ambiguousWriteMethods.size() == 1) {
 			return this.ambiguousWriteMethods.iterator().next();
 		}
@@ -213,14 +200,12 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getPropertyType() {
+	public @Nullable Class<?> getPropertyType() {
 		return this.propertyType;
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getPropertyEditorClass() {
+	public @Nullable Class<?> getPropertyEditorClass() {
 		return this.propertyEditorClass;
 	}
 

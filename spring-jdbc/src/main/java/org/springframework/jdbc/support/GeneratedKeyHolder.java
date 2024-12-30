@@ -21,9 +21,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * The standard implementation of the {@link KeyHolder} interface, to be used for
@@ -60,14 +61,12 @@ public class GeneratedKeyHolder implements KeyHolder {
 
 
 	@Override
-	@Nullable
-	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
+	public @Nullable Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		return getKeyAs(Number.class);
 	}
 
 	@Override
-	@Nullable
-	public <T> T getKeyAs(Class<T> keyType) throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
+	public <T> @Nullable T getKeyAs(Class<T> keyType) throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (this.keyList.isEmpty()) {
 			return null;
 		}
@@ -94,8 +93,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	}
 
 	@Override
-	@Nullable
-	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
+	public @Nullable Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
 		if (this.keyList.isEmpty()) {
 			return null;
 		}

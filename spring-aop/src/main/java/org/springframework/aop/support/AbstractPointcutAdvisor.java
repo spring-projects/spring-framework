@@ -19,10 +19,10 @@ package org.springframework.aop.support;
 import java.io.Serializable;
 
 import org.aopalliance.aop.Advice;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -38,8 +38,7 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
-	@Nullable
-	private Integer order;
+	private @Nullable Integer order;
 
 
 	public void setOrder(int order) {

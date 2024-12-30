@@ -16,8 +16,9 @@
 
 package org.springframework.jms.support.destination;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jms.JmsException;
-import org.springframework.lang.Nullable;
 
 /**
  * Thrown by a DestinationResolver when it cannot resolve a destination name.

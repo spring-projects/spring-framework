@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ class MappedInterceptorTests {
 		assertThat(interceptor.matches(requestFactory.apply("/path3/foo/bar/path2"))).isFalse();
 	}
 
+	@SuppressWarnings("removal")
 	@PathPatternsParameterizedTest
 	void customPathMatcher(Function<String, MockHttpServletRequest> requestFactory) {
 		MappedInterceptor interceptor = new MappedInterceptor(new String[] { "/foo/[0-9]*" }, null, delegate);

@@ -17,13 +17,12 @@
 package org.springframework.test.json;
 
 import org.json.JSONException;
+import org.jspecify.annotations.Nullable;
 import org.skyscreamer.jsonassert.JSONCompare;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.skyscreamer.jsonassert.comparator.DefaultComparator;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Useful methods that can be used with {@code org.skyscreamer.jsonassert}.

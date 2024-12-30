@@ -24,6 +24,8 @@ import java.util.Set;
 import javax.cache.annotation.CacheInvocationContext;
 import javax.cache.annotation.CacheInvocationParameter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 
 /**
@@ -42,12 +44,12 @@ class DefaultCacheInvocationContext<A extends Annotation>
 
 	private final Object target;
 
-	private final Object[] args;
+	private final @Nullable Object[] args;
 
 	private final CacheInvocationParameter[] allParameters;
 
 
-	public DefaultCacheInvocationContext(JCacheOperation<A> operation, Object target, Object[] args) {
+	public DefaultCacheInvocationContext(JCacheOperation<A> operation, Object target, @Nullable Object[] args) {
 		this.operation = operation;
 		this.target = target;
 		this.args = args;
@@ -66,7 +68,7 @@ class DefaultCacheInvocationContext<A extends Annotation>
 	}
 
 	@Override
-	public Object[] getArgs() {
+	public @Nullable Object[] getArgs() {
 		return this.args.clone();
 	}
 

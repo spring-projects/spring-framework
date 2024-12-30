@@ -19,10 +19,11 @@ package org.springframework.transaction.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.util.ObjectUtils;
 
@@ -37,8 +38,7 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-	@Nullable
-	private TransactionAttributeSource transactionAttributeSource;
+	private @Nullable TransactionAttributeSource transactionAttributeSource;
 
 
 	public TransactionAttributeSourcePointcut() {
@@ -89,8 +89,7 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 			return (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
 		}
 
-		@Nullable
-		private TransactionAttributeSource getTransactionAttributeSource() {
+		private @Nullable TransactionAttributeSource getTransactionAttributeSource() {
 			return transactionAttributeSource;
 		}
 

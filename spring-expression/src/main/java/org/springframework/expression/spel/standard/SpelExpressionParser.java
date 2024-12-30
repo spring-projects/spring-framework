@@ -16,11 +16,12 @@
 
 package org.springframework.expression.spel.standard;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
 import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

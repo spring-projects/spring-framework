@@ -19,8 +19,8 @@ package org.springframework.validation;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -61,14 +61,12 @@ public class MapBindingResult extends AbstractBindingResult implements Serializa
 	}
 
 	@Override
-	@NonNull
 	public final Object getTarget() {
 		return this.target;
 	}
 
 	@Override
-	@Nullable
-	protected Object getActualFieldValue(String field) {
+	protected @Nullable Object getActualFieldValue(String field) {
 		return this.target.get(field);
 	}
 

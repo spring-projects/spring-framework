@@ -20,9 +20,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,15 +37,13 @@ import org.springframework.util.Assert;
  */
 public final class RecordedInvocation {
 
-	@Nullable
-	private final Object instance;
+	private final @Nullable Object instance;
 
 	private final InstrumentedMethod instrumentedMethod;
 
 	private final Object[] arguments;
 
-	@Nullable
-	private final Object returnValue;
+	private final @Nullable Object returnValue;
 
 	private final List<StackWalker.StackFrame> stackFrames;
 
@@ -160,8 +159,7 @@ public final class RecordedInvocation {
 	 * @return the value returned by the invocation
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public <T> T getReturnValue() {
+	public <T> @Nullable T getReturnValue() {
 		return (T) this.returnValue;
 	}
 
@@ -192,15 +190,13 @@ public final class RecordedInvocation {
 	 */
 	public static class Builder {
 
-		@Nullable
-		private Object instance;
+		private @Nullable Object instance;
 
 		private final InstrumentedMethod instrumentedMethod;
 
 		private Object[] arguments = new Object[0];
 
-		@Nullable
-		private Object returnValue;
+		private @Nullable Object returnValue;
 
 
 		Builder(InstrumentedMethod instrumentedMethod) {
@@ -234,7 +230,7 @@ public final class RecordedInvocation {
 		 * @param arguments the invocation arguments
 		 * @return {@code this}, to facilitate method chaining
 		 */
-		public Builder withArguments(@Nullable Object... arguments) {
+		public Builder withArguments(Object @Nullable ... arguments) {
 			if (arguments != null) {
 				this.arguments = arguments;
 			}

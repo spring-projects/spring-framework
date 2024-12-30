@@ -18,8 +18,7 @@ package org.springframework.aop.testfixture.interceptor;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Trivial interceptor that can be introduced in a chain to display it.

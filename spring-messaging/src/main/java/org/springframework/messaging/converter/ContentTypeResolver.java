@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
@@ -37,7 +38,6 @@ public interface ContentTypeResolver {
 	 * @throws InvalidMimeTypeException if the content type is a String that cannot be parsed
 	 * @throws IllegalArgumentException if there is a content type but its type is unknown
 	 */
-	@Nullable
-	MimeType resolve(@Nullable MessageHeaders headers) throws InvalidMimeTypeException;
+	@Nullable MimeType resolve(@Nullable MessageHeaders headers) throws InvalidMimeTypeException;
 
 }

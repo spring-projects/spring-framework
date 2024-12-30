@@ -18,8 +18,9 @@ package org.springframework.core.io.support;
 
 import java.io.IOException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.env.PropertySource;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for creating resource-based {@link PropertySource} wrappers.

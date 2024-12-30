@@ -16,7 +16,7 @@
 
 package org.springframework.aop;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@code TargetSource} is used to obtain the current "target" of
@@ -42,8 +42,7 @@ public interface TargetSource extends TargetClassAware {
 	 * @return the type of targets returned by this {@link TargetSource}
 	 */
 	@Override
-	@Nullable
-	Class<?> getTargetClass();
+	@Nullable Class<?> getTargetClass();
 
 	/**
 	 * Will all calls to {@link #getTarget()} return the same object?
@@ -64,8 +63,7 @@ public interface TargetSource extends TargetClassAware {
 	 * or {@code null} if there is no actual target instance
 	 * @throws Exception if the target object can't be resolved
 	 */
-	@Nullable
-	Object getTarget() throws Exception;
+	@Nullable Object getTarget() throws Exception;
 
 	/**
 	 * Release the given target object obtained from the

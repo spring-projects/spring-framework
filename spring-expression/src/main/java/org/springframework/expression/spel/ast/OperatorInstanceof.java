@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
 import org.springframework.expression.EvaluationException;
@@ -25,7 +27,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,8 +38,7 @@ import org.springframework.util.Assert;
  */
 public class OperatorInstanceof extends Operator {
 
-	@Nullable
-	private Class<?> type;
+	private @Nullable Class<?> type;
 
 
 	public OperatorInstanceof(int startPos, int endPos, SpelNodeImpl... operands) {

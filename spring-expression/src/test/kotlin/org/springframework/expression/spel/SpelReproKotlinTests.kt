@@ -40,9 +40,9 @@ class SpelReproKotlinTests {
 		val expr = parser.parseExpression("#key.startsWith('hello')")
 		context.registerFunction("get", Config::class.java.getMethod("get", String::class.java))
 		context.setVariable("key", "hello world")
-		assertThat(expr.getValue(context, Boolean::class.java)).isTrue()
+		assertThat(expr.getValue(context, Boolean::class.java)!!).isTrue()
 		context.setVariable("key", "")
-		assertThat(expr.getValue(context, Boolean::class.java)).isFalse()
+		assertThat(expr.getValue(context, Boolean::class.java)!!).isFalse()
 	}
 
 	@Test
@@ -50,23 +50,23 @@ class SpelReproKotlinTests {
 		val expr = parser.parseExpression("#key.startsWith('hello')")
 		context.registerFunction("suspendingGet", Config::class.java.getMethod("suspendingGet", String::class.java, Continuation::class.java))
 		context.setVariable("key", "hello world")
-		assertThat(expr.getValue(context, Boolean::class.java)).isTrue()
+		assertThat(expr.getValue(context, Boolean::class.java)!!).isTrue()
 		context.setVariable("key", "")
-		assertThat(expr.getValue(context, Boolean::class.java)).isFalse()
+		assertThat(expr.getValue(context, Boolean::class.java)!!).isFalse()
 	}
 
 	@Test
 	fun `gh-30468 Unmangle Kotlin inlined class getter`() {
 		context.setVariable("something", Something(UUID(123), "name"))
 		val expr = parser.parseExpression("#something.id")
-		assertThat(expr.getValue(context, Int::class.java)).isEqualTo(123)
+		assertThat(expr.getValue(context, Int::class.java)!!).isEqualTo(123)
 	}
 
 	@Test
 	fun `gh-30468 Unmangle Kotlin inlined class setter`() {
 		context.setVariable("something", Something(UUID(123), "name"))
 		val expr = parser.parseExpression("#something.id = 456")
-		assertThat(expr.getValue(context, Int::class.java)).isEqualTo(456)
+		assertThat(expr.getValue(context, Int::class.java)!!).isEqualTo(456)
 	}
 
 	@Suppress("UNUSED_PARAMETER")

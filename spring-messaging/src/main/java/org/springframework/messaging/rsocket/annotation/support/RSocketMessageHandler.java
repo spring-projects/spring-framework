@@ -28,6 +28,7 @@ import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.FrameType;
 import io.rsocket.metadata.WellKnownMimeType;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
@@ -38,7 +39,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.PooledDataBuffer;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.handler.CompositeMessageCondition;
@@ -96,8 +96,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	private RSocketStrategies strategies = RSocketStrategies.create();
 
-	@Nullable
-	private MimeType defaultDataMimeType;
+	private @Nullable MimeType defaultDataMimeType;
 
 	private MimeType defaultMetadataMimeType = MimeTypeUtils.parseMimeType(
 			WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -256,8 +255,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * Return the configured
 	 * {@link #setDefaultDataMimeType defaultDataMimeType}, or {@code null}.
 	 */
-	@Nullable
-	public MimeType getDefaultDataMimeType() {
+	public @Nullable MimeType getDefaultDataMimeType() {
 		return this.defaultDataMimeType;
 	}
 
@@ -311,8 +309,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 
 	@Override
-	@Nullable
-	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
+	protected @Nullable CompositeMessageCondition getCondition(AnnotatedElement element) {
 		MessageMapping ann1 = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
 		if (ann1 != null && ann1.value().length > 0) {
 			return new CompositeMessageCondition(
@@ -379,7 +376,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	@Override
-	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
+	protected void handleNoMatch(RouteMatcher.@Nullable Route destination, Message<?> message) {
 		FrameType frameType = RSocketFrameTypeMessageCondition.getFrameType(message);
 		if (frameType == FrameType.SETUP || frameType == FrameType.METADATA_PUSH) {
 			if (frameType == FrameType.SETUP && message.getPayload() instanceof PooledDataBuffer pooledDataBuffer) {

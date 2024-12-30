@@ -21,8 +21,8 @@ import java.io.IOException;
 
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.TagSupport;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.util.TagUtils;
 
 /**
@@ -88,12 +88,10 @@ import org.springframework.web.util.TagUtils;
 public class TransformTag extends HtmlEscapingAwareTag {
 
 	/** the value to transform using the appropriate property editor. */
-	@Nullable
-	private Object value;
+	private @Nullable Object value;
 
 	/** the variable to put the result in. */
-	@Nullable
-	private String var;
+	private @Nullable String var;
 
 	/** the scope of the variable the result will be put in. */
 	private String scope = TagUtils.SCOPE_PAGE;

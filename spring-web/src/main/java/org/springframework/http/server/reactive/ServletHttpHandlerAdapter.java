@@ -35,6 +35,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -42,7 +43,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -67,8 +67,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
-	@Nullable
-	private String servletPath;
+	private @Nullable String servletPath;
 
 	private DataBufferFactory dataBufferFactory = DefaultDataBufferFactory.sharedInstance;
 
@@ -102,8 +101,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	 * a prefix (i.e. "/" or "/*"), or {@code null} if this method is invoked
 	 * before the {@link #init(ServletConfig)} Servlet container callback.
 	 */
-	@Nullable
-	public String getServletPath() {
+	public @Nullable String getServletPath() {
 		return this.servletPath;
 	}
 
@@ -219,8 +217,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 	@Override
-	@Nullable
-	public ServletConfig getServletConfig() {
+	public @Nullable ServletConfig getServletConfig() {
 		return null;
 	}
 
@@ -357,8 +354,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final String logPrefix;
 
-		@Nullable
-		private volatile Subscription subscription;
+		private volatile @Nullable Subscription subscription;
 
 		public HandlerResultSubscriber(AsyncContext asyncContext, AtomicBoolean completionFlag, String logPrefix) {
 			this.asyncContext = asyncContext;

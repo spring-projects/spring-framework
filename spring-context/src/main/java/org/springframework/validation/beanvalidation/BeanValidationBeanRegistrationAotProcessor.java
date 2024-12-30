@@ -36,6 +36,7 @@ import jakarta.validation.metadata.ParameterDescriptor;
 import jakarta.validation.metadata.PropertyDescriptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
@@ -46,7 +47,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -68,8 +68,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 
 	@Override
-	@Nullable
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		if (beanValidationPresent) {
 			return BeanValidationDelegate.processAheadOfTime(registeredBean);
 		}
@@ -82,11 +81,9 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 	 */
 	private static class BeanValidationDelegate {
 
-		@Nullable
-		private static final Validator validator = getValidatorIfAvailable();
+		private static final @Nullable Validator validator = getValidatorIfAvailable();
 
-		@Nullable
-		private static Validator getValidatorIfAvailable() {
+		private static @Nullable Validator getValidatorIfAvailable() {
 			try (ValidatorFactory validator = Validation.buildDefaultValidatorFactory()) {
 				return validator.getValidator();
 			}
@@ -96,8 +93,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			}
 		}
 
-		@Nullable
-		public static BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		public static @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 			if (validator == null) {
 				return null;
 			}

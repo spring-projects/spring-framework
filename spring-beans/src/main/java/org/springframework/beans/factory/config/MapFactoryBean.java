@@ -18,10 +18,11 @@ package org.springframework.beans.factory.config;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -35,12 +36,10 @@ import org.springframework.util.CollectionUtils;
  */
 public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 
-	@Nullable
-	private Map<?, ?> sourceMap;
+	private @Nullable Map<?, ?> sourceMap;
 
 	@SuppressWarnings("rawtypes")
-	@Nullable
-	private Class<? extends Map> targetMapClass;
+	private @Nullable Class<? extends Map> targetMapClass;
 
 
 	/**

@@ -27,13 +27,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -53,16 +53,13 @@ public class TableMetaDataContext {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	// Name of table for this context
-	@Nullable
-	private String tableName;
+	private @Nullable String tableName;
 
 	// Name of catalog for this context
-	@Nullable
-	private String catalogName;
+	private @Nullable String catalogName;
 
 	// Name of schema for this context
-	@Nullable
-	private String schemaName;
+	private @Nullable String schemaName;
 
 	// Should we access insert parameter meta-data info or not
 	private boolean accessTableColumnMetaData = true;
@@ -74,8 +71,7 @@ public class TableMetaDataContext {
 	private boolean quoteIdentifiers = false;
 
 	// The provider of table meta-data
-	@Nullable
-	private TableMetaDataProvider metaDataProvider;
+	private @Nullable TableMetaDataProvider metaDataProvider;
 
 	// List of columns objects to be used in this context
 	private List<String> tableColumns = new ArrayList<>();
@@ -94,8 +90,7 @@ public class TableMetaDataContext {
 	/**
 	 * Get the name of the table for this context.
 	 */
-	@Nullable
-	public String getTableName() {
+	public @Nullable String getTableName() {
 		return this.tableName;
 	}
 
@@ -109,8 +104,7 @@ public class TableMetaDataContext {
 	/**
 	 * Get the name of the catalog for this context.
 	 */
-	@Nullable
-	public String getCatalogName() {
+	public @Nullable String getCatalogName() {
 		return this.catalogName;
 	}
 
@@ -124,8 +118,7 @@ public class TableMetaDataContext {
 	/**
 	 * Get the name of the schema for this context.
 	 */
-	@Nullable
-	public String getSchemaName() {
+	public @Nullable String getSchemaName() {
 		return this.schemaName;
 	}
 
@@ -411,8 +404,7 @@ public class TableMetaDataContext {
 	 * retrieving generated keys is not supported.
 	 * @see #isGetGeneratedKeysSimulated()
 	 */
-	@Nullable
-	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
+	public @Nullable String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return obtainMetaDataProvider().getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
 	}
 
@@ -428,8 +420,7 @@ public class TableMetaDataContext {
 
 	private static final class QuoteHandler {
 
-		@Nullable
-		private final String identifierQuoteString;
+		private final @Nullable String identifierQuoteString;
 
 		private final boolean quoting;
 

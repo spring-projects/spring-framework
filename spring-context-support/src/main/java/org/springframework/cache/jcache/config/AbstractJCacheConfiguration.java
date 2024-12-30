@@ -18,6 +18,8 @@ package org.springframework.cache.jcache.config;
 
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.annotation.AbstractCachingConfiguration;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -26,7 +28,6 @@ import org.springframework.cache.jcache.interceptor.JCacheOperationSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract JSR-107 specific {@code @Configuration} class providing common
@@ -40,8 +41,7 @@ import org.springframework.lang.Nullable;
 @Configuration(proxyBeanMethods = false)
 public abstract class AbstractJCacheConfiguration extends AbstractCachingConfiguration {
 
-	@Nullable
-	protected Supplier<CacheResolver> exceptionCacheResolver;
+	protected @Nullable Supplier<CacheResolver> exceptionCacheResolver;
 
 
 	@Override

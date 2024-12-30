@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -24,7 +25,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -205,8 +205,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 
 		private final int order;
 
-		@Nullable
-		private RegisteredBean registeredBean;
+		private @Nullable RegisteredBean registeredBean;
 
 		MockBeanRegistrationExcludeFilter(boolean excluded, int order) {
 			this.excluded = excluded;

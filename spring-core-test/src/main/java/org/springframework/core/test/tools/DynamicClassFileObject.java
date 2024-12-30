@@ -26,7 +26,7 @@ import java.net.URI;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * In-memory {@link JavaFileObject} used to hold class bytecode.
@@ -38,8 +38,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 
 	private final String className;
 
-	@Nullable
-	private volatile byte[] bytes;
+	private volatile byte @Nullable [] bytes;
 
 
 	DynamicClassFileObject(String className) {
@@ -80,8 +79,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 		return this.className;
 	}
 
-	@Nullable
-	byte[] getBytes() {
+	byte @Nullable [] getBytes() {
 		return this.bytes;
 	}
 

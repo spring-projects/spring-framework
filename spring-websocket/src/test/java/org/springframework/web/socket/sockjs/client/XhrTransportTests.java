@@ -69,7 +69,7 @@ class XhrTransportTests {
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		URI url = URI.create("https://example.com");
 		transport.executeSendRequest(url, requestHeaders, new TextMessage("payload"));
-		assertThat(transport.actualSendRequestHeaders).hasSize(2);
+		assertThat(transport.actualSendRequestHeaders.size()).isEqualTo(2);
 		assertThat(transport.actualSendRequestHeaders.getFirst("foo")).isEqualTo("bar");
 		assertThat(transport.actualSendRequestHeaders.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 	}
@@ -105,7 +105,7 @@ class XhrTransportTests {
 		verify(request).getHttpRequestHeaders();
 		verifyNoMoreInteractions(request);
 
-		assertThat(transport.actualHandshakeHeaders).hasSize(1);
+		assertThat(transport.actualHandshakeHeaders.size()).isOne();
 		assertThat(transport.actualHandshakeHeaders.getOrigin()).isEqualTo("foo");
 
 		assertThat(transport.actualSession.isDisconnected()).isFalse();

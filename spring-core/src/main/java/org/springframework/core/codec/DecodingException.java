@@ -16,7 +16,7 @@
 
 package org.springframework.core.codec;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Indicates an issue with decoding the input stream with a focus on content

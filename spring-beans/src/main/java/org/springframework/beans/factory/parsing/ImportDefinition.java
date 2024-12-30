@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.parsing;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -32,11 +33,9 @@ public class ImportDefinition implements BeanMetadataElement {
 
 	private final String importedResource;
 
-	@Nullable
-	private final Resource[] actualResources;
+	private final Resource @Nullable [] actualResources;
 
-	@Nullable
-	private final Object source;
+	private final @Nullable Object source;
 
 
 	/**
@@ -61,7 +60,7 @@ public class ImportDefinition implements BeanMetadataElement {
 	 * @param importedResource the location of the imported resource
 	 * @param source the source object (may be {@code null})
 	 */
-	public ImportDefinition(String importedResource, @Nullable Resource[] actualResources, @Nullable Object source) {
+	public ImportDefinition(String importedResource, Resource @Nullable [] actualResources, @Nullable Object source) {
 		Assert.notNull(importedResource, "Imported resource must not be null");
 		this.importedResource = importedResource;
 		this.actualResources = actualResources;
@@ -76,14 +75,12 @@ public class ImportDefinition implements BeanMetadataElement {
 		return this.importedResource;
 	}
 
-	@Nullable
-	public final Resource[] getActualResources() {
+	public final Resource @Nullable [] getActualResources() {
 		return this.actualResources;
 	}
 
 	@Override
-	@Nullable
-	public final Object getSource() {
+	public final @Nullable Object getSource() {
 		return this.source;
 	}
 

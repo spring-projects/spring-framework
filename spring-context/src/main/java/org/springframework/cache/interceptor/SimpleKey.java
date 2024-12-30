@@ -21,7 +21,8 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -41,7 +42,7 @@ public class SimpleKey implements Serializable {
 	public static final SimpleKey EMPTY = new SimpleKey();
 
 
-	private final Object[] params;
+	private final @Nullable Object[] params;
 
 	// Effectively final, just re-calculated on deserialization
 	private transient int hashCode;
@@ -51,7 +52,7 @@ public class SimpleKey implements Serializable {
 	 * Create a new {@link SimpleKey} instance.
 	 * @param elements the elements of the key
 	 */
-	public SimpleKey(Object... elements) {
+	public SimpleKey(@Nullable Object... elements) {
 		Assert.notNull(elements, "Elements must not be null");
 		this.params = elements.clone();
 		// Pre-calculate hashCode field

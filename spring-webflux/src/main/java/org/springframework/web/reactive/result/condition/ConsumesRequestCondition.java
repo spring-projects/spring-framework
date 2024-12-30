@@ -23,11 +23,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -75,14 +76,14 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param consumes as described in {@link RequestMapping#consumes()}
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
-	public ConsumesRequestCondition(@Nullable String[] consumes, @Nullable String[] headers) {
+	public ConsumesRequestCondition(String @Nullable [] consumes, String @Nullable [] headers) {
 		this.expressions = parseExpressions(consumes, headers);
 		if (this.expressions.size() > 1) {
 			Collections.sort(this.expressions);
 		}
 	}
 
-	private static List<ConsumeMediaTypeExpression> parseExpressions(@Nullable String[] consumes, @Nullable String[] headers) {
+	private static List<ConsumeMediaTypeExpression> parseExpressions(String @Nullable [] consumes, String @Nullable [] headers) {
 		Set<ConsumeMediaTypeExpression> result = null;
 		if (!ObjectUtils.isEmpty(headers)) {
 			for (String header : headers) {
@@ -194,8 +195,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * or {@code null} if no expressions match.
 	 */
 	@Override
-	@Nullable
-	public ConsumesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
+	public @Nullable ConsumesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return EMPTY_CONDITION;
@@ -217,8 +217,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 				(StringUtils.hasText(contentLength) && !contentLength.trim().equals("0"));
 	}
 
-	@Nullable
-	private List<ConsumeMediaTypeExpression> getMatchingExpressions(ServerWebExchange exchange) {
+	private @Nullable List<ConsumeMediaTypeExpression> getMatchingExpressions(ServerWebExchange exchange) {
 		List<ConsumeMediaTypeExpression> result = null;
 		for (ConsumeMediaTypeExpression expression : this.expressions) {
 			if (expression.match(exchange)) {

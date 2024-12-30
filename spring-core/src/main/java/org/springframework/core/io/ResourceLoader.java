@@ -16,7 +16,8 @@
 
 package org.springframework.core.io;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -76,7 +77,6 @@ public interface ResourceLoader {
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */
-	@Nullable
-	ClassLoader getClassLoader();
+	@Nullable ClassLoader getClassLoader();
 
 }

@@ -24,8 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.jsp.PageContext;
 import jakarta.servlet.jsp.jstl.core.Config;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
@@ -95,8 +94,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * request, session or application scope; if not found, returns {@code null}.
 	 */
 	@Override
-	@Nullable
-	protected TimeZone getFallbackTimeZone() {
+	protected @Nullable TimeZone getFallbackTimeZone() {
 		if (jstlPresent) {
 			TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());
 			if (timeZone != null) {
@@ -113,14 +111,12 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	private static class JstlPageLocaleResolver {
 
-		@Nullable
-		public static Locale getJstlLocale(PageContext pageContext) {
+		public static @Nullable Locale getJstlLocale(PageContext pageContext) {
 			Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
 			return (localeObject instanceof Locale locale ? locale : null);
 		}
 
-		@Nullable
-		public static TimeZone getJstlTimeZone(PageContext pageContext) {
+		public static @Nullable TimeZone getJstlTimeZone(PageContext pageContext) {
 			Object timeZoneObject = Config.find(pageContext, Config.FMT_TIME_ZONE);
 			return (timeZoneObject instanceof TimeZone timeZone ? timeZone : null);
 		}

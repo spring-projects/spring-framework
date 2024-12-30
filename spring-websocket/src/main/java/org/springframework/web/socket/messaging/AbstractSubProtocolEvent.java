@@ -18,8 +18,9 @@ package org.springframework.web.socket.messaging;
 
 import java.security.Principal;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -35,8 +36,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 
 	private final Message<byte[]> message;
 
-	@Nullable
-	private final Principal user;
+	private final @Nullable Principal user;
 
 
 	/**
@@ -79,8 +79,7 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	/**
 	 * Return the user for the session associated with the event.
 	 */
-	@Nullable
-	public Principal getUser() {
+	public @Nullable Principal getUser() {
 		return this.user;
 	}
 

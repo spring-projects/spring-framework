@@ -23,11 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
 import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.http.server.PathContainer.Separator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -112,15 +113,11 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** The options to use to parse a pattern. */
 	private final PathContainer.Options pathOptions;
 
-	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully. */
-	private final boolean matchOptionalTrailingSeparator;
-
 	/** Will this match candidates in a case-sensitive way? (case sensitivity  at parse time). */
 	private final boolean caseSensitive;
 
 	/** First path element in the parsed chain of path elements for this pattern. */
-	@Nullable
-	private final PathElement head;
+	private final @Nullable PathElement head;
 
 	/** How many variables are captured in this pattern. */
 	private int capturedVariableCount;
@@ -152,12 +149,10 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean catchAll = false;
 
 
-	@SuppressWarnings("deprecation")
 	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head) {
 		this.patternString = patternText;
 		this.parser = parser;
 		this.pathOptions = parser.getPathOptions();
-		this.matchOptionalTrailingSeparator = parser.isMatchOptionalTrailingSeparator();
 		this.caseSensitive = parser.isCaseSensitive();
 		this.head = head;
 
@@ -202,8 +197,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matches(PathContainer pathContainer) {
 		if (this.head == null) {
-			return !hasLength(pathContainer) ||
-				(this.matchOptionalTrailingSeparator && pathContainerIsJustSeparator(pathContainer));
+			return !hasLength(pathContainer);
 		}
 		else if (!hasLength(pathContainer)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
@@ -223,12 +217,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @param pathContainer the candidate path to attempt to match against
 	 * @return info object with the extracted variables, or {@code null} for no match
 	 */
-	@Nullable
-	public PathMatchInfo matchAndExtract(PathContainer pathContainer) {
+	public @Nullable PathMatchInfo matchAndExtract(PathContainer pathContainer) {
 		if (this.head == null) {
-			return (hasLength(pathContainer) &&
-					!(this.matchOptionalTrailingSeparator && pathContainerIsJustSeparator(pathContainer)) ?
-					null : PathMatchInfo.EMPTY);
+			return (hasLength(pathContainer) && !pathContainerIsJustSeparator(pathContainer) ? null : PathMatchInfo.EMPTY);
 		}
 		else if (!hasLength(pathContainer)) {
 			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
@@ -249,8 +240,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @param pathContainer the candidate path to attempt to match against
 	 * @return info object with the match result or {@code null} for no match
 	 */
-	@Nullable
-	public PathRemainingMatchInfo matchStartOfPath(PathContainer pathContainer) {
+	public @Nullable PathRemainingMatchInfo matchStartOfPath(PathContainer pathContainer) {
 		if (this.head == null) {
 			return new PathRemainingMatchInfo(EMPTY_PATH, pathContainer);
 		}
@@ -500,8 +490,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		return sb.toString();
 	}
 
-	@Nullable
-	PathElement getHeadSection() {
+	@Nullable PathElement getHeadSection() {
 		return this.head;
 	}
 
@@ -647,7 +636,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * candidate currently being considered for a match but also some accumulators for
 	 * extracted variables.
 	 */
-	class MatchingContext {
+	static class MatchingContext {
 
 		final PathContainer candidate;
 
@@ -655,11 +644,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		final int pathLength;
 
-		@Nullable
-		private Map<String, String> extractedUriVariables;
+		private @Nullable Map<String, String> extractedUriVariables;
 
-		@Nullable
-		private Map<String, MultiValueMap<String, String>> extractedMatrixVariables;
+		private @Nullable Map<String, MultiValueMap<String, String>> extractedMatrixVariables;
 
 		boolean extractingVariables;
 
@@ -679,10 +666,6 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		public void setMatchAllowExtraPath() {
 			this.determineRemainingPath = true;
-		}
-
-		public boolean isMatchOptionalTrailingSeparator() {
-			return matchOptionalTrailingSeparator;
 		}
 
 		public void set(String key, String value, MultiValueMap<String,String> parameters) {

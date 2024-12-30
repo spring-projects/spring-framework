@@ -39,6 +39,7 @@ import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
 import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
@@ -54,7 +55,6 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -99,8 +99,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
-	@Nullable
-	private Class<?> pointcutDeclarationScope;
+	private @Nullable Class<?> pointcutDeclarationScope;
 
 	private boolean aspectCompiledByAjc;
 
@@ -108,14 +107,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private Class<?>[] pointcutParameterTypes = new Class<?>[0];
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private transient ClassLoader pointcutClassLoader;
+	private transient @Nullable ClassLoader pointcutClassLoader;
 
-	@Nullable
-	private transient PointcutExpression pointcutExpression;
+	private transient @Nullable PointcutExpression pointcutExpression;
 
 	private transient boolean pointcutParsingFailed = false;
 
@@ -207,8 +203,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Determine the ClassLoader to use for pointcut evaluation.
 	 */
-	@Nullable
-	private ClassLoader determinePointcutClassLoader() {
+	private @Nullable ClassLoader determinePointcutClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
 			return cbf.getBeanClassLoader();
 		}
@@ -403,8 +398,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 	}
 
-	@Nullable
-	protected String getCurrentProxiedBeanName() {
+	protected @Nullable String getCurrentProxiedBeanName() {
 		return ProxyCreationContext.getCurrentProxiedBeanName();
 	}
 
@@ -412,8 +406,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Get a new pointcut expression based on a target class's loader rather than the default.
 	 */
-	@Nullable
-	private PointcutExpression getFallbackPointcutExpression(Class<?> targetClass) {
+	private @Nullable PointcutExpression getFallbackPointcutExpression(Class<?> targetClass) {
 		try {
 			ClassLoader classLoader = targetClass.getClassLoader();
 			if (classLoader != null && classLoader != this.pointcutClassLoader) {

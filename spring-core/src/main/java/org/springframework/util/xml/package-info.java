@@ -2,9 +2,7 @@
  * Miscellaneous utility classes for XML parsing and transformation,
  * such as error handlers that log warnings via Commons Logging.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.util.xml;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -51,8 +52,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 
 
 	@Override
-	@Nullable
-	public Object fromMessage(Message<?> message, Class<?> targetClass) {
+	public @Nullable Object fromMessage(Message<?> message, Class<?> targetClass) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = converter.fromMessage(message, targetClass);
 			if (result != null) {
@@ -63,8 +63,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
-	@Nullable
-	public Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	public @Nullable Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Object result = (converter instanceof SmartMessageConverter smartMessageConverter ?
 					smartMessageConverter.fromMessage(message, targetClass, conversionHint) :
@@ -77,8 +76,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
-	@Nullable
-	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
+	public @Nullable Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = converter.toMessage(payload, headers);
 			if (result != null) {
@@ -89,8 +87,7 @@ public class CompositeMessageConverter implements SmartMessageConverter {
 	}
 
 	@Override
-	@Nullable
-	public Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	public @Nullable Message<?> toMessage(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		for (MessageConverter converter : getConverters()) {
 			Message<?> result = (converter instanceof SmartMessageConverter smartMessageConverter ?
 					smartMessageConverter.toMessage(payload, headers, conversionHint) :

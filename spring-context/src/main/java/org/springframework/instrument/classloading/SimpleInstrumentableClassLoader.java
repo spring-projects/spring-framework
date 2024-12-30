@@ -18,8 +18,9 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * Simplistic implementation of an instrumentable {@code ClassLoader}.

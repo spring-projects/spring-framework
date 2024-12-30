@@ -27,8 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -103,8 +104,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * @since 4.3
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public <T extends ContentNegotiationStrategy> T getStrategy(Class<T> strategyType) {
+	public <T extends ContentNegotiationStrategy> @Nullable T getStrategy(Class<T> strategyType) {
 		for (ContentNegotiationStrategy strategy : getStrategies()) {
 			if (strategyType.isInstance(strategy)) {
 				return (T) strategy;
@@ -139,17 +139,6 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 		return doResolveExtensions(resolver -> resolver.resolveFileExtensions(mediaType));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>At startup this method returns extensions explicitly registered with
-	 * either {@link PathExtensionContentNegotiationStrategy} or
-	 * {@link ParameterContentNegotiationStrategy}. At runtime if there is a
-	 * "path extension" strategy and its
-	 * {@link PathExtensionContentNegotiationStrategy#setUseRegisteredExtensionsOnly(boolean)
-	 * useRegisteredExtensionsOnly} property is set to "false", the list of extensions may
-	 * increase as file extensions are resolved via
-	 * {@link org.springframework.http.MediaTypeFactory} and cached.
-	 */
 	@Override
 	public List<String> getAllFileExtensions() {
 		return doResolveExtensions(MediaTypeFileExtensionResolver::getAllFileExtensions);

@@ -20,8 +20,8 @@ import java.beans.PropertyEditor;
 
 import jakarta.servlet.jsp.JspTagException;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.BindStatus;
@@ -97,14 +97,11 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 	private boolean ignoreNestedPath = false;
 
-	@Nullable
-	private BindStatus status;
+	private @Nullable BindStatus status;
 
-	@Nullable
-	private Object previousPageStatus;
+	private @Nullable Object previousPageStatus;
 
-	@Nullable
-	private Object previousRequestStatus;
+	private @Nullable Object previousRequestStatus;
 
 
 	/**
@@ -206,8 +203,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * @return the property that this tag is currently bound to,
 	 * or {@code null} if none
 	 */
-	@Nullable
-	public final String getProperty() {
+	public final @Nullable String getProperty() {
 		return getStatus().getExpression();
 	}
 
@@ -216,14 +212,12 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	 * Intended for cooperating nesting tags.
 	 * @return the current Errors instance, or {@code null} if none
 	 */
-	@Nullable
-	public final Errors getErrors() {
+	public final @Nullable Errors getErrors() {
 		return getStatus().getErrors();
 	}
 
 	@Override
-	@Nullable
-	public final PropertyEditor getEditor() {
+	public final @Nullable PropertyEditor getEditor() {
 		return getStatus().getEditor();
 	}
 

@@ -16,9 +16,10 @@
 
 package org.springframework.core.convert.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -56,8 +57,7 @@ final class StringToNumberConverterFactory implements ConverterFactory<String, N
 		}
 
 		@Override
-		@Nullable
-		public T convert(String source) {
+		public @Nullable T convert(String source) {
 			if (source.isEmpty()) {
 				return null;
 			}

@@ -84,7 +84,7 @@ class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
-	void resolveViewNameWithPathExtension() throws Exception {
+	void resolveViewNameWithExtensionByParameter() throws Exception {
 		request.setRequestURI("/test");
 		request.setParameter("format", "xls");
 
@@ -302,77 +302,6 @@ class ContentNegotiatingViewResolverTests {
 
 		given(viewResolverMock1.resolveViewName(viewName, locale)).willReturn(viewMock1);
 		given(viewResolverMock2.resolveViewName(viewName, locale)).willReturn(viewMock2);
-		given(viewMock1.getContentType()).willReturn("application/xml");
-		given(viewMock2.getContentType()).willReturn("text/html;charset=ISO-8859-1");
-		given(viewMock3.getContentType()).willReturn("application/json");
-
-		View result = viewResolver.resolveViewName(viewName, locale);
-		assertThat(result).as("Invalid view").isSameAs(viewMock3);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void resolveViewNameFilename() throws Exception {
-		request.setRequestURI("/test.html");
-
-		ContentNegotiationManager manager =
-				new ContentNegotiationManager(new org.springframework.web.accept.PathExtensionContentNegotiationStrategy());
-
-		ViewResolver viewResolverMock1 = mock(ViewResolver.class, "viewResolver1");
-		ViewResolver viewResolverMock2 = mock(ViewResolver.class, "viewResolver2");
-		viewResolver.setContentNegotiationManager(manager);
-		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
-
-		viewResolver.afterPropertiesSet();
-
-		View viewMock1 = mock(View.class, "application_xml");
-		View viewMock2 = mock(View.class, "text_html");
-
-		String viewName = "view";
-		Locale locale = Locale.ENGLISH;
-
-		given(viewResolverMock1.resolveViewName(viewName, locale)).willReturn(viewMock1);
-		given(viewResolverMock1.resolveViewName(viewName + ".html", locale)).willReturn(null);
-		given(viewResolverMock2.resolveViewName(viewName, locale)).willReturn(null);
-		given(viewResolverMock2.resolveViewName(viewName + ".html", locale)).willReturn(viewMock2);
-		given(viewMock1.getContentType()).willReturn("application/xml");
-		given(viewMock2.getContentType()).willReturn("text/html;charset=ISO-8859-1");
-
-		View result = viewResolver.resolveViewName(viewName, locale);
-		assertThat(result).as("Invalid view").isSameAs(viewMock2);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void resolveViewNameFilenameDefaultView() throws Exception {
-		request.setRequestURI("/test.json");
-
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy pathStrategy =
-				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(mapping);
-		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(pathStrategy));
-
-		ViewResolver viewResolverMock1 = mock();
-		ViewResolver viewResolverMock2 = mock();
-		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
-
-		View viewMock1 = mock(View.class, "application_xml");
-		View viewMock2 = mock(View.class, "text_html");
-		View viewMock3 = mock(View.class, "application_json");
-
-		List<View> defaultViews = new ArrayList<>();
-		defaultViews.add(viewMock3);
-		viewResolver.setDefaultViews(defaultViews);
-
-		viewResolver.afterPropertiesSet();
-
-		String viewName = "view";
-		Locale locale = Locale.ENGLISH;
-
-		given(viewResolverMock1.resolveViewName(viewName, locale)).willReturn(viewMock1);
-		given(viewResolverMock1.resolveViewName(viewName + ".json", locale)).willReturn(null);
-		given(viewResolverMock2.resolveViewName(viewName, locale)).willReturn(viewMock2);
-		given(viewResolverMock2.resolveViewName(viewName + ".json", locale)).willReturn(null);
 		given(viewMock1.getContentType()).willReturn("application/xml");
 		given(viewMock2.getContentType()).willReturn("text/html;charset=ISO-8859-1");
 		given(viewMock3.getContentType()).willReturn("application/json");

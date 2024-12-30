@@ -29,7 +29,6 @@ import static org.springframework.web.servlet.function.RequestPredicates.method;
 import static org.springframework.web.servlet.function.RequestPredicates.methods;
 import static org.springframework.web.servlet.function.RequestPredicates.param;
 import static org.springframework.web.servlet.function.RequestPredicates.path;
-import static org.springframework.web.servlet.function.RequestPredicates.pathExtension;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 /**
@@ -61,14 +60,13 @@ class ToStringVisitorTests {
 		assertThat(result).isEqualTo(expected);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void predicates() {
 		testPredicate(methods(HttpMethod.GET), "GET");
 		testPredicate(methods(HttpMethod.GET, HttpMethod.POST), "[GET, POST]");
 
 		testPredicate(path("/foo"), "/foo");
-
-		testPredicate(pathExtension("foo"), "*.foo");
 
 		testPredicate(contentType(MediaType.APPLICATION_JSON), "Content-Type: application/json");
 

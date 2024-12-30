@@ -19,6 +19,8 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -33,7 +35,6 @@ import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
@@ -80,14 +81,11 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	public static final String ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME = "environmentProperties";
 
 
-	@Nullable
-	private MutablePropertySources propertySources;
+	private @Nullable MutablePropertySources propertySources;
 
-	@Nullable
-	private PropertySources appliedPropertySources;
+	private @Nullable PropertySources appliedPropertySources;
 
-	@Nullable
-	private Environment environment;
+	private @Nullable Environment environment;
 
 
 	/**
@@ -148,8 +146,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				this.propertySources.addLast(
 					new PropertySource<>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
-						@Nullable
-						public String getProperty(String key) {
+						public @Nullable String getProperty(String key) {
 							return propertyResolverToUse.getProperty(key);
 						}
 					}

@@ -18,13 +18,14 @@ package org.springframework.beans.factory.config;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -67,11 +68,9 @@ import org.springframework.util.ClassUtils;
 public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
 		implements BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private ConfigurableBeanFactory beanFactory;
+	private @Nullable ConfigurableBeanFactory beanFactory;
 
 
 	@Override
@@ -117,8 +116,7 @@ public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
 	 * Perform the invocation and convert InvocationTargetException
 	 * into the underlying target exception.
 	 */
-	@Nullable
-	protected Object invokeWithTargetException() throws Exception {
+	protected @Nullable Object invokeWithTargetException() throws Exception {
 		try {
 			return invoke();
 		}

@@ -22,8 +22,9 @@ import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryAmountFormat;
 import javax.money.format.MonetaryFormats;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.format.Formatter;
-import org.springframework.lang.Nullable;
 
 /**
  * Formatter for JSR-354 {@link javax.money.MonetaryAmount} values,
@@ -36,8 +37,7 @@ import org.springframework.lang.Nullable;
  */
 public class MonetaryAmountFormatter implements Formatter<MonetaryAmount> {
 
-	@Nullable
-	private String formatName;
+	private @Nullable String formatName;
 
 
 	/**

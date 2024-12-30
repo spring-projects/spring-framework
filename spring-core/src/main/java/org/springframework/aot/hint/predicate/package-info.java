@@ -1,9 +1,7 @@
 /**
  * Predicate support for runtime hints.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.aot.hint.predicate;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

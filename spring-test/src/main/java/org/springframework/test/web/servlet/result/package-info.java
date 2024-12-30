@@ -4,9 +4,7 @@
  * and {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}
  * to access instances of those implementations.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.web.servlet.result;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

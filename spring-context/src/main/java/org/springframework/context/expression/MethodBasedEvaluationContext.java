@@ -19,10 +19,11 @@ package org.springframework.context.expression;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -45,14 +46,14 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 
 	private final Method method;
 
-	private final Object[] arguments;
+	private final @Nullable Object[] arguments;
 
 	private final ParameterNameDiscoverer parameterNameDiscoverer;
 
 	private boolean argumentsLoaded = false;
 
 
-	public MethodBasedEvaluationContext(Object rootObject, Method method, Object[] arguments,
+	public MethodBasedEvaluationContext(Object rootObject, Method method, @Nullable Object[] arguments,
 			ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(rootObject);
@@ -64,8 +65,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 
 
 	@Override
-	@Nullable
-	public Object lookupVariable(String name) {
+	public @Nullable Object lookupVariable(String name) {
 		Object variable = super.lookupVariable(name);
 		if (variable != null) {
 			return variable;

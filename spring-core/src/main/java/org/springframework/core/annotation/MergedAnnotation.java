@@ -28,8 +28,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
 
 /**
  * A single merged annotation returned from a {@link MergedAnnotations}
@@ -133,8 +134,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * {@link #getRoot() root}.
 	 * @return the source, or {@code null}
 	 */
-	@Nullable
-	Object getSource();
+	@Nullable Object getSource();
 
 	/**
 	 * Get the source of the meta-annotation, or {@code null} if the
@@ -144,8 +144,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @return the meta-annotation source or {@code null}
 	 * @see #getRoot()
 	 */
-	@Nullable
-	MergedAnnotation<?> getMetaSource();
+	@Nullable MergedAnnotation<?> getMetaSource();
 
 	/**
 	 * Get the root annotation, i.e. the {@link #getDistance() distance} {@code 0}

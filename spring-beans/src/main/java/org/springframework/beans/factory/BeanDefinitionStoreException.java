@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.FatalBeanException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a BeanFactory encounters an invalid bean definition:
@@ -30,11 +31,9 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class BeanDefinitionStoreException extends FatalBeanException {
 
-	@Nullable
-	private final String resourceDescription;
+	private final @Nullable String resourceDescription;
 
-	@Nullable
-	private final String beanName;
+	private final @Nullable String beanName;
 
 
 	/**
@@ -101,9 +100,11 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param cause the root cause (may be {@code null})
 	 */
 	public BeanDefinitionStoreException(
-			@Nullable String resourceDescription, String beanName, String msg, @Nullable Throwable cause) {
+			@Nullable String resourceDescription, String beanName, @Nullable String msg, @Nullable Throwable cause) {
 
-		super("Invalid bean definition with name '" + beanName + "' defined in " + resourceDescription + ": " + msg,
+		super(msg == null ?
+						"Invalid bean definition with name '" + beanName + "' defined in " + resourceDescription :
+						"Invalid bean definition with name '" + beanName + "' defined in " + resourceDescription + ": " + msg,
 				cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
@@ -113,16 +114,14 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	/**
 	 * Return the description of the resource that the bean definition came from, if available.
 	 */
-	@Nullable
-	public String getResourceDescription() {
+	public @Nullable String getResourceDescription() {
 		return this.resourceDescription;
 	}
 
 	/**
 	 * Return the name of the bean, if available.
 	 */
-	@Nullable
-	public String getBeanName() {
+	public @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

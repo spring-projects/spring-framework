@@ -18,7 +18,8 @@ package org.springframework.web.context.request.async;
 
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**

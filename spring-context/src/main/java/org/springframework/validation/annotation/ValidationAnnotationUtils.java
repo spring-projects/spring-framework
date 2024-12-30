@@ -18,8 +18,9 @@ package org.springframework.validation.annotation;
 
 import java.lang.annotation.Annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Utility class for handling validation annotations.
@@ -45,8 +46,7 @@ public abstract class ValidationAnnotationUtils {
 	 * @return the validation hints to apply (possibly an empty array),
 	 * or {@code null} if this annotation does not trigger any validation
 	 */
-	@Nullable
-	public static Object[] determineValidationHints(Annotation ann) {
+	public static Object @Nullable [] determineValidationHints(Annotation ann) {
 		// Direct presence of @Validated ?
 		if (ann instanceof Validated validated) {
 			return validated.value();

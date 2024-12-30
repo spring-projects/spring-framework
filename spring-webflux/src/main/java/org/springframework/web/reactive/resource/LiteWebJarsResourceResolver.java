@@ -18,11 +18,11 @@ package org.springframework.web.reactive.resource;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.webjars.WebJarVersionLocator;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -98,8 +98,7 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 				}));
 	}
 
-	@Nullable
-	protected String findWebJarResourcePath(String path) {
+	protected @Nullable String findWebJarResourcePath(String path) {
 		int endOffset = path.indexOf('/', 1);
 		if (endOffset != -1) {
 			int startOffset = (path.startsWith("/") ? 1 : 0);

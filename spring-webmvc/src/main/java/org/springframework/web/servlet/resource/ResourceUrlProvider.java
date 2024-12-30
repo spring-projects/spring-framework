@@ -25,13 +25,13 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -55,8 +55,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 	private UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
@@ -76,7 +75,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * Configure a {@code UrlPathHelper} to use in
 	 * {@link #getForRequestUrl(jakarta.servlet.http.HttpServletRequest, String)}
 	 * in order to derive the lookup path for a target request URL path.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
@@ -84,7 +87,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	/**
 	 * Return the configured {@code UrlPathHelper}.
 	 * @since 4.2.8
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -92,14 +99,22 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	/**
 	 * Configure a {@code PathMatcher} to use when comparing target lookup path
 	 * against resource mappings.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
 
 	/**
 	 * Return the configured {@code PathMatcher}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules. After the deprecation phase, it will no
+	 * longer be possible to set a customized PathMatcher instance.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
@@ -169,8 +184,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param requestUrl the request URL path to resolve
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
-	@Nullable
-	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
+	public final @Nullable String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		int prefixIndex = getLookupPathIndex(request);
 		int suffixIndex = getEndPathIndex(requestUrl);
 		if (prefixIndex >= suffixIndex) {
@@ -183,6 +197,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		return (resolvedLookupPath != null ? prefix + resolvedLookupPath + suffix : null);
 	}
 
+	@SuppressWarnings("removal")
 	private int getLookupPathIndex(HttpServletRequest request) {
 		UrlPathHelper pathHelper = getUrlPathHelper();
 		if (request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) == null) {
@@ -218,9 +233,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * @param lookupPath the lookup path to check
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
-	@Nullable
-	@SuppressWarnings("NullAway")
-	public final String getForLookupPath(String lookupPath) {
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	public final @Nullable String getForLookupPath(String lookupPath) {
 		// Clean duplicate slashes or pathWithinPattern won't match lookupPath
 		String previous;
 		do {

@@ -19,10 +19,11 @@ package org.springframework.test.context.aot;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.Nullable;
 
 /**
  * {@code AotTestContextInitializers} provides mappings from test classes to
@@ -76,8 +77,7 @@ public class AotTestContextInitializers {
 	 * @see #isSupportedTestClass(Class)
 	 * @see #getContextInitializerClass(Class)
 	 */
-	@Nullable
-	public ApplicationContextInitializer<ConfigurableApplicationContext> getContextInitializer(Class<?> testClass) {
+	public @Nullable ApplicationContextInitializer<ConfigurableApplicationContext> getContextInitializer(Class<?> testClass) {
 		Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>> supplier =
 				this.contextInitializers.get(testClass.getName());
 		return (supplier != null ? supplier.get() : null);
@@ -91,8 +91,7 @@ public class AotTestContextInitializers {
 	 * @see #isSupportedTestClass(Class)
 	 * @see #getContextInitializer(Class)
 	 */
-	@Nullable
-	public Class<ApplicationContextInitializer<?>> getContextInitializerClass(Class<?> testClass) {
+	public @Nullable Class<ApplicationContextInitializer<?>> getContextInitializerClass(Class<?> testClass) {
 		return this.contextInitializerClasses.get(testClass.getName());
 	}
 

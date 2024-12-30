@@ -33,11 +33,11 @@ import jakarta.jms.MessageListener;
 import jakarta.jms.Queue;
 import jakarta.jms.Session;
 import jakarta.jms.Topic;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ErrorHandler;
 
@@ -154,41 +154,31 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
 			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", AbstractMessageListenerContainer.class.getClassLoader());
 
-	@Nullable
-	private volatile Object destination;
+	private volatile @Nullable Object destination;
 
-	@Nullable
-	private volatile String messageSelector;
+	private volatile @Nullable String messageSelector;
 
-	@Nullable
-	private volatile Object messageListener;
+	private volatile @Nullable Object messageListener;
 
 	private boolean subscriptionDurable = false;
 
 	private boolean subscriptionShared = false;
 
-	@Nullable
-	private String subscriptionName;
+	private @Nullable String subscriptionName;
 
-	@Nullable
-	private Boolean replyPubSubDomain;
+	private @Nullable Boolean replyPubSubDomain;
 
-	@Nullable
-	private QosSettings replyQosSettings;
+	private @Nullable QosSettings replyQosSettings;
 
 	private boolean pubSubNoLocal = false;
 
-	@Nullable
-	private MessageConverter messageConverter;
+	private @Nullable MessageConverter messageConverter;
 
-	@Nullable
-	private ExceptionListener exceptionListener;
+	private @Nullable ExceptionListener exceptionListener;
 
-	@Nullable
-	private ErrorHandler errorHandler;
+	private @Nullable ErrorHandler errorHandler;
 
-	@Nullable
-	private ObservationRegistry observationRegistry;
+	private @Nullable ObservationRegistry observationRegistry;
 
 	private boolean exposeListenerSession = true;
 
@@ -223,8 +213,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * if the configured destination is not an actual {@link Destination} type;
 	 * c.f. {@link #setDestinationName(String) when the destination is a String}.
 	 */
-	@Nullable
-	public Destination getDestination() {
+	public @Nullable Destination getDestination() {
 		return (this.destination instanceof Destination _destination ? _destination : null);
 	}
 
@@ -249,8 +238,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * {@link String} type; c.f. {@link #setDestination(Destination) when
 	 * it is an actual Destination}.
 	 */
-	@Nullable
-	public String getDestinationName() {
+	public @Nullable String getDestinationName() {
 		return (this.destination instanceof String name ? name : null);
 	}
 
@@ -279,8 +267,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Return the JMS message selector expression (or {@code null} if none).
 	 */
-	@Nullable
-	public String getMessageSelector() {
+	public @Nullable String getMessageSelector() {
 		return this.messageSelector;
 	}
 
@@ -309,8 +296,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Return the message listener object to register.
 	 */
-	@Nullable
-	public Object getMessageListener() {
+	public @Nullable Object getMessageListener() {
 		return this.messageListener;
 	}
 
@@ -428,8 +414,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Return the name of a subscription to create, if any.
 	 * @since 4.1
 	 */
-	@Nullable
-	public String getSubscriptionName() {
+	public @Nullable String getSubscriptionName() {
 		return this.subscriptionName;
 	}
 
@@ -455,8 +440,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Return the name of a durable subscription to create, if any.
 	 */
-	@Nullable
-	public String getDurableSubscriptionName() {
+	public @Nullable String getDurableSubscriptionName() {
 		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
 
@@ -520,8 +504,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	@Override
-	@Nullable
-	public QosSettings getReplyQosSettings() {
+	public @Nullable QosSettings getReplyQosSettings() {
 		return this.replyQosSettings;
 	}
 
@@ -534,8 +517,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	@Override
-	@Nullable
-	public MessageConverter getMessageConverter() {
+	public @Nullable MessageConverter getMessageConverter() {
 		return this.messageConverter;
 	}
 
@@ -551,8 +533,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Return the JMS ExceptionListener to notify in case of a JMSException thrown
 	 * by the registered message listener or the invocation infrastructure, if any.
 	 */
-	@Nullable
-	public ExceptionListener getExceptionListener() {
+	public @Nullable ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
 	}
 
@@ -571,8 +552,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * thrown while processing a {@link Message}.
 	 * @since 4.1
 	 */
-	@Nullable
-	public ErrorHandler getErrorHandler() {
+	public @Nullable ErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
 
@@ -591,8 +571,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * {@link JmsObservationDocumentation#JMS_MESSAGE_PROCESS JMS message processing observations}.
 	 * @since 6.1
 	 */
-	@Nullable
-	public ObservationRegistry getObservationRegistry() {
+	public @Nullable ObservationRegistry getObservationRegistry() {
 		return this.observationRegistry;
 	}
 

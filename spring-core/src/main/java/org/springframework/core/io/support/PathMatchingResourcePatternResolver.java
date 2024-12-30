@@ -60,6 +60,7 @@ import java.util.zip.ZipException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.NativeDetector;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -68,7 +69,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.VfsResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -235,8 +235,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private static final Predicate<ResolvedModule> isNotSystemModule =
 			resolvedModule -> !systemModuleNames.contains(resolvedModule.name());
 
-	@Nullable
-	private static Method equinoxResolveMethod;
+	private static @Nullable Method equinoxResolveMethod;
 
 	static {
 		try {
@@ -260,8 +259,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final Map<String, NavigableSet<String>> jarEntriesCache = new ConcurrentHashMap<>();
 
-	@Nullable
-	private volatile Set<ClassPathManifestEntry> manifestEntriesCache;
+	private volatile @Nullable Set<ClassPathManifestEntry> manifestEntriesCache;
 
 
 	/**
@@ -307,8 +305,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getClassLoader() {
+	public @Nullable ClassLoader getClassLoader() {
 		return getResourceLoader().getClassLoader();
 	}
 
@@ -1075,8 +1072,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		return result;
 	}
 
-	@Nullable
-	private Resource findResource(ModuleReader moduleReader, String name) {
+	private @Nullable Resource findResource(ModuleReader moduleReader, String name) {
 		try {
 			return moduleReader.find(name)
 					.map(this::convertModuleSystemURI)
@@ -1142,8 +1138,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class == method.getDeclaringClass()) {
 				switch (methodName) {
@@ -1174,8 +1169,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 
-		@Nullable
-		public Object getAttributes() {
+		public @Nullable Object getAttributes() {
 			return VfsPatternUtils.getVisitorAttributes();
 		}
 
@@ -1224,8 +1218,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		 * @param path the file path (with or without a leading slash)
 		 * @return the alternative form or {@code null}
 		 */
-		@Nullable
-		private static Resource createAlternative(String path) {
+		private static @Nullable Resource createAlternative(String path) {
 			try {
 				String alternativePath = path.startsWith("/") ? path.substring(1) : "/" + path;
 				return asJarFileResource(alternativePath);

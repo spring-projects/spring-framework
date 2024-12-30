@@ -16,8 +16,9 @@
 
 package org.springframework.http.converter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpInputMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -31,8 +32,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class HttpMessageNotReadableException extends HttpMessageConversionException {
 
-	@Nullable
-	private final HttpInputMessage httpInputMessage;
+	private final @Nullable HttpInputMessage httpInputMessage;
 
 
 	/**

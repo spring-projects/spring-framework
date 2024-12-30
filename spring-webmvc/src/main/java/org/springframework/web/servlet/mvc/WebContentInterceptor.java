@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -73,7 +73,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class WebContentInterceptor extends WebContentGenerator implements HandlerInterceptor {
 
-	private static PathMatcher defaultPathMatcher = new AntPathMatcher();
+	private static final PathMatcher defaultPathMatcher = new AntPathMatcher();
 
 
 	private final PathPatternParser patternParser;
@@ -148,7 +148,11 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @see #addCacheMapping
 	 * @see #setCacheMappings
 	 * @see org.springframework.util.AntPathMatcher
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
@@ -250,8 +254,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the matched {@code CacheControl}, or {@code null} if no match
 	 * @since 5.3
 	 */
-	@Nullable
-	protected CacheControl lookupCacheControl(PathContainer path) {
+	protected @Nullable CacheControl lookupCacheControl(PathContainer path) {
 		for (Map.Entry<PathPattern, CacheControl> entry : this.cacheControlMappings.entrySet()) {
 			if (entry.getKey().matches(path)) {
 				return entry.getValue();
@@ -266,9 +269,12 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * relies on String pattern matching with {@link PathMatcher}.
 	 * @param lookupPath the path to match to
 	 * @return the matched {@code CacheControl}, or {@code null} if no match
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
-	@Nullable
-	protected CacheControl lookupCacheControl(String lookupPath) {
+	@Deprecated(since = "7.0", forRemoval = true)
+	protected @Nullable CacheControl lookupCacheControl(String lookupPath) {
 		for (Map.Entry<PathPattern, CacheControl> entry : this.cacheControlMappings.entrySet()) {
 			if (this.pathMatcher.match(entry.getKey().getPatternString(), lookupPath)) {
 				return entry.getValue();
@@ -284,8 +290,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the matched cacheSeconds, or {@code null} if there is no match
 	 * @since 5.3
 	 */
-	@Nullable
-	protected Integer lookupCacheSeconds(PathContainer path) {
+	protected @Nullable Integer lookupCacheSeconds(PathContainer path) {
 		for (Map.Entry<PathPattern, Integer> entry : this.cacheMappings.entrySet()) {
 			if (entry.getKey().matches(path)) {
 				return entry.getValue();
@@ -300,9 +305,12 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * matching with {@link PathMatcher}.
 	 * @param lookupPath the path to match to
 	 * @return the matched cacheSeconds, or {@code null} if there is no match
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
-	@Nullable
-	protected Integer lookupCacheSeconds(String lookupPath) {
+	@Deprecated(since = "7.0", forRemoval = true)
+	protected @Nullable Integer lookupCacheSeconds(String lookupPath) {
 		for (Map.Entry<PathPattern, Integer> entry : this.cacheMappings.entrySet()) {
 			if (this.pathMatcher.match(entry.getKey().getPatternString(), lookupPath)) {
 				return entry.getValue();

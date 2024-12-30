@@ -3,9 +3,7 @@
  * {@link org.springframework.beans.factory.annotation.Configurable @Configurable}
  * annotation.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.context.annotation.aspectj;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

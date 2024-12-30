@@ -27,16 +27,18 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A simple {@code ResourceResolver} that tries to find a resource under the given
@@ -52,13 +54,11 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
-	@Nullable
-	private Resource[] allowedLocations;
+	private Resource @Nullable [] allowedLocations;
 
 	private final Map<Resource, Charset> locationCharsets = new HashMap<>(4);
 
-	@Nullable
-	private UrlPathHelper urlPathHelper;
+	private @Nullable UrlPathHelper urlPathHelper;
 
 
 	/**
@@ -78,12 +78,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * @since 4.1.2
 	 * @see ResourceHttpRequestHandler#initAllowedLocations()
 	 */
-	public void setAllowedLocations(@Nullable Resource... locations) {
+	public void setAllowedLocations(Resource @Nullable ... locations) {
 		this.allowedLocations = locations;
 	}
 
-	@Nullable
-	public Resource[] getAllowedLocations() {
+	public Resource @Nullable [] getAllowedLocations() {
 		return this.allowedLocations;
 	}
 
@@ -114,7 +113,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * static resources. This helps to derive information about the lookup path
 	 * such as whether it is decoded or not.
 	 * @since 4.3.13
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
@@ -122,32 +125,32 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	/**
 	 * The configured {@link UrlPathHelper}.
 	 * @since 4.3.13
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
-	@Nullable
-	public UrlPathHelper getUrlPathHelper() {
+	@Deprecated(since = "7.0", forRemoval = true)
+	public @Nullable UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
 
 	@Override
-	@Nullable
-	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
+	protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return getResource(requestPath, request, locations);
 	}
 
 	@Override
-	@Nullable
-	protected String resolveUrlPathInternal(String resourcePath, List<? extends Resource> locations,
+	protected @Nullable String resolveUrlPathInternal(String resourcePath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
 		return (StringUtils.hasText(resourcePath) &&
 				getResource(resourcePath, null, locations) != null ? resourcePath : null);
 	}
 
-	@Nullable
-	private Resource getResource(String resourcePath, @Nullable HttpServletRequest request,
+	private @Nullable Resource getResource(String resourcePath, @Nullable HttpServletRequest request,
 			List<? extends Resource> locations) {
 
 		for (Resource location : locations) {
@@ -181,8 +184,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * @param location the location to check
 	 * @return the resource, or {@code null} if none found
 	 */
-	@Nullable
-	protected Resource getResource(String resourcePath, Resource location) throws IOException {
+	protected @Nullable Resource getResource(String resourcePath, Resource location) throws IOException {
 		Resource resource = location.createRelative(resourcePath);
 		if (resource.isReadable()) {
 			if (checkResource(resource, location)) {

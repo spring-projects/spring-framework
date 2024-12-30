@@ -24,6 +24,7 @@ import javax.naming.NamingException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.SimpleTypeConverter;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -73,8 +73,7 @@ import org.springframework.util.ClassUtils;
 public class JndiObjectFactoryBean extends JndiObjectLocator
 		implements FactoryBean<Object>, BeanFactoryAware, BeanClassLoaderAware {
 
-	@Nullable
-	private Class<?>[] proxyInterfaces;
+	private Class<?> @Nullable [] proxyInterfaces;
 
 	private boolean lookupOnStartup = true;
 
@@ -82,17 +81,13 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 
 	private boolean exposeAccessContext = false;
 
-	@Nullable
-	private Object defaultObject;
+	private @Nullable Object defaultObject;
 
-	@Nullable
-	private ConfigurableBeanFactory beanFactory;
+	private @Nullable ConfigurableBeanFactory beanFactory;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private Object jndiObject;
+	private @Nullable Object jndiObject;
 
 
 	/**
@@ -267,14 +262,12 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	 * Return the singleton JNDI object.
 	 */
 	@Override
-	@Nullable
-	public Object getObject() {
+	public @Nullable Object getObject() {
 		return this.jndiObject;
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		if (this.proxyInterfaces != null) {
 			if (this.proxyInterfaces.length == 1) {
 				return this.proxyInterfaces[0];
@@ -369,8 +362,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(MethodInvocation invocation) throws Throwable {
+		public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 			Context ctx = (isEligible(invocation.getMethod()) ? this.jndiTemplate.getContext() : null);
 			try {
 				return invocation.proceed();

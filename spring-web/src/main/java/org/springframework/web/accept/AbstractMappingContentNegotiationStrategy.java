@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -83,8 +83,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	/**
 	 * Whether to ignore requests with unknown file extension. Setting this to
 	 * {@code false} results in {@code HttpMediaTypeNotAcceptableException}.
-	 * <p>By default this is set to {@literal false} but is overridden in
-	 * {@link PathExtensionContentNegotiationStrategy} to {@literal true}.
+	 * <p>By default, this is set to {@literal false}.
 	 */
 	public void setIgnoreUnknownExtensions(boolean ignoreUnknownExtensions) {
 		this.ignoreUnknownExtensions = ignoreUnknownExtensions;
@@ -130,8 +129,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * Extract a key from the request to use to look up media types.
 	 * @return the lookup key, or {@code null} if none
 	 */
-	@Nullable
-	protected abstract String getMediaTypeKey(NativeWebRequest request);
+	protected abstract @Nullable String getMediaTypeKey(NativeWebRequest request);
 
 	/**
 	 * Override to provide handling when a key is successfully resolved via
@@ -146,8 +144,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 	 * determine the media type(s). If a MediaType is returned from
 	 * this method it will be added to the cache in the base class.
 	 */
-	@Nullable
-	protected MediaType handleNoMatch(NativeWebRequest request, String key)
+	protected @Nullable MediaType handleNoMatch(NativeWebRequest request, String key)
 			throws HttpMediaTypeNotAcceptableException {
 
 		if (!isUseRegisteredExtensionsOnly()) {

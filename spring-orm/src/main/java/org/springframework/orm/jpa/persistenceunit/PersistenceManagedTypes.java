@@ -20,8 +20,8 @@ import java.net.URL;
 import java.util.List;
 
 import jakarta.persistence.spi.PersistenceUnitInfo;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,8 +54,7 @@ public interface PersistenceManagedTypes {
 	 * @return the persistence unit root url
 	 * @see PersistenceUnitInfo#getPersistenceUnitRootUrl()
 	 */
-	@Nullable
-	URL getPersistenceUnitRootUrl();
+	@Nullable URL getPersistenceUnitRootUrl();
 
 	/**
 	 * Create an instance using the specified managed class names.

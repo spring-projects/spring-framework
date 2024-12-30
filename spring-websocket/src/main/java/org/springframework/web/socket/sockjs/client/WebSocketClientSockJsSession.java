@@ -21,7 +21,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -39,8 +40,7 @@ import org.springframework.web.socket.adapter.NativeWebSocketSession;
  */
 public class WebSocketClientSockJsSession extends AbstractClientSockJsSession implements NativeWebSocketSession {
 
-	@Nullable
-	private WebSocketSession webSocketSession;
+	private @Nullable WebSocketSession webSocketSession;
 
 
 	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
@@ -58,28 +58,24 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
+	public <T> @Nullable T getNativeSession(@Nullable Class<T> requiredType) {
 		return (requiredType == null || requiredType.isInstance(this.webSocketSession) ? (T) this.webSocketSession : null);
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getLocalAddress();
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getRemoteAddress();
 	}
 
 	@Override
-	@Nullable
-	public String getAcceptedProtocol() {
+	public @Nullable String getAcceptedProtocol() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getAcceptedProtocol();
 	}

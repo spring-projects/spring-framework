@@ -1,9 +1,7 @@
 /**
  * Transaction SPI implementation for JTA.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.transaction.jta;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

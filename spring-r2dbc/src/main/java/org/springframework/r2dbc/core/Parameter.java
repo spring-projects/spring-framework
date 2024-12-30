@@ -16,7 +16,8 @@
 
 package org.springframework.r2dbc.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -32,8 +33,7 @@ import org.springframework.util.ObjectUtils;
 @Deprecated(since = "6.0")
 public final class Parameter {
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
 	private final Class<?> type;
 
@@ -79,8 +79,7 @@ public final class Parameter {
 	 * Return the column value (can be {@code null}).
 	 * @see #hasValue()
 	 */
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 

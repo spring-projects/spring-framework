@@ -19,8 +19,9 @@ package org.springframework.aop.aspectj;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.lang.Nullable;
 
 /**
  * Spring AOP advice that wraps an AspectJ before method.

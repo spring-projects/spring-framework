@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntPredicate;
 
 import org.eclipse.jetty.io.Content;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -39,8 +39,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 
 	private final DefaultDataBuffer delegate;
 
-	@Nullable
-	private final Content.Chunk chunk;
+	private final Content.@Nullable Chunk chunk;
 
 	private final JettyDataBufferFactory bufferFactory;
 

@@ -18,6 +18,8 @@ package org.springframework.format.support;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -28,7 +30,6 @@ import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -59,22 +60,17 @@ import org.springframework.util.StringValueResolver;
 public class FormattingConversionServiceFactoryBean
 		implements FactoryBean<FormattingConversionService>, EmbeddedValueResolverAware, InitializingBean {
 
-	@Nullable
-	private Set<?> converters;
+	private @Nullable Set<?> converters;
 
-	@Nullable
-	private Set<?> formatters;
+	private @Nullable Set<?> formatters;
 
-	@Nullable
-	private Set<FormatterRegistrar> formatterRegistrars;
+	private @Nullable Set<FormatterRegistrar> formatterRegistrars;
 
 	private boolean registerDefaultFormatters = true;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
-	@Nullable
-	private FormattingConversionService conversionService;
+	private @Nullable FormattingConversionService conversionService;
 
 
 	/**
@@ -162,8 +158,7 @@ public class FormattingConversionServiceFactoryBean
 
 
 	@Override
-	@Nullable
-	public FormattingConversionService getObject() {
+	public @Nullable FormattingConversionService getObject() {
 		return this.conversionService;
 	}
 

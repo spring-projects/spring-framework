@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import io.netty.buffer.PooledByteBufAllocator;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -37,7 +38,6 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
@@ -117,17 +117,13 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 		private final List<Decoder<?>> decoders = new ArrayList<>();
 
-		@Nullable
-		private RouteMatcher routeMatcher;
+		private @Nullable RouteMatcher routeMatcher;
 
-		@Nullable
-		private ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+		private @Nullable ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
-		@Nullable
-		private DataBufferFactory bufferFactory;
+		private @Nullable DataBufferFactory bufferFactory;
 
-		@Nullable
-		private MetadataExtractor metadataExtractor;
+		private @Nullable MetadataExtractor metadataExtractor;
 
 		private final List<Consumer<MetadataExtractorRegistry>> metadataExtractors = new ArrayList<>();
 

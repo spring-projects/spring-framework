@@ -24,13 +24,14 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -57,8 +58,7 @@ public abstract class ReflectionHelper {
 	 * @return an {@code ArgumentsMatchInfo} object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
-	@Nullable
-	static ArgumentsMatchKind compareArguments(
+	static @Nullable ArgumentsMatchKind compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),
@@ -146,8 +146,7 @@ public abstract class ReflectionHelper {
 	 * @return an {@code ArgumentsMatchKind} object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
-	@Nullable
-	static ArgumentsMatchKind compareArgumentsVarargs(
+	static @Nullable ArgumentsMatchKind compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.log.LogMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -94,8 +94,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryIn
 
 		private final Iterable<RuntimeHintsRegistrar> registrars;
 
-		@Nullable
-		private final ClassLoader beanClassLoader;
+		private final @Nullable ClassLoader beanClassLoader;
 
 		RuntimeHintsRegistrarContribution(Iterable<RuntimeHintsRegistrar> registrars,
 				@Nullable ClassLoader beanClassLoader) {

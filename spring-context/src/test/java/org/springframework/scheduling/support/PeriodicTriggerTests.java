@@ -20,9 +20,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.NumberUtils;
 
@@ -227,8 +227,7 @@ class PeriodicTriggerTests {
 		return new TestTriggerContext(toInstant(scheduled), toInstant(actual), toInstant(completion));
 	}
 
-	@Nullable
-	private static Instant toInstant(@Nullable Object o) {
+	private static @Nullable Instant toInstant(@Nullable Object o) {
 		if (o == null) {
 			return null;
 		}
@@ -249,14 +248,11 @@ class PeriodicTriggerTests {
 
 	private static class TestTriggerContext implements TriggerContext {
 
-		@Nullable
-		private final Instant scheduled;
+		private final @Nullable Instant scheduled;
 
-		@Nullable
-		private final Instant actual;
+		private final @Nullable Instant actual;
 
-		@Nullable
-		private final Instant completion;
+		private final @Nullable Instant completion;
 
 		TestTriggerContext(@Nullable Instant scheduled,
 				@Nullable Instant actual, @Nullable Instant completion) {

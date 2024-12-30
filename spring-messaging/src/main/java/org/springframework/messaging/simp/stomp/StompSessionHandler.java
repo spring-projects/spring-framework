@@ -16,7 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A contract for client STOMP session lifecycle events including a callback

@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.assertj;
 
 import org.assertj.core.api.AssertProvider;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
@@ -77,7 +77,6 @@ public interface MvcTestResult extends AssertProvider<MvcTestResultAssert> {
 	 * Return the exception that was thrown unexpectedly while processing the
 	 * request, if any.
 	 */
-	@Nullable
-	Exception getUnresolvedException();
+	@Nullable Exception getUnresolvedException();
 
 }

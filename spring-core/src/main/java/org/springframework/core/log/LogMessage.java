@@ -18,7 +18,8 @@ package org.springframework.core.log;
 
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +43,7 @@ import org.springframework.util.Assert;
  */
 public abstract class LogMessage implements CharSequence {
 
-	@Nullable
-	private String result;
+	private @Nullable String result;
 
 
 	@Override
@@ -176,8 +176,7 @@ public abstract class LogMessage implements CharSequence {
 
 	private static final class FormatMessage1 extends FormatMessage {
 
-		@Nullable
-		private final Object arg1;
+		private final @Nullable Object arg1;
 
 		FormatMessage1(String format, @Nullable Object arg1) {
 			super(format);
@@ -193,11 +192,9 @@ public abstract class LogMessage implements CharSequence {
 
 	private static final class FormatMessage2 extends FormatMessage {
 
-		@Nullable
-		private final Object arg1;
+		private final @Nullable Object arg1;
 
-		@Nullable
-		private final Object arg2;
+		private final @Nullable Object arg2;
 
 		FormatMessage2(String format, @Nullable Object arg1, @Nullable Object arg2) {
 			super(format);
@@ -214,14 +211,11 @@ public abstract class LogMessage implements CharSequence {
 
 	private static final class FormatMessage3 extends FormatMessage {
 
-		@Nullable
-		private final Object arg1;
+		private final @Nullable Object arg1;
 
-		@Nullable
-		private final Object arg2;
+		private final @Nullable Object arg2;
 
-		@Nullable
-		private final Object arg3;
+		private final @Nullable Object arg3;
 
 		FormatMessage3(String format, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3) {
 			super(format);
@@ -239,17 +233,13 @@ public abstract class LogMessage implements CharSequence {
 
 	private static final class FormatMessage4 extends FormatMessage {
 
-		@Nullable
-		private final Object arg1;
+		private final @Nullable Object arg1;
 
-		@Nullable
-		private final Object arg2;
+		private final @Nullable Object arg2;
 
-		@Nullable
-		private final Object arg3;
+		private final @Nullable Object arg3;
 
-		@Nullable
-		private final Object arg4;
+		private final @Nullable Object arg4;
 
 		FormatMessage4(String format, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3,
 				@Nullable Object arg4) {
@@ -269,8 +259,7 @@ public abstract class LogMessage implements CharSequence {
 
 	private static final class FormatMessageX extends FormatMessage {
 
-		@Nullable
-		private final Object[] args;
+		private final @Nullable Object[] args;
 
 		FormatMessageX(String format, @Nullable Object... args) {
 			super(format);

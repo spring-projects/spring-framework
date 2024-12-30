@@ -4,9 +4,7 @@
  * as Spring web view technology.
  * Contains a View implementation for FreeMarker templates.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.view.freemarker;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

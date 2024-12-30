@@ -1,9 +1,7 @@
 /**
  * Abstractions and support classes for reactive WebSocket interactions.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.reactive.socket;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

@@ -18,8 +18,9 @@ package org.springframework.jdbc;
 
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when a ResultSet has been accessed in an invalid fashion.
@@ -36,8 +37,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
 
-	@Nullable
-	private final String sql;
+	private final @Nullable String sql;
 
 
 	/**
@@ -64,8 +64,7 @@ public class InvalidResultSetAccessException extends InvalidDataAccessResourceUs
 	/**
 	 * Return the wrapped SQLException.
 	 */
-	@Nullable
-	public SQLException getSQLException() {
+	public @Nullable SQLException getSQLException() {
 		return (SQLException) getCause();
 	}
 
@@ -73,8 +72,7 @@ public class InvalidResultSetAccessException extends InvalidDataAccessResourceUs
 	 * Return the SQL that caused the problem.
 	 * @return the offending SQL, if known
 	 */
-	@Nullable
-	public String getSql() {
+	public @Nullable String getSql() {
 		return this.sql;
 	}
 

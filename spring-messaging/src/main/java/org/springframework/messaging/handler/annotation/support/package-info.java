@@ -1,9 +1,7 @@
 /**
  * Support classes for working with annotated message-handling methods.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.messaging.handler.annotation.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

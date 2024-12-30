@@ -17,8 +17,7 @@
 package org.springframework.web.bind;
 
 import jakarta.servlet.ServletRequest;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Parameter extraction methods, for an approach distinct from data binding,
@@ -55,8 +54,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
-	@Nullable
-	public static Integer getIntParameter(ServletRequest request, String name)
+	public static @Nullable Integer getIntParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
 		if (request.getParameter(name) == null) {
@@ -134,8 +132,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
-	@Nullable
-	public static Long getLongParameter(ServletRequest request, String name)
+	public static @Nullable Long getLongParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
 		if (request.getParameter(name) == null) {
@@ -213,8 +210,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
-	@Nullable
-	public static Float getFloatParameter(ServletRequest request, String name)
+	public static @Nullable Float getFloatParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
 		if (request.getParameter(name) == null) {
@@ -292,8 +288,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
-	@Nullable
-	public static Double getDoubleParameter(ServletRequest request, String name)
+	public static @Nullable Double getDoubleParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
 		if (request.getParameter(name) == null) {
@@ -373,8 +368,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
-	@Nullable
-	public static Boolean getBooleanParameter(ServletRequest request, String name)
+	public static @Nullable Boolean getBooleanParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
 		if (request.getParameter(name) == null) {
@@ -461,8 +455,7 @@ public abstract class ServletRequestUtils {
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
-	@Nullable
-	public static String getStringParameter(ServletRequest request, String name)
+	public static @Nullable String getStringParameter(ServletRequest request, String name)
 			throws ServletRequestBindingException {
 
 		if (request.getParameter(name) == null) {

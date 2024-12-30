@@ -19,7 +19,7 @@ package org.springframework.core.env;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Holder containing one or more {@link PropertySource} objects.
@@ -49,7 +49,6 @@ public interface PropertySources extends Iterable<PropertySource<?>> {
 	 * Return the property source with the given name, {@code null} if not found.
 	 * @param name the {@linkplain PropertySource#getName() name of the property source} to find
 	 */
-	@Nullable
-	PropertySource<?> get(String name);
+	@Nullable PropertySource<?> get(String name);
 
 }

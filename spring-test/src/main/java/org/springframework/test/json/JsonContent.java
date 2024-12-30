@@ -17,8 +17,8 @@
 package org.springframework.test.json;
 
 import org.assertj.core.api.AssertProvider;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.Assert;
 
@@ -34,8 +34,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 
 	private final String json;
 
-	@Nullable
-	private final HttpMessageContentConverter contentConverter;
+	private final @Nullable HttpMessageContentConverter contentConverter;
 
 
 	/**
@@ -78,8 +77,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	/**
 	 * Return the {@link HttpMessageContentConverter} to use to deserialize content.
 	 */
-	@Nullable
-	HttpMessageContentConverter getContentConverter() {
+	@Nullable HttpMessageContentConverter getContentConverter() {
 		return this.contentConverter;
 	}
 

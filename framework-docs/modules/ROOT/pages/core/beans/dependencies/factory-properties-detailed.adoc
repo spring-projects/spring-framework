@@ -168,8 +168,8 @@ listings shows how to use the `parent` attribute:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<!-- in the child (descendant) context -->
-	<bean id="accountService" <!-- bean name is the same as the parent bean -->
+	<!-- in the child (descendant) context, bean name is the same as the parent bean -->
+	<bean id="accountService" 
 		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref parent="accountService"/> <!-- notice how we refer to the parent bean -->

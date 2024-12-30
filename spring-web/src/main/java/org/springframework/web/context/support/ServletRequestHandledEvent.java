@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Servlet-specific subclass of RequestHandledEvent,

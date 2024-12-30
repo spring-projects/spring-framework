@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -120,6 +120,7 @@ public class InterceptorRegistryTests {
 		verifyWebInterceptor(interceptors.get(1), this.webInterceptor2);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void addInterceptorsWithCustomPathMatcher() {
 		PathMatcher pathMatcher = mock();

@@ -19,8 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import java.util.Map;
 
 import jakarta.servlet.jsp.JspException;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The {@code <input>} tag renders an HTML 'input' tag with type 'text' using
@@ -247,20 +246,15 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	public static final String AUTOCOMPLETE_ATTRIBUTE = "autocomplete";
 
 
-	@Nullable
-	private String size;
+	private @Nullable String size;
 
-	@Nullable
-	private String maxlength;
+	private @Nullable String maxlength;
 
-	@Nullable
-	private String alt;
+	private @Nullable String alt;
 
-	@Nullable
-	private String onselect;
+	private @Nullable String onselect;
 
-	@Nullable
-	private String autocomplete;
+	private @Nullable String autocomplete;
 
 
 	/**
@@ -274,8 +268,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code size}' attribute.
 	 */
-	@Nullable
-	protected String getSize() {
+	protected @Nullable String getSize() {
 		return this.size;
 	}
 
@@ -290,8 +283,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code maxlength}' attribute.
 	 */
-	@Nullable
-	protected String getMaxlength() {
+	protected @Nullable String getMaxlength() {
 		return this.maxlength;
 	}
 
@@ -306,8 +298,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code alt}' attribute.
 	 */
-	@Nullable
-	protected String getAlt() {
+	protected @Nullable String getAlt() {
 		return this.alt;
 	}
 
@@ -322,8 +313,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code onselect}' attribute.
 	 */
-	@Nullable
-	protected String getOnselect() {
+	protected @Nullable String getOnselect() {
 		return this.onselect;
 	}
 
@@ -338,8 +328,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code autocomplete}' attribute.
 	 */
-	@Nullable
-	protected String getAutocomplete() {
+	protected @Nullable String getAutocomplete() {
 		return this.autocomplete;
 	}
 

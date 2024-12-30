@@ -157,9 +157,7 @@ Kotlin::
 ----
 ======
 
-Note that you need to enable the use of matrix variables. In the MVC Java configuration,
-you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through
-xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching]. In the MVC XML namespace, you can set
+Note that you need to enable the use of matrix variables. In the MVC XML namespace, you can set
 `<mvc:annotation-driven enable-matrix-variables="true"/>`.
 
 

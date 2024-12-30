@@ -21,11 +21,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -193,13 +193,11 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	}
 
 	@Override
-	@Nullable
-	protected final Message<?> doReceive(MessageChannel channel) {
+	protected final @Nullable Message<?> doReceive(MessageChannel channel) {
 		return doReceive(channel, this.receiveTimeout);
 	}
 
-	@Nullable
-	protected final Message<?> doReceive(MessageChannel channel, long timeout) {
+	protected final @Nullable Message<?> doReceive(MessageChannel channel, long timeout) {
 		Assert.notNull(channel, "MessageChannel is required");
 		if (!(channel instanceof PollableChannel pollableChannel)) {
 			throw new IllegalStateException("A PollableChannel is required to receive messages");
@@ -215,8 +213,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 	}
 
 	@Override
-	@Nullable
-	protected final Message<?> doSendAndReceive(MessageChannel channel, Message<?> requestMessage) {
+	protected final @Nullable Message<?> doSendAndReceive(MessageChannel channel, Message<?> requestMessage) {
 		Assert.notNull(channel, "'channel' is required");
 		Object originalReplyChannelHeader = requestMessage.getHeaders().getReplyChannel();
 		Object originalErrorChannelHeader = requestMessage.getHeaders().getErrorChannel();
@@ -259,8 +256,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		return (receiveTimeout != null ? receiveTimeout : this.receiveTimeout);
 	}
 
-	@Nullable
-	private Long headerToLong(@Nullable Object headerValue) {
+	private @Nullable Long headerToLong(@Nullable Object headerValue) {
 		if (headerValue instanceof Number number) {
 			return number.longValue();
 		}
@@ -284,8 +280,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 		private final boolean throwExceptionOnLateReply;
 
-		@Nullable
-		private volatile Message<?> replyMessage;
+		private volatile @Nullable Message<?> replyMessage;
 
 		private volatile boolean hasReceived;
 
@@ -302,14 +297,12 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		}
 
 		@Override
-		@Nullable
-		public Message<?> receive() {
+		public @Nullable Message<?> receive() {
 			return this.receive(-1);
 		}
 
 		@Override
-		@Nullable
-		public Message<?> receive(long timeout) {
+		public @Nullable Message<?> receive(long timeout) {
 			try {
 				if (timeout < 0) {
 					this.replyLatch.await();

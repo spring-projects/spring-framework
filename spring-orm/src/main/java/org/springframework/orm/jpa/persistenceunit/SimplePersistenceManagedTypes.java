@@ -19,7 +19,7 @@ package org.springframework.orm.jpa.persistenceunit;
 import java.net.URL;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A simple {@link PersistenceManagedTypes} implementation that holds the list
@@ -34,8 +34,7 @@ class SimplePersistenceManagedTypes implements PersistenceManagedTypes {
 
 	private final List<String> managedPackages;
 
-	@Nullable
-	private final URL persistenceUnitRootUrl;
+	private final @Nullable URL persistenceUnitRootUrl;
 
 
 	SimplePersistenceManagedTypes(List<String> managedClassNames, List<String> managedPackages,
@@ -60,8 +59,7 @@ class SimplePersistenceManagedTypes implements PersistenceManagedTypes {
 	}
 
 	@Override
-	@Nullable
-	public URL getPersistenceUnitRootUrl() {
+	public @Nullable URL getPersistenceUnitRootUrl() {
 		return this.persistenceUnitRootUrl;
 	}
 

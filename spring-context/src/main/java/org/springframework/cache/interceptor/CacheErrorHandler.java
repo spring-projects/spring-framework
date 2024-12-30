@@ -16,8 +16,9 @@
 
 package org.springframework.cache.interceptor;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
-import org.springframework.lang.Nullable;
 
 /**
  * A strategy for handling cache-related errors. In most cases, any

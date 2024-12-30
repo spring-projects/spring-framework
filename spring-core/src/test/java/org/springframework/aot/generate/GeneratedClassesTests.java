@@ -148,8 +148,8 @@ class GeneratedClassesTests {
 				"one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses.getOrAddForFeatureComponent(
 				"one", TestComponent.class, emptyTypeCustomizer);
-		GeneratedClass generatedClass3 = prefixed.getOrAddForFeatureComponent
-				("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = prefixed.getOrAddForFeatureComponent(
+				"one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass4 = prefixed.getOrAddForFeatureComponent(
 				"one", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isSameAs(generatedClass2).isNotSameAs(generatedClass3);

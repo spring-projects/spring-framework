@@ -18,7 +18,8 @@ package org.springframework.aot.hint;
 
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
@@ -58,8 +59,7 @@ public final class ResourcePatternHint implements ConditionalHint {
 
 	private final String pattern;
 
-	@Nullable
-	private final TypeReference reachableType;
+	private final @Nullable TypeReference reachableType;
 
 
 	ResourcePatternHint(String pattern, @Nullable TypeReference reachableType) {
@@ -86,9 +86,8 @@ public final class ResourcePatternHint implements ConditionalHint {
 		return PATH_MATCHER.match(this.pattern, path);
 	}
 
-	@Nullable
 	@Override
-	public TypeReference getReachableType() {
+	public @Nullable TypeReference getReachableType() {
 		return this.reachableType;
 	}
 

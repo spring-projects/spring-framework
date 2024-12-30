@@ -18,7 +18,8 @@ package org.springframework.core;
 
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -36,8 +37,7 @@ public final class ReactiveTypeDescriptor {
 
 	private final boolean noValue;
 
-	@Nullable
-	private final Supplier<?> emptySupplier;
+	private final @Nullable Supplier<?> emptySupplier;
 
 	private final boolean deferred;
 

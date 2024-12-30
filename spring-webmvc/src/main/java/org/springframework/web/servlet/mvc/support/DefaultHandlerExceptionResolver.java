@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -30,7 +31,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -177,8 +177,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 
 	@Override
-	@Nullable
-	protected ModelAndView doResolveException(
+	protected @Nullable ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		try {
@@ -273,8 +272,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+	protected @Nullable ModelAndView handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -294,8 +292,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
+	protected @Nullable ModelAndView handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -315,8 +312,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
+	protected @Nullable ModelAndView handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -335,8 +331,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 4.2
 	 */
-	@Nullable
-	protected ModelAndView handleMissingPathVariable(MissingPathVariableException ex,
+	protected @Nullable ModelAndView handleMissingPathVariable(MissingPathVariableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -354,8 +349,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+	protected @Nullable ModelAndView handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -372,8 +366,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
+	protected @Nullable ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -392,8 +385,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleServletRequestBindingException(ServletRequestBindingException ex,
+	protected @Nullable ModelAndView handleServletRequestBindingException(ServletRequestBindingException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -411,8 +403,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
-	@Nullable
-	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
+	protected @Nullable ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -431,8 +422,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 6.1
 	 */
-	@Nullable
-	protected ModelAndView handleHandlerMethodValidationException(HandlerMethodValidationException ex,
+	protected @Nullable ModelAndView handleHandlerMethodValidationException(HandlerMethodValidationException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -452,8 +442,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 4.0
 	 */
-	@Nullable
-	protected ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex,
+	protected @Nullable ModelAndView handleNoHandlerFoundException(NoHandlerFoundException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		pageNotFoundLogger.warn(ex.getMessage());
@@ -473,8 +462,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 6.1
 	 */
-	@Nullable
-	protected ModelAndView handleNoResourceFoundException(NoResourceFoundException ex,
+	protected @Nullable ModelAndView handleNoResourceFoundException(NoResourceFoundException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
@@ -494,8 +482,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 4.2.8
 	 */
-	@Nullable
-	protected ModelAndView handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex,
+	protected @Nullable ModelAndView handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;

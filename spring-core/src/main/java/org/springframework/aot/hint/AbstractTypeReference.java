@@ -18,7 +18,7 @@ package org.springframework.aot.hint;
 
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base {@link TypeReference} implementation that ensures consistent behaviour
@@ -34,8 +34,7 @@ public abstract class AbstractTypeReference implements TypeReference {
 
 	private final String simpleName;
 
-	@Nullable
-	private final TypeReference enclosingType;
+	private final @Nullable TypeReference enclosingType;
 
 
 	protected AbstractTypeReference(String packageName, String simpleName, @Nullable TypeReference enclosingType) {
@@ -63,9 +62,8 @@ public abstract class AbstractTypeReference implements TypeReference {
 		return this.simpleName;
 	}
 
-	@Nullable
 	@Override
-	public TypeReference getEnclosingType() {
+	public @Nullable TypeReference getEnclosingType() {
 		return this.enclosingType;
 	}
 

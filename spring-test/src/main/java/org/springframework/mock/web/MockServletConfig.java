@@ -23,8 +23,8 @@ import java.util.Map;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -93,8 +93,7 @@ public class MockServletConfig implements ServletConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getInitParameter(String name) {
+	public @Nullable String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}

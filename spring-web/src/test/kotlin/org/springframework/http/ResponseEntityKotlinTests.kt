@@ -32,7 +32,7 @@ class ResponseEntityKotlinTests {
 		val responseEntity = ResponseEntity.ofNullable(entity)
 		assertThat(responseEntity).isNotNull()
 		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
-		assertThat(responseEntity.body as Int).isEqualTo(entity)
+		assertThat(responseEntity.body).isEqualTo(entity)
 	}
 
 	@Test

@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import example.Color;
 import example.FruitMap;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,7 +61,6 @@ import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import org.springframework.expression.spel.testresources.Person;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.joining;

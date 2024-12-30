@@ -19,13 +19,13 @@ package org.springframework.web.reactive.result.view;
 import java.util.Locale;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
@@ -74,23 +74,19 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	public static final String REDIRECT_URL_PREFIX = "redirect:";
 
 
-	@Nullable
-	private Class<?> viewClass;
+	private @Nullable Class<?> viewClass;
 
 	private String prefix = "";
 
 	private String suffix = "";
 
-	@Nullable
-	private String[] viewNames;
+	private String @Nullable [] viewNames;
 
 	private Function<String, RedirectView> redirectViewProvider = RedirectView::new;
 
-	@Nullable
-	private String requestContextAttribute;
+	private @Nullable String requestContextAttribute;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 
 	/**
@@ -114,8 +110,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * Return the view class to be used to create views.
 	 * @see #setViewClass
 	 */
-	@Nullable
-	protected Class<?> getViewClass() {
+	protected @Nullable Class<?> getViewClass() {
 		return this.viewClass;
 	}
 
@@ -153,7 +148,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * 'my*', '*Report' and '*Repo*' will all match the view name 'myReport'.
 	 * @see #canHandle
 	 */
-	public void setViewNames(@Nullable String... viewNames) {
+	public void setViewNames(String @Nullable ... viewNames) {
 		this.viewNames = viewNames;
 	}
 
@@ -161,8 +156,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * Return the view names (or name patterns) that can be handled by this
 	 * {@link ViewResolver}.
 	 */
-	@Nullable
-	protected String[] getViewNames() {
+	protected String @Nullable [] getViewNames() {
 		return this.viewNames;
 	}
 
@@ -186,8 +180,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	/**
 	 * Return the name of the {@link RequestContext} attribute for all views, if any.
 	 */
-	@Nullable
-	protected String getRequestContextAttribute() {
+	protected @Nullable String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}
 
@@ -208,8 +201,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	 * Return the containing {@code ApplicationContext}, if any.
 	 * @see #setApplicationContext
 	 */
-	@Nullable
-	public ApplicationContext getApplicationContext() {
+	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 

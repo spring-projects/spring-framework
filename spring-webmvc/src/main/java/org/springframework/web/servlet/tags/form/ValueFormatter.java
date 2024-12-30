@@ -18,7 +18,8 @@ package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.HtmlUtils;
 

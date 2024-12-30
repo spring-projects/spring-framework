@@ -1,9 +1,7 @@
 /**
  * Useful generic {@code java.util.function} helper classes.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.util.function;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

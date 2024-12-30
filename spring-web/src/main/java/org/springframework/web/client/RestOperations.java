@@ -20,13 +20,14 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying a basic set of RESTful operations.
@@ -52,8 +53,7 @@ public interface RestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 */
-	@Nullable
-	<T> T getForObject(String url, Class<T> responseType, Object... uriVariables) throws RestClientException;
+	<T> @Nullable T getForObject(String url, Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Retrieve a representation by doing a GET on the URI template.
@@ -64,8 +64,7 @@ public interface RestOperations {
 	 * @param uriVariables the map containing variables for the URI template
 	 * @return the converted object
 	 */
-	@Nullable
-	<T> T getForObject(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
+	<T> @Nullable T getForObject(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Retrieve a representation by doing a GET on the URL.
@@ -74,8 +73,7 @@ public interface RestOperations {
 	 * @param responseType the type of the return value
 	 * @return the converted object
 	 */
-	@Nullable
-	<T> T getForObject(URI url, Class<T> responseType) throws RestClientException;
+	<T> @Nullable T getForObject(URI url, Class<T> responseType) throws RestClientException;
 
 	/**
 	 * Retrieve an entity by doing a GET on the specified URL.
@@ -161,8 +159,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
-	@Nullable
-	URI postForLocation(String url, @Nullable Object request, Object... uriVariables) throws RestClientException;
+	@Nullable URI postForLocation(String url, @Nullable Object request, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template, and return the value of
@@ -181,8 +178,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
-	@Nullable
-	URI postForLocation(String url, @Nullable Object request, Map<String, ?> uriVariables)
+	@Nullable URI postForLocation(String url, @Nullable Object request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -200,8 +196,7 @@ public interface RestOperations {
 	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
-	@Nullable
-	URI postForLocation(URI url, @Nullable Object request) throws RestClientException;
+	@Nullable URI postForLocation(URI url, @Nullable Object request) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template,
@@ -221,8 +216,7 @@ public interface RestOperations {
 	 * @return the converted object
 	 * @see HttpEntity
 	 */
-	@Nullable
-	<T> T postForObject(String url, @Nullable Object request, Class<T> responseType,
+	<T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
 			Object... uriVariables) throws RestClientException;
 
 	/**
@@ -243,8 +237,7 @@ public interface RestOperations {
 	 * @return the converted object
 	 * @see HttpEntity
 	 */
-	@Nullable
-	<T> T postForObject(String url, @Nullable Object request, Class<T> responseType,
+	<T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -263,8 +256,7 @@ public interface RestOperations {
 	 * @return the converted object
 	 * @see HttpEntity
 	 */
-	@Nullable
-	<T> T postForObject(URI url, @Nullable Object request, Class<T> responseType) throws RestClientException;
+	<T> @Nullable T postForObject(URI url, @Nullable Object request, Class<T> responseType) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template,
@@ -385,8 +377,7 @@ public interface RestOperations {
 	 * @see RestTemplate#setRequestFactory
 	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 */
-	@Nullable
-	<T> T patchForObject(String url, @Nullable Object request, Class<T> responseType, Object... uriVariables)
+	<T> @Nullable T patchForObject(String url, @Nullable Object request, Class<T> responseType, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -407,8 +398,7 @@ public interface RestOperations {
 	 * @see RestTemplate#setRequestFactory
 	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 */
-	@Nullable
-	<T> T patchForObject(String url, @Nullable Object request, Class<T> responseType,
+	<T> @Nullable T patchForObject(String url, @Nullable Object request, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -427,8 +417,7 @@ public interface RestOperations {
 	 * @see RestTemplate#setRequestFactory
 	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 */
-	@Nullable
-	<T> T patchForObject(URI url, @Nullable Object request, Class<T> responseType)
+	<T> @Nullable T patchForObject(URI url, @Nullable Object request, Class<T> responseType)
 			throws RestClientException;
 
 
@@ -658,8 +647,7 @@ public interface RestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	@Nullable
-	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> @Nullable T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables)
 			throws RestClientException;
 
@@ -674,8 +662,7 @@ public interface RestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	@Nullable
-	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> @Nullable T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables)
 			throws RestClientException;
 
@@ -688,8 +675,7 @@ public interface RestOperations {
 	 * @param responseExtractor object that extracts the return value from the response
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	@Nullable
-	<T> T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> @Nullable T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException;
 
 }

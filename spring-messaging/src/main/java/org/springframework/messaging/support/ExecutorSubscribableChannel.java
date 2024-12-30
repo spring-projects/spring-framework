@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
@@ -37,8 +38,7 @@ import org.springframework.messaging.SubscribableChannel;
  */
 public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
-	@Nullable
-	private final Executor executor;
+	private final @Nullable Executor executor;
 
 	private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<>(4);
 
@@ -62,8 +62,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	}
 
 
-	@Nullable
-	public Executor getExecutor() {
+	public @Nullable Executor getExecutor() {
 		return this.executor;
 	}
 
@@ -168,8 +167,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 			}
 		}
 
-		@Nullable
-		private Message<?> applyBeforeHandle(Message<?> message) {
+		private @Nullable Message<?> applyBeforeHandle(Message<?> message) {
 			Message<?> messageToUse = message;
 			for (ExecutorChannelInterceptor interceptor : executorInterceptors) {
 				messageToUse = interceptor.beforeHandle(messageToUse, ExecutorSubscribableChannel.this, this.messageHandler);

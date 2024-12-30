@@ -23,7 +23,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -105,8 +106,7 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	}
 
 	@Override
-	@Nullable
-	public InputStream getResourceAsStream(String requestedPath) {
+	public @Nullable InputStream getResourceAsStream(String requestedPath) {
 		if (this.overrides.containsKey(requestedPath)) {
 			String overriddenPath = this.overrides.get(requestedPath);
 			return (overriddenPath != null ? super.getResourceAsStream(overriddenPath) : null);

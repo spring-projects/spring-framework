@@ -18,7 +18,8 @@ package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
@@ -32,8 +33,7 @@ import org.springframework.web.servlet.LocaleResolver;
  */
 public abstract class AbstractLocaleResolver implements LocaleResolver {
 
-	@Nullable
-	private Locale defaultLocale;
+	private @Nullable Locale defaultLocale;
 
 
 	/**
@@ -48,8 +48,7 @@ public abstract class AbstractLocaleResolver implements LocaleResolver {
 	 * Get the default {@link Locale} that this resolver is supposed to fall back
 	 * to, if any.
 	 */
-	@Nullable
-	protected Locale getDefaultLocale() {
+	protected @Nullable Locale getDefaultLocale() {
 		return this.defaultLocale;
 	}
 

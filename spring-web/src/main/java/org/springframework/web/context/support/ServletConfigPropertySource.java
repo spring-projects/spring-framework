@@ -17,10 +17,10 @@
 package org.springframework.web.context.support;
 
 import jakarta.servlet.ServletConfig;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,8 +42,7 @@ public class ServletConfigPropertySource extends EnumerablePropertySource<Servle
 	}
 
 	@Override
-	@Nullable
-	public String getProperty(String name) {
+	public @Nullable String getProperty(String name) {
 		return this.source.getInitParameter(name);
 	}
 

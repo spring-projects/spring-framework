@@ -19,10 +19,11 @@ package org.springframework.beans.factory.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -35,12 +36,10 @@ import org.springframework.lang.Nullable;
  */
 public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 
-	@Nullable
-	private List<?> sourceList;
+	private @Nullable List<?> sourceList;
 
 	@SuppressWarnings("rawtypes")
-	@Nullable
-	private Class<? extends List> targetListClass;
+	private @Nullable Class<? extends List> targetListClass;
 
 
 	/**

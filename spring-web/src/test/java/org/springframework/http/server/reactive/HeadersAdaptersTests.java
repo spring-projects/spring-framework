@@ -117,7 +117,7 @@ class HeadersAdaptersTests {
 		assertThat(headers2.get("TestHeader")).as("TestHeader")
 				.containsExactly("first", "second", "third");
 		// Using the headerSet approach, we keep the first encountered casing of any given key
-		assertThat(headers2.keySet()).as("first casing variant").containsExactlyInAnyOrder("TestHeader", "SecondHeader");
+		assertThat(headers2.headerNames()).as("first casing variant").containsExactlyInAnyOrder("TestHeader", "SecondHeader");
 		assertThat(headers2.toString()).as("similar toString, no 'with native headers' dump")
 				.isEqualTo(headers.toString().substring(0, headers.toString().indexOf(']') + 1));
 	}
@@ -132,7 +132,7 @@ class HeadersAdaptersTests {
 		assertThat(headers2.get("TestHeader")).as("TestHeader")
 				.containsExactly("first", "second", "third");
 		// Ordering and casing are not guaranteed using the entrySet+put approach
-		assertThat(headers2).as("two keys")
+		assertThat(headers2.asMultiValueMap()).as("two keys")
 				.containsKey("testheader")
 				.containsKey("secondheader")
 				.hasSize(2);
@@ -148,7 +148,10 @@ class HeadersAdaptersTests {
 		assertThat(headers2.get("TestHeader")).as("TestHeader")
 				.containsExactly("first", "second", "third");
 		// Ordering and casing are not guaranteed using the putAll approach
-		assertThat(headers2).as("two keys").containsOnlyKeys("testheader", "secondheader");
+		assertThat(headers2.asMultiValueMap()).as("two keys")
+				.containsKey("testheader")
+				.containsKey("secondheader")
+				.hasSize(2);
 		assertThat(headers2.toString()).as("similar toString, no 'with native headers' dump")
 				.isEqualToIgnoringCase(headers.toString().substring(0, headers.toString().indexOf(']') + 1));
 	}

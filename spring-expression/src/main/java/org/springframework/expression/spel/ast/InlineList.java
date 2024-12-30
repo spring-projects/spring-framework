@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
@@ -28,7 +30,6 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +43,7 @@ import org.springframework.util.Assert;
  */
 public class InlineList extends SpelNodeImpl {
 
-	@Nullable
-	private final TypedValue constant;
+	private final @Nullable TypedValue constant;
 
 
 	public InlineList(int startPos, int endPos, SpelNodeImpl... args) {
@@ -58,8 +58,7 @@ public class InlineList extends SpelNodeImpl {
 	 * <p>This will speed up later getValue calls and reduce the amount of garbage
 	 * created.
 	 */
-	@Nullable
-	private TypedValue computeConstantValue() {
+	private @Nullable TypedValue computeConstantValue() {
 		for (int c = 0, max = getChildCount(); c < max; c++) {
 			SpelNode child = getChild(c);
 			if (!(child instanceof Literal)) {
@@ -125,8 +124,7 @@ public class InlineList extends SpelNodeImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public List<Object> getConstantValue() {
+	public @Nullable List<Object> getConstantValue() {
 		Assert.state(this.constant != null, "No constant");
 		return (List<Object>) this.constant.getValue();
 	}

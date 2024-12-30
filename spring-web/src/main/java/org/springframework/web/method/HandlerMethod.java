@@ -31,6 +31,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.MessageSource;
@@ -43,7 +44,6 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -75,11 +75,9 @@ public class HandlerMethod extends AnnotatedMethod {
 
 	private final Object bean;
 
-	@Nullable
-	private final BeanFactory beanFactory;
+	private final @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private final MessageSource messageSource;
+	private final @Nullable MessageSource messageSource;
 
 	private final Class<?> beanType;
 
@@ -87,14 +85,11 @@ public class HandlerMethod extends AnnotatedMethod {
 
 	private final boolean validateReturnValue;
 
-	@Nullable
-	private HttpStatusCode responseStatus;
+	private @Nullable HttpStatusCode responseStatus;
 
-	@Nullable
-	private String responseStatusReason;
+	private @Nullable String responseStatusReason;
 
-	@Nullable
-	private HandlerMethod resolvedFromHandlerMethod;
+	private @Nullable HandlerMethod resolvedFromHandlerMethod;
 
 	private final String description;
 
@@ -283,8 +278,7 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * @since 4.3.8
 	 * @see ResponseStatus#code()
 	 */
-	@Nullable
-	protected HttpStatusCode getResponseStatus() {
+	protected @Nullable HttpStatusCode getResponseStatus() {
 		return this.responseStatus;
 	}
 
@@ -293,8 +287,7 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * @since 4.3.8
 	 * @see ResponseStatus#reason()
 	 */
-	@Nullable
-	protected String getResponseStatusReason() {
+	protected @Nullable String getResponseStatusReason() {
 		return this.responseStatusReason;
 	}
 
@@ -302,8 +295,7 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * Return the HandlerMethod from which this HandlerMethod instance was
 	 * resolved via {@link #createWithResolvedBean()}.
 	 */
-	@Nullable
-	public HandlerMethod getResolvedFromHandlerMethod() {
+	public @Nullable HandlerMethod getResolvedFromHandlerMethod() {
 		return this.resolvedFromHandlerMethod;
 	}
 

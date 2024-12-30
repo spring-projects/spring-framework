@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -26,7 +28,6 @@ import org.springframework.context.weaving.DefaultContextLoadTimeWeaver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,14 +46,11 @@ import org.springframework.util.Assert;
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoaderAware {
 
-	@Nullable
-	private AnnotationAttributes enableLTW;
+	private @Nullable AnnotationAttributes enableLTW;
 
-	@Nullable
-	private LoadTimeWeavingConfigurer ltwConfigurer;
+	private @Nullable LoadTimeWeavingConfigurer ltwConfigurer;
 
-	@Nullable
-	private ClassLoader beanClassLoader;
+	private @Nullable ClassLoader beanClassLoader;
 
 
 	@Override

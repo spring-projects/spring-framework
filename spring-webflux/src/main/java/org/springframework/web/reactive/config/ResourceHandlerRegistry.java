@@ -22,10 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceTransformer;
@@ -63,8 +64,7 @@ public class ResourceHandlerRegistry {
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 1;
 
-	@Nullable
-	private ResourceUrlProvider resourceUrlProvider;
+	private @Nullable ResourceUrlProvider resourceUrlProvider;
 
 
 	/**
@@ -130,8 +130,7 @@ public class ResourceHandlerRegistry {
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case
 	 * of no registrations.
 	 */
-	@Nullable
-	protected AbstractUrlHandlerMapping getHandlerMapping() {
+	protected @Nullable AbstractUrlHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}

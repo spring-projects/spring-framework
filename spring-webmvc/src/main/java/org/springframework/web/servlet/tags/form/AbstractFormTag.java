@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditor;
 
 import jakarta.servlet.jsp.JspException;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 
@@ -46,8 +46,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * Evaluate the supplied value for the supplied attribute name.
 	 * <p>The default implementation simply returns the given value as-is.
 	 */
-	@Nullable
-	protected Object evaluate(String attributeName, @Nullable Object value) throws JspException {
+	protected @Nullable Object evaluate(String attributeName, @Nullable Object value) throws JspException {
 		return value;
 	}
 

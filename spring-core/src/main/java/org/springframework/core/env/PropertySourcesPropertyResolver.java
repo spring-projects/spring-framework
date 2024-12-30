@@ -16,7 +16,7 @@
 
 package org.springframework.core.env;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link PropertyResolver} implementation that resolves property values against
@@ -31,8 +31,7 @@ import org.springframework.lang.Nullable;
  */
 public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 
-	@Nullable
-	private final PropertySources propertySources;
+	private final @Nullable PropertySources propertySources;
 
 
 	/**
@@ -57,25 +56,21 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	}
 
 	@Override
-	@Nullable
-	public String getProperty(String key) {
+	public @Nullable String getProperty(String key) {
 		return getProperty(key, String.class, true);
 	}
 
 	@Override
-	@Nullable
-	public <T> T getProperty(String key, Class<T> targetValueType) {
+	public <T> @Nullable T getProperty(String key, Class<T> targetValueType) {
 		return getProperty(key, targetValueType, true);
 	}
 
 	@Override
-	@Nullable
-	protected String getPropertyAsRawString(String key) {
+	protected @Nullable String getPropertyAsRawString(String key) {
 		return getProperty(key, String.class, false);
 	}
 
-	@Nullable
-	protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
+	protected <T> @Nullable T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
 		if (this.propertySources != null) {
 			for (PropertySource<?> propertySource : this.propertySources) {
 				if (logger.isTraceEnabled()) {

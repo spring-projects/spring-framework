@@ -25,8 +25,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
@@ -48,8 +49,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public class WebSocketServerSockJsSession extends AbstractSockJsSession implements NativeWebSocketSession {
 
-	@Nullable
-	private WebSocketSession webSocketSession;
+	private @Nullable WebSocketSession webSocketSession;
 
 	private volatile boolean openFrameSent;
 
@@ -70,8 +70,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 
 
 	@Override
-	@Nullable
-	public URI getUri() {
+	public @Nullable URI getUri() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getUri();
 	}
@@ -83,29 +82,25 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	}
 
 	@Override
-	@Nullable
-	public Principal getPrincipal() {
+	public @Nullable Principal getPrincipal() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getPrincipal();
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getLocalAddress();
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getRemoteAddress();
 	}
 
 	@Override
-	@Nullable
-	public String getAcceptedProtocol() {
+	public @Nullable String getAcceptedProtocol() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getAcceptedProtocol();
 	}
@@ -148,8 +143,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	}
 
 	@Override
-	@Nullable
-	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
+	public <T> @Nullable T getNativeSession(@Nullable Class<T> requiredType) {
 		return (this.webSocketSession instanceof NativeWebSocketSession nativeWsSession ?
 				nativeWsSession.getNativeSession(requiredType) : null);
 	}

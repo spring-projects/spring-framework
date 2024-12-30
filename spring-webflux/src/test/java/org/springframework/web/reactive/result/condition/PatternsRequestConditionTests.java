@@ -105,38 +105,6 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void matchTrailingSlash() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/"));
-
-		PathPatternParser patternParser = new PathPatternParser();
-		patternParser.setMatchOptionalTrailingSeparator(true);
-
-		PatternsRequestCondition condition = new PatternsRequestCondition(patternParser.parse("/foo"));
-		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next().getPatternString())
-				.as("Should match by default")
-				.isEqualTo("/foo");
-
-		condition = new PatternsRequestCondition(patternParser.parse("/foo"));
-		match = condition.getMatchingCondition(exchange);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next().getPatternString())
-				.as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)")
-				.isEqualTo("/foo");
-
-		PathPatternParser parser = new PathPatternParser();
-		parser.setMatchOptionalTrailingSeparator(false);
-		condition = new PatternsRequestCondition(parser.parse("/foo"));
-		match = condition.getMatchingCondition(MockServerWebExchange.from(get("/foo/")));
-
-		assertThat(match).isNull();
-	}
-
-	@Test
 	void matchPatternContainsExtension() {
 		PatternsRequestCondition condition = createPatternsCondition("/foo.jpg");
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo.html"));

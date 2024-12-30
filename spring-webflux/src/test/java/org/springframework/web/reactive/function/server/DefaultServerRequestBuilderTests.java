@@ -73,7 +73,7 @@ class DefaultServerRequestBuilderTests {
 		assertThat(result.uri()).isEqualTo(uri);
 		assertThat(result.requestPath().pathWithinApplication().value()).isEqualTo("/bar");
 		assertThat(result.requestPath().contextPath().value()).isEqualTo("/foo");
-		assertThat(result.headers().asHttpHeaders()).hasSize(1);
+		assertThat(result.headers().asHttpHeaders().size()).isOne();
 		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
 		assertThat(result.cookies()).hasSize(1);
 		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");

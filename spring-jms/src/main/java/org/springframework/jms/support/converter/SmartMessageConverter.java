@@ -19,8 +19,7 @@ package org.springframework.jms.support.converter;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An extended {@link MessageConverter} SPI with conversion hint support.

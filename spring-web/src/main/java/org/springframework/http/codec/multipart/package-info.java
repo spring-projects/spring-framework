@@ -1,9 +1,7 @@
 /**
  * Multipart support.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.http.codec.multipart;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

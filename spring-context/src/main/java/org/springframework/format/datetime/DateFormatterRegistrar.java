@@ -19,11 +19,12 @@ package org.springframework.format.datetime;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +43,7 @@ import org.springframework.util.Assert;
  */
 public class DateFormatterRegistrar implements FormatterRegistrar {
 
-	@Nullable
-	private DateFormatter dateFormatter;
+	private @Nullable DateFormatter dateFormatter;
 
 
 	/**

@@ -17,8 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import jakarta.servlet.jsp.JspException;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The {@code <textarea>} tag renders an HTML 'textarea'.
@@ -227,14 +226,11 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	public static final String ONSELECT_ATTRIBUTE = "onselect";
 
 
-	@Nullable
-	private String rows;
+	private @Nullable String rows;
 
-	@Nullable
-	private String cols;
+	private @Nullable String cols;
 
-	@Nullable
-	private String onselect;
+	private @Nullable String onselect;
 
 
 	/**
@@ -248,8 +244,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code rows}' attribute.
 	 */
-	@Nullable
-	protected String getRows() {
+	protected @Nullable String getRows() {
 		return this.rows;
 	}
 
@@ -264,8 +259,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code cols}' attribute.
 	 */
-	@Nullable
-	protected String getCols() {
+	protected @Nullable String getCols() {
 		return this.cols;
 	}
 
@@ -280,8 +274,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the '{@code onselect}' attribute.
 	 */
-	@Nullable
-	protected String getOnselect() {
+	protected @Nullable String getOnselect() {
 		return this.onselect;
 	}
 

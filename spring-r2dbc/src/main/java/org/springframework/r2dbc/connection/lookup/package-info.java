@@ -1,9 +1,7 @@
 /**
  * Provides a strategy for looking up R2DBC ConnectionFactories by name.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.r2dbc.connection.lookup;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

@@ -18,13 +18,13 @@ package org.springframework.web.server.handler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
@@ -45,8 +45,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	private static final Log logger = LogFactory.getLog(ResponseStatusExceptionHandler.class);
 
 
-	@Nullable
-	private Log warnLogger;
+	private @Nullable Log warnLogger;
 
 
 	/**
@@ -116,8 +115,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	 * @return the associated HTTP status code, or {@code null} if it can't be
 	 * derived
 	 */
-	@Nullable
-	protected HttpStatusCode determineStatus(Throwable ex) {
+	protected @Nullable HttpStatusCode determineStatus(Throwable ex) {
 		if (ex instanceof ResponseStatusException responseStatusException) {
 			return responseStatusException.getStatusCode();
 		}

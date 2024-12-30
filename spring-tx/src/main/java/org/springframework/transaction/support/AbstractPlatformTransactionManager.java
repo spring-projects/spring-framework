@@ -26,8 +26,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.ConfigurableTransactionManager;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -611,8 +611,7 @@ public abstract class AbstractPlatformTransactionManager
 	 * @see #doSuspend
 	 * @see #resume
 	 */
-	@Nullable
-	protected final SuspendedResourcesHolder suspend(@Nullable Object transaction) throws TransactionException {
+	protected final @Nullable SuspendedResourcesHolder suspend(@Nullable Object transaction) throws TransactionException {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			List<TransactionSynchronization> suspendedSynchronizations = doSuspendSynchronization();
 			try {
@@ -1332,19 +1331,15 @@ public abstract class AbstractPlatformTransactionManager
 	 */
 	protected static final class SuspendedResourcesHolder {
 
-		@Nullable
-		private final Object suspendedResources;
+		private final @Nullable Object suspendedResources;
 
-		@Nullable
-		private List<TransactionSynchronization> suspendedSynchronizations;
+		private @Nullable List<TransactionSynchronization> suspendedSynchronizations;
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
 		private boolean readOnly;
 
-		@Nullable
-		private Integer isolationLevel;
+		private @Nullable Integer isolationLevel;
 
 		private boolean wasActive;
 

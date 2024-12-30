@@ -16,7 +16,8 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -33,8 +34,7 @@ public interface NameValueExpression<T> {
 
 	String getName();
 
-	@Nullable
-	T getValue();
+	@Nullable T getValue();
 
 	boolean isNegated();
 

@@ -21,10 +21,10 @@ import java.util.Map;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryMetadata;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -54,21 +54,17 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	private static final Object FALLBACK_MARKER = new Object();
 
 
-	@Nullable
-	private Map<?, ?> targetConnectionFactories;
+	private @Nullable Map<?, ?> targetConnectionFactories;
 
-	@Nullable
-	private Object defaultTargetConnectionFactory;
+	private @Nullable Object defaultTargetConnectionFactory;
 
 	private boolean lenientFallback = true;
 
 	private ConnectionFactoryLookup connectionFactoryLookup = new MapConnectionFactoryLookup();
 
-	@Nullable
-	private Map<Object, ConnectionFactory> resolvedConnectionFactories;
+	private @Nullable Map<Object, ConnectionFactory> resolvedConnectionFactories;
 
-	@Nullable
-	private ConnectionFactory resolvedDefaultConnectionFactory;
+	private @Nullable ConnectionFactory resolvedDefaultConnectionFactory;
 
 
 	/**
@@ -142,7 +138,6 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * @see #setTargetConnectionFactories(Map)
 	 * @see #setDefaultTargetConnectionFactory(Object)
 	 */
-	@SuppressWarnings("NullAway")
 	public void initialize() {
 		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
 
@@ -221,7 +216,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * per {@link #determineCurrentLookupKey()}
 	 * @see #determineCurrentLookupKey()
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	protected Mono<ConnectionFactory> determineTargetConnectionFactory() {
 		Assert.state(this.resolvedConnectionFactories != null, "ConnectionFactory router not initialized");
 

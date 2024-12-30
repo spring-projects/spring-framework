@@ -29,13 +29,13 @@ import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.ReadableMetadata;
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -235,8 +235,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	 * @see Readable#get(int, Class)
 	 * @see Readable#get(int)
 	 */
-	@Nullable
-	protected Object getItemValue(Readable readable, int itemIndex, Class<?> paramType) {
+	protected @Nullable Object getItemValue(Readable readable, int itemIndex, Class<?> paramType) {
 		try {
 			return readable.get(itemIndex, paramType);
 		}

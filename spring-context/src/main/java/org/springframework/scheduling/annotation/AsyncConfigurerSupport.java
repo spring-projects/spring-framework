@@ -18,8 +18,9 @@ package org.springframework.scheduling.annotation;
 
 import java.util.concurrent.Executor;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.lang.Nullable;
 
 /**
  * A convenience {@link AsyncConfigurer} that implements all methods
@@ -34,14 +35,12 @@ import org.springframework.lang.Nullable;
 public class AsyncConfigurerSupport implements AsyncConfigurer {
 
 	@Override
-	@Nullable
-	public Executor getAsyncExecutor() {
+	public @Nullable Executor getAsyncExecutor() {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+	public @Nullable AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
 		return null;
 	}
 

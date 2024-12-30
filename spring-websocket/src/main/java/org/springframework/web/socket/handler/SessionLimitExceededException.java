@@ -16,7 +16,8 @@
 
 package org.springframework.web.socket.handler;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.socket.CloseStatus;
 
 /**

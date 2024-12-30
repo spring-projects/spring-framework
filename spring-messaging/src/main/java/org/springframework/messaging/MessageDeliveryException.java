@@ -16,7 +16,7 @@
 
 package org.springframework.messaging;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception that indicates an error occurred during message delivery.

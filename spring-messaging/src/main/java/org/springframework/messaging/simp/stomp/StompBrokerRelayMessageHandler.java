@@ -26,7 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -137,21 +138,17 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private final Map<String, MessageHandler> systemSubscriptions = new HashMap<>(4);
 
-	@Nullable
-	private String virtualHost;
+	private @Nullable String virtualHost;
 
-	@Nullable
-	private TcpOperations<byte[]> tcpClient;
+	private @Nullable TcpOperations<byte[]> tcpClient;
 
-	@Nullable
-	private MessageHeaderInitializer headerInitializer;
+	private @Nullable MessageHeaderInitializer headerInitializer;
 
 	private final DefaultStats stats = new DefaultStats();
 
 	private final Map<String, RelayConnectionHandler> connectionHandlers = new ConcurrentHashMap<>();
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
 
 	/**
@@ -349,8 +346,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Return the configured virtual host value.
 	 */
-	@Nullable
-	public String getVirtualHost() {
+	public @Nullable String getVirtualHost() {
 		return this.virtualHost;
 	}
 
@@ -371,8 +367,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * invoked and this method is invoked before the handler is started and
 	 * hence a default implementation initialized).
 	 */
-	@Nullable
-	public TcpOperations<byte[]> getTcpClient() {
+	public @Nullable TcpOperations<byte[]> getTcpClient() {
 		return this.tcpClient;
 	}
 
@@ -389,8 +384,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	/**
 	 * Return the configured header initializer.
 	 */
-	@Nullable
-	public MessageHeaderInitializer getHeaderInitializer() {
+	public @Nullable MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 
@@ -429,8 +423,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.taskScheduler = taskScheduler;
 	}
 
-	@Nullable
-	public TaskScheduler getTaskScheduler() {
+	public @Nullable TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
 
@@ -644,15 +637,13 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private final MessageChannel outboundChannel;
 
-		@Nullable
-		private volatile TcpConnection<byte[]> tcpConnection;
+		private volatile @Nullable TcpConnection<byte[]> tcpConnection;
 
 		private volatile boolean isStompConnected;
 
 		private long clientSendInterval;
 
-		@Nullable
-		private final AtomicInteger clientSendMessageCount;
+		private final @Nullable AtomicInteger clientSendMessageCount;
 
 		private long clientSendMessageTimestamp;
 
@@ -691,8 +682,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return this.connectHeaders;
 		}
 
-		@Nullable
-		protected TcpConnection<byte[]> getTcpConnection() {
+		protected @Nullable TcpConnection<byte[]> getTcpConnection() {
 			return this.tcpConnection;
 		}
 

@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
@@ -29,7 +31,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.context.annotation.ReflectiveScan;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -43,8 +44,7 @@ import org.springframework.util.ClassUtils;
 class ReflectiveProcessorBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
 	@Override
-	@Nullable
-	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+	public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		Class<?>[] beanClasses = Arrays.stream(beanFactory.getBeanDefinitionNames())
 				.map(beanName -> RegisteredBean.of(beanFactory, beanName).getBeanClass())
 				.toArray(Class<?>[]::new);

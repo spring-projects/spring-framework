@@ -18,9 +18,9 @@ package org.springframework.web.context;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.lang.Nullable;
 
 /**
  * Specialization of {@link ConfigurableEnvironment} allowing initialization of

@@ -24,8 +24,8 @@ import jakarta.resource.spi.XATerminator;
 import jakarta.resource.spi.work.WorkContext;
 import jakarta.resource.spi.work.WorkManager;
 import jakarta.transaction.TransactionSynchronizationRegistry;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,14 +42,11 @@ import org.springframework.util.Assert;
  */
 public class SimpleBootstrapContext implements BootstrapContext {
 
-	@Nullable
-	private final WorkManager workManager;
+	private final @Nullable WorkManager workManager;
 
-	@Nullable
-	private XATerminator xaTerminator;
+	private @Nullable XATerminator xaTerminator;
 
-	@Nullable
-	private TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+	private @Nullable TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
 
 	/**
@@ -96,8 +93,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	}
 
 	@Override
-	@Nullable
-	public XATerminator getXATerminator() {
+	public @Nullable XATerminator getXATerminator() {
 		return this.xaTerminator;
 	}
 
@@ -112,8 +108,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	}
 
 	@Override
-	@Nullable
-	public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
+	public @Nullable TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
 		return this.transactionSynchronizationRegistry;
 	}
 

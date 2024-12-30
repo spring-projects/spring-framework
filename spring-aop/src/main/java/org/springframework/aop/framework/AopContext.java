@@ -16,8 +16,9 @@
 
 package org.springframework.aop.framework;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.Nullable;
 
 /**
  * Class containing static methods used to obtain information about the current AOP invocation.
@@ -80,8 +81,7 @@ public final class AopContext {
 	 * @return the old proxy, which may be {@code null} if none was bound
 	 * @see #currentProxy()
 	 */
-	@Nullable
-	static Object setCurrentProxy(@Nullable Object proxy) {
+	static @Nullable Object setCurrentProxy(@Nullable Object proxy) {
 		Object old = currentProxy.get();
 		if (proxy != null) {
 			currentProxy.set(proxy);

@@ -1,9 +1,7 @@
 /**
  * Provides generic filter base classes allowing for bean-style configuration.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.filter;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

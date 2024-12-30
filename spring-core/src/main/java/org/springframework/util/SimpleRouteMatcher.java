@@ -19,7 +19,7 @@ package org.springframework.util;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@code RouteMatcher} that delegates to a {@link PathMatcher}.
@@ -75,8 +75,7 @@ public class SimpleRouteMatcher implements RouteMatcher {
 	}
 
 	@Override
-	@Nullable
-	public Map<String, String> matchAndExtract(String pattern, Route route) {
+	public @Nullable Map<String, String> matchAndExtract(String pattern, Route route) {
 		if (!match(pattern, route)) {
 			return null;
 		}

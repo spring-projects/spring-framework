@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 import reactor.blockhound.BlockHound;
 import reactor.blockhound.integration.BlockHoundIntegration;
 
@@ -34,7 +35,6 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.HttpHandlerDecoratorFactory;
 import org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationConvention;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -85,33 +85,25 @@ public final class WebHttpHandlerBuilder {
 
 	private final WebHandler webHandler;
 
-	@Nullable
-	private final ApplicationContext applicationContext;
+	private final @Nullable ApplicationContext applicationContext;
 
 	private final List<WebFilter> filters = new ArrayList<>();
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
-	@Nullable
-	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
+	private @Nullable Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
-	@Nullable
-	private WebSessionManager sessionManager;
+	private @Nullable WebSessionManager sessionManager;
 
-	@Nullable
-	private ServerCodecConfigurer codecConfigurer;
+	private @Nullable ServerCodecConfigurer codecConfigurer;
 
-	@Nullable
-	private LocaleContextResolver localeContextResolver;
+	private @Nullable LocaleContextResolver localeContextResolver;
 
-	@Nullable
-	private ForwardedHeaderTransformer forwardedHeaderTransformer;
+	private @Nullable ForwardedHeaderTransformer forwardedHeaderTransformer;
 
-	@Nullable
-	private ObservationRegistry observationRegistry;
+	private @Nullable ObservationRegistry observationRegistry;
 
-	@Nullable
-	private ServerRequestObservationConvention observationConvention;
+	private @Nullable ServerRequestObservationConvention observationConvention;
 
 
 	/**

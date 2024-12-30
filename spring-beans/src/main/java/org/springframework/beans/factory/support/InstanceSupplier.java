@@ -19,7 +19,8 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.function.ThrowingBiFunction;
 import org.springframework.util.function.ThrowingSupplier;
@@ -59,8 +60,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	 * another means.
 	 * @return the factory method used to create the instance, or {@code null}
 	 */
-	@Nullable
-	default Method getFactoryMethod() {
+	default @Nullable Method getFactoryMethod() {
 		return null;
 	}
 
@@ -83,8 +83,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 				return after.applyWithException(registeredBean, InstanceSupplier.this.get(registeredBean));
 			}
 			@Override
-			@Nullable
-			public Method getFactoryMethod() {
+			public @Nullable Method getFactoryMethod() {
 				return InstanceSupplier.this.getFactoryMethod();
 			}
 		};
@@ -127,8 +126,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 				return supplier.getWithException();
 			}
 			@Override
-			@Nullable
-			public Method getFactoryMethod() {
+			public @Nullable Method getFactoryMethod() {
 				return factoryMethod;
 			}
 		};

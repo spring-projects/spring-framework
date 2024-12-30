@@ -16,8 +16,9 @@
 
 package org.springframework.web.socket.sockjs;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for exceptions raised while processing SockJS HTTP requests.
@@ -28,8 +29,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class SockJsException extends NestedRuntimeException {
 
-	@Nullable
-	private final String sessionId;
+	private final @Nullable String sessionId;
 
 
 	/**
@@ -56,8 +56,7 @@ public class SockJsException extends NestedRuntimeException {
 	/**
 	 * Return the SockJS session id.
 	 */
-	@Nullable
-	public String getSockJsSessionId() {
+	public @Nullable String getSockJsSessionId() {
 		return this.sessionId;
 	}
 

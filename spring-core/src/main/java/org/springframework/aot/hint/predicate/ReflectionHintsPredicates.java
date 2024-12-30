@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
@@ -34,7 +36,6 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -203,8 +204,7 @@ public class ReflectionHintsPredicates {
 			this.type = type;
 		}
 
-		@Nullable
-		private TypeHint getTypeHint(RuntimeHints hints) {
+		private @Nullable TypeHint getTypeHint(RuntimeHints hints) {
 			return hints.reflection().getTypeHint(this.type);
 		}
 
@@ -373,8 +373,7 @@ public class ReflectionHintsPredicates {
 
 		private final Field field;
 
-		@Nullable
-		private ExecutableMode executableMode;
+		private @Nullable ExecutableMode executableMode;
 
 		FieldHintPredicate(Field field) {
 			this.field = field;

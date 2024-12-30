@@ -19,11 +19,11 @@ package org.springframework.jms.core.support;
 import jakarta.jms.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.lang.Nullable;
 
 /**
  * Convenient superclass for application classes that need JMS access.
@@ -45,8 +45,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private JmsTemplate jmsTemplate;
+	private @Nullable JmsTemplate jmsTemplate;
 
 
 	/**
@@ -75,8 +74,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/**
 	 * Return the JMS ConnectionFactory used by the gateway.
 	 */
-	@Nullable
-	public final ConnectionFactory getConnectionFactory() {
+	public final @Nullable ConnectionFactory getConnectionFactory() {
 		return (this.jmsTemplate != null ? this.jmsTemplate.getConnectionFactory() : null);
 	}
 
@@ -91,8 +89,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/**
 	 * Return the JmsTemplate for the gateway.
 	 */
-	@Nullable
-	public final JmsTemplate getJmsTemplate() {
+	public final @Nullable JmsTemplate getJmsTemplate() {
 		return this.jmsTemplate;
 	}
 

@@ -19,13 +19,13 @@ package org.springframework.web.socket.client.standard;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
@@ -40,18 +40,15 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  */
 public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport implements BeanFactoryAware {
 
-	@Nullable
-	private final Object endpoint;
+	private final @Nullable Object endpoint;
 
-	@Nullable
-	private final BeanCreatingHandlerProvider<Object> endpointProvider;
+	private final @Nullable BeanCreatingHandlerProvider<Object> endpointProvider;
 
 	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("AnnotatedEndpointConnectionManager-");
 
-	@Nullable
-	private volatile Session session;
+	private volatile @Nullable Session session;
 
 
 	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {

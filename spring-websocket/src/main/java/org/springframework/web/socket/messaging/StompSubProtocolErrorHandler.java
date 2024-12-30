@@ -16,7 +16,8 @@
 
 package org.springframework.web.socket.messaging;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -36,8 +37,7 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 
 
 	@Override
-	@Nullable
-	public Message<byte[]> handleClientMessageProcessingError(@Nullable Message<byte[]> clientMessage, Throwable ex) {
+	public @Nullable Message<byte[]> handleClientMessageProcessingError(@Nullable Message<byte[]> clientMessage, Throwable ex) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setMessage(ex.getMessage());
 		accessor.setLeaveMutable(true);
@@ -57,8 +57,7 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 	}
 
 	@Override
-	@Nullable
-	public Message<byte[]> handleErrorMessageToClient(Message<byte[]> errorMessage) {
+	public @Nullable Message<byte[]> handleErrorMessageToClient(Message<byte[]> errorMessage) {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
 		Assert.notNull(accessor, "No StompHeaderAccessor");
 		if (!accessor.isMutable()) {

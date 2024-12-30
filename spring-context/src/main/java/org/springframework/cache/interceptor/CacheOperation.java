@@ -19,7 +19,8 @@ package org.springframework.cache.interceptor;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 

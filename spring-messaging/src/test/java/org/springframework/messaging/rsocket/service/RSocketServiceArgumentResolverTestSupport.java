@@ -18,8 +18,9 @@ package org.springframework.messaging.rsocket.service;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -28,13 +29,11 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class RSocketServiceArgumentResolverTestSupport {
 
-	@Nullable
-	private RSocketServiceArgumentResolver resolver;
+	private @Nullable RSocketServiceArgumentResolver resolver;
 
 	private final RSocketRequestValues.Builder requestValuesBuilder = RSocketRequestValues.builder(null);
 
-	@Nullable
-	private RSocketRequestValues requestValues;
+	private @Nullable RSocketRequestValues requestValues;
 
 
 	protected RSocketServiceArgumentResolverTestSupport() {

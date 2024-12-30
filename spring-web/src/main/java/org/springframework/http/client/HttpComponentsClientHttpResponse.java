@@ -22,11 +22,11 @@ import java.io.InputStream;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.support.HttpComponentsHeadersAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -44,8 +44,7 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	private final ClassicHttpResponse httpResponse;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
 
 	HttpComponentsClientHttpResponse(ClassicHttpResponse httpResponse) {

@@ -16,7 +16,7 @@
 
 package org.springframework.beans;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown on an attempt to set the value of a property that
@@ -29,8 +29,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class NotWritablePropertyException extends InvalidPropertyException {
 
-	@Nullable
-	private final String[] possibleMatches;
+	private final String @Nullable [] possibleMatches;
 
 
 	/**
@@ -86,8 +85,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 * Return suggestions for actual bean property names that closely match
 	 * the invalid property name, if any.
 	 */
-	@Nullable
-	public String[] getPossibleMatches() {
+	public String @Nullable [] getPossibleMatches() {
 		return this.possibleMatches;
 	}
 

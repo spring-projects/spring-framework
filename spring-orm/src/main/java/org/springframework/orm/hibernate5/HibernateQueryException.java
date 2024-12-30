@@ -17,9 +17,9 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.QueryException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * Hibernate-specific subclass of InvalidDataAccessResourceUsageException,
@@ -39,10 +39,9 @@ public class HibernateQueryException extends InvalidDataAccessResourceUsageExcep
 	/**
 	 * Return the HQL query string that was invalid.
 	 */
-	@Nullable
-	@SuppressWarnings("NullAway")
-	public String getQueryString() {
-		return ((QueryException) getCause()).getQueryString();
+	public @Nullable String getQueryString() {
+		QueryException cause = (QueryException) getCause();
+		return cause == null ? null : cause.getQueryString();
 	}
 
 }

@@ -28,12 +28,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,8 +50,7 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 
 	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
-	@Nullable
-	private Duration readTimeout;
+	private @Nullable Duration readTimeout;
 
 
 	/**

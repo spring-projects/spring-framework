@@ -26,12 +26,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
@@ -297,13 +297,11 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 		parseLocaleCookieIfNecessary(request);
 		return new TimeZoneAwareLocaleContext() {
 			@Override
-			@Nullable
-			public Locale getLocale() {
+			public @Nullable Locale getLocale() {
 				return (Locale) request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME);
 			}
 			@Override
-			@Nullable
-			public TimeZone getTimeZone() {
+			public @Nullable TimeZone getTimeZone() {
 				return (TimeZone) request.getAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME);
 			}
 		};
@@ -395,8 +393,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	 * @since 4.3
 	 * @see StringUtils#parseLocale(String)
 	 */
-	@Nullable
-	protected Locale parseLocaleValue(String localeValue) {
+	protected @Nullable Locale parseLocaleValue(String localeValue) {
 		return StringUtils.parseLocale(localeValue);
 	}
 
@@ -442,8 +439,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	 * @deprecated as of 6.0, in favor of {@link #setDefaultTimeZoneFunction(Function)}
 	 */
 	@Deprecated(since = "6.0")
-	@Nullable
-	protected TimeZone determineDefaultTimeZone(HttpServletRequest request) {
+	protected @Nullable TimeZone determineDefaultTimeZone(HttpServletRequest request) {
 		return this.defaultTimeZoneFunction.apply(request);
 	}
 

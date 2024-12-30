@@ -19,10 +19,10 @@ package org.springframework.test.context.bean.override.mockito;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.example.ExampleService;
 
@@ -70,10 +70,9 @@ public class MockitoBeanOverrideProcessorTests {
 	}
 
 	static class MockitoConf {
-		@Nullable
 		@MockitoBean
 		@MockitoSpyBean
-		public ExampleService a;
+		public @Nullable ExampleService a;
 	}
 
 }

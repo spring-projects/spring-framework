@@ -19,7 +19,7 @@ package org.springframework.messaging.handler;
 import java.util.Collection;
 import java.util.StringJoiner;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for {@code MessageCondition's} that pre-declares abstract methods

@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -223,6 +223,7 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(request)).isFalse();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void pathExtension() {
 		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
@@ -237,6 +238,7 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(initRequest("GET", "/file"))).isFalse();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void pathExtensionPredicate() {
 		List<String> extensions = List.of("foo", "bar");

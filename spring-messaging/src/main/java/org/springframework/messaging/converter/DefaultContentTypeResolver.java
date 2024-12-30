@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeType;
 
@@ -32,8 +33,7 @@ import org.springframework.util.MimeType;
  */
 public class DefaultContentTypeResolver implements ContentTypeResolver {
 
-	@Nullable
-	private MimeType defaultMimeType;
+	private @Nullable MimeType defaultMimeType;
 
 
 	/**
@@ -49,15 +49,13 @@ public class DefaultContentTypeResolver implements ContentTypeResolver {
 	 * Return the default MIME type to use if no
 	 * {@link MessageHeaders#CONTENT_TYPE} header is present.
 	 */
-	@Nullable
-	public MimeType getDefaultMimeType() {
+	public @Nullable MimeType getDefaultMimeType() {
 		return this.defaultMimeType;
 	}
 
 
 	@Override
-	@Nullable
-	public MimeType resolve(@Nullable MessageHeaders headers) {
+	public @Nullable MimeType resolve(@Nullable MessageHeaders headers) {
 		if (headers == null || headers.get(MessageHeaders.CONTENT_TYPE) == null) {
 			return this.defaultMimeType;
 		}

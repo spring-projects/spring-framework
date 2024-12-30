@@ -16,8 +16,9 @@
 
 package org.springframework.expression;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 
 /**
  * A type converter can convert values between different types encountered during
@@ -54,7 +55,6 @@ public interface TypeConverter {
 	 * @return the converted value
 	 * @throws EvaluationException if conversion failed or is not possible to begin with
 	 */
-	@Nullable
-	Object convertValue(@Nullable Object value, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
+	@Nullable Object convertValue(@Nullable Object value, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

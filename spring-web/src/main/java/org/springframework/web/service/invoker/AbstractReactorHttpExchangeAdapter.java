@@ -18,11 +18,12 @@ package org.springframework.web.service.invoker;
 
 import java.time.Duration;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,8 +37,7 @@ public abstract class AbstractReactorHttpExchangeAdapter implements ReactorHttpE
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
-	@Nullable
-	private Duration blockTimeout;
+	private @Nullable Duration blockTimeout;
 
 
 	/**
@@ -69,8 +69,7 @@ public abstract class AbstractReactorHttpExchangeAdapter implements ReactorHttpE
 	}
 
 	@Override
-	@Nullable
-	public Duration getBlockTimeout() {
+	public @Nullable Duration getBlockTimeout() {
 		return this.blockTimeout;
 	}
 

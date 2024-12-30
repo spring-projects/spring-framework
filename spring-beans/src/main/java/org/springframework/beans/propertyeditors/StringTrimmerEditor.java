@@ -18,7 +18,8 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -32,8 +33,7 @@ import org.springframework.util.StringUtils;
  */
 public class StringTrimmerEditor extends PropertyEditorSupport {
 
-	@Nullable
-	private final String charsToDelete;
+	private final @Nullable String charsToDelete;
 
 	private final boolean emptyAsNull;
 

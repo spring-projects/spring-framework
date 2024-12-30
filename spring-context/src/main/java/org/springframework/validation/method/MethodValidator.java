@@ -18,8 +18,9 @@ package org.springframework.validation.method;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Contract to apply method validation and handle the results.
@@ -51,7 +52,7 @@ public interface MethodValidator {
 	 * @return the result of validation
 	 */
 	MethodValidationResult validateArguments(
-			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object target, Method method, MethodParameter @Nullable [] parameters,
 			Object[] arguments, Class<?>[] groups);
 
 	/**
@@ -62,7 +63,7 @@ public interface MethodValidator {
 	 * @throws MethodValidationException in case of unhandled errors.
 	 */
 	default void applyArgumentValidation(
-			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object target, Method method, MethodParameter @Nullable [] parameters,
 			Object[] arguments, Class<?>[] groups) {
 
 		MethodValidationResult result = validateArguments(target, method, parameters, arguments, groups);

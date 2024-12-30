@@ -58,7 +58,7 @@ public class WebClientRequestException extends WebClientException {
 	 */
 	private static HttpHeaders copy(HttpHeaders headers) {
 		HttpHeaders result = new HttpHeaders();
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+		for (Map.Entry<String, List<String>> entry : headers.headerSet()) {
 			for (String value : entry.getValue()) {
 				result.add(entry.getKey(), value);
 			}

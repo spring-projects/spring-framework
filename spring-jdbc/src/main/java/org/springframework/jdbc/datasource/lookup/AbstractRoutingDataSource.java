@@ -25,9 +25,10 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.AbstractDataSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -44,21 +45,17 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class AbstractRoutingDataSource extends AbstractDataSource implements InitializingBean {
 
-	@Nullable
-	private Map<Object, Object> targetDataSources;
+	private @Nullable Map<Object, Object> targetDataSources;
 
-	@Nullable
-	private Object defaultTargetDataSource;
+	private @Nullable Object defaultTargetDataSource;
 
 	private boolean lenientFallback = true;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
-	@Nullable
-	private Map<Object, DataSource> resolvedDataSources;
+	private @Nullable Map<Object, DataSource> resolvedDataSources;
 
-	@Nullable
-	private DataSource resolvedDefaultDataSource;
+	private @Nullable DataSource resolvedDefaultDataSource;
 
 
 	/**
@@ -202,8 +199,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * @since 5.2.9
 	 * @see #setDefaultTargetDataSource
 	 */
-	@Nullable
-	public DataSource getResolvedDefaultDataSource() {
+	public @Nullable DataSource getResolvedDefaultDataSource() {
 		return this.resolvedDefaultDataSource;
 	}
 
@@ -271,7 +267,6 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * to match the stored lookup key type, as resolved by the
 	 * {@link #resolveSpecifiedLookupKey} method.
 	 */
-	@Nullable
-	protected abstract Object determineCurrentLookupKey();
+	protected abstract @Nullable Object determineCurrentLookupKey();
 
 }

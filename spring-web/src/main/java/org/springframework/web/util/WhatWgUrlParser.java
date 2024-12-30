@@ -31,8 +31,8 @@ import java.util.function.IntPredicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -71,24 +71,19 @@ final class WhatWgUrlParser {
 
 	private final StringBuilder input;
 
-	@Nullable
-	private final UrlRecord base;
+	private final @Nullable UrlRecord base;
 
-	@Nullable
-	private Charset encoding;
+	private @Nullable Charset encoding;
 
-	@Nullable
-	private final Consumer<String> validationErrorHandler;
+	private final @Nullable Consumer<String> validationErrorHandler;
 
 	private int pointer;
 
 	private final StringBuilder buffer;
 
-	@Nullable
-	private State state;
+	private @Nullable State state;
 
-	@Nullable
-	private State stateOverride;
+	private @Nullable State stateOverride;
 
 	private boolean atSignSeen;
 
@@ -539,8 +534,7 @@ final class WhatWgUrlParser {
 		}
 	}
 
-	@Nullable
-	private String percentEncode(int c, IntPredicate percentEncodeSet) {
+	private @Nullable String percentEncode(int c, IntPredicate percentEncodeSet) {
 		if (this.encoding == null) {
 			return null;
 		}
@@ -1723,25 +1717,19 @@ final class WhatWgUrlParser {
 
 		private String scheme = "";
 
-		@Nullable
-		private StringBuilder username = null;
+		private @Nullable StringBuilder username = null;
 
-		@Nullable
-		private StringBuilder password = null;
+		private @Nullable StringBuilder password = null;
 
-		@Nullable
-		private Host host = null;
+		private @Nullable Host host = null;
 
-		@Nullable
-		private Port port = null;
+		private @Nullable Port port = null;
 
 		private Path path = new PathSegments();
 
-		@Nullable
-		private StringBuilder query = null;
+		private @Nullable StringBuilder query = null;
 
-		@Nullable
-		private StringBuilder fragment = null;
+		private @Nullable StringBuilder fragment = null;
 
 		public UrlRecord() {
 		}
@@ -1836,8 +1824,7 @@ final class WhatWgUrlParser {
 		/**
 		 * Convenience method to return the full user info.
 		 */
-		@Nullable
-		public String userInfo() {
+		public @Nullable String userInfo() {
 			if (!includesCredentials()) {
 				return null;
 			}
@@ -1853,8 +1840,7 @@ final class WhatWgUrlParser {
 		 * A URL’s host is {@code null} or a {@linkplain Host host}.
 		 * It is initially {@code null}.
 		 */
-		@Nullable
-		public Host host() {
+		public @Nullable Host host() {
 			return this.host;
 		}
 
@@ -1891,8 +1877,7 @@ final class WhatWgUrlParser {
 		 * integer, or a string containing a uri template.
 		 * <p>It is initially {@code null}.
 		 */
-		@Nullable
-		public Port port() {
+		public @Nullable Port port() {
 			return this.port;
 		}
 
@@ -1930,8 +1915,7 @@ final class WhatWgUrlParser {
 		 * A URL’s query is either {@code null} or an ASCII string.
 		 * <p>It is initially {@code null}.
 		 */
-		@Nullable
-		public String query() {
+		public @Nullable String query() {
 			return (this.query != null ? this.query.toString() : null);
 		}
 
@@ -1958,8 +1942,7 @@ final class WhatWgUrlParser {
 		 * other components identify.
 		 * <p>It is initially {@code null}.
 		 */
-		@Nullable
-		public String fragment() {
+		public @Nullable String fragment() {
 			return (this.fragment != null ? this.fragment.toString() : null);
 		}
 
@@ -2916,11 +2899,9 @@ final class WhatWgUrlParser {
 
 	static final class PathSegment implements Path {
 
-		@Nullable
-		private StringBuilder builder = null;
+		private @Nullable StringBuilder builder = null;
 
-		@Nullable
-		String segment;
+		@Nullable String segment;
 
 		PathSegment(String segment) {
 			this.segment = segment;

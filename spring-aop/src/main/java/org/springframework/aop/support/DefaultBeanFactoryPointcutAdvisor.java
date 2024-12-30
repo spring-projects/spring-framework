@@ -16,8 +16,9 @@
 
 package org.springframework.aop.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.Pointcut;
-import org.springframework.lang.Nullable;
 
 /**
  * Concrete BeanFactory-based PointcutAdvisor that allows for any Advice

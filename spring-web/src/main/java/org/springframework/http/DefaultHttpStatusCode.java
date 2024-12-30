@@ -18,7 +18,7 @@ package org.springframework.http;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default implementation of {@link HttpStatusCode}.

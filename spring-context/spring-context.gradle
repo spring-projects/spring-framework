@@ -33,7 +33,6 @@ dependencies {
 	optional("org.reactivestreams:reactive-streams")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation(testFixtures(project(":spring-beans")))
-	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
 	testImplementation(project(":spring-core-test"))

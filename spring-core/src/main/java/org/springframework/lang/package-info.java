@@ -7,4 +7,7 @@
  * (for example, FindBugs or Animal Sniffer), alternative JVM languages (for example, Kotlin), as well as IDEs
  * (for example, IntelliJ IDEA or Eclipse with corresponding project setup).
  */
+@NullMarked
 package org.springframework.lang;
+
+import org.jspecify.annotations.NullMarked;

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
@@ -72,7 +74,6 @@ import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -121,65 +122,45 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 
-	@Nullable
-	private Decoder<?> jackson2JsonDecoder;
+	private @Nullable Decoder<?> jackson2JsonDecoder;
 
-	@Nullable
-	private Encoder<?> jackson2JsonEncoder;
+	private @Nullable Encoder<?> jackson2JsonEncoder;
 
-	@Nullable
-	private Encoder<?> jackson2SmileEncoder;
+	private @Nullable Encoder<?> jackson2SmileEncoder;
 
-	@Nullable
-	private Decoder<?> jackson2SmileDecoder;
+	private @Nullable Decoder<?> jackson2SmileDecoder;
 
-	@Nullable
-	private Decoder<?> protobufDecoder;
+	private @Nullable Decoder<?> protobufDecoder;
 
-	@Nullable
-	private Encoder<?> protobufEncoder;
+	private @Nullable Encoder<?> protobufEncoder;
 
-	@Nullable
-	private Decoder<?> jaxb2Decoder;
+	private @Nullable Decoder<?> jaxb2Decoder;
 
-	@Nullable
-	private Encoder<?> jaxb2Encoder;
+	private @Nullable Encoder<?> jaxb2Encoder;
 
-	@Nullable
-	private Decoder<?> kotlinSerializationCborDecoder;
+	private @Nullable Decoder<?> kotlinSerializationCborDecoder;
 
-	@Nullable
-	private Encoder<?> kotlinSerializationCborEncoder;
+	private @Nullable Encoder<?> kotlinSerializationCborEncoder;
 
-	@Nullable
-	private Decoder<?> kotlinSerializationJsonDecoder;
+	private @Nullable Decoder<?> kotlinSerializationJsonDecoder;
 
-	@Nullable
-	private Encoder<?> kotlinSerializationJsonEncoder;
+	private @Nullable Encoder<?> kotlinSerializationJsonEncoder;
 
-	@Nullable
-	private Decoder<?> kotlinSerializationProtobufDecoder;
+	private @Nullable Decoder<?> kotlinSerializationProtobufDecoder;
 
-	@Nullable
-	private Encoder<?> kotlinSerializationProtobufEncoder;
+	private @Nullable Encoder<?> kotlinSerializationProtobufEncoder;
 
-	@Nullable
-	private DefaultMultipartCodecs multipartCodecs;
+	private @Nullable DefaultMultipartCodecs multipartCodecs;
 
-	@Nullable
-	private Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
+	private @Nullable Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
 
-	@Nullable
-	private HttpMessageReader<?> multipartReader;
+	private @Nullable HttpMessageReader<?> multipartReader;
 
-	@Nullable
-	private Consumer<Object> codecConsumer;
+	private @Nullable Consumer<Object> codecConsumer;
 
-	@Nullable
-	private Integer maxInMemorySize;
+	private @Nullable Integer maxInMemorySize;
 
-	@Nullable
-	private Boolean enableLoggingRequestDetails;
+	private @Nullable Boolean enableLoggingRequestDetails;
 
 	private boolean registerDefaults = true;
 
@@ -352,8 +333,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	@Override
-	@Nullable
-	public Integer maxInMemorySize() {
+	public @Nullable Integer maxInMemorySize() {
 		return this.maxInMemorySize;
 	}
 
@@ -392,8 +372,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	@Override
-	@Nullable
-	public Boolean isEnableLoggingRequestDetails() {
+	public @Nullable Boolean isEnableLoggingRequestDetails() {
 		return this.enableLoggingRequestDetails;
 	}
 

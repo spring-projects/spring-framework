@@ -57,12 +57,12 @@ import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -120,38 +120,27 @@ public class Jackson2ObjectMapperBuilder {
 
 	private boolean createXmlMapper = false;
 
-	@Nullable
-	private JsonFactory factory;
+	private @Nullable JsonFactory factory;
 
-	@Nullable
-	private DateFormat dateFormat;
+	private @Nullable DateFormat dateFormat;
 
-	@Nullable
-	private Locale locale;
+	private @Nullable Locale locale;
 
-	@Nullable
-	private TimeZone timeZone;
+	private @Nullable TimeZone timeZone;
 
-	@Nullable
-	private AnnotationIntrospector annotationIntrospector;
+	private @Nullable AnnotationIntrospector annotationIntrospector;
 
-	@Nullable
-	private PropertyNamingStrategy propertyNamingStrategy;
+	private @Nullable PropertyNamingStrategy propertyNamingStrategy;
 
-	@Nullable
-	private TypeResolverBuilder<?> defaultTyping;
+	private @Nullable TypeResolverBuilder<?> defaultTyping;
 
-	@Nullable
-	private JsonInclude.Value serializationInclusion;
+	private JsonInclude.@Nullable Value serializationInclusion;
 
-	@Nullable
-	private FilterProvider filters;
+	private @Nullable FilterProvider filters;
 
-	@Nullable
-	private List<Module> modules;
+	private @Nullable List<Module> modules;
 
-	@Nullable
-	private Class<? extends Module>[] moduleClasses;
+	private Class<? extends Module> @Nullable [] moduleClasses;
 
 	private boolean findModulesViaServiceLoader = false;
 
@@ -159,17 +148,13 @@ public class Jackson2ObjectMapperBuilder {
 
 	private ClassLoader moduleClassLoader = getClass().getClassLoader();
 
-	@Nullable
-	private HandlerInstantiator handlerInstantiator;
+	private @Nullable HandlerInstantiator handlerInstantiator;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private Boolean defaultUseWrapper;
+	private @Nullable Boolean defaultUseWrapper;
 
-	@Nullable
-	private Consumer<ObjectMapper> configurer;
+	private @Nullable Consumer<ObjectMapper> configurer;
 
 
 	/**

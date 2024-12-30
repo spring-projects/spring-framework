@@ -204,7 +204,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 		StepVerifier.create(result)
 				.assertNext(entity -> {
 					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-					assertThat(entity.getHeaders()).containsEntry("Foo", Collections.singletonList("bar"));
+					assertThat(entity.getHeaders().hasHeaderValues("Foo", Collections.singletonList("bar"))).isTrue();
 					assertThat(entity.getBody()).isNull();
 				})
 				.expectComplete()

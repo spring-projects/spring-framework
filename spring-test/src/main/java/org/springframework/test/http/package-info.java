@@ -1,9 +1,7 @@
 /**
  * Test support for HTTP concepts.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.http;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

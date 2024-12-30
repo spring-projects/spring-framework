@@ -18,12 +18,12 @@ package org.springframework.web.socket.server.support;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -41,8 +41,7 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 
 	private boolean webSocketUpgradeMatch;
 
-	@Nullable
-	private Integer phase;
+	private @Nullable Integer phase;
 
 	private volatile boolean running;
 
@@ -118,8 +117,7 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 
 
 	@Override
-	@Nullable
-	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+	protected @Nullable Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		Object handler = super.getHandlerInternal(request);
 		return (matchWebSocketUpgrade(handler, request) ? handler : null);
 	}

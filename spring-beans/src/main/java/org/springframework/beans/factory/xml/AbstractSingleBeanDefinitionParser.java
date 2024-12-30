@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for those {@link BeanDefinitionParser} implementations that
@@ -98,8 +98,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * @return the name of the parent bean for the currently parsed bean,
 	 * or {@code null} if none
 	 */
-	@Nullable
-	protected String getParentName(Element element) {
+	protected @Nullable String getParentName(Element element) {
 		return null;
 	}
 
@@ -115,8 +114,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * the supplied {@code Element}, or {@code null} if none
 	 * @see #getBeanClassName
 	 */
-	@Nullable
-	protected Class<?> getBeanClass(Element element) {
+	protected @Nullable Class<?> getBeanClass(Element element) {
 		return null;
 	}
 
@@ -127,8 +125,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * the supplied {@code Element}, or {@code null} if none
 	 * @see #getBeanClass
 	 */
-	@Nullable
-	protected String getBeanClassName(Element element) {
+	protected @Nullable String getBeanClassName(Element element) {
 		return null;
 	}
 

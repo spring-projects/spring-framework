@@ -3,9 +3,7 @@
  * Contains generic Marshaller and Unmarshaller interfaces,
  * and XmlMappingExceptions related to O/X Mapping
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.oxm;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

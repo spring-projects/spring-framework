@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -52,7 +53,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -117,43 +117,31 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
 	}
 
-	@Nullable
-	private String baseUrl;
+	private @Nullable String baseUrl;
 
-	@Nullable
-	private Map<String, ?> defaultUriVariables;
+	private @Nullable Map<String, ?> defaultUriVariables;
 
-	@Nullable
-	private UriBuilderFactory uriBuilderFactory;
+	private @Nullable UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private HttpHeaders defaultHeaders;
+	private @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private MultiValueMap<String, String> defaultCookies;
+	private @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest;
+	private @Nullable Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest;
 
-	@Nullable
-	private List<StatusHandler> statusHandlers;
+	private @Nullable List<StatusHandler> statusHandlers;
 
-	@Nullable
-	private ClientHttpRequestFactory requestFactory;
+	private @Nullable ClientHttpRequestFactory requestFactory;
 
-	@Nullable
-	private List<HttpMessageConverter<?>> messageConverters;
+	private @Nullable List<HttpMessageConverter<?>> messageConverters;
 
-	@Nullable
-	private List<ClientHttpRequestInterceptor> interceptors;
+	private @Nullable List<ClientHttpRequestInterceptor> interceptors;
 
-	@Nullable
-	private List<ClientHttpRequestInitializer> initializers;
+	private @Nullable List<ClientHttpRequestInitializer> initializers;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	@Nullable
-	private ClientRequestObservationConvention observationConvention;
+	private @Nullable ClientRequestObservationConvention observationConvention;
 
 
 	public DefaultRestClientBuilder() {
@@ -209,8 +197,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.observationConvention = restTemplate.getObservationConvention();
 	}
 
-	@Nullable
-	private static UriBuilderFactory getUriBuilderFactory(RestTemplate restTemplate) {
+	private static @Nullable UriBuilderFactory getUriBuilderFactory(RestTemplate restTemplate) {
 		UriTemplateHandler uriTemplateHandler = restTemplate.getUriTemplateHandler();
 		if (uriTemplateHandler instanceof DefaultUriBuilderFactory builderFactory) {
 			// only reuse the DefaultUriBuilderFactory if it has been customized
@@ -517,8 +504,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return factory;
 	}
 
-	@Nullable
-	private HttpHeaders copyDefaultHeaders() {
+	private @Nullable HttpHeaders copyDefaultHeaders() {
 		if (this.defaultHeaders == null) {
 			return null;
 		}
@@ -527,8 +513,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return HttpHeaders.readOnlyHttpHeaders(copy);
 	}
 
-	@Nullable
-	private MultiValueMap<String, String> copyDefaultCookies() {
+	private @Nullable MultiValueMap<String, String> copyDefaultCookies() {
 		if (this.defaultCookies == null) {
 			return null;
 		}

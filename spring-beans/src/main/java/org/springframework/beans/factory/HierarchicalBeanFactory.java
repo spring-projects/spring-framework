@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Sub-interface implemented by bean factories that can be part
@@ -36,8 +36,7 @@ public interface HierarchicalBeanFactory extends BeanFactory {
 	/**
 	 * Return the parent bean factory, or {@code null} if there is none.
 	 */
-	@Nullable
-	BeanFactory getParentBeanFactory();
+	@Nullable BeanFactory getParentBeanFactory();
 
 	/**
 	 * Return whether the local bean factory contains a bean of the given name,

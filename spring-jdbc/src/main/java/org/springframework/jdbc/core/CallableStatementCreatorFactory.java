@@ -25,8 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * Helper class that efficiently creates multiple {@link CallableStatementCreator}
@@ -130,11 +131,9 @@ public class CallableStatementCreatorFactory {
 	 */
 	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider, ParameterDisposer {
 
-		@Nullable
-		private ParameterMapper inParameterMapper;
+		private @Nullable ParameterMapper inParameterMapper;
 
-		@Nullable
-		private Map<String, ?> inParameters;
+		private @Nullable Map<String, ?> inParameters;
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.

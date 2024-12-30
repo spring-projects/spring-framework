@@ -19,7 +19,7 @@ package org.springframework.web.socket.sockjs.frame;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Encode and decode messages to and from a SockJS message frame,
@@ -50,8 +50,7 @@ public interface SockJsMessageCodec {
 	 * @return an array of messages, or {@code null} if none
 	 * @throws IOException if the content could not be parsed
 	 */
-	@Nullable
-	String[] decode(String content) throws IOException;
+	String @Nullable [] decode(String content) throws IOException;
 
 	/**
 	 * Decode the given SockJS message frame.
@@ -59,7 +58,6 @@ public interface SockJsMessageCodec {
 	 * @return an array of messages, or {@code null} if none
 	 * @throws IOException if the content could not be parsed
 	 */
-	@Nullable
-	String[] decodeInputStream(InputStream content) throws IOException;
+	String @Nullable [] decodeInputStream(InputStream content) throws IOException;
 
 }

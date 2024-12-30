@@ -18,8 +18,9 @@ package org.springframework.context.event.test;
 
 import java.util.UUID;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
-import org.springframework.lang.Nullable;
 
 /**
  * A basic test event that can be uniquely identified easily.

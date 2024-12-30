@@ -18,7 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -87,8 +88,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * a thrown exception's class hierarchy.
 	 * @since 6.0
 	 */
-	@Nullable
-	private final Class<? extends Throwable> exceptionType;
+	private final @Nullable Class<? extends Throwable> exceptionType;
 
 
 	/**

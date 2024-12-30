@@ -19,7 +19,8 @@ package org.springframework.web.socket.sockjs.frame;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -109,8 +110,7 @@ public class SockJsFrame {
 	 * for SockJS "open" and "close" frames, which do not contain data, return
 	 * {@code null}.
 	 */
-	@Nullable
-	public String getFrameData() {
+	public @Nullable String getFrameData() {
 		if (getType() == SockJsFrameType.OPEN || getType() == SockJsFrameType.HEARTBEAT) {
 			return null;
 		}

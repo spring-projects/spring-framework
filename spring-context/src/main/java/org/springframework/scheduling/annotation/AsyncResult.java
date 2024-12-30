@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A pass-through {@code Future} handle that can be used for method signatures
@@ -39,11 +39,9 @@ import org.springframework.lang.Nullable;
 @Deprecated(since = "6.0")
 public class AsyncResult<V> implements Future<V> {
 
-	@Nullable
-	private final V value;
+	private final @Nullable V value;
 
-	@Nullable
-	private final Throwable executionException;
+	private final @Nullable Throwable executionException;
 
 
 	/**
@@ -80,8 +78,7 @@ public class AsyncResult<V> implements Future<V> {
 	}
 
 	@Override
-	@Nullable
-	public V get() throws ExecutionException {
+	public @Nullable V get() throws ExecutionException {
 		if (this.executionException != null) {
 			throw (this.executionException instanceof ExecutionException execEx ? execEx :
 					new ExecutionException(this.executionException));
@@ -90,8 +87,7 @@ public class AsyncResult<V> implements Future<V> {
 	}
 
 	@Override
-	@Nullable
-	public V get(long timeout, TimeUnit unit) throws ExecutionException {
+	public @Nullable V get(long timeout, TimeUnit unit) throws ExecutionException {
 		return get();
 	}
 

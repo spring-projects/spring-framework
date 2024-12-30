@@ -22,7 +22,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -49,8 +50,7 @@ final class AttributeMethods {
 	};
 
 
-	@Nullable
-	private final Class<? extends Annotation> annotationType;
+	private final @Nullable Class<? extends Annotation> annotationType;
 
 	private final Method[] attributeMethods;
 
@@ -155,8 +155,7 @@ final class AttributeMethods {
 	 * @param name the attribute name to find
 	 * @return the attribute method or {@code null}
 	 */
-	@Nullable
-	Method get(String name) {
+	@Nullable Method get(String name) {
 		int index = indexOf(name);
 		return (index != -1 ? this.attributeMethods[index] : null);
 	}

@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.reactive.server;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@code ExchangeResult} sub-class that exposes the response body fully
@@ -29,8 +29,7 @@ import org.springframework.lang.Nullable;
  */
 public class EntityExchangeResult<T> extends ExchangeResult {
 
-	@Nullable
-	private final T body;
+	private final @Nullable T body;
 
 
 	EntityExchangeResult(ExchangeResult result, @Nullable T body) {
@@ -42,8 +41,7 @@ public class EntityExchangeResult<T> extends ExchangeResult {
 	/**
 	 * Return the entity extracted from the response body.
 	 */
-	@Nullable
-	public T getResponseBody() {
+	public @Nullable T getResponseBody() {
 		return this.body;
 	}
 

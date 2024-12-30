@@ -17,9 +17,9 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.TargetSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**

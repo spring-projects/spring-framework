@@ -21,11 +21,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.annotation.Header;
@@ -67,8 +67,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 	@Override
-	@Nullable
-	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name) {
+	protected @Nullable Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name) {
 
 		Object headerValue = message.getHeaders().get(name);
 		Object nativeHeaderValue = getNativeHeaderValue(message, name);
@@ -84,8 +83,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 		return (headerValue != null ? headerValue : nativeHeaderValue);
 	}
 
-	@Nullable
-	private Object getNativeHeaderValue(Message<?> message, String name) {
+	private @Nullable Object getNativeHeaderValue(Message<?> message, String name) {
 		Map<String, List<String>> nativeHeaders = getNativeHeaders(message);
 		if (name.startsWith("nativeHeaders.")) {
 			name = name.substring("nativeHeaders.".length());
@@ -98,8 +96,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private Map<String, List<String>> getNativeHeaders(Message<?> message) {
+	private @Nullable Map<String, List<String>> getNativeHeaders(Message<?> message) {
 		return (Map<String, List<String>>) message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
 	}
 

@@ -2,9 +2,7 @@
  * Spring's generic cache abstraction.
  * Concrete implementations are provided in the subpackages.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.cache;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

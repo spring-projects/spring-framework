@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Bean used to pass name-value pair parameters from a {@link ParamTag} to a
@@ -31,11 +31,9 @@ import org.springframework.lang.Nullable;
  */
 public class Param {
 
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
-	@Nullable
-	private String value;
+	private @Nullable String value;
 
 
 	/**
@@ -48,8 +46,7 @@ public class Param {
 	/**
 	 * Return the raw parameter name.
 	 */
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -63,8 +60,7 @@ public class Param {
 	/**
 	 * Return the raw parameter value.
 	 */
-	@Nullable
-	public String getValue() {
+	public @Nullable String getValue() {
 		return this.value;
 	}
 

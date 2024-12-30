@@ -16,7 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.util.Assert;
@@ -50,11 +51,9 @@ import org.springframework.util.Assert;
  */
 public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
-	@Nullable
-	private final String transactionName;
+	private final @Nullable String transactionName;
 
-	@Nullable
-	private final Object transaction;
+	private final @Nullable Object transaction;
 
 	private final boolean newTransaction;
 
@@ -66,8 +65,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	private final boolean debug;
 
-	@Nullable
-	private final Object suspendedResources;
+	private final @Nullable Object suspendedResources;
 
 
 	/**
@@ -157,8 +155,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * Return the holder for resources that have been suspended for this transaction,
 	 * if any.
 	 */
-	@Nullable
-	public Object getSuspendedResources() {
+	public @Nullable Object getSuspendedResources() {
 		return this.suspendedResources;
 	}
 

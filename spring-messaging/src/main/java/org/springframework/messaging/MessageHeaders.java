@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.IdGenerator;
@@ -112,8 +112,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
 
-	@Nullable
-	private static volatile IdGenerator idGenerator;
+	private static volatile @Nullable IdGenerator idGenerator;
 
 	@SuppressWarnings("serial")
 	private final Map<String, Object> headers;
@@ -183,30 +182,25 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return (generator != null ? generator : defaultIdGenerator);
 	}
 
-	@Nullable
-	public UUID getId() {
+	public @Nullable UUID getId() {
 		return get(ID, UUID.class);
 	}
 
-	@Nullable
-	public Long getTimestamp() {
+	public @Nullable Long getTimestamp() {
 		return get(TIMESTAMP, Long.class);
 	}
 
-	@Nullable
-	public Object getReplyChannel() {
+	public @Nullable Object getReplyChannel() {
 		return get(REPLY_CHANNEL);
 	}
 
-	@Nullable
-	public Object getErrorChannel() {
+	public @Nullable Object getErrorChannel() {
 		return get(ERROR_CHANNEL);
 	}
 
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public <T> T get(Object key, Class<T> type) {
+	public <T> @Nullable T get(Object key, Class<T> type) {
 		Object value = this.headers.get(key);
 		if (value == null) {
 			return null;
@@ -237,8 +231,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	@Override
-	@Nullable
-	public Object get(Object key) {
+	public @Nullable Object get(Object key) {
 		return this.headers.get(key);
 	}
 

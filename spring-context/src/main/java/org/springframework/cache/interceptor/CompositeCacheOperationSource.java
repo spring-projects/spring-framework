@@ -21,7 +21,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -77,8 +78,7 @@ public class CompositeCacheOperationSource implements CacheOperationSource, Seri
 	}
 
 	@Override
-	@Nullable
-	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
+	public @Nullable Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
 		Collection<CacheOperation> ops = null;
 		for (CacheOperationSource source : this.cacheOperationSources) {
 			Collection<CacheOperation> cacheOperations = source.getCacheOperations(method, targetClass);

@@ -19,8 +19,9 @@ package org.springframework.jdbc.core;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface for code that operates on a CallableStatement.
@@ -74,7 +75,6 @@ public interface CallableStatementCallback<T> {
 	 * into a DataAccessException by an SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
 	 */
-	@Nullable
-	T doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException;
+	@Nullable T doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException;
 
 }

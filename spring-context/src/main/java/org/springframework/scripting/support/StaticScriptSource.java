@@ -16,7 +16,8 @@
 
 package org.springframework.scripting.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 
@@ -36,8 +37,7 @@ public class StaticScriptSource implements ScriptSource {
 
 	private boolean modified;
 
-	@Nullable
-	private String className;
+	private @Nullable String className;
 
 
 	/**
@@ -82,8 +82,7 @@ public class StaticScriptSource implements ScriptSource {
 	}
 
 	@Override
-	@Nullable
-	public String suggestedClassName() {
+	public @Nullable String suggestedClassName() {
 		return this.className;
 	}
 

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -38,7 +39,6 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.SslInfo;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
@@ -56,14 +56,11 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
-	@Nullable
-	private final InetSocketAddress localAddress;
+	private final @Nullable InetSocketAddress localAddress;
 
-	@Nullable
-	private final InetSocketAddress remoteAddress;
+	private final @Nullable InetSocketAddress remoteAddress;
 
-	@Nullable
-	private final SslInfo sslInfo;
+	private final @Nullable SslInfo sslInfo;
 
 	private final Flux<DataBuffer> body;
 
@@ -82,20 +79,17 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
 	@Override
-	@Nullable
-	protected SslInfo initSslInfo() {
+	protected @Nullable SslInfo initSslInfo() {
 		return this.sslInfo;
 	}
 
@@ -304,8 +298,16 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add the given header values.
 		 * @param headers the header values
+		 * @deprecated Use {@link #headers(HttpHeaders)}
 		 */
+		@Deprecated
 		B headers(MultiValueMap<String, String> headers);
+
+		/**
+		 * Add the given header values.
+		 * @param headers the header values
+		 */
+		B headers(HttpHeaders headers);
 
 		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
@@ -415,8 +417,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final URI url;
 
-		@Nullable
-		private String contextPath;
+		private @Nullable String contextPath;
 
 		private final UriComponentsBuilder queryParamsBuilder = UriComponentsBuilder.newInstance();
 
@@ -424,14 +425,11 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
-		@Nullable
-		private InetSocketAddress remoteAddress;
+		private @Nullable InetSocketAddress remoteAddress;
 
-		@Nullable
-		private InetSocketAddress localAddress;
+		private @Nullable InetSocketAddress localAddress;
 
-		@Nullable
-		private SslInfo sslInfo;
+		private @Nullable SslInfo sslInfo;
 
 		DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -494,7 +492,14 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		@Deprecated
 		public BodyBuilder headers(MultiValueMap<String, String> headers) {
+			this.headers.putAll(headers);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(HttpHeaders headers) {
 			this.headers.putAll(headers);
 			return this;
 		}

@@ -1,9 +1,7 @@
 /**
  * Bean overriding mechanism based on Mockito mocking and spying.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.context.bean.override.mockito;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

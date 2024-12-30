@@ -23,7 +23,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,14 +57,12 @@ public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBean
 	/**
 	 * Stores the set of method names to use for creating the management interface.
 	 */
-	@Nullable
-	private Set<String> managedMethods;
+	private @Nullable Set<String> managedMethods;
 
 	/**
 	 * Stores the mappings of bean keys to an array of method names.
 	 */
-	@Nullable
-	private Map<String, Set<String>> methodMappings;
+	private @Nullable Map<String, Set<String>> methodMappings;
 
 
 	/**

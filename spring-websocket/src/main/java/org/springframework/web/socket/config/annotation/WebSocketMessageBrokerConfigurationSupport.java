@@ -16,13 +16,14 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.SimpSessionScope;
@@ -59,8 +60,7 @@ import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
 
-	@Nullable
-	private WebSocketTransportRegistration transportRegistration;
+	private @Nullable WebSocketTransportRegistration transportRegistration;
 
 
 	@Override

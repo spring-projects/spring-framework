@@ -16,7 +16,7 @@
 
 package org.springframework.ui.context;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Sub-interface of ThemeSource to be implemented by objects that
@@ -41,7 +41,6 @@ public interface HierarchicalThemeSource extends ThemeSource {
 	/**
 	 * Return the parent of this ThemeSource, or {@code null} if none.
 	 */
-	@Nullable
-	ThemeSource getParentThemeSource();
+	@Nullable ThemeSource getParentThemeSource();
 
 }

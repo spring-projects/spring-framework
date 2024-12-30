@@ -16,6 +16,8 @@
 
 package org.springframework.context.aot;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -23,7 +25,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.KotlinDetector;
-import org.springframework.lang.Nullable;
 
 /**
  * AOT {@code BeanRegistrationAotProcessor} that adds additional hints
@@ -35,8 +36,7 @@ import org.springframework.lang.Nullable;
 class KotlinReflectionBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
 	@Override
-	@Nullable
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (KotlinDetector.isKotlinType(beanClass)) {
 			return new AotContribution(beanClass);

@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
@@ -61,26 +61,19 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	private static final Log logger = LogFactory.getLog(WebSocketMessageBrokerStats.class);
 
 
-	@Nullable
-	private SubProtocolWebSocketHandler webSocketHandler;
+	private @Nullable SubProtocolWebSocketHandler webSocketHandler;
 
-	@Nullable
-	private StompSubProtocolHandler stompSubProtocolHandler;
+	private @Nullable StompSubProtocolHandler stompSubProtocolHandler;
 
-	@Nullable
-	private StompBrokerRelayMessageHandler stompBrokerRelay;
+	private @Nullable StompBrokerRelayMessageHandler stompBrokerRelay;
 
-	@Nullable
-	private TaskExecutor inboundChannelExecutor;
+	private @Nullable TaskExecutor inboundChannelExecutor;
 
-	@Nullable
-	private TaskExecutor outboundChannelExecutor;
+	private @Nullable TaskExecutor outboundChannelExecutor;
 
-	@Nullable
-	private TaskScheduler sockJsTaskScheduler;
+	private @Nullable TaskScheduler sockJsTaskScheduler;
 
-	@Nullable
-	private ScheduledFuture<?> loggingTask;
+	private @Nullable ScheduledFuture<?> loggingTask;
 
 	private long loggingPeriod = TimeUnit.MINUTES.toMillis(30);
 
@@ -132,8 +125,7 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 		this.loggingTask = initLoggingTask(TimeUnit.MINUTES.toMillis(1));
 	}
 
-	@Nullable
-	private StompSubProtocolHandler initStompSubProtocolHandler() {
+	private @Nullable StompSubProtocolHandler initStompSubProtocolHandler() {
 		if (this.webSocketHandler == null) {
 			return null;
 		}
@@ -149,8 +141,7 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 		return null;
 	}
 
-	@Nullable
-	private ScheduledFuture<?> initLoggingTask(long initialDelay) {
+	private @Nullable ScheduledFuture<?> initLoggingTask(long initialDelay) {
 		if (this.sockJsTaskScheduler != null && this.loggingPeriod > 0 && logger.isInfoEnabled()) {
 			return this.sockJsTaskScheduler.scheduleWithFixedDelay(
 					() -> logger.info(WebSocketMessageBrokerStats.this.toString()),
@@ -166,8 +157,7 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	 * is configured.
 	 * @since 6.2
 	 */
-	@Nullable
-	public SubProtocolWebSocketHandler.Stats getWebSocketSessionStats() {
+	public SubProtocolWebSocketHandler.@Nullable Stats getWebSocketSessionStats() {
 		return (this.webSocketHandler != null ? this.webSocketHandler.getStats() : null);
 	}
 
@@ -176,8 +166,7 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	 * Can return {@code null} if no {@link SubProtocolHandler} was found.
 	 * @since 6.2
 	 */
-	@Nullable
-	public StompSubProtocolHandler.Stats getStompSubProtocolStats() {
+	public StompSubProtocolHandler.@Nullable Stats getStompSubProtocolStats() {
 		return (this.stompSubProtocolHandler != null ? this.stompSubProtocolHandler.getStats() : null);
 	}
 
@@ -187,8 +176,7 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	 * is configured.
 	 * @since 6.2
 	 */
-	@Nullable
-	public StompBrokerRelayMessageHandler.Stats getStompBrokerRelayStats() {
+	public StompBrokerRelayMessageHandler.@Nullable Stats getStompBrokerRelayStats() {
 		return (this.stompBrokerRelay != null ? this.stompBrokerRelay.getStats() : null);
 	}
 

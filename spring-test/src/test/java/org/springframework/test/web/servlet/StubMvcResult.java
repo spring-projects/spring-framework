@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
@@ -127,12 +129,12 @@ public class StubMvcResult implements MvcResult {
 	}
 
 	@Override
-	public Object getAsyncResult() {
+	public @Nullable Object getAsyncResult() {
 		return null;
 	}
 
 	@Override
-	public Object getAsyncResult(long timeToWait) {
+	public @Nullable Object getAsyncResult(long timeToWait) {
 		return null;
 	}
 

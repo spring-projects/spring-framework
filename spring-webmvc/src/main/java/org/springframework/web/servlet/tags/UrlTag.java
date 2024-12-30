@@ -29,8 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
@@ -149,17 +149,13 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 	private Set<String> templateParams = Collections.emptySet();
 
-	@Nullable
-	private UrlType type;
+	private @Nullable UrlType type;
 
-	@Nullable
-	private String value;
+	private @Nullable String value;
 
-	@Nullable
-	private String context;
+	private @Nullable String context;
 
-	@Nullable
-	private String var;
+	private @Nullable String var;
 
 	private int scope = PageContext.PAGE_SCOPE;
 

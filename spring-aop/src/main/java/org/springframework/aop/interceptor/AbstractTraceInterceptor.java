@@ -22,9 +22,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,8 +52,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * The default {@code Log} instance used to write trace messages.
 	 * This instance is mapped to the implementing {@code Class}.
 	 */
-	@Nullable
-	protected transient Log defaultLogger = LogFactory.getLog(getClass());
+	protected transient @Nullable Log defaultLogger = LogFactory.getLog(getClass());
 
 	/**
 	 * Indicates whether proxy class names should be hidden when using dynamic loggers.
@@ -125,8 +124,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * @see #invokeUnderTrace(org.aopalliance.intercept.MethodInvocation, org.apache.commons.logging.Log)
 	 */
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 		Log logger = getLoggerForInvocation(invocation);
 		if (isInterceptorEnabled(invocation, logger)) {
 			return invokeUnderTrace(invocation, logger);
@@ -245,7 +243,6 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * @see #writeToLog(Log, String)
 	 * @see #writeToLog(Log, String, Throwable)
 	 */
-	@Nullable
-	protected abstract Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable;
+	protected abstract @Nullable Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable;
 
 }

@@ -19,11 +19,13 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.lang.Nullable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.MissingRequestValueException;
@@ -67,7 +69,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	}
 
 	private boolean singleParam(RequestHeader annotation, Class<?> type) {
-		return !Map.class.isAssignableFrom(type);
+		return !Map.class.isAssignableFrom(type) && !HttpHeaders.class.isAssignableFrom(type);
 	}
 
 	@Override
@@ -78,8 +80,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	}
 
 	@Override
-	@Nullable
-	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected @Nullable Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		List<String> headerValues = exchange.getRequest().getHeaders().get(name);
 		Object result = null;
 		if (headerValues != null) {

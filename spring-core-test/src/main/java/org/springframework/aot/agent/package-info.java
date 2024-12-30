@@ -1,9 +1,7 @@
 /**
  * Support for recording method invocations relevant to {@link org.springframework.aot.hint.RuntimeHints} metadata.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.aot.agent;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

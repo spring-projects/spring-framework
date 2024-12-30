@@ -18,7 +18,8 @@ package org.springframework.transaction.support;
 
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
@@ -45,8 +46,7 @@ public interface TransactionOperations {
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 * @see #executeWithoutResult(Consumer)
 	 */
-	@Nullable
-	<T> T execute(TransactionCallback<T> action) throws TransactionException;
+	<T> @Nullable T execute(TransactionCallback<T> action) throws TransactionException;
 
 	/**
 	 * Execute the action specified by the given {@link Runnable} within a transaction.

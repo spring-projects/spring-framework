@@ -20,12 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
@@ -153,32 +154,23 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 	private static class TestWebFluxConfigurer implements WebFluxConfigurer {
 
-		@Nullable
-		private Consumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer;
+		private @Nullable Consumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer;
 
-		@Nullable
-		private Consumer<CorsRegistry> corsRegistryConsumer;
+		private @Nullable Consumer<CorsRegistry> corsRegistryConsumer;
 
-		@Nullable
-		private Consumer<ArgumentResolverConfigurer> argumentResolverConsumer;
+		private @Nullable Consumer<ArgumentResolverConfigurer> argumentResolverConsumer;
 
-		@Nullable
-		private Consumer<PathMatchConfigurer> pathMatchConsumer;
+		private @Nullable Consumer<PathMatchConfigurer> pathMatchConsumer;
 
-		@Nullable
-		private Consumer<ServerCodecConfigurer> messageCodecsConsumer;
+		private @Nullable Consumer<ServerCodecConfigurer> messageCodecsConsumer;
 
-		@Nullable
-		private Consumer<FormatterRegistry> formattersConsumer;
+		private @Nullable Consumer<FormatterRegistry> formattersConsumer;
 
-		@Nullable
-		private Validator validator;
+		private @Nullable Validator validator;
 
-		@Nullable
-		private Consumer<ViewResolverRegistry> viewResolversConsumer;
+		private @Nullable Consumer<ViewResolverRegistry> viewResolversConsumer;
 
-		@Nullable
-		private Consumer<BlockingExecutionConfigurer> executionConsumer;
+		private @Nullable Consumer<BlockingExecutionConfigurer> executionConsumer;
 
 		@Override
 		public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
@@ -223,8 +215,7 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		}
 
 		@Override
-		@Nullable
-		public Validator getValidator() {
+		public @Nullable Validator getValidator() {
 			return this.validator;
 		}
 

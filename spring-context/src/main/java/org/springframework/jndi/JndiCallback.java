@@ -19,7 +19,7 @@ package org.springframework.jndi;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Callback interface to be implemented by classes that need to perform an
@@ -47,8 +47,7 @@ public interface JndiCallback<T> {
 	 * @return a result object, or {@code null}
 	 * @throws NamingException if thrown by JNDI methods
 	 */
-	@Nullable
-	T doInContext(Context ctx) throws NamingException;
+	@Nullable T doInContext(Context ctx) throws NamingException;
 
 }
 

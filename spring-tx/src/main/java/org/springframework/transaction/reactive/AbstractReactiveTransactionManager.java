@@ -28,10 +28,10 @@ import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.ConfigurableTransactionManager;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -976,19 +976,15 @@ public abstract class AbstractReactiveTransactionManager
 	 */
 	protected static final class SuspendedResourcesHolder {
 
-		@Nullable
-		private final Object suspendedResources;
+		private final @Nullable Object suspendedResources;
 
-		@Nullable
-		private List<TransactionSynchronization> suspendedSynchronizations;
+		private @Nullable List<TransactionSynchronization> suspendedSynchronizations;
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
 		private boolean readOnly;
 
-		@Nullable
-		private Integer isolationLevel;
+		private @Nullable Integer isolationLevel;
 
 		private boolean wasActive;
 

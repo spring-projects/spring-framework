@@ -24,13 +24,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.PatternMatchUtils;
@@ -71,8 +71,7 @@ public class SQLErrorCodesFactory {
 	 * Lazily initialized in order to avoid making {@code SQLErrorCodesFactory} constructor
 	 * reachable on native images when not needed.
 	 */
-	@Nullable
-	private static SQLErrorCodesFactory instance;
+	private static @Nullable SQLErrorCodesFactory instance;
 
 
 	/**
@@ -156,8 +155,7 @@ public class SQLErrorCodesFactory {
 	 * @return the resource, or {@code null} if the resource wasn't found
 	 * @see #getInstance
 	 */
-	@Nullable
-	protected Resource loadResource(String path) {
+	protected @Nullable Resource loadResource(String path) {
 		return new ClassPathResource(path, getClass().getClassLoader());
 	}
 
@@ -223,8 +221,7 @@ public class SQLErrorCodesFactory {
 	 * @since 5.2.9
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
-	@Nullable
-	public SQLErrorCodes resolveErrorCodes(DataSource dataSource) {
+	public @Nullable SQLErrorCodes resolveErrorCodes(DataSource dataSource) {
 		Assert.notNull(dataSource, "DataSource must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up default SQLErrorCodes for DataSource [" + identify(dataSource) + "]");
@@ -286,8 +283,7 @@ public class SQLErrorCodesFactory {
 	 * @since 4.3.5
 	 * @see #registerDatabase(DataSource, String)
 	 */
-	@Nullable
-	public SQLErrorCodes unregisterDatabase(DataSource dataSource) {
+	public @Nullable SQLErrorCodes unregisterDatabase(DataSource dataSource) {
 		return this.dataSourceCache.remove(dataSource);
 	}
 

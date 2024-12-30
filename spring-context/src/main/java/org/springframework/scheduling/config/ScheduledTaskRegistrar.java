@@ -29,10 +29,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
@@ -74,29 +74,21 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	public static final String CRON_DISABLED = "-";
 
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
-	@Nullable
-	private ScheduledExecutorService localExecutor;
+	private @Nullable ScheduledExecutorService localExecutor;
 
-	@Nullable
-	private ObservationRegistry observationRegistry;
+	private @Nullable ObservationRegistry observationRegistry;
 
-	@Nullable
-	private List<TriggerTask> triggerTasks;
+	private @Nullable List<TriggerTask> triggerTasks;
 
-	@Nullable
-	private List<CronTask> cronTasks;
+	private @Nullable List<CronTask> cronTasks;
 
-	@Nullable
-	private List<IntervalTask> fixedRateTasks;
+	private @Nullable List<IntervalTask> fixedRateTasks;
 
-	@Nullable
-	private List<IntervalTask> fixedDelayTasks;
+	private @Nullable List<IntervalTask> fixedDelayTasks;
 
-	@Nullable
-	private List<DelayedTask> oneTimeTasks;
+	private @Nullable List<DelayedTask> oneTimeTasks;
 
 	private final Map<Task, ScheduledTask> unresolvedTasks = new HashMap<>(16);
 
@@ -134,8 +126,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	/**
 	 * Return the {@link TaskScheduler} instance for this registrar (may be {@code null}).
 	 */
-	@Nullable
-	public TaskScheduler getScheduler() {
+	public @Nullable TaskScheduler getScheduler() {
 		return this.taskScheduler;
 	}
 
@@ -151,8 +142,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * Return the {@link ObservationRegistry} for this registrar.
 	 * @since 6.1
 	 */
-	@Nullable
-	public ObservationRegistry getObservationRegistry() {
+	public @Nullable ObservationRegistry getObservationRegistry() {
 		return this.observationRegistry;
 	}
 
@@ -485,8 +475,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * @return a handle to the scheduled task, allowing to cancel it
 	 * @since 4.3
 	 */
-	@Nullable
-	public ScheduledTask scheduleTriggerTask(TriggerTask task) {
+	public @Nullable ScheduledTask scheduleTriggerTask(TriggerTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
@@ -510,8 +499,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 4.3
 	 */
-	@Nullable
-	public ScheduledTask scheduleCronTask(CronTask task) {
+	public @Nullable ScheduledTask scheduleCronTask(CronTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
@@ -535,8 +523,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 5.0.2
 	 */
-	@Nullable
-	public ScheduledTask scheduleFixedRateTask(FixedRateTask task) {
+	public @Nullable ScheduledTask scheduleFixedRateTask(FixedRateTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
@@ -569,8 +556,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 5.0.2
 	 */
-	@Nullable
-	public ScheduledTask scheduleFixedDelayTask(FixedDelayTask task) {
+	public @Nullable ScheduledTask scheduleFixedDelayTask(FixedDelayTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {
@@ -603,8 +589,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * (or {@code null} if processing a previously registered task)
 	 * @since 6.1
 	 */
-	@Nullable
-	public ScheduledTask scheduleOneTimeTask(OneTimeTask task) {
+	public @Nullable ScheduledTask scheduleOneTimeTask(OneTimeTask task) {
 		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
 		boolean newTask = false;
 		if (scheduledTask == null) {

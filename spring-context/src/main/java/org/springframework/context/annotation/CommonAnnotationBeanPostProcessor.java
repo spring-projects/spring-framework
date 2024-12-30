@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aot.generate.AccessControl;
@@ -68,7 +70,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -146,11 +147,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
 
-	@Nullable
-	private static final Class<? extends Annotation> jakartaResourceType;
+	private static final @Nullable Class<? extends Annotation> jakartaResourceType;
 
-	@Nullable
-	private static final Class<? extends Annotation> ejbAnnotationType;
+	private static final @Nullable Class<? extends Annotation> ejbAnnotationType;
 
 	static {
 		jakartaResourceType = loadAnnotationType("jakarta.annotation.Resource");
@@ -171,17 +170,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private boolean alwaysUseJndiLookup = false;
 
-	@Nullable
-	private transient BeanFactory jndiFactory;
+	private transient @Nullable BeanFactory jndiFactory;
 
-	@Nullable
-	private transient BeanFactory resourceFactory;
+	private transient @Nullable BeanFactory resourceFactory;
 
-	@Nullable
-	private transient BeanFactory beanFactory;
+	private transient @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private transient StringValueResolver embeddedValueResolver;
+	private transient @Nullable StringValueResolver embeddedValueResolver;
 
 	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
@@ -298,8 +293,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
-	@Nullable
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		BeanRegistrationAotContribution parentAotContribution = super.processAheadOfTime(registeredBean);
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
@@ -316,8 +310,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		return parentAotContribution;
 	}
 
-	@Nullable
-	private AutowireCandidateResolver getAutowireCandidateResolver(RegisteredBean registeredBean) {
+	private @Nullable AutowireCandidateResolver getAutowireCandidateResolver(RegisteredBean registeredBean) {
 		if (registeredBean.getBeanFactory() instanceof DefaultListableBeanFactory lbf) {
 			return lbf.getAutowireCandidateResolver();
 		}
@@ -335,8 +328,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
-	@Nullable
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
+	public @Nullable Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}
 
@@ -585,8 +577,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private static Class<? extends Annotation> loadAnnotationType(String name) {
+	private static @Nullable Class<? extends Annotation> loadAnnotationType(String name) {
 		try {
 			return (Class<? extends Annotation>)
 					ClassUtils.forName(name, CommonAnnotationBeanPostProcessor.class.getClassLoader());
@@ -609,8 +600,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		protected Class<?> lookupType = Object.class;
 
-		@Nullable
-		protected String mappedName;
+		protected @Nullable String mappedName;
 
 		public LookupElement(Member member, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
@@ -775,8 +765,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final Collection<LookupElement> lookupElements;
 
-		@Nullable
-		private final AutowireCandidateResolver candidateResolver;
+		private final @Nullable AutowireCandidateResolver candidateResolver;
 
 		AotContribution(Class<?> target, Collection<LookupElement> lookupElements,
 				@Nullable AutowireCandidateResolver candidateResolver) {

@@ -16,9 +16,10 @@
 
 package org.springframework.beans.testfixture.beans.factory.aot;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.Nullable;
 
 /**
  * A public {@link FactoryBean} with a generic type.
@@ -33,15 +34,13 @@ public class GenericFactoryBean<T> implements FactoryBean<T> {
 		this.beanType = beanType;
 	}
 
-	@Nullable
 	@Override
-	public T getObject() throws Exception {
+	public @Nullable T getObject() throws Exception {
 		return BeanUtils.instantiateClass(this.beanType);
 	}
 
-	@Nullable
 	@Override
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		return this.beanType;
 	}
 }

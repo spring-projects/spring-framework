@@ -17,9 +17,9 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
@@ -63,8 +63,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	private final MessageSendingOperations<String> messagingTemplate;
 
-	@Nullable
-	private MessageHeaderInitializer headerInitializer;
+	private @Nullable MessageHeaderInitializer headerInitializer;
 
 
 	/**
@@ -90,8 +89,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	/**
 	 * Return the configured header initializer.
 	 */
-	@Nullable
-	public MessageHeaderInitializer getHeaderInitializer() {
+	public @Nullable MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;
 	}
 

@@ -20,10 +20,10 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -84,7 +84,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 	 * @since 4.2
 	 * @see #dirtyContext
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void beforeOrAfterTestMethod(TestContext testContext, MethodMode requiredMethodMode,
 			ClassMode requiredClassMode) throws Exception {
 
@@ -136,7 +136,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 	 * @since 4.2
 	 * @see #dirtyContext
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void beforeOrAfterTestClass(TestContext testContext, ClassMode requiredClassMode) throws Exception {
 		Assert.notNull(testContext, "TestContext must not be null");
 		Assert.notNull(requiredClassMode, "requiredClassMode must not be null");

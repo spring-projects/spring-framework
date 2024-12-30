@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.util.ServletRequestPathUtils;
@@ -56,9 +56,10 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 		this.parser = delegate.getPatternParser();
 	}
 
-	@Nullable
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Override
-	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		PathPattern pathPattern = this.pathPatternCache.computeIfAbsent(pattern, value -> {
 			Assert.state(this.pathPatternCache.size() < MAX_PATTERNS, "Max size for pattern cache exceeded.");
 			return this.parser.parse(pattern);
@@ -67,9 +68,8 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 		return (pathPattern.matches(path) ? new RequestMatchResult(pathPattern, path) : null);
 	}
 
-	@Nullable
 	@Override
-	public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+	public @Nullable HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		return this.delegate.getHandler(request);
 	}
 

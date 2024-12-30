@@ -19,8 +19,7 @@ package org.springframework.aop.interceptor;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for monitoring interceptors, such as performance monitors.

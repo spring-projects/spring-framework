@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ExceptionDepthComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -98,8 +99,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
-	@Nullable
-	public Method resolveMethod(Throwable exception) {
+	public @Nullable Method resolveMethod(Throwable exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
 		if (method == null) {
 			Throwable cause = exception.getCause();
@@ -118,8 +118,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 4.3.1
 	 */
-	@Nullable
-	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
+	public @Nullable Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
@@ -132,8 +131,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * Return the {@link Method} mapped to the given exception type, or
 	 * {@link #NO_MATCHING_EXCEPTION_HANDLER_METHOD} if none.
 	 */
-	@Nullable
-	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
+	private @Nullable Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {

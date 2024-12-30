@@ -25,7 +25,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
@@ -160,8 +161,7 @@ public class DestinationPatternsMessageCondition
 	 * or {@code null} either if a destination can not be extracted or there is no match
 	 */
 	@Override
-	@Nullable
-	public DestinationPatternsMessageCondition getMatchingCondition(Message<?> message) {
+	public @Nullable DestinationPatternsMessageCondition getMatchingCondition(Message<?> message) {
 		Object destination = message.getHeaders().get(LOOKUP_DESTINATION_HEADER);
 		if (destination == null) {
 			return null;

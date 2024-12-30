@@ -16,10 +16,11 @@
 
 package org.springframework.http.server.reactive;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -46,8 +47,7 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * be {@code null} if there is no default value from the
 	 * underlying server.
 	 */
-	@Nullable
-	HttpStatusCode getStatusCode();
+	@Nullable HttpStatusCode getStatusCode();
 
 	/**
 	 * Set the HTTP status code to the given value as an integer.

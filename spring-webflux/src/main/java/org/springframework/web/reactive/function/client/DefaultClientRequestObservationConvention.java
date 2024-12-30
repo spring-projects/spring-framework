@@ -22,10 +22,10 @@ import java.util.regex.Pattern;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
 import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
@@ -90,8 +90,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	@Override
-	@Nullable
-	public String getContextualName(ClientRequestObservationContext context) {
+	public @Nullable String getContextualName(ClientRequestObservationContext context) {
 		ClientRequest request = context.getRequest();
 		return (request != null ? "http " + request.method().name().toLowerCase(Locale.ROOT) : null);
 	}

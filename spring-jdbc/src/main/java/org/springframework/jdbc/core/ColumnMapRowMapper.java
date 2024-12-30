@@ -21,8 +21,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -90,8 +91,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * @return the Object returned
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
 	 */
-	@Nullable
-	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+	protected @Nullable Object getColumnValue(ResultSet rs, int index) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index);
 	}
 

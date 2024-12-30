@@ -19,7 +19,7 @@ package org.springframework.util;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Extension of the {@code Map} interface that stores multiple values.
@@ -36,8 +36,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * @param key the key
 	 * @return the first value for the specified key, or {@code null} if none
 	 */
-	@Nullable
-	V getFirst(K key);
+	@Nullable V getFirst(K key);
 
 	/**
 	 * Add the given single value to the current list of values for the given key.

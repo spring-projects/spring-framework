@@ -16,8 +16,9 @@
 
 package org.springframework.web.bind.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -59,7 +60,6 @@ public interface WebArgumentResolver {
 	 * @return the argument value, or {@code UNRESOLVED} if not resolvable
 	 * @throws Exception in case of resolution failure
 	 */
-	@Nullable
-	Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception;
+	@Nullable Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception;
 
 }

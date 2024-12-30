@@ -28,7 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Clob;
 import java.sql.SQLException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -41,14 +42,11 @@ import org.springframework.util.FileCopyUtils;
 @Deprecated
 class PassThroughClob implements Clob {
 
-	@Nullable
-	private String content;
+	private @Nullable String content;
 
-	@Nullable
-	private Reader characterStream;
+	private @Nullable Reader characterStream;
 
-	@Nullable
-	private InputStream asciiStream;
+	private @Nullable InputStream asciiStream;
 
 	private final long contentLength;
 

@@ -129,7 +129,7 @@ class WebClientExtensionsTests {
 	@Test
 	fun `awaitExchangeOrNull returning null`() {
 		val foo = mockk<Foo>()
-		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo?>>>()) } returns Mono.empty()
+		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.empty()
 		runBlocking {
 			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(null)
 		}

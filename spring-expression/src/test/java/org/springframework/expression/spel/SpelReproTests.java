@@ -37,6 +37,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -61,7 +62,6 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -1169,7 +1169,6 @@ class SpelReproTests extends AbstractExpressionTests {
 		TypedValue value = accessor.read(context, target, "property");
 		assertThat(value.getValue()).isEqualTo(1);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
-		assertThat(value.getTypeDescriptor().getAnnotations()).isNotEmpty();
 	}
 
 	@Test
@@ -2158,8 +2157,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		@Nullable
-		public Integer getProperty() {
+		public @Nullable Integer getProperty() {
 			return this.value;
 		}
 	}

@@ -23,12 +23,12 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -72,8 +72,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 
 
 	@Override
-	@Nullable
-	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId)
+	public @Nullable InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId)
 			throws SAXException, IOException {
 
 		InputSource source = super.resolveEntity(publicId, systemId);
@@ -135,8 +134,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	 * that the parser open a regular URI connection to the system identifier
 	 * @since 6.0.4
 	 */
-	@Nullable
-	protected InputSource resolveSchemaEntity(@Nullable String publicId, String systemId) {
+	protected @Nullable InputSource resolveSchemaEntity(@Nullable String publicId, String systemId) {
 		InputSource source;
 		// External dtd/xsd lookup via https even for canonical http declaration
 		String url = systemId;

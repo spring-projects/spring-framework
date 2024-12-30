@@ -16,11 +16,12 @@
 
 package org.springframework.aop.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -110,8 +111,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.advisorDefinition.getSource();
 	}
 

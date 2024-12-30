@@ -21,10 +21,10 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -73,8 +73,7 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final Method addTransformerMethod;
 
-	@Nullable
-	private final Method getThrowawayClassLoaderMethod;
+	private final @Nullable Method getThrowawayClassLoaderMethod;
 
 
 	/**

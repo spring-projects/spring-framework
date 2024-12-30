@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
@@ -55,7 +56,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.SpringProperties;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -129,19 +129,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	private final CacheOperationExpressionEvaluator evaluator = new CacheOperationExpressionEvaluator(
 			new CacheEvaluationContextFactory(this.originalEvaluationContext));
 
-	@Nullable
-	private final ReactiveCachingHandler reactiveCachingHandler;
+	private final @Nullable ReactiveCachingHandler reactiveCachingHandler;
 
-	@Nullable
-	private CacheOperationSource cacheOperationSource;
+	private @Nullable CacheOperationSource cacheOperationSource;
 
 	private SingletonSupplier<KeyGenerator> keyGenerator = SingletonSupplier.of(SimpleKeyGenerator::new);
 
-	@Nullable
-	private SingletonSupplier<CacheResolver> cacheResolver;
+	private @Nullable SingletonSupplier<CacheResolver> cacheResolver;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 	private boolean initialized = false;
 
@@ -192,8 +188,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	/**
 	 * Return the CacheOperationSource for this cache aspect.
 	 */
-	@Nullable
-	public CacheOperationSource getCacheOperationSource() {
+	public @Nullable CacheOperationSource getCacheOperationSource() {
 		return this.cacheOperationSource;
 	}
 
@@ -228,8 +223,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	/**
 	 * Return the default {@link CacheResolver} that this cache aspect delegates to.
 	 */
-	@Nullable
-	public CacheResolver getCacheResolver() {
+	public @Nullable CacheResolver getCacheResolver() {
 		return SupplierUtils.resolve(this.cacheResolver);
 	}
 
@@ -397,8 +391,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		this.evaluator.clear();
 	}
 
-	@Nullable
-	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
+	protected @Nullable Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
 		// Check whether aspect is enabled (to cope with cases where the AJ is pulled in automatically)
 		if (this.initialized) {
 			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
@@ -425,13 +418,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @return the result of the invocation
 	 * @see CacheOperationInvoker#invoke()
 	 */
-	@Nullable
-	protected Object invokeOperation(CacheOperationInvoker invoker) {
+	protected @Nullable Object invokeOperation(CacheOperationInvoker invoker) {
 		return invoker.invoke();
 	}
 
-	@Nullable
-	private Object execute(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
+	private @Nullable Object execute(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 		if (contexts.isSynchronized()) {
 			// Special handling of synchronized invocation
 			return executeSynchronized(invoker, method, contexts);
@@ -449,8 +440,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return cacheHit;
 	}
 
-	@Nullable
-	private Object executeSynchronized(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
+	private @Nullable Object executeSynchronized(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 		CacheOperationContext context = contexts.get(CacheableOperation.class).iterator().next();
 		if (isConditionPassing(context, CacheOperationExpressionEvaluator.NO_RESULT)) {
 			Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
@@ -487,8 +477,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @return a {@link Cache.ValueWrapper} holding the cached value,
 	 * or {@code null} if none is found
 	 */
-	@Nullable
-	private Object findCachedValue(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
+	private @Nullable Object findCachedValue(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 		for (CacheOperationContext context : contexts.get(CacheableOperation.class)) {
 			if (isConditionPassing(context, CacheOperationExpressionEvaluator.NO_RESULT)) {
 				Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
@@ -509,8 +498,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return null;
 	}
 
-	@Nullable
-	private Object findInCaches(CacheOperationContext context, Object key,
+	private @Nullable Object findInCaches(CacheOperationContext context, Object key,
 			CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 
 		for (Cache cache : context.getCaches()) {
@@ -543,8 +531,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return null;
 	}
 
-	@Nullable
-	private Object evaluate(@Nullable Object cacheHit, CacheOperationInvoker invoker, Method method,
+	private @Nullable Object evaluate(@Nullable Object cacheHit, CacheOperationInvoker invoker, Method method,
 			CacheOperationContexts contexts) {
 
 		// Re-invocation in reactive pipeline after late cache hit determination?
@@ -596,13 +583,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return returnValue;
 	}
 
-	@Nullable
-	private Object unwrapCacheValue(@Nullable Object cacheValue) {
+	private @Nullable Object unwrapCacheValue(@Nullable Object cacheValue) {
 		return (cacheValue instanceof Cache.ValueWrapper wrapper ? wrapper.get() : cacheValue);
 	}
 
-	@Nullable
-	private Object wrapCacheValue(Method method, @Nullable Object cacheValue) {
+	private @Nullable Object wrapCacheValue(Method method, @Nullable Object cacheValue) {
 		if (method.getReturnType() == Optional.class &&
 				(cacheValue == null || cacheValue.getClass() != Optional.class)) {
 			return Optional.ofNullable(cacheValue);
@@ -610,8 +595,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return cacheValue;
 	}
 
-	@Nullable
-	private Object unwrapReturnValue(@Nullable Object returnValue) {
+	private @Nullable Object unwrapReturnValue(@Nullable Object returnValue) {
 		return ObjectUtils.unwrapOptional(returnValue);
 	}
 
@@ -633,8 +617,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return (cachePutContexts.size() != excluded.size());
 	}
 
-	@Nullable
-	private Object processCacheEvicts(Collection<CacheOperationContext> contexts, boolean beforeInvocation,
+	private @Nullable Object processCacheEvicts(Collection<CacheOperationContext> contexts, boolean beforeInvocation,
 			@Nullable Object result) {
 
 		if (contexts.isEmpty()) {
@@ -841,7 +824,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final CacheOperationMetadata metadata;
 
-		private final Object[] args;
+		private final @Nullable Object[] args;
 
 		private final Object target;
 
@@ -849,13 +832,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final Collection<String> cacheNames;
 
-		@Nullable
-		private Boolean conditionPassing;
+		private @Nullable Boolean conditionPassing;
 
-		@Nullable
-		private Object key;
+		private @Nullable Object key;
 
-		public CacheOperationContext(CacheOperationMetadata metadata, Object[] args, Object target) {
+		public CacheOperationContext(CacheOperationMetadata metadata, @Nullable Object[] args, Object target) {
 			this.metadata = metadata;
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
@@ -879,11 +860,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		@Override
-		public Object[] getArgs() {
+		public @Nullable Object[] getArgs() {
 			return this.args;
 		}
 
-		private Object[] extractArgs(Method method, Object[] args) {
+		private @Nullable Object[] extractArgs(Method method, @Nullable Object[] args) {
 			if (!method.isVarArgs()) {
 				return args;
 			}
@@ -926,8 +907,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		/**
 		 * Compute the key for the given caching operation.
 		 */
-		@Nullable
-		protected Object generateKey(@Nullable Object result) {
+		protected @Nullable Object generateKey(@Nullable Object result) {
 			if (StringUtils.hasText(this.metadata.operation.getKey())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
 				this.key = evaluator.key(this.metadata.operation.getKey(), this.metadata.methodKey, evaluationContext);
@@ -943,8 +923,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		 * @return generated key
 		 * @since 6.1.2
 		 */
-		@Nullable
-		protected Object getGeneratedKey() {
+		protected @Nullable Object getGeneratedKey() {
 			return this.key;
 		}
 
@@ -1018,8 +997,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			this.context = context;
 		}
 
-		@Nullable
-		public Object apply(@Nullable Object result) {
+		public @Nullable Object apply(@Nullable Object result) {
 			if (result instanceof CompletableFuture<?> future) {
 				return future.whenComplete((value, ex) -> {
 					if (ex == null) {
@@ -1097,8 +1075,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
-		@Nullable
-		public Object executeSynchronized(CacheOperationInvoker invoker, Method method, Cache cache, Object key) {
+		public @Nullable Object executeSynchronized(CacheOperationInvoker invoker, Method method, Cache cache, Object key) {
 			ReactiveAdapter adapter = this.registry.getAdapter(method.getReturnType());
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
@@ -1127,8 +1104,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			return NOT_HANDLED;
 		}
 
-		@Nullable
-		public Object processCacheEvicts(List<CacheOperationContext> contexts, @Nullable Object result) {
+		public @Nullable Object processCacheEvicts(List<CacheOperationContext> contexts, @Nullable Object result) {
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))
@@ -1138,8 +1114,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Nullable
-		public Object findInCaches(CacheOperationContext context, Cache cache, Object key,
+		public @Nullable Object findInCaches(CacheOperationContext context, Cache cache, Object key,
 				CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 
 			ReactiveAdapter adapter = this.registry.getAdapter(context.getMethod().getReturnType());
@@ -1188,8 +1163,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					(data != null ? Flux.just(data) : Flux.empty()));
 		}
 
-		@Nullable
-		public Object processPutRequest(CachePutRequest request, @Nullable Object result) {
+		public @Nullable Object processPutRequest(CachePutRequest request, @Nullable Object result) {
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {

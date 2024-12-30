@@ -23,10 +23,10 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -108,8 +108,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 	 * @param obj the object to get the property value for
 	 * @return the property value
 	 */
-	@Nullable
-	private Object getPropertyValue(Object obj) {
+	private @Nullable Object getPropertyValue(Object obj) {
 		// If a nested property cannot be read, simply return null
 		// (similar to JSTL EL). If the property doesn't exist in the
 		// first place, let the exception through.

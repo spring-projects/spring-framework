@@ -20,9 +20,9 @@ import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
 import jakarta.servlet.jsp.tagext.TagSupport;
 import jakarta.servlet.jsp.tagext.TryCatchFinally;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.PropertyAccessor;
-import org.springframework.lang.Nullable;
 
 /**
  * <p>The {@code <nestedPath>} tag supports and assists with nested beans or
@@ -68,12 +68,10 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 	public static final String NESTED_PATH_VARIABLE_NAME = "nestedPath";
 
 
-	@Nullable
-	private String path;
+	private @Nullable String path;
 
 	/** Caching a previous nested path, so that it may be reset. */
-	@Nullable
-	private String previousNestedPath;
+	private @Nullable String previousNestedPath;
 
 
 	/**
@@ -95,8 +93,7 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 	/**
 	 * Return the path that this tag applies to.
 	 */
-	@Nullable
-	public String getPath() {
+	public @Nullable String getPath() {
 		return this.path;
 	}
 

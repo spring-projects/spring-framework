@@ -20,8 +20,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.Conventions;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -66,8 +67,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 
 
 	@Override
-	@Nullable
-	public Object put(String key, @Nullable Object value) {
+	public @Nullable Object put(String key, @Nullable Object value) {
 		if (value != null) {
 			return super.put(key, value);
 		}
@@ -169,8 +169,7 @@ public class ConcurrentModel extends ConcurrentHashMap<String, Object> implement
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String attributeName) {
+	public @Nullable Object getAttribute(String attributeName) {
 		return get(attributeName);
 	}
 

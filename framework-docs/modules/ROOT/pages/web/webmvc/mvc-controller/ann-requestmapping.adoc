@@ -248,36 +248,6 @@ specific than other pattern that do not have double wildcards.
 For the full details, follow the above links to the pattern Comparators.
 
 
-[[mvc-ann-requestmapping-suffix-pattern-match]]
-== Suffix Match
-
-Starting in 5.3, by default Spring MVC no longer performs `.{asterisk}` suffix pattern
-matching where a controller mapped to `/person` is also implicitly mapped to
-`/person.{asterisk}`. As a consequence path extensions are no longer used to interpret
-the requested content type for the response -- for example, `/person.pdf`, `/person.xml`,
-and so on.
-
-Using file extensions in this way was necessary when browsers used to send `Accept` headers
-that were hard to interpret consistently. At present, that is no longer a necessity and
-using the `Accept` header should be the preferred choice.
-
-Over time, the use of file name extensions has proven problematic in a variety of ways.
-It can cause ambiguity when overlain with the use of URI variables, path parameters, and
-URI encoding. Reasoning about URL-based authorization
-and security (see next section for more details) also becomes more difficult.
-
-To completely disable the use of path extensions in versions prior to 5.3, set the following:
-
-* `useSuffixPatternMatching(false)`, see xref:web/webmvc/mvc-config/path-matching.adoc[PathMatchConfigurer]
-* `favorPathExtension(false)`, see xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer]
-
-Having a way to request content types other than through the `"Accept"` header can still
-be useful, for example, when typing a URL in a browser. A safe alternative to path extensions is
-to use the query parameter strategy. If you must use file extensions, consider restricting
-them to a list of explicitly registered extensions through the `mediaTypes` property of
-xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer].
-
-
 [[mvc-ann-requestmapping-rfd]]
 == Suffix Match and RFD
 

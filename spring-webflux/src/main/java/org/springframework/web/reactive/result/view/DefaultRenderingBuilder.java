@@ -19,9 +19,10 @@ package org.springframework.web.reactive.result.view;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -36,14 +37,11 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 
 	private final Object view;
 
-	@Nullable
-	private Model model;
+	private @Nullable Model model;
 
-	@Nullable
-	private HttpStatusCode status;
+	private @Nullable HttpStatusCode status;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
 
 	DefaultRenderingBuilder(Object view) {

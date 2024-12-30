@@ -16,7 +16,8 @@
 
 package org.springframework.transaction;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -29,8 +30,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class TransactionSystemException extends TransactionException {
 
-	@Nullable
-	private Throwable applicationException;
+	private @Nullable Throwable applicationException;
 
 
 	/**
@@ -71,8 +71,7 @@ public class TransactionSystemException extends TransactionException {
 	 * if any.
 	 * @return the application exception, or {@code null} if none set
 	 */
-	@Nullable
-	public final Throwable getApplicationException() {
+	public final @Nullable Throwable getApplicationException() {
 		return this.applicationException;
 	}
 
@@ -81,8 +80,7 @@ public class TransactionSystemException extends TransactionException {
 	 * i.e. the application exception, if any, or the TransactionSystemException's own cause.
 	 * @return the original exception, or {@code null} if there was none
 	 */
-	@Nullable
-	public Throwable getOriginalException() {
+	public @Nullable Throwable getOriginalException() {
 		return (this.applicationException != null ? this.applicationException : getCause());
 	}
 

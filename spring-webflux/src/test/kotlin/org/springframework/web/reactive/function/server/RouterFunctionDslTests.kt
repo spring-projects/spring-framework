@@ -265,6 +265,7 @@ class RouterFunctionDslTests {
 				Mono.empty()
 			}
 		}
+		@Suppress("DEPRECATION")
 		GET(pathExtension { it == "properties" }) {
 			ok().bodyValue("foo=bar")
 		}

@@ -23,9 +23,10 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -121,8 +122,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
-	@Nullable
-	public RequestMethodsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
+	public @Nullable RequestMethodsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return matchPreFlight(exchange.getRequest());
 		}
@@ -140,8 +140,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Hence empty conditions is a match, otherwise try to match to the HTTP
 	 * method in the "Access-Control-Request-Method" header.
 	 */
-	@Nullable
-	private RequestMethodsRequestCondition matchPreFlight(ServerHttpRequest request) {
+	private @Nullable RequestMethodsRequestCondition matchPreFlight(ServerHttpRequest request) {
 		if (getMethods().isEmpty()) {
 			return this;
 		}
@@ -149,8 +148,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return expectedMethod != null ? matchRequestMethod(expectedMethod) : null;
 	}
 
-	@Nullable
-	private RequestMethodsRequestCondition matchRequestMethod(HttpMethod httpMethod) {
+	private @Nullable RequestMethodsRequestCondition matchRequestMethod(HttpMethod httpMethod) {
 		RequestMethod requestMethod = RequestMethod.resolve(httpMethod);
 		if (requestMethod != null) {
 			if (getMethods().contains(requestMethod)) {

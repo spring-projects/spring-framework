@@ -2,9 +2,7 @@
  * This package provides support for client HTTP
  * {@link io.micrometer.observation.Observation}.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.http.client.observation;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

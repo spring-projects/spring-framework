@@ -20,8 +20,8 @@ import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -125,8 +125,7 @@ public abstract class PropertySource<T> {
 	 * @param name the property to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
-	@Nullable
-	public abstract Object getProperty(String name);
+	public abstract @Nullable Object getProperty(String name);
 
 
 	/**
@@ -218,8 +217,7 @@ public abstract class PropertySource<T> {
 		 * Always returns {@code null}.
 		 */
 		@Override
-		@Nullable
-		public String getProperty(String name) {
+		public @Nullable String getProperty(String name) {
 			return null;
 		}
 	}
@@ -251,8 +249,7 @@ public abstract class PropertySource<T> {
 		}
 
 		@Override
-		@Nullable
-		public String getProperty(String name) {
+		public @Nullable String getProperty(String name) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}
 	}

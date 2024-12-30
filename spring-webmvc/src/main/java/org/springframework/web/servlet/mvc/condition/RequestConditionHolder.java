@@ -20,8 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A holder for a {@link RequestCondition} useful when the type of the request
@@ -39,8 +38,7 @@ import org.springframework.lang.Nullable;
  */
 public final class RequestConditionHolder extends AbstractRequestCondition<RequestConditionHolder> {
 
-	@Nullable
-	private final RequestCondition<Object> condition;
+	private final @Nullable RequestCondition<Object> condition;
 
 
 	/**
@@ -56,8 +54,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	/**
 	 * Return the held request condition, or {@code null} if not holding one.
 	 */
-	@Nullable
-	public RequestCondition<?> getCondition() {
+	public @Nullable RequestCondition<?> getCondition() {
 		return this.condition;
 	}
 
@@ -111,8 +108,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * holder, return the same holder instance.
 	 */
 	@Override
-	@Nullable
-	public RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
+	public @Nullable RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
 		if (this.condition == null) {
 			return this;
 		}

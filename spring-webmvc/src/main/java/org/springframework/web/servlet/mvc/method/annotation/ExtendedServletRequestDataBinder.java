@@ -25,9 +25,9 @@ import java.util.function.Predicate;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
@@ -132,8 +132,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private static Map<String, String> getUriVars(ServletRequest request) {
+	private static @Nullable Map<String, String> getUriVars(ServletRequest request) {
 		return (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 	}
 
@@ -148,8 +147,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		}
 	}
 
-	@Nullable
-	private Object getHeaderValue(HttpServletRequest request, String name) {
+	private @Nullable Object getHeaderValue(HttpServletRequest request, String name) {
 		if (!this.headerPredicate.test(name)) {
 			return null;
 		}
@@ -183,8 +181,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		}
 
 		@Override
-		@Nullable
-		protected Object getRequestParameter(String name, Class<?> type) {
+		protected @Nullable Object getRequestParameter(String name, Class<?> type) {
 			Object value = super.getRequestParameter(name, type);
 			if (value == null) {
 				Map<String, String> uriVars = getUriVars(getRequest());

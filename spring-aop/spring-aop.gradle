@@ -5,12 +5,12 @@ apply plugin: "kotlin"
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
+	compileOnly("com.google.code.findbugs:jsr305") // for the AOP Alliance fork
 	optional("org.apache.commons:commons-pool2")
 	optional("org.aspectj:aspectjweaver")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testFixturesImplementation(testFixtures(project(":spring-beans")))
 	testFixturesImplementation(testFixtures(project(":spring-core")))
-	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))

@@ -28,8 +28,8 @@ import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -77,8 +77,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The {@code MBeanServer} instance being used to register beans.
 	 */
-	@Nullable
-	protected MBeanServer server;
+	protected @Nullable MBeanServer server;
 
 	/**
 	 * The beans that have been registered by this exporter.
@@ -104,8 +103,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * Return the {@code MBeanServer} that the beans will be registered with.
 	 */
-	@Nullable
-	public final MBeanServer getServer() {
+	public final @Nullable MBeanServer getServer() {
 		return this.server;
 	}
 

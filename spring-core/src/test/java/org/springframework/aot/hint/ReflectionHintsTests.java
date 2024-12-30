@@ -22,9 +22,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -246,8 +246,7 @@ class ReflectionHintsTests {
 	@SuppressWarnings("unused")
 	static class TestType {
 
-		@Nullable
-		private String field;
+		private @Nullable String field;
 
 		void setName(String name) {
 

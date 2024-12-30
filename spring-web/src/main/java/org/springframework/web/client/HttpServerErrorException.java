@@ -18,10 +18,11 @@ package org.springframework.web.client;
 
 import java.nio.charset.Charset;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when an HTTP 5xx is received.
@@ -53,7 +54,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * Constructor with a status code and status text, and content.
 	 */
 	public HttpServerErrorException(
-			HttpStatusCode statusCode, String statusText, @Nullable byte[] body, @Nullable Charset charset) {
+			HttpStatusCode statusCode, String statusText, byte @Nullable [] body, @Nullable Charset charset) {
 
 		super(statusCode, statusText, body, charset);
 	}
@@ -62,7 +63,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * Constructor with a status code and status text, headers, and content.
 	 */
 	public HttpServerErrorException(HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset) {
+			@Nullable HttpHeaders headers, byte @Nullable [] body, @Nullable Charset charset) {
 
 		super(statusCode, statusText, headers, body, charset);
 	}
@@ -73,7 +74,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.2.2
 	 */
 	public HttpServerErrorException(String message, HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset) {
+			@Nullable HttpHeaders headers, byte @Nullable [] body, @Nullable Charset charset) {
 
 		super(message, statusCode, statusText, headers, body, charset);
 	}
@@ -83,7 +84,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.1
 	 */
 	public static HttpServerErrorException create(HttpStatusCode statusCode,
-			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+			String statusText, HttpHeaders headers, byte [] body, @Nullable Charset charset) {
 
 		return create(null, statusCode, statusText, headers, body, charset);
 	}

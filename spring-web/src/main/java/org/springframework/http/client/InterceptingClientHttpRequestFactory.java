@@ -20,8 +20,9 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link ClientHttpRequestFactory} wrapper with support for

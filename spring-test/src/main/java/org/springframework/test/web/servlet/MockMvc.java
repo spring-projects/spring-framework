@@ -27,9 +27,9 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.Mergeable;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -78,11 +78,9 @@ public final class MockMvc {
 
 	private final ServletContext servletContext;
 
-	@Nullable
-	private RequestBuilder defaultRequestBuilder;
+	private @Nullable RequestBuilder defaultRequestBuilder;
 
-	@Nullable
-	private Charset defaultResponseCharacterEncoding;
+	private @Nullable Charset defaultResponseCharacterEncoding;
 
 	private List<ResultMatcher> defaultResultMatchers = new ArrayList<>();
 

@@ -18,7 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.security.cert.X509Certificate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A holder for SSL session information.
@@ -31,13 +31,11 @@ public interface SslInfo {
 	/**
 	 * Return the SSL session id, if any.
 	 */
-	@Nullable
-	String getSessionId();
+	@Nullable String getSessionId();
 
 	/**
 	 * Return SSL certificates associated with the request, if any.
 	 */
-	@Nullable
-	X509Certificate[] getPeerCertificates();
+	X509Certificate @Nullable [] getPeerCertificates();
 
 }

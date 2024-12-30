@@ -17,10 +17,10 @@
 package org.springframework.http.client.observation;
 
 import io.micrometer.observation.transport.RequestReplySenderContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * Context that holds information for metadata collection during the
@@ -34,8 +34,7 @@ import org.springframework.lang.Nullable;
  */
 public class ClientRequestObservationContext extends RequestReplySenderContext<ClientHttpRequest, ClientHttpResponse> {
 
-	@Nullable
-	private String uriTemplate;
+	private @Nullable String uriTemplate;
 
 
 	/**
@@ -64,8 +63,7 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	/**
 	 * Return the URI template used for the current client exchange, {@code null} if none was used.
 	 */
-	@Nullable
-	public String getUriTemplate() {
+	public @Nullable String getUriTemplate() {
 		return this.uriTemplate;
 	}
 

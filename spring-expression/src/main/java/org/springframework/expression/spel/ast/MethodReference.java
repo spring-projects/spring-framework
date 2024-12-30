@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
@@ -41,7 +43,6 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectiveMethodExecutor;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -59,11 +60,9 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final String name;
 
-	@Nullable
-	private Character originalPrimitiveExitTypeDescriptor;
+	private @Nullable Character originalPrimitiveExitTypeDescriptor;
 
-	@Nullable
-	private volatile CachedMethodExecutor cachedExecutor;
+	private volatile @Nullable CachedMethodExecutor cachedExecutor;
 
 
 	public MethodReference(boolean nullSafe, String methodName, int startPos, int endPos, SpelNodeImpl... arguments) {
@@ -191,8 +190,7 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
-	@Nullable
-	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value,
+	private @Nullable MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value,
 			@Nullable TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 
 		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
@@ -378,11 +376,9 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final EvaluationContext evaluationContext;
 
-		@Nullable
-		private final Object value;
+		private final @Nullable Object value;
 
-		@Nullable
-		private final TypeDescriptor targetType;
+		private final @Nullable TypeDescriptor targetType;
 
 		private final Object[] arguments;
 
@@ -417,11 +413,9 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final MethodExecutor methodExecutor;
 
-		@Nullable
-		private final Class<?> staticClass;
+		private final @Nullable Class<?> staticClass;
 
-		@Nullable
-		private final TypeDescriptor target;
+		private final @Nullable TypeDescriptor target;
 
 		private final List<TypeDescriptor> argumentTypes;
 

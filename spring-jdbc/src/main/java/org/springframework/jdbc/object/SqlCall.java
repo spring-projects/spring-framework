@@ -21,11 +21,12 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -58,15 +59,13 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * String of form {call add_invoice(?, ?, ?)} or {? = call get_invoice_count(?)}
 	 * if isFunction is set to true. Updated after each parameter is added.
 	 */
-	@Nullable
-	private String callString;
+	private @Nullable String callString;
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
-	@Nullable
-	private CallableStatementCreatorFactory callableStatementFactory;
+	private @Nullable CallableStatementCreatorFactory callableStatementFactory;
 
 
 	/**
@@ -177,8 +176,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Get the call string.
 	 */
-	@Nullable
-	public String getCallString() {
+	public @Nullable String getCallString() {
 		return this.callString;
 	}
 

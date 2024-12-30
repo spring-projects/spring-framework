@@ -24,10 +24,10 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.MappingMatch;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -256,8 +256,7 @@ public abstract class ServletRequestPathUtils {
 					RequestPath.parse(requestUri, request.getContextPath()));
 		}
 
-		@Nullable
-		private static String getServletPathPrefix(HttpServletRequest request) {
+		private static @Nullable String getServletPathPrefix(HttpServletRequest request) {
 			HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
 			mapping = (mapping != null ? mapping : request.getHttpServletMapping());
 			if (ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {

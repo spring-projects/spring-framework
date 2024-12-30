@@ -28,9 +28,9 @@ import java.util.Set;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -48,8 +48,7 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 
 	private final HttpFields headers;
 
-	@Nullable
-	private final HttpFields.Mutable mutable;
+	private final HttpFields.@Nullable Mutable mutable;
 
 
 	/**
@@ -143,9 +142,8 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 		return false;
 	}
 
-	@Nullable
 	@Override
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		List<String> list = null;
 		if (key instanceof String name) {
 			for (HttpField f : this.headers) {
@@ -160,9 +158,8 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 		return list;
 	}
 
-	@Nullable
 	@Override
-	public List<String> put(String key, List<String> value) {
+	public @Nullable List<String> put(String key, List<String> value) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> oldValues = get(key);
 
@@ -183,9 +180,8 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 		return oldValues;
 	}
 
-	@Nullable
 	@Override
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(Object key) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> list = null;
 		if (key instanceof String name) {
@@ -315,8 +311,7 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 
 		private final Iterator<String> iterator;
 
-		@Nullable
-		private String currentName;
+		private @Nullable String currentName;
 
 		private HeaderNamesIterator(Iterator<String> iterator) {
 			this.iterator = iterator;

@@ -18,7 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.ResultSet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Common base class for ResultSet-supporting SqlParameters like
@@ -29,14 +29,11 @@ import org.springframework.lang.Nullable;
  */
 public class ResultSetSupportingSqlParameter extends SqlParameter {
 
-	@Nullable
-	private ResultSetExtractor<?> resultSetExtractor;
+	private @Nullable ResultSetExtractor<?> resultSetExtractor;
 
-	@Nullable
-	private RowCallbackHandler rowCallbackHandler;
+	private @Nullable RowCallbackHandler rowCallbackHandler;
 
-	@Nullable
-	private RowMapper<?> rowMapper;
+	private @Nullable RowMapper<?> rowMapper;
 
 
 	/**
@@ -114,24 +111,21 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the ResultSetExtractor held by this parameter, if any.
 	 */
-	@Nullable
-	public ResultSetExtractor<?> getResultSetExtractor() {
+	public @Nullable ResultSetExtractor<?> getResultSetExtractor() {
 		return this.resultSetExtractor;
 	}
 
 	/**
 	 * Return the RowCallbackHandler held by this parameter, if any.
 	 */
-	@Nullable
-	public RowCallbackHandler getRowCallbackHandler() {
+	public @Nullable RowCallbackHandler getRowCallbackHandler() {
 		return this.rowCallbackHandler;
 	}
 
 	/**
 	 * Return the RowMapper held by this parameter, if any.
 	 */
-	@Nullable
-	public RowMapper<?> getRowMapper() {
+	public @Nullable RowMapper<?> getRowMapper() {
 		return this.rowMapper;
 	}
 

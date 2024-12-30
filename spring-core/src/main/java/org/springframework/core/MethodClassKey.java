@@ -18,7 +18,8 @@ package org.springframework.core;
 
 import java.lang.reflect.Method;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -33,8 +34,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 
 	private final Method method;
 
-	@Nullable
-	private final Class<?> targetClass;
+	private final @Nullable Class<?> targetClass;
 
 
 	/**

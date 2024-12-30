@@ -322,8 +322,8 @@ public class MockMvcTesterIntegrationTests {
 		}
 
 		private Consumer<HttpHeaders> textContent(String charset) {
-			return headers -> assertThat(headers).containsEntry(
-					"Content-Type", List.of("text/plain;charset=%s".formatted(charset)));
+			return headers -> assertThat(headers.hasHeaderValues("Content-Type", List.of("text/plain;charset=%s".formatted(charset))))
+					.as("hasHeaderValues").isTrue();
 		}
 	}
 

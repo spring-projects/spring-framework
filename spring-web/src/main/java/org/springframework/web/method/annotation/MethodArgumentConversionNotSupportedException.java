@@ -16,9 +16,10 @@
 
 package org.springframework.web.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * A ConversionNotSupportedException raised while resolving a method argument.

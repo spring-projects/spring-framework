@@ -20,8 +20,7 @@ import java.lang.reflect.Method;
 
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied

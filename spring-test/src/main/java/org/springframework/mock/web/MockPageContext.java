@@ -36,8 +36,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -63,8 +63,7 @@ public class MockPageContext extends PageContext {
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
-	@Nullable
-	private JspWriter out;
+	private @Nullable JspWriter out;
 
 
 	/**
@@ -163,15 +162,13 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name) {
+	public @Nullable Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name, int scope) {
+	public @Nullable Object getAttribute(String name, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return switch (scope) {
 			case PAGE_SCOPE -> getAttribute(name);
@@ -186,8 +183,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	@Nullable
-	public Object findAttribute(String name) {
+	public @Nullable Object findAttribute(String name) {
 		Object value = getAttribute(name);
 		if (value == null) {
 			value = getAttribute(name, REQUEST_SCOPE);
@@ -268,8 +264,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	@Nullable
-	public ELContext getELContext() {
+	public @Nullable ELContext getELContext() {
 		return null;
 	}
 
@@ -294,8 +289,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	@Nullable
-	public Exception getException() {
+	public @Nullable Exception getException() {
 		return null;
 	}
 

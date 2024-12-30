@@ -29,13 +29,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Extension;
 import jakarta.websocket.WebSocketContainer;
 import jakarta.websocket.server.ServerContainer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -63,8 +63,7 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 
 	private static final String[] SUPPORTED_VERSIONS = new String[] {"13"};
 
-	@Nullable
-	private volatile List<WebSocketExtension> extensions;
+	private volatile @Nullable List<WebSocketExtension> extensions;
 
 
 	@Override

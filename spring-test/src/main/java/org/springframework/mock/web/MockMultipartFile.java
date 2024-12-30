@@ -21,8 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,8 +45,7 @@ public class MockMultipartFile implements MultipartFile {
 
 	private final String originalFilename;
 
-	@Nullable
-	private final String contentType;
+	private final @Nullable String contentType;
 
 	private final byte[] content;
 
@@ -56,7 +55,7 @@ public class MockMultipartFile implements MultipartFile {
 	 * @param name the name of the file
 	 * @param content the content of the file
 	 */
-	public MockMultipartFile(String name, @Nullable byte[] content) {
+	public MockMultipartFile(String name, byte @Nullable [] content) {
 		this(name, "", null, content);
 	}
 
@@ -78,7 +77,7 @@ public class MockMultipartFile implements MultipartFile {
 	 * @param content the content of the file
 	 */
 	public MockMultipartFile(
-			String name, @Nullable String originalFilename, @Nullable String contentType, @Nullable byte[] content) {
+			String name, @Nullable String originalFilename, @Nullable String contentType, byte @Nullable [] content) {
 
 		Assert.hasLength(name, "Name must not be empty");
 		this.name = name;
@@ -109,14 +108,12 @@ public class MockMultipartFile implements MultipartFile {
 	}
 
 	@Override
-	@NonNull
 	public String getOriginalFilename() {
 		return this.originalFilename;
 	}
 
 	@Override
-	@Nullable
-	public String getContentType() {
+	public @Nullable String getContentType() {
 		return this.contentType;
 	}
 

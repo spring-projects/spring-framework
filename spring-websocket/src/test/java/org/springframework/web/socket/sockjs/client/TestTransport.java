@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -47,8 +47,7 @@ class TestTransport implements Transport {
 
 	private TransportRequest request;
 
-	@Nullable
-	private CompletableFuture<WebSocketSession> future;
+	private @Nullable CompletableFuture<WebSocketSession> future;
 
 
 	public TestTransport(String name) {

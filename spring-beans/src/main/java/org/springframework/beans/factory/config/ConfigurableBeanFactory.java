@@ -19,6 +19,8 @@ package org.springframework.beans.factory.config;
 import java.beans.PropertyEditor;
 import java.util.concurrent.Executor;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TypeConverter;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.metrics.ApplicationStartup;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -94,8 +95,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * (only {@code null} if even the system ClassLoader isn't accessible).
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */
-	@Nullable
-	ClassLoader getBeanClassLoader();
+	@Nullable ClassLoader getBeanClassLoader();
 
 	/**
 	 * Specify a temporary ClassLoader to use for type matching purposes.
@@ -113,8 +113,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * if any.
 	 * @since 2.5
 	 */
-	@Nullable
-	ClassLoader getTempClassLoader();
+	@Nullable ClassLoader getTempClassLoader();
 
 	/**
 	 * Set whether to cache bean metadata such as given bean definitions
@@ -144,8 +143,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Return the resolution strategy for expressions in bean definition values.
 	 * @since 3.0
 	 */
-	@Nullable
-	BeanExpressionResolver getBeanExpressionResolver();
+	@Nullable BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
 	 * Set the {@link Executor} (possibly a {@link org.springframework.core.task.TaskExecutor})
@@ -160,8 +158,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * for background bootstrapping, if any.
 	 * @since 6.2
 	 */
-	@Nullable
-	Executor getBootstrapExecutor();
+	@Nullable Executor getBootstrapExecutor();
 
 	/**
 	 * Specify a {@link ConversionService} to use for converting
@@ -174,8 +171,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Return the associated ConversionService, if any.
 	 * @since 3.0
 	 */
-	@Nullable
-	ConversionService getConversionService();
+	@Nullable ConversionService getConversionService();
 
 	/**
 	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.
@@ -246,8 +242,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return the resolved value (may be the original value as-is)
 	 * @since 3.0
 	 */
-	@Nullable
-	String resolveEmbeddedValue(String value);
+	@Nullable String resolveEmbeddedValue(String value);
 
 	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created
@@ -290,8 +285,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return the registered Scope implementation, or {@code null} if none
 	 * @see #registerScope
 	 */
-	@Nullable
-	Scope getRegisteredScope(String scopeName);
+	@Nullable Scope getRegisteredScope(String scopeName);
 
 	/**
 	 * Set the {@code ApplicationStartup} for this bean factory.

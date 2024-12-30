@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -56,14 +57,11 @@ public class DefaultTestContext implements TestContext {
 
 	private final Class<?> testClass;
 
-	@Nullable
-	private volatile Object testInstance;
+	private volatile @Nullable Object testInstance;
 
-	@Nullable
-	private volatile Method testMethod;
+	private volatile @Nullable Method testMethod;
 
-	@Nullable
-	private volatile Throwable testException;
+	private volatile @Nullable Throwable testException;
 
 	private volatile MethodInvoker methodInvoker = MethodInvoker.DEFAULT_INVOKER;
 
@@ -174,8 +172,7 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	@Override
-	@Nullable
-	public final Throwable getTestException() {
+	public final @Nullable Throwable getTestException() {
 		return this.testException;
 	}
 
@@ -211,8 +208,7 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name) {
+	public @Nullable Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
@@ -229,8 +225,7 @@ public class DefaultTestContext implements TestContext {
 	}
 
 	@Override
-	@Nullable
-	public Object removeAttribute(String name) {
+	public @Nullable Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);
 	}

@@ -16,9 +16,8 @@
 
 package org.springframework.transaction;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-
-import org.springframework.lang.Nullable;
 
 /**
  * This is the central interface in Spring's reactive transaction infrastructure.

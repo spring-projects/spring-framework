@@ -28,8 +28,8 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -50,16 +50,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class MockFilterChain implements FilterChain {
 
-	@Nullable
-	private ServletRequest request;
+	private @Nullable ServletRequest request;
 
-	@Nullable
-	private ServletResponse response;
+	private @Nullable ServletResponse response;
 
 	private final List<Filter> filters;
 
-	@Nullable
-	private Iterator<Filter> iterator;
+	private @Nullable Iterator<Filter> iterator;
 
 
 	/**
@@ -100,16 +97,14 @@ public class MockFilterChain implements FilterChain {
 	/**
 	 * Return the request that {@link #doFilter} has been called with.
 	 */
-	@Nullable
-	public ServletRequest getRequest() {
+	public @Nullable ServletRequest getRequest() {
 		return this.request;
 	}
 
 	/**
 	 * Return the response that {@link #doFilter} has been called with.
 	 */
-	@Nullable
-	public ServletResponse getResponse() {
+	public @Nullable ServletResponse getResponse() {
 		return this.response;
 	}
 

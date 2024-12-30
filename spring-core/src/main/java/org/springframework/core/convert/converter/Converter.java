@@ -16,7 +16,8 @@
 
 package org.springframework.core.convert.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -41,8 +42,7 @@ public interface Converter<S, T> {
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
 	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type
 	 */
-	@Nullable
-	T convert(S source);
+	@Nullable T convert(S source);
 
 	/**
 	 * Construct a composed {@link Converter} that first applies this {@link Converter}

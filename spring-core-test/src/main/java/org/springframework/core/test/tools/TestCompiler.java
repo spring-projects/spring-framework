@@ -35,7 +35,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility that can be used to dynamically compile and test Java source code.
@@ -48,8 +48,7 @@ import org.springframework.lang.Nullable;
  */
 public final class TestCompiler {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private final JavaCompiler compiler;
 

@@ -3,9 +3,7 @@
  * contains the {@code ServerHttpRequest} and {@code ServerHttpResponse},
  * as well as a Servlet-based implementation of these interfaces.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.http.server;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

@@ -20,10 +20,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Oracle-specific implementation for the {@link CallMetaDataProvider} interface.
@@ -58,15 +59,13 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
+	public @Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		// Oracle uses catalog name for package name or an empty string if no package
 		return (catalogName == null ? "" : catalogNameToUse(catalogName));
 	}
 
 	@Override
-	@Nullable
-	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		// Use current user schema if no schema specified
 		return (schemaName == null ? getUserName() : super.metaDataSchemaNameToUse(schemaName));
 	}

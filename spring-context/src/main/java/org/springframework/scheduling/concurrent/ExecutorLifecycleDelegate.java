@@ -21,8 +21,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.SmartLifecycle;
-import org.springframework.lang.Nullable;
 
 /**
  * An internal delegate for common {@link ExecutorService} lifecycle management
@@ -47,8 +48,7 @@ final class ExecutorLifecycleDelegate implements SmartLifecycle {
 
 	private int executingTaskCount = 0;
 
-	@Nullable
-	private Runnable stopCallback;
+	private @Nullable Runnable stopCallback;
 
 
 	public ExecutorLifecycleDelegate(ExecutorService executor) {

@@ -23,10 +23,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.log.LogFormatUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -61,17 +61,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	@Nullable
-	private Predicate<Object> mappedHandlerPredicate;
+	private @Nullable Predicate<Object> mappedHandlerPredicate;
 
-	@Nullable
-	private Set<?> mappedHandlers;
+	private @Nullable Set<?> mappedHandlers;
 
-	@Nullable
-	private Class<?>[] mappedHandlerClasses;
+	private Class<?> @Nullable [] mappedHandlerClasses;
 
-	@Nullable
-	private Log warnLogger;
+	private @Nullable Log warnLogger;
 
 	private boolean preventResponseCaching = false;
 
@@ -134,8 +130,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * Return the {@link #setMappedHandlerClasses(Class[]) configured} mapped
 	 * handler classes.
 	 */
-	@Nullable
-	protected Class<?>[] getMappedHandlerClasses() {
+	protected Class<?> @Nullable [] getMappedHandlerClasses() {
 		return this.mappedHandlerClasses;
 	}
 
@@ -173,8 +168,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * to the {@link #doResolveException} template method.
 	 */
 	@Override
-	@Nullable
-	public ModelAndView resolveException(
+	public @Nullable ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
@@ -305,8 +299,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return a corresponding {@code ModelAndView} to forward to,
 	 * or {@code null} for default processing in the resolution chain
 	 */
-	@Nullable
-	protected abstract ModelAndView doResolveException(
+	protected abstract @Nullable ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }

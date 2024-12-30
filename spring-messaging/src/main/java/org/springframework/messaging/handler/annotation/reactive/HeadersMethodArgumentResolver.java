@@ -19,8 +19,9 @@ package org.springframework.messaging.handler.annotation.reactive;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -49,8 +50,7 @@ public class HeadersMethodArgumentResolver implements SyncHandlerMethodArgumentR
 	}
 
 	@Override
-	@Nullable
-	public Object resolveArgumentValue(MethodParameter parameter, Message<?> message) {
+	public @Nullable Object resolveArgumentValue(MethodParameter parameter, Message<?> message) {
 		Class<?> paramType = parameter.getParameterType();
 		if (Map.class.isAssignableFrom(paramType)) {
 			return message.getHeaders();

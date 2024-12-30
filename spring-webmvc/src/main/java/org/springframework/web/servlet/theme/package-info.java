@@ -17,9 +17,7 @@
  * <li>The {@code pagedlist} demo application uses themes</li>
  * </ul>
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.theme;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

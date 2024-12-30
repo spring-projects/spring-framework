@@ -24,8 +24,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Metadata interface for a Spring-managed JPA {@link EntityManagerFactory}.
@@ -46,8 +45,7 @@ public interface EntityManagerFactoryInfo {
 	 * or {@code null} if the standard JPA provider autodetection process
 	 * was used to configure the EntityManagerFactory
 	 */
-	@Nullable
-	PersistenceProvider getPersistenceProvider();
+	@Nullable PersistenceProvider getPersistenceProvider();
 
 	/**
 	 * Return the PersistenceUnitInfo used to create this
@@ -56,8 +54,7 @@ public interface EntityManagerFactoryInfo {
 	 * or {@code null} if the in-container contract was not used to
 	 * configure the EntityManagerFactory
 	 */
-	@Nullable
-	PersistenceUnitInfo getPersistenceUnitInfo();
+	@Nullable PersistenceUnitInfo getPersistenceUnitInfo();
 
 	/**
 	 * Return the name of the persistence unit used to create this
@@ -68,16 +65,14 @@ public interface EntityManagerFactoryInfo {
 	 * @see #getPersistenceUnitInfo()
 	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
 	 */
-	@Nullable
-	String getPersistenceUnitName();
+	@Nullable String getPersistenceUnitName();
 
 	/**
 	 * Return the JDBC DataSource that this EntityManagerFactory
 	 * obtains its JDBC Connections from.
 	 * @return the JDBC DataSource, or {@code null} if not known
 	 */
-	@Nullable
-	DataSource getDataSource();
+	@Nullable DataSource getDataSource();
 
 	/**
 	 * Return the (potentially vendor-specific) EntityManager interface
@@ -86,15 +81,13 @@ public interface EntityManagerFactoryInfo {
 	 * to happen: either based on a target {@code EntityManager} instance
 	 * or simply defaulting to {@code jakarta.persistence.EntityManager}.
 	 */
-	@Nullable
-	Class<? extends EntityManager> getEntityManagerInterface();
+	@Nullable Class<? extends EntityManager> getEntityManagerInterface();
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * EntityManagerFactory, or {@code null} if not known.
 	 */
-	@Nullable
-	JpaDialect getJpaDialect();
+	@Nullable JpaDialect getJpaDialect();
 
 	/**
 	 * Return the ClassLoader that the application's beans are loaded with.

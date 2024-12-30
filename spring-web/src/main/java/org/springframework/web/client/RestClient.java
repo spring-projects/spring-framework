@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +46,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.CheckReturnValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
@@ -672,8 +672,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
-		@Nullable
-		default <T> T exchange(ExchangeFunction<T> exchangeFunction) {
+		default <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
 
@@ -704,8 +703,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
-		@Nullable
-		<T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
+		<T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
 
 
 		/**
@@ -722,8 +720,7 @@ public interface RestClient {
 			 * @return the exchanged type
 			 * @throws IOException in case of I/O errors
 			 */
-			@Nullable
-			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+			@Nullable T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
 
@@ -738,8 +735,7 @@ public interface RestClient {
 			 * @param <T> the body type
 			 * @return the body, or {@code null} if no response body was available
 			 */
-			@Nullable
-			<T> T bodyTo(Class<T> bodyType);
+			<T> @Nullable T bodyTo(Class<T> bodyType);
 
 			/**
 			 * Extract the response body as an object of the given type.
@@ -747,8 +743,7 @@ public interface RestClient {
 			 * @param <T> the body type
 			 * @return the body, or {@code null} if no response body was available
 			 */
-			@Nullable
-			<T> T bodyTo(ParameterizedTypeReference<T> bodyType);
+			<T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType);
 
 		}
 	}
@@ -860,8 +855,7 @@ public interface RestClient {
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
 		 */
-		@Nullable
-		<T> T body(Class<T> bodyType);
+		<T> @Nullable T body(Class<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
@@ -873,8 +867,7 @@ public interface RestClient {
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
 		 */
-		@Nullable
-		<T> T body(ParameterizedTypeReference<T> bodyType);
+		<T> @Nullable T body(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of

@@ -24,9 +24,9 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
@@ -41,8 +41,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
  */
 public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware {
 
-	@Nullable
-	private ClassLoader classLoader;
+	private @Nullable ClassLoader classLoader;
 
 	private CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
@@ -98,14 +97,12 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 
 
 	@Override
-	@Nullable
-	public Object evaluate(ScriptSource script) {
+	public @Nullable Object evaluate(ScriptSource script) {
 		return evaluate(script, null);
 	}
 
 	@Override
-	@Nullable
-	public Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) {
+	public @Nullable Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) {
 		GroovyShell groovyShell = new GroovyShell(
 				this.classLoader, new Binding(arguments), this.compilerConfiguration);
 		try {

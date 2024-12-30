@@ -18,8 +18,8 @@ package org.springframework.web.reactive.resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,8 +45,7 @@ public abstract class AbstractPrefixVersionStrategy implements VersionStrategy {
 
 
 	@Override
-	@Nullable
-	public String extractVersion(String requestPath) {
+	public @Nullable String extractVersion(String requestPath) {
 		return (requestPath.startsWith(this.prefix) ? this.prefix : null);
 	}
 

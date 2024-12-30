@@ -20,9 +20,10 @@ import java.util.Properties;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 
 /**
  * Subclass of PropertyPlaceholderConfigurer that supports JDK 1.4's
@@ -47,11 +48,9 @@ import org.springframework.lang.Nullable;
 @Deprecated
 public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigurer implements InitializingBean {
 
-	@Nullable
-	private String systemTreePath;
+	private @Nullable String systemTreePath;
 
-	@Nullable
-	private String userTreePath;
+	private @Nullable String userTreePath;
 
 	private Preferences systemPrefs = Preferences.systemRoot();
 
@@ -120,8 +119,7 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 * @param preferences the Preferences to resolve against
 	 * @return the value for the placeholder, or {@code null} if none found
 	 */
-	@Nullable
-	protected String resolvePlaceholder(@Nullable String path, String key, Preferences preferences) {
+	protected @Nullable String resolvePlaceholder(@Nullable String path, String key, Preferences preferences) {
 		if (path != null) {
 			// Do not create the node if it does not exist...
 			try {

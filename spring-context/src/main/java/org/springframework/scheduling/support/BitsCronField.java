@@ -20,7 +20,8 @@ import java.time.DateTimeException;
 import java.time.temporal.Temporal;
 import java.time.temporal.ValueRange;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -170,9 +171,8 @@ final class BitsCronField extends CronField {
 	}
 
 
-	@Nullable
 	@Override
-	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
+	public <T extends Temporal & Comparable<? super T>> @Nullable T nextOrSame(T temporal) {
 		int current = type().get(temporal);
 		int next = nextSetBit(current);
 		if (next == -1) {

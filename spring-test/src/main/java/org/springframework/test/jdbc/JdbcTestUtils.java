@@ -18,11 +18,11 @@ package org.springframework.test.jdbc;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**

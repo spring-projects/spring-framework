@@ -21,9 +21,9 @@ import java.lang.reflect.AnnotatedElement;
 
 import jakarta.ejb.ApplicationException;
 import jakarta.ejb.TransactionAttributeType;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
@@ -44,8 +44,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 	}
 
 	@Override
-	@Nullable
-	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement element) {
+	public @Nullable TransactionAttribute parseTransactionAnnotation(AnnotatedElement element) {
 		jakarta.ejb.TransactionAttribute ann = element.getAnnotation(jakarta.ejb.TransactionAttribute.class);
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);

@@ -20,8 +20,8 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
@@ -49,8 +49,7 @@ public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 	}
 
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		beforeAccess();
 		try {
 			return methodInvocation.proceed();

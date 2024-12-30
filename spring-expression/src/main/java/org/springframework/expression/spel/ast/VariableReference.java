@@ -19,6 +19,8 @@ package org.springframework.expression.spel.ast;
 import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -26,7 +28,6 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a variable reference &mdash; for example, {@code #root}, {@code #this},

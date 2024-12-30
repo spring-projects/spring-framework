@@ -19,6 +19,8 @@ package org.springframework.core.type.classreading;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.MethodVisitor;
@@ -27,7 +29,6 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -40,18 +41,15 @@ import org.springframework.util.ClassUtils;
  */
 final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private String className = "";
 
 	private int access;
 
-	@Nullable
-	private String superClassName;
+	private @Nullable String superClassName;
 
-	@Nullable
-	private String enclosingClassName;
+	private @Nullable String enclosingClassName;
 
 	private boolean independentInnerClass;
 
@@ -63,11 +61,9 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
 	private final Set<MethodMetadata> declaredMethods = new LinkedHashSet<>(4);
 
-	@Nullable
-	private SimpleAnnotationMetadata metadata;
+	private @Nullable SimpleAnnotationMetadata metadata;
 
-	@Nullable
-	private Source source;
+	private @Nullable Source source;
 
 
 	SimpleAnnotationMetadataReadingVisitor(@Nullable ClassLoader classLoader) {
@@ -111,15 +107,13 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 	}
 
 	@Override
-	@Nullable
-	public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+	public @Nullable AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
 		return MergedAnnotationReadingVisitor.get(this.classLoader, getSource(),
 				descriptor, visible, this.annotations::add);
 	}
 
 	@Override
-	@Nullable
-	public MethodVisitor visitMethod(
+	public @Nullable MethodVisitor visitMethod(
 			int access, String name, String descriptor, String signature, String[] exceptions) {
 
 		// Skip bridge methods and constructors - we're only interested in original user methods.

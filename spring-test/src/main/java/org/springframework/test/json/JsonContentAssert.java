@@ -16,7 +16,7 @@
 
 package org.springframework.test.json;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default {@link AbstractJsonContentAssert} implementation.

@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently
@@ -103,11 +103,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private final Map<String, String> parameters;
 
-	@Nullable
-	private transient Charset resolvedCharset;
+	private transient @Nullable Charset resolvedCharset;
 
-	@Nullable
-	private volatile String toStringValue;
+	private volatile @Nullable String toStringValue;
 
 
 	/**
@@ -295,8 +293,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Return the subtype suffix as defined in RFC 6839.
 	 * @since 5.3
 	 */
-	@Nullable
-	public String getSubtypeSuffix() {
+	public @Nullable String getSubtypeSuffix() {
 		int suffixIndex = this.subtype.lastIndexOf('+');
 		if (suffixIndex != -1 && this.subtype.length() > suffixIndex) {
 			return this.subtype.substring(suffixIndex + 1);
@@ -309,8 +306,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return the character set, or {@code null} if not available
 	 * @since 4.3
 	 */
-	@Nullable
-	public Charset getCharset() {
+	public @Nullable Charset getCharset() {
 		return this.resolvedCharset;
 	}
 
@@ -319,8 +315,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param name the parameter name
 	 * @return the parameter value, or {@code null} if not present
 	 */
-	@Nullable
-	public String getParameter(String name) {
+	public @Nullable String getParameter(String name) {
 		return this.parameters.get(name);
 	}
 

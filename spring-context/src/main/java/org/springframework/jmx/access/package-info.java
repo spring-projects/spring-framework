@@ -1,9 +1,7 @@
 /**
  * Provides support for accessing remote MBean resources.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.jmx.access;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

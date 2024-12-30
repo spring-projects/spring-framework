@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -40,7 +42,6 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
-import org.springframework.lang.Nullable;
 
 /**
  * Reflection-based {@link MethodResolver} used by default in {@link StandardEvaluationContext}
@@ -59,8 +60,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	// more closely following the Java rules.
 	private final boolean useDistance;
 
-	@Nullable
-	private Map<Class<?>, MethodFilter> filters;
+	private @Nullable Map<Class<?>, MethodFilter> filters;
 
 
 	public ReflectiveMethodResolver() {
@@ -113,8 +113,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * </ol>
 	 */
 	@Override
-	@Nullable
-	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+	public @Nullable MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 			List<TypeDescriptor> argumentTypes) throws AccessException {
 
 		try {

@@ -22,12 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.SmartClassLoader;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -46,8 +47,7 @@ import org.springframework.util.ClassUtils;
  */
 public class StandardTypeLocator implements TypeLocator {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private final List<String> importPrefixes = new ArrayList<>(1);
 
@@ -129,8 +129,7 @@ public class StandardTypeLocator implements TypeLocator {
 		throw new SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typeName);
 	}
 
-	@Nullable
-	private Class<?> loadType(String typeName) {
+	private @Nullable Class<?> loadType(String typeName) {
 		try {
 			return ClassUtils.forName(typeName, this.classLoader);
 		}

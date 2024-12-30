@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link ClientHttpResponse} that can not only check if
@@ -37,8 +38,7 @@ import org.springframework.lang.Nullable;
  */
 class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 
-	@Nullable
-	private PushbackInputStream pushbackInputStream;
+	private @Nullable PushbackInputStream pushbackInputStream;
 
 
 	public IntrospectingClientHttpResponse(ClientHttpResponse response) {

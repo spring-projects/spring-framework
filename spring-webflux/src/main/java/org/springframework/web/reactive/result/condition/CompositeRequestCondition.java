@@ -21,7 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -143,8 +144,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * <p>An empty {@code CompositeRequestCondition} matches to all requests.
 	 */
 	@Override
-	@Nullable
-	public CompositeRequestCondition getMatchingCondition(ServerWebExchange exchange) {
+	public @Nullable CompositeRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (isEmpty()) {
 			return this;
 		}

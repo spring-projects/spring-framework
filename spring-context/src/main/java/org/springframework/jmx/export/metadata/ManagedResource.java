@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.export.metadata;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Metadata indicating that instances of an annotated class
@@ -31,24 +31,19 @@ import org.springframework.lang.Nullable;
  */
 public class ManagedResource extends AbstractJmxAttribute {
 
-	@Nullable
-	private String objectName;
+	private @Nullable String objectName;
 
 	private boolean log = false;
 
-	@Nullable
-	private String logFile;
+	private @Nullable String logFile;
 
-	@Nullable
-	private String persistPolicy;
+	private @Nullable String persistPolicy;
 
 	private int persistPeriod = -1;
 
-	@Nullable
-	private String persistName;
+	private @Nullable String persistName;
 
-	@Nullable
-	private String persistLocation;
+	private @Nullable String persistLocation;
 
 
 	/**
@@ -61,8 +56,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	/**
 	 * Return the JMX ObjectName of this managed resource.
 	 */
-	@Nullable
-	public String getObjectName() {
+	public @Nullable String getObjectName() {
 		return this.objectName;
 	}
 
@@ -78,8 +72,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 		this.logFile = logFile;
 	}
 
-	@Nullable
-	public String getLogFile() {
+	public @Nullable String getLogFile() {
 		return this.logFile;
 	}
 
@@ -87,8 +80,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 		this.persistPolicy = persistPolicy;
 	}
 
-	@Nullable
-	public String getPersistPolicy() {
+	public @Nullable String getPersistPolicy() {
 		return this.persistPolicy;
 	}
 
@@ -104,8 +96,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 		this.persistName = persistName;
 	}
 
-	@Nullable
-	public String getPersistName() {
+	public @Nullable String getPersistName() {
 		return this.persistName;
 	}
 
@@ -113,8 +104,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 		this.persistLocation = persistLocation;
 	}
 
-	@Nullable
-	public String getPersistLocation() {
+	public @Nullable String getPersistLocation() {
 		return this.persistLocation;
 	}
 

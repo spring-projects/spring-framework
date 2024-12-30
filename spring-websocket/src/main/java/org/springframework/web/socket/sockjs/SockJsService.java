@@ -16,9 +16,10 @@
 
 package org.springframework.web.socket.sockjs;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 

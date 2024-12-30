@@ -25,13 +25,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
@@ -218,8 +218,7 @@ class MethodMessageHandlerTests {
 			return Collections.singletonList(this.returnValueHandler);
 		}
 
-		@Nullable
-		public Object getLastReturnValue() {
+		public @Nullable Object getLastReturnValue() {
 			return this.returnValueHandler.getLastReturnValue();
 		}
 
@@ -238,8 +237,7 @@ class MethodMessageHandlerTests {
 		}
 
 		@Override
-		@Nullable
-		protected RouteMatcher.Route getDestination(Message<?> message) {
+		protected RouteMatcher.@Nullable Route getDestination(Message<?> message) {
 			return (RouteMatcher.Route) message.getHeaders().get(
 					DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
 		}

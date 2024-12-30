@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.HttpString;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -113,22 +113,19 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		return (key instanceof String headerName ? this.headers.get(headerName) : null);
 	}
 
 	@Override
-	@Nullable
-	public List<String> put(String key, List<String> value) {
+	public @Nullable List<String> put(String key, List<String> value) {
 		HeaderValues previousValues = this.headers.get(key);
 		this.headers.putAll(HttpString.tryFromString(key), value);
 		return previousValues;
 	}
 
 	@Override
-	@Nullable
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(Object key) {
 		if (key instanceof String headerName) {
 			Collection<String> removed = this.headers.remove(headerName);
 			if (removed != null) {
@@ -243,8 +240,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 		private final Iterator<HttpString> iterator;
 
-		@Nullable
-		private String currentName;
+		private @Nullable String currentName;
 
 		private HeaderNamesIterator(Iterator<HttpString> iterator) {
 			this.iterator = iterator;

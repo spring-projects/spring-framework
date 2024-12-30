@@ -18,8 +18,9 @@ package org.springframework.beans.factory.aot;
 
 import java.util.function.UnaryOperator;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -94,8 +95,7 @@ public interface BeanRegistrationAotContribution {
 	 * they are both {@code null}.
 	 * @since 6.1
 	 */
-	@Nullable
-	static BeanRegistrationAotContribution concat(@Nullable BeanRegistrationAotContribution a,
+	static @Nullable BeanRegistrationAotContribution concat(@Nullable BeanRegistrationAotContribution a,
 			@Nullable BeanRegistrationAotContribution b) {
 
 		if (a == null) {

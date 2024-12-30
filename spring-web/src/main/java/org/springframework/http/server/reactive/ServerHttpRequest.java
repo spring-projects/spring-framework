@@ -20,13 +20,14 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -73,16 +74,14 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return the local address the request was accepted on, if available.
 	 * @since 5.2.3
 	 */
-	@Nullable
-	default InetSocketAddress getLocalAddress() {
+	default @Nullable InetSocketAddress getLocalAddress() {
 		return null;
 	}
 
 	/**
 	 * Return the remote address where this request is connected to, if available.
 	 */
-	@Nullable
-	default InetSocketAddress getRemoteAddress() {
+	default @Nullable InetSocketAddress getRemoteAddress() {
 		return null;
 	}
 
@@ -92,8 +91,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * @return the session information, or {@code null} if none available
 	 * @since 5.0.2
 	 */
-	@Nullable
-	default SslInfo getSslInfo() {
+	default @Nullable SslInfo getSslInfo() {
 		return null;
 	}
 
@@ -166,7 +164,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * Manipulate request headers. The provided {@code HttpHeaders} contains
 		 * current request headers, so that the {@code Consumer} can
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} or
-		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * {@linkplain HttpHeaders#remove(String) remove} existing values, or
 		 * use any other {@link HttpHeaders} methods.
 		 * @see #header(String, String...)
 		 */

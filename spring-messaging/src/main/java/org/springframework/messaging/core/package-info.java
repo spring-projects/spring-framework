@@ -1,9 +1,7 @@
 /**
  * Defines interfaces and implementation classes for messaging templates.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.messaging.core;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

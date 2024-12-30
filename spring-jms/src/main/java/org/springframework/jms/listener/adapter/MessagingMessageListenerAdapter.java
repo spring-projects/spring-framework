@@ -18,12 +18,12 @@ package org.springframework.jms.listener.adapter;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
@@ -57,8 +57,7 @@ import org.springframework.util.Assert;
 public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener
 		implements SubscriptionNameProvider {
 
-	@Nullable
-	private InvocableHandlerMethod handlerMethod;
+	private @Nullable InvocableHandlerMethod handlerMethod;
 
 
 	/**
@@ -103,8 +102,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	 * Invoke the handler, wrapping any exception in a {@link ListenerExecutionFailedException}
 	 * with a dedicated error message.
 	 */
-	@Nullable
-	private Object invokeHandler(jakarta.jms.Message jmsMessage, @Nullable Session session, Message<?> message) {
+	private @Nullable Object invokeHandler(jakarta.jms.Message jmsMessage, @Nullable Session session, Message<?> message) {
 		InvocableHandlerMethod handlerMethod = getHandlerMethod();
 		try {
 			return handlerMethod.invoke(message, jmsMessage, session);

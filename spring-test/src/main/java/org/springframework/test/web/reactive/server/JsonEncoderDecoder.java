@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
@@ -28,7 +30,6 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link Encoder} and {@link Decoder} that is able to encode and decode
@@ -56,8 +57,7 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 	 * @return a {@link JsonEncoderDecoder} or {@code null} if a suitable codec
 	 * is not available
 	 */
-	@Nullable
-	static JsonEncoderDecoder from(Collection<HttpMessageWriter<?>> messageWriters,
+	static @Nullable JsonEncoderDecoder from(Collection<HttpMessageWriter<?>> messageWriters,
 			Collection<HttpMessageReader<?>> messageReaders) {
 
 		Encoder<?> jsonEncoder = findJsonEncoder(messageWriters);
@@ -75,15 +75,13 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 	 * @param writers the writers to inspect
 	 * @return a suitable JSON {@link Encoder} or {@code null}
 	 */
-	@Nullable
-	private static Encoder<?> findJsonEncoder(Collection<HttpMessageWriter<?>> writers) {
+	private static @Nullable Encoder<?> findJsonEncoder(Collection<HttpMessageWriter<?>> writers) {
 		return findJsonEncoder(writers.stream()
 				.filter(EncoderHttpMessageWriter.class::isInstance)
 				.map(writer -> ((EncoderHttpMessageWriter<?>) writer).getEncoder()));
 	}
 
-	@Nullable
-	private static Encoder<?> findJsonEncoder(Stream<Encoder<?>> stream) {
+	private static @Nullable Encoder<?> findJsonEncoder(Stream<Encoder<?>> stream) {
 		return stream
 				.filter(encoder -> encoder.canEncode(MAP_TYPE, MediaType.APPLICATION_JSON))
 				.findFirst()
@@ -96,15 +94,13 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 	 * @param readers the readers to inspect
 	 * @return a suitable JSON {@link Decoder} or {@code null}
 	 */
-	@Nullable
-	private static Decoder<?> findJsonDecoder(Collection<HttpMessageReader<?>> readers) {
+	private static @Nullable Decoder<?> findJsonDecoder(Collection<HttpMessageReader<?>> readers) {
 		return findJsonDecoder(readers.stream()
 				.filter(DecoderHttpMessageReader.class::isInstance)
 				.map(reader -> ((DecoderHttpMessageReader<?>) reader).getDecoder()));
 	}
 
-	@Nullable
-	private static Decoder<?> findJsonDecoder(Stream<Decoder<?>> decoderStream) {
+	private static @Nullable Decoder<?> findJsonDecoder(Stream<Decoder<?>> decoderStream) {
 		return decoderStream
 				.filter(decoder -> decoder.canDecode(MAP_TYPE, MediaType.APPLICATION_JSON))
 				.findFirst()

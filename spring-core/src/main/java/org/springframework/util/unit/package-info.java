@@ -1,9 +1,7 @@
 /**
  * Useful unit data types.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.util.unit;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

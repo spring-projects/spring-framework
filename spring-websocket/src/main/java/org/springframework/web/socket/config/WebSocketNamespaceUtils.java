@@ -19,6 +19,7 @@ package org.springframework.web.socket.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -64,8 +64,7 @@ abstract class WebSocketNamespaceUtils {
 		return handlerRef;
 	}
 
-	@Nullable
-	public static RuntimeBeanReference registerSockJsService(
+	public static @Nullable RuntimeBeanReference registerSockJsService(
 			Element element, String schedulerName, ParserContext context, @Nullable Object source) {
 
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
