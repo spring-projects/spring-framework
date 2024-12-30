@@ -422,13 +422,12 @@ class HttpHeadersTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void contentDisposition() {
 		ContentDisposition disposition = headers.getContentDisposition();
 		assertThat(disposition).isNotNull();
 		assertThat(headers.getContentDisposition()).as("Invalid Content-Disposition header").isEqualTo(ContentDisposition.empty());
 
-		disposition = ContentDisposition.attachment().name("foo").filename("foo.txt").size(123L).build();
+		disposition = ContentDisposition.attachment().name("foo").filename("foo.txt").build();
 		headers.setContentDisposition(disposition);
 		assertThat(headers.getContentDisposition()).as("Invalid Content-Disposition header").isEqualTo(disposition);
 	}

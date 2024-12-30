@@ -17,8 +17,6 @@
 package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.MockingDetails;
-import org.mockito.mock.MockCreationSettings;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +30,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mockingDetails;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsSpy;
+import static org.springframework.test.mockito.MockitoAssertions.assertMockName;
 
 /**
  * Tests that {@link MockitoSpyBean @MockitoSpyBean} can be used to spy on a bean
@@ -57,10 +56,8 @@ class MockitoSpyBeanWithMultipleExistingBeansAndExplicitBeanNameIntegrationTests
 
 	@Test
 	void test() {
-		MockingDetails mockingDetails = mockingDetails(spy);
-		MockCreationSettings<?> mockSettings = mockingDetails.getMockCreationSettings();
-		assertThat(mockingDetails.isSpy()).as("is spy").isTrue();
-		assertThat(mockSettings.getMockName()).hasToString("stringService");
+		assertIsSpy(spy);
+		assertMockName(spy, "stringService");
 
 		assertThat(caller.sayGreeting()).isEqualTo("I say two 123");
 		then(spy).should().greeting();

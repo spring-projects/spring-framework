@@ -18,6 +18,8 @@ package org.springframework.scheduling.config;
 
 import java.time.Instant;
 
+import org.springframework.lang.Nullable;
+import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.util.Assert;
 
 /**
@@ -68,7 +70,7 @@ public class Task {
 	}
 
 
-	private class OutcomeTrackingRunnable implements Runnable {
+	private class OutcomeTrackingRunnable implements SchedulingAwareRunnable {
 
 		private final Runnable runnable;
 
@@ -87,6 +89,23 @@ public class Task {
 				Task.this.lastExecutionOutcome = Task.this.lastExecutionOutcome.failure(exc);
 				throw exc;
 			}
+		}
+
+		@Override
+		public boolean isLongLived() {
+			if (this.runnable instanceof SchedulingAwareRunnable sar) {
+				return sar.isLongLived();
+			}
+			return SchedulingAwareRunnable.super.isLongLived();
+		}
+
+		@Nullable
+		@Override
+		public String getQualifier() {
+			if (this.runnable instanceof SchedulingAwareRunnable sar) {
+				return sar.getQualifier();
+			}
+			return SchedulingAwareRunnable.super.getQualifier();
 		}
 
 		@Override

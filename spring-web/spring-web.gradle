@@ -99,5 +99,5 @@ dependencies {
 	testRuntimeOnly("org.eclipse.angus:angus-mail")
 	testRuntimeOnly("org.eclipse:yasson")
 	testRuntimeOnly("org.glassfish:jakarta.el")
-	testRuntimeOnly("org.hibernate:hibernate-validator")
+	testRuntimeOnly("org.hibernate.validator:hibernate-validator")
 }

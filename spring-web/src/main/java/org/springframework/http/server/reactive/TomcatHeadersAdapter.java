@@ -163,9 +163,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void clear() {
-		for (int i = 0 ; i < this.headers.size(); i++) {
-			this.headers.removeHeader(i);
-		}
+		this.headers.recycle();
 	}
 
 	@Override

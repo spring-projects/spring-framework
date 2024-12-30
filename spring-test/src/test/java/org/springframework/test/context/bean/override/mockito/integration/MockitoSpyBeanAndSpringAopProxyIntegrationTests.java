@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cache.CacheManager;
@@ -44,6 +43,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsSpy;
 
 /**
  * Tests for {@link MockitoSpyBean @MockitoSpyBean} used in combination with Spring AOP.
@@ -79,7 +79,7 @@ class MockitoSpyBeanAndSpringAopProxyIntegrationTests {
 	void stubAndVerifyOnUltimateTargetOfSpringAopProxy() {
 		assertThat(AopUtils.isAopProxy(dateService)).as("is Spring AOP proxy").isTrue();
 		DateService spy = AopTestUtils.getUltimateTargetObject(dateService);
-		assertThat(Mockito.mockingDetails(spy).isSpy()).as("ultimate target is Mockito spy").isTrue();
+		assertIsSpy(dateService, "ultimate target");
 
 		given(spy.getDate(false)).willReturn(1L);
 		Long date = dateService.getDate(false);
@@ -110,7 +110,7 @@ class MockitoSpyBeanAndSpringAopProxyIntegrationTests {
 	@RepeatedTest(2)
 	void stubOnUltimateTargetAndVerifyOnSpringAopProxy() {
 		assertThat(AopUtils.isAopProxy(dateService)).as("is Spring AOP proxy").isTrue();
-		assertThat(Mockito.mockingDetails(dateService).isSpy()).as("Spring AOP proxy is Mockito spy").isTrue();
+		assertIsSpy(dateService, "Spring AOP proxy");
 
 		DateService spy = AopTestUtils.getUltimateTargetObject(dateService);
 		given(spy.getDate(false)).willReturn(1L);
@@ -141,7 +141,7 @@ class MockitoSpyBeanAndSpringAopProxyIntegrationTests {
 	@RepeatedTest(2)
 	void stubAndVerifyDirectlyOnSpringAopProxy() throws Exception {
 		assertThat(AopUtils.isCglibProxy(dateService)).as("is Spring AOP CGLIB proxy").isTrue();
-		assertThat(Mockito.mockingDetails(dateService).isSpy()).as("is Mockito spy").isTrue();
+		assertIsSpy(dateService);
 
 		doReturn(1L).when(dateService).getDate(false);
 		Long date = dateService.getDate(false);

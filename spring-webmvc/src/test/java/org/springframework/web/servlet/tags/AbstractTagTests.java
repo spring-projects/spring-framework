@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package org.springframework.web.servlet.tags;
 
+import jakarta.el.ELContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
@@ -59,11 +65,32 @@ public abstract class AbstractTagTests {
 			sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		}
 
-		return new MockPageContext(sc, request, response);
+		return new ExtendedMockPageContext(sc, request, response);
 	}
 
 	protected boolean inDispatcherServlet() {
 		return true;
+	}
+
+
+	protected static class ExtendedMockPageContext extends MockPageContext {
+
+		private ELContext elContext;
+
+		public ExtendedMockPageContext(@Nullable ServletContext servletContext, @Nullable HttpServletRequest request,
+				@Nullable HttpServletResponse response) {
+
+			super(servletContext, request, response);
+		}
+
+		@Override
+		public ELContext getELContext() {
+			return this.elContext;
+		}
+
+		public void setELContext(ELContext elContext) {
+			this.elContext = elContext;
+		}
 	}
 
 }

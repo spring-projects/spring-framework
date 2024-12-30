@@ -201,7 +201,6 @@ class ReactiveTypeHandler {
 	 * @return the concrete streaming {@code MediaType} if one could be found or {@code null}
 	 * if none could be found
 	 */
-	@SuppressWarnings("deprecation")
 	@Nullable
 	static MediaType findConcreteJsonStreamMediaType(Collection<MediaType> acceptedMediaTypes) {
 		for (MediaType acceptedType : acceptedMediaTypes) {
@@ -219,9 +218,6 @@ class ReactiveTypeHandler {
 			}
 			else if (MediaType.APPLICATION_NDJSON.includes(acceptedType)) {
 				return MediaType.APPLICATION_NDJSON;
-			}
-			else if (MediaType.APPLICATION_STREAM_JSON.includes(acceptedType)) {
-				return MediaType.APPLICATION_STREAM_JSON;
 			}
 		}
 		return null; // not a concrete streaming type

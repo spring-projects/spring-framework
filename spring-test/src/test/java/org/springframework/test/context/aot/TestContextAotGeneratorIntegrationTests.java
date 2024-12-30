@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 import org.assertj.core.util.Arrays;
 import org.easymock.EasyMockSupport;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.DefaultGenerationContext;
@@ -80,6 +79,7 @@ import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
 import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.proxies;
 import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.reflection;
 import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.resource;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -377,8 +377,8 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 		GreetingService greetingService = context.getBean(GreetingService.class);
 		MessageService messageService = context.getBean(MessageService.class);
 
-		assertThat(Mockito.mockingDetails(greetingService).isMock()).as("Mockito mock").isTrue();
-		assertThat(Mockito.mockingDetails(messageService).isMock()).as("Mockito mock").isTrue();
+		assertIsMock(greetingService, "greetingService");
+		assertIsMock(messageService, "messageService");
 	}
 
 	private void assertContextForWebTests(WebApplicationContext wac) throws Exception {

@@ -272,6 +272,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test  // gh-25290
+	@SuppressWarnings("removal")
 	void testDefaultConfigWithBeansInParentContext() {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		parent.registerSingleton("localeResolver", CookieLocaleResolver.class);

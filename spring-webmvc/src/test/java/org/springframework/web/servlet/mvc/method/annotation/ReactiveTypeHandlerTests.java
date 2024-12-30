@@ -158,19 +158,6 @@ class ReactiveTypeHandlerTests {
 				.isEqualTo(MediaType.APPLICATION_NDJSON);
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test
-	void findsConcreteStreamingMediaType_plainStreamingJsonFirst() {
-		final List<MediaType> accept = List.of(
-				MediaType.ALL,
-				MediaType.APPLICATION_STREAM_JSON,
-				MediaType.parseMediaType("application/*+x-ndjson"),
-				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
-
-		assertThat(ReactiveTypeHandler.findConcreteJsonStreamMediaType(accept))
-				.isEqualTo(MediaType.APPLICATION_STREAM_JSON);
-	}
-
 	@Test
 	void deferredResultSubscriberWithOneValue() throws Exception {
 

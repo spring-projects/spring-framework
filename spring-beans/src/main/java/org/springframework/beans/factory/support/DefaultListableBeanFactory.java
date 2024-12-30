@@ -1170,6 +1170,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 				else {
+					if (logger.isInfoEnabled()) {
+						logger.info("Removing alias '" + beanName + "' for bean '" + aliasedName +
+								"' due to registration of bean definition for bean '" + beanName + "': [" +
+								beanDefinition + "]");
+					}
 					removeAlias(beanName);
 				}
 			}

@@ -22,6 +22,7 @@ import org.assertj.core.api.AbstractByteArrayAssert;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ByteArrayAssert;
+import org.assertj.core.api.StringAssert;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -160,6 +161,18 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 */
 	public SELF hasRedirectedUrl(@Nullable String redirectedUrl) {
 		redirectedUrl().isEqualTo(redirectedUrl);
+		return this.myself;
+	}
+
+	/**
+	 * Verify that the {@link jakarta.servlet.http.HttpServletResponse#sendError(int, String)} Servlet error message}
+	 * is equal to the given value.
+	 * @param errorMessage the expected Servlet error message (can be null)
+	 * @since 6.2.1
+	 */
+	public SELF hasErrorMessage(@Nullable String errorMessage) {
+		new StringAssert(getResponse().getErrorMessage())
+				.as("Servlet error message").isEqualTo(errorMessage);
 		return this.myself;
 	}
 

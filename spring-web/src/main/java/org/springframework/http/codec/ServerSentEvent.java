@@ -20,6 +20,7 @@ import java.time.Duration;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.
@@ -102,6 +103,34 @@ public final class ServerSentEvent<T> {
 		return this.data;
 	}
 
+	/**
+	 * Return a StringBuilder with the id, event, retry, and comment fields fully
+	 * serialized, and also appending "data:" if there is data.
+	 * @since 6.2.1
+	 */
+	public String format() {
+		StringBuilder sb = new StringBuilder();
+		if (this.id != null) {
+			appendAttribute("id", this.id, sb);
+		}
+		if (this.event != null) {
+			appendAttribute("event", this.event, sb);
+		}
+		if (this.retry != null) {
+			appendAttribute("retry", this.retry.toMillis(), sb);
+		}
+		if (this.comment != null) {
+			sb.append(':').append(StringUtils.replace(this.comment, "\n", "\n:")).append('\n');
+		}
+		if (this.data != null) {
+			sb.append("data:");
+		}
+		return sb.toString();
+	}
+
+	private void appendAttribute(String fieldName, Object fieldValue, StringBuilder sb) {
+		sb.append(fieldName).append(':').append(fieldValue).append('\n');
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {

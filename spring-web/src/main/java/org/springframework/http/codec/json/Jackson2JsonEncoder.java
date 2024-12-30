@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,9 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 		this(Jackson2ObjectMapperBuilder.json().build());
 	}
 
-	@SuppressWarnings("deprecation")
 	public Jackson2JsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		setStreamingMediaTypes(Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON));
+		setStreamingMediaTypes(Arrays.asList(MediaType.APPLICATION_NDJSON));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 

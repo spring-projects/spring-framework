@@ -18,9 +18,7 @@ package org.springframework.expression.spel;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
@@ -63,9 +61,6 @@ public class ExpressionState {
 
 	@Nullable
 	private Deque<TypedValue> contextObjects;
-
-	@Nullable
-	private Deque<VariableScope> variableScopes;
 
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
@@ -207,12 +202,10 @@ public class ExpressionState {
 	 * context object} and a new local variable scope.
 	 */
 	public void enterScope() {
-		initVariableScopes().push(new VariableScope());
 		initScopeRootObjects().push(getActiveContextObject());
 	}
 
 	public void exitScope() {
-		initVariableScopes().pop();
 		initScopeRootObjects().pop();
 	}
 
@@ -229,15 +222,6 @@ public class ExpressionState {
 			this.scopeRootObjects = new ArrayDeque<>();
 		}
 		return this.scopeRootObjects;
-	}
-
-	private Deque<VariableScope> initVariableScopes() {
-		if (this.variableScopes == null) {
-			this.variableScopes = new ArrayDeque<>();
-			// top-level empty variable scope
-			this.variableScopes.add(new VariableScope());
-		}
-		return this.variableScopes;
 	}
 
 	public TypedValue operate(Operation op, @Nullable Object left, @Nullable Object right) throws EvaluationException {
@@ -263,45 +247,6 @@ public class ExpressionState {
 
 	public SpelParserConfiguration getConfiguration() {
 		return this.configuration;
-	}
-
-
-	/**
-	 * A new local variable scope is entered when a new expression scope is
-	 * entered and exited when the corresponding expression scope is exited.
-	 *
-	 * <p>If variable names clash with those in a higher level scope, those in
-	 * the higher level scope will not be accessible within the current scope.
-	 */
-	private static class VariableScope {
-
-		private final Map<String, Object> variables = new HashMap<>();
-
-		VariableScope() {
-		}
-
-		VariableScope(String name, Object value) {
-			this.variables.put(name, value);
-		}
-
-		VariableScope(@Nullable Map<String, Object> variables) {
-			if (variables != null) {
-				this.variables.putAll(variables);
-			}
-		}
-
-		@Nullable
-		Object lookupVariable(String name) {
-			return this.variables.get(name);
-		}
-
-		void setVariable(String name, Object value) {
-			this.variables.put(name,value);
-		}
-
-		boolean definesVariable(String name) {
-			return this.variables.containsKey(name);
-		}
 	}
 
 }

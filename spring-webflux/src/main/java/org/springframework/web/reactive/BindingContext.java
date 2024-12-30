@@ -18,19 +18,14 @@ package org.springframework.web.reactive;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-
-import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.SmartValidator;
@@ -141,7 +136,7 @@ public class BindingContext {
 	public WebExchangeDataBinder createDataBinder(
 			ServerWebExchange exchange, @Nullable Object target, String name, @Nullable ResolvableType targetType) {
 
-		WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(target, name);
+		WebExchangeDataBinder dataBinder = createBinderInstance(target, name);
 		dataBinder.setNameResolver(new BindParamNameResolver());
 
 		if (target == null && targetType != null) {
@@ -161,6 +156,18 @@ public class BindingContext {
 		}
 
 		return dataBinder;
+	}
+
+	/**
+	 * Extension point to create the WebDataBinder instance.
+	 * By default, this is {@code WebRequestDataBinder}.
+	 * @param target the binding target or {@code null} for type conversion only
+	 * @param name the binding target object name
+	 * @return the created {@link WebExchangeDataBinder} instance
+	 * @since 6.2.1
+	 */
+	protected WebExchangeDataBinder createBinderInstance(@Nullable Object target, String name) {
+		return new WebExchangeDataBinder(target, name);
 	}
 
 	/**
@@ -197,51 +204,6 @@ public class BindingContext {
 				!value.getClass().isArray() && !(value instanceof Collection) && !(value instanceof Map) &&
 				this.reactiveAdapterRegistry.getAdapter(null, value) == null &&
 				!BeanUtils.isSimpleValueType(value.getClass()));
-	}
-
-
-	/**
-	 * Extended variant of {@link WebExchangeDataBinder}, adding path variables.
-	 */
-	private static class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
-
-		public ExtendedWebExchangeDataBinder(@Nullable Object target, String objectName) {
-			super(target, objectName);
-		}
-
-		@Override
-		public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
-			return super.getValuesToBind(exchange).doOnNext(map -> {
-				Map<String, String> vars = exchange.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-				if (!CollectionUtils.isEmpty(vars)) {
-					vars.forEach((key, value) -> addValueIfNotPresent(map, "URI variable", key, value));
-				}
-				HttpHeaders headers = exchange.getRequest().getHeaders();
-				for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-					List<String> values = entry.getValue();
-					if (!CollectionUtils.isEmpty(values)) {
-						String name = entry.getKey().replace("-", "");
-						addValueIfNotPresent(map, "Header", name, (values.size() == 1 ? values.get(0) : values));
-					}
-				}
-			});
-		}
-
-		private static void addValueIfNotPresent(
-				Map<String, Object> map, String label, String name, @Nullable Object value) {
-
-			if (value != null) {
-				if (map.containsKey(name)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(label + " '" + name + "' overridden by request bind value.");
-					}
-				}
-				else {
-					map.put(name, value);
-				}
-			}
-		}
-
 	}
 
 

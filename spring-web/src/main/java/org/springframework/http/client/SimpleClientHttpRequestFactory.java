@@ -62,11 +62,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	/**
 	 * Set the number of bytes to write in each chunk when not buffering request
 	 * bodies locally.
-	 * <p>Note that this parameter is only used when
-	 * {@link #setBufferRequestBody(boolean) bufferRequestBody} is set to {@code false},
-	 * and the {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length}
-	 * is not known in advance.
-	 * @see #setBufferRequestBody(boolean)
 	 */
 	public void setChunkSize(int chunkSize) {
 		this.chunkSize = chunkSize;
