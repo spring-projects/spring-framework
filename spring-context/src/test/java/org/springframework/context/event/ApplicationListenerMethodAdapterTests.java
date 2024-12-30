@@ -213,8 +213,8 @@ class ApplicationListenerMethodAdapterTests extends AbstractApplicationEventList
 
 	@Test
 	void invokeListenerWithWrongGenericPayload() {
-		Method method = ReflectionUtils.findMethod
-				(SampleEvents.class, "handleGenericStringPayload", EntityWrapper.class);
+		Method method = ReflectionUtils.findMethod(
+				SampleEvents.class, "handleGenericStringPayload", EntityWrapper.class);
 		EntityWrapper<Integer> payload = new EntityWrapper<>(123);
 		invokeListener(method, new PayloadApplicationEvent<>(this, payload));
 		verify(this.sampleEvents, times(0)).handleGenericStringPayload(any());
