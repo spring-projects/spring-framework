@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.DataSource;
 
@@ -70,7 +71,7 @@ public abstract class AbstractJdbcCall {
 	 * Has this operation been compiled? Compilation means at least checking
 	 * that a DataSource or JdbcTemplate has been provided.
 	 */
-	private volatile boolean compiled;
+	private final AtomicBoolean compiled = new AtomicBoolean(false);
 
 	/** The generated string used for call statement. */
 	private @Nullable String callString;
@@ -278,11 +279,11 @@ public abstract class AbstractJdbcCall {
 	 * @throws org.springframework.dao.InvalidDataAccessApiUsageException if the object hasn't
 	 * been correctly initialized, for example if no DataSource has been provided
 	 */
-	public final synchronized void compile() throws InvalidDataAccessApiUsageException {
-		if (!isCompiled()) {
-			if (getProcedureName() == null) {
-				throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");
-			}
+	public final void compile() throws InvalidDataAccessApiUsageException {
+		if (getProcedureName() == null) {
+			throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");
+		}
+		if (this.compiled.compareAndSet(false, true)) {
 			try {
 				this.jdbcTemplate.afterPropertiesSet();
 			}
@@ -290,7 +291,6 @@ public abstract class AbstractJdbcCall {
 				throw new InvalidDataAccessApiUsageException(ex.getMessage());
 			}
 			compileInternal();
-			this.compiled = true;
 			if (logger.isDebugEnabled()) {
 				logger.debug("SqlCall for " + (isFunction() ? "function" : "procedure") +
 						" [" + getProcedureName() + "] compiled");
@@ -335,7 +335,7 @@ public abstract class AbstractJdbcCall {
 	 * @return whether this operation is compiled and ready to use
 	 */
 	public boolean isCompiled() {
-		return this.compiled;
+		return this.compiled.get();
 	}
 
 	/**

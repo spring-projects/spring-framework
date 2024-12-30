@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.DataSource;
 
@@ -82,7 +83,7 @@ public abstract class AbstractJdbcInsert {
 	 * Has this operation been compiled? Compilation means at least checking
 	 * that a DataSource or JdbcTemplate has been provided.
 	 */
-	private volatile boolean compiled;
+	private final AtomicBoolean compiled = new AtomicBoolean(false);
 
 	/** The generated string used for insert statement. */
 	private String insertString = "";
@@ -268,15 +269,15 @@ public abstract class AbstractJdbcInsert {
 	 * @throws InvalidDataAccessApiUsageException if the object hasn't been correctly initialized,
 	 * for example if no DataSource has been provided
 	 */
-	public final synchronized void compile() throws InvalidDataAccessApiUsageException {
-		if (!isCompiled()) {
-			if (getTableName() == null) {
-				throw new InvalidDataAccessApiUsageException("Table name is required");
-			}
-			if (isQuoteIdentifiers() && this.declaredColumns.isEmpty()) {
-				throw new InvalidDataAccessApiUsageException(
-						"Explicit column names must be provided when using quoted identifiers");
-			}
+	public final void compile() throws InvalidDataAccessApiUsageException {
+		if (getTableName() == null) {
+			throw new InvalidDataAccessApiUsageException("Table name is required");
+		}
+		if (isQuoteIdentifiers() && this.declaredColumns.isEmpty()) {
+			throw new InvalidDataAccessApiUsageException(
+					"Explicit column names must be provided when using quoted identifiers");
+		}
+		if (this.compiled.compareAndSet(false, true)) {
 			try {
 				this.jdbcTemplate.afterPropertiesSet();
 			}
@@ -284,7 +285,6 @@ public abstract class AbstractJdbcInsert {
 				throw new InvalidDataAccessApiUsageException(ex.getMessage());
 			}
 			compileInternal();
-			this.compiled = true;
 			if (logger.isDebugEnabled()) {
 				logger.debug("JdbcInsert for table [" + getTableName() + "] compiled");
 			}
@@ -320,7 +320,7 @@ public abstract class AbstractJdbcInsert {
 	 * @return whether this operation is compiled and ready to use
 	 */
 	public boolean isCompiled() {
-		return this.compiled;
+		return this.compiled.get();
 	}
 
 	/**
