@@ -22,8 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -122,8 +122,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * or {@code null} otherwise.
 	 */
 	@Override
-	@Nullable
-	public HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
+	public @Nullable HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return PRE_FLIGHT_MATCH;
 		}

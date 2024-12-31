@@ -32,8 +32,8 @@ import jakarta.mail.NoSuchProviderException;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.MimeMessage;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
@@ -80,28 +80,21 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	private Properties javaMailProperties = new Properties();
 
-	@Nullable
-	private Session session;
+	private @Nullable Session session;
 
-	@Nullable
-	private String protocol;
+	private @Nullable String protocol;
 
-	@Nullable
-	private String host;
+	private @Nullable String host;
 
 	private int port = DEFAULT_PORT;
 
-	@Nullable
-	private String username;
+	private @Nullable String username;
 
-	@Nullable
-	private String password;
+	private @Nullable String password;
 
-	@Nullable
-	private String defaultEncoding;
+	private @Nullable String defaultEncoding;
 
-	@Nullable
-	private FileTypeMap defaultFileTypeMap;
+	private @Nullable FileTypeMap defaultFileTypeMap;
 
 
 	/**
@@ -174,8 +167,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the mail protocol.
 	 */
-	@Nullable
-	public String getProtocol() {
+	public @Nullable String getProtocol() {
 		return this.protocol;
 	}
 
@@ -190,8 +182,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the mail server host.
 	 */
-	@Nullable
-	public String getHost() {
+	public @Nullable String getHost() {
 		return this.host;
 	}
 
@@ -229,8 +220,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the username for the account at the mail host.
 	 */
-	@Nullable
-	public String getUsername() {
+	public @Nullable String getUsername() {
 		return this.username;
 	}
 
@@ -252,8 +242,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Return the password for the account at the mail host.
 	 */
-	@Nullable
-	public String getPassword() {
+	public @Nullable String getPassword() {
 		return this.password;
 	}
 
@@ -270,8 +259,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the default encoding for {@link MimeMessage MimeMessages},
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	public String getDefaultEncoding() {
+	public @Nullable String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
 
@@ -296,8 +284,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the default Java Activation {@link FileTypeMap} for
 	 * {@link MimeMessage MimeMessages}, or {@code null} if none.
 	 */
-	@Nullable
-	public FileTypeMap getDefaultFileTypeMap() {
+	public @Nullable FileTypeMap getDefaultFileTypeMap() {
 		return this.defaultFileTypeMap;
 	}
 
@@ -377,7 +364,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @throws org.springframework.mail.MailSendException
 	 * in case of failure when sending a message
 	 */
-	protected void doSend(MimeMessage[] mimeMessages, @Nullable Object[] originalMessages) throws MailException {
+	protected void doSend(MimeMessage[] mimeMessages, Object @Nullable [] originalMessages) throws MailException {
 		Map<Object, Exception> failedMessages = new LinkedHashMap<>();
 		Transport transport = null;
 

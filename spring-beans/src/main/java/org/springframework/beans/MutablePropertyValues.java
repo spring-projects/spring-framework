@@ -27,7 +27,8 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -45,8 +46,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	private final List<PropertyValue> propertyValueList;
 
-	@Nullable
-	private Set<String> processedProperties;
+	private @Nullable Set<String> processedProperties;
 
 	private volatile boolean converted;
 
@@ -268,8 +268,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	@Override
-	@Nullable
-	public PropertyValue getPropertyValue(String propertyName) {
+	public @Nullable PropertyValue getPropertyValue(String propertyName) {
 		for (PropertyValue pv : this.propertyValueList) {
 			if (pv.getName().equals(propertyName)) {
 				return pv;
@@ -286,8 +285,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #getPropertyValue(String)
 	 * @see PropertyValue#getValue()
 	 */
-	@Nullable
-	public Object get(String propertyName) {
+	public @Nullable Object get(String propertyName) {
 		PropertyValue pv = getPropertyValue(propertyName);
 		return (pv != null ? pv.getValue() : null);
 	}

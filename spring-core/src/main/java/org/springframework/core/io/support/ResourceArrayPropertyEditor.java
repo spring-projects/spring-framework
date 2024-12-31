@@ -26,12 +26,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -64,8 +64,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
-	@Nullable
-	private PropertyResolver propertyResolver;
+	private @Nullable PropertyResolver propertyResolver;
 
 	private final boolean ignoreUnresolvablePlaceholders;
 

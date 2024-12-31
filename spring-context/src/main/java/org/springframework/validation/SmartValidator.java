@@ -16,7 +16,7 @@
 
 package org.springframework.validation;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Extended variant of the {@link Validator} interface, adding support for
@@ -74,8 +74,7 @@ public interface SmartValidator extends Validator {
 	 * validator type does not match.
 	 * @since 6.1
 	 */
-	@Nullable
-	default <T> T unwrap(@Nullable Class<T> type) {
+	default <T> @Nullable T unwrap(@Nullable Class<T> type) {
 		return null;
 	}
 

@@ -18,7 +18,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Superclass for exceptions related to a property access,
@@ -30,8 +30,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public abstract class PropertyAccessException extends BeansException {
 
-	@Nullable
-	private final PropertyChangeEvent propertyChangeEvent;
+	private final @Nullable PropertyChangeEvent propertyChangeEvent;
 
 
 	/**
@@ -61,24 +60,21 @@ public abstract class PropertyAccessException extends BeansException {
 	 * <p>May be {@code null}; only available if an actual bean property
 	 * was affected.
 	 */
-	@Nullable
-	public PropertyChangeEvent getPropertyChangeEvent() {
+	public @Nullable PropertyChangeEvent getPropertyChangeEvent() {
 		return this.propertyChangeEvent;
 	}
 
 	/**
 	 * Return the name of the affected property, if available.
 	 */
-	@Nullable
-	public String getPropertyName() {
+	public @Nullable String getPropertyName() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getPropertyName() : null);
 	}
 
 	/**
 	 * Return the affected value that was about to be set, if any.
 	 */
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getNewValue() : null);
 	}
 

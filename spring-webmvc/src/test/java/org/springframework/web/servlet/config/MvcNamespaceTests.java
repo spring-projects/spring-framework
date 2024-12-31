@@ -39,6 +39,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.MappingMatch;
 import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,9 +62,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -145,6 +146,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -194,6 +196,7 @@ public class MvcNamespaceTests {
 	}
 
 
+	@SuppressWarnings("removal")
 	@Test
 	void testDefaultConfig() throws Exception {
 		loadBeanDefinitions("mvc-config.xml");
@@ -202,6 +205,8 @@ public class MvcNamespaceTests {
 		assertThat(mapping).isNotNull();
 		assertThat(mapping.getOrder()).isEqualTo(0);
 		assertThat(mapping.getUrlPathHelper().shouldRemoveSemicolonContent()).isTrue();
+		assertThat(mapping.getPathMatcher()).isEqualTo(appContext.getBean("mvcPathMatcher"));
+		assertThat(mapping.getPatternParser()).isNotNull();
 		mapping.setDefaultHandler(handlerMethod);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
@@ -321,6 +326,7 @@ public class MvcNamespaceTests {
 		doTestCustomValidator("mvc-config-custom-validator.xml");
 	}
 
+	@SuppressWarnings("removal")
 	private void doTestCustomValidator(String xml) throws Exception {
 		loadBeanDefinitions(xml);
 
@@ -375,8 +381,8 @@ public class MvcNamespaceTests {
 		assertThat(chain.getInterceptorList()).hasSize(3);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
-	@SuppressWarnings("deprecation")
 	void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 
@@ -386,13 +392,11 @@ public class MvcNamespaceTests {
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
 
-		ResourceHttpRequestHandler handler = appContext.getBean(ResourceHttpRequestHandler.class);
-		assertThat(handler).isNotNull();
-		assertThat(handler.getContentNegotiationManager()).isSameAs(manager);
-
 		SimpleUrlHandlerMapping resourceMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertThat(resourceMapping).isNotNull();
 		assertThat(resourceMapping.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE - 1);
+		assertThat(resourceMapping.getPathMatcher()).isNotNull();
+		assertThat(resourceMapping.getPatternParser()).isNotNull();
 
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertThat(beanNameMapping).isNotNull();
@@ -424,6 +428,33 @@ public class MvcNamespaceTests {
 				.isInstanceOf(NoResourceFoundException.class);
 	}
 
+	@SuppressWarnings("removal")
+	@Test
+	void testUseDeprecatedPathMatcher() throws Exception {
+		loadBeanDefinitions("mvc-config-deprecated-path-matcher.xml");
+		Map<String, AbstractHandlerMapping> handlerMappings = appContext.getBeansOfType(AbstractHandlerMapping.class);
+		AntPathMatcher mvcPathMatcher = appContext.getBean("pathMatcher", AntPathMatcher.class);
+		assertThat(handlerMappings).hasSize(4);
+		handlerMappings.forEach((name, hm) -> {
+			assertThat(hm.getPathMatcher()).as("path matcher for %s", name).isEqualTo(mvcPathMatcher);
+			assertThat(hm.getPatternParser()).as("pattern parser for %s", name).isNull();
+		});
+	}
+
+	@SuppressWarnings("removal")
+	@Test
+	void testUsePathPatternParser() throws Exception {
+		loadBeanDefinitions("mvc-config-custom-pattern-parser.xml");
+
+		PathPatternParser patternParser = appContext.getBean("patternParser", PathPatternParser.class);
+		Map<String, AbstractHandlerMapping> handlerMappings = appContext.getBeansOfType(AbstractHandlerMapping.class);
+		assertThat(handlerMappings).hasSize(4);
+		handlerMappings.forEach((name, hm) -> {
+			assertThat(hm.getPathMatcher()).as("path matcher for %s", name).isNotNull();
+			assertThat(hm.getPatternParser()).as("pattern parser for %s", name).isEqualTo(patternParser);
+		});
+	}
+
 	@Test
 	void testResourcesWithOptionalAttributes() {
 		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml");
@@ -439,6 +470,7 @@ public class MvcNamespaceTests {
 		assertThat(handler.getCacheSeconds()).isEqualTo(3600);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void testResourcesWithResolversTransformers() {
 		loadBeanDefinitions("mvc-config-resources-chain.xml");
@@ -589,6 +621,7 @@ public class MvcNamespaceTests {
 		assertThat(interceptor2.getParamName()).isEqualTo("style");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void testViewControllers() throws Exception {
 		loadBeanDefinitions("mvc-config-view-controllers.xml");
@@ -600,6 +633,9 @@ public class MvcNamespaceTests {
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertThat(beanNameMapping).isNotNull();
 		assertThat(beanNameMapping.getOrder()).isEqualTo(2);
+
+		assertThat(beanNameMapping.getPathMatcher()).isNotNull();
+		assertThat(beanNameMapping.getPatternParser()).isNotNull();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
@@ -882,6 +918,7 @@ public class MvcNamespaceTests {
 		assertThat(compositeResolver.getOrder()).isEqualTo(123);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void testPathMatchingHandlerMappings() {
 		loadBeanDefinitions("mvc-config-path-matching-mappings.xml");
@@ -896,11 +933,11 @@ public class MvcNamespaceTests {
 		assertThat(viewController.getUrlPathHelper().getClass()).isEqualTo(TestPathHelper.class);
 		assertThat(viewController.getPathMatcher().getClass()).isEqualTo(TestPathMatcher.class);
 
-		for (SimpleUrlHandlerMapping handlerMapping : appContext.getBeansOfType(SimpleUrlHandlerMapping.class).values()) {
+		appContext.getBeansOfType(SimpleUrlHandlerMapping.class).forEach((name, handlerMapping) -> {
 			assertThat(handlerMapping).isNotNull();
-			assertThat(handlerMapping.getUrlPathHelper().getClass()).isEqualTo(TestPathHelper.class);
-			assertThat(handlerMapping.getPathMatcher().getClass()).isEqualTo(TestPathMatcher.class);
-		}
+			assertThat(handlerMapping.getUrlPathHelper().getClass()).as("path helper for %s", name).isEqualTo(TestPathHelper.class);
+			assertThat(handlerMapping.getPathMatcher().getClass()).as("path matcher for %s", name).isEqualTo(TestPathMatcher.class);
+		});
 	}
 
 	@Test
@@ -910,7 +947,7 @@ public class MvcNamespaceTests {
 		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
 		assertThat(beanNames).hasSize(2);
 		for (String beanName : beanNames) {
-			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
+			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) appContext.getBean(beanName);
 			assertThat(handlerMapping).isNotNull();
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
 			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource) accessor
@@ -935,7 +972,7 @@ public class MvcNamespaceTests {
 		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
 		assertThat(beanNames).hasSize(2);
 		for (String beanName : beanNames) {
-			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
+			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) appContext.getBean(beanName);
 			assertThat(handlerMapping).isNotNull();
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
 			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource) accessor

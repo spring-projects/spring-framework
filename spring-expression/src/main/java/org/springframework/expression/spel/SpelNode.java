@@ -16,10 +16,11 @@
 
 package org.springframework.expression.spel;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a node in the abstract syntax tree (AST) for a parsed Spring
@@ -38,8 +39,7 @@ public interface SpelNode {
 	 * @return the value of this node evaluated against the specified state
 	 * @throws EvaluationException if any problem occurs evaluating the expression
 	 */
-	@Nullable
-	Object getValue(ExpressionState expressionState) throws EvaluationException;
+	@Nullable Object getValue(ExpressionState expressionState) throws EvaluationException;
 
 	/**
 	 * Evaluate the expression node in the context of the supplied expression state
@@ -96,8 +96,7 @@ public interface SpelNode {
 	 * @return the class of the object if it is not already a class object,
 	 * or {@code null} if the object is {@code null}
 	 */
-	@Nullable
-	Class<?> getObjectClass(@Nullable Object obj);
+	@Nullable Class<?> getObjectClass(@Nullable Object obj);
 
 	/**
 	 * Return the start position of this AST node in the expression string.

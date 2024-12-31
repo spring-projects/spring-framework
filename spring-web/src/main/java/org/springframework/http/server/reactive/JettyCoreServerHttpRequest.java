@@ -24,6 +24,7 @@ import java.util.List;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.server.Request;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import reactor.core.publisher.Flux;
 
@@ -33,7 +34,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.support.JettyHeadersAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -75,8 +75,7 @@ class JettyCoreServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Nullable
-	public SslInfo initSslInfo() {
+	public @Nullable SslInfo initSslInfo() {
 		if (this.request.getConnectionMetaData().isSecure() &&
 				this.request.getAttribute(EndPoint.SslSessionData.ATTRIBUTE) instanceof EndPoint.SslSessionData sessionData) {
 			return new DefaultSslInfo(sessionData.sslSessionId(), sessionData.peerCertificates());
@@ -96,15 +95,13 @@ class JettyCoreServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		SocketAddress localAddress = this.request.getConnectionMetaData().getLocalSocketAddress();
 		return localAddress instanceof InetSocketAddress inet ? inet : null;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		SocketAddress remoteAddress = this.request.getConnectionMetaData().getRemoteSocketAddress();
 		return remoteAddress instanceof InetSocketAddress inet ? inet : null;
 	}

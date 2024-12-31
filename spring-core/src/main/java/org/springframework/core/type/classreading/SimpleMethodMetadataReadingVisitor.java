@@ -20,13 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.lang.Nullable;
 
 /**
  * ASM method visitor that creates {@link SimpleMethodMetadata}.
@@ -38,8 +39,7 @@ import org.springframework.lang.Nullable;
  */
 final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
 	private final String declaringClassName;
 
@@ -53,8 +53,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 	private final Consumer<SimpleMethodMetadata> consumer;
 
-	@Nullable
-	private Source source;
+	private @Nullable Source source;
 
 
 	SimpleMethodMetadataReadingVisitor(@Nullable ClassLoader classLoader, String declaringClassName,
@@ -71,8 +70,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 
 	@Override
-	@Nullable
-	public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+	public @Nullable AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
 		return MergedAnnotationReadingVisitor.get(this.classLoader, getSource(),
 				descriptor, visible, this.annotations::add);
 	}
@@ -107,8 +105,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 		private final String descriptor;
 
-		@Nullable
-		private String toStringValue;
+		private @Nullable String toStringValue;
 
 		Source(String declaringClassName, String methodName, String descriptor) {
 			this.declaringClassName = declaringClassName;

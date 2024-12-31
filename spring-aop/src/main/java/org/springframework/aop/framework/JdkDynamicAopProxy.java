@@ -27,6 +27,7 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.RawTargetAccess;
@@ -35,7 +36,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -163,8 +163,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * unless a hook method throws an exception.
 	 */
 	@Override
-	@Nullable
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		Object oldProxy = null;
 		boolean setProxyContext = false;
 

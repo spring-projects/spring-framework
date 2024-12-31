@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.core.log.LogFormatUtils;
@@ -35,7 +36,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.SubProtocolCapable;
@@ -285,8 +285,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @return the selected protocols or {@code null}
 	 * @see #determineHandlerSupportedProtocols(WebSocketHandler)
 	 */
-	@Nullable
-	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
+	protected @Nullable String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
 		List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
 		for (String protocol : requestedProtocols) {
 			if (handlerProtocols.contains(protocol.toLowerCase(Locale.ROOT))) {
@@ -346,8 +345,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @param attributes handshake attributes to pass to the WebSocket session
 	 * @return the user for the WebSocket session, or {@code null} if not available
 	 */
-	@Nullable
-	protected Principal determineUser(
+	protected @Nullable Principal determineUser(
 			ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		return request.getPrincipal();

@@ -17,8 +17,8 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.Session;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 /**

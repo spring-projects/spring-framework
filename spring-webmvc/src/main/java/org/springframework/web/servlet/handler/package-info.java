@@ -2,9 +2,7 @@
  * Provides standard HandlerMapping implementations,
  * including abstract base classes for custom implementations.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.handler;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

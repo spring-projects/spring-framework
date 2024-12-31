@@ -22,11 +22,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -59,13 +59,11 @@ public abstract class AbstractBrokerMessageHandler
 
 	private final Collection<String> destinationPrefixes;
 
-	@Nullable
-	private Predicate<String> userDestinationPredicate;
+	private @Nullable Predicate<String> userDestinationPredicate;
 
 	private boolean preservePublishOrder = false;
 
-	@Nullable
-	private ApplicationEventPublisher eventPublisher;
+	private @Nullable ApplicationEventPublisher eventPublisher;
 
 	private final AtomicBoolean brokerAvailable = new AtomicBoolean();
 
@@ -75,8 +73,7 @@ public abstract class AbstractBrokerMessageHandler
 
 	private boolean autoStartup = true;
 
-	@Nullable
-	private Integer phase;
+	private @Nullable Integer phase;
 
 	private volatile boolean running;
 
@@ -186,8 +183,7 @@ public abstract class AbstractBrokerMessageHandler
 		this.eventPublisher = publisher;
 	}
 
-	@Nullable
-	public ApplicationEventPublisher getApplicationEventPublisher() {
+	public @Nullable ApplicationEventPublisher getApplicationEventPublisher() {
 		return this.eventPublisher;
 	}
 

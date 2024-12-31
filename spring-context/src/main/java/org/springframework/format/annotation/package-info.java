@@ -1,9 +1,7 @@
 /**
  * Annotations for declaratively configuring field and parameter formatting rules.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.format.annotation;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

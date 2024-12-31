@@ -20,7 +20,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Context object encapsulating last execution times and last completion time
@@ -48,9 +48,8 @@ public interface TriggerContext {
 	 * <p>The default implementation delegates to {@link #lastScheduledExecution()}.
 	 * @deprecated as of 6.0, in favor on {@link #lastScheduledExecution()}
 	 */
-	@Nullable
 	@Deprecated(since = "6.0")
-	default Date lastScheduledExecutionTime() {
+	default @Nullable Date lastScheduledExecutionTime() {
 		Instant instant = lastScheduledExecution();
 		return (instant != null ? Date.from(instant) : null);
 	}
@@ -60,8 +59,7 @@ public interface TriggerContext {
 	 * or {@code null} if not scheduled before.
 	 * @since 6.0
 	 */
-	@Nullable
-	Instant lastScheduledExecution();
+	@Nullable Instant lastScheduledExecution();
 
 	/**
 	 * Return the last <i>actual</i> execution time of the task,
@@ -69,9 +67,8 @@ public interface TriggerContext {
 	 * <p>The default implementation delegates to {@link #lastActualExecution()}.
 	 * @deprecated as of 6.0, in favor on {@link #lastActualExecution()}
 	 */
-	@Nullable
 	@Deprecated(since = "6.0")
-	default Date lastActualExecutionTime() {
+	default @Nullable Date lastActualExecutionTime() {
 		Instant instant = lastActualExecution();
 		return (instant != null ? Date.from(instant) : null);
 	}
@@ -81,8 +78,7 @@ public interface TriggerContext {
 	 * or {@code null} if not scheduled before.
 	 * @since 6.0
 	 */
-	@Nullable
-	Instant lastActualExecution();
+	@Nullable Instant lastActualExecution();
 
 	/**
 	 * Return the last completion time of the task,
@@ -91,8 +87,7 @@ public interface TriggerContext {
 	 * @deprecated as of 6.0, in favor on {@link #lastCompletion()}
 	 */
 	@Deprecated(since = "6.0")
-	@Nullable
-	default Date lastCompletionTime() {
+	default @Nullable Date lastCompletionTime() {
 		Instant instant = lastCompletion();
 		return (instant != null ? Date.from(instant) : null);
 	}
@@ -102,7 +97,6 @@ public interface TriggerContext {
 	 * or {@code null} if not scheduled before.
 	 * @since 6.0
 	 */
-	@Nullable
-	Instant lastCompletion();
+	@Nullable Instant lastCompletion();
 
 }

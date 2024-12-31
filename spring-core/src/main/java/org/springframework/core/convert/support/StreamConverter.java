@@ -24,10 +24,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.lang.Nullable;
 
 /**
  * Converts a {@link Stream} to and from a collection or array, converting the
@@ -89,8 +90,7 @@ class StreamConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	@Nullable
-	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	public @Nullable Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.isAssignableTo(STREAM_TYPE)) {
 			return convertFromStream((Stream<?>) source, sourceType, targetType);
 		}
@@ -101,8 +101,7 @@ class StreamConverter implements ConditionalGenericConverter {
 		throw new IllegalStateException("Unexpected source/target types");
 	}
 
-	@Nullable
-	private Object convertFromStream(@Nullable Stream<?> source, TypeDescriptor streamType, TypeDescriptor targetType) {
+	private @Nullable Object convertFromStream(@Nullable Stream<?> source, TypeDescriptor streamType, TypeDescriptor targetType) {
 		List<Object> content = (source != null ? source.collect(Collectors.<Object>toList()) : Collections.emptyList());
 		TypeDescriptor listType = TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
 		return this.conversionService.convert(content, listType, targetType);

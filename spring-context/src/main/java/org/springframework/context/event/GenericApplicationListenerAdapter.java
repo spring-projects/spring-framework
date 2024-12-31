@@ -18,12 +18,13 @@ package org.springframework.context.event;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -43,8 +44,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	private final ApplicationListener<ApplicationEvent> delegate;
 
-	@Nullable
-	private final ResolvableType declaredEventType;
+	private final @Nullable ResolvableType declaredEventType;
 
 
 	/**
@@ -95,8 +95,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	}
 
 
-	@Nullable
-	private static ResolvableType resolveDeclaredEventType(ApplicationListener<ApplicationEvent> listener) {
+	private static @Nullable ResolvableType resolveDeclaredEventType(ApplicationListener<ApplicationEvent> listener) {
 		ResolvableType declaredEventType = resolveDeclaredEventType(listener.getClass());
 		if (declaredEventType == null || declaredEventType.isAssignableFrom(ApplicationEvent.class)) {
 			Class<?> targetClass = AopUtils.getTargetClass(listener);
@@ -107,8 +106,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 		return declaredEventType;
 	}
 
-	@Nullable
-	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
+	static @Nullable ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
 		ResolvableType eventType = eventTypeCache.get(listenerType);
 		if (eventType == null) {
 			eventType = ResolvableType.forClass(listenerType).as(ApplicationListener.class).getGeneric();

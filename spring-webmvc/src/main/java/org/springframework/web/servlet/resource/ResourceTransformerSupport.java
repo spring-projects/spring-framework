@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.servlet.resource;
 import java.util.Collections;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -36,8 +36,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ResourceTransformerSupport implements ResourceTransformer {
 
-	@Nullable
-	private ResourceUrlProvider resourceUrlProvider;
+	private @Nullable ResourceUrlProvider resourceUrlProvider;
 
 
 	/**
@@ -53,8 +52,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	/**
 	 * Return the configured {@code ResourceUrlProvider}.
 	 */
-	@Nullable
-	public ResourceUrlProvider getResourceUrlProvider() {
+	public @Nullable ResourceUrlProvider getResourceUrlProvider() {
 		return this.resourceUrlProvider;
 	}
 
@@ -70,8 +68,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param transformerChain the transformer chain
 	 * @return the resolved URL, or {@code} if not resolvable
 	 */
-	@Nullable
-	protected String resolveUrlPath(String resourcePath, HttpServletRequest request,
+	protected @Nullable String resolveUrlPath(String resourcePath, HttpServletRequest request,
 			Resource resource, ResourceTransformerChain transformerChain) {
 
 		if (resourcePath.startsWith("/")) {
@@ -94,6 +91,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param request the referer request
 	 * @return the absolute request path for the given resource path
 	 */
+	@SuppressWarnings("removal")
 	protected String toAbsolutePath(String path, HttpServletRequest request) {
 		String absolutePath = path;
 		if (!path.startsWith("/")) {
@@ -105,8 +103,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 		return StringUtils.cleanPath(absolutePath);
 	}
 
-	@Nullable
-	private ResourceUrlProvider findResourceUrlProvider(HttpServletRequest request) {
+	private @Nullable ResourceUrlProvider findResourceUrlProvider(HttpServletRequest request) {
 		if (this.resourceUrlProvider != null) {
 			return this.resourceUrlProvider;
 		}

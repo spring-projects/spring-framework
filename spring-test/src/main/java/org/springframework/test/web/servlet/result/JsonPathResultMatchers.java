@@ -22,8 +22,8 @@ import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringStartsWith;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -47,8 +47,7 @@ public class JsonPathResultMatchers {
 
 	private final JsonPathExpectationsHelper jsonPathHelper;
 
-	@Nullable
-	private String prefix;
+	private @Nullable String prefix;
 
 
 	/**

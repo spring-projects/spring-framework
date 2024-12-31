@@ -33,6 +33,7 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -47,7 +48,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -411,8 +411,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			}
 		}
 
-		@Nullable
-		public View resolveViewName(String viewName, Locale locale) throws Exception {
+		public @Nullable View resolveViewName(String viewName, Locale locale) throws Exception {
 			for (ViewResolver resolver : this.viewResolvers) {
 				View view = resolver.resolveViewName(viewName, locale);
 				if (view != null) {

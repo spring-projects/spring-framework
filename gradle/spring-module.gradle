@@ -13,8 +13,8 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
-	errorprone 'com.uber.nullaway:nullaway:0.10.26'
-	errorprone 'com.google.errorprone:error_prone_core:2.9.0'
+	errorprone 'com.uber.nullaway:nullaway:0.12.2'
+	errorprone 'com.google.errorprone:error_prone_core:2.35.1'
 }
 
 pluginManager.withPlugin("kotlin") {
@@ -117,10 +117,8 @@ tasks.withType(JavaCompile).configureEach {
     options.errorprone {
     	disableAllChecks = true
         option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
-        option("NullAway:AnnotatedPackages", "org.springframework")
-        option("NullAway:UnannotatedSubPackages", "org.springframework.instrument,org.springframework.context.index," +
-				"org.springframework.asm,org.springframework.cglib,org.springframework.objenesis," +
-				"org.springframework.javapoet,org.springframework.aot.nativex.substitution,org.springframework.aot.nativex.feature")
+        // TODO Replace by proper flag when supported, see https://github.com/uber/NullAway/issues/574
+		option("NullAway:AnnotatedPackages", "")
     }
 }
 tasks.compileJava {

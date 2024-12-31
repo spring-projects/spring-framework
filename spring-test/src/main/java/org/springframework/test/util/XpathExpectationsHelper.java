@@ -31,12 +31,12 @@ import javax.xml.xpath.XPathFactory;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
@@ -214,8 +214,7 @@ public class XpathExpectationsHelper {
 	 * @throws Exception if content parsing or expression evaluation fails
 	 * @since 5.1
 	 */
-	@Nullable
-	public <T> T evaluateXpath(byte[] content, @Nullable String encoding, Class<T> targetClass) throws Exception {
+	public <T> @Nullable T evaluateXpath(byte[] content, @Nullable String encoding, Class<T> targetClass) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
 		return evaluateXpath(document, toQName(targetClass), targetClass);
 	}
@@ -242,8 +241,7 @@ public class XpathExpectationsHelper {
 	 * @throws XPathExpressionException if expression evaluation failed
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	protected <T> T evaluateXpath(Document document, QName evaluationType, Class<T> expectedClass)
+	protected <T> @Nullable T evaluateXpath(Document document, QName evaluationType, Class<T> expectedClass)
 			throws XPathExpressionException {
 
 		return (T) getXpathExpression().evaluate(document, evaluationType);

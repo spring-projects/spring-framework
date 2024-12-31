@@ -18,6 +18,8 @@ package org.springframework.web.servlet.view;
 
 import java.util.Locale;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -29,7 +31,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
@@ -65,11 +66,9 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	public static final String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
 
-	@Nullable
-	private Resource location;
+	private @Nullable Resource location;
 
-	@Nullable
-	private ConfigurableApplicationContext cachedFactory;
+	private @Nullable ConfigurableApplicationContext cachedFactory;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
@@ -119,8 +118,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	}
 
 	@Override
-	@Nullable
-	protected View loadView(String viewName, Locale locale) throws BeansException {
+	protected @Nullable View loadView(String viewName, Locale locale) throws BeansException {
 		BeanFactory factory = initFactory();
 		try {
 			return factory.getBean(viewName, View.class);

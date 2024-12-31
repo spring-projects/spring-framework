@@ -18,10 +18,11 @@ package org.springframework.web.client;
 
 import java.nio.charset.Charset;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when an HTTP 4xx is received.
@@ -53,7 +54,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	 * Constructor with a status code and status text, and content.
 	 */
 	public HttpClientErrorException(
-			HttpStatusCode statusCode, String statusText, @Nullable byte[] body, @Nullable Charset responseCharset) {
+			HttpStatusCode statusCode, String statusText, byte @Nullable [] body, @Nullable Charset responseCharset) {
 
 		super(statusCode, statusText, body, responseCharset);
 	}
@@ -62,7 +63,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	 * Constructor with a status code and status text, headers, and content.
 	 */
 	public HttpClientErrorException(HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset responseCharset) {
+			@Nullable HttpHeaders headers, byte @Nullable [] body, @Nullable Charset responseCharset) {
 
 		super(statusCode, statusText, headers, body, responseCharset);
 	}
@@ -73,7 +74,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	 * @since 5.2.2
 	 */
 	public HttpClientErrorException(String message, HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset responseCharset) {
+			@Nullable HttpHeaders headers, byte @Nullable [] body, @Nullable Charset responseCharset) {
 
 		super(message, statusCode, statusText, headers, body, responseCharset);
 	}

@@ -21,7 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -49,7 +50,7 @@ public abstract class AbstractBrokerRegistration {
 	 * @param destinationPrefixes the destination prefixes
 	 */
 	public AbstractBrokerRegistration(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel, @Nullable String[] destinationPrefixes) {
+			MessageChannel clientOutboundChannel, String @Nullable [] destinationPrefixes) {
 
 		Assert.notNull(clientInboundChannel, "'clientInboundChannel' must not be null");
 		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");

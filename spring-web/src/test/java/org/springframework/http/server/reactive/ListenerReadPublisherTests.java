@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
@@ -103,7 +104,7 @@ class ListenerReadPublisherTests {
 		}
 
 		@Override
-		protected DataBuffer read() {
+		protected @Nullable DataBuffer read() {
 			if (this.discardCalls != 0) {
 				return null;
 			}

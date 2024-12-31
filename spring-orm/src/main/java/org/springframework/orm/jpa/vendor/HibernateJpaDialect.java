@@ -47,6 +47,7 @@ import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -61,7 +62,6 @@ import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLExceptionSubclassTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.orm.jpa.DefaultJpaDialect;
@@ -89,11 +89,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	boolean prepareConnection = true;
 
-	@Nullable
-	private SQLExceptionTranslator jdbcExceptionTranslator;
+	private @Nullable SQLExceptionTranslator jdbcExceptionTranslator;
 
-	@Nullable
-	private SQLExceptionTranslator transactionExceptionTranslator = new SQLExceptionSubclassTranslator();
+	private @Nullable SQLExceptionTranslator transactionExceptionTranslator = new SQLExceptionSubclassTranslator();
 
 
 	/**
@@ -198,8 +196,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return new SessionTransactionData(session, previousFlushMode, false, null, readOnly);
 	}
 
-	@Nullable
-	protected FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
+	protected @Nullable FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
 		FlushMode flushMode = session.getHibernateFlushMode();
 		if (readOnly) {
 			// We should suppress flushing for a read-only transaction.
@@ -235,8 +232,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
-	@Nullable
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+	public @Nullable DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException hibernateEx) {
 			return convertHibernateAccessException(hibernateEx);
 		}
@@ -345,8 +341,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return entityManager.unwrap(SessionImplementor.class);
 	}
 
-	@Nullable
-	protected Object getIdentifier(HibernateException hibEx) {
+	protected @Nullable Object getIdentifier(HibernateException hibEx) {
 		try {
 			// getIdentifier declares Serializable return value on 5.x but Object on 6.x
 			// -> not binary compatible, let's invoke it reflectively for the time being
@@ -362,13 +357,11 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final SessionImplementor session;
 
-		@Nullable
-		private final FlushMode previousFlushMode;
+		private final @Nullable FlushMode previousFlushMode;
 
 		private final boolean needsConnectionReset;
 
-		@Nullable
-		private final Integer previousIsolationLevel;
+		private final @Nullable Integer previousIsolationLevel;
 
 		private final boolean readOnly;
 

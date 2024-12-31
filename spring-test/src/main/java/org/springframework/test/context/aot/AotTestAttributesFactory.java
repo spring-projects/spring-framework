@@ -19,8 +19,9 @@ package org.springframework.test.context.aot;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.AotDetector;
-import org.springframework.lang.Nullable;
 
 /**
  * Factory for {@link AotTestAttributes}.
@@ -30,8 +31,7 @@ import org.springframework.lang.Nullable;
  */
 final class AotTestAttributesFactory {
 
-	@Nullable
-	private static volatile Map<String, String> attributes;
+	private static volatile @Nullable Map<String, String> attributes;
 
 
 	private AotTestAttributesFactory() {

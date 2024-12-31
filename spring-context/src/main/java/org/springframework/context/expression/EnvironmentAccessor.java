@@ -16,12 +16,13 @@
 
 package org.springframework.context.expression;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.env.Environment;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

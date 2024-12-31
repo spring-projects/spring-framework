@@ -16,7 +16,8 @@
 
 package org.springframework.aot.hint;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -33,8 +34,7 @@ public interface ConditionalHint {
 	 * {@code null} if this hint should always been applied.
 	 * @return the reachable type, if any
 	 */
-	@Nullable
-	TypeReference getReachableType();
+	@Nullable TypeReference getReachableType();
 
 	/**
 	 * Whether the condition described for this hint is met. If it is not,

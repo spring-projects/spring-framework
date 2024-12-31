@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.tags;
 
 import jakarta.servlet.jsp.JspException;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.util.HtmlUtils;
 
 /**
@@ -41,8 +41,7 @@ import org.springframework.web.util.HtmlUtils;
 @SuppressWarnings("serial")
 public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 
-	@Nullable
-	private Boolean htmlEscape;
+	private @Nullable Boolean htmlEscape;
 
 
 	/**

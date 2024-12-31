@@ -17,8 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import jakarta.servlet.jsp.JspException;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract base class to provide common methods for
@@ -81,8 +80,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * Return a unique ID for the bound name within the current PageContext.
 	 */
 	@Override
-	@Nullable
-	protected String autogenerateId() throws JspException {
+	protected @Nullable String autogenerateId() throws JspException {
 		String id = super.autogenerateId();
 		return (id != null ? TagIdGenerator.nextId(id, this.pageContext) : null);
 	}

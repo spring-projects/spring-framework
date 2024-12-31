@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A hint that describes the need for a JDK interface-based {@link Proxy}.
@@ -35,8 +35,7 @@ public final class JdkProxyHint implements ConditionalHint {
 
 	private final List<TypeReference> proxiedInterfaces;
 
-	@Nullable
-	private final TypeReference reachableType;
+	private final @Nullable TypeReference reachableType;
 
 
 	private JdkProxyHint(Builder builder) {
@@ -71,9 +70,8 @@ public final class JdkProxyHint implements ConditionalHint {
 		return this.proxiedInterfaces;
 	}
 
-	@Nullable
 	@Override
-	public TypeReference getReachableType() {
+	public @Nullable TypeReference getReachableType() {
 		return this.reachableType;
 	}
 
@@ -97,8 +95,7 @@ public final class JdkProxyHint implements ConditionalHint {
 
 		private final LinkedList<TypeReference> proxiedInterfaces;
 
-		@Nullable
-		private TypeReference reachableType;
+		private @Nullable TypeReference reachableType;
 
 		Builder() {
 			this.proxiedInterfaces = new LinkedList<>();

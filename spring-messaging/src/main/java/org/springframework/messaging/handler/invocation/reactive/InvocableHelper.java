@@ -25,11 +25,11 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.MessagingAdviceBean;
@@ -146,8 +146,7 @@ class InvocableHelper {
 	 * @param ex the exception raised or signaled
 	 * @return a method to handle the exception, or {@code null}
 	 */
-	@Nullable
-	public InvocableHandlerMethod initExceptionHandlerMethod(HandlerMethod handlerMethod, Throwable ex) {
+	public @Nullable InvocableHandlerMethod initExceptionHandlerMethod(HandlerMethod handlerMethod, Throwable ex) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching for methods to handle " + ex.getClass().getSimpleName());
 		}

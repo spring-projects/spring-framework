@@ -20,7 +20,7 @@ package org.springframework.aot.hint;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A hint that describes the need for Java serialization at runtime.
@@ -32,8 +32,7 @@ public final class JavaSerializationHint implements ConditionalHint {
 
 	private final TypeReference type;
 
-	@Nullable
-	private final TypeReference reachableType;
+	private final @Nullable TypeReference reachableType;
 
 
 	JavaSerializationHint(Builder builder) {
@@ -51,8 +50,7 @@ public final class JavaSerializationHint implements ConditionalHint {
 	}
 
 	@Override
-	@Nullable
-	public TypeReference getReachableType() {
+	public @Nullable TypeReference getReachableType() {
 		return this.reachableType;
 	}
 
@@ -75,8 +73,7 @@ public final class JavaSerializationHint implements ConditionalHint {
 
 		private final TypeReference type;
 
-		@Nullable
-		private TypeReference reachableType;
+		private @Nullable TypeReference reachableType;
 
 		Builder(TypeReference type) {
 			this.type = type;

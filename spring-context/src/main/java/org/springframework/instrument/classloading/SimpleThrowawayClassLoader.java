@@ -16,8 +16,9 @@
 
 package org.springframework.instrument.classloading;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * ClassLoader that can be used to load classes without bringing them

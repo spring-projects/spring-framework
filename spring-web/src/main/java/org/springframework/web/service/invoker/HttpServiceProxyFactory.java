@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
@@ -34,7 +35,6 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.annotation.HttpExchange;
@@ -58,8 +58,7 @@ public final class HttpServiceProxyFactory {
 
 	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
-	@Nullable
-	private final StringValueResolver embeddedValueResolver;
+	private final @Nullable StringValueResolver embeddedValueResolver;
 
 
 	private HttpServiceProxyFactory(
@@ -123,16 +122,13 @@ public final class HttpServiceProxyFactory {
 	 */
 	public static final class Builder {
 
-		@Nullable
-		private HttpExchangeAdapter exchangeAdapter;
+		private @Nullable HttpExchangeAdapter exchangeAdapter;
 
 		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
-		@Nullable
-		private ConversionService conversionService;
+		private @Nullable ConversionService conversionService;
 
-		@Nullable
-		private StringValueResolver embeddedValueResolver;
+		private @Nullable StringValueResolver embeddedValueResolver;
 
 		private Builder() {
 		}
@@ -233,8 +229,7 @@ public final class HttpServiceProxyFactory {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(MethodInvocation invocation) throws Throwable {
+		public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
 			if (httpServiceMethod != null) {

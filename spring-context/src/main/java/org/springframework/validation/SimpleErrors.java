@@ -22,8 +22,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -88,13 +89,13 @@ public class SimpleErrors implements Errors, Serializable {
 	}
 
 	@Override
-	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+	public void reject(String errorCode, Object @Nullable [] errorArgs, @Nullable String defaultMessage) {
 		this.globalErrors.add(new ObjectError(getObjectName(), new String[] {errorCode}, errorArgs, defaultMessage));
 	}
 
 	@Override
 	public void rejectValue(@Nullable String field, String errorCode,
-			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+			Object @Nullable [] errorArgs, @Nullable String defaultMessage) {
 
 		if (!StringUtils.hasLength(field)) {
 			reject(errorCode, errorArgs, defaultMessage);
@@ -123,8 +124,7 @@ public class SimpleErrors implements Errors, Serializable {
 	}
 
 	@Override
-	@Nullable
-	public Object getFieldValue(String field) {
+	public @Nullable Object getFieldValue(String field) {
 		FieldError fieldError = getFieldError(field);
 		if (fieldError != null) {
 			return fieldError.getRejectedValue();
@@ -147,8 +147,7 @@ public class SimpleErrors implements Errors, Serializable {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getFieldType(String field) {
+	public @Nullable Class<?> getFieldType(String field) {
 		PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(this.target.getClass(), field);
 		if (pd != null) {
 			return pd.getPropertyType();

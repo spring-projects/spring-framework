@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.KotlinDetector;
@@ -32,7 +33,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -67,8 +67,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private static final Method CALLABLE_METHOD = ClassUtils.getMethod(Callable.class, "call");
 
-	@Nullable
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+	private @Nullable HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 
 	/**
@@ -253,8 +252,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		 * Bridge to controller method-level annotations.
 		 */
 		@Override
-		@Nullable
-		public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
+		public <A extends Annotation> @Nullable A getMethodAnnotation(Class<A> annotationType) {
 			return ServletInvocableHandlerMethod.this.getMethodAnnotation(annotationType);
 		}
 
@@ -275,8 +273,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	private class ConcurrentResultMethodParameter extends AnnotatedMethodParameter {
 
-		@Nullable
-		private final Object returnValue;
+		private final @Nullable Object returnValue;
 
 		private final ResolvableType returnType;
 

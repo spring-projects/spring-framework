@@ -19,7 +19,8 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.text.NumberFormat;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
@@ -47,8 +48,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 
 	private final Class<? extends Number> numberClass;
 
-	@Nullable
-	private final NumberFormat numberFormat;
+	private final @Nullable NumberFormat numberFormat;
 
 	private final boolean allowEmpty;
 

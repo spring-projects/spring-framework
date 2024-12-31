@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -47,8 +47,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	private final JettyWebSocketSession wsSession;
 
-	@Nullable
-	private Session nativeSession;
+	private @Nullable Session nativeSession;
 
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSession wsSession) {

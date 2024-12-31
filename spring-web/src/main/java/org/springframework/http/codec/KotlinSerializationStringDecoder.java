@@ -21,6 +21,7 @@ import java.util.Map;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.StringFormat;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +32,6 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**

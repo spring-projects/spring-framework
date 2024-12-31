@@ -24,9 +24,9 @@ import java.lang.reflect.Proxy;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Wrapped;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -129,8 +129,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isObjectMethod(method)) {
 				if (ReflectionUtils.isToStringMethod(method)) {
 					return proxyToString(proxy);

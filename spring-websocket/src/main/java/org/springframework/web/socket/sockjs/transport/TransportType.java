@@ -21,8 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 
 /**
  * SockJS transport types.
@@ -50,8 +51,7 @@ public enum TransportType {
 			Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(type -> type.value, type -> type));
 
 
-	@Nullable
-	public static TransportType fromValue(String value) {
+	public static @Nullable TransportType fromValue(String value) {
 		return TRANSPORT_TYPES.get(value);
 	}
 

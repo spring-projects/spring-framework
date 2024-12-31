@@ -18,7 +18,8 @@ package org.springframework.context.expression;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -35,8 +36,7 @@ public final class AnnotatedElementKey implements Comparable<AnnotatedElementKey
 
 	private final AnnotatedElement element;
 
-	@Nullable
-	private final Class<?> targetClass;
+	private final @Nullable Class<?> targetClass;
 
 
 	/**

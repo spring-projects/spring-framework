@@ -20,13 +20,13 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -63,8 +63,7 @@ public class ContextConfigurationAttributes {
 
 	private final boolean inheritInitializers;
 
-	@Nullable
-	private final String name;
+	private final @Nullable String name;
 
 	private final Class<? extends ContextLoader> contextLoaderClass;
 
@@ -305,8 +304,7 @@ public class ContextConfigurationAttributes {
 	 * @since 3.2.2
 	 * @see ContextConfiguration#name()
 	 */
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 

@@ -20,7 +20,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
@@ -47,16 +48,13 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
 
 
-	@Nullable
-	private ConnectionHandle connectionHandle;
+	private @Nullable ConnectionHandle connectionHandle;
 
-	@Nullable
-	private Connection currentConnection;
+	private @Nullable Connection currentConnection;
 
 	private boolean transactionActive = false;
 
-	@Nullable
-	private Boolean savepointsSupported;
+	private @Nullable Boolean savepointsSupported;
 
 	private int savepointCounter = 0;
 
@@ -99,8 +97,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	/**
 	 * Return the ConnectionHandle held by this ConnectionHolder.
 	 */
-	@Nullable
-	public ConnectionHandle getConnectionHandle() {
+	public @Nullable ConnectionHandle getConnectionHandle() {
 		return this.connectionHandle;
 	}
 

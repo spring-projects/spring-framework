@@ -23,9 +23,7 @@
  * compliant with https://www.w3.org/TR/xhtml1/ and attendant
  * https://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.tags;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

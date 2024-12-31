@@ -19,10 +19,10 @@ package org.springframework.beans.factory.config;
 import java.io.Serializable;
 
 import jakarta.inject.Provider;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,8 +43,7 @@ import org.springframework.util.Assert;
  */
 public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider<Object>> {
 
-	@Nullable
-	private String targetBeanName;
+	private @Nullable String targetBeanName;
 
 
 	/**

@@ -18,7 +18,7 @@ package org.springframework.core.metrics;
 
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Step recording metrics about a particular phase or action happening during the {@link ApplicationStartup}.
@@ -56,8 +56,7 @@ public interface StartupStep {
 	 * <p>The parent step is the step that was started the most recently
 	 * when the current step was created.
 	 */
-	@Nullable
-	Long getParentId();
+	@Nullable Long getParentId();
 
 	/**
 	 * Add a {@link Tag} to the step.

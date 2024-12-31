@@ -20,7 +20,8 @@ import java.util.List;
 
 import javax.lang.model.SourceVersion;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -34,8 +35,7 @@ final class SimpleTypeReference extends AbstractTypeReference {
 	private static final List<String> PRIMITIVE_NAMES = List.of("boolean", "byte",
 			"short", "int", "long", "char", "float", "double", "void");
 
-	@Nullable
-	private String canonicalName;
+	private @Nullable String canonicalName;
 
 	SimpleTypeReference(String packageName, String simpleName, @Nullable TypeReference enclosingType) {
 		super(packageName, simpleName, enclosingType);

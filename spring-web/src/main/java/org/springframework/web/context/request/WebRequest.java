@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Generic interface for a web request. Mainly intended for generic web
@@ -41,8 +41,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see jakarta.servlet.http.HttpServletRequest#getHeader(String)
 	 */
-	@Nullable
-	String getHeader(String headerName);
+	@Nullable String getHeader(String headerName);
 
 	/**
 	 * Return the request header values for the given header name,
@@ -51,8 +50,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see jakarta.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
-	@Nullable
-	String[] getHeaderValues(String headerName);
+	String @Nullable [] getHeaderValues(String headerName);
 
 	/**
 	 * Return an Iterator over request header names.
@@ -66,8 +64,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see jakarta.servlet.http.HttpServletRequest#getParameter(String)
 	 */
-	@Nullable
-	String getParameter(String paramName);
+	@Nullable String getParameter(String paramName);
 
 	/**
 	 * Return the request parameter values for the given parameter name,
@@ -75,8 +72,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see jakarta.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */
-	@Nullable
-	String[] getParameterValues(String paramName);
+	String @Nullable [] getParameterValues(String paramName);
 
 	/**
 	 * Return an Iterator over request parameter names.
@@ -110,15 +106,13 @@ public interface WebRequest extends RequestAttributes {
 	 * Return the remote user for this request, if any.
 	 * @see jakarta.servlet.http.HttpServletRequest#getRemoteUser()
 	 */
-	@Nullable
-	String getRemoteUser();
+	@Nullable String getRemoteUser();
 
 	/**
 	 * Return the user principal for this request, if any.
 	 * @see jakarta.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
-	@Nullable
-	Principal getUserPrincipal();
+	@Nullable Principal getUserPrincipal();
 
 	/**
 	 * Determine whether the user is in the given role for this request.

@@ -16,7 +16,7 @@
 
 package org.springframework.expression;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represent an exception that occurs during expression parsing.

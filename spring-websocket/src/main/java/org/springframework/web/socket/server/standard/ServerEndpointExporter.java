@@ -27,11 +27,11 @@ import jakarta.websocket.DeploymentException;
 import jakarta.websocket.server.ServerContainer;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.server.ServerEndpointConfig;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
@@ -56,11 +56,9 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 public class ServerEndpointExporter extends WebApplicationObjectSupport
 		implements InitializingBean, SmartInitializingSingleton {
 
-	@Nullable
-	private List<Class<?>> annotatedEndpointClasses;
+	private @Nullable List<Class<?>> annotatedEndpointClasses;
 
-	@Nullable
-	private ServerContainer serverContainer;
+	private @Nullable ServerContainer serverContainer;
 
 
 	/**
@@ -84,8 +82,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	/**
 	 * Return the JSR-356 {@link ServerContainer} to use for endpoint registration.
 	 */
-	@Nullable
-	protected ServerContainer getServerContainer() {
+	protected @Nullable ServerContainer getServerContainer() {
 		return this.serverContainer;
 	}
 

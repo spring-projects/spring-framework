@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -32,7 +33,6 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -256,8 +256,7 @@ public class RestClientBuilderTests {
 				);
 	}
 
-	@Nullable
-	private static Object fieldValue(String name, DefaultRestClientBuilder instance) {
+	private static @Nullable Object fieldValue(String name, DefaultRestClientBuilder instance) {
 		try {
 			Field field = DefaultRestClientBuilder.class.getDeclaredField(name);
 			field.setAccessible(true);
@@ -270,8 +269,7 @@ public class RestClientBuilderTests {
 		}
 	}
 
-	@Nullable
-	private static Object fieldValue(String name, RestClient instance) {
+	private static @Nullable Object fieldValue(String name, RestClient instance) {
 		try {
 			Field field = DefaultRestClient.class.getDeclaredField(name);
 			field.setAccessible(true);

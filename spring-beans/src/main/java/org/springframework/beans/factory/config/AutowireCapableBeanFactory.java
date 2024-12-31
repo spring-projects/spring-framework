@@ -18,12 +18,13 @@ package org.springframework.beans.factory.config;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of the {@link org.springframework.beans.factory.BeanFactory}
@@ -381,8 +382,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @since 2.5
 	 * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
 	 */
-	@Nullable
-	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
+	@Nullable Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
 
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
@@ -398,8 +398,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @since 2.5
 	 * @see DependencyDescriptor
 	 */
-	@Nullable
-	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
+	@Nullable Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException;
 
 }

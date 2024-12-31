@@ -28,8 +28,8 @@ import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import io.netty5.handler.codec.http.headers.HttpHeaders;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -57,8 +57,7 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 
 
 	@Override
-	@Nullable
-	public String getFirst(String key) {
+	public @Nullable String getFirst(String key) {
 		CharSequence value = this.headers.get(key);
 		return (value != null ? value.toString() : null);
 	}
@@ -124,8 +123,7 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 	}
 
 	@Override
-	@Nullable
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		Iterator<CharSequence> iterator = this.headers.valuesIterator((CharSequence) key);
 		if (iterator.hasNext()) {
 			List<String> result = new ArrayList<>();
@@ -135,17 +133,15 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 		return null;
 	}
 
-	@Nullable
 	@Override
-	public List<String> put(String key, @Nullable List<String> value) {
+	public @Nullable List<String> put(String key, @Nullable List<String> value) {
 		List<String> previousValues = get(key);
 		this.headers.set(key, value);
 		return previousValues;
 	}
 
-	@Nullable
 	@Override
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(Object key) {
 		if (key instanceof String headerName) {
 			List<String> previousValues = get(headerName);
 			this.headers.remove(headerName);
@@ -258,8 +254,7 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 
 		private final Iterator<CharSequence> iterator;
 
-		@Nullable
-		private CharSequence currentName;
+		private @Nullable CharSequence currentName;
 
 		private HeaderNamesIterator(Iterator<CharSequence> iterator) {
 			this.iterator = iterator;

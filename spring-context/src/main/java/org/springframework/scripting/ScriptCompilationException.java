@@ -16,8 +16,9 @@
 
 package org.springframework.scripting;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception to be thrown on script compilation failure.
@@ -28,8 +29,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ScriptCompilationException extends NestedRuntimeException {
 
-	@Nullable
-	private final ScriptSource scriptSource;
+	private final @Nullable ScriptSource scriptSource;
 
 
 	/**
@@ -88,8 +88,7 @@ public class ScriptCompilationException extends NestedRuntimeException {
 	 * Return the source for the offending script.
 	 * @return the source, or {@code null} if not available
 	 */
-	@Nullable
-	public ScriptSource getScriptSource() {
+	public @Nullable ScriptSource getScriptSource() {
 		return this.scriptSource;
 	}
 

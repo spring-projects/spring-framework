@@ -24,8 +24,8 @@ import java.util.Properties;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
@@ -49,22 +49,17 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
 
 
-	@Nullable
-	private Properties exceptionMappings;
+	private @Nullable Properties exceptionMappings;
 
-	@Nullable
-	private Class<?>[] excludedExceptions;
+	private Class<?> @Nullable [] excludedExceptions;
 
-	@Nullable
-	private String defaultErrorView;
+	private @Nullable String defaultErrorView;
 
-	@Nullable
-	private Integer defaultStatusCode;
+	private @Nullable Integer defaultStatusCode;
 
 	private final Map<String, Integer> statusCodes = new HashMap<>();
 
-	@Nullable
-	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
+	private @Nullable String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
 
 	/**
@@ -181,8 +176,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * or {@code null} for default processing in the resolution chain
 	 */
 	@Override
-	@Nullable
-	protected ModelAndView doResolveException(
+	protected @Nullable ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		// Expose ModelAndView for chosen error view.
@@ -210,8 +204,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the resolved view name, or {@code null} if excluded or none found
 	 */
-	@Nullable
-	protected String determineViewName(Exception ex, HttpServletRequest request) {
+	protected @Nullable String determineViewName(Exception ex, HttpServletRequest request) {
 		String viewName = null;
 		if (this.excludedExceptions != null) {
 			for (Class<?> excludedEx : this.excludedExceptions) {
@@ -241,8 +234,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @return the view name, or {@code null} if none found
 	 * @see #setExceptionMappings
 	 */
-	@Nullable
-	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
+	protected @Nullable String findMatchingViewName(Properties exceptionMappings, Exception ex) {
 		String viewName = null;
 		String dominantMapping = null;
 		int deepest = Integer.MAX_VALUE;
@@ -296,8 +288,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @see #setDefaultStatusCode
 	 * @see #applyStatusCodeIfPossible
 	 */
-	@Nullable
-	protected Integer determineStatusCode(HttpServletRequest request, String viewName) {
+	protected @Nullable Integer determineStatusCode(HttpServletRequest request, String viewName) {
 		if (this.statusCodes.containsKey(viewName)) {
 			return this.statusCodes.get(viewName);
 		}

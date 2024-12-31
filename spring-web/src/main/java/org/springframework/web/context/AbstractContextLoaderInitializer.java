@@ -20,9 +20,9 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.lang.Nullable;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
@@ -79,8 +79,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * desired
 	 * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
 	 */
-	@Nullable
-	protected abstract WebApplicationContext createRootApplicationContext();
+	protected abstract @Nullable WebApplicationContext createRootApplicationContext();
 
 	/**
 	 * Specify application context initializers to be applied to the root application
@@ -89,8 +88,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * @see #createRootApplicationContext()
 	 * @see ContextLoaderListener#setContextInitializers
 	 */
-	@Nullable
-	protected ApplicationContextInitializer<?>[] getRootApplicationContextInitializers() {
+	protected ApplicationContextInitializer<?> @Nullable [] getRootApplicationContextInitializers() {
 		return null;
 	}
 

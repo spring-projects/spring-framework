@@ -16,8 +16,9 @@
 
 package org.springframework.mail;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for all mail exceptions.

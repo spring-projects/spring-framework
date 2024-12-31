@@ -19,7 +19,7 @@ package org.springframework.jdbc.core.metadata;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Sybase specific implementation for the {@link CallMetaDataProvider} interface.
@@ -42,8 +42,7 @@ public class SybaseCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 
 	@Override
-	@Nullable
-	public String parameterNameToUse(@Nullable String parameterName) {
+	public @Nullable String parameterNameToUse(@Nullable String parameterName) {
 		if (parameterName == null) {
 			return null;
 		}

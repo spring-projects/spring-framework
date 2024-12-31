@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.ListIterator;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,11 +35,9 @@ import org.springframework.util.Assert;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	@Nullable
-	private final ResourceResolver resolver;
+	private final @Nullable ResourceResolver resolver;
 
-	@Nullable
-	private final ResourceResolverChain nextChain;
+	private final @Nullable ResourceResolverChain nextChain;
 
 
 	public DefaultResourceResolverChain(@Nullable List<? extends ResourceResolver> resolvers) {
@@ -67,8 +65,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
-	@Nullable
-	public Resource resolveResource(
+	public @Nullable Resource resolveResource(
 			@Nullable HttpServletRequest request, String requestPath, List<? extends Resource> locations) {
 
 		return (this.resolver != null && this.nextChain != null ?
@@ -76,8 +73,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	@Override
-	@Nullable
-	public String resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
+	public @Nullable String resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
 		return (this.resolver != null && this.nextChain != null ?
 				this.resolver.resolveUrlPath(resourcePath, locations, this.nextChain) : null);
 	}

@@ -35,6 +35,7 @@ import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -46,7 +47,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeType;
@@ -109,11 +109,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
 
 
-	@Nullable
-	private Configuration configuration;
+	private @Nullable Configuration configuration;
 
-	@Nullable
-	private String encoding;
+	private @Nullable String encoding;
 
 	private boolean exposeSpringMacroHelpers = true;
 
@@ -131,8 +129,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	/**
 	 * Get the FreeMarker {@link Configuration} used by this view.
 	 */
-	@Nullable
-	protected Configuration getConfiguration() {
+	protected @Nullable Configuration getConfiguration() {
 		return this.configuration;
 	}
 
@@ -193,8 +190,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * determine the encoding.
 	 * @see #setEncoding(String)
 	 */
-	@Nullable
-	protected String getEncoding() {
+	protected @Nullable String getEncoding() {
 		return this.encoding;
 	}
 

@@ -18,8 +18,7 @@ package org.springframework.core.annotation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Log facade used to handle annotation introspection failures (in particular
@@ -55,8 +54,7 @@ enum IntrospectionFailureLogger {
 	};
 
 
-	@Nullable
-	private static Log logger;
+	private static @Nullable Log logger;
 
 
 	void log(String message, @Nullable Object source, Exception ex) {

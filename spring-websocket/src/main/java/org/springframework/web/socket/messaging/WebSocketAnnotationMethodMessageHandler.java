@@ -19,8 +19,9 @@ package org.springframework.web.socket.messaging;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.MessagingAdviceBean;
@@ -100,8 +101,7 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		}
 
 		@Override
-		@Nullable
-		public Class<?> getBeanType() {
+		public @Nullable Class<?> getBeanType() {
 			return this.adviceBean.getBeanType();
 		}
 

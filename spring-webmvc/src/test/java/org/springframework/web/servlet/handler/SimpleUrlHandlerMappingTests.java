@@ -65,6 +65,7 @@ class SimpleUrlHandlerMappingTests {
 				.isInstanceOf(NoSuchBeanDefinitionException.class);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void newlineInRequestShouldMatch() throws Exception {
 		Object controller = new Object();

@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -54,7 +55,6 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Indexed;
@@ -116,20 +116,15 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private final List<TypeFilter> excludeFilters = new ArrayList<>();
 
-	@Nullable
-	private Environment environment;
+	private @Nullable Environment environment;
 
-	@Nullable
-	private ConditionEvaluator conditionEvaluator;
+	private @Nullable ConditionEvaluator conditionEvaluator;
 
-	@Nullable
-	private ResourcePatternResolver resourcePatternResolver;
+	private @Nullable ResourcePatternResolver resourcePatternResolver;
 
-	@Nullable
-	private MetadataReaderFactory metadataReaderFactory;
+	private @Nullable MetadataReaderFactory metadataReaderFactory;
 
-	@Nullable
-	private CandidateComponentsIndex componentsIndex;
+	private @Nullable CandidateComponentsIndex componentsIndex;
 
 
 	/**
@@ -255,8 +250,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Return the {@link BeanDefinitionRegistry} used by this scanner, if any.
 	 */
-	@Nullable
-	protected BeanDefinitionRegistry getRegistry() {
+	protected @Nullable BeanDefinitionRegistry getRegistry() {
 		return null;
 	}
 
@@ -368,8 +362,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @since 5.0
 	 * @see #indexSupportsIncludeFilter(TypeFilter)
 	 */
-	@Nullable
-	private String extractStereotype(TypeFilter filter) {
+	private @Nullable String extractStereotype(TypeFilter filter) {
 		if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
 			return annotationTypeFilter.getAnnotationType().getName();
 		}

@@ -28,10 +28,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.Assert;
@@ -117,8 +118,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	// SimpUserRegistry methods
 
 	@Override
-	@Nullable
-	public SimpUser getUser(String userName) {
+	public @Nullable SimpUser getUser(String userName) {
 		// Prefer remote registries due to cross-server SessionLookup
 		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
 			SimpUser user = registry.getUserMap().get(userName);
@@ -279,8 +279,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		private final Set<TransferSimpSession> sessions;
 
 		// Cross-server session lookup (for example, user connected to multiple servers)
-		@Nullable
-		private SessionLookup sessionLookup;
+		private @Nullable SessionLookup sessionLookup;
 
 		/**
 		 * Default constructor for JSON deserialization.
@@ -312,9 +311,8 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			return this.name;
 		}
 
-		@Nullable
 		@Override
-		public Principal getPrincipal() {
+		public @Nullable Principal getPrincipal() {
 			return null;
 		}
 
@@ -327,8 +325,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		@Nullable
-		public SimpSession getSession(String sessionId) {
+		public @Nullable SimpSession getSession(String sessionId) {
 			if (this.sessionLookup != null) {
 				return this.sessionLookup.findSessions(getName()).get(sessionId);
 			}

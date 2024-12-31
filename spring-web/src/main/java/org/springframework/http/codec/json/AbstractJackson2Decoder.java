@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,7 +50,6 @@ import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -257,8 +257,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return reader;
 	}
 
-	@Nullable
-	private Class<?> getContextClass(@Nullable ResolvableType elementType) {
+	private @Nullable Class<?> getContextClass(@Nullable ResolvableType elementType) {
 		MethodParameter param = (elementType != null ? getParameter(elementType) : null);
 		return (param != null ? param.getContainingClass() : null);
 	}
@@ -307,8 +306,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	// Jackson2CodecSupport
 
 	@Override
-	@Nullable
-	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
+	protected <A extends Annotation> @Nullable A getAnnotation(MethodParameter parameter, Class<A> annotType) {
 		return parameter.getParameterAnnotation(annotType);
 	}
 

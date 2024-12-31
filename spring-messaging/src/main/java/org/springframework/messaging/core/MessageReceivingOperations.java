@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -36,8 +37,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
-	@Nullable
-	Message<?> receive() throws MessagingException;
+	@Nullable Message<?> receive() throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination.
@@ -45,8 +45,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
-	@Nullable
-	Message<?> receive(D destination) throws MessagingException;
+	@Nullable Message<?> receive(D destination) throws MessagingException;
 
 	/**
 	 * Receive a message from a default destination and convert its payload to the
@@ -55,8 +54,7 @@ public interface MessageReceivingOperations<D> {
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T receiveAndConvert(Class<T> targetClass) throws MessagingException;
+	<T> @Nullable T receiveAndConvert(Class<T> targetClass) throws MessagingException;
 
 	/**
 	 * Receive a message from the given destination and convert its payload to the
@@ -66,7 +64,6 @@ public interface MessageReceivingOperations<D> {
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException;
+	<T> @Nullable T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException;
 
 }

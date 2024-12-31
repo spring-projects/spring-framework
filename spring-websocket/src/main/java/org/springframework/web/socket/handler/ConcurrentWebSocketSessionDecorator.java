@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -56,8 +56,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 
 	private final OverflowStrategy overflowStrategy;
 
-	@Nullable
-	private Consumer<WebSocketMessage<?>> preSendCallback;
+	private @Nullable Consumer<WebSocketMessage<?>> preSendCallback;
 
 
 	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<>();

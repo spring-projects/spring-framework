@@ -25,6 +25,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -33,7 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.lang.Nullable;
 
 /**
  * Common base class for plain JSON converters, for example, Gson and JSON-B.
@@ -55,8 +56,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	@Nullable
-	private String jsonPrefix;
+	private @Nullable String jsonPrefix;
 
 
 	public AbstractJsonHttpMessageConverter() {

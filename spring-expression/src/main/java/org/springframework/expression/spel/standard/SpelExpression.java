@@ -18,6 +18,8 @@ package org.springframework.expression.spel.standard;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -33,7 +35,6 @@ import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -63,12 +64,10 @@ public class SpelExpression implements Expression {
 	private final SpelParserConfiguration configuration;
 
 	// The default context is used if no override is supplied by the user
-	@Nullable
-	private EvaluationContext evaluationContext;
+	private @Nullable EvaluationContext evaluationContext;
 
 	// Holds the compiled form of the expression (if it has been compiled)
-	@Nullable
-	private volatile CompiledExpression compiledAst;
+	private volatile @Nullable CompiledExpression compiledAst;
 
 	// Count of many times as the expression been interpreted - can trigger compilation
 	// when certain limit reached
@@ -117,8 +116,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public Object getValue() throws EvaluationException {
+	public @Nullable Object getValue() throws EvaluationException {
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
 			try {
@@ -146,8 +144,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
+	public <T> @Nullable T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
 			try {
@@ -182,8 +179,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public Object getValue(@Nullable Object rootObject) throws EvaluationException {
+	public @Nullable Object getValue(@Nullable Object rootObject) throws EvaluationException {
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
 			try {
@@ -211,8 +207,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T getValue(@Nullable Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
+	public <T> @Nullable T getValue(@Nullable Object rootObject, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
 			try {
@@ -247,8 +242,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public Object getValue(EvaluationContext context) throws EvaluationException {
+	public @Nullable Object getValue(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
@@ -277,8 +271,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType) throws EvaluationException {
+	public <T> @Nullable T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
@@ -312,8 +305,7 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
+	public @Nullable Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
@@ -342,8 +334,7 @@ public class SpelExpression implements Expression {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> expectedResultType)
+	public <T> @Nullable T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext must not be null");
@@ -379,20 +370,17 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getValueType() throws EvaluationException {
+	public @Nullable Class<?> getValueType() throws EvaluationException {
 		return getValueType(getEvaluationContext());
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getValueType(@Nullable Object rootObject) throws EvaluationException {
+	public @Nullable Class<?> getValueType(@Nullable Object rootObject) throws EvaluationException {
 		return getValueType(getEvaluationContext(), rootObject);
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getValueType(EvaluationContext context) throws EvaluationException {
+	public @Nullable Class<?> getValueType(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext must not be null");
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(expressionState).getTypeDescriptor();
@@ -400,38 +388,33 @@ public class SpelExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getValueType(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
+	public @Nullable Class<?> getValueType(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(expressionState).getTypeDescriptor();
 		return (typeDescriptor != null ? typeDescriptor.getType() : null);
 	}
 
 	@Override
-	@Nullable
-	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
+	public @Nullable TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
 		return getValueTypeDescriptor(getEvaluationContext());
 	}
 
 	@Override
-	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(@Nullable Object rootObject) throws EvaluationException {
+	public @Nullable TypeDescriptor getValueTypeDescriptor(@Nullable Object rootObject) throws EvaluationException {
 		ExpressionState expressionState =
 				new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), this.configuration);
 		return this.ast.getValueInternal(expressionState).getTypeDescriptor();
 	}
 
 	@Override
-	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
+	public @Nullable TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "EvaluationContext must not be null");
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
 		return this.ast.getValueInternal(expressionState).getTypeDescriptor();
 	}
 
 	@Override
-	@Nullable
-	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, @Nullable Object rootObject)
+	public @Nullable TypeDescriptor getValueTypeDescriptor(EvaluationContext context, @Nullable Object rootObject)
 			throws EvaluationException {
 
 		Assert.notNull(context, "EvaluationContext must not be null");

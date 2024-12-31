@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.lang.model.element.Modifier;
 
 import org.assertj.core.api.AbstractStringAssert;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedFiles.FileHandler;
@@ -34,7 +35,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.lang.Nullable;
 import org.springframework.util.function.ThrowingConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -226,11 +226,9 @@ class GeneratedFilesTests {
 
 	static class TestGeneratedFiles implements GeneratedFiles {
 
-		@Nullable
-		private Kind kind;
+		private @Nullable Kind kind;
 
-		@Nullable
-		private String path;
+		private @Nullable String path;
 
 		private TestFileHandler fileHandler = new TestFileHandler();
 
@@ -256,8 +254,7 @@ class GeneratedFilesTests {
 
 	private static class GeneratedFileAssert extends AbstractStringAssert<GeneratedFileAssert> {
 
-		@Nullable
-		private final Boolean override;
+		private final @Nullable Boolean override;
 
 		GeneratedFileAssert(InputStreamSource content, @Nullable Boolean override) throws IOException {
 			super(readSource(content), GeneratedFileAssert.class);
@@ -272,11 +269,9 @@ class GeneratedFilesTests {
 
 	private static class TestFileHandler extends FileHandler {
 
-		@Nullable
-		private InputStreamSource content;
+		private @Nullable InputStreamSource content;
 
-		@Nullable
-		private Boolean override;
+		private @Nullable Boolean override;
 
 		TestFileHandler(@Nullable InputStreamSource content) {
 			super(content != null, () -> content);

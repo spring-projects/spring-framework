@@ -20,11 +20,11 @@ import jakarta.resource.ResourceException;
 import jakarta.resource.spi.ActivationSpec;
 import jakarta.resource.spi.ResourceAdapter;
 import jakarta.resource.spi.endpoint.MessageEndpointFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -152,14 +152,11 @@ import org.springframework.util.Assert;
  */
 public class GenericMessageEndpointManager implements SmartLifecycle, InitializingBean, DisposableBean {
 
-	@Nullable
-	private ResourceAdapter resourceAdapter;
+	private @Nullable ResourceAdapter resourceAdapter;
 
-	@Nullable
-	private MessageEndpointFactory messageEndpointFactory;
+	private @Nullable MessageEndpointFactory messageEndpointFactory;
 
-	@Nullable
-	private ActivationSpec activationSpec;
+	private @Nullable ActivationSpec activationSpec;
 
 	private boolean autoStartup = true;
 
@@ -180,8 +177,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Return the JCA ResourceAdapter to manage endpoints for.
 	 */
-	@Nullable
-	public ResourceAdapter getResourceAdapter() {
+	public @Nullable ResourceAdapter getResourceAdapter() {
 		return this.resourceAdapter;
 	}
 
@@ -200,8 +196,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Return the JCA MessageEndpointFactory to activate.
 	 */
-	@Nullable
-	public MessageEndpointFactory getMessageEndpointFactory() {
+	public @Nullable MessageEndpointFactory getMessageEndpointFactory() {
 		return this.messageEndpointFactory;
 	}
 
@@ -217,8 +212,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Return the JCA ActivationSpec to use for activating the endpoint.
 	 */
-	@Nullable
-	public ActivationSpec getActivationSpec() {
+	public @Nullable ActivationSpec getActivationSpec() {
 		return this.activationSpec;
 	}
 

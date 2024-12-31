@@ -29,6 +29,7 @@ import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.AccessControl.Visibility;
@@ -54,7 +55,6 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.ThrowingSupplier;
 

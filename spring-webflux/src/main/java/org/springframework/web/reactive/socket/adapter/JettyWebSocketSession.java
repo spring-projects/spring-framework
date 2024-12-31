@@ -26,6 +26,7 @@ import org.eclipse.jetty.util.IteratingCallback;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -34,7 +35,6 @@ import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
@@ -62,18 +62,16 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private boolean awaitingMessage = false;
 
-	@Nullable
-	private FluxSink<WebSocketMessage> sink;
+	private @Nullable FluxSink<WebSocketMessage> sink;
 
-	@Nullable
-	private final Sinks.Empty<Void> handlerCompletionSink;
+	private final Sinks.@Nullable Empty<Void> handlerCompletionSink;
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
 		this(session, info, factory, null);
 	}
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			@Nullable Sinks.Empty<Void> completionSink) {
+			Sinks.@Nullable Empty<Void> completionSink) {
 
 		super(session, ObjectUtils.getIdentityHexString(session), info, factory);
 		this.handlerCompletionSink = completionSink;

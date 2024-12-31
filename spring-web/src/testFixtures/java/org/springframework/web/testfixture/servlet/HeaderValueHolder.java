@@ -21,7 +21,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -63,13 +64,11 @@ class HeaderValueHolder {
 		return this.values.stream().map(Object::toString).toList();
 	}
 
-	@Nullable
-	Object getValue() {
+	@Nullable Object getValue() {
 		return (!this.values.isEmpty() ? this.values.get(0) : null);
 	}
 
-	@Nullable
-	String getStringValue() {
+	@Nullable String getStringValue() {
 		return (!this.values.isEmpty() ? String.valueOf(this.values.get(0)) : null);
 	}
 

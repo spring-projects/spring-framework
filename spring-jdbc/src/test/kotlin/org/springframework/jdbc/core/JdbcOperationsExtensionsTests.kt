@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.core
 
-import java.sql.*
-
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.sql.JDBCType
+import java.sql.ResultSet
 
 /**
  * Mock object based tests for [JdbcOperations] Kotlin extensions
@@ -54,7 +54,7 @@ class JdbcOperationsExtensionsTests {
 	fun `queryForObject with nullable RowMapper-like function`() {
 		every { template.queryForObject(sql, any<RowMapper<Int>>(), 3) } returns null
 		assertThat(template.queryForObject<Int?>(sql, 3) { _, _ -> null }).isNull()
-		verify { template.queryForObject(eq(sql), any<RowMapper<Int?>>(), eq(3)) }
+		verify { template.queryForObject(eq(sql), any<RowMapper<Int>>(), eq(3)) }
 	}
 
 	@Test
@@ -115,9 +115,9 @@ class JdbcOperationsExtensionsTests {
 
 	@Test  // gh-22682
 	fun `query with nullable ResultSetExtractor-like function`() {
-		every { template.query(eq(sql), any<ResultSetExtractor<Int?>>(), eq(3)) } returns null
+		every { template.query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3)) } returns null
 		assertThat(template.query<Int?>(sql, 3) { _ -> null }).isNull()
-		verify { template.query(eq(sql), any<ResultSetExtractor<Int?>>(), eq(3)) }
+		verify { template.query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3)) }
 	}
 
 	@Suppress("RemoveExplicitTypeArguments")

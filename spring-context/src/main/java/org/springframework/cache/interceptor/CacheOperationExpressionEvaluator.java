@@ -21,12 +21,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
-import org.springframework.lang.Nullable;
 
 /**
  * Utility class handling the SpEL expression parsing.
@@ -85,7 +86,7 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 	 * @return the evaluation context
 	 */
 	public EvaluationContext createEvaluationContext(Collection<? extends Cache> caches,
-			Method method, Object[] args, Object target, Class<?> targetClass, Method targetMethod,
+			Method method, @Nullable Object[] args, Object target, Class<?> targetClass, Method targetMethod,
 			@Nullable Object result) {
 
 		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(
@@ -101,8 +102,7 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 		return evaluationContext;
 	}
 
-	@Nullable
-	public Object key(String keyExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+	public @Nullable Object key(String keyExpression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
 		return getExpression(this.keyCache, methodKey, keyExpression).getValue(evalContext);
 	}
 

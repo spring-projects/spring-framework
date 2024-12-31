@@ -24,8 +24,9 @@ import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.MutableEntry;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.support.AbstractValueAdaptingCache;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -79,15 +80,13 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	protected Object lookup(Object key) {
+	protected @Nullable Object lookup(Object key) {
 		return this.cache.get(key);
 	}
 
 	@Override
-	@Nullable
 	@SuppressWarnings("unchecked")
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	public <T> @Nullable T get(Object key, Callable<T> valueLoader) {
 		try {
 			return (T) this.cache.invoke(key, this.valueLoaderEntryProcessor, valueLoader);
 		}
@@ -102,8 +101,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
+	public @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Object previous = this.cache.invoke(key, PutIfAbsentEntryProcessor.INSTANCE, toStoreValue(value));
 		return (previous != null ? toValueWrapper(previous) : null);
 	}
@@ -136,8 +134,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 		private static final PutIfAbsentEntryProcessor INSTANCE = new PutIfAbsentEntryProcessor();
 
 		@Override
-		@Nullable
-		public Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
+		public @Nullable Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
 			Object existingValue = entry.getValue();
 			if (existingValue == null) {
 				entry.setValue(arguments[0]);
@@ -161,9 +158,8 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 		}
 
 		@Override
-		@Nullable
 		@SuppressWarnings("unchecked")
-		public Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
+		public @Nullable Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
 			Callable<Object> valueLoader = (Callable<Object>) arguments[0];
 			if (entry.exists()) {
 				return this.fromStoreValue.apply(entry.getValue());

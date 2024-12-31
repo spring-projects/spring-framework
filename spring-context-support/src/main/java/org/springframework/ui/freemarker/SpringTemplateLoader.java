@@ -23,10 +23,10 @@ import java.io.Reader;
 import freemarker.cache.TemplateLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * FreeMarker {@link TemplateLoader} adapter that loads template files via a
@@ -68,8 +68,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 
 
 	@Override
-	@Nullable
-	public Object findTemplateSource(String name) throws IOException {
+	public @Nullable Object findTemplateSource(String name) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for FreeMarker template with name [" + name + "]");
 		}

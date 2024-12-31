@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.StringJoiner;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -34,7 +36,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectionHelper;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -62,8 +63,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 	// Captures the most recently used method for the function invocation *if* the method
 	// can safely be used for compilation (i.e. no argument conversion is going on)
-	@Nullable
-	private volatile Method method;
+	private volatile @Nullable Method method;
 
 
 	public FunctionReference(String functionName, int startPos, int endPos, SpelNodeImpl... arguments) {
@@ -229,8 +229,9 @@ public class FunctionReference extends SpelNodeImpl {
 		ReflectionHelper.convertAllMethodHandleArguments(converter, functionArgs, methodHandle, varArgPosition);
 
 		if (isSuspectedVarargs) {
-			if (declaredParamCount == 1) {
-				// We only repackage the varargs if it is the ONLY argument -- for example,
+			if (declaredParamCount == 1 && !methodHandle.isVarargsCollector()) {
+				// We only repackage the arguments if the MethodHandle accepts a single
+				// argument AND the MethodHandle is not a "varargs collector" -- for example,
 				// when we are dealing with a bound MethodHandle.
 				functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
 						methodHandle.type().parameterArray(), functionArgs);

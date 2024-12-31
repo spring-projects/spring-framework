@@ -30,10 +30,10 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSchema;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
 import jakarta.xml.bind.annotation.XmlType;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -150,8 +150,7 @@ abstract class Jaxb2Helper {
 
 		private final Set<QName> names;
 
-		@Nullable
-		private List<XMLEvent> events;
+		private @Nullable List<XMLEvent> events;
 
 		private int elementDepth = 0;
 

@@ -20,8 +20,9 @@ import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.format.annotation.DurationFormat;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -61,7 +62,7 @@ public abstract class DurationFormatterUtils {
 	 * will default to ms)
 	 * @return a duration
 	 */
-	public static Duration parse(String value, DurationFormat.Style style, @Nullable DurationFormat.Unit unit) {
+	public static Duration parse(String value, DurationFormat.Style style, DurationFormat.@Nullable Unit unit) {
 		Assert.hasText(value, () -> "Value must not be empty");
 		return switch (style) {
 			case ISO8601 -> parseIso8601(value);
@@ -88,7 +89,7 @@ public abstract class DurationFormatterUtils {
 	 * to ms)
 	 * @return the printed result
 	 */
-	public static String print(Duration value, DurationFormat.Style style, @Nullable DurationFormat.Unit unit) {
+	public static String print(Duration value, DurationFormat.Style style, DurationFormat.@Nullable Unit unit) {
 		return switch (style) {
 			case ISO8601 -> value.toString();
 			case SIMPLE -> printSimple(value, unit);
@@ -116,7 +117,7 @@ public abstract class DurationFormatterUtils {
 	 * @throws IllegalArgumentException if the value is not a known style or cannot be
 	 * parsed
 	 */
-	public static Duration detectAndParse(String value, @Nullable DurationFormat.Unit unit) {
+	public static Duration detectAndParse(String value, DurationFormat.@Nullable Unit unit) {
 		return parse(value, detect(value), unit);
 	}
 
@@ -155,7 +156,7 @@ public abstract class DurationFormatterUtils {
 		}
 	}
 
-	private static Duration parseSimple(String text, @Nullable DurationFormat.Unit fallbackUnit) {
+	private static Duration parseSimple(String text, DurationFormat.@Nullable Unit fallbackUnit) {
 		try {
 			Matcher matcher = SIMPLE_PATTERN.matcher(text);
 			Assert.state(matcher.matches(), "Does not match simple duration pattern");
@@ -171,7 +172,7 @@ public abstract class DurationFormatterUtils {
 		}
 	}
 
-	private static String printSimple(Duration duration, @Nullable DurationFormat.Unit unit) {
+	private static String printSimple(Duration duration, DurationFormat.@Nullable Unit unit) {
 		unit = (unit == null ? DurationFormat.Unit.MILLIS : unit);
 		return unit.print(duration);
 	}

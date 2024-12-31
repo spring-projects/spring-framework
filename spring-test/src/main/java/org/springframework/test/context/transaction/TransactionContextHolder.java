@@ -16,8 +16,9 @@
 
 package org.springframework.test.context.transaction;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NamedInheritableThreadLocal;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link InheritableThreadLocal}-based holder for the current {@link TransactionContext}.
@@ -39,13 +40,11 @@ final class TransactionContextHolder {
 		currentTransactionContext.set(transactionContext);
 	}
 
-	@Nullable
-	static TransactionContext getCurrentTransactionContext() {
+	static @Nullable TransactionContext getCurrentTransactionContext() {
 		return currentTransactionContext.get();
 	}
 
-	@Nullable
-	static TransactionContext removeCurrentTransactionContext() {
+	static @Nullable TransactionContext removeCurrentTransactionContext() {
 		TransactionContext transactionContext = currentTransactionContext.get();
 		currentTransactionContext.remove();
 		return transactionContext;

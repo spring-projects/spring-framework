@@ -4,9 +4,7 @@
  * and {@link org.springframework.cache.Cache Cache} implementation for
  * use in a Spring context, using a JSR-107 compliant cache provider.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.cache.jcache;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

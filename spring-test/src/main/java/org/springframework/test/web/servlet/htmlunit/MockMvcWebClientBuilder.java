@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import org.htmlunit.WebClient;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
@@ -43,8 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<MockMvcWebClientBuilder> {
 
-	@Nullable
-	private WebClient webClient;
+	private @Nullable WebClient webClient;
 
 
 	protected MockMvcWebClientBuilder(MockMvc mockMvc) {

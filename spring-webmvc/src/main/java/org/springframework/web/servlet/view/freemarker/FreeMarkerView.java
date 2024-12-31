@@ -48,13 +48,13 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
@@ -107,17 +107,13 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class FreeMarkerView extends AbstractTemplateView {
 
-	@Nullable
-	private String encoding;
+	private @Nullable String encoding;
 
-	@Nullable
-	private Configuration configuration;
+	private @Nullable Configuration configuration;
 
-	@Nullable
-	private TaglibFactory taglibFactory;
+	private @Nullable TaglibFactory taglibFactory;
 
-	@Nullable
-	private ServletContextHashModel servletContextHashModel;
+	private @Nullable ServletContextHashModel servletContextHashModel;
 
 
 	/**
@@ -162,8 +158,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * determine the encoding.
 	 * @see #setEncoding(String)
 	 */
-	@Nullable
-	protected String getEncoding() {
+	protected @Nullable String getEncoding() {
 		return this.encoding;
 	}
 
@@ -183,8 +178,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	/**
 	 * Return the FreeMarker {@link Configuration} used by this view.
 	 */
-	@Nullable
-	protected Configuration getConfiguration() {
+	protected @Nullable Configuration getConfiguration() {
 		return this.configuration;
 	}
 
@@ -469,20 +463,17 @@ public class FreeMarkerView extends AbstractTemplateView {
 	private class DelegatingServletConfig implements ServletConfig {
 
 		@Override
-		@Nullable
-		public String getServletName() {
+		public @Nullable String getServletName() {
 			return FreeMarkerView.this.getBeanName();
 		}
 
 		@Override
-		@Nullable
-		public ServletContext getServletContext() {
+		public @Nullable ServletContext getServletContext() {
 			return FreeMarkerView.this.getServletContext();
 		}
 
 		@Override
-		@Nullable
-		public String getInitParameter(String paramName) {
+		public @Nullable String getInitParameter(String paramName) {
 			return null;
 		}
 

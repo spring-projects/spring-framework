@@ -19,8 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A contract for inspecting and potentially modifying request data values such
@@ -64,8 +63,7 @@ public interface RequestDataValueProcessor {
 	 * @param request the current request
 	 * @return additional hidden form fields to be added, or {@code null} if none
 	 */
-	@Nullable
-	Map<String, String> getExtraHiddenFields(HttpServletRequest request);
+	@Nullable Map<String, String> getExtraHiddenFields(HttpServletRequest request);
 
 	/**
 	 * Invoked when a URL is about to be rendered or redirected to.

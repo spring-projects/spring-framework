@@ -21,10 +21,10 @@ import java.util.TimeZone;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.servlet.LocaleResolver} implementation
@@ -83,13 +83,11 @@ public class FixedLocaleResolver extends AbstractLocaleContextResolver {
 	public LocaleContext resolveLocaleContext(HttpServletRequest request) {
 		return new TimeZoneAwareLocaleContext() {
 			@Override
-			@Nullable
-			public Locale getLocale() {
+			public @Nullable Locale getLocale() {
 				return getDefaultLocale();
 			}
 			@Override
-			@Nullable
-			public TimeZone getTimeZone() {
+			public @Nullable TimeZone getTimeZone() {
 				return getDefaultTimeZone();
 			}
 		};

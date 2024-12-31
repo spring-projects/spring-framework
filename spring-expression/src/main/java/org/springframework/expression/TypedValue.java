@@ -16,8 +16,9 @@
 
 package org.springframework.expression;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -38,11 +39,9 @@ public class TypedValue {
 	public static final TypedValue NULL = new TypedValue(null);
 
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
-	@Nullable
-	private TypeDescriptor typeDescriptor;
+	private @Nullable TypeDescriptor typeDescriptor;
 
 
 	/**
@@ -67,13 +66,11 @@ public class TypedValue {
 	}
 
 
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 
-	@Nullable
-	public TypeDescriptor getTypeDescriptor() {
+	public @Nullable TypeDescriptor getTypeDescriptor() {
 		if (this.typeDescriptor == null && this.value != null) {
 			this.typeDescriptor = TypeDescriptor.forObject(this.value);
 		}

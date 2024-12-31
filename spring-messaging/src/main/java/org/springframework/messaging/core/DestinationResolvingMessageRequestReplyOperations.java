@@ -18,7 +18,8 @@ package org.springframework.messaging.core;
 
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -42,8 +43,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
-	@Nullable
-	Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException;
+	@Nullable Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException;
 
 	/**
 	 * Resolve the given destination name, convert the payload request Object
@@ -57,8 +57,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
+	<T> @Nullable T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass)
 			throws MessagingException;
 
 	/**
@@ -74,8 +73,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request,
+	<T> @Nullable T convertSendAndReceive(String destinationName, Object request,
 			@Nullable Map<String, Object> headers, Class<T> targetClass) throws MessagingException;
 
 	/**
@@ -92,8 +90,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
+	<T> @Nullable T convertSendAndReceive(String destinationName, Object request, Class<T> targetClass,
 			@Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 	/**
@@ -111,8 +108,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * @return the converted payload of the reply message, possibly {@code null} if
 	 * the message could not be received, for example due to a timeout
 	 */
-	@Nullable
-	<T> T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers,
+	<T> @Nullable T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers,
 			Class<T> targetClass, @Nullable MessagePostProcessor requestPostProcessor) throws MessagingException;
 
 }

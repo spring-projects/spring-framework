@@ -27,8 +27,9 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.oxm.Marshaller;
@@ -51,11 +52,9 @@ import org.springframework.util.MimeType;
  */
 public class MarshallingMessageConverter extends AbstractMessageConverter {
 
-	@Nullable
-	private Marshaller marshaller;
+	private @Nullable Marshaller marshaller;
 
-	@Nullable
-	private Unmarshaller unmarshaller;
+	private @Nullable Unmarshaller unmarshaller;
 
 
 	/**
@@ -102,8 +101,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	/**
 	 * Return the configured Marshaller.
 	 */
-	@Nullable
-	public Marshaller getMarshaller() {
+	public @Nullable Marshaller getMarshaller() {
 		return this.marshaller;
 	}
 
@@ -117,8 +115,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	/**
 	 * Return the configured unmarshaller.
 	 */
-	@Nullable
-	public Unmarshaller getUnmarshaller() {
+	public @Nullable Unmarshaller getUnmarshaller() {
 		return this.unmarshaller;
 	}
 
@@ -142,8 +139,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	@Nullable
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	protected @Nullable Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		Assert.state(this.unmarshaller != null, "Property 'unmarshaller' is required");
 		try {
 			Source source = getSource(message.getPayload());
@@ -168,8 +164,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
+	protected @Nullable Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
 			@Nullable Object conversionHint) {
 
 		Assert.state(this.marshaller != null, "Property 'marshaller' is required");

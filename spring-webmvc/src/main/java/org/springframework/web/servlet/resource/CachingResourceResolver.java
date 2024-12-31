@@ -24,12 +24,12 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -107,8 +107,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	@Nullable
-	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
+	protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		String key = computeKey(request, requestPath);
@@ -139,8 +138,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		return RESOLVED_RESOURCE_CACHE_KEY_PREFIX + requestPath;
 	}
 
-	@Nullable
-	private String getContentCodingKey(HttpServletRequest request) {
+	private @Nullable String getContentCodingKey(HttpServletRequest request) {
 		String header = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
 		if (!StringUtils.hasText(header)) {
 			return null;
@@ -156,8 +154,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	@Nullable
-	protected String resolveUrlPathInternal(String resourceUrlPath,
+	protected @Nullable String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		String key = RESOLVED_URL_PATH_CACHE_KEY_PREFIX + resourceUrlPath;

@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -33,7 +34,6 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -65,18 +65,15 @@ import org.springframework.util.ClassUtils;
 public abstract class AbstractJmsListeningContainer extends JmsDestinationAccessor
 		implements BeanNameAware, DisposableBean, SmartLifecycle {
 
-	@Nullable
-	private String clientId;
+	private @Nullable String clientId;
 
 	private boolean autoStartup = true;
 
 	private int phase = DEFAULT_PHASE;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private Connection sharedConnection;
+	private @Nullable Connection sharedConnection;
 
 	private boolean sharedConnectionStarted = false;
 
@@ -110,8 +107,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the JMS client ID for the shared Connection created and used
 	 * by this container, if any.
 	 */
-	@Nullable
-	public String getClientId() {
+	public @Nullable String getClientId() {
 		return this.clientId;
 	}
 
@@ -158,8 +154,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the bean name that this listener container has been assigned
 	 * in its containing bean factory, if any.
 	 */
-	@Nullable
-	protected final String getBeanName() {
+	protected final @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

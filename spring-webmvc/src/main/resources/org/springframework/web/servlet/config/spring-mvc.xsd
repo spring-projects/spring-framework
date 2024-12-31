@@ -31,51 +31,6 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
-						<xsd:attribute name="suffix-pattern" type="xsd:boolean">
-							<xsd:annotation>
-								<xsd:documentation><![CDATA[
-	Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
-	a method mapped to "/users" also matches to "/users.*".
-
-	In 5.2.4, suffix pattern matching was deprecated in order to discourage use of path
-	extensions for request mapping and for content negotiation (see deprecation notes on
-	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping and on
-	org.springframework.web.accept.ContentNegotiationManagerFactoryBean and
-	also see https://github.com/spring-projects/spring-framework/issues/24179.
-
-	The default value is true but in 5.3 it changes to false.
-								]]></xsd:documentation>
-							</xsd:annotation>
-						</xsd:attribute>
-						<xsd:attribute name="trailing-slash" type="xsd:boolean">
-							<xsd:annotation>
-								<xsd:documentation><![CDATA[
-	Whether to match to URLs irrespective of the presence of a trailing slash.
-	If enabled a method mapped to "/users" also matches to "/users/".
-
-	The default was changed in 6.0 from true to false in order to support the
-	deprecation of the property.
-										]]></xsd:documentation>
-							</xsd:annotation>
-						</xsd:attribute>
-						<xsd:attribute name="registered-suffixes-only" type="xsd:boolean">
-							<xsd:annotation>
-								<xsd:documentation><![CDATA[
-	Whether suffix pattern matching should work only against path extensions
-	explicitly registered when you configure content negotiation.
-	This is generally recommended to reduce ambiguity and to
-	avoid issues such as when a "." appears in the path for other reasons.
-
-	In 5.2.4, suffix pattern matching was deprecated in order to discourage use of path
-	extensions for request mapping and for content negotiation (see deprecation notes on
-	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping and on
-	org.springframework.web.accept.ContentNegotiationManagerFactoryBean and
-	also see https://github.com/spring-projects/spring-framework/issues/24179.
-
-	The default value is false.
-								]]></xsd:documentation>
-							</xsd:annotation>
-						</xsd:attribute>
 						<xsd:attribute name="path-helper" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
@@ -89,7 +44,14 @@
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	The bean name of the PathMatcher implementation to use for matching URL paths against registered URL patterns.
-	Default is AntPathMatcher.
+	If no bean is provided, the PathPatternParser will be used instead.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="pattern-parser" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The bean name of the PathPatternParser instance to use for matching URL paths against registered URL patterns.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

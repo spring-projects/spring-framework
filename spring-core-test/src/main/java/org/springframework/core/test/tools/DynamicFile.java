@@ -19,7 +19,8 @@ package org.springframework.core.test.tools;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**

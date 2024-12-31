@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -29,8 +30,7 @@ public class BeanExpressionContext {
 
 	private final ConfigurableBeanFactory beanFactory;
 
-	@Nullable
-	private final Scope scope;
+	private final @Nullable Scope scope;
 
 
 	public BeanExpressionContext(ConfigurableBeanFactory beanFactory, @Nullable Scope scope) {
@@ -43,8 +43,7 @@ public class BeanExpressionContext {
 		return this.beanFactory;
 	}
 
-	@Nullable
-	public final Scope getScope() {
+	public final @Nullable Scope getScope() {
 		return this.scope;
 	}
 
@@ -54,8 +53,7 @@ public class BeanExpressionContext {
 				(this.scope != null && this.scope.resolveContextualObject(key) != null));
 	}
 
-	@Nullable
-	public Object getObject(String key) {
+	public @Nullable Object getObject(String key) {
 		if (this.beanFactory.containsBean(key)) {
 			return this.beanFactory.getBean(key);
 		}

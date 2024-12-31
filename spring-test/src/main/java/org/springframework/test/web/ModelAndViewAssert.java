@@ -109,7 +109,7 @@ public abstract class ModelAndViewAssert {
 	 * @param mav the ModelAndView to test against (never {@code null})
 	 * @param expectedModel the expected model
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static void assertModelAttributeValues(ModelAndView mav, Map<String, Object> expectedModel) {
 		Map<String, Object> model = mav.getModel();
 

@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,6 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -60,8 +60,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final DataBufferFactory dataBufferFactory;
 
-	@Nullable
-	private HttpStatusCode statusCode;
+	private @Nullable HttpStatusCode statusCode;
 
 	private final HttpHeaders headers;
 
@@ -71,8 +70,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
 
-	@Nullable
-	private HttpHeaders readOnlyHeaders;
+	private @Nullable HttpHeaders readOnlyHeaders;
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
@@ -105,8 +103,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	@Nullable
-	public HttpStatusCode getStatusCode() {
+	public @Nullable HttpStatusCode getStatusCode() {
 		return this.statusCode;
 	}
 

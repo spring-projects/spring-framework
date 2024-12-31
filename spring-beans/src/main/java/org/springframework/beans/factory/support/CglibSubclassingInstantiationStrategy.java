@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +37,6 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -241,8 +241,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		}
 
 		@Override
-		@Nullable
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
+		public @Nullable Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 			// Cast is safe, as CallbackFilter filters are used selectively.
 			LookupOverride lo = (LookupOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
 			Assert.state(lo != null, "LookupOverride not found");
@@ -276,9 +275,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			this.owner = owner;
 		}
 
-		@Nullable
 		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
+		public @Nullable Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 			ReplaceOverride ro = (ReplaceOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
 			Assert.state(ro != null, "ReplaceOverride not found");
 			// TODO could cache if a singleton for minor performance optimization
@@ -286,8 +284,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			return processReturnType(method, mr.reimplement(obj, method, args));
 		}
 
-		@Nullable
-		private <T> T processReturnType(Method method, @Nullable T returnValue) {
+		private <T> @Nullable T processReturnType(Method method, @Nullable T returnValue) {
 			Class<?> returnType = method.getReturnType();
 			if (returnValue == null && returnType != void.class && returnType.isPrimitive()) {
 				throw new IllegalStateException(

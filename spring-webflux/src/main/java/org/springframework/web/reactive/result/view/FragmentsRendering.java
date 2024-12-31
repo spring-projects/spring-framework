@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -27,7 +28,6 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,8 +50,7 @@ public interface FragmentsRendering {
 	/**
 	 * Return the HTTP status to set the response to.
 	 */
-	@Nullable
-	HttpStatusCode status();
+	@Nullable HttpStatusCode status();
 
 	/**
 	 * Return headers to add to the response.

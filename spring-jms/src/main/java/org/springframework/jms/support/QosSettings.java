@@ -17,8 +17,7 @@
 package org.springframework.jms.support;
 
 import jakarta.jms.Message;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Gather the Quality-of-Service settings that can be used when sending a message.

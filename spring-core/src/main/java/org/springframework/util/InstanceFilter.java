@@ -19,7 +19,7 @@ package org.springframework.util;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A simple instance filter that checks if a given instance match based on

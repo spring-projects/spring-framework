@@ -24,9 +24,9 @@ import jakarta.jms.QueueConnection;
 import jakarta.jms.QueueConnectionFactory;
 import jakarta.jms.TopicConnection;
 import jakarta.jms.TopicConnectionFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -60,8 +60,7 @@ import org.springframework.util.Assert;
 public class DelegatingConnectionFactory
 		implements SmartConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean {
 
-	@Nullable
-	private ConnectionFactory targetConnectionFactory;
+	private @Nullable ConnectionFactory targetConnectionFactory;
 
 	private boolean shouldStopConnections = false;
 
@@ -76,8 +75,7 @@ public class DelegatingConnectionFactory
 	/**
 	 * Return the target ConnectionFactory that this ConnectionFactory delegates to.
 	 */
-	@Nullable
-	public ConnectionFactory getTargetConnectionFactory() {
+	public @Nullable ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
 	}
 

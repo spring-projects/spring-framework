@@ -16,7 +16,7 @@
 
 package org.springframework.dao;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception to be thrown on a query timeout. This could have different causes depending on

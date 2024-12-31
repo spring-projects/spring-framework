@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.quartz.Calendar;
 import org.quartz.JobDetail;
 import org.quartz.JobListener;
@@ -38,7 +39,6 @@ import org.quartz.xml.XMLSchedulingDataProcessor;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -63,32 +63,23 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	private boolean overwriteExistingJobs = false;
 
-	@Nullable
-	private String[] jobSchedulingDataLocations;
+	private String @Nullable [] jobSchedulingDataLocations;
 
-	@Nullable
-	private List<JobDetail> jobDetails;
+	private @Nullable List<JobDetail> jobDetails;
 
-	@Nullable
-	private Map<String, Calendar> calendars;
+	private @Nullable Map<String, Calendar> calendars;
 
-	@Nullable
-	private List<Trigger> triggers;
+	private @Nullable List<Trigger> triggers;
 
-	@Nullable
-	private SchedulerListener[] schedulerListeners;
+	private SchedulerListener @Nullable [] schedulerListeners;
 
-	@Nullable
-	private JobListener[] globalJobListeners;
+	private JobListener @Nullable [] globalJobListeners;
 
-	@Nullable
-	private TriggerListener[] globalTriggerListeners;
+	private TriggerListener @Nullable [] globalTriggerListeners;
 
-	@Nullable
-	private PlatformTransactionManager transactionManager;
+	private @Nullable PlatformTransactionManager transactionManager;
 
-	@Nullable
-	protected ResourceLoader resourceLoader;
+	protected @Nullable ResourceLoader resourceLoader;
 
 
 	/**
@@ -203,7 +194,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	/**
 	 * Register jobs and triggers (within a transaction, if possible).
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
 		if (this.transactionManager != null) {

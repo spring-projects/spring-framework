@@ -18,12 +18,13 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
@@ -64,15 +65,12 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
-	@Nullable
-	private Boolean allowBeanDefinitionOverriding;
+	private @Nullable Boolean allowBeanDefinitionOverriding;
 
-	@Nullable
-	private Boolean allowCircularReferences;
+	private @Nullable Boolean allowCircularReferences;
 
 	/** Bean factory for this context. */
-	@Nullable
-	private volatile DefaultListableBeanFactory beanFactory;
+	private volatile @Nullable DefaultListableBeanFactory beanFactory;
 
 
 	/**

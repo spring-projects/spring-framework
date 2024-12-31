@@ -16,10 +16,11 @@
 
 package org.springframework.expression.spel.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
-import org.springframework.lang.Nullable;
 
 /**
  * Standard implementation of {@link OperatorOverloader}.

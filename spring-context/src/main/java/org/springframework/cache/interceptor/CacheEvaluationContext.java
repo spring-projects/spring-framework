@@ -20,9 +20,10 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.lang.Nullable;
 
 /**
  * Cache-specific evaluation context that adds method parameters as SpEL
@@ -47,7 +48,7 @@ class CacheEvaluationContext extends MethodBasedEvaluationContext {
 	private final Set<String> unavailableVariables = new HashSet<>(1);
 
 
-	CacheEvaluationContext(Object rootObject, Method method, Object[] arguments,
+	CacheEvaluationContext(Object rootObject, Method method, @Nullable Object[] arguments,
 			ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(rootObject, method, arguments, parameterNameDiscoverer);
@@ -70,8 +71,7 @@ class CacheEvaluationContext extends MethodBasedEvaluationContext {
 	 * Load the param information only when needed.
 	 */
 	@Override
-	@Nullable
-	public Object lookupVariable(String name) {
+	public @Nullable Object lookupVariable(String name) {
 		if (this.unavailableVariables.contains(name)) {
 			throw new VariableNotAvailableException(name);
 		}

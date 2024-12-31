@@ -19,6 +19,8 @@ package org.springframework.context.expression;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -36,7 +38,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -155,8 +156,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 
 	@Override
-	@Nullable
-	public Object evaluate(@Nullable String value, BeanExpressionContext beanExpressionContext) throws BeansException {
+	public @Nullable Object evaluate(@Nullable String value, BeanExpressionContext beanExpressionContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;
 		}

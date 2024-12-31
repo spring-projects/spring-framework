@@ -26,12 +26,12 @@ import jakarta.websocket.RemoteEndpoint;
 import jakarta.websocket.SendHandler;
 import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -52,7 +52,7 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 	}
 
 	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			@Nullable Sinks.Empty<Void> completionSink) {
+			Sinks.@Nullable Empty<Void> completionSink) {
 
 		super(session, session.getId(), info, factory, completionSink);
 	}

@@ -22,8 +22,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -46,8 +46,7 @@ import org.springframework.util.Assert;
  */
 public class CharacterEncodingFilter extends OncePerRequestFilter {
 
-	@Nullable
-	private String encoding;
+	private @Nullable String encoding;
 
 	private boolean forceRequestEncoding = false;
 
@@ -120,8 +119,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * Return the configured encoding for requests and/or responses.
 	 * @since 4.3
 	 */
-	@Nullable
-	public String getEncoding() {
+	public @Nullable String getEncoding() {
 		return this.encoding;
 	}
 

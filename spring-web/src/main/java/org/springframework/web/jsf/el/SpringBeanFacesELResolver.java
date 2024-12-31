@@ -21,8 +21,8 @@ import jakarta.el.ELException;
 import jakarta.el.ELResolver;
 import jakarta.el.PropertyNotWritableException;
 import jakarta.faces.context.FacesContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -69,8 +69,7 @@ import org.springframework.web.jsf.FacesContextUtils;
 public class SpringBeanFacesELResolver extends ELResolver {
 
 	@Override
-	@Nullable
-	public Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
 			WebApplicationContext wac = getWebApplicationContext(elContext);
@@ -83,8 +82,7 @@ public class SpringBeanFacesELResolver extends ELResolver {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
 			WebApplicationContext wac = getWebApplicationContext(elContext);

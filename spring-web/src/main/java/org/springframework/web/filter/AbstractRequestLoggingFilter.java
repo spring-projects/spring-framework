@@ -26,10 +26,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -99,8 +99,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private boolean includePayload = false;
 
-	@Nullable
-	private Predicate<String> headerPredicate;
+	private @Nullable Predicate<String> headerPredicate;
 
 	private int maxPayloadLength = DEFAULT_MAX_PAYLOAD_LENGTH;
 
@@ -198,8 +197,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * The configured {@link #setHeaderPredicate(Predicate) headerPredicate}.
 	 * @since 5.2
 	 */
-	@Nullable
-	protected Predicate<String> getHeaderPredicate() {
+	protected @Nullable Predicate<String> getHeaderPredicate() {
 		return this.headerPredicate;
 	}
 
@@ -378,8 +376,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * {@link #isIncludePayload()} returns true.
 	 * @since 5.0.3
 	 */
-	@Nullable
-	protected String getMessagePayload(HttpServletRequest request) {
+	protected @Nullable String getMessagePayload(HttpServletRequest request) {
 		ContentCachingRequestWrapper wrapper =
 				WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
 		if (wrapper != null) {

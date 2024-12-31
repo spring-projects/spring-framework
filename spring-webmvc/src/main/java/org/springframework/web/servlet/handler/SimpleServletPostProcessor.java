@@ -23,11 +23,11 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
@@ -70,11 +70,9 @@ public class SimpleServletPostProcessor implements
 
 	private boolean useSharedServletConfig = true;
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private ServletConfig servletConfig;
+	private @Nullable ServletConfig servletConfig;
 
 
 	/**
@@ -143,8 +141,7 @@ public class SimpleServletPostProcessor implements
 
 		private final String servletName;
 
-		@Nullable
-		private final ServletContext servletContext;
+		private final @Nullable ServletContext servletContext;
 
 		public DelegatingServletConfig(String servletName, @Nullable ServletContext servletContext) {
 			this.servletName = servletName;
@@ -157,14 +154,12 @@ public class SimpleServletPostProcessor implements
 		}
 
 		@Override
-		@Nullable
-		public ServletContext getServletContext() {
+		public @Nullable ServletContext getServletContext() {
 			return this.servletContext;
 		}
 
 		@Override
-		@Nullable
-		public String getInitParameter(String paramName) {
+		public @Nullable String getInitParameter(String paramName) {
 			return null;
 		}
 

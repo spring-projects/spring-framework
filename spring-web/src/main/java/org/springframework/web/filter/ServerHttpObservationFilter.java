@@ -30,13 +30,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.observation.DefaultServerRequestObservationConvention;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.http.server.observation.ServerRequestObservationConvention;
-import org.springframework.lang.Nullable;
 
 
 /**
@@ -160,13 +160,11 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		return observation;
 	}
 
-	@Nullable
-	static Throwable unwrapServletException(Throwable ex) {
+	static @Nullable Throwable unwrapServletException(Throwable ex) {
 		return (ex instanceof ServletException) ? ex.getCause() : ex;
 	}
 
-	@Nullable
-	static Throwable fetchException(ServletRequest request) {
+	static @Nullable Throwable fetchException(ServletRequest request) {
 		return (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
 	}
 

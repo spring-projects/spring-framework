@@ -16,8 +16,9 @@
 
 package org.springframework.messaging.handler;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a Spring-managed bean with cross-cutting functionality to be
@@ -40,8 +41,7 @@ public interface MessagingAdviceBean extends Ordered {
 	 * <p>If the bean type is a CGLIB-generated class, the original user-defined
 	 * class is returned.
 	 */
-	@Nullable
-	Class<?> getBeanType();
+	@Nullable Class<?> getBeanType();
 
 	/**
 	 * Return the advice bean instance, if necessary resolving a bean specified

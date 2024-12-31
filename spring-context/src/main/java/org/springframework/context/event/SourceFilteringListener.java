@@ -16,11 +16,12 @@
 
 package org.springframework.context.event;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.context.ApplicationListener} decorator that filters
@@ -38,8 +39,7 @@ public class SourceFilteringListener implements GenericApplicationListener {
 
 	private final Object source;
 
-	@Nullable
-	private GenericApplicationListener delegate;
+	private @Nullable GenericApplicationListener delegate;
 
 
 	/**

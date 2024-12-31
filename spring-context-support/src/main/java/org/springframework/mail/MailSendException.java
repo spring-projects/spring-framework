@@ -21,7 +21,8 @@ import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -36,8 +37,7 @@ public class MailSendException extends MailException {
 
 	private final transient Map<Object, Exception> failedMessages;
 
-	@Nullable
-	private final Exception[] messageExceptions;
+	private final Exception @Nullable [] messageExceptions;
 
 
 	/**
@@ -124,8 +124,7 @@ public class MailSendException extends MailException {
 
 
 	@Override
-	@Nullable
-	public String getMessage() {
+	public @Nullable String getMessage() {
 		if (ObjectUtils.isEmpty(this.messageExceptions)) {
 			return super.getMessage();
 		}

@@ -25,9 +25,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -85,19 +85,15 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  */
 public class DelegatingFilterProxy extends GenericFilterBean {
 
-	@Nullable
-	private String contextAttribute;
+	private @Nullable String contextAttribute;
 
-	@Nullable
-	private WebApplicationContext webApplicationContext;
+	private @Nullable WebApplicationContext webApplicationContext;
 
-	@Nullable
-	private String targetBeanName;
+	private @Nullable String targetBeanName;
 
 	private boolean targetFilterLifecycle = false;
 
-	@Nullable
-	private volatile Filter delegate;
+	private volatile @Nullable Filter delegate;
 
 	private final Lock delegateLock = new ReentrantLock();
 
@@ -182,8 +178,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * Return the name of the ServletContext attribute which should be used to retrieve the
 	 * {@link WebApplicationContext} from which to load the delegate {@link Filter} bean.
 	 */
-	@Nullable
-	public String getContextAttribute() {
+	public @Nullable String getContextAttribute() {
 		return this.contextAttribute;
 	}
 
@@ -200,8 +195,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	/**
 	 * Return the name of the target bean in the Spring application context.
 	 */
-	@Nullable
-	protected String getTargetBeanName() {
+	protected @Nullable String getTargetBeanName() {
 		return this.targetBeanName;
 	}
 
@@ -303,8 +297,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @see WebApplicationContextUtils#getWebApplicationContext(jakarta.servlet.ServletContext)
 	 * @see WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	@Nullable
-	protected WebApplicationContext findWebApplicationContext() {
+	protected @Nullable WebApplicationContext findWebApplicationContext() {
 		if (this.webApplicationContext != null) {
 			// The user has injected a context at construction time -> use it...
 			if (this.webApplicationContext instanceof ConfigurableApplicationContext cac && !cac.isActive()) {

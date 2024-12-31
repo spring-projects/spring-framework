@@ -18,8 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.BodyTagSupport;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The {@code <param>} tag collects name-value parameters and passes them to a
@@ -64,8 +63,7 @@ public class ParamTag extends BodyTagSupport {
 
 	private String name = "";
 
-	@Nullable
-	private String value;
+	private @Nullable String value;
 
 	private boolean valueSet;
 

@@ -18,10 +18,11 @@ package org.springframework.web.cors.reactive;
 
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -41,7 +42,7 @@ public abstract class CorsUtils {
 	 */
 	@SuppressWarnings("deprecation")
 	public static boolean isCorsRequest(ServerHttpRequest request) {
-		return request.getHeaders().containsKey(HttpHeaders.ORIGIN) && !isSameOrigin(request);
+		return request.getHeaders().containsHeader(HttpHeaders.ORIGIN) && !isSameOrigin(request);
 	}
 
 	/**
@@ -51,8 +52,8 @@ public abstract class CorsUtils {
 	public static boolean isPreFlightRequest(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		return (request.getMethod() == HttpMethod.OPTIONS
-				&& headers.containsKey(HttpHeaders.ORIGIN)
-				&& headers.containsKey(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD));
+				&& headers.containsHeader(HttpHeaders.ORIGIN)
+				&& headers.containsHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD));
 	}
 
 	/**

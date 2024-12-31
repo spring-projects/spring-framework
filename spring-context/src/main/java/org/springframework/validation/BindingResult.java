@@ -19,8 +19,9 @@ package org.springframework.validation;
 import java.beans.PropertyEditor;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.lang.Nullable;
 
 /**
  * General interface that represents binding results. Extends the
@@ -55,8 +56,7 @@ public interface BindingResult extends Errors {
 	 * Return the wrapped target object, which may be a bean, an object with
 	 * public fields, a Map - depending on the concrete binding strategy.
 	 */
-	@Nullable
-	Object getTarget();
+	@Nullable Object getTarget();
 
 	/**
 	 * Return a model Map for the obtained state, exposing a BindingResult
@@ -84,8 +84,7 @@ public interface BindingResult extends Errors {
 	 * @param field the field to check
 	 * @return the current value of the field in its raw form, or {@code null} if not known
 	 */
-	@Nullable
-	Object getRawFieldValue(String field);
+	@Nullable Object getRawFieldValue(String field);
 
 	/**
 	 * Find a custom property editor for the given type and property.
@@ -95,16 +94,14 @@ public interface BindingResult extends Errors {
 	 * is given but should be specified in any case for consistency checking)
 	 * @return the registered editor, or {@code null} if none
 	 */
-	@Nullable
-	PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType);
+	@Nullable PropertyEditor findEditor(@Nullable String field, @Nullable Class<?> valueType);
 
 	/**
 	 * Return the underlying PropertyEditorRegistry.
 	 * @return the PropertyEditorRegistry, or {@code null} if none
 	 * available for this BindingResult
 	 */
-	@Nullable
-	PropertyEditorRegistry getPropertyEditorRegistry();
+	@Nullable PropertyEditorRegistry getPropertyEditorRegistry();
 
 	/**
 	 * Resolve the given error code into message codes.

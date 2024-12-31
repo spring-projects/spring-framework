@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Set of method overrides, determining which, if any, methods on a
@@ -90,8 +90,7 @@ public class MethodOverrides {
 	 * @param method method to check for overrides for
 	 * @return the method override, or {@code null} if none
 	 */
-	@Nullable
-	public MethodOverride getOverride(Method method) {
+	public @Nullable MethodOverride getOverride(Method method) {
 		MethodOverride match = null;
 		for (MethodOverride candidate : this.overrides) {
 			if (candidate.matches(method)) {

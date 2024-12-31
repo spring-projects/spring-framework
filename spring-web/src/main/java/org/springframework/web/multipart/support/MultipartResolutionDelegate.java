@@ -23,10 +23,10 @@ import java.util.Locale;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -52,8 +52,7 @@ public final class MultipartResolutionDelegate {
 	}
 
 
-	@Nullable
-	public static MultipartRequest resolveMultipartRequest(NativeWebRequest webRequest) {
+	public static @Nullable MultipartRequest resolveMultipartRequest(NativeWebRequest webRequest) {
 		MultipartRequest multipartRequest = webRequest.getNativeRequest(MultipartRequest.class);
 		if (multipartRequest != null) {
 			return multipartRequest;
@@ -91,8 +90,7 @@ public final class MultipartResolutionDelegate {
 				(Part.class == paramType || isPartCollection(parameter) || isPartArray(parameter)));
 	}
 
-	@Nullable
-	public static Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
+	public static @Nullable Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
 			throws Exception {
 
 		MultipartHttpServletRequest multipartRequest =
@@ -169,8 +167,7 @@ public final class MultipartResolutionDelegate {
 		return (Part.class == methodParam.getNestedParameterType().componentType());
 	}
 
-	@Nullable
-	private static Class<?> getCollectionParameterType(MethodParameter methodParam) {
+	private static @Nullable Class<?> getCollectionParameterType(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType();
 		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
 			Class<?> valueType = ResolvableType.forMethodParameter(methodParam).asCollection().resolveGeneric();

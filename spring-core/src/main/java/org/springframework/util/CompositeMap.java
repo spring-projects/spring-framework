@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Composite map that combines two other maps.
@@ -42,11 +42,9 @@ final class CompositeMap<K, V> implements Map<K, V> {
 
 	private final Map<K,V> second;
 
-	@Nullable
-	private final BiFunction<K,V,V> putFunction;
+	private final @Nullable BiFunction<K,V,V> putFunction;
 
-	@Nullable
-	private final Consumer<Map<K, V>> putAllFunction;
+	private final @Nullable Consumer<Map<K, V>> putAllFunction;
 
 
 	CompositeMap(Map<K, V> first, Map<K, V> second) {
@@ -97,8 +95,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 	}
 
 	@Override
-	@Nullable
-	public V get(Object key) {
+	public @Nullable V get(Object key) {
 		V firstResult = this.first.get(key);
 		if (firstResult != null) {
 			return firstResult;
@@ -109,8 +106,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 	}
 
 	@Override
-	@Nullable
-	public V put(K key, V value) {
+	public @Nullable V put(K key, V value) {
 		if (this.putFunction == null) {
 			throw new UnsupportedOperationException();
 		}
@@ -120,8 +116,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 	}
 
 	@Override
-	@Nullable
-	public V remove(Object key) {
+	public @Nullable V remove(Object key) {
 		V firstResult = this.first.remove(key);
 		V secondResult = this.second.remove(key);
 		if (firstResult != null) {

@@ -16,7 +16,8 @@
 
 package org.springframework.test.json;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.test.json.JsonComparison.Result;
 
 /**

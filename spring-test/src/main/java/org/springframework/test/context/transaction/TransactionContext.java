@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -52,8 +52,7 @@ class TransactionContext {
 
 	private boolean flaggedForRollback;
 
-	@Nullable
-	private TransactionStatus transactionStatus;
+	private @Nullable TransactionStatus transactionStatus;
 
 	private final AtomicInteger transactionsStarted = new AtomicInteger();
 
@@ -69,8 +68,7 @@ class TransactionContext {
 	}
 
 
-	@Nullable
-	TransactionStatus getTransactionStatus() {
+	@Nullable TransactionStatus getTransactionStatus() {
 		return this.transactionStatus;
 	}
 

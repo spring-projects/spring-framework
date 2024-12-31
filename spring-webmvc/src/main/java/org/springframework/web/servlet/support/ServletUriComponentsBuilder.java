@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.support;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -44,8 +44,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
-	@Nullable
-	private String originalPath;
+	private @Nullable String originalPath;
 
 
 	/**
@@ -201,8 +200,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * @return the removed path extension for possible re-use, or {@code null}
 	 * @since 4.0
 	 */
-	@Nullable
-	public String removePathExtension() {
+	public @Nullable String removePathExtension() {
 		String extension = null;
 		if (this.originalPath != null) {
 			extension = UriUtils.extractFileExtension(this.originalPath);

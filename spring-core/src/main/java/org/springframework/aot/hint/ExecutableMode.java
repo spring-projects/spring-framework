@@ -18,7 +18,7 @@ package org.springframework.aot.hint;
 
 import java.lang.reflect.Executable;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represent the need of reflection for a given {@link Executable}.

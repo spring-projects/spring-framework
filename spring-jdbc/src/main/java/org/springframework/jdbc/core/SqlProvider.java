@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by objects that can provide SQL strings.
@@ -38,7 +38,6 @@ public interface SqlProvider {
 	 * typically the SQL used for creating statements.
 	 * @return the SQL string, or {@code null} if not available
 	 */
-	@Nullable
-	String getSql();
+	@Nullable String getSql();
 
 }

@@ -23,6 +23,7 @@ import jakarta.websocket.Decoder;
 import jakarta.websocket.EncodeException;
 import jakarta.websocket.Encoder;
 import jakarta.websocket.EndpointConfig;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ContextLoader;
 
@@ -124,8 +124,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * not using {@link ContextLoader}, this method should be overridden.
 	 * @return the {@link ApplicationContext} or {@code null}
 	 */
-	@Nullable
-	protected ApplicationContext getApplicationContext() {
+	protected @Nullable ApplicationContext getApplicationContext() {
 		return ContextLoader.getCurrentWebApplicationContext();
 	}
 
@@ -160,8 +159,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * @see jakarta.websocket.Encoder.Binary#encode(Object)
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public M encode(T object) throws EncodeException {
+	public @Nullable M encode(T object) throws EncodeException {
 		try {
 			return (M) getConversionService().convert(object, getType(), getMessageType());
 		}
@@ -186,8 +184,7 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * @see jakarta.websocket.Decoder.Binary#decode(ByteBuffer)
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public T decode(M message) throws DecodeException {
+	public @Nullable T decode(M message) throws DecodeException {
 		try {
 			return (T) getConversionService().convert(message, getMessageType(), getType());
 		}

@@ -24,7 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -148,8 +149,7 @@ public final class BridgeMethodResolver {
 	 * @param bridgeMethod the bridge method
 	 * @return the bridged method, or {@code null} if none found
 	 */
-	@Nullable
-	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
+	private static @Nullable Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
 		if (candidateMethods.isEmpty()) {
 			return null;
 		}
@@ -215,8 +215,7 @@ public final class BridgeMethodResolver {
 	 * matches that of the supplied bridge method.
 	 * @throws IllegalStateException if the generic declaration cannot be found
 	 */
-	@Nullable
-	private static Method findGenericDeclaration(Method bridgeMethod) {
+	private static @Nullable Method findGenericDeclaration(Method bridgeMethod) {
 		if (!bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
@@ -235,8 +234,7 @@ public final class BridgeMethodResolver {
 		return searchInterfaces(interfaces, bridgeMethod);
 	}
 
-	@Nullable
-	private static Method searchInterfaces(Class<?>[] interfaces, Method bridgeMethod) {
+	private static @Nullable Method searchInterfaces(Class<?>[] interfaces, Method bridgeMethod) {
 		for (Class<?> ifc : interfaces) {
 			Method method = searchForMatch(ifc, bridgeMethod);
 			if (method != null && !method.isBridge()) {
@@ -257,8 +255,7 @@ public final class BridgeMethodResolver {
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
 	 * otherwise {@code null} is returned.
 	 */
-	@Nullable
-	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
+	private static @Nullable Method searchForMatch(Class<?> type, Method bridgeMethod) {
 		try {
 			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 		}

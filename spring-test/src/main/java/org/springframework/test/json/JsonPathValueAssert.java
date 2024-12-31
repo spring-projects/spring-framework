@@ -17,8 +17,8 @@
 package org.springframework.test.json;
 
 import com.jayway.jsonpath.JsonPath;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.http.HttpMessageContentConverter;
 
 /**

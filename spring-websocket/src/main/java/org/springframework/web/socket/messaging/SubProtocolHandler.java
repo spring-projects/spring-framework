@@ -18,7 +18,8 @@ package org.springframework.web.socket.messaging;
 
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.web.socket.CloseStatus;
@@ -67,8 +68,7 @@ public interface SubProtocolHandler {
 	 * Resolve the session id from the given message or return {@code null}.
 	 * @param message the message to resolve the session id from
 	 */
-	@Nullable
-	String resolveSessionId(Message<?> message);
+	@Nullable String resolveSessionId(Message<?> message);
 
 	/**
 	 * Invoked after a {@link WebSocketSession} has started.

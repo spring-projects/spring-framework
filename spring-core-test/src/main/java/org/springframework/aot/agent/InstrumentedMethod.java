@@ -173,7 +173,6 @@ enum InstrumentedMethod {
 	/**
 	 * {@link Class#getField(String)}.
 	 */
-	@SuppressWarnings("NullAway")
 	CLASS_GETFIELD(Class.class, "getField", HintType.REFLECTION,
 			invocation -> {
 				Field field = invocation.getReturnValue();
@@ -181,7 +180,7 @@ enum InstrumentedMethod {
 					return runtimeHints -> false;
 				}
 				return reflection().onType(field.getDeclaringClass())
-						.or(reflection().onField(invocation.getReturnValue()));
+						.or(reflection().onField(field));
 			}),
 
 	/**

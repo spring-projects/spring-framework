@@ -23,8 +23,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * SPI interface that allows to plug in vendor-specific behavior
@@ -49,8 +48,7 @@ public interface JpaVendorAdapter {
 	 * excluding provider classes from temporary class overriding.
 	 * @since 2.5.2
 	 */
-	@Nullable
-	default String getPersistenceProviderRootPackage() {
+	default @Nullable String getPersistenceProviderRootPackage() {
 		return null;
 	}
 
@@ -99,8 +97,7 @@ public interface JpaVendorAdapter {
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * provider, or {@code null} if there is none.
 	 */
-	@Nullable
-	default JpaDialect getJpaDialect() {
+	default @Nullable JpaDialect getJpaDialect() {
 		return null;
 	}
 

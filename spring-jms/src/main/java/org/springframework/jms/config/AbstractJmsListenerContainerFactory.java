@@ -21,12 +21,12 @@ import jakarta.jms.ConnectionFactory;
 import jakarta.jms.ExceptionListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -42,53 +42,37 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private ConnectionFactory connectionFactory;
+	private @Nullable ConnectionFactory connectionFactory;
 
-	@Nullable
-	private DestinationResolver destinationResolver;
+	private @Nullable DestinationResolver destinationResolver;
 
-	@Nullable
-	private MessageConverter messageConverter;
+	private @Nullable MessageConverter messageConverter;
 
-	@Nullable
-	private ExceptionListener exceptionListener;
+	private @Nullable ExceptionListener exceptionListener;
 
-	@Nullable
-	private ErrorHandler errorHandler;
+	private @Nullable ErrorHandler errorHandler;
 
-	@Nullable
-	private Boolean sessionTransacted;
+	private @Nullable Boolean sessionTransacted;
 
-	@Nullable
-	private Integer sessionAcknowledgeMode;
+	private @Nullable Integer sessionAcknowledgeMode;
 
-	@Nullable
-	private Boolean pubSubDomain;
+	private @Nullable Boolean pubSubDomain;
 
-	@Nullable
-	private Boolean replyPubSubDomain;
+	private @Nullable Boolean replyPubSubDomain;
 
-	@Nullable
-	private QosSettings replyQosSettings;
+	private @Nullable QosSettings replyQosSettings;
 
-	@Nullable
-	private Boolean subscriptionDurable;
+	private @Nullable Boolean subscriptionDurable;
 
-	@Nullable
-	private Boolean subscriptionShared;
+	private @Nullable Boolean subscriptionShared;
 
-	@Nullable
-	private String clientId;
+	private @Nullable String clientId;
 
-	@Nullable
-	private Integer phase;
+	private @Nullable Integer phase;
 
-	@Nullable
-	private Boolean autoStartup;
+	private @Nullable Boolean autoStartup;
 
-	@Nullable
-	private ObservationRegistry observationRegistry;
+	private @Nullable ObservationRegistry observationRegistry;
 
 
 	/**

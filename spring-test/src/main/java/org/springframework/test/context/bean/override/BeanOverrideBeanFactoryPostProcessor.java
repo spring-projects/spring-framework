@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -39,7 +41,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -293,8 +294,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		this.beanOverrideRegistry.registerBeanOverrideHandler(handler, beanName);
 	}
 
-	@Nullable
-	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
+	private @Nullable String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
 			boolean requireExistingBean) {
 
 		Field field = handler.getField();
@@ -368,8 +368,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 * @return the name of the primary candidate, or {@code null} if none found
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#determinePrimaryCandidate(Map, Class)
 	 */
-	@Nullable
-	private static String determinePrimaryCandidate(
+	private static @Nullable String determinePrimaryCandidate(
 			ConfigurableListableBeanFactory beanFactory, Set<String> candidateBeanNames, Class<?> beanType) {
 
 		if (candidateBeanNames.isEmpty()) {

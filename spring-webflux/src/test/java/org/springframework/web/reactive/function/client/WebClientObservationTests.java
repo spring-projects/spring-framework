@@ -91,7 +91,7 @@ class WebClientObservationTests {
 
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
 				.hasLowCardinalityKeyValue("uri", "/base/resource/{id}");
-		assertThat(clientRequest.headers()).containsEntry("foo", Collections.singletonList("bar"));
+		assertThat(clientRequest.headers().hasHeaderValues("foo", Collections.singletonList("bar"))).isTrue();
 	}
 
 	@Test

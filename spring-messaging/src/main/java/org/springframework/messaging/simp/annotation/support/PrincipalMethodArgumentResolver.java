@@ -19,8 +19,9 @@ package org.springframework.messaging.simp.annotation.support;
 import java.security.Principal;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -41,8 +42,7 @@ public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentRes
 	}
 
 	@Override
-	@Nullable
-	public Object resolveArgument(MethodParameter parameter, Message<?> message){
+	public @Nullable Object resolveArgument(MethodParameter parameter, Message<?> message){
 		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
 		return parameter.isOptional() ? Optional.ofNullable(user) : user;
 	}

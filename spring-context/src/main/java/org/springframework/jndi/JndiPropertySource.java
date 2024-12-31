@@ -18,8 +18,9 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.env.PropertySource;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link PropertySource} implementation that reads properties from an underlying Spring
@@ -78,8 +79,7 @@ public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 	 * {@code null} and issues a DEBUG-level log statement with the exception message.
 	 */
 	@Override
-	@Nullable
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		if (getSource().isResourceRef() && name.indexOf(':') != -1) {
 			// We're in resource-ref (prefixing with "java:comp/env") mode. Let's not bother
 			// with property names with a colon it since they're probably just containing a

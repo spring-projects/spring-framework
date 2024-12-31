@@ -19,12 +19,13 @@ package org.springframework.web.server;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.ErrorResponse;
 
@@ -41,16 +42,13 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 			ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, "parseError");
 
 
-	@Nullable
-	private final MediaType contentType;
+	private final @Nullable MediaType contentType;
 
 	private final List<MediaType> supportedMediaTypes;
 
-	@Nullable
-	private final ResolvableType bodyType;
+	private final @Nullable ResolvableType bodyType;
 
-	@Nullable
-	private final HttpMethod method;
+	private final @Nullable HttpMethod method;
 
 
 	/**
@@ -126,8 +124,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 * Return the request Content-Type header if it was parsed successfully,
 	 * or {@code null} otherwise.
 	 */
-	@Nullable
-	public MediaType getContentType() {
+	public @Nullable MediaType getContentType() {
 		return this.contentType;
 	}
 
@@ -146,8 +143,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 * @return the body type, or {@code null} if not available
 	 * @since 5.1
 	 */
-	@Nullable
-	public ResolvableType getBodyType() {
+	public @Nullable ResolvableType getBodyType() {
 		return this.bodyType;
 	}
 

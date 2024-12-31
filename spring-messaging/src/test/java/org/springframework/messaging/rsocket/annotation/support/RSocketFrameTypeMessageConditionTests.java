@@ -19,9 +19,9 @@ package org.springframework.messaging.rsocket.annotation.support;
 import java.util.Arrays;
 
 import io.rsocket.frame.FrameType;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 

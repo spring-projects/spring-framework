@@ -1,9 +1,7 @@
 /**
  * Support package for annotation-based Servlet MVC controllers.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.mvc.annotation;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

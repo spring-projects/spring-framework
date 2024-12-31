@@ -22,11 +22,11 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -162,8 +162,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 		return true;
 	}
 
-	@Nullable
-	private HttpSession getSession(ServerHttpRequest request) {
+	private @Nullable HttpSession getSession(ServerHttpRequest request) {
 		if (request instanceof ServletServerHttpRequest serverRequest) {
 			return serverRequest.getServletRequest().getSession(isCreateSession());
 		}

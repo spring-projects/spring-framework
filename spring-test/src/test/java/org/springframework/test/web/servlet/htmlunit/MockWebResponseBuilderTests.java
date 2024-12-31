@@ -126,7 +126,7 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders).hasSize(1);
+		assertThat(responseHeaders.size()).as("size").isOne();
 		NameValuePair header = responseHeaders.get(0);
 		assertThat(header.getName()).isEqualTo("Set-Cookie");
 		assertThat(header.getValue()).isEqualTo("cookieA=valueA");

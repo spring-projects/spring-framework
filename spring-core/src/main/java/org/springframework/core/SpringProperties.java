@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Static holder for local Spring properties, i.e. defined at the Spring library level.
@@ -97,8 +97,7 @@ public final class SpringProperties {
 	 * @param key the property key
 	 * @return the associated property value, or {@code null} if none found
 	 */
-	@Nullable
-	public static String getProperty(String key) {
+	public static @Nullable String getProperty(String key) {
 		String value = localProperties.getProperty(key);
 		if (value == null) {
 			try {

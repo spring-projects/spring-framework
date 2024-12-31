@@ -17,9 +17,9 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.HibernateException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.UncategorizedDataAccessException;
-import org.springframework.lang.Nullable;
 
 /**
  * Hibernate-specific subclass of UncategorizedDataAccessException,

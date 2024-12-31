@@ -28,10 +28,10 @@ import java.util.Objects;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -96,8 +96,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	@Override
-	@Nullable
-	public MultipartFile getFile(String name) {
+	public @Nullable MultipartFile getFile(String name) {
 		return this.multipartFiles.getFirst(name);
 	}
 
@@ -118,8 +117,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	@Override
-	@Nullable
-	public String getMultipartContentType(String paramOrFileName) {
+	public @Nullable String getMultipartContentType(String paramOrFileName) {
 		MultipartFile file = getFile(paramOrFileName);
 		if (file != null) {
 			return file.getContentType();
@@ -156,8 +154,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	@Override
-	@Nullable
-	public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+	public @Nullable HttpHeaders getMultipartHeaders(String paramOrFileName) {
 		MultipartFile file = getFile(paramOrFileName);
 		if (file != null) {
 			HttpHeaders headers = new HttpHeaders();

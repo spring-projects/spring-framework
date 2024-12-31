@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -40,10 +41,10 @@ import org.springframework.util.ObjectUtils;
  * @see ChildBeanDefinition
  */
 @SuppressWarnings("serial")
-public class GenericBeanDefinition extends AbstractBeanDefinition {
+public class
+GenericBeanDefinition extends AbstractBeanDefinition {
 
-	@Nullable
-	private String parentName;
+	private @Nullable String parentName;
 
 
 	/**
@@ -74,8 +75,7 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	@Nullable
-	public String getParentName() {
+	public @Nullable String getParentName() {
 		return this.parentName;
 	}
 

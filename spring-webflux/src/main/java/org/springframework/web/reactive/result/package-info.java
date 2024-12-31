@@ -4,9 +4,7 @@
  * {@code WebHandler}. Includes the handling of handler result values &mdash;
  * for example, {@code @ResponseBody}, view resolution, and so on.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.reactive.result;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

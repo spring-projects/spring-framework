@@ -16,9 +16,10 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -33,8 +34,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@Nullable
-	private final BeanFactory beanFactory;
+	private final @Nullable BeanFactory beanFactory;
 
 
 	public AsyncTaskMethodReturnValueHandler(@Nullable BeanFactory beanFactory) {

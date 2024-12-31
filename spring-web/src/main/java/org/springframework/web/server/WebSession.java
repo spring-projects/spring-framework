@@ -20,9 +20,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,8 +56,7 @@ public interface WebSession {
 	 * @return the attribute value
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	default <T> T getAttribute(String name) {
+	default <T> @Nullable T getAttribute(String name) {
 		return (T) getAttributes().get(name);
 	}
 

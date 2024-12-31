@@ -20,8 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -53,8 +54,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		return getReturnValueHandler(returnType) != null;
 	}
 
-	@Nullable
-	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
+	private @Nullable HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
@@ -78,8 +78,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 	}
 
-	@Nullable
-	private HandlerMethodReturnValueHandler selectHandler(@Nullable Object value, MethodParameter returnType) {
+	private @Nullable HandlerMethodReturnValueHandler selectHandler(@Nullable Object value, MethodParameter returnType) {
 		boolean isAsyncValue = isAsyncReturnValue(value, returnType);
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (isAsyncValue && !(handler instanceof AsyncHandlerMethodReturnValueHandler)) {

@@ -1,9 +1,7 @@
 /**
  * Default implementation of the type conversion system.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.core.convert.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

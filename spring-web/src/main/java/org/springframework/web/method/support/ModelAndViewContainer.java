@@ -20,8 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -51,18 +52,15 @@ public class ModelAndViewContainer {
 
 	private boolean ignoreDefaultModelOnRedirect = true;
 
-	@Nullable
-	private Object view;
+	private @Nullable Object view;
 
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
-	@Nullable
-	private ModelMap redirectModel;
+	private @Nullable ModelMap redirectModel;
 
 	private boolean redirectModelScenario = false;
 
-	@Nullable
-	private HttpStatusCode status;
+	private @Nullable HttpStatusCode status;
 
 	private final Set<String> noBinding = new HashSet<>(4);
 
@@ -104,8 +102,7 @@ public class ModelAndViewContainer {
 	 * Return the view name to be resolved by the DispatcherServlet via a
 	 * ViewResolver, or {@code null} if a View object is set.
 	 */
-	@Nullable
-	public String getViewName() {
+	public @Nullable String getViewName() {
 		return (this.view instanceof String viewName ? viewName : null);
 	}
 
@@ -121,8 +118,7 @@ public class ModelAndViewContainer {
 	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
-	@Nullable
-	public Object getView() {
+	public @Nullable Object getView() {
 		return this.view;
 	}
 
@@ -204,8 +200,7 @@ public class ModelAndViewContainer {
 	 * Return the configured HTTP status, if any.
 	 * @since 4.3
 	 */
-	@Nullable
-	public HttpStatusCode getStatus() {
+	public @Nullable HttpStatusCode getStatus() {
 		return this.status;
 	}
 

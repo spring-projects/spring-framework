@@ -36,10 +36,10 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
@@ -150,8 +150,7 @@ public abstract class JdbcUtils {
 	 * @throws SQLException if thrown by the JDBC API
 	 * @see #getResultSetValue(ResultSet, int)
 	 */
-	@Nullable
-	public static Object getResultSetValue(ResultSet rs, int index, @Nullable Class<?> requiredType) throws SQLException {
+	public static @Nullable Object getResultSetValue(ResultSet rs, int index, @Nullable Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
 		}
@@ -274,8 +273,7 @@ public abstract class JdbcUtils {
 	 * @see java.sql.Clob
 	 * @see java.sql.Timestamp
 	 */
-	@Nullable
-	public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
+	public static @Nullable Object getResultSetValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
 		String className = null;
 		if (obj != null) {
@@ -445,8 +443,7 @@ public abstract class JdbcUtils {
 	 * @param source the name as provided in database meta-data
 	 * @return the common name to be used (for example, "DB2" or "Sybase")
 	 */
-	@Nullable
-	public static String commonDatabaseName(@Nullable String source) {
+	public static @Nullable String commonDatabaseName(@Nullable String source) {
 		String name = source;
 		if (source != null && source.startsWith("DB2")) {
 			name = "DB2";
@@ -479,8 +476,7 @@ public abstract class JdbcUtils {
 	 * (for example, "VARCHAR"/"NUMERIC"), or {@code null} if not resolvable
 	 * @since 5.2
 	 */
-	@Nullable
-	public static String resolveTypeName(int sqlType) {
+	public static @Nullable String resolveTypeName(int sqlType) {
 		return typeNames.get(sqlType);
 	}
 

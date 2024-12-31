@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.wiring;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -49,8 +50,7 @@ public class BeanWiringInfo {
 	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
 	private boolean isDefaultBeanName = false;
 
@@ -120,8 +120,7 @@ public class BeanWiringInfo {
 	/**
 	 * Return the specific bean name that this BeanWiringInfo points to, if any.
 	 */
-	@Nullable
-	public String getBeanName() {
+	public @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

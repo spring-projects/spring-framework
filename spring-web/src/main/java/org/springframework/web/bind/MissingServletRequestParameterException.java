@@ -16,8 +16,9 @@
 
 package org.springframework.web.bind;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link ServletRequestBindingException} subclass that indicates a missing parameter.
@@ -32,8 +33,7 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 
 	private final String parameterType;
 
-	@Nullable
-	private final MethodParameter parameter;
+	private final @Nullable MethodParameter parameter;
 
 
 	/**
@@ -97,8 +97,7 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 	 * a controller method argument.
 	 * @since 6.1
 	 */
-	@Nullable
-	public MethodParameter getMethodParameter() {
+	public @Nullable MethodParameter getMethodParameter() {
 		return this.parameter;
 	}
 

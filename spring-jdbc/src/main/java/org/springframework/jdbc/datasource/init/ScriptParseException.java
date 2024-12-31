@@ -16,8 +16,9 @@
 
 package org.springframework.jdbc.datasource.init;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.lang.Nullable;
 
 /**
  * Thrown by {@link ScriptUtils} if an SQL script cannot be properly parsed.

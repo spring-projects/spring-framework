@@ -18,7 +18,8 @@ package org.springframework.scheduling.config;
 
 import java.time.Instant;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**

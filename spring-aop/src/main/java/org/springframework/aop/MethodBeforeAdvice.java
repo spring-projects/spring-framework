@@ -18,7 +18,7 @@ package org.springframework.aop;
 
 import java.lang.reflect.Method;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Advice invoked before a method is invoked. Such advices cannot

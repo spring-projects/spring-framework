@@ -100,7 +100,7 @@ class StandardWebSocketClientTests {
 
 		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
-		assertThat(session.getHandshakeHeaders()).hasSize(1);
+		assertThat(session.getHandshakeHeaders().size()).isOne();
 		assertThat(session.getHandshakeHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 

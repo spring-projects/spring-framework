@@ -19,7 +19,8 @@ package org.springframework.messaging.simp.user;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +39,7 @@ public class UserDestinationResult {
 
 	private final String subscribeDestination;
 
-	@Nullable
-	private final String user;
+	private final @Nullable String user;
 
 	private final Set<String> sessionIds;
 
@@ -106,16 +106,14 @@ public class UserDestinationResult {
 	 * sessionId in place of a user name thus removing the need for a user-to-session
 	 * lookup via {@link SimpUserRegistry}.
 	 */
-	@Nullable
-	public String getUser() {
+	public @Nullable String getUser() {
 		return this.user;
 	}
 
 	/**
 	 * Return the session id for the targetDestination.
 	 */
-	@Nullable
-	public Set<String> getSessionIds() {
+	public @Nullable Set<String> getSessionIds() {
 		return this.sessionIds;
 	}
 

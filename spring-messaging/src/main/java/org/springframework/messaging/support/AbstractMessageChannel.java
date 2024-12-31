@@ -22,9 +22,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -174,8 +174,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 		private int receiveInterceptorIndex = -1;
 
-		@Nullable
-		public Message<?> applyPreSend(Message<?> message, MessageChannel channel) {
+		public @Nullable Message<?> applyPreSend(Message<?> message, MessageChannel channel) {
 			Message<?> messageToUse = message;
 			for (ChannelInterceptor interceptor : interceptors) {
 				Message<?> resolvedMessage = interceptor.preSend(messageToUse, channel);
@@ -224,8 +223,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 			return true;
 		}
 
-		@Nullable
-		public Message<?> applyPostReceive(Message<?> message, MessageChannel channel) {
+		public @Nullable Message<?> applyPostReceive(Message<?> message, MessageChannel channel) {
 			Message<?> messageToUse = message;
 			for (ChannelInterceptor interceptor : interceptors) {
 				messageToUse = interceptor.postReceive(messageToUse, channel);

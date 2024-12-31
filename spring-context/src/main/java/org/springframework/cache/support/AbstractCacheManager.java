@@ -23,10 +23,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -86,8 +87,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	// Lazy cache initialization on access
 
 	@Override
-	@Nullable
-	public Cache getCache(String name) {
+	public @Nullable Cache getCache(String name) {
 		// Quick check for existing cache...
 		Cache cache = this.cacheMap.get(name);
 		if (cache != null) {
@@ -128,8 +128,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @see #getCache(String)
 	 * @see #getMissingCache(String)
 	 */
-	@Nullable
-	protected final Cache lookupCache(String name) {
+	protected final @Nullable Cache lookupCache(String name) {
 		return this.cacheMap.get(name);
 	}
 
@@ -172,8 +171,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @since 4.1
 	 * @see #getCache(String)
 	 */
-	@Nullable
-	protected Cache getMissingCache(String name) {
+	protected @Nullable Cache getMissingCache(String name) {
 		return null;
 	}
 

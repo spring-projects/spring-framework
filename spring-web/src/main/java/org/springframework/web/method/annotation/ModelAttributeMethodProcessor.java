@@ -22,11 +22,11 @@ import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
@@ -103,8 +103,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @throws Exception if WebDataBinder initialization fails
 	 */
 	@Override
-	@Nullable
-	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+	public final @Nullable Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		Assert.state(mavContainer != null, "ModelAttributeMethodProcessor requires ModelAndViewContainer");
@@ -172,8 +171,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		return attribute;
 	}
 
-	@Nullable
-	private static Object wrapAsOptionalIfNecessary(MethodParameter parameter, @Nullable Object target) {
+	private static @Nullable Object wrapAsOptionalIfNecessary(MethodParameter parameter, @Nullable Object target) {
 		return (parameter.getParameterType() == Optional.class ? Optional.ofNullable(target) : target);
 	}
 
@@ -190,8 +188,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param request the current request
 	 * @return the created model attribute, or {@code null}
 	 */
-	@Nullable
-	protected Object createAttribute(String attributeName, MethodParameter parameter,
+	protected @Nullable Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		return null;

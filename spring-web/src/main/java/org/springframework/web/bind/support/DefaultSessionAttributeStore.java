@@ -16,7 +16,8 @@
 
 package org.springframework.web.bind.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequest;
 
@@ -56,8 +57,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 	@Override
-	@Nullable
-	public Object retrieveAttribute(WebRequest request, String attributeName) {
+	public @Nullable Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");
 		String storeAttributeName = getAttributeNameInSession(request, attributeName);

@@ -23,11 +23,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncManager;
@@ -51,8 +51,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	@Nullable
-	private Long asyncRequestTimeout;
+	private @Nullable Long asyncRequestTimeout;
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
@@ -88,9 +87,8 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 		return handler instanceof HandlerFunction;
 	}
 
-	@Nullable
 	@Override
-	public ModelAndView handle(HttpServletRequest servletRequest,
+	public @Nullable ModelAndView handle(HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse,
 			Object handler) throws Exception {
 
@@ -149,8 +147,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 		return serverRequest;
 	}
 
-	@Nullable
-	private ServerResponse handleAsync(WebAsyncManager asyncManager) throws Exception {
+	private @Nullable ServerResponse handleAsync(WebAsyncManager asyncManager) throws Exception {
 		Object result = asyncManager.getConcurrentResult();
 		asyncManager.clearConcurrentResult();
 		LogFormatUtils.traceDebug(logger, traceOn -> {

@@ -16,12 +16,13 @@
 
 package org.springframework.expression.common;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a template expression broken into pieces.
@@ -78,8 +79,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
+	public <T> @Nullable T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
 		String value = getValue();
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
 	}
@@ -97,8 +97,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public <T> T getValue(@Nullable Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException {
+	public <T> @Nullable T getValue(@Nullable Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException {
 		String value = getValue(rootObject);
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
 	}
@@ -116,8 +115,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType)
+	public <T> @Nullable T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
 		String value = getValue(context);
@@ -137,8 +135,7 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	@Override
-	@Nullable
-	public <T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> desiredResultType)
+	public <T> @Nullable T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> desiredResultType)
 			throws EvaluationException {
 
 		String value = getValue(context,rootObject);

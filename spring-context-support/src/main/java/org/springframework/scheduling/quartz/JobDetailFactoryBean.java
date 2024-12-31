@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,14 +50,11 @@ import org.springframework.util.Assert;
 public class JobDetailFactoryBean
 		implements FactoryBean<JobDetail>, BeanNameAware, ApplicationContextAware, InitializingBean {
 
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
-	@Nullable
-	private String group;
+	private @Nullable String group;
 
-	@Nullable
-	private Class<? extends Job> jobClass;
+	private @Nullable Class<? extends Job> jobClass;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
@@ -65,20 +62,15 @@ public class JobDetailFactoryBean
 
 	private boolean requestsRecovery = false;
 
-	@Nullable
-	private String description;
+	private @Nullable String description;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private String applicationContextJobDataKey;
+	private @Nullable String applicationContextJobDataKey;
 
-	@Nullable
-	private JobDetail jobDetail;
+	private @Nullable JobDetail jobDetail;
 
 
 	/**
@@ -218,8 +210,7 @@ public class JobDetailFactoryBean
 
 
 	@Override
-	@Nullable
-	public JobDetail getObject() {
+	public @Nullable JobDetail getObject() {
 		return this.jobDetail;
 	}
 

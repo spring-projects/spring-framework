@@ -29,14 +29,15 @@ import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
+import org.jspecify.annotations.Nullable;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -65,7 +66,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(HttpMethod.valueOf(exchange.getRequestMethod().toString()), initUri(exchange), "",
-				new UndertowHeadersAdapter(exchange.getRequestHeaders()));
+				new HttpHeaders(new UndertowHeadersAdapter(exchange.getRequestHeaders())));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);
@@ -90,20 +91,17 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		return this.exchange.getDestinationAddress();
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		return this.exchange.getSourceAddress();
 	}
 
-	@Nullable
 	@Override
-	protected SslInfo initSslInfo() {
+	protected @Nullable SslInfo initSslInfo() {
 		SSLSession session = this.exchange.getConnection().getSslSession();
 		if (session != null) {
 			return new DefaultSslInfo(session);
@@ -167,8 +165,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		@Nullable
-		protected DataBuffer read() throws IOException {
+		protected @Nullable DataBuffer read() throws IOException {
 			PooledByteBuffer pooledByteBuffer = this.byteBufferPool.allocate();
 			try (pooledByteBuffer) {
 				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();

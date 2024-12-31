@@ -29,7 +29,6 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.method;
 import static org.springframework.web.reactive.function.server.RequestPredicates.methods;
 import static org.springframework.web.reactive.function.server.RequestPredicates.path;
-import static org.springframework.web.reactive.function.server.RequestPredicates.pathExtension;
 import static org.springframework.web.reactive.function.server.RequestPredicates.queryParam;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -68,8 +67,6 @@ class ToStringVisitorTests {
 		testPredicate(methods(HttpMethod.GET, HttpMethod.POST), "[GET, POST]");
 
 		testPredicate(path("/foo"), "/foo");
-
-		testPredicate(pathExtension("foo"), "*.foo");
 
 		testPredicate(contentType(MediaType.APPLICATION_JSON), "Content-Type: application/json");
 

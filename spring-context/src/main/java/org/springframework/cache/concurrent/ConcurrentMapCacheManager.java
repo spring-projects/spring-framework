@@ -24,11 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.serializer.support.SerializationDelegate;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link CacheManager} implementation that lazily builds {@link ConcurrentMapCache}
@@ -60,8 +61,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 
 	private boolean storeByValue = false;
 
-	@Nullable
-	private SerializationDelegate serialization;
+	private @Nullable SerializationDelegate serialization;
 
 
 	/**
@@ -166,8 +166,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	}
 
 	@Override
-	@Nullable
-	public Cache getCache(String name) {
+	public @Nullable Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {
 			cache = this.cacheMap.computeIfAbsent(name, this::createConcurrentMapCache);

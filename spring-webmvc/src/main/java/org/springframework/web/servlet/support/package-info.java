@@ -3,9 +3,7 @@
  * Provides easy evaluation of the request context in views,
  * and miscellaneous HandlerInterceptor implementations.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

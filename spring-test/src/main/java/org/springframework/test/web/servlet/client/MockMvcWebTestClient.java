@@ -19,11 +19,11 @@ package org.springframework.test.web.servlet.client;
 import java.util.function.Supplier;
 
 import jakarta.servlet.Filter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.reactive.server.ExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
@@ -297,7 +297,7 @@ public interface MockMvcWebTestClient {
 		 * {@link StandaloneMockMvcBuilder#addMappedInterceptors(String[], HandlerInterceptor...)}.
 		 */
 		ControllerSpec mappedInterceptors(
-				@Nullable String[] pathPatterns, HandlerInterceptor... interceptors);
+				String @Nullable [] pathPatterns, HandlerInterceptor... interceptors);
 
 		/**
 		 * Set a ContentNegotiationManager.
@@ -371,16 +371,6 @@ public interface MockMvcWebTestClient {
 		ControllerSpec patternParser(PathPatternParser parser);
 
 		/**
-		 * Whether to match trailing slashes.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setUseTrailingSlashPatternMatch(boolean)}.
-		 * @deprecated as of 6.0, see
-		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
-		 */
-		@Deprecated(since = "6.0")
-		ControllerSpec useTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch);
-
-		/**
 		 * Configure placeholder values to use.
 		 * <p>This is delegated to
 		 * {@link StandaloneMockMvcBuilder#addPlaceholderValue(String, String)}.
@@ -424,7 +414,7 @@ public interface MockMvcWebTestClient {
 		 * {@link RouterFunctionMockMvcBuilder#addMappedInterceptors(String[], HandlerInterceptor...)}.
 		 */
 		RouterFunctionSpec mappedInterceptors(
-				@Nullable String[] pathPatterns, HandlerInterceptor... interceptors);
+				String @Nullable [] pathPatterns, HandlerInterceptor... interceptors);
 
 		/**
 		 * Specify the timeout value for async execution.

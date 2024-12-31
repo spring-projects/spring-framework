@@ -170,7 +170,8 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/cbor"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -181,7 +182,8 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/cbor"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -191,7 +193,8 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(serializableBeanArray, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/cbor"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -202,7 +205,8 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(listOf(serializableBean), ResolvableType.forType(typeOf<List<SerializableBean>>().javaType), null, outputMessage, null)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/cbor"))
+		@Suppress("DEPRECATION")
+		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 

@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.aot;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.lang.Nullable;
 
 /**
  * Thrown when AOT fails to process a bean.

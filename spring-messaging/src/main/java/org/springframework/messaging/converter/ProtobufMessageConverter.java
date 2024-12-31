@@ -28,8 +28,8 @@ import java.util.Map;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -75,8 +75,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 
 	final ExtensionRegistry extensionRegistry;
 
-	@Nullable
-	private final ProtobufFormatSupport protobufFormatSupport;
+	private final @Nullable ProtobufFormatSupport protobufFormatSupport;
 
 
 	/**
@@ -244,7 +243,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 
 		private final JsonFormat.Printer printer;
 
-		public ProtobufJavaUtilSupport(@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
+		public ProtobufJavaUtilSupport(JsonFormat.@Nullable Parser parser, JsonFormat.@Nullable Printer printer) {
 			this.parser = (parser != null ? parser : JsonFormat.parser());
 			this.printer = (printer != null ? printer : JsonFormat.printer());
 		}

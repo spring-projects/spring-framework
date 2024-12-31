@@ -7,6 +7,10 @@ You can use the `@EnableWebMvc` annotation to enable MVC configuration with prog
 
 include-code::./WebConfiguration[tag=snippet,indent=0]
 
+WARNING: As of 7.0, support for the XML configuration namespace for Spring MVC has been deprecated.
+There are no plans yet for removing it completely but XML configuration will not be updated to follow
+the Java configuration model.
+
 NOTE: When using Spring Boot, you may want to use `@Configuration` classes of type `WebMvcConfigurer` but without `@EnableWebMvc` to keep Spring Boot MVC customizations. See more details in xref:web/webmvc/mvc-config/customize.adoc[the MVC Config API section] and in {spring-boot-docs-ref}/web/servlet.html#web.servlet.spring-mvc.auto-configuration[the dedicated Spring Boot documentation].
 
 The preceding example registers a number of Spring MVC

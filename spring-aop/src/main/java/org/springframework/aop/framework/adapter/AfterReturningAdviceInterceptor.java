@@ -20,10 +20,10 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,8 +52,7 @@ public class AfterReturningAdviceInterceptor implements MethodInterceptor, After
 
 
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation mi) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation mi) throws Throwable {
 		Object retVal = mi.proceed();
 		this.advice.afterReturning(retVal, mi.getMethod(), mi.getArguments(), mi.getThis());
 		return retVal;

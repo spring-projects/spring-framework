@@ -1,9 +1,7 @@
 /**
  * AssertJ support for MockMvc.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.web.servlet.assertj;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

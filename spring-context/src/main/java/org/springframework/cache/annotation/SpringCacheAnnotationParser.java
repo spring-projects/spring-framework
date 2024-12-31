@@ -24,13 +24,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,21 +59,18 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	@Override
-	@Nullable
-	public Collection<CacheOperation> parseCacheAnnotations(Class<?> type) {
+	public @Nullable Collection<CacheOperation> parseCacheAnnotations(Class<?> type) {
 		DefaultCacheConfig defaultConfig = new DefaultCacheConfig(type);
 		return parseCacheAnnotations(defaultConfig, type);
 	}
 
 	@Override
-	@Nullable
-	public Collection<CacheOperation> parseCacheAnnotations(Method method) {
+	public @Nullable Collection<CacheOperation> parseCacheAnnotations(Method method) {
 		DefaultCacheConfig defaultConfig = new DefaultCacheConfig(method.getDeclaringClass());
 		return parseCacheAnnotations(defaultConfig, method);
 	}
 
-	@Nullable
-	private Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig, AnnotatedElement ae) {
+	private @Nullable Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig, AnnotatedElement ae) {
 		Collection<CacheOperation> ops = parseCacheAnnotations(cachingConfig, ae, false);
 		if (ops != null && ops.size() > 1) {
 			// More than one operation found -> local declarations override interface-declared ones...
@@ -84,8 +82,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return ops;
 	}
 
-	@Nullable
-	private Collection<CacheOperation> parseCacheAnnotations(
+	private @Nullable Collection<CacheOperation> parseCacheAnnotations(
 			DefaultCacheConfig cachingConfig, AnnotatedElement ae, boolean localOnly) {
 
 		Collection<? extends Annotation> annotations = (localOnly ?
@@ -232,17 +229,13 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 
 		private final Class<?> target;
 
-		@Nullable
-		private String[] cacheNames;
+		private String @Nullable [] cacheNames;
 
-		@Nullable
-		private String keyGenerator;
+		private @Nullable String keyGenerator;
 
-		@Nullable
-		private String cacheManager;
+		private @Nullable String cacheManager;
 
-		@Nullable
-		private String cacheResolver;
+		private @Nullable String cacheResolver;
 
 		private boolean initialized = false;
 

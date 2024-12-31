@@ -26,7 +26,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -155,8 +156,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <A extends Annotation> MergedAnnotation<A> find(Object requiredType,
+	private <A extends Annotation> @Nullable MergedAnnotation<A> find(Object requiredType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate,
 			@Nullable MergedAnnotationSelector<A> selector) {
 
@@ -222,8 +222,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 	private class AnnotationsSpliterator<A extends Annotation> implements Spliterator<MergedAnnotation<A>> {
 
-		@Nullable
-		private final Object requiredType;
+		private final @Nullable Object requiredType;
 
 		private final int[] mappingCursors;
 
@@ -259,8 +258,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 			return false;
 		}
 
-		@Nullable
-		private AnnotationTypeMapping getNextSuitableMapping(int annotationIndex) {
+		private @Nullable AnnotationTypeMapping getNextSuitableMapping(int annotationIndex) {
 			AnnotationTypeMapping mapping;
 			do {
 				mapping = getMapping(annotationIndex, this.mappingCursors[annotationIndex]);
@@ -273,15 +271,13 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 			return null;
 		}
 
-		@Nullable
-		private AnnotationTypeMapping getMapping(int annotationIndex, int mappingIndex) {
+		private @Nullable AnnotationTypeMapping getMapping(int annotationIndex, int mappingIndex) {
 			AnnotationTypeMappings mappings = MergedAnnotationsCollection.this.mappings[annotationIndex];
 			return (mappingIndex < mappings.size() ? mappings.get(mappingIndex) : null);
 		}
 
-		@Nullable
 		@SuppressWarnings("unchecked")
-		private MergedAnnotation<A> createMergedAnnotationIfPossible(int annotationIndex, int mappingIndex) {
+		private @Nullable MergedAnnotation<A> createMergedAnnotationIfPossible(int annotationIndex, int mappingIndex) {
 			MergedAnnotation<?> root = annotations[annotationIndex];
 			if (mappingIndex == 0) {
 				return (MergedAnnotation<A>) root;
@@ -293,8 +289,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 		}
 
 		@Override
-		@Nullable
-		public Spliterator<MergedAnnotation<A>> trySplit() {
+		public @Nullable Spliterator<MergedAnnotation<A>> trySplit() {
 			return null;
 		}
 

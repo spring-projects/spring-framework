@@ -20,8 +20,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -48,16 +48,13 @@ public class CookieGenerator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private String cookieName;
+	private @Nullable String cookieName;
 
-	@Nullable
-	private String cookieDomain;
+	private @Nullable String cookieDomain;
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
-	@Nullable
-	private Integer cookieMaxAge;
+	private @Nullable Integer cookieMaxAge;
 
 	private boolean cookieSecure = false;
 
@@ -75,8 +72,7 @@ public class CookieGenerator {
 	/**
 	 * Return the given name for cookies created by this generator.
 	 */
-	@Nullable
-	public String getCookieName() {
+	public @Nullable String getCookieName() {
 		return this.cookieName;
 	}
 
@@ -92,8 +88,7 @@ public class CookieGenerator {
 	/**
 	 * Return the domain for cookies created by this generator, if any.
 	 */
-	@Nullable
-	public String getCookieDomain() {
+	public @Nullable String getCookieDomain() {
 		return this.cookieDomain;
 	}
 
@@ -127,8 +122,7 @@ public class CookieGenerator {
 	/**
 	 * Return the maximum age for cookies created by this generator.
 	 */
-	@Nullable
-	public Integer getCookieMaxAge() {
+	public @Nullable Integer getCookieMaxAge() {
 		return this.cookieMaxAge;
 	}
 

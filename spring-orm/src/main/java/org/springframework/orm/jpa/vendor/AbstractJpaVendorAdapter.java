@@ -22,8 +22,8 @@ import java.util.Map;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 
@@ -39,8 +39,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	private Database database = Database.DEFAULT;
 
-	@Nullable
-	private String databasePlatform;
+	private @Nullable String databasePlatform;
 
 	private boolean generateDdl = false;
 
@@ -77,8 +76,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	/**
 	 * Return the name of the target database to operate on.
 	 */
-	@Nullable
-	protected String getDatabasePlatform() {
+	protected @Nullable String getDatabasePlatform() {
 		return this.databasePlatform;
 	}
 
@@ -125,8 +123,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 
 	@Override
-	@Nullable
-	public String getPersistenceProviderRootPackage() {
+	public @Nullable String getPersistenceProviderRootPackage() {
 		return null;
 	}
 
@@ -141,8 +138,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 	@Override
-	@Nullable
-	public JpaDialect getJpaDialect() {
+	public @Nullable JpaDialect getJpaDialect() {
 		return null;
 	}
 

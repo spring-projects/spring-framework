@@ -25,7 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -90,8 +91,7 @@ public final class GenericTypeResolver {
 	 * @return the resolved parameter type of the method return type, or {@code null}
 	 * if not resolvable or if the single argument is of type {@link WildcardType}.
 	 */
-	@Nullable
-	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericType) {
+	public static @Nullable Class<?> resolveReturnTypeArgument(Method method, Class<?> genericType) {
 		Assert.notNull(method, "Method must not be null");
 		ResolvableType resolvableType = ResolvableType.forMethodReturnType(method).as(genericType);
 		if (!resolvableType.hasGenerics() || resolvableType.getType() instanceof WildcardType) {
@@ -108,8 +108,7 @@ public final class GenericTypeResolver {
 	 * @param genericType the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
-	@Nullable
-	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericType) {
+	public static @Nullable Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericType) {
 		ResolvableType resolvableType = ResolvableType.forClass(clazz).as(genericType);
 		if (!resolvableType.hasGenerics()) {
 			return null;
@@ -117,8 +116,7 @@ public final class GenericTypeResolver {
 		return getSingleGeneric(resolvableType);
 	}
 
-	@Nullable
-	private static Class<?> getSingleGeneric(ResolvableType resolvableType) {
+	private static @Nullable Class<?> getSingleGeneric(ResolvableType resolvableType) {
 		Assert.isTrue(resolvableType.getGenerics().length == 1,
 				() -> "Expected 1 type argument on generic interface [" + resolvableType +
 				"] but found " + resolvableType.getGenerics().length);
@@ -135,8 +133,7 @@ public final class GenericTypeResolver {
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
-	@Nullable
-	public static Class<?>[] resolveTypeArguments(Class<?> clazz, Class<?> genericType) {
+	public static Class<?> @Nullable [] resolveTypeArguments(Class<?> clazz, Class<?> genericType) {
 		ResolvableType type = ResolvableType.forClass(clazz).as(genericType);
 		if (!type.hasGenerics() || !type.hasResolvableGenerics()) {
 			return null;
@@ -295,8 +292,7 @@ public final class GenericTypeResolver {
 		}
 
 		@Override
-		@Nullable
-		public ResolvableType resolveVariable(TypeVariable<?> variable) {
+		public @Nullable ResolvableType resolveVariable(TypeVariable<?> variable) {
 			Type type = this.typeVariableMap.get(variable);
 			return (type != null ? ResolvableType.forType(type) : null);
 		}

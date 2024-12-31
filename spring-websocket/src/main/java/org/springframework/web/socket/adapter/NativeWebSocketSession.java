@@ -16,7 +16,8 @@
 
 package org.springframework.web.socket.adapter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -39,7 +40,6 @@ public interface NativeWebSocketSession extends WebSocketSession {
 	 * @return the native session of the required type,
 	 * or {@code null} if not available
 	 */
-	@Nullable
-	<T> T getNativeSession(@Nullable Class<T> requiredType);
+	<T> @Nullable T getNativeSession(@Nullable Class<T> requiredType);
 
 }

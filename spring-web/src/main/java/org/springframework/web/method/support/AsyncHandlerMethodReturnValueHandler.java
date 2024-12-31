@@ -16,8 +16,9 @@
 
 package org.springframework.web.method.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * A return value handler that supports async types. Such return value types

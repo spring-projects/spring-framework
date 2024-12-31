@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,7 +45,6 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -498,8 +498,7 @@ public interface ServerRequest {
 		 * {@linkplain InetSocketAddress#getPort() port} in the returned address will
 		 * be {@code 0}.
 		 */
-		@Nullable
-		InetSocketAddress host();
+		@Nullable InetSocketAddress host();
 
 		/**
 		 * Get the value of the {@code Range} header.
@@ -520,8 +519,7 @@ public interface ServerRequest {
 		 * @param headerName the header name
 		 * @since 5.2.5
 		 */
-		@Nullable
-		default String firstHeader(String headerName) {
+		default @Nullable String firstHeader(String headerName) {
 			List<String> list = header(headerName);
 			return list.isEmpty() ? null : list.get(0);
 		}
@@ -574,7 +572,7 @@ public interface ServerRequest {
 		 * Manipulate this request's headers with the given consumer.
 		 * <p>The headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder

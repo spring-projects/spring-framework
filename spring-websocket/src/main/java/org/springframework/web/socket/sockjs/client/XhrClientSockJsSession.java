@@ -22,9 +22,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -78,21 +79,18 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		URI uri = getUri();
 		return (uri != null ? new InetSocketAddress(uri.getHost(), uri.getPort()) : null);
 	}
 
 	@Override
-	@Nullable
-	public String getAcceptedProtocol() {
+	public @Nullable String getAcceptedProtocol() {
 		return null;
 	}
 

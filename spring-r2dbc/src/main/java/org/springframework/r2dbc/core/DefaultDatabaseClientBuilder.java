@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Statement;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindMarkersFactoryResolver;
 import org.springframework.util.Assert;
@@ -34,11 +34,9 @@ import org.springframework.util.Assert;
  */
 class DefaultDatabaseClientBuilder implements DatabaseClient.Builder {
 
-	@Nullable
-	private BindMarkersFactory bindMarkers;
+	private @Nullable BindMarkersFactory bindMarkers;
 
-	@Nullable
-	private ConnectionFactory connectionFactory;
+	private @Nullable ConnectionFactory connectionFactory;
 
 	private ExecuteFunction executeFunction = Statement::execute;
 

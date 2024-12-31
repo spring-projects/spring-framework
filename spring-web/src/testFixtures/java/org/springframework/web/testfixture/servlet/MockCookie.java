@@ -21,9 +21,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import jakarta.servlet.http.Cookie;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -54,8 +54,7 @@ public class MockCookie extends Cookie {
 	private static final String EXPIRES = "Expires";
 
 
-	@Nullable
-	private ZonedDateTime expires;
+	private @Nullable ZonedDateTime expires;
 
 
 	/**
@@ -81,8 +80,7 @@ public class MockCookie extends Cookie {
 	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
 	 * @since 5.1.11
 	 */
-	@Nullable
-	public ZonedDateTime getExpires() {
+	public @Nullable ZonedDateTime getExpires() {
 		return this.expires;
 	}
 
@@ -101,8 +99,7 @@ public class MockCookie extends Cookie {
 	 * Get the "SameSite" attribute for this cookie.
 	 * @return the "SameSite" attribute for this cookie, or {@code null} if not set
 	 */
-	@Nullable
-	public String getSameSite() {
+	public @Nullable String getSameSite() {
 		return getAttribute(SAME_SITE);
 	}
 

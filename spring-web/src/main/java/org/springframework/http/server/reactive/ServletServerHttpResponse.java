@@ -27,6 +27,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 
@@ -37,7 +38,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -54,11 +54,9 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	private final ServletOutputStream outputStream;
 
-	@Nullable
-	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
+	private volatile @Nullable ResponseBodyFlushProcessor bodyFlushProcessor;
 
-	@Nullable
-	private volatile ResponseBodyProcessor bodyProcessor;
+	private volatile @Nullable ResponseBodyProcessor bodyProcessor;
 
 	private volatile boolean flushOnNext;
 

@@ -34,12 +34,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -218,8 +218,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		// Override header accessors to not expose forwarded headers
 
 		@Override
-		@Nullable
-		public String getHeader(String name) {
+		public @Nullable String getHeader(String name) {
 			if (FORWARDED_HEADER_NAMES.contains(name)) {
 				return null;
 			}
@@ -246,18 +245,15 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ForwardedHeaderExtractingRequest extends ForwardedHeaderRemovingRequest {
 
-		@Nullable
-		private final String scheme;
+		private final @Nullable String scheme;
 
 		private final boolean secure;
 
-		@Nullable
-		private final String host;
+		private final @Nullable String host;
 
 		private final int port;
 
-		@Nullable
-		private final InetSocketAddress remoteAddress;
+		private final @Nullable InetSocketAddress remoteAddress;
 
 		private final ForwardedPrefixExtractor forwardedPrefixExtractor;
 
@@ -285,14 +281,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		@Nullable
-		public String getScheme() {
+		public @Nullable String getScheme() {
 			return this.scheme;
 		}
 
 		@Override
-		@Nullable
-		public String getServerName() {
+		public @Nullable String getServerName() {
 			return this.host;
 		}
 
@@ -322,14 +316,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		@Nullable
-		public String getRemoteHost() {
+		public @Nullable String getRemoteHost() {
 			return (this.remoteAddress != null ? this.remoteAddress.getHostString() : super.getRemoteHost());
 		}
 
 		@Override
-		@Nullable
-		public String getRemoteAddr() {
+		public @Nullable String getRemoteAddr() {
 			return (this.remoteAddress != null ? this.remoteAddress.getHostString() : super.getRemoteAddr());
 		}
 
@@ -340,8 +332,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@SuppressWarnings("DataFlowIssue")
 		@Override
-		@Nullable
-		public Object getAttribute(String name) {
+		public @Nullable Object getAttribute(String name) {
 			if (name.equals(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)) {
 				return this.forwardedPrefixExtractor.getErrorRequestUri();
 			}
@@ -363,11 +354,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private String actualRequestUri;
 
-		@Nullable
-		private final String forwardedPrefix;
+		private final @Nullable String forwardedPrefix;
 
-		@Nullable
-		private String requestUri;
+		private @Nullable String requestUri;
 
 		private String requestUrl;
 
@@ -389,8 +378,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.requestUrl = initRequestUrl();
 		}
 
-		@Nullable
-		private static String initForwardedPrefix(HttpServletRequest request) {
+		private static @Nullable String initForwardedPrefix(HttpServletRequest request) {
 			String result = null;
 			Enumeration<String> names = request.getHeaderNames();
 			while (names.hasMoreElements()) {
@@ -414,8 +402,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			return null;
 		}
 
-		@Nullable
-		private String initRequestUri() {
+		private @Nullable String initRequestUri() {
 			if (this.forwardedPrefix != null) {
 				return this.forwardedPrefix +
 						UrlPathHelper.rawPathInstance.getPathWithinApplication(this.delegate.get());
@@ -455,8 +442,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			}
 		}
 
-		@Nullable
-		public String getErrorRequestUri() {
+		public @Nullable String getErrorRequestUri() {
 			HttpServletRequest request = this.delegate.get();
 			String requestUri = (String) request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE);
 			if (this.forwardedPrefix == null || requestUri == null) {

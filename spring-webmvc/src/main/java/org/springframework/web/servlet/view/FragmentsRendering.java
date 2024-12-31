@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.SmartView;
 
@@ -45,8 +46,7 @@ public interface FragmentsRendering extends SmartView {
 	/**
 	 * Return the HTTP status to set the response to.
 	 */
-	@Nullable
-	HttpStatusCode status();
+	@Nullable HttpStatusCode status();
 
 	/**
 	 * Return headers to add to the response.

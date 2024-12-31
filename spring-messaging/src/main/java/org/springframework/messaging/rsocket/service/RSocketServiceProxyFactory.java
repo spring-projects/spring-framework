@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
@@ -54,13 +54,11 @@ public final class RSocketServiceProxyFactory {
 
 	private final List<RSocketServiceArgumentResolver> argumentResolvers;
 
-	@Nullable
-	private final StringValueResolver embeddedValueResolver;
+	private final @Nullable StringValueResolver embeddedValueResolver;
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
-	@Nullable
-	private final Duration blockTimeout;
+	private final @Nullable Duration blockTimeout;
 
 
 	private RSocketServiceProxyFactory(
@@ -129,18 +127,15 @@ public final class RSocketServiceProxyFactory {
 	 */
 	public static final class Builder {
 
-		@Nullable
-		private RSocketRequester rsocketRequester;
+		private @Nullable RSocketRequester rsocketRequester;
 
 		private final List<RSocketServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
-		@Nullable
-		private StringValueResolver embeddedValueResolver;
+		private @Nullable StringValueResolver embeddedValueResolver;
 
 		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
-		@Nullable
-		private Duration blockTimeout;
+		private @Nullable Duration blockTimeout;
 
 		private Builder() {
 		}
@@ -247,8 +242,7 @@ public final class RSocketServiceProxyFactory {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(MethodInvocation invocation) throws Throwable {
+		public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
 			RSocketServiceMethod serviceMethod = this.serviceMethods.get(method);
 			if (serviceMethod != null) {

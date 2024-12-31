@@ -18,13 +18,14 @@ package org.springframework.test.context.testng;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,8 +71,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 */
 	protected final JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
-	@Nullable
-	private String sqlScriptEncoding;
+	private @Nullable String sqlScriptEncoding;
 
 
 	/**

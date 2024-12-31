@@ -19,8 +19,8 @@ package org.springframework.web.servlet.view.freemarker;
 import java.util.Locale;
 
 import freemarker.template.Configuration;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
@@ -105,8 +105,7 @@ public class FreeMarkerViewResolver extends AbstractTemplateViewResolver {
 	 * @see #postProcessView(FreeMarkerView)
 	 */
 	@Override
-	@Nullable
-	protected View loadView(String viewName, Locale locale) throws Exception {
+	protected @Nullable View loadView(String viewName, Locale locale) throws Exception {
 		View view = super.loadView(viewName, locale);
 		if (view instanceof FreeMarkerView freeMarkerView) {
 			postProcessView(freeMarkerView);

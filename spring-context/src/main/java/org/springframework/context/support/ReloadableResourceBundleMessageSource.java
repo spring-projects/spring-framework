@@ -31,11 +31,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -97,8 +98,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	private List<String> fileExtensions = List.of(".properties", XML_EXTENSION);
 
-	@Nullable
-	private Properties fileEncodings;
+	private @Nullable Properties fileEncodings;
 
 	private boolean concurrentRefresh = true;
 
@@ -191,8 +191,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * returning the value found in the bundle as-is (without MessageFormat parsing).
 	 */
 	@Override
-	@Nullable
-	protected String resolveCodeWithoutArguments(String code, Locale locale) {
+	protected @Nullable String resolveCodeWithoutArguments(String code, Locale locale) {
 		if (getCacheMillis() < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
 			String result = propHolder.getProperty(code);
@@ -220,8 +219,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * using a cached MessageFormat instance per message code.
 	 */
 	@Override
-	@Nullable
-	protected MessageFormat resolveCode(String code, Locale locale) {
+	protected @Nullable MessageFormat resolveCode(String code, Locale locale) {
 		if (getCacheMillis() < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
 			MessageFormat result = propHolder.getMessageFormat(code, locale);
@@ -542,8 +540,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @return the {@code Resource} to use, or {@code null} if none found
 	 * @since 6.1
 	 */
-	@Nullable
-	protected Resource resolveResource(String filename) {
+	protected @Nullable Resource resolveResource(String filename) {
 		for (String fileExtension : this.fileExtensions) {
 			Resource resource = this.resourceLoader.getResource(filename + fileExtension);
 			if (resource.exists()) {
@@ -645,8 +642,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 */
 	protected class PropertiesHolder {
 
-		@Nullable
-		private final Properties properties;
+		private final @Nullable Properties properties;
 
 		private final long fileTimestamp;
 
@@ -668,8 +664,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			this.fileTimestamp = fileTimestamp;
 		}
 
-		@Nullable
-		public Properties getProperties() {
+		public @Nullable Properties getProperties() {
 			return this.properties;
 		}
 
@@ -685,16 +680,14 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return this.refreshTimestamp;
 		}
 
-		@Nullable
-		public String getProperty(String code) {
+		public @Nullable String getProperty(String code) {
 			if (this.properties == null) {
 				return null;
 			}
 			return this.properties.getProperty(code);
 		}
 
-		@Nullable
-		public MessageFormat getMessageFormat(String code, Locale locale) {
+		public @Nullable MessageFormat getMessageFormat(String code, Locale locale) {
 			if (this.properties == null) {
 				return null;
 			}

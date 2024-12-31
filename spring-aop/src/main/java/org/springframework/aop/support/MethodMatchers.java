@@ -20,10 +20,11 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

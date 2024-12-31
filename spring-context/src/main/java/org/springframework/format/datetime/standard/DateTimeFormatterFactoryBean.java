@@ -18,9 +18,10 @@ package org.springframework.format.datetime.standard;
 
 import java.time.format.DateTimeFormatter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that creates a JSR-310 {@link java.time.format.DateTimeFormatter}.
@@ -37,8 +38,7 @@ import org.springframework.lang.Nullable;
 public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
 		implements FactoryBean<DateTimeFormatter>, InitializingBean {
 
-	@Nullable
-	private DateTimeFormatter dateTimeFormatter;
+	private @Nullable DateTimeFormatter dateTimeFormatter;
 
 
 	@Override
@@ -47,8 +47,7 @@ public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
 	}
 
 	@Override
-	@Nullable
-	public DateTimeFormatter getObject() {
+	public @Nullable DateTimeFormatter getObject() {
 		return this.dateTimeFormatter;
 	}
 

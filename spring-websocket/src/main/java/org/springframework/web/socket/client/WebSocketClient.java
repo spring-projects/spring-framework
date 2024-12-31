@@ -19,7 +19,8 @@ package org.springframework.web.socket.client;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;

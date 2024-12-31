@@ -19,8 +19,9 @@ package org.springframework.messaging.rsocket;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**

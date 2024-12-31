@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} which returns a value which is the result of a static or instance
@@ -88,8 +89,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	private boolean initialized = false;
 
 	/** Method call result in the singleton case. */
-	@Nullable
-	private Object singletonObject;
+	private @Nullable Object singletonObject;
 
 
 	/**
@@ -116,8 +116,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	 * specified method on the fly.
 	 */
 	@Override
-	@Nullable
-	public Object getObject() throws Exception {
+	public @Nullable Object getObject() throws Exception {
 		if (this.singleton) {
 			if (!this.initialized) {
 				throw new FactoryBeanNotInitializedException();
@@ -136,8 +135,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	 * or {@code null} if not known in advance.
 	 */
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		if (!isPrepared()) {
 			// Not fully initialized yet -> return null to indicate "not known yet".
 			return null;

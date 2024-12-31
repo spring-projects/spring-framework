@@ -2,9 +2,7 @@
  * Support classes for JNDI usage,
  * including a JNDI-based BeanFactory implementation.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.jndi.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

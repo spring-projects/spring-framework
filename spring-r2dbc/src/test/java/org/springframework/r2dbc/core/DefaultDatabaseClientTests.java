@@ -29,6 +29,7 @@ import io.r2dbc.spi.test.MockColumnMetadata;
 import io.r2dbc.spi.test.MockResult;
 import io.r2dbc.spi.test.MockRow;
 import io.r2dbc.spi.test.MockRowMetadata;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -43,7 +44,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
 
@@ -488,7 +488,7 @@ class DefaultDatabaseClientTests {
 	 * Mocks a {@link Result} with a single column "name" and a single row if a non-null
 	 * row is provided.
 	 */
-	private MockResult mockSingleColumnResult(@Nullable MockRow.Builder row) {
+	private MockResult mockSingleColumnResult(MockRow.@Nullable Builder row) {
 		MockResult.Builder resultBuilder = MockResult.builder();
 		if (row != null) {
 			MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(

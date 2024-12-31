@@ -16,7 +16,8 @@
 
 package org.springframework.http;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.InvalidMimeTypeException;
 
 /**
@@ -50,6 +51,14 @@ public class InvalidMediaTypeException extends IllegalArgumentException {
 		this.mediaType = ex.getMimeType();
 	}
 
+	/**
+	 * Returns the detail message string of this exception instance (never {@code null}).
+	 */
+	@Override
+	@SuppressWarnings("NullAway") // InvalidMediaTypeException message is never null
+	public String getMessage() {
+		return super.getMessage();
+	}
 
 	/**
 	 * Return the offending media type.

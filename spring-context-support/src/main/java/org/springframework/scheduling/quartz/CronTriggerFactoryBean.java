@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -30,7 +31,6 @@ import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -70,43 +70,33 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		);
 
 
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
-	@Nullable
-	private String group;
+	private @Nullable String group;
 
-	@Nullable
-	private JobDetail jobDetail;
+	private @Nullable JobDetail jobDetail;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
-	@Nullable
-	private Date startTime;
+	private @Nullable Date startTime;
 
 	private long startDelay = 0;
 
-	@Nullable
-	private String cronExpression;
+	private @Nullable String cronExpression;
 
-	@Nullable
-	private TimeZone timeZone;
+	private @Nullable TimeZone timeZone;
 
-	@Nullable
-	private String calendarName;
+	private @Nullable String calendarName;
 
 	private int priority;
 
 	private int misfireInstruction = CronTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
-	@Nullable
-	private String description;
+	private @Nullable String description;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private CronTrigger cronTrigger;
+	private @Nullable CronTrigger cronTrigger;
 
 
 	/**
@@ -281,8 +271,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 
 	@Override
-	@Nullable
-	public CronTrigger getObject() {
+	public @Nullable CronTrigger getObject() {
 		return this.cronTrigger;
 	}
 

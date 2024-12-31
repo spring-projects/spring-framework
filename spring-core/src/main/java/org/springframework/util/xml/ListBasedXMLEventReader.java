@@ -25,7 +25,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -40,8 +41,7 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 
 	private final List<XMLEvent> events;
 
-	@Nullable
-	private XMLEvent currentEvent;
+	private @Nullable XMLEvent currentEvent;
 
 	private int cursor = 0;
 
@@ -70,8 +70,7 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 	}
 
 	@Override
-	@Nullable
-	public XMLEvent peek() {
+	public @Nullable XMLEvent peek() {
 		if (hasNext()) {
 			return this.events.get(this.cursor);
 		}
@@ -105,8 +104,7 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 	}
 
 	@Override
-	@Nullable
-	public XMLEvent nextTag() throws XMLStreamException {
+	public @Nullable XMLEvent nextTag() throws XMLStreamException {
 		checkIfClosed();
 
 		while (true) {

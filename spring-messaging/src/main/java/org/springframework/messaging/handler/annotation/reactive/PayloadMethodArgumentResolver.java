@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,7 +38,6 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -79,8 +79,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	private final List<Decoder<?>> decoders;
 
-	@Nullable
-	private final Validator validator;
+	private final @Nullable Validator validator;
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 
@@ -108,8 +107,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	/**
 	 * Return the configured validator, if any.
 	 */
-	@Nullable
-	public Validator getValidator() {
+	public @Nullable Validator getValidator() {
 		return this.validator;
 	}
 
@@ -196,8 +194,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * {@link MimeType} value or a String to parse to a {@link MimeType}.
 	 * @param message the input message
 	 */
-	@Nullable
-	protected MimeType getMimeType(Message<?> message) {
+	protected @Nullable MimeType getMimeType(Message<?> message) {
 		Object headerValue = message.getHeaders().get(MessageHeaders.CONTENT_TYPE);
 		if (headerValue == null) {
 			return null;
@@ -279,8 +276,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				"Payload content is missing: " + param.getExecutable().toGenericString());
 	}
 
-	@Nullable
-	private Consumer<Object> getValidator(Message<?> message, MethodParameter parameter) {
+	private @Nullable Consumer<Object> getValidator(Message<?> message, MethodParameter parameter) {
 		if (this.validator == null) {
 			return null;
 		}

@@ -1,9 +1,7 @@
 /**
  * Instrumentation for {@link io.micrometer.observation.Observation observing} reactive HTTP server applications.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.http.server.reactive.observation;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

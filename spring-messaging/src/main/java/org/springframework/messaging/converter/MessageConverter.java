@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.converter;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
@@ -42,8 +43,7 @@ public interface MessageConverter {
 	 * @return the result of the conversion, or {@code null} if the converter cannot
 	 * perform the conversion
 	 */
-	@Nullable
-	Object fromMessage(Message<?> message, Class<?> targetClass);
+	@Nullable Object fromMessage(Message<?> message, Class<?> targetClass);
 
 	/**
 	 * Create a {@link Message} whose payload is the result of converting the given
@@ -58,7 +58,6 @@ public interface MessageConverter {
 	 * @return the new message, or {@code null} if the converter does not support the
 	 * Object type or the target media type
 	 */
-	@Nullable
-	Message<?> toMessage(Object payload, @Nullable MessageHeaders headers);
+	@Nullable Message<?> toMessage(Object payload, @Nullable MessageHeaders headers);
 
 }

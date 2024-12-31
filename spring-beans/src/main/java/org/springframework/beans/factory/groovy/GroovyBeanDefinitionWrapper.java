@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import groovy.lang.GroovyObjectSupport;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -57,23 +57,17 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			FACTORY_BEAN, FACTORY_METHOD, INIT_METHOD, DESTROY_METHOD, SINGLETON);
 
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private final Class<?> clazz;
+	private final @Nullable Class<?> clazz;
 
-	@Nullable
-	private final Collection<?> constructorArgs;
+	private final @Nullable Collection<?> constructorArgs;
 
-	@Nullable
-	private AbstractBeanDefinition definition;
+	private @Nullable AbstractBeanDefinition definition;
 
-	@Nullable
-	private BeanWrapper definitionWrapper;
+	private @Nullable BeanWrapper definitionWrapper;
 
-	@Nullable
-	private String parentName;
+	private @Nullable String parentName;
 
 
 	GroovyBeanDefinitionWrapper(String beanName) {
@@ -91,8 +85,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	}
 
 
-	@Nullable
-	public String getBeanName() {
+	public @Nullable String getBeanName() {
 		return this.beanName;
 	}
 
@@ -159,8 +152,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 
 
 	@Override
-	@Nullable
-	public Object getProperty(String property) {
+	public @Nullable Object getProperty(String property) {
 		Assert.state(this.definitionWrapper != null, "BeanDefinition wrapper not initialized");
 		if (this.definitionWrapper.isReadableProperty(property)) {
 			return this.definitionWrapper.getPropertyValue(property);

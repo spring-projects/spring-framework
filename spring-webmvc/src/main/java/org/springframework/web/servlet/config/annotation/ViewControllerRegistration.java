@@ -16,9 +16,10 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;

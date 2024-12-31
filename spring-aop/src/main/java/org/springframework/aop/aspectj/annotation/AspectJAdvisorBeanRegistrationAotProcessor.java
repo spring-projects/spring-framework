@@ -18,13 +18,14 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.lang.reflect.Field;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -43,8 +44,7 @@ class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 
 	@Override
-	@Nullable
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		if (aspectjPresent) {
 			Class<?> beanClass = registeredBean.getBeanClass();
 			if (compiledByAjc(beanClass)) {

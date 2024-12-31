@@ -20,8 +20,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying the API to be implemented by a class providing call meta-data.
@@ -67,46 +68,40 @@ public interface CallMetaDataProvider {
 	 * Provide any modification of the procedure name passed in to match the meta-data currently used.
 	 * <p>This could include altering the case.
 	 */
-	@Nullable
-	String procedureNameToUse(@Nullable String procedureName);
+	@Nullable String procedureNameToUse(@Nullable String procedureName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta-data currently used.
 	 * <p>This could include altering the case.
 	 */
-	@Nullable
-	String catalogNameToUse(@Nullable String catalogName);
+	@Nullable String catalogNameToUse(@Nullable String catalogName);
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta-data currently used.
 	 * <p>This could include altering the case.
 	 */
-	@Nullable
-	String schemaNameToUse(@Nullable String schemaName);
+	@Nullable String schemaNameToUse(@Nullable String schemaName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta-data currently used.
 	 * <p>The returned value will be used for meta-data lookups. This could include altering the case
 	 * used or providing a base catalog if none is provided.
 	 */
-	@Nullable
-	String metaDataCatalogNameToUse(@Nullable String catalogName) ;
+	@Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) ;
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta-data currently used.
 	 * <p>The returned value will be used for meta-data lookups. This could include altering the case
 	 * used or providing a base schema if none is provided.
 	 */
-	@Nullable
-	String metaDataSchemaNameToUse(@Nullable String schemaName);
+	@Nullable String metaDataSchemaNameToUse(@Nullable String schemaName);
 
 	/**
 	 * Provide any modification of the column name passed in to match the meta-data currently used.
 	 * <p>This could include altering the case.
 	 * @param parameterName name of the parameter of column
 	 */
-	@Nullable
-	String parameterNameToUse(@Nullable String parameterName);
+	@Nullable String parameterNameToUse(@Nullable String parameterName);
 
 	/**
 	 * Return the name of the named parameter to use for binding the given parameter name.
@@ -147,8 +142,7 @@ public interface CallMetaDataProvider {
 	 * Get the name of the current user. Useful for meta-data lookups etc.
 	 * @return current user name from database connection
 	 */
-	@Nullable
-	String getUserName();
+	@Nullable String getUserName();
 
 	/**
 	 * Are we using the meta-data for the procedure columns?

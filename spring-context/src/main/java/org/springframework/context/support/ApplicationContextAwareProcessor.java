@@ -16,6 +16,8 @@
 
 package org.springframework.context.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -28,7 +30,6 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -79,8 +80,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 
 	@Override
-	@Nullable
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public @Nullable Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Aware) {
 			invokeAwareInterfaces(bean);
 		}

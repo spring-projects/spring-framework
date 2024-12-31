@@ -3,9 +3,7 @@
  * {@link org.springframework.web.socket.sockjs.support.AbstractSockJsService}
  * implementation.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.socket.sockjs.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

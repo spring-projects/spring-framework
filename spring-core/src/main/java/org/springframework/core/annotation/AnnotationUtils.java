@@ -30,11 +30,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -187,8 +188,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.0
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <A extends Annotation> A getAnnotation(Annotation annotation, Class<A> annotationType) {
+	public static <A extends Annotation> @Nullable A getAnnotation(Annotation annotation, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
 		if (annotationType.isInstance(annotation)) {
 			return synthesizeAnnotation((A) annotation, annotationType);
@@ -215,8 +215,7 @@ public abstract class AnnotationUtils {
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 3.1
 	 */
-	@Nullable
-	public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
+	public static <A extends Annotation> @Nullable A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
 				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
@@ -247,8 +246,7 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 * @see #getAnnotation(AnnotatedElement, Class)
 	 */
-	@Nullable
-	public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
+	public static <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
 		Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		return getAnnotation((AnnotatedElement) resolvedMethod, annotationType);
 	}
@@ -266,8 +264,7 @@ public abstract class AnnotationUtils {
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated
-	@Nullable
-	public static Annotation[] getAnnotations(AnnotatedElement annotatedElement) {
+	public static Annotation @Nullable [] getAnnotations(AnnotatedElement annotatedElement) {
 		try {
 			return synthesizeAnnotationArray(annotatedElement.getAnnotations(), annotatedElement);
 		}
@@ -291,8 +288,7 @@ public abstract class AnnotationUtils {
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated
-	@Nullable
-	public static Annotation[] getAnnotations(Method method) {
+	public static Annotation @Nullable [] getAnnotations(Method method) {
 		try {
 			return synthesizeAnnotationArray(BridgeMethodResolver.findBridgedMethod(method).getAnnotations(), method);
 		}
@@ -480,8 +476,7 @@ public abstract class AnnotationUtils {
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.2
 	 */
-	@Nullable
-	public static <A extends Annotation> A findAnnotation(
+	public static <A extends Annotation> @Nullable A findAnnotation(
 			AnnotatedElement annotatedElement, @Nullable Class<A> annotationType) {
 
 		if (annotationType == null) {
@@ -515,8 +510,7 @@ public abstract class AnnotationUtils {
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @see #getAnnotation(Method, Class)
 	 */
-	@Nullable
-	public static <A extends Annotation> A findAnnotation(Method method, @Nullable Class<A> annotationType) {
+	public static <A extends Annotation> @Nullable A findAnnotation(Method method, @Nullable Class<A> annotationType) {
 		if (annotationType == null) {
 			return null;
 		}
@@ -555,8 +549,7 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the type of annotation to look for
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
-	@Nullable
-	public static <A extends Annotation> A findAnnotation(Class<?> clazz, @Nullable Class<A> annotationType) {
+	public static <A extends Annotation> @Nullable A findAnnotation(Class<?> clazz, @Nullable Class<A> annotationType) {
 		if (annotationType == null) {
 			return null;
 		}
@@ -605,8 +598,7 @@ public abstract class AnnotationUtils {
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated
-	@Nullable
-	public static Class<?> findAnnotationDeclaringClass(
+	public static @Nullable Class<?> findAnnotationDeclaringClass(
 			Class<? extends Annotation> annotationType, @Nullable Class<?> clazz) {
 
 		if (clazz == null) {
@@ -642,8 +634,7 @@ public abstract class AnnotationUtils {
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated
-	@Nullable
-	public static Class<?> findAnnotationDeclaringClassForTypes(
+	public static @Nullable Class<?> findAnnotationDeclaringClassForTypes(
 			List<Class<? extends Annotation>> annotationTypes, @Nullable Class<?> clazz) {
 
 		if (clazz == null) {
@@ -984,8 +975,7 @@ public abstract class AnnotationUtils {
 		}
 	}
 
-	@Nullable
-	private static Object getAttributeValueForMirrorResolution(Method attribute, @Nullable Object attributes) {
+	private static @Nullable Object getAttributeValueForMirrorResolution(Method attribute, @Nullable Object attributes) {
 		if (!(attributes instanceof AnnotationAttributes annotationAttributes)) {
 			return null;
 		}
@@ -993,8 +983,7 @@ public abstract class AnnotationUtils {
 		return (result instanceof DefaultValueHolder defaultValueHolder ? defaultValueHolder.defaultValue : result);
 	}
 
-	@Nullable
-	private static Object adaptValue(
+	private static @Nullable Object adaptValue(
 			@Nullable Object annotatedElement, @Nullable Object value, boolean classValuesAsString) {
 
 		if (classValuesAsString) {
@@ -1032,8 +1021,7 @@ public abstract class AnnotationUtils {
 	 * in which case such an exception will be rethrown
 	 * @see #getValue(Annotation, String)
 	 */
-	@Nullable
-	public static Object getValue(Annotation annotation) {
+	public static @Nullable Object getValue(Annotation annotation) {
 		return getValue(annotation, VALUE);
 	}
 
@@ -1046,8 +1034,7 @@ public abstract class AnnotationUtils {
 	 * in which case such an exception will be rethrown
 	 * @see #getValue(Annotation)
 	 */
-	@Nullable
-	public static Object getValue(@Nullable Annotation annotation, @Nullable String attributeName) {
+	public static @Nullable Object getValue(@Nullable Annotation annotation, @Nullable String attributeName) {
 		if (annotation == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
@@ -1075,8 +1062,7 @@ public abstract class AnnotationUtils {
 	 * @return the value returned from the method invocation
 	 * @since 5.3.24
 	 */
-	@Nullable
-	static Object invokeAnnotationMethod(Method method, @Nullable Object annotation) {
+	static @Nullable Object invokeAnnotationMethod(Method method, @Nullable Object annotation) {
 		if (annotation == null) {
 			return null;
 		}
@@ -1156,8 +1142,7 @@ public abstract class AnnotationUtils {
 	 * @return the default value, or {@code null} if not found
 	 * @see #getDefaultValue(Annotation, String)
 	 */
-	@Nullable
-	public static Object getDefaultValue(Annotation annotation) {
+	public static @Nullable Object getDefaultValue(Annotation annotation) {
 		return getDefaultValue(annotation, VALUE);
 	}
 
@@ -1168,8 +1153,7 @@ public abstract class AnnotationUtils {
 	 * @return the default value of the named attribute, or {@code null} if not found
 	 * @see #getDefaultValue(Class, String)
 	 */
-	@Nullable
-	public static Object getDefaultValue(@Nullable Annotation annotation, @Nullable String attributeName) {
+	public static @Nullable Object getDefaultValue(@Nullable Annotation annotation, @Nullable String attributeName) {
 		return (annotation != null ? getDefaultValue(annotation.annotationType(), attributeName) : null);
 	}
 
@@ -1180,8 +1164,7 @@ public abstract class AnnotationUtils {
 	 * @return the default value, or {@code null} if not found
 	 * @see #getDefaultValue(Class, String)
 	 */
-	@Nullable
-	public static Object getDefaultValue(Class<? extends Annotation> annotationType) {
+	public static @Nullable Object getDefaultValue(Class<? extends Annotation> annotationType) {
 		return getDefaultValue(annotationType, VALUE);
 	}
 
@@ -1193,8 +1176,7 @@ public abstract class AnnotationUtils {
 	 * @return the default value of the named attribute, or {@code null} if not found
 	 * @see #getDefaultValue(Annotation, String)
 	 */
-	@Nullable
-	public static Object getDefaultValue(
+	public static @Nullable Object getDefaultValue(
 			@Nullable Class<? extends Annotation> annotationType, @Nullable String attributeName) {
 
 		if (annotationType == null || !StringUtils.hasText(attributeName)) {

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.net.URI;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerResponse;
 import reactor.netty.http.server.WebsocketServerSpec;
@@ -26,7 +27,6 @@ import reactor.netty.http.server.WebsocketServerSpec;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -44,11 +44,9 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 	private final Supplier<WebsocketServerSpec.Builder> specBuilderSupplier;
 
-	@Nullable
-	private Integer maxFramePayloadLength;
+	private @Nullable Integer maxFramePayloadLength;
 
-	@Nullable
-	private Boolean handlePing;
+	private @Nullable Boolean handlePing;
 
 
 	/**

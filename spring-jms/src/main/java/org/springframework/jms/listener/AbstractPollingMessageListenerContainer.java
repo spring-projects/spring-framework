@@ -23,12 +23,12 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -89,8 +89,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private boolean sessionTransactedCalled = false;
 
-	@Nullable
-	private PlatformTransactionManager transactionManager;
+	private @Nullable PlatformTransactionManager transactionManager;
 
 	private final DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
@@ -133,8 +132,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * Return the Spring PlatformTransactionManager to use for transactional
 	 * wrapping of message receipt plus listener execution.
 	 */
-	@Nullable
-	protected final PlatformTransactionManager getTransactionManager() {
+	protected final @Nullable PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
 
@@ -436,8 +434,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return the Message, or {@code null} if none
 	 * @throws JMSException if thrown by JMS methods
 	 */
-	@Nullable
-	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
+	protected @Nullable Message receiveMessage(MessageConsumer consumer) throws JMSException {
 		return receiveFromConsumer(consumer, getReceiveTimeout());
 	}
 
@@ -468,8 +465,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return an appropriate Connection fetched from the holder,
 	 * or {@code null} if none found
 	 */
-	@Nullable
-	protected Connection getConnection(JmsResourceHolder holder) {
+	protected @Nullable Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
 	}
 
@@ -480,8 +476,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @return an appropriate Session fetched from the holder,
 	 * or {@code null} if none found
 	 */
-	@Nullable
-	protected Session getSession(JmsResourceHolder holder) {
+	protected @Nullable Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
 	}
 
@@ -492,14 +487,12 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		@Override
-		@Nullable
-		public Connection getConnection(JmsResourceHolder holder) {
+		public @Nullable Connection getConnection(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getConnection(holder);
 		}
 
 		@Override
-		@Nullable
-		public Session getSession(JmsResourceHolder holder) {
+		public @Nullable Session getSession(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getSession(holder);
 		}
 

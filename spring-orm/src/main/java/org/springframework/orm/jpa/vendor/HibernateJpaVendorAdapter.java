@@ -37,8 +37,7 @@ import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
@@ -177,8 +176,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 * @see #determineDatabaseDialectName
 	 */
-	@Nullable
-	protected Class<?> determineDatabaseDialectClass(Database database) {
+	protected @Nullable Class<?> determineDatabaseDialectClass(Database database) {
 		return switch (database) {
 			case DB2 -> DB2Dialect.class;
 			case H2 -> H2Dialect.class;
@@ -201,8 +199,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @since 7.0
 	 * @see #determineDatabaseDialectClass
 	 */
-	@Nullable
-	protected String determineDatabaseDialectName(Database database) {
+	protected @Nullable String determineDatabaseDialectName(Database database) {
 		return switch (database) {
 			case DERBY -> "org.hibernate.community.dialect.DerbyDialect";
 			default -> null;

@@ -16,8 +16,9 @@
 
 package org.springframework.cache.interceptor;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
-import org.springframework.lang.Nullable;
 
 /**
  * A simple {@link CacheErrorHandler} that does not handle the

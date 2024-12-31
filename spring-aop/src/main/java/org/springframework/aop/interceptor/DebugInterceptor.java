@@ -17,8 +17,7 @@
 package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that can be introduced in a chain
@@ -58,8 +57,7 @@ public class DebugInterceptor extends SimpleTraceInterceptor {
 
 
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 		synchronized (this) {
 			this.count++;
 		}

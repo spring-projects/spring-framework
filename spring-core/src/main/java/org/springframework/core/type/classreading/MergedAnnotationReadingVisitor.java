@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -43,11 +44,9 @@ import org.springframework.util.ClassUtils;
  */
 class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVisitor {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 
-	@Nullable
-	private final Object source;
+	private final @Nullable Object source;
 
 	private final Class<A> annotationType;
 
@@ -81,8 +80,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 	}
 
 	@Override
-	@Nullable
-	public AnnotationVisitor visitAnnotation(String name, String descriptor) {
+	public @Nullable AnnotationVisitor visitAnnotation(String name, String descriptor) {
 		return visitAnnotation(descriptor, annotation -> this.attributes.put(name, annotation));
 	}
 
@@ -108,8 +106,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <T extends Annotation> AnnotationVisitor visitAnnotation(
+	private <T extends Annotation> @Nullable AnnotationVisitor visitAnnotation(
 			String descriptor, Consumer<MergedAnnotation<T>> consumer) {
 
 		String className = Type.getType(descriptor).getClassName();
@@ -121,8 +118,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader,
+	static <A extends Annotation> @Nullable AnnotationVisitor get(@Nullable ClassLoader classLoader,
 			@Nullable Object source, String descriptor, boolean visible,
 			Consumer<MergedAnnotation<A>> consumer) {
 
@@ -173,8 +169,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 		}
 
 		@Override
-		@Nullable
-		public AnnotationVisitor visitAnnotation(String name, String descriptor) {
+		public @Nullable AnnotationVisitor visitAnnotation(String name, String descriptor) {
 			return MergedAnnotationReadingVisitor.this.visitAnnotation(descriptor, this.elements::add);
 		}
 

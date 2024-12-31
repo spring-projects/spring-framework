@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface that defines common cache operations.
@@ -65,8 +65,7 @@ public interface Cache {
 	 * @see #get(Object, Class)
 	 * @see #get(Object, Callable)
 	 */
-	@Nullable
-	ValueWrapper get(Object key);
+	@Nullable ValueWrapper get(Object key);
 
 	/**
 	 * Return the value to which this cache maps the specified key,
@@ -86,8 +85,7 @@ public interface Cache {
 	 * @since 4.0
 	 * @see #get(Object)
 	 */
-	@Nullable
-	<T> T get(Object key, @Nullable Class<T> type);
+	<T> @Nullable T get(Object key, @Nullable Class<T> type);
 
 	/**
 	 * Return the value to which this cache maps the specified key, obtaining
@@ -105,8 +103,7 @@ public interface Cache {
 	 * @since 4.3
 	 * @see #get(Object)
 	 */
-	@Nullable
-	<T> T get(Object key, Callable<T> valueLoader);
+	<T> @Nullable T get(Object key, Callable<T> valueLoader);
 
 	/**
 	 * Return the value to which this cache maps the specified key,
@@ -136,8 +133,7 @@ public interface Cache {
 	 * @since 6.1
 	 * @see #retrieve(Object, Supplier)
 	 */
-	@Nullable
-	default CompletableFuture<?> retrieve(Object key) {
+	default @Nullable CompletableFuture<?> retrieve(Object key) {
 		throw new UnsupportedOperationException(
 				getClass().getName() + " does not support CompletableFuture-based retrieval");
 	}
@@ -214,8 +210,7 @@ public interface Cache {
 	 * @since 4.1
 	 * @see #put(Object, Object)
 	 */
-	@Nullable
-	default ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
+	default @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		ValueWrapper existingValue = get(key);
 		if (existingValue == null) {
 			put(key, value);
@@ -299,8 +294,7 @@ public interface Cache {
 		/**
 		 * Return the actual value in the cache.
 		 */
-		@Nullable
-		Object get();
+		@Nullable Object get();
 	}
 
 
@@ -312,16 +306,14 @@ public interface Cache {
 	@SuppressWarnings("serial")
 	class ValueRetrievalException extends RuntimeException {
 
-		@Nullable
-		private final Object key;
+		private final @Nullable Object key;
 
 		public ValueRetrievalException(@Nullable Object key, Callable<?> loader, @Nullable Throwable ex) {
 			super(String.format("Value for key '%s' could not be loaded using '%s'", key, loader), ex);
 			this.key = key;
 		}
 
-		@Nullable
-		public Object getKey() {
+		public @Nullable Object getKey() {
 			return this.key;
 		}
 	}

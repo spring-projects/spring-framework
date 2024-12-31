@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Mutable transaction context that encapsulates transactional synchronizations and
@@ -36,21 +36,17 @@ import org.springframework.lang.Nullable;
  */
 public class TransactionContext {
 
-	@Nullable
-	private final TransactionContext parent;
+	private final @Nullable TransactionContext parent;
 
 	private final Map<Object, Object> resources = new LinkedHashMap<>();
 
-	@Nullable
-	private Set<TransactionSynchronization> synchronizations;
+	private @Nullable Set<TransactionSynchronization> synchronizations;
 
-	@Nullable
-	private volatile String currentTransactionName;
+	private volatile @Nullable String currentTransactionName;
 
 	private volatile boolean currentTransactionReadOnly;
 
-	@Nullable
-	private volatile Integer currentTransactionIsolationLevel;
+	private volatile @Nullable Integer currentTransactionIsolationLevel;
 
 	private volatile boolean actualTransactionActive;
 
@@ -64,8 +60,7 @@ public class TransactionContext {
 	}
 
 
-	@Nullable
-	public TransactionContext getParent() {
+	public @Nullable TransactionContext getParent() {
 		return this.parent;
 	}
 
@@ -77,8 +72,7 @@ public class TransactionContext {
 		this.synchronizations = synchronizations;
 	}
 
-	@Nullable
-	public Set<TransactionSynchronization> getSynchronizations() {
+	public @Nullable Set<TransactionSynchronization> getSynchronizations() {
 		return this.synchronizations;
 	}
 
@@ -86,8 +80,7 @@ public class TransactionContext {
 		this.currentTransactionName = currentTransactionName;
 	}
 
-	@Nullable
-	public String getCurrentTransactionName() {
+	public @Nullable String getCurrentTransactionName() {
 		return this.currentTransactionName;
 	}
 
@@ -103,8 +96,7 @@ public class TransactionContext {
 		this.currentTransactionIsolationLevel = currentTransactionIsolationLevel;
 	}
 
-	@Nullable
-	public Integer getCurrentTransactionIsolationLevel() {
+	public @Nullable Integer getCurrentTransactionIsolationLevel() {
 		return this.currentTransactionIsolationLevel;
 	}
 

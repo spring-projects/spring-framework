@@ -22,7 +22,7 @@ import java.util.Spliterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The default implementation of the {@link PropertySources} interface.
@@ -87,8 +87,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	@Override
-	@Nullable
-	public PropertySource<?> get(String name) {
+	public @Nullable PropertySource<?> get(String name) {
 		for (PropertySource<?> propertySource : this.propertySourceList) {
 			if (propertySource.getName().equals(name)) {
 				return propertySource;
@@ -155,8 +154,7 @@ public class MutablePropertySources implements PropertySources {
 	 * Remove and return the property source with the given name, {@code null} if not found.
 	 * @param name the name of the property source to find and remove
 	 */
-	@Nullable
-	public PropertySource<?> remove(String name) {
+	public @Nullable PropertySource<?> remove(String name) {
 		synchronized (this.propertySourceList) {
 			int index = this.propertySourceList.indexOf(PropertySource.named(name));
 			return (index != -1 ? this.propertySourceList.remove(index) : null);

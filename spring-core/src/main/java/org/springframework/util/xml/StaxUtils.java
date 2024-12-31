@@ -34,10 +34,9 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stax.StAXSource;
 
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Convenience methods for working with the StAX API. Partly historic due to JAXP 1.3
@@ -134,8 +133,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXSource}
 	 * or custom StAX Source
 	 */
-	@Nullable
-	public static XMLStreamReader getXMLStreamReader(Source source) {
+	public static @Nullable XMLStreamReader getXMLStreamReader(Source source) {
 		if (source instanceof StAXSource stAXSource) {
 			return stAXSource.getXMLStreamReader();
 		}
@@ -154,8 +152,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXSource}
 	 * or custom StAX Source
 	 */
-	@Nullable
-	public static XMLEventReader getXMLEventReader(Source source) {
+	public static @Nullable XMLEventReader getXMLEventReader(Source source) {
 		if (source instanceof StAXSource stAXSource) {
 			return stAXSource.getXMLEventReader();
 		}
@@ -220,8 +217,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXResult}
 	 * or custom StAX Result
 	 */
-	@Nullable
-	public static XMLStreamWriter getXMLStreamWriter(Result result) {
+	public static @Nullable XMLStreamWriter getXMLStreamWriter(Result result) {
 		if (result instanceof StAXResult stAXResult) {
 			return stAXResult.getXMLStreamWriter();
 		}
@@ -240,8 +236,7 @@ public abstract class StaxUtils {
 	 * @throws IllegalArgumentException if {@code source} isn't a JAXP 1.4 {@link StAXResult}
 	 * or custom StAX Result
 	 */
-	@Nullable
-	public static XMLEventWriter getXMLEventWriter(Result result) {
+	public static @Nullable XMLEventWriter getXMLEventWriter(Result result) {
 		if (result instanceof StAXResult stAXResult) {
 			return stAXResult.getXMLEventWriter();
 		}

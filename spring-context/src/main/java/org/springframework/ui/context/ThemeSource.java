@@ -16,7 +16,7 @@
 
 package org.springframework.ui.context;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by objects that can resolve {@link Theme Themes}.
@@ -42,7 +42,6 @@ public interface ThemeSource {
 	 * return default Themes for other theme names.
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 */
-	@Nullable
-	Theme getTheme(String themeName);
+	@Nullable Theme getTheme(String themeName);
 
 }

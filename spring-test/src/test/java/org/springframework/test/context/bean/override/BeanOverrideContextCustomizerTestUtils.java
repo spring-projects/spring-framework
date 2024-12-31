@@ -18,8 +18,9 @@ package org.springframework.test.context.bean.override;
 
 import java.util.Collections;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
 
@@ -42,8 +43,7 @@ public abstract class BeanOverrideContextCustomizerTestUtils {
 	 * @param testClass a test class to introspect
 	 * @return a context customizer for bean override support, or null
 	 */
-	@Nullable
-	public static ContextCustomizer createContextCustomizer(Class<?> testClass) {
+	public static @Nullable ContextCustomizer createContextCustomizer(Class<?> testClass) {
 		return factory.createContextCustomizer(testClass, Collections.emptyList());
 	}
 

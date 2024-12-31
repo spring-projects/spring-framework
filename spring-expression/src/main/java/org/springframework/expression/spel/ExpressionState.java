@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -31,7 +33,6 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -59,8 +60,7 @@ public class ExpressionState {
 
 	private final SpelParserConfiguration configuration;
 
-	@Nullable
-	private Deque<TypedValue> contextObjects;
+	private @Nullable Deque<TypedValue> contextObjects;
 
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
@@ -69,8 +69,7 @@ public class ExpressionState {
 	// #list1.?[#list2.contains(#this)]
 	// On entering the selection we enter a new scope, and #this is now the
 	// element from list1.
-	@Nullable
-	private Deque<TypedValue> scopeRootObjects;
+	private @Nullable Deque<TypedValue> scopeRootObjects;
 
 
 	public ExpressionState(EvaluationContext context) {
@@ -190,8 +189,7 @@ public class ExpressionState {
 		return result;
 	}
 
-	@Nullable
-	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public @Nullable Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		Object val = value.getValue();
 		return this.relatedContext.getTypeConverter().convertValue(
 				val, TypeDescriptor.forObject(val), targetTypeDescriptor);

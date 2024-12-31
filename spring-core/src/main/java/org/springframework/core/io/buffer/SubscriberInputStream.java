@@ -28,11 +28,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Exceptions;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -80,16 +80,13 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 
 	private int consumed;
 
-	@Nullable
-	private DataBuffer available;
+	private @Nullable DataBuffer available;
 
-	@Nullable
-	private Subscription subscription;
+	private @Nullable Subscription subscription;
 
 	private boolean done;
 
-	@Nullable
-	private Throwable error;
+	private @Nullable Throwable error;
 
 
 	/**

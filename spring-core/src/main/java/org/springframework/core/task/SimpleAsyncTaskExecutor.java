@@ -24,7 +24,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
@@ -76,19 +77,15 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	/** Internal concurrency throttle used by this executor. */
 	private final ConcurrencyThrottleAdapter concurrencyThrottle = new ConcurrencyThrottleAdapter();
 
-	@Nullable
-	private VirtualThreadDelegate virtualThreadDelegate;
+	private @Nullable VirtualThreadDelegate virtualThreadDelegate;
 
-	@Nullable
-	private ThreadFactory threadFactory;
+	private @Nullable ThreadFactory threadFactory;
 
-	@Nullable
-	private TaskDecorator taskDecorator;
+	private @Nullable TaskDecorator taskDecorator;
 
 	private long taskTerminationTimeout;
 
-	@Nullable
-	private Set<Thread> activeThreads;
+	private @Nullable Set<Thread> activeThreads;
 
 	private volatile boolean active = true;
 
@@ -142,8 +139,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	/**
 	 * Return the external factory to use for creating new Threads, if any.
 	 */
-	@Nullable
-	public final ThreadFactory getThreadFactory() {
+	public final @Nullable ThreadFactory getThreadFactory() {
 		return this.threadFactory;
 	}
 

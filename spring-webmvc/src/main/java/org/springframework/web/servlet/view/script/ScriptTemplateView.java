@@ -36,6 +36,7 @@ import javax.script.SimpleBindings;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -44,7 +45,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.StandardScriptEvalException;
 import org.springframework.scripting.support.StandardScriptUtils;
 import org.springframework.util.Assert;
@@ -88,35 +88,25 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			new NamedThreadLocal<>("ScriptTemplateView engines");
 
 
-	@Nullable
-	private ScriptEngine engine;
+	private @Nullable ScriptEngine engine;
 
-	@Nullable
-	private Supplier<ScriptEngine> engineSupplier;
+	private @Nullable Supplier<ScriptEngine> engineSupplier;
 
-	@Nullable
-	private String engineName;
+	private @Nullable String engineName;
 
-	@Nullable
-	private Boolean sharedEngine;
+	private @Nullable Boolean sharedEngine;
 
-	@Nullable
-	private String[] scripts;
+	private String @Nullable [] scripts;
 
-	@Nullable
-	private String renderObject;
+	private @Nullable String renderObject;
 
-	@Nullable
-	private String renderFunction;
+	private @Nullable String renderFunction;
 
-	@Nullable
-	private Charset charset;
+	private @Nullable Charset charset;
 
-	@Nullable
-	private String[] resourceLoaderPaths;
+	private String @Nullable [] resourceLoaderPaths;
 
-	@Nullable
-	private volatile ScriptEngineManager scriptEngineManager;
+	private volatile @Nullable ScriptEngineManager scriptEngineManager;
 
 
 	/**
@@ -350,8 +340,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-	@Nullable
-	protected Resource getResource(String location) {
+	protected @Nullable Resource getResource(String location) {
 		if (this.resourceLoaderPaths != null) {
 			for (String path : this.resourceLoaderPaths) {
 				Resource resource = obtainApplicationContext().getResource(path + location);

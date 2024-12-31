@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
@@ -63,11 +63,9 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private final HttpServletRequest request;
 
-	@Nullable
-	private HttpServletResponse response;
+	private @Nullable HttpServletResponse response;
 
-	@Nullable
-	private volatile HttpSession session;
+	private volatile @Nullable HttpSession session;
 
 	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<>(1);
 
@@ -102,8 +100,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	/**
 	 * Exposes the native {@link HttpServletResponse} that we're wrapping (if any).
 	 */
-	@Nullable
-	public final HttpServletResponse getResponse() {
+	public final @Nullable HttpServletResponse getResponse() {
 		return this.response;
 	}
 
@@ -111,8 +108,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * Exposes the {@link HttpSession} that we're wrapping.
 	 * @param allowCreate whether to allow creation of a new session if none exists yet
 	 */
-	@Nullable
-	protected final HttpSession getSession(boolean allowCreate) {
+	protected final @Nullable HttpSession getSession(boolean allowCreate) {
 		if (isRequestActive()) {
 			HttpSession session = this.request.getSession(allowCreate);
 			this.session = session;
@@ -143,8 +139,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 
 	@Override
-	@Nullable
-	public Object getAttribute(String name, int scope) {
+	public @Nullable Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
 				throw new IllegalStateException(
@@ -243,8 +238,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 	@Override
-	@Nullable
-	public Object resolveReference(String key) {
+	public @Nullable Object resolveReference(String key) {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return this.request;
 		}

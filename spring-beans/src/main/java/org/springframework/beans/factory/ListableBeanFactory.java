@@ -20,9 +20,10 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
@@ -375,8 +376,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @see #getBeansWithAnnotation(Class)
 	 * @see #getType(String)
 	 */
-	@Nullable
-	<A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+	<A extends Annotation> @Nullable A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException;
 
 	/**
@@ -397,8 +397,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @see #getBeansWithAnnotation(Class)
 	 * @see #getType(String, boolean)
 	 */
-	@Nullable
-	<A extends Annotation> A findAnnotationOnBean(
+	<A extends Annotation> @Nullable A findAnnotationOnBean(
 			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException;
 

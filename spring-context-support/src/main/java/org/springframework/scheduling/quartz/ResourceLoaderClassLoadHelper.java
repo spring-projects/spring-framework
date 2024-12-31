@@ -22,12 +22,12 @@ import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.quartz.spi.ClassLoadHelper;
 
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -44,8 +44,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 
 	protected static final Log logger = LogFactory.getLog(ResourceLoaderClassLoadHelper.class);
 
-	@Nullable
-	private ResourceLoader resourceLoader;
+	private @Nullable ResourceLoader resourceLoader;
 
 
 	/**
@@ -88,8 +87,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 	@Override
-	@Nullable
-	public URL getResource(String name) {
+	public @Nullable URL getResource(String name) {
 		Assert.state(this.resourceLoader != null, "ResourceLoaderClassLoadHelper not initialized");
 		Resource resource = this.resourceLoader.getResource(name);
 		if (resource.exists()) {
@@ -109,8 +107,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 	@Override
-	@Nullable
-	public InputStream getResourceAsStream(String name) {
+	public @Nullable InputStream getResourceAsStream(String name) {
 		Assert.state(this.resourceLoader != null, "ResourceLoaderClassLoadHelper not initialized");
 		Resource resource = this.resourceLoader.getResource(name);
 		if (resource.exists()) {

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,8 +34,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -127,18 +126,12 @@ class ResourceHttpRequestHandlerTests {
 		}
 
 		@Test  // SPR-13658
-		@SuppressWarnings("deprecation")
 		void getResourceWithRegisteredMediaType() throws Exception {
-			ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
-			factory.addMediaType("bar", new MediaType("foo", "bar"));
-			factory.afterPropertiesSet();
-			ContentNegotiationManager manager = factory.getObject();
-
 			List<Resource> paths = List.of(new ClassPathResource("test/", getClass()));
 			ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 			handler.setServletContext(new MockServletContext());
+			handler.setMediaTypes(Map.of("bar", new MediaType("foo", "bar")));
 			handler.setLocations(paths);
-			handler.setContentNegotiationManager(manager);
 			handler.afterPropertiesSet();
 
 			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.bar");
@@ -148,19 +141,12 @@ class ResourceHttpRequestHandlerTests {
 			assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
 		}
 
-		@Test  // SPR-14577
-		@SuppressWarnings("deprecation")
+		@Test // SPR-14577
 		void getMediaTypeWithFavorPathExtensionOff() throws Exception {
-			ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
-			factory.setFavorPathExtension(false);
-			factory.afterPropertiesSet();
-			ContentNegotiationManager manager = factory.getObject();
-
 			List<Resource> paths = List.of(new ClassPathResource("test/", getClass()));
 			ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 			handler.setServletContext(new MockServletContext());
 			handler.setLocations(paths);
-			handler.setContentNegotiationManager(manager);
 			handler.afterPropertiesSet();
 
 			this.request.addHeader("Accept", "application/json,text/plain,*/*");

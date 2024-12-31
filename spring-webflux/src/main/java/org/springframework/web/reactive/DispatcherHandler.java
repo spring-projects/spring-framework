@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +30,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.cors.reactive.PreFlightRequestHandler;
@@ -71,14 +71,11 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  */
 public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, ApplicationContextAware {
 
-	@Nullable
-	private List<HandlerMapping> handlerMappings;
+	private @Nullable List<HandlerMapping> handlerMappings;
 
-	@Nullable
-	private List<HandlerAdapter> handlerAdapters;
+	private @Nullable List<HandlerAdapter> handlerAdapters;
 
-	@Nullable
-	private List<HandlerResultHandler> resultHandlers;
+	private @Nullable List<HandlerResultHandler> resultHandlers;
 
 
 	/**
@@ -105,8 +102,7 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 	 * prior to {@link #setApplicationContext(ApplicationContext)}.
 	 * @return immutable list with the configured mappings or {@code null}
 	 */
-	@Nullable
-	public final List<HandlerMapping> getHandlerMappings() {
+	public final @Nullable List<HandlerMapping> getHandlerMappings() {
 		return this.handlerMappings;
 	}
 

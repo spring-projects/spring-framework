@@ -18,8 +18,9 @@ package org.springframework.web.servlet;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 
@@ -47,16 +48,13 @@ import org.springframework.util.CollectionUtils;
 public class ModelAndView {
 
 	/** View instance or view name String. */
-	@Nullable
-	private Object view;
+	private @Nullable Object view;
 
 	/** Model Map. */
-	@Nullable
-	private ModelMap model;
+	private @Nullable ModelMap model;
 
 	/** Optional HTTP status for the response. */
-	@Nullable
-	private HttpStatusCode status;
+	private @Nullable HttpStatusCode status;
 
 	/** Indicates whether this instance has been cleared with a call to {@link #clear()}. */
 	private boolean cleared = false;
@@ -193,8 +191,7 @@ public class ModelAndView {
 	 * Return the view name to be resolved by the DispatcherServlet
 	 * via a ViewResolver, or {@code null} if we are using a View object.
 	 */
-	@Nullable
-	public String getViewName() {
+	public @Nullable String getViewName() {
 		return (this.view instanceof String name ? name : null);
 	}
 
@@ -210,8 +207,7 @@ public class ModelAndView {
 	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
-	@Nullable
-	public View getView() {
+	public @Nullable View getView() {
 		return (this.view instanceof View v ? v : null);
 	}
 
@@ -236,8 +232,7 @@ public class ModelAndView {
 	 * Return the model map. May return {@code null}.
 	 * Called by DispatcherServlet for evaluation of the model.
 	 */
-	@Nullable
-	protected Map<String, Object> getModelInternal() {
+	protected @Nullable Map<String, Object> getModelInternal() {
 		return this.model;
 	}
 
@@ -272,8 +267,7 @@ public class ModelAndView {
 	 * Return the configured HTTP status for the response, if any.
 	 * @since 4.3
 	 */
-	@Nullable
-	public HttpStatusCode getStatus() {
+	public @Nullable HttpStatusCode getStatus() {
 		return this.status;
 	}
 

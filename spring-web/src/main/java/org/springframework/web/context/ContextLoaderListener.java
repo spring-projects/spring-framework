@@ -19,8 +19,7 @@ package org.springframework.web.context;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
@@ -39,8 +38,7 @@ import org.springframework.lang.Nullable;
  */
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
 
 	/**

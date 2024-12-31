@@ -26,7 +26,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -54,11 +55,9 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 
 	private final Map<String, Object> valueCache = new ConcurrentHashMap<>(8);
 
-	@Nullable
-	private volatile Integer hashCode;
+	private volatile @Nullable Integer hashCode;
 
-	@Nullable
-	private volatile String string;
+	private volatile @Nullable String string;
 
 
 	private SynthesizedMergedAnnotationInvocationHandler(MergedAnnotation<A> annotation, Class<A> type) {

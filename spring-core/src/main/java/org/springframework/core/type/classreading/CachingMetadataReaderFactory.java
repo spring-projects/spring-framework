@@ -21,10 +21,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
@@ -41,8 +42,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
 	/** MetadataReader cache: either local or shared at the ResourceLoader level. */
-	@Nullable
-	private Map<Resource, MetadataReader> metadataReaderCache;
+	private @Nullable Map<Resource, MetadataReader> metadataReaderCache;
 
 
 	/**

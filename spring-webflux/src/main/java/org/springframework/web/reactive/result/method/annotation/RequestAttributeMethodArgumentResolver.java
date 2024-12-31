@@ -16,13 +16,13 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -66,8 +66,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 	}
 
 	@Override
-	@Nullable
-	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected @Nullable Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		Object value = exchange.getAttribute(name);
 		ReactiveAdapter toAdapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
 		if (toAdapter != null) {

@@ -29,10 +29,10 @@ import com.github.benmanes.caffeine.cache.AsyncCacheLoader;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -70,8 +70,7 @@ public class CaffeineCacheManager implements CacheManager {
 
 	private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
 
-	@Nullable
-	private AsyncCacheLoader<Object, Object> cacheLoader;
+	private @Nullable AsyncCacheLoader<Object, Object> cacheLoader;
 
 	private boolean asyncCacheMode = false;
 
@@ -251,8 +250,7 @@ public class CaffeineCacheManager implements CacheManager {
 	}
 
 	@Override
-	@Nullable
-	public Cache getCache(String name) {
+	public @Nullable Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {
 			cache = this.cacheMap.computeIfAbsent(name, this::createCaffeineCache);

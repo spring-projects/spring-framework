@@ -16,12 +16,13 @@
 
 package org.springframework.jdbc.object;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,12 +41,10 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * Object enabling us to create PreparedStatementCreators efficiently,
 	 * based on this class's declared parameters.
 	 */
-	@Nullable
-	private PreparedStatementCreatorFactory preparedStatementFactory;
+	private @Nullable PreparedStatementCreatorFactory preparedStatementFactory;
 
 	/** Parsed representation of the SQL statement. */
-	@Nullable
-	private ParsedSql cachedSql;
+	private @Nullable ParsedSql cachedSql;
 
 	/** Monitor for locking the cached representation of the parsed SQL statement. */
 	private final Object parsedSqlMonitor = new Object();
@@ -95,7 +94,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementSetter newPreparedStatementSetter(@Nullable Object[] params) {
+	protected final PreparedStatementSetter newPreparedStatementSetter(Object @Nullable [] params) {
 		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
 	}
@@ -105,7 +104,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(@Nullable Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(Object @Nullable [] params) {
 		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
@@ -117,7 +116,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * the factory's, for example because of named parameter expanding)
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object @Nullable [] params) {
 		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);
 	}

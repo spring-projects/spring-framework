@@ -16,7 +16,7 @@
 
 package org.springframework.http;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Enumeration of HTTP status codes.
@@ -523,8 +523,7 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @return the corresponding {@code HttpStatus}, or {@code null} if not found
 	 * @since 5.0
 	 */
-	@Nullable
-	public static HttpStatus resolve(int statusCode) {
+	public static @Nullable HttpStatus resolve(int statusCode) {
 		// Use cached VALUES instead of values() to prevent array allocation.
 		for (HttpStatus status : VALUES) {
 			if (status.value == statusCode) {
@@ -591,8 +590,7 @@ public enum HttpStatus implements HttpStatusCode {
 		 * @return the corresponding {@code Series}, or {@code null} if not found
 		 * @since 5.1.3
 		 */
-		@Nullable
-		public static Series resolve(int statusCode) {
+		public static @Nullable Series resolve(int statusCode) {
 			int seriesCode = statusCode / 100;
 			for (Series series : values()) {
 				if (series.value == seriesCode) {

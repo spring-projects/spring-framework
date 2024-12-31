@@ -19,8 +19,9 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -41,11 +42,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class LookupOverride extends MethodOverride {
 
-	@Nullable
-	private final String beanName;
+	private final @Nullable String beanName;
 
-	@Nullable
-	private Method method;
+	private @Nullable Method method;
 
 
 	/**
@@ -75,8 +74,7 @@ public class LookupOverride extends MethodOverride {
 	/**
 	 * Return the name of the bean that should be returned by this {@code LookupOverride}.
 	 */
-	@Nullable
-	public String getBeanName() {
+	public @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

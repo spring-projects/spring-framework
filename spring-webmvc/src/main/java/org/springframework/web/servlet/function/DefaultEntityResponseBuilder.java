@@ -34,6 +34,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -57,7 +58,6 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -260,8 +260,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		}
 
 		@Override
-		@Nullable
-		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
+		protected @Nullable ModelAndView writeToInternal(HttpServletRequest servletRequest,
 				HttpServletResponse servletResponse, Context context)
 				throws ServletException, IOException {
 
@@ -322,8 +321,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 		}
 
-		@Nullable
-		private static MediaType getContentType(HttpServletResponse response) {
+		private static @Nullable MediaType getContentType(HttpServletResponse response) {
 			try {
 				return MediaType.parseMediaType(response.getContentType()).removeQualityValue();
 			}
@@ -367,8 +365,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		}
 
 		@Override
-		@Nullable
-		protected ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+		protected @Nullable ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
 				Context context) throws ServletException, IOException {
 
 			DeferredResult<ServerResponse> deferredResult = createDeferredResult(servletRequest, servletResponse, context);
@@ -421,8 +418,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		}
 
 		@Override
-		@Nullable
-		protected ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+		protected @Nullable ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
 				Context context) throws ServletException, IOException {
 
 			DeferredResult<?> deferredResult = new DeferredResult<>();
@@ -443,8 +439,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 			private final DeferredResult<?> deferredResult;
 
-			@Nullable
-			private Subscription subscription;
+			private @Nullable Subscription subscription;
 
 
 			public DeferredResultSubscriber(HttpServletRequest servletRequest,

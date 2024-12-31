@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,8 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
-	@Nullable
-	private static String originalPropertyValue;
+	private static @Nullable String originalPropertyValue;
 
 	@BeforeAll
 	static void setProperty() {

@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.web;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -71,8 +72,7 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 		}
 	}
 
-	@Nullable
-	private static WebAppConfiguration getWebAppConfiguration(Class<?> testClass) {
+	private static @Nullable WebAppConfiguration getWebAppConfiguration(Class<?> testClass) {
 		return TestContextAnnotationUtils.findMergedAnnotation(testClass, WebAppConfiguration.class);
 	}
 

@@ -25,10 +25,10 @@ import freemarker.ext.jakarta.jsp.TaglibFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
@@ -80,11 +80,9 @@ import org.springframework.web.context.ServletContextAware;
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
-	@Nullable
-	private Configuration configuration;
+	private @Nullable Configuration configuration;
 
-	@Nullable
-	private TaglibFactory taglibFactory;
+	private @Nullable TaglibFactory taglibFactory;
 
 
 	/**

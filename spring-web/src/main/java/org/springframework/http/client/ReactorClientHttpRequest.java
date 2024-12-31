@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -34,7 +35,6 @@ import reactor.netty.http.client.HttpClientRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -53,8 +53,7 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 
 	private final URI uri;
 
-	@Nullable
-	private final Duration exchangeTimeout;
+	private final @Nullable Duration exchangeTimeout;
 
 
 	/**

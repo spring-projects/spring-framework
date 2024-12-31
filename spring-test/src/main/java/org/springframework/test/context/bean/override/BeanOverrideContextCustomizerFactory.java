@@ -20,7 +20,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -39,8 +40,7 @@ import org.springframework.util.Assert;
 class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 
 	@Override
-	@Nullable
-	public BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass,
+	public @Nullable BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
 		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>();

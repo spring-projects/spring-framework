@@ -25,6 +25,8 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,7 +45,6 @@ import org.springframework.jdbc.core.namedparam.SimplePropertySqlParameterSource
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -268,7 +269,7 @@ final class DefaultJdbcClient implements JdbcClient {
 			return new PreparedStatementCreatorFactory(this.sql).newPreparedStatementCreator(this.indexedParams);
 		}
 
-		private PreparedStatementCreator statementCreatorForIndexedParamsWithKeys(@Nullable String[] keyColumnNames) {
+		private PreparedStatementCreator statementCreatorForIndexedParamsWithKeys(String @Nullable [] keyColumnNames) {
 			PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(this.sql);
 			if (keyColumnNames != null) {
 				pscf.setGeneratedKeysColumnNames(keyColumnNames);

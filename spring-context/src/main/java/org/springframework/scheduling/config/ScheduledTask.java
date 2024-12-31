@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A representation of a scheduled task at runtime,
@@ -38,8 +38,7 @@ public final class ScheduledTask {
 
 	private final Task task;
 
-	@Nullable
-	volatile ScheduledFuture<?> future;
+	volatile @Nullable ScheduledFuture<?> future;
 
 
 	ScheduledTask(Task task) {
@@ -84,8 +83,7 @@ public final class ScheduledTask {
 	 * if the task has been cancelled or no new execution is scheduled.
 	 * @since 6.2
 	 */
-	@Nullable
-	public Instant nextExecution() {
+	public @Nullable Instant nextExecution() {
 		ScheduledFuture<?> future = this.future;
 		if (future != null && !future.isCancelled()) {
 			long delay = future.getDelay(TimeUnit.MILLISECONDS);

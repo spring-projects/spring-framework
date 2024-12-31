@@ -16,7 +16,7 @@
 
 package org.springframework.validation;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy interface for building message codes from validation error codes.

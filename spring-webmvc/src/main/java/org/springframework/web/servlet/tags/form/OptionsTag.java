@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import jakarta.servlet.jsp.JspException;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -196,22 +196,19 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
 	 * objects used to generate the inner '{@code option}' tags.
 	 */
-	@Nullable
-	private Object items;
+	private @Nullable Object items;
 
 	/**
 	 * The name of the property mapped to the '{@code value}' attribute
 	 * of the '{@code option}' tag.
 	 */
-	@Nullable
-	private String itemValue;
+	private @Nullable String itemValue;
 
 	/**
 	 * The name of the property mapped to the inner text of the
 	 * '{@code option}' tag.
 	 */
-	@Nullable
-	private String itemLabel;
+	private @Nullable String itemLabel;
 
 	private boolean disabled;
 
@@ -232,8 +229,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * of objects used to generate the inner '{@code option}' tags.
 	 * <p>Typically a runtime expression.
 	 */
-	@Nullable
-	protected Object getItems() {
+	protected @Nullable Object getItems() {
 		return this.items;
 	}
 
@@ -252,8 +248,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Return the name of the property mapped to the '{@code value}'
 	 * attribute of the '{@code option}' tag.
 	 */
-	@Nullable
-	protected String getItemValue() {
+	protected @Nullable String getItemValue() {
 		return this.itemValue;
 	}
 
@@ -270,8 +265,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Get the name of the property mapped to the label (inner text) of the
 	 * '{@code option}' tag.
 	 */
-	@Nullable
-	protected String getItemLabel() {
+	protected @Nullable String getItemLabel() {
 		return this.itemLabel;
 	}
 
@@ -323,8 +317,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * since we're dealing with multiple HTML elements.
 	 */
 	@Override
-	@Nullable
-	protected String resolveId() throws JspException {
+	protected @Nullable String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
 		if (id != null) {
 			String idString = id.toString();
@@ -349,8 +342,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 */
 	private class OptionsWriter extends OptionWriter {
 
-		@Nullable
-		private final String selectName;
+		private final @Nullable String selectName;
 
 		public OptionsWriter(@Nullable String selectName, Object optionSource,
 				@Nullable String valueProperty, @Nullable String labelProperty) {

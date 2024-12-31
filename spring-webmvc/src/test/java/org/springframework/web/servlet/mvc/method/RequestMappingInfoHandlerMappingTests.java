@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
@@ -75,7 +75,7 @@ import static org.junit.jupiter.api.Named.named;
  */
 class RequestMappingInfoHandlerMappingTests {
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "removal"})
 	static Stream<?> pathPatternsArguments() {
 		TestController controller = new TestController();
 
@@ -259,7 +259,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(chain).isNull();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	@PathPatternsParameterizedTest
 	void handleMatchUriTemplateVariables(TestRequestMappingInfoHandlerMapping mapping) {
 		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
@@ -278,7 +278,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(uriVariables.get("path2")).isEqualTo("2");
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	@PathPatternsParameterizedTest // SPR-9098
 	void handleMatchUriTemplateVariablesDecode(TestRequestMappingInfoHandlerMapping mapping) {
 		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
@@ -302,6 +302,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(uriVariables.get("identifier")).isEqualTo("a/b");
 	}
 
+	@SuppressWarnings("removal")
 	@PathPatternsParameterizedTest
 	void handleMatchBestMatchingPatternAttribute(TestRequestMappingInfoHandlerMapping mapping) {
 		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
@@ -314,6 +315,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
 	}
 
+	@SuppressWarnings("removal")
 	@PathPatternsParameterizedTest
 	void handleMatchBestMatchingPatternAttributeInObservationContext(TestRequestMappingInfoHandlerMapping mapping) {
 		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
@@ -402,6 +404,7 @@ class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+	@SuppressWarnings("removal")
 	@PathPatternsParameterizedTest // SPR-10140, SPR-16867
 	void handleMatchMatrixVariablesDecoding(TestRequestMappingInfoHandlerMapping mapping) {
 
@@ -616,15 +619,13 @@ class RequestMappingInfoHandlerMappingTests {
 			}
 		}
 
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings("removal")
 		private RequestMappingInfo.BuilderConfiguration getBuilderConfig() {
 			RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 			if (getPatternParser() != null) {
 				config.setPatternParser(getPatternParser());
 			}
 			else {
-				config.setSuffixPatternMatch(true);
-				config.setRegisteredSuffixPatternMatch(true);
 				config.setPathMatcher(getPathMatcher());
 			}
 			return config;

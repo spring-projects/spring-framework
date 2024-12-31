@@ -25,7 +25,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Declares that a field or method parameter should be formatted as a

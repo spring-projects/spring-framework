@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import reactor.netty.Connection;
 import reactor.netty.http.client.HttpClientResponse;
@@ -27,7 +28,6 @@ import reactor.netty.http.client.HttpClientResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.support.Netty4HeadersAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -45,8 +45,7 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpHeaders headers;
 
-	@Nullable
-	private volatile InputStream body;
+	private volatile @Nullable InputStream body;
 
 
 	/**

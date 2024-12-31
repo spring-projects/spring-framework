@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,7 +36,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -63,8 +63,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final List<MediaType> mediaTypes;
 
-	@Nullable
-	private final MediaType defaultMediaType;
+	private final @Nullable MediaType defaultMediaType;
 
 
 	/**
@@ -86,8 +85,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		}
 	}
 
-	@Nullable
-	private static MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
+	private static @Nullable MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
 		return mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
 	}
 
@@ -153,8 +151,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return message.writeWith(body);
 	}
 
-	@Nullable
-	private MediaType updateContentType(ReactiveHttpOutputMessage message, @Nullable MediaType mediaType) {
+	private @Nullable MediaType updateContentType(ReactiveHttpOutputMessage message, @Nullable MediaType mediaType) {
 		MediaType result = message.getHeaders().getContentType();
 		if (result != null) {
 			return result;

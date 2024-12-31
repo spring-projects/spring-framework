@@ -16,8 +16,9 @@
 
 package org.springframework.beans;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract superclass for all exceptions thrown in the beans package

@@ -20,8 +20,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.Conventions;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -150,8 +151,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * @return the corresponding attribute value, or {@code null} if none
 	 * @since 5.2
 	 */
-	@Nullable
-	public Object getAttribute(String attributeName) {
+	public @Nullable Object getAttribute(String attributeName) {
 		return get(attributeName);
 	}
 

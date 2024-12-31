@@ -74,25 +74,6 @@ class StandaloneMockMvcBuilderTests {
 		assertThat(((HandlerMethod) chain.getHandler()).getMethod().getName()).isEqualTo("handleWithPlaceholders");
 	}
 
-	@Test  // SPR-13637
-	@SuppressWarnings("deprecation")
-	void suffixPatternMatch() throws Exception {
-		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
-		builder.setUseSuffixPatternMatch(false);
-		builder.build();
-
-		RequestMappingHandlerMapping hm = builder.wac.getBean(RequestMappingHandlerMapping.class);
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/persons");
-		HandlerExecutionChain chain = hm.getHandler(request);
-		assertThat(chain).isNotNull();
-		assertThat(((HandlerMethod) chain.getHandler()).getMethod().getName()).isEqualTo("persons");
-
-		request = new MockHttpServletRequest("GET", "/persons.xml");
-		chain = hm.getHandler(request);
-		assertThat(chain).isNull();
-	}
-
 	@Test  // SPR-12553
 	void applicationContextAttribute() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());

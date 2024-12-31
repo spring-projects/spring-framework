@@ -149,6 +149,7 @@ class PathResourceResolverTests {
 		assertThat(path).isNull();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void relativePathEncodedForUrlResource() throws Exception {
 		TestUrlResource location = new TestUrlResource("file:///tmp");

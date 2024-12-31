@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -62,14 +63,12 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	@Nullable
-	public Validator getValidator() {
+	public @Nullable Validator getValidator() {
 		return createSingleBean(WebFluxConfigurer::getValidator, Validator.class);
 	}
 
 	@Override
-	@Nullable
-	public MessageCodesResolver getMessageCodesResolver() {
+	public @Nullable MessageCodesResolver getMessageCodesResolver() {
 		return createSingleBean(WebFluxConfigurer::getMessageCodesResolver, MessageCodesResolver.class);
 	}
 
@@ -115,14 +114,12 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
 	}
 
-	@Nullable
 	@Override
-	public WebSocketService getWebSocketService() {
+	public @Nullable WebSocketService getWebSocketService() {
 		return createSingleBean(WebFluxConfigurer::getWebSocketService, WebSocketService.class);
 	}
 
-	@Nullable
-	private <T> T createSingleBean(Function<WebFluxConfigurer, T> factory, Class<T> beanType) {
+	private <T> @Nullable T createSingleBean(Function<WebFluxConfigurer, T> factory, Class<T> beanType) {
 		List<T> result = this.delegates.stream().map(factory).filter(Objects::nonNull).toList();
 		if (result.isEmpty()) {
 			return null;

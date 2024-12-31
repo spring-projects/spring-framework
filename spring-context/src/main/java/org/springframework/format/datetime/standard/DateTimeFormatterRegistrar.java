@@ -51,7 +51,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  * @see org.springframework.format.FormatterRegistrar#registerFormatters
  * @see org.springframework.format.datetime.DateFormatterRegistrar
  */
-@SuppressWarnings("NullAway")
+@SuppressWarnings("NullAway") // Well-known map keys
 public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	private enum Type {DATE, TIME, DATE_TIME}

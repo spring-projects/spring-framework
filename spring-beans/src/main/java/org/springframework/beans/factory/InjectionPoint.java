@@ -22,8 +22,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -42,14 +43,11 @@ import org.springframework.util.ObjectUtils;
  */
 public class InjectionPoint {
 
-	@Nullable
-	protected MethodParameter methodParameter;
+	protected @Nullable MethodParameter methodParameter;
 
-	@Nullable
-	protected Field field;
+	protected @Nullable Field field;
 
-	@Nullable
-	private volatile Annotation[] fieldAnnotations;
+	private volatile Annotation @Nullable [] fieldAnnotations;
 
 
 	/**
@@ -93,8 +91,7 @@ public class InjectionPoint {
 	 * <p>Note: Either MethodParameter or Field is available.
 	 * @return the MethodParameter, or {@code null} if none
 	 */
-	@Nullable
-	public MethodParameter getMethodParameter() {
+	public @Nullable MethodParameter getMethodParameter() {
 		return this.methodParameter;
 	}
 
@@ -103,8 +100,7 @@ public class InjectionPoint {
 	 * <p>Note: Either MethodParameter or Field is available.
 	 * @return the Field, or {@code null} if none
 	 */
-	@Nullable
-	public Field getField() {
+	public @Nullable Field getField() {
 		return this.field;
 	}
 
@@ -142,8 +138,7 @@ public class InjectionPoint {
 	 * @return the annotation instance, or {@code null} if none found
 	 * @since 4.3.9
 	 */
-	@Nullable
-	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+	public <A extends Annotation> @Nullable A getAnnotation(Class<A> annotationType) {
 		return (this.field != null ? this.field.getAnnotation(annotationType) :
 				obtainMethodParameter().getParameterAnnotation(annotationType));
 	}

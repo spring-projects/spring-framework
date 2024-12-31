@@ -55,17 +55,22 @@ public class RequestHeaderMapMethodArgumentResolver extends HandlerMethodArgumen
 	}
 
 	private boolean allParams(RequestHeader annotation, Class<?> type) {
-		return Map.class.isAssignableFrom(type);
+		return Map.class.isAssignableFrom(type) || HttpHeaders.class.isAssignableFrom(type);
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Object resolveArgumentValue(
 			MethodParameter methodParameter, BindingContext context, ServerWebExchange exchange) {
 
 		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(methodParameter.getParameterType());
 		HttpHeaders headers = exchange.getRequest().getHeaders();
-		return (isMultiValueMap ? headers : headers.toSingleValueMap());
+		if (isMultiValueMap) {
+			return headers.asMultiValueMap();
+		}
+		boolean isHttpHeaders = HttpHeaders.class.isAssignableFrom(methodParameter.getParameterType());
+		return (isHttpHeaders ? headers : headers.toSingleValueMap());
 	}
 
 }

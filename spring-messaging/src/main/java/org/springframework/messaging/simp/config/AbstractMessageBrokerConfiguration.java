@@ -24,13 +24,14 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.SmartApplicationListener;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
@@ -121,20 +122,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private ChannelRegistration clientInboundChannelRegistration;
+	private @Nullable ChannelRegistration clientInboundChannelRegistration;
 
-	@Nullable
-	private ChannelRegistration clientOutboundChannelRegistration;
+	private @Nullable ChannelRegistration clientOutboundChannelRegistration;
 
-	@Nullable
-	private MessageBrokerRegistry brokerRegistry;
+	private @Nullable MessageBrokerRegistry brokerRegistry;
 
-	@Nullable
-	private Integer phase;
+	private @Nullable Integer phase;
 
 
 	/**
@@ -149,8 +145,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		this.applicationContext = applicationContext;
 	}
 
-	@Nullable
-	public ApplicationContext getApplicationContext() {
+	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
@@ -324,8 +319,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Provide access to the configured PatchMatcher for access from other
 	 * configuration classes.
 	 */
-	@Nullable
-	public final PathMatcher getPathMatcher(
+	public final @Nullable PathMatcher getPathMatcher(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel) {
 
 		return getBrokerRegistry(clientInboundChannel, clientOutboundChannel).getPathMatcher();
@@ -385,8 +379,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	@Nullable
-	public AbstractBrokerMessageHandler simpleBrokerMessageHandler(
+	public @Nullable AbstractBrokerMessageHandler simpleBrokerMessageHandler(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
 			AbstractSubscribableChannel brokerChannel, UserDestinationResolver userDestinationResolver) {
 
@@ -414,8 +407,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	@Nullable
-	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler(
+	public @Nullable AbstractBrokerMessageHandler stompBrokerRelayMessageHandler(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
 			AbstractSubscribableChannel brokerChannel, UserDestinationMessageHandler userDestinationMessageHandler,
 			@Nullable MessageHandler userRegistryMessageHandler, UserDestinationResolver userDestinationResolver) {
@@ -458,8 +450,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	@Nullable
-	public MessageHandler userRegistryMessageHandler(
+	public @Nullable MessageHandler userRegistryMessageHandler(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
 			SimpUserRegistry userRegistry, SimpMessagingTemplate brokerMessagingTemplate,
 			@Qualifier("messageBrokerTaskScheduler") TaskScheduler scheduler) {
@@ -618,8 +609,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Override this method to provide a custom {@link Validator}.
 	 * @since 4.0.1
 	 */
-	@Nullable
-	public Validator getValidator() {
+	public @Nullable Validator getValidator() {
 		return null;
 	}
 

@@ -16,11 +16,12 @@
 
 package org.springframework.test.context.aot;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link DefaultGenerationContext} with a custom implementation of
@@ -31,8 +32,7 @@ import org.springframework.lang.Nullable;
  */
 class TestContextGenerationContext extends DefaultGenerationContext {
 
-	@Nullable
-	private final String featureName;
+	private final @Nullable String featureName;
 
 
 	/**

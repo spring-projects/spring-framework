@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -104,40 +104,32 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	public static final String FORWARD_URL_PREFIX = "forward:";
 
 
-	@Nullable
-	private Class<?> viewClass;
+	private @Nullable Class<?> viewClass;
 
 	private String prefix = "";
 
 	private String suffix = "";
 
-	@Nullable
-	private String contentType;
+	private @Nullable String contentType;
 
 	private boolean redirectContextRelative = true;
 
 	private boolean redirectHttp10Compatible = true;
 
-	@Nullable
-	private String[] redirectHosts;
+	private String @Nullable [] redirectHosts;
 
-	@Nullable
-	private String requestContextAttribute;
+	private @Nullable String requestContextAttribute;
 
 	/** Map of static attributes, keyed by attribute name (String). */
 	private final Map<String, Object> staticAttributes = new HashMap<>();
 
-	@Nullable
-	private Boolean exposePathVariables;
+	private @Nullable Boolean exposePathVariables;
 
-	@Nullable
-	private Boolean exposeContextBeansAsAttributes;
+	private @Nullable Boolean exposeContextBeansAsAttributes;
 
-	@Nullable
-	private String[] exposedContextBeanNames;
+	private String @Nullable [] exposedContextBeanNames;
 
-	@Nullable
-	private String[] viewNames;
+	private String @Nullable [] viewNames;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
@@ -162,8 +154,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the view class to be used to create views.
 	 * @see #setViewClass
 	 */
-	@Nullable
-	protected Class<?> getViewClass() {
+	protected @Nullable Class<?> getViewClass() {
 		return this.viewClass;
 	}
 
@@ -208,8 +199,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the content type for all views, if any.
 	 */
-	@Nullable
-	protected String getContentType() {
+	protected @Nullable String getContentType() {
 		return this.contentType;
 	}
 
@@ -273,7 +263,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @param redirectHosts one or more application hosts
 	 * @since 4.3
 	 */
-	public void setRedirectHosts(@Nullable String... redirectHosts) {
+	public void setRedirectHosts(String @Nullable ... redirectHosts) {
 		this.redirectHosts = redirectHosts;
 	}
 
@@ -281,8 +271,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the configured application hosts for redirect purposes.
 	 * @since 4.3
 	 */
-	@Nullable
-	public String[] getRedirectHosts() {
+	public String @Nullable [] getRedirectHosts() {
 		return this.redirectHosts;
 	}
 
@@ -298,8 +287,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the name of the RequestContext attribute for all views, if any.
 	 */
-	@Nullable
-	protected String getRequestContextAttribute() {
+	protected @Nullable String getRequestContextAttribute() {
 		return this.requestContextAttribute;
 	}
 
@@ -363,8 +351,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return whether views resolved by this resolver should add path variables to the model or not.
 	 */
-	@Nullable
-	protected Boolean getExposePathVariables() {
+	protected @Nullable Boolean getExposePathVariables() {
 		return this.exposePathVariables;
 	}
 
@@ -381,8 +368,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
 	}
 
-	@Nullable
-	protected Boolean getExposeContextBeansAsAttributes() {
+	protected @Nullable Boolean getExposeContextBeansAsAttributes() {
 		return this.exposeContextBeansAsAttributes;
 	}
 
@@ -392,12 +378,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * attributes.
 	 * @see AbstractView#setExposedContextBeanNames
 	 */
-	public void setExposedContextBeanNames(@Nullable String... exposedContextBeanNames) {
+	public void setExposedContextBeanNames(String @Nullable ... exposedContextBeanNames) {
 		this.exposedContextBeanNames = exposedContextBeanNames;
 	}
 
-	@Nullable
-	protected String[] getExposedContextBeanNames() {
+	protected String @Nullable [] getExposedContextBeanNames() {
 		return this.exposedContextBeanNames;
 	}
 
@@ -408,7 +393,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * view name 'myReport'.
 	 * @see #canHandle
 	 */
-	public void setViewNames(@Nullable String... viewNames) {
+	public void setViewNames(String @Nullable ... viewNames) {
 		this.viewNames = viewNames;
 	}
 
@@ -416,8 +401,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the view names (or name patterns) that can be handled by this
 	 * {@link org.springframework.web.servlet.ViewResolver}.
 	 */
-	@Nullable
-	protected String[] getViewNames() {
+	protected String @Nullable [] getViewNames() {
 		return this.viewNames;
 	}
 
@@ -462,8 +446,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #requiredViewClass
 	 */
 	@Override
-	@Nullable
-	protected View createView(String viewName, Locale locale) throws Exception {
+	protected @Nullable View createView(String viewName, Locale locale) throws Exception {
 		// If this resolver is not supposed to handle the given view,
 		// return null to pass on to the next resolver in the chain.
 		if (!canHandle(viewName, locale)) {
@@ -547,8 +530,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
 	@Override
-	@Nullable
-	protected View loadView(String viewName, Locale locale) throws Exception {
+	protected @Nullable View loadView(String viewName, Locale locale) throws Exception {
 		AbstractUrlBasedView view = buildView(viewName);
 		View result = applyLifecycleMethods(viewName, view);
 		return (view.checkResource(locale) ? result : null);

@@ -18,6 +18,7 @@ package org.springframework.aot.generate;
 
 import javax.lang.model.element.Modifier;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
@@ -26,7 +27,6 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.MethodSpec.Builder;
 import org.springframework.javapoet.TypeName;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

@@ -23,11 +23,11 @@ import java.nio.charset.StandardCharsets;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.StringFormat;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**

@@ -20,7 +20,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.TriggerContext;
 
 /**
@@ -33,14 +34,11 @@ public class SimpleTriggerContext implements TriggerContext {
 
 	private final Clock clock;
 
-	@Nullable
-	private volatile Instant lastScheduledExecution;
+	private volatile @Nullable Instant lastScheduledExecution;
 
-	@Nullable
-	private volatile Instant lastActualExecution;
+	private volatile @Nullable Instant lastActualExecution;
 
-	@Nullable
-	private volatile Instant lastCompletion;
+	private volatile @Nullable Instant lastCompletion;
 
 
 	/**
@@ -66,8 +64,7 @@ public class SimpleTriggerContext implements TriggerContext {
 		this(toInstant(lastScheduledExecutionTime), toInstant(lastActualExecutionTime), toInstant(lastCompletionTime));
 	}
 
-	@Nullable
-	private static Instant toInstant(@Nullable Date date) {
+	private static @Nullable Instant toInstant(@Nullable Date date) {
 		return (date != null ? date.toInstant() : null);
 	}
 
@@ -134,20 +131,17 @@ public class SimpleTriggerContext implements TriggerContext {
 	}
 
 	@Override
-	@Nullable
-	public Instant lastScheduledExecution() {
+	public @Nullable Instant lastScheduledExecution() {
 		return this.lastScheduledExecution;
 	}
 
 	@Override
-	@Nullable
-	public Instant lastActualExecution() {
+	public @Nullable Instant lastActualExecution() {
 		return this.lastActualExecution;
 	}
 
 	@Override
-	@Nullable
-	public Instant lastCompletion() {
+	public @Nullable Instant lastCompletion() {
 		return this.lastCompletion;
 	}
 

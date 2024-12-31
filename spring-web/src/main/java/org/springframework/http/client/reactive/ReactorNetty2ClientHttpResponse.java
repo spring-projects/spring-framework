@@ -24,6 +24,7 @@ import io.netty5.handler.codec.http.headers.DefaultHttpSetCookie;
 import io.netty5.handler.codec.http.headers.HttpSetCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.netty5.ChannelOperationsId;
 import reactor.netty5.Connection;
@@ -37,7 +38,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.support.Netty5HeadersAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -136,8 +136,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
-	@Nullable
-	private static String toString(@Nullable CharSequence value) {
+	private static @Nullable String toString(@Nullable CharSequence value) {
 		return (value != null ? value.toString() : null);
 	}
 
@@ -145,8 +144,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 		return (value != null ? value : -1);
 	}
 
-	@Nullable
-	private static String getSameSite(HttpSetCookie cookie) {
+	private static @Nullable String getSameSite(HttpSetCookie cookie) {
 		if (cookie instanceof DefaultHttpSetCookie defaultCookie && defaultCookie.sameSite() != null) {
 			return defaultCookie.sameSite().name();
 		}

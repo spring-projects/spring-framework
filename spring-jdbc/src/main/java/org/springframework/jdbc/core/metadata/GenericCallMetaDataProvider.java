@@ -26,12 +26,12 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlInOutParameter;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -125,26 +125,22 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String procedureNameToUse(@Nullable String procedureName) {
+	public @Nullable String procedureNameToUse(@Nullable String procedureName) {
 		return identifierNameToUse(procedureName);
 	}
 
 	@Override
-	@Nullable
-	public String catalogNameToUse(@Nullable String catalogName) {
+	public @Nullable String catalogNameToUse(@Nullable String catalogName) {
 		return identifierNameToUse(catalogName);
 	}
 
 	@Override
-	@Nullable
-	public String schemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String schemaNameToUse(@Nullable String schemaName) {
 		return identifierNameToUse(schemaName);
 	}
 
 	@Override
-	@Nullable
-	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
+	public @Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		if (isSupportsCatalogsInProcedureCalls()) {
 			return catalogNameToUse(catalogName);
 		}
@@ -154,8 +150,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		if (isSupportsSchemasInProcedureCalls()) {
 			return schemaNameToUse(schemaName);
 		}
@@ -165,8 +160,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	@Override
-	@Nullable
-	public String parameterNameToUse(@Nullable String parameterName) {
+	public @Nullable String parameterNameToUse(@Nullable String parameterName) {
 		return identifierNameToUse(parameterName);
 	}
 
@@ -279,8 +273,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 
-	@Nullable
-	private String identifierNameToUse(@Nullable String identifierName) {
+	private @Nullable String identifierNameToUse(@Nullable String identifierName) {
 		if (identifierName == null) {
 			return null;
 		}
@@ -438,8 +431,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		return new ProcedureMetadata(schemaName, procedureName, matches, true);
 	}
 
-	@Nullable
-	private static String escapeNamePattern(@Nullable String name, @Nullable String escape) {
+	private static @Nullable String escapeNamePattern(@Nullable String name, @Nullable String escape) {
 		if (name == null || escape == null) {
 			return name;
 		}

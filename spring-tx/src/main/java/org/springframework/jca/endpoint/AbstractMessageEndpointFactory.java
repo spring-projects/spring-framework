@@ -29,9 +29,9 @@ import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.SimpleTransactionFactory;
 import org.springframework.transaction.jta.TransactionFactory;
 import org.springframework.util.Assert;
@@ -51,16 +51,13 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private TransactionFactory transactionFactory;
+	private @Nullable TransactionFactory transactionFactory;
 
-	@Nullable
-	private String transactionName;
+	private @Nullable String transactionName;
 
 	private int transactionTimeout = -1;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
 
 	/**
@@ -141,8 +138,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * @see #setBeanName
 	 */
 	@Override
-	@Nullable
-	public String getActivationName() {
+	public @Nullable String getActivationName() {
 		return this.beanName;
 	}
 
@@ -151,8 +147,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * returning {@code} null in order to indicate a synthetic endpoint type.
 	 */
 	@Override
-	@Nullable
-	public Class<?> getEndpointClass() {
+	public @Nullable Class<?> getEndpointClass() {
 		return null;
 	}
 
@@ -206,13 +201,11 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 */
 	protected abstract class AbstractMessageEndpoint implements MessageEndpoint {
 
-		@Nullable
-		private TransactionDelegate transactionDelegate;
+		private @Nullable TransactionDelegate transactionDelegate;
 
 		private boolean beforeDeliveryCalled = false;
 
-		@Nullable
-		private ClassLoader previousContextClassLoader;
+		private @Nullable ClassLoader previousContextClassLoader;
 
 		/**
 		 * Initialize this endpoint's TransactionDelegate.
@@ -319,11 +312,9 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 */
 	private class TransactionDelegate {
 
-		@Nullable
-		private final XAResource xaResource;
+		private final @Nullable XAResource xaResource;
 
-		@Nullable
-		private Transaction transaction;
+		private @Nullable Transaction transaction;
 
 		private boolean rollbackOnly;
 

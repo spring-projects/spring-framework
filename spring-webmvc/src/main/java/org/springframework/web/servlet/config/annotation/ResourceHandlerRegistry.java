@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -66,11 +66,7 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext applicationContext;
 
-	@Nullable
-	private final ContentNegotiationManager contentNegotiationManager;
-
-	@Nullable
-	private final UrlPathHelper pathHelper;
+	private final @Nullable UrlPathHelper pathHelper;
 
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
@@ -104,14 +100,16 @@ public class ResourceHandlerRegistry {
 	 * {@link #ResourceHandlerRegistry(ApplicationContext, ServletContext, ContentNegotiationManager)}
 	 * that also accepts the {@link UrlPathHelper} used for mapping requests to static resources.
 	 * @since 4.3.13
+	 * @deprecated in favor of
+	 * {@link #ResourceHandlerRegistry(ApplicationContext, ServletContext, ContentNegotiationManager)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
 			@Nullable ContentNegotiationManager contentNegotiationManager, @Nullable UrlPathHelper pathHelper) {
 
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;
 		this.servletContext = servletContext;
-		this.contentNegotiationManager = contentNegotiationManager;
 		this.pathHelper = pathHelper;
 	}
 
@@ -158,8 +156,7 @@ public class ResourceHandlerRegistry {
 	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case
 	 * of no registrations.
 	 */
-	@Nullable
-	protected AbstractHandlerMapping getHandlerMapping() {
+	protected @Nullable AbstractHandlerMapping getHandlerMapping() {
 		if (this.registrations.isEmpty()) {
 			return null;
 		}
@@ -173,14 +170,11 @@ public class ResourceHandlerRegistry {
 		return new SimpleUrlHandlerMapping(urlMap, this.order);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	private ResourceHttpRequestHandler getRequestHandler(ResourceHandlerRegistration registration) {
 		ResourceHttpRequestHandler handler = registration.getRequestHandler();
 		if (this.pathHelper != null) {
 			handler.setUrlPathHelper(this.pathHelper);
-		}
-		if (this.contentNegotiationManager != null) {
-			handler.setContentNegotiationManager(this.contentNegotiationManager);
 		}
 		handler.setServletContext(this.servletContext);
 		handler.setApplicationContext(this.applicationContext);

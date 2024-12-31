@@ -18,8 +18,9 @@ package org.springframework.context.support;
 
 import java.io.Serializable;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -35,14 +36,11 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class DefaultMessageSourceResolvable implements MessageSourceResolvable, Serializable {
 
-	@Nullable
-	private final String[] codes;
+	private final String @Nullable [] codes;
 
-	@Nullable
-	private final Object[] arguments;
+	private final Object @Nullable [] arguments;
 
-	@Nullable
-	private final String defaultMessage;
+	private final @Nullable String defaultMessage;
 
 
 	/**
@@ -86,7 +84,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * @param defaultMessage the default message to be used to resolve this message
 	 */
 	public DefaultMessageSourceResolvable(
-			@Nullable String[] codes, @Nullable Object[] arguments, @Nullable String defaultMessage) {
+			String @Nullable [] codes, Object @Nullable [] arguments, @Nullable String defaultMessage) {
 
 		this.codes = codes;
 		this.arguments = arguments;
@@ -106,26 +104,22 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * Return the default code of this resolvable, that is,
 	 * the last one in the codes array.
 	 */
-	@Nullable
-	public String getCode() {
+	public @Nullable String getCode() {
 		return (this.codes != null && this.codes.length > 0 ? this.codes[this.codes.length - 1] : null);
 	}
 
 	@Override
-	@Nullable
-	public String[] getCodes() {
+	public String @Nullable [] getCodes() {
 		return this.codes;
 	}
 
 	@Override
-	@Nullable
-	public Object[] getArguments() {
+	public Object @Nullable [] getArguments() {
 		return this.arguments;
 	}
 
 	@Override
-	@Nullable
-	public String getDefaultMessage() {
+	public @Nullable String getDefaultMessage() {
 		return this.defaultMessage;
 	}
 

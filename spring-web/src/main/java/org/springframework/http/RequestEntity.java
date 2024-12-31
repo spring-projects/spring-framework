@@ -25,7 +25,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -66,14 +67,11 @@ import org.springframework.util.ObjectUtils;
  */
 public class RequestEntity<T> extends HttpEntity<T> {
 
-	@Nullable
-	private final HttpMethod method;
+	private final @Nullable HttpMethod method;
 
-	@Nullable
-	private final URI url;
+	private final @Nullable URI url;
 
-	@Nullable
-	private final Type type;
+	private final @Nullable Type type;
 
 	/**
 	 * Constructor with method and URL but without body nor headers.
@@ -81,7 +79,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(HttpMethod method, URI url) {
-		this(null, null, method, url, null);
+		this(null, (HttpHeaders) null, method, url, null);
 	}
 
 	/**
@@ -91,7 +89,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(@Nullable T body, HttpMethod method, URI url) {
-		this(body, null, method, url, null);
+		this(body, (HttpHeaders) null, method, url, null);
 	}
 
 	/**
@@ -103,7 +101,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 */
 	public RequestEntity(@Nullable T body, HttpMethod method, URI url, Type type) {
-		this(body, null, method, url, type);
+		this(body, (HttpHeaders) null, method, url, type);
 	}
 
 	/**
@@ -111,7 +109,52 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
+	 * @since 7.0
 	 */
+	public RequestEntity(HttpHeaders headers, HttpMethod method, URI url) {
+		this(null, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers and body.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @since 7.0
+	 */
+	public RequestEntity(@Nullable T body, @Nullable HttpHeaders headers,
+			@Nullable HttpMethod method, URI url) {
+
+		this(body, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers, body and type.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 7.0
+	 */
+	public RequestEntity(@Nullable T body, @Nullable HttpHeaders headers,
+			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
+
+		super(body, headers);
+		this.method = method;
+		this.url = url;
+		this.type = type;
+	}
+
+	/**
+	 * Constructor with method, URL and headers but without body.
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @deprecated Use {@link #RequestEntity(HttpHeaders, HttpMethod, URI)}
+	 */
+	@Deprecated
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		this(null, headers, method, url, null);
 	}
@@ -122,7 +165,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
+	 * @deprecated Use {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI)}
 	 */
+	@Deprecated
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, URI url) {
 
@@ -137,7 +182,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @param type the type used for generic type resolution
 	 * @since 4.3
+	 * @deprecated Use {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI, Type)}
 	 */
+	@Deprecated
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
 
@@ -152,8 +199,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP method of the request.
 	 * @return the HTTP method as an {@code HttpMethod} enum value
 	 */
-	@Nullable
-	public HttpMethod getMethod() {
+	public @Nullable HttpMethod getMethod() {
 		return this.method;
 	}
 
@@ -185,8 +231,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the request's body type, or {@code null} if not known
 	 * @since 4.3
 	 */
-	@Nullable
-	public Type getType() {
+	public @Nullable Type getType() {
 		if (this.type == null) {
 			T body = getBody();
 			if (body != null) {
@@ -444,7 +489,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * Manipulate this entity's headers with the given consumer. The
 		 * headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
@@ -552,17 +597,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		@Nullable
-		private final URI uri;
+		private final @Nullable URI uri;
 
-		@Nullable
-		private final String uriTemplate;
+		private final @Nullable String uriTemplate;
 
-		@Nullable
-		private final Object[] uriVarsArray;
+		private final Object @Nullable [] uriVarsArray;
 
-		@Nullable
-		private final Map<String, ?> uriVarsMap;
+		private final @Nullable Map<String, ?> uriVarsMap;
 
 		DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -697,16 +738,14 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		private final String uriTemplate;
 
-		@Nullable
-		private final Object[] uriVarsArray;
+		private final Object @Nullable [] uriVarsArray;
 
-		@Nullable
-		private final Map<String, ?> uriVarsMap;
+		private final @Nullable Map<String, ?> uriVarsMap;
 
 		UriTemplateRequestEntity(
-				@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+				@Nullable T body, @Nullable HttpHeaders headers,
 				@Nullable HttpMethod method, @Nullable Type type, String uriTemplate,
-				@Nullable Object[] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
+				Object @Nullable [] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
 
 			super(body, headers, method, null, type);
 			this.uriTemplate = uriTemplate;
@@ -718,13 +757,11 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return this.uriTemplate;
 		}
 
-		@Nullable
-		public Object[] getVars() {
+		public Object @Nullable [] getVars() {
 			return this.uriVarsArray;
 		}
 
-		@Nullable
-		public Map<String, ?> getVarsMap() {
+		public @Nullable Map<String, ?> getVarsMap() {
 			return this.uriVarsMap;
 		}
 

@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -38,14 +39,11 @@ import org.springframework.util.StringValueResolver;
 @SuppressWarnings("serial")
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
-	@Nullable
-	private String descriptor;
+	private @Nullable String descriptor;
 
-	@Nullable
-	private String timeoutString;
+	private @Nullable String timeoutString;
 
-	@Nullable
-	private String qualifier;
+	private @Nullable String qualifier;
 
 	private Collection<String> labels = Collections.emptyList();
 
@@ -102,8 +100,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * or {@code null} if none.
 	 * @since 4.3.4
 	 */
-	@Nullable
-	public String getDescriptor() {
+	public @Nullable String getDescriptor() {
 		return this.descriptor;
 	}
 
@@ -125,8 +122,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * @see #getTimeout
 	 * @see #resolveAttributeStrings
 	 */
-	@Nullable
-	public String getTimeoutString() {
+	public @Nullable String getTimeoutString() {
 		return this.timeoutString;
 	}
 
@@ -146,8 +142,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * @since 3.0
 	 */
 	@Override
-	@Nullable
-	public String getQualifier() {
+	public @Nullable String getQualifier() {
 		return this.qualifier;
 	}
 

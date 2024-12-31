@@ -18,10 +18,10 @@ package org.springframework.expression.spel.ast;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.TargetedAccessor;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -102,8 +102,7 @@ class AccessorUtilsTests {
 	private record DemoAccessor(String name, Class<?>[] types) implements TargetedAccessor {
 
 		@Override
-		@Nullable
-		public Class<?>[] getSpecificTargetClasses() {
+		public Class<?> @Nullable [] getSpecificTargetClasses() {
 			return this.types;
 		}
 

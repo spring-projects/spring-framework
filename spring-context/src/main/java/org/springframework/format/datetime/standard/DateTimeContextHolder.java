@@ -19,8 +19,9 @@ package org.springframework.format.datetime.standard;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.Nullable;
 
 /**
  * A holder for a thread-local user {@link DateTimeContext}.
@@ -64,8 +65,7 @@ public final class DateTimeContextHolder {
 	 * Return the DateTimeContext associated with the current thread, if any.
 	 * @return the current DateTimeContext, or {@code null} if none
 	 */
-	@Nullable
-	public static DateTimeContext getDateTimeContext() {
+	public static @Nullable DateTimeContext getDateTimeContext() {
 		return dateTimeContextHolder.get();
 	}
 

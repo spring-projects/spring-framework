@@ -21,11 +21,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SupplierUtils;
@@ -60,8 +61,7 @@ class DynamicValuesPropertySource extends MapPropertySource {
 
 
 	@Override
-	@Nullable
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		return SupplierUtils.resolve(super.getProperty(name));
 	}
 

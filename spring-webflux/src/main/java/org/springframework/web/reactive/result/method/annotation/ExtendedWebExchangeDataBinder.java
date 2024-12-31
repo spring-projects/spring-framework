@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -85,7 +85,7 @@ public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 				vars.forEach((key, value) -> addValueIfNotPresent(map, "URI variable", key, value));
 			}
 			HttpHeaders headers = exchange.getRequest().getHeaders();
-			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			for (Map.Entry<String, List<String>> entry : headers.headerSet()) {
 				String name = entry.getKey();
 				if (!this.headerPredicate.test(entry.getKey())) {
 					continue;

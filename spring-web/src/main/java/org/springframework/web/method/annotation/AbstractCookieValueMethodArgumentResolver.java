@@ -16,9 +16,10 @@
 
 package org.springframework.web.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.ServletRequestBindingException;

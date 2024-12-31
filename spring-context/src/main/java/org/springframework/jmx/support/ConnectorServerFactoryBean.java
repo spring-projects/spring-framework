@@ -30,11 +30,12 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.MBeanServerForwarder;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.JmxException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -65,18 +66,15 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 	private final Map<String, Object> environment = new HashMap<>();
 
-	@Nullable
-	private MBeanServerForwarder forwarder;
+	private @Nullable MBeanServerForwarder forwarder;
 
-	@Nullable
-	private ObjectName objectName;
+	private @Nullable ObjectName objectName;
 
 	private boolean threaded = false;
 
 	private boolean daemon = false;
 
-	@Nullable
-	private JMXConnectorServer connectorServer;
+	private @Nullable JMXConnectorServer connectorServer;
 
 
 	/**
@@ -207,8 +205,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 
 	@Override
-	@Nullable
-	public JMXConnectorServer getObject() {
+	public @Nullable JMXConnectorServer getObject() {
 		return this.connectorServer;
 	}
 

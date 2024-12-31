@@ -19,13 +19,14 @@ package org.springframework.test.context.jdbc;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;

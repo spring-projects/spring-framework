@@ -19,8 +19,9 @@ package org.springframework.jdbc.core;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataAccessException;
-import org.springframework.lang.Nullable;
 
 /**
  * Generic callback interface for code that operates on a JDBC Connection.
@@ -64,7 +65,6 @@ public interface ConnectionCallback<T> {
 	 * @see JdbcTemplate#queryForObject(String, Class)
 	 * @see JdbcTemplate#queryForRowSet(String)
 	 */
-	@Nullable
-	T doInConnection(Connection con) throws SQLException, DataAccessException;
+	@Nullable T doInConnection(Connection con) throws SQLException, DataAccessException;
 
 }

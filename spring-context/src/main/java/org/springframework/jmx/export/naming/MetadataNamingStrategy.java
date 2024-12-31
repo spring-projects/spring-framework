@@ -21,12 +21,13 @@ import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -56,11 +57,9 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	/**
 	 * The {@code JmxAttributeSource} implementation to use for reading metadata.
 	 */
-	@Nullable
-	private JmxAttributeSource attributeSource;
+	private @Nullable JmxAttributeSource attributeSource;
 
-	@Nullable
-	private String defaultDomain;
+	private @Nullable String defaultDomain;
 
 
 	/**

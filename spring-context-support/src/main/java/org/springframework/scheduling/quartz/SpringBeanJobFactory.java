@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.quartz;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.SchedulerContext;
 import org.quartz.spi.TriggerFiredBundle;
 
@@ -24,7 +25,6 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.Nullable;
 
 /**
  * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
@@ -46,14 +46,11 @@ import org.springframework.lang.Nullable;
 public class SpringBeanJobFactory extends AdaptableJobFactory
 		implements ApplicationContextAware, SchedulerContextAware {
 
-	@Nullable
-	private String[] ignoredUnknownProperties;
+	private String @Nullable [] ignoredUnknownProperties;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
-	@Nullable
-	private SchedulerContext schedulerContext;
+	private @Nullable SchedulerContext schedulerContext;
 
 
 	/**

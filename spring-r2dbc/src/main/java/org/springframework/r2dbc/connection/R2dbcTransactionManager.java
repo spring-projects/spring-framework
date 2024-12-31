@@ -24,10 +24,10 @@ import io.r2dbc.spi.IsolationLevel;
 import io.r2dbc.spi.Option;
 import io.r2dbc.spi.R2dbcException;
 import io.r2dbc.spi.Result;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.reactive.AbstractReactiveTransactionManager;
@@ -83,8 +83,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class R2dbcTransactionManager extends AbstractReactiveTransactionManager implements InitializingBean {
 
-	@Nullable
-	private ConnectionFactory connectionFactory;
+	private @Nullable ConnectionFactory connectionFactory;
 
 	private boolean enforceReadOnly = false;
 
@@ -123,8 +122,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	/**
 	 * Return the R2DBC {@link ConnectionFactory} that this instance manages transactions for.
 	 */
-	@Nullable
-	public ConnectionFactory getConnectionFactory() {
+	public @Nullable ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
 	}
 
@@ -415,8 +413,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 * should remain {@link TransactionDefinition#ISOLATION_DEFAULT default}.
 	 * @see TransactionDefinition#getIsolationLevel()
 	 */
-	@Nullable
-	protected IsolationLevel resolveIsolationLevel(int isolationLevel) {
+	protected @Nullable IsolationLevel resolveIsolationLevel(int isolationLevel) {
 		return switch (isolationLevel) {
 			case TransactionDefinition.ISOLATION_READ_COMMITTED -> IsolationLevel.READ_COMMITTED;
 			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED -> IsolationLevel.READ_UNCOMMITTED;
@@ -448,13 +445,11 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		@SuppressWarnings("unchecked")
 		@Override
-		@Nullable
-		public <T> T getAttribute(Option<T> option) {
+		public <T> @Nullable T getAttribute(Option<T> option) {
 			return (T) doGetValue(option);
 		}
 
-		@Nullable
-		private Object doGetValue(Option<?> option) {
+		private @Nullable Object doGetValue(Option<?> option) {
 			if (io.r2dbc.spi.TransactionDefinition.ISOLATION_LEVEL.equals(option)) {
 				return this.isolationLevel;
 			}
@@ -491,15 +486,13 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 */
 	private static class ConnectionFactoryTransactionObject {
 
-		@Nullable
-		private ConnectionHolder connectionHolder;
+		private @Nullable ConnectionHolder connectionHolder;
 
 		private boolean newConnectionHolder;
 
 		private boolean mustRestoreAutoCommit;
 
-		@Nullable
-		private String savepointName;
+		private @Nullable String savepointName;
 
 		void setConnectionHolder(@Nullable ConnectionHolder connectionHolder, boolean newConnectionHolder) {
 			setConnectionHolder(connectionHolder);

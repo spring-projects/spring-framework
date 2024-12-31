@@ -4,9 +4,7 @@
  *
  * <p>Intended for use by tools and aspects (making an ideal target for pointcuts).
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.stereotype;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

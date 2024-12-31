@@ -24,6 +24,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.CannotAcquireLockException;
@@ -33,7 +34,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -139,8 +139,7 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 		translator = new SQLErrorCodeSQLExceptionTranslator() {
 			@SuppressWarnings("deprecation")
 			@Override
-			@Nullable
-			protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlException) {
+			protected @Nullable DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlException) {
 				assertThat(task).isEqualTo(TASK);
 				assertThat(sql).isEqualTo(SQL);
 				return (sqlException == badSqlEx) ? customDex : null;

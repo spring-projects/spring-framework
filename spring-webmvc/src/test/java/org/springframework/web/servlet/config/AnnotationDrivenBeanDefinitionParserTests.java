@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -28,7 +29,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -78,19 +78,15 @@ class AnnotationDrivenBeanDefinitionParserTests {
 				.asInstanceOf(BOOLEAN).isTrue();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
-	@SuppressWarnings("deprecation")
 	public void testPathMatchingConfiguration() {
 		loadBeanDefinitions("mvc-config-path-matching.xml");
 		RequestMappingHandlerMapping hm = this.appContext.getBean(RequestMappingHandlerMapping.class);
 		assertThat(hm).isNotNull();
-		assertThat(hm.useSuffixPatternMatch()).isTrue();
-		assertThat(hm.useTrailingSlashMatch()).isFalse();
-		assertThat(hm.useRegisteredSuffixPatternMatch()).isTrue();
 		assertThat(hm.getUrlPathHelper()).isInstanceOf(TestPathHelper.class);
 		assertThat(hm.getPathMatcher()).isInstanceOf(TestPathMatcher.class);
-		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
-		assertThat(fileExtensions).containsExactly("xml");
+		assertThat(hm.getPatternParser()).isNull();
 	}
 
 	@Test

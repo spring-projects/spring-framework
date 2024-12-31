@@ -23,9 +23,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -102,8 +102,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	}
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
-	@Nullable
-	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
+	private @Nullable HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
@@ -134,8 +133,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	}
 
 	@Override
-	@Nullable
-	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
+	public @Nullable CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		if (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandler) {
 			return asyncHandler.toCompletableFuture(returnValue, returnType);

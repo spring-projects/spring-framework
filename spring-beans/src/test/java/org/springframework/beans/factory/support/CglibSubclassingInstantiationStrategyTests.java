@@ -22,9 +22,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -147,8 +146,7 @@ class CglibSubclassingInstantiationStrategyTests {
 
 	static class MyReplacer implements MethodReplacer {
 
-		@Nullable
-		Object returnValue;
+		@Nullable Object returnValue;
 
 		void reset() {
 			this.returnValue = null;

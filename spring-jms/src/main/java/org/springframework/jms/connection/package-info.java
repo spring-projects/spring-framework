@@ -2,9 +2,7 @@
  * Provides a PlatformTransactionManager implementation for a single
  * JMS ConnectionFactory, and a SingleConnectionFactory adapter.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.jms.connection;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

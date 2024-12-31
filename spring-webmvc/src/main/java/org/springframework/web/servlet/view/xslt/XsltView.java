@@ -40,13 +40,13 @@ import javax.xml.transform.stream.StreamSource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
@@ -77,29 +77,23 @@ import org.springframework.web.util.WebUtils;
  */
 public class XsltView extends AbstractUrlBasedView {
 
-	@Nullable
-	private Class<? extends TransformerFactory> transformerFactoryClass;
+	private @Nullable Class<? extends TransformerFactory> transformerFactoryClass;
 
-	@Nullable
-	private String sourceKey;
+	private @Nullable String sourceKey;
 
-	@Nullable
-	private URIResolver uriResolver;
+	private @Nullable URIResolver uriResolver;
 
 	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
 
 	private boolean indent = true;
 
-	@Nullable
-	private Properties outputProperties;
+	private @Nullable Properties outputProperties;
 
 	private boolean cacheTemplates = true;
 
-	@Nullable
-	private TransformerFactory transformerFactory;
+	private @Nullable TransformerFactory transformerFactory;
 
-	@Nullable
-	private Templates cachedTemplates;
+	private @Nullable Templates cachedTemplates;
 
 
 	/**
@@ -283,8 +277,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @see #setSourceKey
 	 * @see #convertSource
 	 */
-	@Nullable
-	protected Source locateSource(Map<String, Object> model) throws Exception {
+	protected @Nullable Source locateSource(Map<String, Object> model) throws Exception {
 		if (this.sourceKey != null) {
 			return convertSource(model.get(this.sourceKey));
 		}

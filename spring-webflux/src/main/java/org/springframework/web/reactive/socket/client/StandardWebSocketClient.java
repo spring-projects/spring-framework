@@ -179,12 +179,12 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> requestHeaders) {
-			requestHeaders.putAll(this.requestHeaders);
+			this.requestHeaders.forEach(requestHeaders::put);
 		}
 
 		@Override
 		public void afterResponse(HandshakeResponse response) {
-			this.responseHeaders.putAll(response.getHeaders());
+			response.getHeaders().forEach(this.responseHeaders::put);
 		}
 	}
 

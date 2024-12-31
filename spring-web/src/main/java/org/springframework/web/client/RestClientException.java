@@ -16,9 +16,10 @@
 
 package org.springframework.web.client;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for exceptions thrown by {@link RestTemplate} in case a request

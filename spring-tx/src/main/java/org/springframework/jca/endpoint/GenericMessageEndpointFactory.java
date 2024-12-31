@@ -23,10 +23,10 @@ import jakarta.resource.spi.UnavailableException;
 import jakarta.resource.spi.endpoint.MessageEndpoint;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -54,8 +54,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactory {
 
-	@Nullable
-	private Object messageListener;
+	private @Nullable Object messageListener;
 
 
 	/**
@@ -108,8 +107,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	private class GenericMessageEndpoint extends AbstractMessageEndpoint implements MethodInterceptor {
 
 		@Override
-		@Nullable
-		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+		public @Nullable Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			Throwable endpointEx = null;
 			boolean applyDeliveryCalls = !hasBeforeDeliveryBeenCalled();
 			if (applyDeliveryCalls) {

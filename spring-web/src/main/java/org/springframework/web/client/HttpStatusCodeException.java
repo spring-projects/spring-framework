@@ -18,10 +18,11 @@ package org.springframework.web.client;
 
 import java.nio.charset.Charset;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -72,7 +73,7 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	 * @since 3.0.5
 	 */
 	protected HttpStatusCodeException(HttpStatusCode statusCode, String statusText,
-			@Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+			byte @Nullable [] responseBody, @Nullable Charset responseCharset) {
 
 		this(statusCode, statusText, null, responseBody, responseCharset);
 	}
@@ -88,7 +89,7 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	 * @since 3.1.2
 	 */
 	protected HttpStatusCodeException(HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, byte @Nullable [] responseBody, @Nullable Charset responseCharset) {
 
 		this(getMessage(statusCode, statusText),
 				statusCode, statusText, responseHeaders, responseBody, responseCharset);
@@ -106,7 +107,7 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	 * @since 5.2.2
 	 */
 	protected HttpStatusCodeException(String message, HttpStatusCode statusCode, String statusText,
-			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+			@Nullable HttpHeaders responseHeaders, byte @Nullable [] responseBody, @Nullable Charset responseCharset) {
 
 		super(message, statusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}

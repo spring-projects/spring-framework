@@ -19,8 +19,9 @@ package org.springframework.web.service.invoker;
 import java.net.URL;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriTemplate;

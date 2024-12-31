@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.aot;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * AOT processor that makes bean factory initialization contributions by
@@ -58,7 +59,6 @@ public interface BeanFactoryInitializationAotProcessor {
 	 * @param beanFactory the bean factory to process
 	 * @return a {@link BeanFactoryInitializationAotContribution} or {@code null}
 	 */
-	@Nullable
-	BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory);
+	@Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory);
 
 }

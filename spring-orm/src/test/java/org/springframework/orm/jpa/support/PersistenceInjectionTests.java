@@ -31,6 +31,7 @@ import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import org.hibernate.Session;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -40,7 +41,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;

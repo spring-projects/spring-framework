@@ -1,9 +1,7 @@
 /**
  * Common MVC logic for matching incoming requests based on conditions.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.mvc.condition;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

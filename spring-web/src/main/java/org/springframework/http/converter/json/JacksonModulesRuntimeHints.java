@@ -18,11 +18,12 @@ package org.springframework.http.converter.json;
 
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint.Builder;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers reflection hints

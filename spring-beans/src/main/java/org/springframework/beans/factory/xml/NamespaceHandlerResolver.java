@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Used by the {@link org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader} to
@@ -36,7 +36,6 @@ public interface NamespaceHandlerResolver {
 	 * @param namespaceUri the relevant namespace URI
 	 * @return the located {@link NamespaceHandler} (may be {@code null})
 	 */
-	@Nullable
-	NamespaceHandler resolve(String namespaceUri);
+	@Nullable NamespaceHandler resolve(String namespaceUri);
 
 }

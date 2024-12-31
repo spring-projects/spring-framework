@@ -18,7 +18,8 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**

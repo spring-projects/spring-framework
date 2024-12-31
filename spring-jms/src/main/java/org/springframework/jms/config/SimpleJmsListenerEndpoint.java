@@ -17,9 +17,9 @@
 package org.springframework.jms.config;
 
 import jakarta.jms.MessageListener;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.listener.MessageListenerContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -31,8 +31,7 @@ import org.springframework.util.Assert;
  */
 public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
-	@Nullable
-	private MessageListener messageListener;
+	private @Nullable MessageListener messageListener;
 
 
 	/**
@@ -47,8 +46,7 @@ public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	 * Return the {@link MessageListener} to invoke when a message matching
 	 * the endpoint is received.
 	 */
-	@Nullable
-	public MessageListener getMessageListener() {
+	public @Nullable MessageListener getMessageListener() {
 		return this.messageListener;
 	}
 

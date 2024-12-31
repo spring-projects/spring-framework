@@ -20,9 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.lang.Nullable;
 
 /**
  * Simple {@link ScopeMetadataResolver} implementation that follows JSR-330 scoping rules:
@@ -77,8 +78,7 @@ public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 	 * @param annotationType the JSR-330 annotation type
 	 * @return the Spring scope name
 	 */
-	@Nullable
-	protected String resolveScopeName(String annotationType) {
+	protected @Nullable String resolveScopeName(String annotationType) {
 		return this.scopeMap.get(annotationType);
 	}
 

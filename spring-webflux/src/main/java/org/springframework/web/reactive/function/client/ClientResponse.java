@@ -343,7 +343,7 @@ public interface ClientResponse {
 		 * Manipulate this response's headers with the given consumer.
 		 * <p>The headers provided to the consumer are "live", so that the consumer
 		 * can be used to {@linkplain HttpHeaders#set(String, String) overwrite}
-		 * existing header values, {@linkplain HttpHeaders#remove(Object) remove}
+		 * existing header values, {@linkplain HttpHeaders#remove(String) remove}
 		 * values, or use any of the other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder

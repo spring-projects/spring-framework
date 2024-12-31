@@ -23,9 +23,9 @@ import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,14 +56,12 @@ public class Jackson2SockJsMessageCodec extends AbstractSockJsMessageCodec {
 
 
 	@Override
-	@Nullable
-	public String[] decode(String content) throws IOException {
+	public String @Nullable [] decode(String content) throws IOException {
 		return this.objectMapper.readValue(content, String[].class);
 	}
 
 	@Override
-	@Nullable
-	public String[] decodeInputStream(InputStream content) throws IOException {
+	public String @Nullable [] decodeInputStream(InputStream content) throws IOException {
 		return this.objectMapper.readValue(content, String[].class);
 	}
 

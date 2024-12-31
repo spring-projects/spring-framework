@@ -17,8 +17,7 @@
 package org.springframework.core.test.tools;
 
 import org.assertj.core.api.AbstractAssert;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

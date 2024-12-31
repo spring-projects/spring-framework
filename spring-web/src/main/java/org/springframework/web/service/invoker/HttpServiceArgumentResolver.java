@@ -16,8 +16,9 @@
 
 package org.springframework.web.service.invoker;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**

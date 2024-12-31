@@ -36,7 +36,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -349,8 +350,7 @@ public final class CollectionFactory {
 	public static Properties createStringAdaptingProperties() {
 		return new SortedProperties(false) {
 			@Override
-			@Nullable
-			public String getProperty(String key) {
+			public @Nullable String getProperty(String key) {
 				Object value = get(key);
 				return (value != null ? value.toString() : null);
 			}

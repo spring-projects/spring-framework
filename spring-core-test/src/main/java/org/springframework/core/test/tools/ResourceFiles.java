@@ -19,7 +19,7 @@ package org.springframework.core.test.tools;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An immutable collection of {@link ResourceFile} instances.
@@ -115,8 +115,7 @@ public final class ResourceFiles implements Iterable<ResourceFile> {
 	 * @param path the path to find
 	 * @return a {@link ResourceFile} instance or {@code null}
 	 */
-	@Nullable
-	public ResourceFile get(String path) {
+	public @Nullable ResourceFile get(String path) {
 		return this.files.get(path);
 	}
 

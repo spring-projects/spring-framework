@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.util.Assert;
 
@@ -107,8 +107,7 @@ public class TransactionSynchronizationManager {
 	 * @return a value bound to the current context (usually the active
 	 * resource object), or {@code null} if none
 	 */
-	@Nullable
-	public Object getResource(Object key) {
+	public @Nullable Object getResource(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		return doGetResource(actualKey);
 	}
@@ -116,8 +115,7 @@ public class TransactionSynchronizationManager {
 	/**
 	 * Actually check the value of the resource that is bound for the given key.
 	 */
-	@Nullable
-	private Object doGetResource(Object actualKey) {
+	private @Nullable Object doGetResource(Object actualKey) {
 		return this.transactionContext.getResources().get(actualKey);
 	}
 
@@ -158,8 +156,7 @@ public class TransactionSynchronizationManager {
 	 * @param key the key to unbind (usually the resource factory)
 	 * @return the previously bound value, or {@code null} if none bound
 	 */
-	@Nullable
-	public Object unbindResourceIfPossible(Object key) {
+	public @Nullable Object unbindResourceIfPossible(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		return doUnbindResource(actualKey);
 	}
@@ -167,8 +164,7 @@ public class TransactionSynchronizationManager {
 	/**
 	 * Actually remove the value of the resource that is bound for the given key.
 	 */
-	@Nullable
-	private Object doUnbindResource(Object actualKey) {
+	private @Nullable Object doUnbindResource(Object actualKey) {
 		Map<Object, Object> map = this.transactionContext.getResources();
 		return map.remove(actualKey);
 	}
@@ -279,8 +275,7 @@ public class TransactionSynchronizationManager {
 	 * for example to optimize fetch strategies for specific named transactions.
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
-	@Nullable
-	public String getCurrentTransactionName() {
+	public @Nullable String getCurrentTransactionName() {
 		return this.transactionContext.getCurrentTransactionName();
 	}
 
@@ -339,8 +334,7 @@ public class TransactionSynchronizationManager {
 	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
 	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
-	@Nullable
-	public Integer getCurrentTransactionIsolationLevel() {
+	public @Nullable Integer getCurrentTransactionIsolationLevel() {
 		return this.transactionContext.getCurrentTransactionIsolationLevel();
 	}
 

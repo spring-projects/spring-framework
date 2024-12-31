@@ -36,8 +36,9 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.lang.Contract;
-import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -515,8 +516,7 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (for example, "'myString'"),
 	 * or {@code null} if the input was {@code null}
 	 */
-	@Nullable
-	public static String quote(@Nullable String str) {
+	public static @Nullable String quote(@Nullable String str) {
 		return (str != null ? "'" + str + "'" : null);
 	}
 
@@ -527,8 +527,7 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (for example, "'myString'"),
 	 * or the input object as-is if not a {@code String}
 	 */
-	@Nullable
-	public static Object quoteIfString(@Nullable Object obj) {
+	public static @Nullable Object quoteIfString(@Nullable Object obj) {
 		return (obj instanceof String str ? quote(str) : obj);
 	}
 
@@ -619,8 +618,7 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename, or {@code null} if none
 	 */
-	@Nullable
-	public static String getFilename(@Nullable String path) {
+	public static @Nullable String getFilename(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -635,8 +633,7 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename extension, or {@code null} if none
 	 */
-	@Nullable
-	public static String getFilenameExtension(@Nullable String path) {
+	public static @Nullable String getFilenameExtension(@Nullable String path) {
 		if (path == null) {
 			return null;
 		}
@@ -866,8 +863,7 @@ public abstract class StringUtils {
 	 * @see #parseLocaleString
 	 * @see Locale#forLanguageTag
 	 */
-	@Nullable
-	public static Locale parseLocale(String localeValue) {
+	public static @Nullable Locale parseLocale(String localeValue) {
 		if (!localeValue.contains("_") && !localeValue.contains(" ")) {
 			validateLocalePart(localeValue);
 			Locale resolved = Locale.forLanguageTag(localeValue);
@@ -893,8 +889,7 @@ public abstract class StringUtils {
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
 	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
-	@Nullable
-	public static Locale parseLocaleString(String localeString) {
+	public static @Nullable Locale parseLocaleString(String localeString) {
 		if (localeString.isEmpty()) {
 			return null;
 		}
@@ -990,7 +985,7 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to append
 	 * @return the new array (never {@code null})
 	 */
-	public static String[] addStringToArray(@Nullable String[] array, String str) {
+	public static String[] addStringToArray(String @Nullable [] array, String str) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[] {str};
 		}
@@ -1009,8 +1004,7 @@ public abstract class StringUtils {
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
 	 */
-	@Nullable
-	public static String[] concatenateStringArrays(@Nullable String[] array1, @Nullable String[] array2) {
+	public static String @Nullable [] concatenateStringArrays(String @Nullable [] array1, String @Nullable [] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -1081,8 +1075,7 @@ public abstract class StringUtils {
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or {@code null} if the delimiter wasn't found in the given input {@code String}
 	 */
-	@Nullable
-	public static String[] split(@Nullable String toSplit, @Nullable String delimiter) {
+	public static String @Nullable [] split(@Nullable String toSplit, @Nullable String delimiter) {
 		if (!hasLength(toSplit) || !hasLength(delimiter)) {
 			return null;
 		}
@@ -1106,8 +1099,7 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
-	@Nullable
-	public static Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
+	public static @Nullable Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
 		return splitArrayElementsIntoProperties(array, delimiter, null);
 	}
 
@@ -1125,8 +1117,7 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
-	@Nullable
-	public static Properties splitArrayElementsIntoProperties(
+	public static @Nullable Properties splitArrayElementsIntoProperties(
 			String[] array, String delimiter, @Nullable String charsToDelete) {
 
 		if (ObjectUtils.isEmpty(array)) {
@@ -1353,7 +1344,7 @@ public abstract class StringUtils {
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code String}
 	 */
-	public static String arrayToDelimitedString(@Nullable Object[] arr, String delim) {
+	public static String arrayToDelimitedString(@Nullable Object @Nullable [] arr, String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
 			return "";
 		}
@@ -1375,7 +1366,7 @@ public abstract class StringUtils {
 	 * @param arr the array to display (potentially {@code null} or empty)
 	 * @return the delimited {@code String}
 	 */
-	public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {
+	public static String arrayToCommaDelimitedString(@Nullable Object @Nullable [] arr) {
 		return arrayToDelimitedString(arr, ",");
 	}
 

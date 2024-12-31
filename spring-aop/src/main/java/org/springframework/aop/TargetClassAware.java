@@ -16,7 +16,7 @@
 
 package org.springframework.aop;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Minimal interface for exposing the target class behind a proxy.
@@ -36,7 +36,6 @@ public interface TargetClassAware {
 	 * (typically a proxy configuration or an actual proxy).
 	 * @return the target Class, or {@code null} if not known
 	 */
-	@Nullable
-	Class<?> getTargetClass();
+	@Nullable Class<?> getTargetClass();
 
 }

@@ -295,17 +295,17 @@ public class DefaultWebClientTests {
 
 		WebClient.Builder builder1 = client1.mutate();
 		builder1.filters(filters -> assertThat(filters).hasSize(1));
-		builder1.defaultHeaders(headers -> assertThat(headers).hasSize(1));
+		builder1.defaultHeaders(headers -> assertThat(headers.size()).isOne());
 		builder1.defaultCookies(cookies -> assertThat(cookies).hasSize(1));
 
 		WebClient.Builder builder2 = client2.mutate();
 		builder2.filters(filters -> assertThat(filters).hasSize(2));
-		builder2.defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		builder2.defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
 		builder2.defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 
 		WebClient.Builder builder1a = client1a.mutate();
 		builder1a.filters(filters -> assertThat(filters).hasSize(2));
-		builder1a.defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		builder1a.defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
 		builder1a.defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 	}
 

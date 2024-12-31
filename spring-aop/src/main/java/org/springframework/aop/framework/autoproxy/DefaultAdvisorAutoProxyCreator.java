@@ -16,8 +16,9 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.lang.Nullable;
 
 /**
  * {@code BeanPostProcessor} implementation that creates AOP proxies based on all
@@ -44,8 +45,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 	private boolean usePrefix = false;
 
-	@Nullable
-	private String advisorBeanNamePrefix;
+	private @Nullable String advisorBeanNamePrefix;
 
 
 	/**
@@ -78,8 +78,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	 * Return the prefix for bean names that will cause them to be included
 	 * for auto-proxying by this object.
 	 */
-	@Nullable
-	public String getAdvisorBeanNamePrefix() {
+	public @Nullable String getAdvisorBeanNamePrefix() {
 		return this.advisorBeanNamePrefix;
 	}
 

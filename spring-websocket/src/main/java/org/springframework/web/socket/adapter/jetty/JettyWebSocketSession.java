@@ -30,9 +30,9 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.ExtensionConfig;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -57,20 +57,15 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private final String id;
 
-	@Nullable
-	private URI uri;
+	private @Nullable URI uri;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
-	@Nullable
-	private String acceptedProtocol;
+	private @Nullable String acceptedProtocol;
 
-	@Nullable
-	private List<WebSocketExtension> extensions;
+	private @Nullable List<WebSocketExtension> extensions;
 
-	@Nullable
-	private Principal user;
+	private @Nullable Principal user;
 
 
 	/**
@@ -101,8 +96,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
-	@Nullable
-	public URI getUri() {
+	public @Nullable URI getUri() {
 		checkNativeSessionInitialized();
 		return this.uri;
 	}
@@ -114,8 +108,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
-	@Nullable
-	public String getAcceptedProtocol() {
+	public @Nullable String getAcceptedProtocol() {
 		checkNativeSessionInitialized();
 		return this.acceptedProtocol;
 	}
@@ -127,8 +120,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
-	@Nullable
-	public Principal getPrincipal() {
+	public @Nullable Principal getPrincipal() {
 		return this.user;
 	}
 

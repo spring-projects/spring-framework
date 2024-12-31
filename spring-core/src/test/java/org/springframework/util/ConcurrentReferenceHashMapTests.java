@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap.Entry;
 import org.springframework.util.ConcurrentReferenceHashMap.Reference;
 import org.springframework.util.ConcurrentReferenceHashMap.Restructure;

@@ -1,9 +1,7 @@
 /**
  * Support package for recording metrics during application startup.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.core.metrics;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

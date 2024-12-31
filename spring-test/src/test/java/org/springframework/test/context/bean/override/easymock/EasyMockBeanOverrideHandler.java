@@ -20,11 +20,11 @@ import java.lang.reflect.Field;
 
 import org.easymock.EasyMock;
 import org.easymock.MockType;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 
 import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE;

@@ -24,10 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -124,8 +124,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * Find a registered {@link HandlerMethodArgumentResolver} that supports
 	 * the given method parameter.
 	 */
-	@Nullable
-	public HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
+	public @Nullable HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
 			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {

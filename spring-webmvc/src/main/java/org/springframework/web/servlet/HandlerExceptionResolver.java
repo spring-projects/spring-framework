@@ -18,8 +18,7 @@ package org.springframework.web.servlet;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by objects that can resolve exceptions thrown during
@@ -49,8 +48,7 @@ public interface HandlerExceptionResolver {
 	 * @return a corresponding {@code ModelAndView} to forward to,
 	 * or {@code null} for default processing in the resolution chain
 	 */
-	@Nullable
-	ModelAndView resolveException(
+	@Nullable ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }

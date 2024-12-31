@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.jstl.core.Config;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -34,9 +35,9 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -49,6 +50,7 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Context holder for request-specific state, like current web application context, current locale,
@@ -95,37 +97,28 @@ public class RequestContext {
 
 	private final HttpServletRequest request;
 
-	@Nullable
-	private final HttpServletResponse response;
+	private final @Nullable HttpServletResponse response;
 
-	@Nullable
-	private final Map<String, Object> model;
+	private final @Nullable Map<String, Object> model;
 
 	private final WebApplicationContext webApplicationContext;
 
-	@Nullable
-	private Locale locale;
+	private @Nullable Locale locale;
 
-	@Nullable
-	private TimeZone timeZone;
+	private @Nullable TimeZone timeZone;
 
 	@Deprecated
-	@Nullable
-	private org.springframework.ui.context.Theme theme;
+	private org.springframework.ui.context.@Nullable Theme theme;
 
-	@Nullable
-	private Boolean defaultHtmlEscape;
+	private @Nullable Boolean defaultHtmlEscape;
 
-	@Nullable
-	private final Boolean responseEncodedHtmlEscape;
+	private final @Nullable Boolean responseEncodedHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
 
-	@Nullable
-	private RequestDataValueProcessor requestDataValueProcessor;
+	private @Nullable RequestDataValueProcessor requestDataValueProcessor;
 
-	@Nullable
-	private Map<String, Errors> errorsMap;
+	private @Nullable Map<String, Errors> errorsMap;
 
 
 	/**
@@ -269,8 +262,7 @@ public class RequestContext {
 	/**
 	 * Return the underlying ServletContext. Only intended for cooperating classes in this package.
 	 */
-	@Nullable
-	protected final ServletContext getServletContext() {
+	protected final @Nullable ServletContext getServletContext() {
 		return this.webApplicationContext.getServletContext();
 	}
 
@@ -285,8 +277,7 @@ public class RequestContext {
 	 * Return the model Map that this RequestContext encapsulates, if any.
 	 * @return the populated model Map, or {@code null} if none available
 	 */
-	@Nullable
-	public final Map<String, Object> getModel() {
+	public final @Nullable Map<String, Object> getModel() {
 		return this.model;
 	}
 
@@ -315,8 +306,7 @@ public class RequestContext {
 	 * Also includes a fallback check for JSTL's TimeZone attribute.
 	 * @see RequestContextUtils#getTimeZone
 	 */
-	@Nullable
-	public TimeZone getTimeZone() {
+	public @Nullable TimeZone getTimeZone() {
 		return (this.timeZone != null ? this.timeZone : getFallbackTimeZone());
 	}
 
@@ -343,8 +333,7 @@ public class RequestContext {
 	 * session or application scope; returns {@code null} if not found.
 	 * @return the fallback time zone (or {@code null} if none derivable from the request)
 	 */
-	@Nullable
-	protected TimeZone getFallbackTimeZone() {
+	protected @Nullable TimeZone getFallbackTimeZone() {
 		if (jstlPresent) {
 			TimeZone timeZone = JstlLocaleResolver.getJstlTimeZone(getRequest(), getServletContext());
 			if (timeZone != null) {
@@ -435,7 +424,7 @@ public class RequestContext {
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated(since = "6.0")
-	public void changeTheme(@Nullable org.springframework.ui.context.Theme theme) {
+	public void changeTheme(org.springframework.ui.context.@Nullable Theme theme) {
 		org.springframework.web.servlet.ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
 		if (themeResolver == null) {
 			throw new IllegalStateException("Cannot change theme if no ThemeResolver configured");
@@ -483,8 +472,7 @@ public class RequestContext {
 	 * Return the default HTML escape setting, differentiating between no default specified and an explicit value.
 	 * @return whether default HTML escaping is enabled (null = no explicit default)
 	 */
-	@Nullable
-	public Boolean getDefaultHtmlEscape() {
+	public @Nullable Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}
 
@@ -504,8 +492,7 @@ public class RequestContext {
 	 * @return whether default use of response encoding HTML escaping is enabled (null = no explicit default)
 	 * @since 4.1.2
 	 */
-	@Nullable
-	public Boolean getResponseEncodedHtmlEscape() {
+	public @Nullable Boolean getResponseEncodedHtmlEscape() {
 		return this.responseEncodedHtmlEscape;
 	}
 
@@ -514,7 +501,11 @@ public class RequestContext {
 	 * Set the UrlPathHelper to use for context path and request URI decoding.
 	 * Can be used to pass a shared UrlPathHelper instance in.
 	 * <p>A default UrlPathHelper is always available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
@@ -524,7 +515,11 @@ public class RequestContext {
 	 * Return the UrlPathHelper used for context path and request URI decoding.
 	 * Can be used to configure the current UrlPathHelper.
 	 * <p>A default UrlPathHelper is always available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
@@ -534,8 +529,7 @@ public class RequestContext {
 	 * WebApplicationContext under the name {@code "requestDataValueProcessor"}.
 	 * Or {@code null} if no matching bean was found.
 	 */
-	@Nullable
-	public RequestDataValueProcessor getRequestDataValueProcessor() {
+	public @Nullable RequestDataValueProcessor getRequestDataValueProcessor() {
 		return this.requestDataValueProcessor;
 	}
 
@@ -639,7 +633,7 @@ public class RequestContext {
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, @Nullable Object[] args, String defaultMessage) {
+	public String getMessage(String code, Object @Nullable [] args, String defaultMessage) {
 		return getMessage(code, args, defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -662,7 +656,7 @@ public class RequestContext {
 	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
 	 */
-	public String getMessage(String code, @Nullable Object[] args, String defaultMessage, boolean htmlEscape) {
+	public String getMessage(String code, Object @Nullable [] args, String defaultMessage, boolean htmlEscape) {
 		String msg = getMessageSource().getMessage(code, args, defaultMessage, getLocale());
 		if (msg == null) {
 			return "";
@@ -687,7 +681,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
+	public String getMessage(String code, Object @Nullable [] args) throws NoSuchMessageException {
 		return getMessage(code, args, isDefaultHtmlEscape());
 	}
 
@@ -710,7 +704,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, @Nullable Object[] args, boolean htmlEscape) throws NoSuchMessageException {
+	public String getMessage(String code, Object @Nullable [] args, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = getMessageSource().getMessage(code, args, getLocale());
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
@@ -763,7 +757,7 @@ public class RequestContext {
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
-	public String getThemeMessage(String code, @Nullable Object[] args, String defaultMessage) {
+	public String getThemeMessage(String code, Object @Nullable [] args, String defaultMessage) {
 		String msg = getTheme().getMessageSource().getMessage(code, args, defaultMessage, getLocale());
 		return (msg != null ? msg : "");
 	}
@@ -810,7 +804,7 @@ public class RequestContext {
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
-	public String getThemeMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
+	public String getThemeMessage(String code, Object @Nullable [] args) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(code, args, getLocale());
 	}
 
@@ -848,8 +842,7 @@ public class RequestContext {
 	 * @param name the name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
-	@Nullable
-	public Errors getErrors(String name) {
+	public @Nullable Errors getErrors(String name) {
 		return getErrors(name, isDefaultHtmlEscape());
 	}
 
@@ -859,8 +852,7 @@ public class RequestContext {
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */
-	@Nullable
-	public Errors getErrors(String name, boolean htmlEscape) {
+	public @Nullable Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
 			this.errorsMap = new HashMap<>();
 		}
@@ -897,8 +889,7 @@ public class RequestContext {
 	 * @param modelName the name of the model object
 	 * @return the model object
 	 */
-	@Nullable
-	protected Object getModelObject(String modelName) {
+	protected @Nullable Object getModelObject(String modelName) {
 		if (this.model != null) {
 			return this.model.get(modelName);
 		}
@@ -935,8 +926,7 @@ public class RequestContext {
 	 */
 	private static class JstlLocaleResolver {
 
-		@Nullable
-		public static Locale getJstlLocale(HttpServletRequest request, @Nullable ServletContext servletContext) {
+		public static @Nullable Locale getJstlLocale(HttpServletRequest request, @Nullable ServletContext servletContext) {
 			Object localeObject = Config.get(request, Config.FMT_LOCALE);
 			if (localeObject == null) {
 				HttpSession session = request.getSession(false);
@@ -950,8 +940,7 @@ public class RequestContext {
 			return (localeObject instanceof Locale locale ? locale : null);
 		}
 
-		@Nullable
-		public static TimeZone getJstlTimeZone(HttpServletRequest request, @Nullable ServletContext servletContext) {
+		public static @Nullable TimeZone getJstlTimeZone(HttpServletRequest request, @Nullable ServletContext servletContext) {
 			Object timeZoneObject = Config.get(request, Config.FMT_TIME_ZONE);
 			if (timeZoneObject == null) {
 				HttpSession session = request.getSession(false);

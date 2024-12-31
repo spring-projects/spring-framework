@@ -18,7 +18,7 @@ package org.springframework.aot.agent;
 
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Reference to a Java method, identified by its owner class and the method name.

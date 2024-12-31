@@ -45,7 +45,7 @@ class HttpHeadersAssertTests {
 		Map<String, String> map = Map.of("first", "1");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).containsHeader("wrong-name"))
-				.withMessageContainingAll("HTTP headers", "first", "wrong-name");
+				.withMessageContainingAll("HTTP header", "first", "wrong-name");
 	}
 
 	@Test
@@ -71,8 +71,8 @@ class HttpHeadersAssertTests {
 	void doesNotContainHeaderWithNamePresent() {
 		Map<String, String> map = Map.of("first", "1");
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).doesNotContainKey("first"))
-				.withMessageContainingAll("HTTP headers", "first");
+				.isThrownBy(() -> assertThat(map).doesNotContainHeader("first"))
+				.withMessageContainingAll("HTTP header", "first");
 	}
 
 	@Test
@@ -112,7 +112,7 @@ class HttpHeadersAssertTests {
 		headers.addAll("header", List.of("first", "second", "third"));
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", "second"))
-				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
+				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
 	@Test
@@ -121,7 +121,7 @@ class HttpHeadersAssertTests {
 		map.add("test-header", "a");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", "a"))
-				.withMessageContainingAll("HTTP headers", "test-header", "wrong-name");
+				.withMessageContainingAll("HTTP header", "test-header", "wrong-name");
 	}
 
 	@Test
@@ -146,7 +146,7 @@ class HttpHeadersAssertTests {
 		map.addAll("header", List.of("123", "456", "789"));
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", 456))
-				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
+				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
 	@Test
@@ -164,7 +164,7 @@ class HttpHeadersAssertTests {
 		map.setInstant("header", instant);
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(30)))
-				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
+				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
 	@Test
@@ -174,7 +174,7 @@ class HttpHeadersAssertTests {
 		map.setInstant("header", instant);
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(1)))
-				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
+				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
 

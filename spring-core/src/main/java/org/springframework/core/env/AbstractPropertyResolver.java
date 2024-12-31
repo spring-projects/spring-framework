@@ -22,11 +22,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -43,14 +43,11 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private volatile ConfigurableConversionService conversionService;
+	private volatile @Nullable ConfigurableConversionService conversionService;
 
-	@Nullable
-	private PropertyPlaceholderHelper nonStrictHelper;
+	private @Nullable PropertyPlaceholderHelper nonStrictHelper;
 
-	@Nullable
-	private PropertyPlaceholderHelper strictHelper;
+	private @Nullable PropertyPlaceholderHelper strictHelper;
 
 	private boolean ignoreUnresolvableNestedPlaceholders = false;
 
@@ -58,11 +55,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String placeholderSuffix = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
-	@Nullable
-	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
+	private @Nullable String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
-	@Nullable
-	private Character escapeCharacter = SystemPropertyUtils.ESCAPE_CHARACTER;
+	private @Nullable Character escapeCharacter = SystemPropertyUtils.ESCAPE_CHARACTER;
 
 	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
@@ -175,8 +170,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	@Override
-	@Nullable
-	public String getProperty(String key) {
+	public @Nullable String getProperty(String key) {
 		return getProperty(key, String.class);
 	}
 
@@ -264,8 +258,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * @since 4.3.5
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	protected <T> T convertValueIfNecessary(Object value, @Nullable Class<T> targetType) {
+	protected <T> @Nullable T convertValueIfNecessary(Object value, @Nullable Class<T> targetType) {
 		if (targetType == null) {
 			return (T) value;
 		}
@@ -288,7 +281,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * @param key the property name to resolve
 	 * @return the property value or {@code null} if none found
 	 */
-	@Nullable
-	protected abstract String getPropertyAsRawString(String key);
+	protected abstract @Nullable String getPropertyAsRawString(String key);
 
 }

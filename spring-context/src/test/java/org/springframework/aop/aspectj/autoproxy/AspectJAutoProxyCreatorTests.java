@@ -29,6 +29,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -66,7 +67,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.annotation.Order;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

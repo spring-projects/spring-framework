@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 
 /**
@@ -74,8 +74,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 
 	private String name = "";
 
-	@Nullable
-	private Errors errors;
+	private @Nullable Errors errors;
 
 
 	/**
@@ -115,8 +114,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 	 * Retrieve the Errors instance that this tag is currently bound to.
 	 * <p>Intended for cooperating nesting tags.
 	 */
-	@Nullable
-	public final Errors getErrors() {
+	public final @Nullable Errors getErrors() {
 		return this.errors;
 	}
 

@@ -35,10 +35,10 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -73,21 +73,17 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	private MessageType targetType = MessageType.BYTES;
 
-	@Nullable
-	private String encoding;
+	private @Nullable String encoding;
 
-	@Nullable
-	private String encodingPropertyName;
+	private @Nullable String encodingPropertyName;
 
-	@Nullable
-	private String typeIdPropertyName;
+	private @Nullable String typeIdPropertyName;
 
 	private Map<String, Class<?>> idClassMappings = new HashMap<>();
 
 	private final Map<Class<?>, String> classIdMappings = new HashMap<>();
 
-	@Nullable
-	private ClassLoader beanClassLoader;
+	private @Nullable ClassLoader beanClassLoader;
 
 
 	/**
@@ -478,8 +474,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * converter for the current conversion attempt
 	 * @return the serialization view class, or {@code null} if none
 	 */
-	@Nullable
-	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
+	protected @Nullable Class<?> getSerializationView(@Nullable Object conversionHint) {
 		if (conversionHint instanceof MethodParameter methodParam) {
 			JsonView annotation = methodParam.getParameterAnnotation(JsonView.class);
 			if (annotation == null) {

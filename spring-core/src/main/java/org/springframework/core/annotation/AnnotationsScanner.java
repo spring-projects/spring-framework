@@ -25,12 +25,13 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -75,16 +76,14 @@ abstract class AnnotationsScanner {
 	 * @param processor the processor that receives the annotations
 	 * @return the result of {@link AnnotationsProcessor#finish(Object)}
 	 */
-	@Nullable
-	static <C, R> R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
+	static <C, R> @Nullable R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
 			Predicate<Class<?>> searchEnclosingClass, AnnotationsProcessor<C, R> processor) {
 
 		R result = process(context, source, searchStrategy, searchEnclosingClass, processor);
 		return processor.finish(result);
 	}
 
-	@Nullable
-	private static <C, R> R process(C context, AnnotatedElement source,
+	private static <C, R> @Nullable R process(C context, AnnotatedElement source,
 			SearchStrategy searchStrategy, Predicate<Class<?>> searchEnclosingClass,
 			AnnotationsProcessor<C, R> processor) {
 
@@ -97,8 +96,7 @@ abstract class AnnotationsScanner {
 		return processElement(context, source, processor);
 	}
 
-	@Nullable
-	private static <C, R> R processClass(C context, Class<?> source, SearchStrategy searchStrategy,
+	private static <C, R> @Nullable R processClass(C context, Class<?> source, SearchStrategy searchStrategy,
 			Predicate<Class<?>> searchEnclosingClass, AnnotationsProcessor<C, R> processor) {
 
 		return switch (searchStrategy) {
@@ -109,8 +107,7 @@ abstract class AnnotationsScanner {
 		};
 	}
 
-	@Nullable
-	private static <C, R> R processClassInheritedAnnotations(C context, Class<?> source,
+	private static <C, R> @Nullable R processClassInheritedAnnotations(C context, Class<?> source,
 			AnnotationsProcessor<C, R> processor) {
 
 		try {
@@ -164,8 +161,7 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	@Nullable
-	private static <C, R> R processClassHierarchy(C context, Class<?> source,
+	private static <C, R> @Nullable R processClassHierarchy(C context, Class<?> source,
 			AnnotationsProcessor<C, R> processor, boolean includeInterfaces,
 			Predicate<Class<?>> searchEnclosingClass) {
 
@@ -173,8 +169,7 @@ abstract class AnnotationsScanner {
 				includeInterfaces, searchEnclosingClass);
 	}
 
-	@Nullable
-	private static <C, R> R processClassHierarchy(C context, int[] aggregateIndex, Class<?> source,
+	private static <C, R> @Nullable R processClassHierarchy(C context, int[] aggregateIndex, Class<?> source,
 			AnnotationsProcessor<C, R> processor, boolean includeInterfaces,
 			Predicate<Class<?>> searchEnclosingClass) {
 
@@ -236,8 +231,7 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	@Nullable
-	private static <C, R> R processMethod(C context, Method source,
+	private static <C, R> @Nullable R processMethod(C context, Method source,
 			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
 		return switch (searchStrategy) {
@@ -249,8 +243,7 @@ abstract class AnnotationsScanner {
 		};
 	}
 
-	@Nullable
-	private static <C, R> R processMethodInheritedAnnotations(C context, Method source,
+	private static <C, R> @Nullable R processMethodInheritedAnnotations(C context, Method source,
 			AnnotationsProcessor<C, R> processor) {
 
 		try {
@@ -264,8 +257,7 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	@Nullable
-	private static <C, R> R processMethodHierarchy(C context, int[] aggregateIndex,
+	private static <C, R> @Nullable R processMethodHierarchy(C context, int[] aggregateIndex,
 			Class<?> sourceClass, AnnotationsProcessor<C, R> processor, Method rootMethod,
 			boolean includeInterfaces) {
 
@@ -390,8 +382,7 @@ abstract class AnnotationsScanner {
 		return true;
 	}
 
-	@Nullable
-	private static <C, R> R processMethodAnnotations(C context, int aggregateIndex, Method source,
+	private static <C, R> @Nullable R processMethodAnnotations(C context, int aggregateIndex, Method source,
 			AnnotationsProcessor<C, R> processor) {
 
 		Annotation[] annotations = getDeclaredAnnotations(source, false);
@@ -412,8 +403,7 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	@Nullable
-	private static <C, R> R processElement(C context, AnnotatedElement source,
+	private static <C, R> @Nullable R processElement(C context, AnnotatedElement source,
 			AnnotationsProcessor<C, R> processor) {
 
 		try {
@@ -428,8 +418,7 @@ abstract class AnnotationsScanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	static <A extends Annotation> A getDeclaredAnnotation(AnnotatedElement source, Class<A> annotationType) {
+	static <A extends Annotation> @Nullable A getDeclaredAnnotation(AnnotatedElement source, Class<A> annotationType) {
 		Annotation[] annotations = getDeclaredAnnotations(source, false);
 		for (Annotation annotation : annotations) {
 			if (annotation != null && annotationType == annotation.annotationType()) {

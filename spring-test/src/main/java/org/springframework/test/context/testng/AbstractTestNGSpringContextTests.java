@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITestResult;
@@ -31,7 +32,6 @@ import org.testng.annotations.BeforeMethod;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
@@ -69,13 +69,11 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * The {@link ApplicationContext} that was injected into this test instance
 	 * via {@link #setApplicationContext(ApplicationContext)}.
 	 */
-	@Nullable
-	protected ApplicationContext applicationContext;
+	protected @Nullable ApplicationContext applicationContext;
 
 	private final TestContextManager testContextManager;
 
-	@Nullable
-	private Throwable testException;
+	private @Nullable Throwable testException;
 
 
 	/**
@@ -198,8 +196,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	}
 
 
-	@Nullable
-	private Throwable getTestResultException(ITestResult testResult) {
+	private @Nullable Throwable getTestResultException(ITestResult testResult) {
 		Throwable testResultException = testResult.getThrowable();
 		if (testResultException instanceof InvocationTargetException) {
 			testResultException = testResultException.getCause();

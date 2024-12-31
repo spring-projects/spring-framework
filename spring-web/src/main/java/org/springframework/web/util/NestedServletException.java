@@ -17,9 +17,9 @@
 package org.springframework.web.util;
 
 import jakarta.servlet.ServletException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.NestedExceptionUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Legacy subclass of {@link ServletException} that handles a root cause in terms

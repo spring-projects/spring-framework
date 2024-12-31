@@ -22,8 +22,7 @@ import java.io.Writer;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.jsp.JspWriter;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Mock implementation of the {@link jakarta.servlet.jsp.JspWriter} class.
@@ -36,8 +35,7 @@ public class MockJspWriter extends JspWriter {
 
 	private final HttpServletResponse response;
 
-	@Nullable
-	private PrintWriter targetWriter;
+	private @Nullable PrintWriter targetWriter;
 
 
 	/**

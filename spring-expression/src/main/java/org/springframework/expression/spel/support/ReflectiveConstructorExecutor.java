@@ -18,11 +18,12 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Constructor;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -37,8 +38,7 @@ public class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
 	private final Constructor<?> ctor;
 
-	@Nullable
-	private final Integer varargsPosition;
+	private final @Nullable Integer varargsPosition;
 
 
 	public ReflectiveConstructorExecutor(Constructor<?> ctor) {

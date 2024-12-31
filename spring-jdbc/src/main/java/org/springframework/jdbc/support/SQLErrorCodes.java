@@ -16,7 +16,8 @@
 
 package org.springframework.jdbc.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -35,8 +36,7 @@ import org.springframework.util.StringUtils;
  */
 public class SQLErrorCodes {
 
-	@Nullable
-	private String[] databaseProductNames;
+	private String @Nullable [] databaseProductNames;
 
 	private boolean useSqlStateForTranslation = false;
 
@@ -60,11 +60,9 @@ public class SQLErrorCodes {
 
 	private String[] cannotSerializeTransactionCodes = new String[0];
 
-	@Nullable
-	private CustomSQLErrorCodesTranslation[] customTranslations;
+	private CustomSQLErrorCodesTranslation @Nullable [] customTranslations;
 
-	@Nullable
-	private SQLExceptionTranslator customSqlExceptionTranslator;
+	private @Nullable SQLExceptionTranslator customSqlExceptionTranslator;
 
 
 	/**
@@ -75,8 +73,7 @@ public class SQLErrorCodes {
 		this.databaseProductNames = new String[] {databaseProductName};
 	}
 
-	@Nullable
-	public String getDatabaseProductName() {
+	public @Nullable String getDatabaseProductName() {
 		return (this.databaseProductNames != null && this.databaseProductNames.length > 0 ?
 				this.databaseProductNames[0] : null);
 	}
@@ -85,12 +82,11 @@ public class SQLErrorCodes {
 	 * Set this property to specify multiple database names that contains spaces,
 	 * in which case we can not use bean names for lookup.
 	 */
-	public void setDatabaseProductNames(@Nullable String... databaseProductNames) {
+	public void setDatabaseProductNames(String @Nullable ... databaseProductNames) {
 		this.databaseProductNames = databaseProductNames;
 	}
 
-	@Nullable
-	public String[] getDatabaseProductNames() {
+	public String @Nullable [] getDatabaseProductNames() {
 		return this.databaseProductNames;
 	}
 
@@ -190,8 +186,7 @@ public class SQLErrorCodes {
 		this.customTranslations = customTranslations;
 	}
 
-	@Nullable
-	public CustomSQLErrorCodesTranslation[] getCustomTranslations() {
+	public CustomSQLErrorCodesTranslation @Nullable [] getCustomTranslations() {
 		return this.customTranslations;
 	}
 
@@ -214,8 +209,7 @@ public class SQLErrorCodes {
 		this.customSqlExceptionTranslator = customSqlExceptionTranslator;
 	}
 
-	@Nullable
-	public SQLExceptionTranslator getCustomSqlExceptionTranslator() {
+	public @Nullable SQLExceptionTranslator getCustomSqlExceptionTranslator() {
 		return this.customSqlExceptionTranslator;
 	}
 

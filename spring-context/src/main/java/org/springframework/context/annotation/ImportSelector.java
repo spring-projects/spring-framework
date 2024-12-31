@@ -18,8 +18,9 @@ package org.springframework.context.annotation;
 
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by types that determine which @{@link Configuration}
@@ -77,8 +78,7 @@ public interface ImportSelector {
 	 * of transitively imported configuration classes, or {@code null} if none
 	 * @since 5.2.4
 	 */
-	@Nullable
-	default Predicate<String> getExclusionFilter() {
+	default @Nullable Predicate<String> getExclusionFilter() {
 		return null;
 	}
 

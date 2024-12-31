@@ -22,8 +22,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

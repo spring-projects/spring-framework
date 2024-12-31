@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -236,7 +237,7 @@ class MethodMessageHandlerTests {
 		}
 
 		@Override
-		protected String getMatchingMapping(String mapping, Message<?> message) {
+		protected @Nullable String getMatchingMapping(String mapping, Message<?> message) {
 			String destination = getLookupDestination(getDestination(message));
 			Assert.notNull(destination, "No destination");
 			return mapping.equals(destination) || this.pathMatcher.match(mapping, destination) ? mapping : null;

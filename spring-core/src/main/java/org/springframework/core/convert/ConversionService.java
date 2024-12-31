@@ -16,7 +16,7 @@
 
 package org.springframework.core.convert;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
@@ -72,8 +72,7 @@ public interface ConversionService {
 	 * @throws ConversionException if a conversion exception occurred
 	 * @throws IllegalArgumentException if targetType is {@code null}
 	 */
-	@Nullable
-	<T> T convert(@Nullable Object source, Class<T> targetType);
+	<T> @Nullable T convert(@Nullable Object source, Class<T> targetType);
 
 	/**
 	 * Convert the given {@code source} to the specified {@code targetType}.
@@ -87,8 +86,7 @@ public interface ConversionService {
 	 * @throws IllegalArgumentException if targetType is {@code null}
 	 * @since 6.1
 	 */
-	@Nullable
-	default Object convert(@Nullable Object source, TypeDescriptor targetType) {
+	default @Nullable Object convert(@Nullable Object source, TypeDescriptor targetType) {
 		return convert(source, TypeDescriptor.forObject(source), targetType);
 	}
 
@@ -105,7 +103,6 @@ public interface ConversionService {
 	 * @throws IllegalArgumentException if targetType is {@code null},
 	 * or {@code sourceType} is {@code null} but source is not {@code null}
 	 */
-	@Nullable
-	Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
+	@Nullable Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

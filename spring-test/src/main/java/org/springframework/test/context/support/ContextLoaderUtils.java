@@ -232,7 +232,7 @@ abstract class ContextLoaderUtils {
 	 * @throws IllegalArgumentException if the supplied class is {@code null} or if
 	 * {@code @ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 

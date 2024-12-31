@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.parsing;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,8 +38,7 @@ public class Location {
 
 	private final Resource resource;
 
-	@Nullable
-	private final Object source;
+	private final @Nullable Object source;
 
 
 	/**
@@ -75,8 +75,7 @@ public class Location {
 	 * <p>See the {@link Location class level javadoc for this class} for examples
 	 * of what the actual type of the returned object may be.
 	 */
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.source;
 	}
 

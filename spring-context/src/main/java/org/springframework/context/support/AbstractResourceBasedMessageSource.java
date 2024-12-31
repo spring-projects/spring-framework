@@ -20,7 +20,8 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -39,13 +40,11 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 
 	private final Set<String> basenameSet = new LinkedHashSet<>(4);
 
-	@Nullable
-	private String defaultEncoding;
+	private @Nullable String defaultEncoding;
 
 	private boolean fallbackToSystemLocale = true;
 
-	@Nullable
-	private Locale defaultLocale;
+	private @Nullable Locale defaultLocale;
 
 	private long cacheMillis = -1;
 
@@ -134,8 +133,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return the default charset to use for parsing properties files, if any.
 	 * @since 4.3
 	 */
-	@Nullable
-	protected String getDefaultEncoding() {
+	protected @Nullable String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
 
@@ -187,8 +185,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * @see #setFallbackToSystemLocale
 	 * @see Locale#getDefault()
 	 */
-	@Nullable
-	protected Locale getDefaultLocale() {
+	protected @Nullable Locale getDefaultLocale() {
 		if (this.defaultLocale != null) {
 			return this.defaultLocale;
 		}

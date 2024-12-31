@@ -18,9 +18,9 @@ package org.springframework.web.servlet.view;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.MessageSource;
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
@@ -77,8 +77,7 @@ import org.springframework.web.servlet.support.RequestContext;
  */
 public class JstlView extends InternalResourceView {
 
-	@Nullable
-	private MessageSource messageSource;
+	private @Nullable MessageSource messageSource;
 
 
 	/**

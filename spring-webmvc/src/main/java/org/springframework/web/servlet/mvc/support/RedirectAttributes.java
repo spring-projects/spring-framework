@@ -19,7 +19,8 @@ package org.springframework.web.servlet.mvc.support;
 import java.util.Collection;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.FlashMap;
 

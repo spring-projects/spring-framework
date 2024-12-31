@@ -64,7 +64,7 @@ This prevents the same `@Bean` method from accidentally being invoked through a 
 Java method call, which helps to reduce subtle bugs that can be hard to track down.
 
 When `@Bean` methods are declared within classes that are not annotated with
-`@Configuration` - or when `@Configuration(proxyBeanMethods=false)` is declared -,
+`@Configuration`, or when `@Configuration(proxyBeanMethods=false)` is declared,
 they are referred to as being processed in a "lite" mode. In such scenarios,
 `@Bean` methods are effectively a general-purpose factory method mechanism without
 special runtime processing (that is, without generating a CGLIB subclass for it).

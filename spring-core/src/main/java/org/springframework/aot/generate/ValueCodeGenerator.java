@@ -20,8 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -41,8 +42,7 @@ public final class ValueCodeGenerator {
 
 	private final List<Delegate> delegates;
 
-	@Nullable
-	private final GeneratedMethods generatedMethods;
+	private final @Nullable GeneratedMethods generatedMethods;
 
 
 	private ValueCodeGenerator(List<Delegate> delegates, @Nullable GeneratedMethods generatedMethods) {
@@ -128,8 +128,7 @@ public final class ValueCodeGenerator {
 	 * {@code null} if no specific scope is set.
 	 * @return the generated methods to use for code generation
 	 */
-	@Nullable
-	public GeneratedMethods getGeneratedMethods() {
+	public @Nullable GeneratedMethods getGeneratedMethods() {
 		return this.generatedMethods;
 	}
 
@@ -149,8 +148,7 @@ public final class ValueCodeGenerator {
 		 * @return the code that represents the specified value or {@code null} if
 		 * the specified value is not supported.
 		 */
-		@Nullable
-		CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value);
+		@Nullable CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value);
 	}
 
 }

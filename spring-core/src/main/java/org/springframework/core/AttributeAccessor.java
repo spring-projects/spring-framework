@@ -18,7 +18,8 @@ package org.springframework.core;
 
 import java.util.function.Function;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -48,8 +49,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @return the current value of the attribute, if any
 	 */
-	@Nullable
-	Object getAttribute(String name);
+	@Nullable Object getAttribute(String name);
 
 	/**
 	 * Compute a new value for the attribute identified by {@code name} if
@@ -89,8 +89,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @return the last value of the attribute, if any
 	 */
-	@Nullable
-	Object removeAttribute(String name);
+	@Nullable Object removeAttribute(String name);
 
 	/**
 	 * Return {@code true} if the attribute identified by {@code name} exists.

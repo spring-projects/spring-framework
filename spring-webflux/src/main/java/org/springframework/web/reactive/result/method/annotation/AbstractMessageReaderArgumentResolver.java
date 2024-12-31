@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,7 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.ValidationAnnotationUtils;
@@ -260,8 +260,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * a (possibly empty) Object[] with validation hints. A return value of
 	 * {@code null} indicates that validation is not required.
 	 */
-	@Nullable
-	private Object[] extractValidationHints(MethodParameter parameter) {
+	private Object @Nullable [] extractValidationHints(MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Object[] hints = ValidationAnnotationUtils.determineValidationHints(ann);

@@ -19,13 +19,14 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -46,11 +47,9 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	 */
 	private final Method methodToInvoke;
 
-	@Nullable
-	private final Integer varargsPosition;
+	private final @Nullable Integer varargsPosition;
 
-	@Nullable
-	private final Class<?> publicDeclaringClass;
+	private final @Nullable Class<?> publicDeclaringClass;
 
 	private boolean argumentConversionOccurred = false;
 
@@ -93,8 +92,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	 * @return the public class or interface that declares the method, or {@code null} if
 	 * no such public type could be found
 	 */
-	@Nullable
-	public Class<?> getPublicDeclaringClass() {
+	public @Nullable Class<?> getPublicDeclaringClass() {
 		return this.publicDeclaringClass;
 	}
 

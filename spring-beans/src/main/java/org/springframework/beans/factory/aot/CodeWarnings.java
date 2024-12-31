@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.AnnotationSpec;
 import org.springframework.javapoet.AnnotationSpec.Builder;
@@ -30,7 +32,6 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.FieldSpec;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**

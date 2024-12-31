@@ -16,10 +16,11 @@
 
 package org.springframework.context.event;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 
 /**
  * Extended variant of the standard {@link ApplicationListener} interface,

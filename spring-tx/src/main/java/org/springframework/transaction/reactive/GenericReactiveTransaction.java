@@ -16,7 +16,8 @@
 
 package org.springframework.transaction.reactive;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.util.Assert;
 
@@ -40,11 +41,9 @@ import org.springframework.util.Assert;
  */
 public class GenericReactiveTransaction implements ReactiveTransaction {
 
-	@Nullable
-	private final String transactionName;
+	private final @Nullable String transactionName;
 
-	@Nullable
-	private final Object transaction;
+	private final @Nullable Object transaction;
 
 	private final boolean newTransaction;
 
@@ -56,8 +55,7 @@ public class GenericReactiveTransaction implements ReactiveTransaction {
 
 	private final boolean debug;
 
-	@Nullable
-	private final Object suspendedResources;
+	private final @Nullable Object suspendedResources;
 
 	private boolean rollbackOnly = false;
 
@@ -151,8 +149,7 @@ public class GenericReactiveTransaction implements ReactiveTransaction {
 	 * Return the holder for resources that have been suspended for this transaction,
 	 * if any.
 	 */
-	@Nullable
-	public Object getSuspendedResources() {
+	public @Nullable Object getSuspendedResources() {
 		return this.suspendedResources;
 	}
 

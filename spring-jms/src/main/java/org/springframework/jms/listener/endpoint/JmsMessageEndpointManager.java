@@ -18,6 +18,7 @@ package org.springframework.jms.listener.endpoint;
 
 import jakarta.jms.MessageListener;
 import jakarta.resource.ResourceException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
@@ -25,7 +26,6 @@ import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of the generic JCA 1.5
@@ -60,8 +60,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	private JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 
-	@Nullable
-	private JmsActivationSpecConfig activationSpecConfig;
+	private @Nullable JmsActivationSpecConfig activationSpecConfig;
 
 
 	/**
@@ -146,8 +145,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * Return the {@link JmsActivationSpecConfig} object that this endpoint manager
 	 * should use for activating its listener. Return {@code null} if none is set.
 	 */
-	@Nullable
-	public JmsActivationSpecConfig getActivationSpecConfig() {
+	public @Nullable JmsActivationSpecConfig getActivationSpecConfig() {
 		return this.activationSpecConfig;
 	}
 
@@ -191,8 +189,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
-	@Nullable
-	public MessageConverter getMessageConverter() {
+	public @Nullable MessageConverter getMessageConverter() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {
 			return config.getMessageConverter();
@@ -201,8 +198,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
-	@Nullable
-	public DestinationResolver getDestinationResolver() {
+	public @Nullable DestinationResolver getDestinationResolver() {
 		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory standardFactory) {
 			return standardFactory.getDestinationResolver();
 		}
@@ -228,8 +224,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	}
 
 	@Override
-	@Nullable
-	public QosSettings getReplyQosSettings() {
+	public @Nullable QosSettings getReplyQosSettings() {
 		JmsActivationSpecConfig config = getActivationSpecConfig();
 		if (config != null) {
 			return config.getReplyQosSettings();

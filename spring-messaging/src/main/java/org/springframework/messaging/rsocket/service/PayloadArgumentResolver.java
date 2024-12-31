@@ -16,11 +16,12 @@
 
 package org.springframework.messaging.rsocket.service;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.util.Assert;
 

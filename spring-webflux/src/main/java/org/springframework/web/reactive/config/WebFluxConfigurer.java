@@ -18,11 +18,12 @@ package org.springframework.web.reactive.config;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.ErrorResponse;
@@ -74,8 +75,7 @@ public interface WebFluxConfigurer {
 	 * <p>The configured validator is used for validating annotated controller
 	 * method arguments.
 	 */
-	@Nullable
-	default Validator getValidator() {
+	default @Nullable Validator getValidator() {
 		return null;
 	}
 
@@ -84,8 +84,7 @@ public interface WebFluxConfigurer {
 	 * annotated controller method arguments instead of the one created by
 	 * default in {@link org.springframework.validation.DataBinder}.
 	 */
-	@Nullable
-	default MessageCodesResolver getMessageCodesResolver() {
+	default @Nullable MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}
 
@@ -170,8 +169,7 @@ public interface WebFluxConfigurer {
 	 * {@link org.springframework.web.reactive.socket.server.RequestUpgradeStrategy}.
 	 * @since 5.3
 	 */
-	@Nullable
-	default WebSocketService getWebSocketService() {
+	default @Nullable WebSocketService getWebSocketService() {
 		return null;
 	}
 

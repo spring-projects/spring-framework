@@ -18,6 +18,7 @@ package org.springframework.beans.factory.wiring;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -26,7 +27,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -52,11 +52,9 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private volatile BeanWiringInfoResolver beanWiringInfoResolver;
+	private volatile @Nullable BeanWiringInfoResolver beanWiringInfoResolver;
 
-	@Nullable
-	private volatile ConfigurableListableBeanFactory beanFactory;
+	private volatile @Nullable ConfigurableListableBeanFactory beanFactory;
 
 
 	/**
@@ -92,8 +90,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
 	 * @return the default BeanWiringInfoResolver (never {@code null})
 	 */
-	@Nullable
-	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
+	protected @Nullable BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
 		return new ClassNameBeanWiringInfoResolver();
 	}
 

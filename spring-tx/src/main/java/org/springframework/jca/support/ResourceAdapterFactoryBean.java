@@ -21,12 +21,12 @@ import jakarta.resource.spi.BootstrapContext;
 import jakarta.resource.spi.ResourceAdapter;
 import jakarta.resource.spi.XATerminator;
 import jakarta.resource.spi.work.WorkManager;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that bootstraps
@@ -50,17 +50,13 @@ import org.springframework.lang.Nullable;
  */
 public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>, InitializingBean, DisposableBean {
 
-	@Nullable
-	private ResourceAdapter resourceAdapter;
+	private @Nullable ResourceAdapter resourceAdapter;
 
-	@Nullable
-	private BootstrapContext bootstrapContext;
+	private @Nullable BootstrapContext bootstrapContext;
 
-	@Nullable
-	private WorkManager workManager;
+	private @Nullable WorkManager workManager;
 
-	@Nullable
-	private XATerminator xaTerminator;
+	private @Nullable XATerminator xaTerminator;
 
 
 	/**
@@ -129,8 +125,7 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 
 
 	@Override
-	@Nullable
-	public ResourceAdapter getObject() {
+	public @Nullable ResourceAdapter getObject() {
 		return this.resourceAdapter;
 	}
 

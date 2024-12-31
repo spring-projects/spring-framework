@@ -17,8 +17,7 @@
 package org.springframework.web.testfixture.xml;
 
 import jakarta.xml.bind.annotation.XmlRootElement;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Sebastien Deleuze

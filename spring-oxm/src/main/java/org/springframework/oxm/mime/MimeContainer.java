@@ -17,8 +17,7 @@
 package org.springframework.oxm.mime;
 
 import jakarta.activation.DataHandler;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a container for MIME attachments
@@ -58,7 +57,6 @@ public interface MimeContainer {
 	 * @param contentId the content id
 	 * @return the attachment, as a data handler
 	 */
-	@Nullable
-	DataHandler getAttachment(String contentId);
+	@Nullable DataHandler getAttachment(String contentId);
 
 }

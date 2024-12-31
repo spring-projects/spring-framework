@@ -18,9 +18,9 @@ package org.springframework.aop.target.dynamic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.TargetSource;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract {@link org.springframework.aop.TargetSource} implementation that
@@ -42,7 +42,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
+	@SuppressWarnings("NullAway.Init")
 	protected Object targetObject;
 
 	private long refreshCheckDelay = -1;
@@ -66,7 +66,6 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public synchronized Class<?> getTargetClass() {
 		if (this.targetObject == null) {
 			refresh();
@@ -75,8 +74,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	}
 
 	@Override
-	@Nullable
-	public final synchronized Object getTarget() {
+	public final synchronized @Nullable Object getTarget() {
 		if ((refreshCheckDelayElapsed() && requiresRefresh()) || this.targetObject == null) {
 			refresh();
 		}

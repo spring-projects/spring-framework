@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -37,7 +38,6 @@ import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -74,46 +74,33 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 
-	@Nullable
-	private String baseUrl;
+	private @Nullable String baseUrl;
 
-	@Nullable
-	private Map<String, ?> defaultUriVariables;
+	private @Nullable Map<String, ?> defaultUriVariables;
 
-	@Nullable
-	private UriBuilderFactory uriBuilderFactory;
+	private @Nullable UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private HttpHeaders defaultHeaders;
+	private @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private MultiValueMap<String, String> defaultCookies;
+	private @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
+	private @Nullable Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
 
-	@Nullable
-	private Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlers;
+	private @Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlers;
 
-	@Nullable
-	private List<ExchangeFilterFunction> filters;
+	private @Nullable List<ExchangeFilterFunction> filters;
 
-	@Nullable
-	private ClientHttpConnector connector;
+	private @Nullable ClientHttpConnector connector;
 
-	@Nullable
-	private ExchangeStrategies strategies;
+	private @Nullable ExchangeStrategies strategies;
 
-	@Nullable
-	private List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
+	private @Nullable List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
 
-	@Nullable
-	private ExchangeFunction exchangeFunction;
+	private @Nullable ExchangeFunction exchangeFunction;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	@Nullable
-	private ClientRequestObservationConvention observationConvention;
+	private @Nullable ClientRequestObservationConvention observationConvention;
 
 
 	public DefaultWebClientBuilder() {
@@ -368,8 +355,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return factory;
 	}
 
-	@Nullable
-	private HttpHeaders copyDefaultHeaders() {
+	private @Nullable HttpHeaders copyDefaultHeaders() {
 		if (this.defaultHeaders == null) {
 			return null;
 		}
@@ -378,8 +364,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
-	@Nullable
-	private MultiValueMap<String, String> copyDefaultCookies() {
+	private @Nullable MultiValueMap<String, String> copyDefaultCookies() {
 		if (this.defaultCookies == null) {
 			return null;
 		}

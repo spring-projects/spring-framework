@@ -27,13 +27,13 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.JettyUpgradeListener;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
@@ -92,7 +92,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 		upgradeRequest.setSubProtocols(handler.getSubProtocols());
 		if (headers != null) {
-			headers.keySet().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
+			headers.headerNames().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
 		}
 
 		final AtomicReference<HandshakeInfo> handshakeInfo = new AtomicReference<>();

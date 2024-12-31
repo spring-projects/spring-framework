@@ -36,8 +36,8 @@ import org.aspectj.weaver.reflect.ReflectionBasedReferenceTypeDelegate;
 import org.aspectj.weaver.reflect.ReflectionVar;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -79,8 +79,7 @@ class RuntimeTestWalker {
 	}
 
 
-	@Nullable
-	private final Test runtimeTest;
+	private final @Nullable Test runtimeTest;
 
 
 	public RuntimeTestWalker(ShadowMatch shadowMatch) {

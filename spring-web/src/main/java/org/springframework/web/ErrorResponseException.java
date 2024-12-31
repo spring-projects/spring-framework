@@ -18,11 +18,12 @@ package org.springframework.web;
 
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
@@ -48,8 +49,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 	private final String messageDetailCode;
 
-	@Nullable
-	private final Object[] messageDetailArguments;
+	private final Object @Nullable [] messageDetailArguments;
 
 
 	/**
@@ -82,7 +82,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 */
 	public ErrorResponseException(
 			HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause,
-			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+			@Nullable String messageDetailCode, Object @Nullable [] messageDetailArguments) {
 
 		super(null, cause);
 		this.status = status;
@@ -165,8 +165,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	@Override
-	@Nullable
-	public Object[] getDetailMessageArguments() {
+	public Object @Nullable [] getDetailMessageArguments() {
 		return this.messageDetailArguments;
 	}
 

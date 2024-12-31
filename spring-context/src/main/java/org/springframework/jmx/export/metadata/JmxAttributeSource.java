@@ -18,7 +18,7 @@ package org.springframework.jmx.export.metadata;
 
 import java.lang.reflect.Method;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface used by the {@code MetadataMBeanInfoAssembler} to
@@ -40,8 +40,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
-	@Nullable
-	ManagedResource getManagedResource(Class<?> clazz) throws InvalidMetadataException;
+	@Nullable ManagedResource getManagedResource(Class<?> clazz) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an instance of {@code ManagedAttribute}
@@ -51,8 +50,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
-	@Nullable
-	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
+	@Nullable ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an instance of {@code ManagedMetric}
@@ -62,8 +60,7 @@ public interface JmxAttributeSource {
 	 * @return the metric, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
-	@Nullable
-	ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException;
+	@Nullable ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an instance of {@code ManagedOperation}
@@ -73,8 +70,7 @@ public interface JmxAttributeSource {
 	 * @return the attribute, or {@code null} if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
-	@Nullable
-	ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException;
+	@Nullable ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an array of {@code ManagedOperationParameter}

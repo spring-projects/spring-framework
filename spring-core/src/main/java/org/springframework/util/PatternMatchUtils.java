@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility methods for simple pattern matching, in particular for Spring's typical
@@ -83,7 +83,7 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches any of the given patterns
 	 */
-	public static boolean simpleMatch(@Nullable String[] patterns, @Nullable String str) {
+	public static boolean simpleMatch(String @Nullable [] patterns, @Nullable String str) {
 		if (patterns != null) {
 			for (String pattern : patterns) {
 				if (simpleMatch(pattern, str)) {

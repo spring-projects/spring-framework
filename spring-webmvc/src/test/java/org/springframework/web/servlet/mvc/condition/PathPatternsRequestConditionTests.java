@@ -127,29 +127,6 @@ class PathPatternsRequestConditionTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void matchTrailingSlash() {
-		MockHttpServletRequest request = createRequest("/foo/");
-
-		PathPatternParser patternParser = new PathPatternParser();
-		patternParser.setMatchOptionalTrailingSeparator(true);
-
-		PathPatternsRequestCondition condition = new PathPatternsRequestCondition(patternParser, "/foo");
-		PathPatternsRequestCondition match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNotNull();
-		assertThat(match.getPatternValues()).containsExactly("/foo");
-
-		PathPatternParser strictParser = new PathPatternParser();
-		strictParser.setMatchOptionalTrailingSeparator(false);
-
-		condition = new PathPatternsRequestCondition(strictParser, "/foo");
-		match = condition.getMatchingCondition(request);
-
-		assertThat(match).isNull();
-	}
-
-	@Test
 	void matchPatternContainsExtension() {
 		MockHttpServletRequest request = createRequest("/foo.html");
 		PathPatternsRequestCondition match = createCondition("/foo.jpg").getMatchingCondition(request);

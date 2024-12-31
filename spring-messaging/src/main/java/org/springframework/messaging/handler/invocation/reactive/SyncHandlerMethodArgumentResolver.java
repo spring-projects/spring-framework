@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -47,7 +47,6 @@ public interface SyncHandlerMethodArgumentResolver extends HandlerMethodArgument
 	 * @param message the currently processed message
 	 * @return the resolved value, if any
 	 */
-	@Nullable
-	Object resolveArgumentValue(MethodParameter parameter, Message<?> message);
+	@Nullable Object resolveArgumentValue(MethodParameter parameter, Message<?> message);
 
 }

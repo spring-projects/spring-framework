@@ -19,9 +19,9 @@ package org.springframework.jms.listener.adapter;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.support.destination.DestinationResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,8 +87,7 @@ public class JmsResponse<T> {
 	 * @return the {@link Destination} to use
 	 * @throws JMSException if the DestinationResolver failed to resolve the destination
 	 */
-	@Nullable
-	public Destination resolveDestination(DestinationResolver destinationResolver, Session session)
+	public @Nullable Destination resolveDestination(DestinationResolver destinationResolver, Session session)
 			throws JMSException {
 
 		if (this.destination instanceof Destination dest) {

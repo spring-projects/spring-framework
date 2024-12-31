@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -190,20 +191,15 @@ import org.springframework.util.StringUtils;
  */
 public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private Class<?> serviceLocatorInterface;
+	private @Nullable Class<?> serviceLocatorInterface;
 
-	@Nullable
-	private Constructor<Exception> serviceLocatorExceptionConstructor;
+	private @Nullable Constructor<Exception> serviceLocatorExceptionConstructor;
 
-	@Nullable
-	private Properties serviceMappings;
+	private @Nullable Properties serviceMappings;
 
-	@Nullable
-	private ListableBeanFactory beanFactory;
+	private @Nullable ListableBeanFactory beanFactory;
 
-	@Nullable
-	private Object proxy;
+	private @Nullable Object proxy;
 
 
 	/**
@@ -329,14 +325,12 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 
 
 	@Override
-	@Nullable
-	public Object getObject() {
+	public @Nullable Object getObject() {
 		return this.proxy;
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		return this.serviceLocatorInterface;
 	}
 
@@ -394,7 +388,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		/**
 		 * Check whether a service id was passed in.
 		 */
-		private String tryGetBeanName(@Nullable Object[] args) {
+		private String tryGetBeanName(Object @Nullable [] args) {
 			String beanName = "";
 			if (args != null && args.length == 1 && args[0] != null) {
 				beanName = args[0].toString();

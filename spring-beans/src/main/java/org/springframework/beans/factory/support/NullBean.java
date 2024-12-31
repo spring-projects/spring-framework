@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.Nullable;
 
 /**
  * Internal representation of a null bean instance, for example, for a {@code null} value

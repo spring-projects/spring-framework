@@ -33,8 +33,8 @@ import javax.naming.OperationNotSupportedException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -213,8 +213,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 	@Override
-	@Nullable
-	public Object addToEnvironment(String propName, Object propVal) {
+	public @Nullable Object addToEnvironment(String propName, Object propVal) {
 		return this.environment.put(propName, propVal);
 	}
 

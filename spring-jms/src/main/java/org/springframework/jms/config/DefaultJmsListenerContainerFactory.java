@@ -18,8 +18,9 @@ package org.springframework.jms.config;
 
 import java.util.concurrent.Executor;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.backoff.BackOff;
 
@@ -36,32 +37,23 @@ import org.springframework.util.backoff.BackOff;
 public class DefaultJmsListenerContainerFactory
 		extends AbstractJmsListenerContainerFactory<DefaultMessageListenerContainer> {
 
-	@Nullable
-	private Executor taskExecutor;
+	private @Nullable Executor taskExecutor;
 
-	@Nullable
-	private PlatformTransactionManager transactionManager;
+	private @Nullable PlatformTransactionManager transactionManager;
 
-	@Nullable
-	private Integer cacheLevel;
+	private @Nullable Integer cacheLevel;
 
-	@Nullable
-	private String cacheLevelName;
+	private @Nullable String cacheLevelName;
 
-	@Nullable
-	private String concurrency;
+	private @Nullable String concurrency;
 
-	@Nullable
-	private Integer maxMessagesPerTask;
+	private @Nullable Integer maxMessagesPerTask;
 
-	@Nullable
-	private Long receiveTimeout;
+	private @Nullable Long receiveTimeout;
 
-	@Nullable
-	private Long recoveryInterval;
+	private @Nullable Long recoveryInterval;
 
-	@Nullable
-	private BackOff backOff;
+	private @Nullable BackOff backOff;
 
 
 	/**

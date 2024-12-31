@@ -60,6 +60,7 @@ class ResourceHandlerRegistryTests {
 	private MockHttpServletResponse response;
 
 
+	@SuppressWarnings("removal")
 	@BeforeEach
 	void setup() {
 		GenericWebApplicationContext appContext = new GenericWebApplicationContext();
@@ -202,6 +203,7 @@ class ResourceHandlerRegistryTests {
 		assertThat(transformers).containsExactly(cachingTransformer, cssLinkTransformer);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void urlResourceWithCharset() {
 		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp/");

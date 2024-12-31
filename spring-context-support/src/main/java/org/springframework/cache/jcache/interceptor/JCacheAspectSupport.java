@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,7 +29,6 @@ import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,20 +53,15 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private JCacheOperationSource cacheOperationSource;
+	private @Nullable JCacheOperationSource cacheOperationSource;
 
-	@Nullable
-	private CacheResultInterceptor cacheResultInterceptor;
+	private @Nullable CacheResultInterceptor cacheResultInterceptor;
 
-	@Nullable
-	private CachePutInterceptor cachePutInterceptor;
+	private @Nullable CachePutInterceptor cachePutInterceptor;
 
-	@Nullable
-	private CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor;
+	private @Nullable CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor;
 
-	@Nullable
-	private CacheRemoveAllInterceptor cacheRemoveAllInterceptor;
+	private @Nullable CacheRemoveAllInterceptor cacheRemoveAllInterceptor;
 
 	private boolean initialized = false;
 
@@ -101,8 +96,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 
-	@Nullable
-	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
+	protected @Nullable Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
 		// Check whether aspect is enabled to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
 			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
@@ -126,8 +120,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private Object execute(CacheOperationInvocationContext<?> context, CacheOperationInvoker invoker) {
+	private @Nullable Object execute(CacheOperationInvocationContext<?> context, CacheOperationInvoker invoker) {
 		CacheOperationInvoker adapter = new CacheOperationInvokerAdapter(invoker);
 		BasicOperation operation = context.getOperation();
 
@@ -165,8 +158,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	 * @return the result of the invocation
 	 * @see CacheOperationInvoker#invoke()
 	 */
-	@Nullable
-	protected Object invokeOperation(CacheOperationInvoker invoker) {
+	protected @Nullable Object invokeOperation(CacheOperationInvoker invoker) {
 		return invoker.invoke();
 	}
 
@@ -180,8 +172,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 		}
 
 		@Override
-		@Nullable
-		public Object invoke() throws ThrowableWrapper {
+		public @Nullable Object invoke() throws ThrowableWrapper {
 			return invokeOperation(this.delegate);
 		}
 	}

@@ -26,6 +26,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
@@ -42,7 +43,6 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -83,17 +83,13 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private Environment environment;
+	private @Nullable Environment environment;
 
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
-	@Nullable
-	private FilterConfig filterConfig;
+	private @Nullable FilterConfig filterConfig;
 
 	private final Set<String> requiredProperties = new HashSet<>(4);
 
@@ -275,8 +271,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @return the FilterConfig instance, or {@code null} if none available
 	 * @see jakarta.servlet.GenericServlet#getServletConfig()
 	 */
-	@Nullable
-	public FilterConfig getFilterConfig() {
+	public @Nullable FilterConfig getFilterConfig() {
 		return this.filterConfig;
 	}
 
@@ -291,8 +286,7 @@ public abstract class GenericFilterBean implements Filter, BeanNameAware, Enviro
 	 * @see jakarta.servlet.FilterConfig#getFilterName()
 	 * @see #setBeanName
 	 */
-	@Nullable
-	protected String getFilterName() {
+	protected @Nullable String getFilterName() {
 		return (this.filterConfig != null ? this.filterConfig.getFilterName() : this.beanName);
 	}
 

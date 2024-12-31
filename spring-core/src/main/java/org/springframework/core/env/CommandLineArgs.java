@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A simple representation of command line arguments, broken into
@@ -73,8 +73,7 @@ class CommandLineArgs {
 	 * <p>{@code null} signifies that the option was not present on the command
 	 * line. An empty list signifies that no values were associated with this option.
 	 */
-	@Nullable
-	public List<String> getOptionValues(String optionName) {
+	public @Nullable List<String> getOptionValues(String optionName) {
 		return this.optionArgs.get(optionName);
 	}
 

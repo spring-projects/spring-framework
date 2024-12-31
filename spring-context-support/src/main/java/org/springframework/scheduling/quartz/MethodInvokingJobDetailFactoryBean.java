@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -36,7 +37,6 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
@@ -78,27 +78,21 @@ import org.springframework.util.MethodInvoker;
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
 		implements FactoryBean<JobDetail>, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
 	private String group = Scheduler.DEFAULT_GROUP;
 
 	private boolean concurrent = true;
 
-	@Nullable
-	private String targetBeanName;
+	private @Nullable String targetBeanName;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private JobDetail jobDetail;
+	private @Nullable JobDetail jobDetail;
 
 
 	/**
@@ -199,8 +193,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
 	@Override
-	@Nullable
-	public Class<?> getTargetClass() {
+	public @Nullable Class<?> getTargetClass() {
 		Class<?> targetClass = super.getTargetClass();
 		if (targetClass == null && this.targetBeanName != null) {
 			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
@@ -213,8 +206,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
 	@Override
-	@Nullable
-	public Object getTargetObject() {
+	public @Nullable Object getTargetObject() {
 		Object targetObject = super.getTargetObject();
 		if (targetObject == null && this.targetBeanName != null) {
 			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
@@ -225,8 +217,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 
 	@Override
-	@Nullable
-	public JobDetail getObject() {
+	public @Nullable JobDetail getObject() {
 		return this.jobDetail;
 	}
 
@@ -249,8 +240,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 		protected static final Log logger = LogFactory.getLog(MethodInvokingJob.class);
 
-		@Nullable
-		private MethodInvoker methodInvoker;
+		private @Nullable MethodInvoker methodInvoker;
 
 		/**
 		 * Set the MethodInvoker to use.

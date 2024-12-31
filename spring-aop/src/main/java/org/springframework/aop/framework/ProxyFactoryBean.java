@@ -27,6 +27,7 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -43,7 +44,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -101,11 +101,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	private static final Log logger = LogFactory.getLog(ProxyFactoryBean.class);
 
-	@Nullable
-	private String[] interceptorNames;
+	private String @Nullable [] interceptorNames;
 
-	@Nullable
-	private String targetName;
+	private @Nullable String targetName;
 
 	private boolean autodetectInterfaces = true;
 
@@ -115,20 +113,17 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	private boolean freezeProxy = false;
 
-	@Nullable
-	private transient ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
+	private transient @Nullable ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private transient boolean classLoaderConfigured = false;
 
-	@Nullable
-	private transient BeanFactory beanFactory;
+	private transient @Nullable BeanFactory beanFactory;
 
 	/** Whether the advisor chain has already been initialized. */
 	private boolean advisorChainInitialized = false;
 
 	/** If this is a singleton, the cached singleton proxy instance. */
-	@Nullable
-	private Object singletonInstance;
+	private @Nullable Object singletonInstance;
 
 
 	/**
@@ -246,8 +241,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	@Override
-	@Nullable
-	public Object getObject() throws BeansException {
+	public @Nullable Object getObject() throws BeansException {
 		initializeAdvisorChain();
 		if (isSingleton()) {
 			return getSingletonInstance();
@@ -268,8 +262,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * @see org.springframework.aop.framework.AopProxy#getProxyClass
 	 */
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		synchronized (this) {
 			if (this.singletonInstance != null) {
 				return this.singletonInstance.getClass();

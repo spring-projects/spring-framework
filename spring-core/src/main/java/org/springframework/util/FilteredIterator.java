@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link Iterator} that filters out values that do not match a predicate.
@@ -37,8 +37,7 @@ final class FilteredIterator<E> implements Iterator<E> {
 
 	private final Predicate<E> filter;
 
-	@Nullable
-	private E next;
+	private @Nullable E next;
 
 	private boolean hasNext;
 

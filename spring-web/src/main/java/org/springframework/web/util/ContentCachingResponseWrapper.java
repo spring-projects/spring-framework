@@ -30,9 +30,9 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
 /**
@@ -51,14 +51,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
 
-	@Nullable
-	private ServletOutputStream outputStream;
+	private @Nullable ServletOutputStream outputStream;
 
-	@Nullable
-	private PrintWriter writer;
+	private @Nullable PrintWriter writer;
 
-	@Nullable
-	private Integer contentLength;
+	private @Nullable Integer contentLength;
 
 
 	/**
@@ -202,8 +199,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	@Nullable
-	public String getHeader(String name) {
+	public @Nullable String getHeader(String name) {
 		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			return this.contentLength.toString();
 		}

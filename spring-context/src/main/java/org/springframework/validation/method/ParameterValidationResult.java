@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -49,19 +50,15 @@ public class ParameterValidationResult {
 
 	private final MethodParameter methodParameter;
 
-	@Nullable
-	private final Object argument;
+	private final @Nullable Object argument;
 
 	private final List<MessageSourceResolvable> resolvableErrors;
 
-	@Nullable
-	private final Object container;
+	private final @Nullable Object container;
 
-	@Nullable
-	private final Integer containerIndex;
+	private final @Nullable Integer containerIndex;
 
-	@Nullable
-	private final Object containerKey;
+	private final @Nullable Object containerKey;
 
 	private final BiFunction<MessageSourceResolvable, Class<?>, Object> sourceLookup;
 
@@ -96,8 +93,7 @@ public class ParameterValidationResult {
 	/**
 	 * The method argument value that was validated.
 	 */
-	@Nullable
-	public Object getArgument() {
+	public @Nullable Object getArgument() {
 		return this.argument;
 	}
 
@@ -132,8 +128,7 @@ public class ParameterValidationResult {
 	 * {@link #getContainerIndex()} and {@link #getContainerKey()} provide
 	 * information about the index or key if applicable.
 	 */
-	@Nullable
-	public Object getContainer() {
+	public @Nullable Object getContainer() {
 		return this.container;
 	}
 
@@ -142,8 +137,7 @@ public class ParameterValidationResult {
 	 * {@link List} or array, this method returns the index of the validated
 	 * {@link #getArgument() argument}.
 	 */
-	@Nullable
-	public Integer getContainerIndex() {
+	public @Nullable Integer getContainerIndex() {
 		return this.containerIndex;
 	}
 
@@ -152,8 +146,7 @@ public class ParameterValidationResult {
 	 * key such as {@link java.util.Map}, this method returns the key of the
 	 * validated {@link #getArgument() argument}.
 	 */
-	@Nullable
-	public Object getContainerKey() {
+	public @Nullable Object getContainerKey() {
 		return this.containerKey;
 	}
 

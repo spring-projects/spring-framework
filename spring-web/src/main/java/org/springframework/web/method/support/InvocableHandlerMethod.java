@@ -30,6 +30,7 @@ import kotlin.reflect.KType;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
@@ -39,7 +40,6 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.method.MethodValidator;
@@ -70,11 +70,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-	@Nullable
-	private WebDataBinderFactory dataBinderFactory;
+	private @Nullable WebDataBinderFactory dataBinderFactory;
 
-	@Nullable
-	private MethodValidator methodValidator;
+	private @Nullable MethodValidator methodValidator;
 
 	private Class<?>[] validationGroups = EMPTY_GROUPS;
 
@@ -173,8 +171,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @see #getMethodArgumentValues
 	 * @see #doInvoke
 	 */
-	@Nullable
-	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
+	public @Nullable Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
@@ -242,8 +239,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
-	@Nullable
-	protected Object doInvoke(Object... args) throws Exception {
+	protected @Nullable Object doInvoke(Object... args) throws Exception {
 		Method method = getBridgedMethod();
 		try {
 			if (KotlinDetector.isKotlinReflectPresent()) {
@@ -300,9 +296,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	private static class KotlinDelegate {
 
-		@Nullable
 		@SuppressWarnings("DataFlowIssue")
-		public static Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		public static @Nullable Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			// For property accessors
 			if (function == null) {

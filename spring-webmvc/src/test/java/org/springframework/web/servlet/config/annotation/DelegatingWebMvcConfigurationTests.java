@@ -230,20 +230,17 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(resolver.getErrorResponseInterceptors()).containsExactly(interceptor);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
-	@SuppressWarnings("deprecation")
 	public void configurePathMatcher() {
 		PathMatcher pathMatcher = mock();
 		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
-			@SuppressWarnings("deprecation")
+			@SuppressWarnings("removal")
 			public void configurePathMatch(PathMatchConfigurer configurer) {
-				configurer.setUseRegisteredSuffixPatternMatch(true)
-						.setUseTrailingSlashMatch(false)
-						.setUrlPathHelper(pathHelper)
-						.setPathMatcher(pathMatcher);
+				configurer.setUrlPathHelper(pathHelper).setPathMatcher(pathMatcher);
 			}
 			@Override
 			public void addViewControllers(ViewControllerRegistry registry) {
@@ -272,9 +269,6 @@ public class DelegatingWebMvcConfigurationTests {
 				webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
-		assertThat(annotationsMapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(annotationsMapping.useSuffixPatternMatch()).isTrue();
-		assertThat(annotationsMapping.useTrailingSlashMatch()).isFalse();
 		configAssertion.accept(annotationsMapping.getUrlPathHelper(), annotationsMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) webMvcConfig.viewControllerHandlerMapping(
@@ -299,6 +293,7 @@ public class DelegatingWebMvcConfigurationTests {
 		configAssertion.accept(webMvcConfig.mvcUrlPathHelper(), webMvcConfig.mvcPathMatcher());
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void configurePathPatternParser() {
 		PathPatternParser patternParser = new PathPatternParser();
@@ -306,6 +301,7 @@ public class DelegatingWebMvcConfigurationTests {
 		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
+			@SuppressWarnings("removal")
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setPatternParser(patternParser)

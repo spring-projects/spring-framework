@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by objects used within a {@link BeanFactory} which
@@ -92,8 +92,7 @@ public interface FactoryBean<T> {
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException
 	 */
-	@Nullable
-	T getObject() throws Exception;
+	@Nullable T getObject() throws Exception;
 
 	/**
 	 * Return the type of object that this FactoryBean creates,
@@ -114,8 +113,7 @@ public interface FactoryBean<T> {
 	 * or {@code null} if not known at the time of the call
 	 * @see ListableBeanFactory#getBeansOfType
 	 */
-	@Nullable
-	Class<?> getObjectType();
+	@Nullable Class<?> getObjectType();
 
 	/**
 	 * Is the object managed by this factory a singleton? That is,

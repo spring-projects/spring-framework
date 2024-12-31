@@ -18,7 +18,8 @@ package org.springframework.messaging.simp.stomp;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;

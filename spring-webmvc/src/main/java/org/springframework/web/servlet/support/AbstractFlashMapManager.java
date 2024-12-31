@@ -26,15 +26,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A base class for {@link FlashMapManager} implementations.
@@ -74,7 +76,11 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	/**
 	 * Set the UrlPathHelper to use to match FlashMap instances to requests.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
@@ -82,15 +88,18 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	/**
 	 * Return the UrlPathHelper implementation to use.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
 
 	@Override
-	@Nullable
-	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
+	public final @Nullable FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
 		List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
 		if (CollectionUtils.isEmpty(allFlashMaps)) {
 			return null;
@@ -139,8 +148,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * Return a FlashMap contained in the given list that matches the request.
 	 * @return a matching FlashMap or {@code null}
 	 */
-	@Nullable
-	private FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
+	private @Nullable FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
 		List<FlashMap> result = new ArrayList<>();
 		for (FlashMap flashMap : allMaps) {
 			if (isFlashMapForRequest(flashMap, request)) {
@@ -218,8 +226,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		}
 	}
 
-	@Nullable
-	private String decodeAndNormalizePath(@Nullable String path, HttpServletRequest request) {
+	private @Nullable String decodeAndNormalizePath(@Nullable String path, HttpServletRequest request) {
 		if (StringUtils.hasLength(path)) {
 			path = getUrlPathHelper().decodeRequestString(request, path);
 			if (path.charAt(0) != '/') {
@@ -236,8 +243,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @param request the current request
 	 * @return a List with FlashMap instances, or {@code null} if none found
 	 */
-	@Nullable
-	protected abstract List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
+	protected abstract @Nullable List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
 
 	/**
 	 * Update the FlashMap instances in the underlying storage.
@@ -258,8 +264,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 * @return the mutex to use (may be {@code null} if none applicable)
 	 * @since 4.0.3
 	 */
-	@Nullable
-	protected Object getFlashMapsMutex(HttpServletRequest request) {
+	protected @Nullable Object getFlashMapsMutex(HttpServletRequest request) {
 		return DEFAULT_FLASH_MAPS_MUTEX;
 	}
 

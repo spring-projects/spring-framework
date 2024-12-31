@@ -20,9 +20,9 @@ import java.util.function.Consumer;
 
 import com.jayway.jsonpath.Configuration;
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.util.Assert;
 

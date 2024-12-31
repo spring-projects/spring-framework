@@ -18,6 +18,8 @@ package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Representation of the context of the invocation of a cache operation.
  *
@@ -48,6 +50,6 @@ public interface CacheOperationInvocationContext<O extends BasicOperation> {
 	/**
 	 * Return the argument list used to invoke the method.
 	 */
-	Object[] getArgs();
+	@Nullable Object[] getArgs();
 
 }

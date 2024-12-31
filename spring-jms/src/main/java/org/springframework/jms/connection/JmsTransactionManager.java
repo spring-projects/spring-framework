@@ -21,9 +21,9 @@ import jakarta.jms.ConnectionFactory;
 import jakarta.jms.JMSException;
 import jakarta.jms.Session;
 import jakarta.jms.TransactionRolledBackException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -93,8 +93,7 @@ import org.springframework.util.Assert;
 public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
-	@Nullable
-	private ConnectionFactory connectionFactory;
+	private @Nullable ConnectionFactory connectionFactory;
 
 	private boolean lazyResourceRetrieval = false;
 
@@ -144,8 +143,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JMS ConnectionFactory that this instance should manage transactions for.
 	 */
-	@Nullable
-	public ConnectionFactory getConnectionFactory() {
+	public @Nullable ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
 	}
 
@@ -357,36 +355,31 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		@Override
-		@Nullable
-		public Connection getConnection() {
+		public @Nullable Connection getConnection() {
 			initializeConnection();
 			return super.getConnection();
 		}
 
 		@Override
-		@Nullable
-		public <C extends Connection> C getConnection(Class<C> connectionType) {
+		public <C extends Connection> @Nullable C getConnection(Class<C> connectionType) {
 			initializeConnection();
 			return super.getConnection(connectionType);
 		}
 
 		@Override
-		@Nullable
-		public Session getSession() {
+		public @Nullable Session getSession() {
 			initializeSession();
 			return super.getSession();
 		}
 
 		@Override
-		@Nullable
-		public <S extends Session> S getSession(Class<S> sessionType) {
+		public <S extends Session> @Nullable S getSession(Class<S> sessionType) {
 			initializeSession();
 			return super.getSession(sessionType);
 		}
 
 		@Override
-		@Nullable
-		public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
+		public <S extends Session> @Nullable S getSession(Class<S> sessionType, @Nullable Connection connection) {
 			initializeSession();
 			return super.getSession(sessionType, connection);
 		}
@@ -428,8 +421,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	private static class JmsTransactionObject implements SmartTransactionObject {
 
-		@Nullable
-		private JmsResourceHolder resourceHolder;
+		private @Nullable JmsResourceHolder resourceHolder;
 
 		public void setResourceHolder(@Nullable JmsResourceHolder resourceHolder) {
 			this.resourceHolder = resourceHolder;

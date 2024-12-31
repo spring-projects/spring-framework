@@ -22,12 +22,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link FragmentsRendering.Builder}.
@@ -37,17 +37,13 @@ import org.springframework.lang.Nullable;
  */
 class DefaultFragmentsRenderingBuilder implements FragmentsRendering.Builder {
 
-	@Nullable
-	private Collection<Fragment> fragmentsCollection;
+	private @Nullable Collection<Fragment> fragmentsCollection;
 
-	@Nullable
-	private final Flux<Fragment> fragmentsFlux;
+	private final @Nullable Flux<Fragment> fragmentsFlux;
 
-	@Nullable
-	private HttpStatusCode status;
+	private @Nullable HttpStatusCode status;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
 	DefaultFragmentsRenderingBuilder() {
 		this.fragmentsCollection = null;

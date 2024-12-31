@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -37,7 +38,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
@@ -122,18 +122,15 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 
 	private final ExecutorLifecycleDelegate fixedDelayLifecycle = new ExecutorLifecycleDelegate(this.fixedDelayExecutor);
 
-	@Nullable
-	private ErrorHandler errorHandler;
+	private @Nullable ErrorHandler errorHandler;
 
 	private Clock clock = Clock.systemDefaultZone();
 
 	private int phase = DEFAULT_PHASE;
 
-	@Nullable
-	private Executor targetTaskExecutor;
+	private @Nullable Executor targetTaskExecutor;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 
 	/**
@@ -270,8 +267,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	}
 
 	@Override
-	@Nullable
-	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+	public @Nullable ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		try {
 			Runnable delegate = scheduledTask(task);
 			ErrorHandler errorHandler =

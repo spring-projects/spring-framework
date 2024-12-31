@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
@@ -38,7 +39,6 @@ import org.springframework.context.annotation6.Jsr330NamedForScanning;
 import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.LambdaBeanConfiguration;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import static java.lang.String.format;

@@ -19,10 +19,11 @@ package org.springframework.cache.interceptor;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -36,8 +37,7 @@ class CacheEvaluationContextFactory {
 
 	private final StandardEvaluationContext originalContext;
 
-	@Nullable
-	private Supplier<ParameterNameDiscoverer> parameterNameDiscoverer;
+	private @Nullable Supplier<ParameterNameDiscoverer> parameterNameDiscoverer;
 
 	CacheEvaluationContextFactory(StandardEvaluationContext originalContext) {
 		this.originalContext = originalContext;
@@ -62,7 +62,7 @@ class CacheEvaluationContextFactory {
 	 * @return a context suitable for this cache operation
 	 */
 	public CacheEvaluationContext forOperation(CacheExpressionRootObject rootObject,
-			Method targetMethod, Object[] args) {
+			Method targetMethod, @Nullable Object[] args) {
 
 		CacheEvaluationContext evaluationContext = new CacheEvaluationContext(
 				rootObject, targetMethod, args, getParameterNameDiscoverer());

@@ -19,7 +19,8 @@ package org.springframework.core;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -47,8 +48,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	}
 
 
-	@Nullable
-	private final ClassLoader overrideDelegate;
+	private final @Nullable ClassLoader overrideDelegate;
 
 
 	/**
@@ -115,8 +115,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @return the Class object, or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
-	@Nullable
-	protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+	protected @Nullable Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
 		Class<?> result = findLoadedClass(name);
 		if (result == null) {
 			byte[] bytes = loadBytesForClass(name);
@@ -137,8 +136,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
-	@Nullable
-	protected byte[] loadBytesForClass(String name) throws ClassNotFoundException {
+	protected byte @Nullable [] loadBytesForClass(String name) throws ClassNotFoundException {
 		InputStream is = openStreamForClass(name);
 		if (is == null) {
 			return null;
@@ -161,8 +159,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @param name the name of the class
 	 * @return the InputStream containing the byte code for the specified class
 	 */
-	@Nullable
-	protected InputStream openStreamForClass(String name) {
+	protected @Nullable InputStream openStreamForClass(String name) {
 		String internalName = name.replace('.', '/') + CLASS_FILE_SUFFIX;
 		return getParent().getResourceAsStream(internalName);
 	}

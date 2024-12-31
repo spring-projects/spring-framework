@@ -24,9 +24,9 @@ import java.util.function.Consumer;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;

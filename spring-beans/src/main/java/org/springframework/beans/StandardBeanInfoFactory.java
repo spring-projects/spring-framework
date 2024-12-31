@@ -22,7 +22,6 @@ import java.beans.Introspector;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.SpringProperties;
-import org.springframework.lang.NonNull;
 
 /**
  * {@link BeanInfoFactory} implementation that performs standard
@@ -66,7 +65,6 @@ public class StandardBeanInfoFactory implements BeanInfoFactory, Ordered {
 
 
 	@Override
-	@NonNull
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		BeanInfo beanInfo = (shouldIntrospectorIgnoreBeaninfoClasses ?
 				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :

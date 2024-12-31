@@ -23,9 +23,10 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -61,19 +62,15 @@ import org.springframework.util.StringUtils;
 public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler
 		implements BeanClassLoaderAware, InitializingBean {
 
-	@Nullable
-	private Class<?>[] managedInterfaces;
+	private Class<?> @Nullable [] managedInterfaces;
 
 	/** Mappings of bean keys to an array of classes. */
-	@Nullable
-	private Properties interfaceMappings;
+	private @Nullable Properties interfaceMappings;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** Mappings of bean keys to an array of classes. */
-	@Nullable
-	private Map<String, Class<?>[]> resolvedInterfaceMappings;
+	private @Nullable Map<String, Class<?>[]> resolvedInterfaceMappings;
 
 
 	/**
@@ -84,7 +81,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * Each entry <strong>MUST</strong> be an interface.
 	 * @see #setInterfaceMappings
 	 */
-	public void setManagedInterfaces(@Nullable Class<?>... managedInterfaces) {
+	public void setManagedInterfaces(Class<?> @Nullable ... managedInterfaces) {
 		if (managedInterfaces != null) {
 			for (Class<?> ifc : managedInterfaces) {
 				if (!ifc.isInterface()) {

@@ -27,10 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -72,16 +72,13 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private final List<Transport> transports;
 
-	@Nullable
-	private String[] httpHeaderNames;
+	private String @Nullable [] httpHeaderNames;
 
 	private InfoReceiver infoReceiver;
 
-	@Nullable
-	private SockJsMessageCodec messageCodec;
+	private @Nullable SockJsMessageCodec messageCodec;
 
-	@Nullable
-	private TaskScheduler connectTimeoutScheduler;
+	private @Nullable TaskScheduler connectTimeoutScheduler;
 
 	private volatile boolean running;
 
@@ -125,7 +122,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * headers (for example, auth headers) to be used for other HTTP requests.
 	 * @param httpHeaderNames the HTTP header names
 	 */
-	public void setHttpHeaderNames(@Nullable String... httpHeaderNames) {
+	public void setHttpHeaderNames(String @Nullable ... httpHeaderNames) {
 		this.httpHeaderNames = httpHeaderNames;
 	}
 
@@ -133,8 +130,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * The configured HTTP header names to be copied from the handshake
 	 * headers and also included in other HTTP requests.
 	 */
-	@Nullable
-	public String[] getHttpHeaderNames() {
+	public String @Nullable [] getHttpHeaderNames() {
 		return this.httpHeaderNames;
 	}
 
@@ -268,8 +264,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		return new SockJsUrlInfo(url);
 	}
 
-	@Nullable
-	private HttpHeaders getHttpRequestHeaders(@Nullable HttpHeaders webSocketHttpHeaders) {
+	private @Nullable HttpHeaders getHttpRequestHeaders(@Nullable HttpHeaders webSocketHttpHeaders) {
 		if (getHttpHeaderNames() == null || webSocketHttpHeaders == null) {
 			return webSocketHttpHeaders;
 		}
@@ -335,8 +330,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * <p>By default this method returns {@code null}.
 	 * @return the user to associate with the session (possibly {@code null})
 	 */
-	@Nullable
-	protected Principal getUser() {
+	protected @Nullable Principal getUser() {
 		return null;
 	}
 

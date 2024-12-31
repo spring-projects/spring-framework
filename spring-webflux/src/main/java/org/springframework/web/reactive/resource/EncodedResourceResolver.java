@@ -31,13 +31,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -166,8 +166,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		});
 	}
 
-	@Nullable
-	private String getAcceptEncoding(ServerWebExchange exchange) {
+	private @Nullable String getAcceptEncoding(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String header = request.getHeaders().getFirst(HttpHeaders.ACCEPT_ENCODING);
 		return (header != null ? header.toLowerCase(Locale.ROOT) : null);
@@ -277,8 +276,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
+		public @Nullable String getFilename() {
 			return this.original.getFilename();
 		}
 

@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -30,7 +32,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -47,20 +48,15 @@ import org.springframework.util.function.SingletonSupplier;
 @Configuration(proxyBeanMethods = false)
 public abstract class AbstractCachingConfiguration implements ImportAware {
 
-	@Nullable
-	protected AnnotationAttributes enableCaching;
+	protected @Nullable AnnotationAttributes enableCaching;
 
-	@Nullable
-	protected Supplier<CacheManager> cacheManager;
+	protected @Nullable Supplier<CacheManager> cacheManager;
 
-	@Nullable
-	protected Supplier<CacheResolver> cacheResolver;
+	protected @Nullable Supplier<CacheResolver> cacheResolver;
 
-	@Nullable
-	protected Supplier<KeyGenerator> keyGenerator;
+	protected @Nullable Supplier<KeyGenerator> keyGenerator;
 
-	@Nullable
-	protected Supplier<CacheErrorHandler> errorHandler;
+	protected @Nullable Supplier<CacheErrorHandler> errorHandler;
 
 
 	@Override
@@ -119,8 +115,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 		 * @param <T> the type of the supplier
 		 * @return another supplier mapped by the specified function
 		 */
-		@Nullable
-		public <T> Supplier<T> adapt(Function<CachingConfigurer, T> provider) {
+		public <T> @Nullable Supplier<T> adapt(Function<CachingConfigurer, T> provider) {
 			return () -> {
 				CachingConfigurer cachingConfigurer = this.supplier.get();
 				return (cachingConfigurer != null ? provider.apply(cachingConfigurer) : null);

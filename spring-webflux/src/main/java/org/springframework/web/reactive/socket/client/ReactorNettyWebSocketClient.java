@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.WebsocketClientSpec;
@@ -28,7 +29,6 @@ import reactor.netty.http.websocket.WebsocketInbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -51,11 +51,9 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private final Supplier<WebsocketClientSpec.Builder> specBuilderSupplier;
 
-	@Nullable
-	private Integer maxFramePayloadLength;
+	private @Nullable Integer maxFramePayloadLength;
 
-	@Nullable
-	private Boolean handlePing;
+	private @Nullable Boolean handlePing;
 
 
 	/**

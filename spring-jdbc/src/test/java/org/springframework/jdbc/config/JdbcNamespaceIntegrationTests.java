@@ -18,6 +18,7 @@ package org.springframework.jdbc.config;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.PropertyValue;
@@ -33,7 +34,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -188,8 +188,7 @@ class JdbcNamespaceIntegrationTests {
 		}
 	}
 
-	@Nullable
-	private String extractDataSourceUrl(String file) {
+	private @Nullable String extractDataSourceUrl(String file) {
 		try (ConfigurableApplicationContext context = context(file)) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);

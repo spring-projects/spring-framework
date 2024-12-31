@@ -33,10 +33,10 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.Method;
 import org.apache.hc.core5.http.io.entity.NullEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -140,8 +140,7 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 		}
 
 		@Override
-		@Nullable
-		public String getContentType() {
+		public @Nullable String getContentType() {
 			return this.headers.getFirst(HttpHeaders.CONTENT_TYPE);
 		}
 
@@ -166,14 +165,12 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 		}
 
 		@Override
-		@Nullable
-		public Supplier<List<? extends Header>> getTrailers() {
+		public @Nullable Supplier<List<? extends Header>> getTrailers() {
 			return null;
 		}
 
 		@Override
-		@Nullable
-		public String getContentEncoding() {
+		public @Nullable String getContentEncoding() {
 			return this.headers.getFirst(HttpHeaders.CONTENT_ENCODING);
 		}
 
@@ -183,8 +180,7 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 		}
 
 		@Override
-		@Nullable
-		public Set<String> getTrailerNames() {
+		public @Nullable Set<String> getTrailerNames() {
 			return null;
 		}
 

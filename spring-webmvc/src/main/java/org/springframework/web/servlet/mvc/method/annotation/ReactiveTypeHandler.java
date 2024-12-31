@@ -29,6 +29,7 @@ import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshotFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -46,7 +47,6 @@ import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -93,8 +93,7 @@ class ReactiveTypeHandler {
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
-	@Nullable
-	private final Object contextSnapshotHelper;
+	private final @Nullable Object contextSnapshotHelper;
 
 
 	public ReactiveTypeHandler() {
@@ -114,8 +113,7 @@ class ReactiveTypeHandler {
 		this.contextSnapshotHelper = initContextSnapshotHelper(contextSnapshotFactory);
 	}
 
-	@Nullable
-	private static Object initContextSnapshotHelper(@Nullable Object snapshotFactory) {
+	private static @Nullable Object initContextSnapshotHelper(@Nullable Object snapshotFactory) {
 		if (isContextPropagationPresent) {
 			return new ContextSnapshotHelper((ContextSnapshotFactory) snapshotFactory);
 		}
@@ -137,8 +135,7 @@ class ReactiveTypeHandler {
 	 * @return an emitter for streaming, or {@code null} if handled internally
 	 * with a {@link DeferredResult}
 	 */
-	@Nullable
-	public ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
+	public @Nullable ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
 		Assert.notNull(returnValue, "Expected return value");
@@ -201,8 +198,7 @@ class ReactiveTypeHandler {
 	 * @return the concrete streaming {@code MediaType} if one could be found or {@code null}
 	 * if none could be found
 	 */
-	@Nullable
-	static MediaType findConcreteJsonStreamMediaType(Collection<MediaType> acceptedMediaTypes) {
+	static @Nullable MediaType findConcreteJsonStreamMediaType(Collection<MediaType> acceptedMediaTypes) {
 		for (MediaType acceptedType : acceptedMediaTypes) {
 			if (WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON.includes(acceptedType)) {
 				if (acceptedType.isConcrete()) {
@@ -250,13 +246,11 @@ class ReactiveTypeHandler {
 
 		private final TaskExecutor taskExecutor;
 
-		@Nullable
-		private Subscription subscription;
+		private @Nullable Subscription subscription;
 
 		private final AtomicReference<Object> elementRef = new AtomicReference<>();
 
-		@Nullable
-		private Throwable error;
+		private @Nullable Throwable error;
 
 		private volatile boolean terminated;
 

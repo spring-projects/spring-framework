@@ -18,7 +18,7 @@ package org.springframework.context.event.test;
 
 import java.util.UUID;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Stephane Nicoll

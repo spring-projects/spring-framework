@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for resolving a value by evaluating it as an expression,
@@ -42,7 +43,6 @@ public interface BeanExpressionResolver {
 	 * @return the resolved value (potentially the given value as-is)
 	 * @throws BeansException if evaluation failed
 	 */
-	@Nullable
-	Object evaluate(@Nullable String value, BeanExpressionContext beanExpressionContext) throws BeansException;
+	@Nullable Object evaluate(@Nullable String value, BeanExpressionContext beanExpressionContext) throws BeansException;
 
 }

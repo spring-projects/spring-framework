@@ -16,13 +16,14 @@
 
 package org.springframework.aop.target;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for pooling {@link org.springframework.aop.TargetSource}
@@ -101,8 +102,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * APIs, so we're forgiving with our exception signature
 	 */
 	@Override
-	@Nullable
-	public abstract Object getTarget() throws Exception;
+	public abstract @Nullable Object getTarget() throws Exception;
 
 	/**
 	 * Return the given object to the pool.

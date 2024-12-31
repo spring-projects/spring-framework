@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -38,7 +39,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -207,8 +207,7 @@ public abstract class ConfigurationClassUtils {
 	 * or {@code Ordered.LOWEST_PRECEDENCE} if none declared
 	 * @since 5.0
 	 */
-	@Nullable
-	public static Integer getOrder(AnnotationMetadata metadata) {
+	public static @Nullable Integer getOrder(AnnotationMetadata metadata) {
 		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
 		return (orderAttributes != null ? ((Integer) orderAttributes.get(AnnotationUtils.VALUE)) : null);
 	}

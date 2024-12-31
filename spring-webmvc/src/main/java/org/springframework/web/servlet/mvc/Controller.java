@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -121,7 +121,6 @@ public interface Controller {
 	 * @return a ModelAndView to render, or {@code null} if handled directly
 	 * @throws Exception in case of errors
 	 */
-	@Nullable
-	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
+	@Nullable ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

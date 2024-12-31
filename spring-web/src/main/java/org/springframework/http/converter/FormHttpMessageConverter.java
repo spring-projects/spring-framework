@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
@@ -37,7 +39,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -174,8 +175,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private Charset charset = DEFAULT_CHARSET;
 
-	@Nullable
-	private Charset multipartCharset;
+	private @Nullable Charset multipartCharset;
 
 
 	public FormHttpMessageConverter() {
@@ -581,8 +581,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * @param part the part to determine the file name for
 	 * @return the filename, or {@code null} if not known
 	 */
-	@Nullable
-	protected String getFilename(Object part) {
+	protected @Nullable String getFilename(Object part) {
 		if (part instanceof Resource resource) {
 			return resource.getFilename();
 		}
@@ -646,7 +645,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		private void writeHeaders() throws IOException {
 			if (!this.headersWritten) {
-				for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
+				for (Map.Entry<String, List<String>> entry : this.headers.headerSet()) {
 					byte[] headerName = getBytes(entry.getKey());
 					for (String headerValueString : entry.getValue()) {
 						byte[] headerValue = getBytes(headerValueString);

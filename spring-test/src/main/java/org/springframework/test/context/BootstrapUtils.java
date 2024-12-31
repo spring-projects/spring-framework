@@ -23,10 +23,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.log.LogMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.ClassUtils;
 
@@ -168,8 +168,7 @@ public abstract class BootstrapUtils {
 		}
 	}
 
-	@Nullable
-	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
+	private static @Nullable Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
 		Set<BootstrapWith> annotations = new LinkedHashSet<>();
 		AnnotationDescriptor<BootstrapWith> descriptor =
 				TestContextAnnotationUtils.findAnnotationDescriptor(testClass, BootstrapWith.class);

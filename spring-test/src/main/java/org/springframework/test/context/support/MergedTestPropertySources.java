@@ -19,11 +19,12 @@ package org.springframework.test.context.support;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 

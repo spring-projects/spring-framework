@@ -42,8 +42,8 @@ import jakarta.jms.TemporaryQueue;
 import jakarta.jms.TemporaryTopic;
 import jakarta.jms.Topic;
 import jakarta.jms.TopicSession;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -240,8 +240,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * Checks for a cached Session for the given mode.
 	 */
 	@Override
-	@Nullable
-	protected Session getSession(Connection con, Integer mode) throws JMSException {
+	protected @Nullable Session getSession(Connection con, Integer mode) throws JMSException {
 		if (!this.active) {
 			return null;
 		}
@@ -312,8 +311,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (methodName.equals("equals")) {
 				// Only consider equal when proxies are identical.
@@ -538,8 +536,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Destination destination;
 
-		@Nullable
-		private String destinationString;
+		private @Nullable String destinationString;
 
 		public DestinationCacheKey(Destination destination) {
 			Assert.notNull(destination, "Destination must not be null");
@@ -592,14 +589,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 */
 	private static class ConsumerCacheKey extends DestinationCacheKey {
 
-		@Nullable
-		private final String selector;
+		private final @Nullable String selector;
 
-		@Nullable
-		private final Boolean noLocal;
+		private final @Nullable Boolean noLocal;
 
-		@Nullable
-		private final String subscription;
+		private final @Nullable String subscription;
 
 		private final boolean durable;
 

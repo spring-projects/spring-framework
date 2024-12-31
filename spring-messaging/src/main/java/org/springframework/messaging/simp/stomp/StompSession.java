@@ -18,7 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a STOMP session with operations to send messages,
@@ -136,8 +136,7 @@ public interface StompSession {
 		 * Return the receipt id, or {@code null} if the STOMP frame for which
 		 * the handle was returned did not have a "receipt" header.
 		 */
-		@Nullable
-		String getReceiptId();
+		@Nullable String getReceiptId();
 
 		/**
 		 * Task to invoke when a receipt is received.
@@ -173,8 +172,7 @@ public interface StompSession {
 		/**
 		 * Return the id for the subscription.
 		 */
-		@Nullable
-		String getSubscriptionId();
+		@Nullable String getSubscriptionId();
 
 		/**
 		 * Return the headers used on the SUBSCRIBE frame.

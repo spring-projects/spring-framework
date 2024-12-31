@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,8 +53,7 @@ public class BufferingStompDecoder {
 
 	private final Queue<ByteBuffer> chunks = new LinkedBlockingQueue<>();
 
-	@Nullable
-	private volatile Integer expectedContentLength;
+	private volatile @Nullable Integer expectedContentLength;
 
 
 	/**
@@ -163,8 +163,7 @@ public class BufferingStompDecoder {
 	/**
 	 * Get the expected content length of the currently buffered, incomplete STOMP frame.
 	 */
-	@Nullable
-	public Integer getExpectedContentLength() {
+	public @Nullable Integer getExpectedContentLength() {
 		return this.expectedContentLength;
 	}
 

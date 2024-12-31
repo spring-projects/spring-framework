@@ -19,12 +19,13 @@ package org.springframework.beans.factory.parsing;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.lang.Nullable;
 
 /**
  * ComponentDefinition based on a standard BeanDefinition, exposing the given bean
@@ -56,7 +57,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * @param beanName the name of the bean
 	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
-	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, @Nullable String[] aliases) {
+	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, String @Nullable [] aliases) {
 		this(new BeanDefinitionHolder(beanDefinition, beanName, aliases));
 	}
 

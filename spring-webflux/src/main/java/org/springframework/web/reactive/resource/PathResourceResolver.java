@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.log.LogFormatUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -42,8 +42,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PathResourceResolver extends AbstractResourceResolver {
 
-	@Nullable
-	private Resource[] allowedLocations;
+	private Resource @Nullable [] allowedLocations;
 
 
 	/**
@@ -61,12 +60,11 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * to match its list of locations.
 	 * @param locations the list of allowed locations
 	 */
-	public void setAllowedLocations(@Nullable Resource... locations) {
+	public void setAllowedLocations(Resource @Nullable ... locations) {
 		this.allowedLocations = locations;
 	}
 
-	@Nullable
-	public Resource[] getAllowedLocations() {
+	public Resource @Nullable [] getAllowedLocations() {
 		return this.allowedLocations;
 	}
 

@@ -16,7 +16,7 @@
 
 package org.springframework.scheduling;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Extension of the {@link Runnable} interface, adding special callbacks
@@ -58,8 +58,7 @@ public interface SchedulingAwareRunnable extends Runnable {
 	 * @since 6.1
 	 * @see org.springframework.scheduling.annotation.Scheduled#scheduler()
 	 */
-	@Nullable
-	default String getQualifier() {
+	default @Nullable String getQualifier() {
 		return null;
 	}
 

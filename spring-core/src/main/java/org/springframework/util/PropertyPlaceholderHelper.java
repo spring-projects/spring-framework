@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import java.util.Properties;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class for working with Strings that have placeholder values in them.
@@ -112,8 +112,7 @@ public class PropertyPlaceholderHelper {
 		 * @param placeholderName the name of the placeholder to resolve
 		 * @return the replacement value, or {@code null} if no replacement is to be made
 		 */
-		@Nullable
-		String resolvePlaceholder(String placeholderName);
+		@Nullable String resolvePlaceholder(String placeholderName);
 	}
 
 }

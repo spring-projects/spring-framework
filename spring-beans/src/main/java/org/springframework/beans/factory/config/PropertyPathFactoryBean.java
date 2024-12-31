@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -87,23 +87,19 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 	private static final Log logger = LogFactory.getLog(PropertyPathFactoryBean.class);
 
-	@Nullable
-	private BeanWrapper targetBeanWrapper;
+	private @Nullable BeanWrapper targetBeanWrapper;
 
-	@Nullable
+	@SuppressWarnings("NullAway.Init")
 	private String targetBeanName;
 
-	@Nullable
-	private String propertyPath;
+	private @Nullable String propertyPath;
 
-	@Nullable
-	private Class<?> resultType;
+	private @Nullable Class<?> resultType;
 
-	@Nullable
+	@SuppressWarnings("NullAway.Init")
 	private String beanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**
@@ -162,7 +158,6 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 
@@ -202,8 +197,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 
 	@Override
-	@Nullable
-	public Object getObject() throws BeansException {
+	public @Nullable Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target != null) {
 			if (logger.isWarnEnabled() && this.targetBeanName != null &&
@@ -225,8 +219,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		return this.resultType;
 	}
 
