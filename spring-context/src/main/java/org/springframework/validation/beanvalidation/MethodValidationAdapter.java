@@ -367,7 +367,7 @@ public class MethodValidationAdapter implements MethodValidator {
 					container = null;
 				}
 
-				if (node.getKind().equals(ElementKind.PROPERTY)) {
+				if (node.getKind().equals(ElementKind.PROPERTY) || node.getKind().equals(ElementKind.BEAN)) {
 					nestedViolations
 							.computeIfAbsent(parameterNode, k ->
 									new ParamErrorsBuilder(parameter, value, container, index, key))
