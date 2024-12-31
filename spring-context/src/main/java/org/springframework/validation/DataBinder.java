@@ -1032,7 +1032,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 		int size = (indexes.last() < this.autoGrowCollectionLimit ? indexes.last() + 1 : 0);
 		List<V> list = (List<V>) CollectionFactory.createCollection(paramType, size);
-		indexes.forEach(i -> list.add(null));
+		for (int i = 0; i < size; i++) {
+			list.add(null);
+		}
 		for (int index : indexes) {
 			list.set(index, (V) createObject(elementType, paramPath + "[" + index + "].", valueResolver));
 		}

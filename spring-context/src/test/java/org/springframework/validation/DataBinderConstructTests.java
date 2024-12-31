@@ -121,6 +121,24 @@ class DataBinderConstructTests {
 		assertThat(list.get(2).param1()).isEqualTo("value3");
 	}
 
+	@Test // gh-34145
+	void listBindingWithNonconsecutiveIndices() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"dataClassList[0].param1", "value1", "dataClassList[0].param2", "true",
+				"dataClassList[1].param1", "value2", "dataClassList[1].param2", "true",
+				"dataClassList[3].param1", "value3", "dataClassList[3].param2", "true"));
+
+		DataBinder binder = initDataBinder(ListDataClass.class);
+		binder.construct(valueResolver);
+
+		ListDataClass dataClass = getTarget(binder);
+		List<DataClass> list = dataClass.dataClassList();
+
+		assertThat(list.get(0).param1()).isEqualTo("value1");
+		assertThat(list.get(1).param1()).isEqualTo("value2");
+		assertThat(list.get(3).param1()).isEqualTo("value3");
+	}
+
 	@Test
 	void mapBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of(
