@@ -919,7 +919,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	/**
 	 * Create the array for the given array type.
-	 *
 	 * @param arrayType the desired type of the target array
 	 * @return a new array instance
 	 */
@@ -931,10 +930,12 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				Object array = Array.newInstance(componentType, 1);
 				Array.set(array, 0, createArray(componentType));
 				return array;
-			} else {
+			}
+			else {
 				return Array.newInstance(componentType, 0);
 			}
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("Unsupported Array type: " + arrayType.getName());
 		}
 	}
