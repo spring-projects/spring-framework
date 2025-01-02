@@ -116,7 +116,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 			}
 		}
 		try {
-			beanFactory.getBean(MockitoBeans.class).resetAll(reset);
+			beanFactory.getBean(MockBeans.class).resetAll(reset);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Continue
