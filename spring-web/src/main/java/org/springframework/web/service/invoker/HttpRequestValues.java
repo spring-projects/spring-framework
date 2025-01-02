@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -464,16 +464,14 @@ public class HttpRequestValues {
 				String uriTemplate, Map<String, String> uriVars, MultiValueMap<String, String> requestParams) {
 
 			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
-			int i = 0;
 			for (Map.Entry<String, List<String>> entry : requestParams.entrySet()) {
-				String nameVar = "queryParam" + i;
+				String nameVar = entry.getKey();
 				uriVars.put(nameVar, entry.getKey());
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					String valueVar = nameVar + "[" + j + "]";
 					uriVars.put(valueVar, entry.getValue().get(j));
 					uriComponentsBuilder.queryParam("{" + nameVar + "}", "{" + valueVar + "}");
 				}
-				i++;
 			}
 			return uriComponentsBuilder.build().toUriString();
 		}
