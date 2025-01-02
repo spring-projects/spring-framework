@@ -383,36 +383,6 @@ public final class WebAsyncManager {
 		}
 	}
 
-	private void setConcurrentResultAndDispatch(@Nullable Object result) {
-		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
-		synchronized (WebAsyncManager.this) {
-			if (!this.state.compareAndSet(State.ASYNC_PROCESSING, State.RESULT_SET)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Async result already set: [" + this.state.get() +
-							"], ignored result for " + formatUri(this.asyncWebRequest));
-				}
-				return;
-			}
-
-			this.concurrentResult = result;
-			if (logger.isDebugEnabled()) {
-				logger.debug("Async result set for " + formatUri(this.asyncWebRequest));
-			}
-
-			if (this.asyncWebRequest.isAsyncComplete()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Async request already completed for " + formatUri(this.asyncWebRequest));
-				}
-				return;
-			}
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Performing async dispatch for " + formatUri(this.asyncWebRequest));
-			}
-			this.asyncWebRequest.dispatch();
-		}
-	}
-
 	/**
 	 * Start concurrent request processing and initialize the given
 	 * {@link DeferredResult} with a {@link DeferredResultHandler} that saves
@@ -445,7 +415,7 @@ public final class WebAsyncManager {
 		}
 
 		List<DeferredResultProcessingInterceptor> interceptors = new ArrayList<>();
-		interceptors.add(deferredResult.getInterceptor());
+		interceptors.add(deferredResult.getLifecycleInterceptor());
 		interceptors.addAll(this.deferredResultInterceptors.values());
 		interceptors.add(timeoutDeferredResultInterceptor);
 
@@ -510,6 +480,36 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.startAsync();
 	}
 
+	private void setConcurrentResultAndDispatch(@Nullable Object result) {
+		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
+		synchronized (WebAsyncManager.this) {
+			if (!this.state.compareAndSet(State.ASYNC_PROCESSING, State.RESULT_SET)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Async result already set: [" + this.state.get() + "], " +
+							"ignored result for " + formatUri(this.asyncWebRequest));
+				}
+				return;
+			}
+
+			this.concurrentResult = result;
+			if (logger.isDebugEnabled()) {
+				logger.debug("Async result set for " + formatUri(this.asyncWebRequest));
+			}
+
+			if (this.asyncWebRequest.isAsyncComplete()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Async request already completed for " + formatUri(this.asyncWebRequest));
+				}
+				return;
+			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Performing async dispatch for " + formatUri(this.asyncWebRequest));
+			}
+			this.asyncWebRequest.dispatch();
+		}
+	}
+
 	private static String formatUri(AsyncWebRequest asyncWebRequest) {
 		HttpServletRequest request = asyncWebRequest.getNativeRequest(HttpServletRequest.class);
 		return (request != null ? "\"" + request.getRequestURI() + "\"" : "servlet container");
@@ -519,13 +519,13 @@ public final class WebAsyncManager {
 	/**
 	 * Represents a state for {@link WebAsyncManager} to be in.
 	 * <p><pre>
-	 *        NOT_STARTED <------+
-	 *             |             |
-	 *             v             |
-	 *      ASYNC_PROCESSING     |
-	 *             |             |
-	 *             v             |
-	 *         RESULT_SET -------+
+	 *     +------> NOT_STARTED <------+
+	 *     |             |             |
+	 *     |             v             |
+	 *     |      ASYNC_PROCESSING     |
+	 *     |             |             |
+	 *     |             v             |
+	 *     <-------+ RESULT_SET -------+
 	 * </pre>
 	 * @since 5.3.33
 	 */
