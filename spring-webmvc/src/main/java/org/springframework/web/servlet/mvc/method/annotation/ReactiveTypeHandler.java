@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,8 +333,8 @@ class ReactiveTypeHandler {
 					this.subscription.request(1);
 				}
 				catch (final Throwable ex) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Send for " + this.emitter + " failed: " + ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Send for " + this.emitter + " failed: " + ex);
 					}
 					terminate();
 					this.emitter.completeWithError(ex);
@@ -347,8 +347,8 @@ class ReactiveTypeHandler {
 				Throwable ex = this.error;
 				this.error = null;
 				if (ex != null) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Publisher for " + this.emitter + " failed: " + ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Publisher for " + this.emitter + " failed: " + ex);
 					}
 					this.emitter.completeWithError(ex);
 				}
