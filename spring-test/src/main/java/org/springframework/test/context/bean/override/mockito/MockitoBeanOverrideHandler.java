@@ -64,13 +64,13 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 	}
 
 	private MockitoBeanOverrideHandler(Field field, ResolvableType typeToMock, @Nullable String beanName,
-			BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces, @Nullable Answers answers,
+			BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces, Answers answers,
 			boolean serializable) {
 
 		super(field, typeToMock, beanName, strategy, reset);
 		Assert.notNull(typeToMock, "'typeToMock' must not be null");
 		this.extraInterfaces = asClassSet(extraInterfaces);
-		this.answers = (answers != null ? answers : Answers.RETURNS_DEFAULTS);
+		this.answers = answers;
 		this.serializable = serializable;
 	}
 

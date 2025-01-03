@@ -35,8 +35,8 @@ class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
 	public AbstractMockitoBeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Field field) {
-		if (overrideAnnotation instanceof MockitoBean mockBean) {
-			return new MockitoBeanOverrideHandler(field, ResolvableType.forField(field, testClass), mockBean);
+		if (overrideAnnotation instanceof MockitoBean mockitoBean) {
+			return new MockitoBeanOverrideHandler(field, ResolvableType.forField(field, testClass), mockitoBean);
 		}
 		else if (overrideAnnotation instanceof MockitoSpyBean spyBean) {
 			return new MockitoSpyBeanOverrideHandler(field, ResolvableType.forField(field, testClass), spyBean);
