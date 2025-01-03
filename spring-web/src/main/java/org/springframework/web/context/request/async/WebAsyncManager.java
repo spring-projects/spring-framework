@@ -427,6 +427,11 @@ public final class WebAsyncManager {
 			}
 			try {
 				interceptorChain.triggerAfterTimeout(this.asyncWebRequest, deferredResult);
+				synchronized (WebAsyncManager.this) {
+					// If application thread set the DeferredResult first in a race,
+					// we must still not return until setConcurrentResultAndDispatch is done
+					return;
+				}
 			}
 			catch (Throwable ex) {
 				setConcurrentResultAndDispatch(ex);
@@ -439,6 +444,11 @@ public final class WebAsyncManager {
 			}
 			try {
 				interceptorChain.triggerAfterError(this.asyncWebRequest, deferredResult, ex);
+				synchronized (WebAsyncManager.this) {
+					// If application thread set the DeferredResult first in a race,
+					// we must still not return until setConcurrentResultAndDispatch is done
+					return;
+				}
 			}
 			catch (Throwable interceptorEx) {
 				setConcurrentResultAndDispatch(interceptorEx);
