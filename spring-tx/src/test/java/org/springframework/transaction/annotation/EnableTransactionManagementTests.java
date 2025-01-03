@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import static org.springframework.transaction.annotation.RollbackOn.ALL_EXCEPTIO
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 3.1
  */
 class EnableTransactionManagementTests {
@@ -288,6 +289,34 @@ class EnableTransactionManagementTests {
 	}
 
 	@Test
+	void transactionManagerViaQualifierAnnotationWithNoSuchBeanDefinitionException() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh34187Config.class);
+		TransactionalTestBeanWithNonExistentQualifier bean = ctx.getBean(TransactionalTestBeanWithNonExistentQualifier.class);
+		CallCountingTransactionManager txManager = ctx.getBean("txManager", CallCountingTransactionManager.class);
+
+		bean.findAllFoos();
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
+	@Test
+	void transactionManagerViaQualifierAnnotationWithBeanNotOfRequiredTypeException() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh34187Config.class);
+		TransactionalTestBeanWithInvalidQualifier bean = ctx.getBean(TransactionalTestBeanWithInvalidQualifier.class);
+		CallCountingTransactionManager txManager = ctx.getBean("txManager", CallCountingTransactionManager.class);
+
+		bean.findAllFoos();
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
+	@Test
 	void spr14322AnnotationOnInterfaceWithInterfaceProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigA.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
@@ -385,6 +414,17 @@ class EnableTransactionManagementTests {
 	@Qualifier("qualified")
 	public static class TransactionalTestBeanSubclass extends TransactionalTestBean {
 	}
+
+	@Service
+	@Qualifier("nonExistentBean")
+	public static class TransactionalTestBeanWithNonExistentQualifier extends TransactionalTestBean {
+	}
+
+	@Service
+	@Qualifier("transactionalTestBeanWithInvalidQualifier")
+	public static class TransactionalTestBeanWithInvalidQualifier extends TransactionalTestBean {
+	}
+
 
 
 	@Configuration
@@ -600,6 +640,36 @@ class EnableTransactionManagementTests {
 			return new CallCountingTransactionManager();
 		}
 	}
+
+	@Configuration
+	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
+	static class Gh34187Config {
+
+		@Autowired
+		public void initializeApp(ConfigurableApplicationContext applicationContext) {
+			applicationContext.getBeanFactory().registerSingleton(
+					"qualifiedTransactionManager", new CallCountingTransactionManager());
+			applicationContext.getBeanFactory().registerAlias("qualifiedTransactionManager", "qualified");
+		}
+
+		@Bean
+		public TransactionalTestBeanWithNonExistentQualifier transactionalTestBeanWithNonExistentQualifier() {
+			return new TransactionalTestBeanWithNonExistentQualifier();
+		}
+
+		@Bean
+		public TransactionalTestBeanWithInvalidQualifier transactionalTestBeanWithInvalidQualifier() {
+			return new TransactionalTestBeanWithInvalidQualifier();
+		}
+
+		@Bean
+		@Primary
+		public CallCountingTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
 
 
 	public interface BaseTransactionalInterface {

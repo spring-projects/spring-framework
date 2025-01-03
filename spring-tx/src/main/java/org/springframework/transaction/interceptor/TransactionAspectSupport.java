@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
@@ -81,6 +82,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Paluch
  * @author Sebastien Deleuze
  * @author Enric Sala
+ * @author Yanming Zhou
  * @since 1.1
  * @see PlatformTransactionManager
  * @see ReactiveTransactionManager
@@ -506,7 +508,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				try {
 					return determineQualifiedTransactionManager(this.beanFactory, typeQualifier);
 				}
-				catch (NoSuchBeanDefinitionException ex) {
+				catch (NoSuchBeanDefinitionException | BeanNotOfRequiredTypeException ex) {
 					// Consider type qualifier as optional, proceed with regular resolution below.
 				}
 			}
