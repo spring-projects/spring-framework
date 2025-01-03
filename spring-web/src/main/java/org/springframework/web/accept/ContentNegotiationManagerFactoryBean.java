@@ -190,10 +190,6 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
 	}
 
-	private boolean useRegisteredExtensionsOnly() {
-		return (this.useRegisteredExtensionsOnly != null && this.useRegisteredExtensionsOnly);
-	}
-
 	/**
 	 * Whether to disable checking the 'Accept' request header.
 	 * <p>By default this value is set to {@code false}.
