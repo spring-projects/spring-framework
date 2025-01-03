@@ -97,7 +97,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 			assertThat(throwableSeenByInterceptor).isSameAs(undeclaredCheckedException);
 			assertThat(throwableSeenByCaller)
 					.isInstanceOf(UndeclaredThrowableException.class)
-					.hasCauseReference(undeclaredCheckedException);
+					.cause().isSameAs(undeclaredCheckedException);
 		}
 
 		@Test
@@ -145,7 +145,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 			invokeProxy();
 			assertThat(throwableSeenByCaller)
 					.isInstanceOf(UndeclaredThrowableException.class)
-					.hasCauseReference(undeclaredCheckedException);
+					.cause().isSameAs(undeclaredCheckedException);
 		}
 
 		@Test
