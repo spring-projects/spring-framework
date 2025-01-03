@@ -54,6 +54,7 @@ class HttpEntityTests {
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		map.set("Content-Type", "text/plain");
 		String body = "foo";
+		@SuppressWarnings("deprecation")
 		HttpEntity<String> entity = new HttpEntity<>(body, map);
 		assertThat(entity.getBody()).isEqualTo(body);
 		assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);

@@ -196,8 +196,8 @@ public class MvcNamespaceTests {
 	}
 
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testDefaultConfig() throws Exception {
 		loadBeanDefinitions("mvc-config.xml");
 
@@ -381,8 +381,8 @@ public class MvcNamespaceTests {
 		assertThat(chain.getInterceptorList()).hasSize(3);
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 
@@ -428,8 +428,8 @@ public class MvcNamespaceTests {
 				.isInstanceOf(NoResourceFoundException.class);
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testUseDeprecatedPathMatcher() throws Exception {
 		loadBeanDefinitions("mvc-config-deprecated-path-matcher.xml");
 		Map<String, AbstractHandlerMapping> handlerMappings = appContext.getBeansOfType(AbstractHandlerMapping.class);
@@ -441,8 +441,8 @@ public class MvcNamespaceTests {
 		});
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testUsePathPatternParser() throws Exception {
 		loadBeanDefinitions("mvc-config-custom-pattern-parser.xml");
 
@@ -470,8 +470,8 @@ public class MvcNamespaceTests {
 		assertThat(handler.getCacheSeconds()).isEqualTo(3600);
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testResourcesWithResolversTransformers() {
 		loadBeanDefinitions("mvc-config-resources-chain.xml");
 
@@ -621,8 +621,8 @@ public class MvcNamespaceTests {
 		assertThat(interceptor2.getParamName()).isEqualTo("style");
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testViewControllers() throws Exception {
 		loadBeanDefinitions("mvc-config-view-controllers.xml");
 
@@ -918,8 +918,8 @@ public class MvcNamespaceTests {
 		assertThat(compositeResolver.getOrder()).isEqualTo(123);
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void testPathMatchingHandlerMappings() {
 		loadBeanDefinitions("mvc-config-path-matching-mappings.xml");
 

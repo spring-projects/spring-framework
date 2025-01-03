@@ -123,6 +123,7 @@ class HeadersAdaptersTests {
 	}
 
 	@ParameterizedPopulatedHeadersTest
+	@SuppressWarnings("deprecation")
 	void copyUsingEntrySetPutRemovesDuplicates(MultiValueMap<String, String> headers) {
 		HttpHeaders headers2 = new HttpHeaders();
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
@@ -141,6 +142,7 @@ class HeadersAdaptersTests {
 	}
 
 	@ParameterizedPopulatedHeadersTest
+	@SuppressWarnings("deprecation")
 	void copyUsingPutAllRemovesDuplicates(MultiValueMap<String, String> headers) {
 		HttpHeaders headers2 = new HttpHeaders();
 		headers2.putAll(headers);

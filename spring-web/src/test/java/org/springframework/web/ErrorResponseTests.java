@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ErrorResponseTests {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void createWithHttpHeader() {
 		ErrorResponse response = ErrorResponse.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
 				.header("header", "value").build();
@@ -40,6 +41,7 @@ class ErrorResponseTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void createWithHttpHeadersConsumer() {
 		ErrorResponse response = ErrorResponse.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
 				.header("header", "value")

@@ -301,6 +301,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void createException() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
@@ -379,6 +380,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void createError() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
