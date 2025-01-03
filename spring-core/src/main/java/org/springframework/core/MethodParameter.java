@@ -412,7 +412,8 @@ public class MethodParameter {
 				return true;
 			}
 		}
-		for (AnnotatedType annotatedType : this.executable.getAnnotatedParameterTypes()) {
+		if (this.parameterIndex >= 0) {
+			AnnotatedType annotatedType = this.executable.getAnnotatedParameterTypes()[this.parameterIndex];
 			for (Annotation ann : annotatedType.getAnnotations()) {
 				if ("Nullable".equals(ann.annotationType().getSimpleName())) {
 					return true;
