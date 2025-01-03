@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -388,37 +387,16 @@ public class MethodParameter {
 
 	/**
 	 * Return whether this method indicates a parameter which is not required:
-	 * either in the form of Java 8's {@link java.util.Optional}, any variant
-	 * of a parameter-level {@code Nullable} annotation (such as from JSpecify,
-	 * JSR-305 or Jakarta set of annotations), or a language-level nullable type
+	 * either in the form of Java 8's {@link java.util.Optional}, JSpecify annotations,
+	 * any variant of a parameter-level {@code @Nullable} annotation (such as from Spring,
+	 * JSR-305 or Jakarta set of annotations), a language-level nullable type
 	 * declaration or {@code Continuation} parameter in Kotlin.
 	 * @since 4.3
+	 * @see Nullness#forMethodParameter(MethodParameter)
 	 */
 	public boolean isOptional() {
-		return (getParameterType() == Optional.class || hasNullableAnnotation() ||
+		return (getParameterType() == Optional.class || Nullness.forMethodParameter(this) == Nullness.NULLABLE ||
 				(KotlinDetector.isKotlinType(getContainingClass()) && KotlinDelegate.isOptional(this)));
-	}
-
-	/**
-	 * Check whether this method parameter is annotated with any variant of a
-	 * {@code Nullable} annotation, for example, {@code org.springframework.lang.Nullable},
-	 * {@code org.jspecify.annotations.Nullable} or {@code jakarta.annotation.Nullable}.
-	 */
-	private boolean hasNullableAnnotation() {
-		for (Annotation ann : getParameterAnnotations()) {
-			if ("Nullable".equals(ann.annotationType().getSimpleName())) {
-				return true;
-			}
-		}
-		if (this.parameterIndex >= 0) {
-			AnnotatedType annotatedType = this.executable.getAnnotatedParameterTypes()[this.parameterIndex];
-			for (Annotation ann : annotatedType.getAnnotations()) {
-				if ("Nullable".equals(ann.annotationType().getSimpleName())) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
