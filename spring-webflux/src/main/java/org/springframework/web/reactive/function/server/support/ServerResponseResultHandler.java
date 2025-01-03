@@ -47,6 +47,12 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	private int order = 0;
 
+	/**
+	 * Return the configured {@link HttpMessageWriter}'s.
+	 */
+	public List<HttpMessageWriter<?>> getMessageWriters() {
+		return this.messageWriters;
+	}
 
 	/**
 	 * Configure HTTP message writers to serialize the request body with.
@@ -56,6 +62,16 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 		this.messageWriters = configurer;
 	}
 
+	/**
+	 * Return the configured {@link ViewResolver}'s.
+	 */
+	public List<ViewResolver> getViewResolvers() {
+		return this.viewResolvers;
+	}
+
+	/**
+	 * Set the current view resolvers.
+	 */
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
 		this.viewResolvers = viewResolvers;
 	}
