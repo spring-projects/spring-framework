@@ -174,7 +174,7 @@ class ResourceHandlerFunctionTests {
 
 		ServerResponse response = this.handlerFunction.handle(request);
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS));
+		assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD, HttpMethod.OPTIONS));
 
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		ModelAndView mav = response.writeTo(servletRequest, servletResponse, this.context);
@@ -183,7 +183,7 @@ class ResourceHandlerFunctionTests {
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		String allowHeader = servletResponse.getHeader("Allow");
 		String[] methods = StringUtils.tokenizeToStringArray(allowHeader, ",");
-		assertThat(methods).containsExactlyInAnyOrder("GET","HEAD","OPTIONS");
+		assertThat(methods).containsExactlyInAnyOrder("GET","QUERY","HEAD","OPTIONS");
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
 		assertThat(actualBytes).isEmpty();
 	}
