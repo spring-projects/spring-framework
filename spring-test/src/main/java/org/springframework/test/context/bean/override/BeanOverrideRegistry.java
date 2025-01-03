@@ -108,9 +108,11 @@ class BeanOverrideRegistry {
 	}
 
 	void inject(Object target, BeanOverrideHandler handler) {
+		Field field = handler.getField();
+		Assert.notNull(field, () -> "BeanOverrideHandler must have a non-null field: " + handler);
 		String beanName = this.handlerToBeanNameMap.get(handler);
 		Assert.state(StringUtils.hasLength(beanName), () -> "No bean found for BeanOverrideHandler: " + handler);
-		inject(handler.getField(), target, beanName);
+		inject(field, target, beanName);
 	}
 
 	private void inject(Field field, Object target, String beanName) {

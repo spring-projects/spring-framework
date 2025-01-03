@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override;
+package org.springframework.test.context.bean.override.mockito.mockbeans;
 
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Test utilities for Bean Overrides.
- *
- * @author Sam Brannen
- * @since 6.2.2
- */
-public abstract class BeanOverrideTestUtils {
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-	public static List<BeanOverrideHandler> findHandlers(Class<?> testClass) {
-		return BeanOverrideHandler.forTestClass(testClass);
-	}
-
-	public static List<BeanOverrideHandler> findAllHandlers(Class<?> testClass) {
-		return BeanOverrideHandler.findAllHandlers(testClass);
-	}
-
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@MockitoBean(types = Service02.class)
+@MockitoBean(types = Service03.class)
+@interface SharedMocks {
 }

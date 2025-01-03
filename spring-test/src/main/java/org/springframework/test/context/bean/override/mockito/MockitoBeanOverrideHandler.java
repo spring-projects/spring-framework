@@ -57,13 +57,17 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 	private final boolean serializable;
 
 
-	MockitoBeanOverrideHandler(Field field, ResolvableType typeToMock, MockitoBean mockitoBean) {
+	MockitoBeanOverrideHandler(ResolvableType typeToMock, MockitoBean mockitoBean) {
+		this(null, typeToMock, mockitoBean);
+	}
+
+	MockitoBeanOverrideHandler(@Nullable Field field, ResolvableType typeToMock, MockitoBean mockitoBean) {
 		this(field, typeToMock, (!mockitoBean.name().isBlank() ? mockitoBean.name() : null),
 			(mockitoBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE),
 			mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
 	}
 
-	private MockitoBeanOverrideHandler(Field field, ResolvableType typeToMock, @Nullable String beanName,
+	private MockitoBeanOverrideHandler(@Nullable Field field, ResolvableType typeToMock, @Nullable String beanName,
 			BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces, Answers answers,
 			boolean serializable) {
 

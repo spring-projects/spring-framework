@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,76 @@ class MockitoBeanOverrideHandlerTests {
 		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
+	@Test  // gh-33925
+	void isEqualToWithSameInstanceFromClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(ClassLevelStringMockByName1.class);
+		assertThat(handler1).isEqualTo(handler1);
+		assertThat(handler1).hasSameHashCodeAs(handler1);
+
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByType1.class);
+		assertThat(handler2).isEqualTo(handler2);
+		assertThat(handler2).hasSameHashCodeAs(handler2);
+	}
+
+	@Test  // gh-33925
+	void isEqualToWithSameByNameLookupMetadataFromClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(ClassLevelStringMockByName1.class);
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByName2.class);
+		assertThat(handler1).isEqualTo(handler2);
+		assertThat(handler2).isEqualTo(handler1);
+		assertThat(handler1).hasSameHashCodeAs(handler2);
+	}
+
+	@Test  // gh-33925
+	void isNotEqualToWithDifferentByNameLookupMetadataFromClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(ClassLevelStringMockByName1.class);
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByName3.class);
+		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler2).isNotEqualTo(handler1);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
+	}
+
+	@Test  // gh-33925
+	void isEqualToWithSameByTypeLookupMetadataFromClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(ClassLevelStringMockByType1.class);
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByType2.class);
+		assertThat(handler1).isEqualTo(handler2);
+		assertThat(handler2).isEqualTo(handler1);
+		assertThat(handler1).hasSameHashCodeAs(handler2);
+	}
+
+	@Test  // gh-33925
+	void isNotEqualToWithDifferentByTypeLookupMetadataFromClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(ClassLevelStringMockByType1.class);
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByType3.class);
+		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler2).isNotEqualTo(handler1);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
+	}
+
+	@Test  // gh-33925
+	void isEqualToWithSameByNameLookupMetadataFromFieldAndClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service3"));
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByName1.class);
+		assertThat(handler1).isEqualTo(handler2);
+		assertThat(handler2).isEqualTo(handler1);
+		assertThat(handler1).hasSameHashCodeAs(handler2);
+	}
+
+	/**
+	 * Since the "field name as fallback qualifier" is not available for an annotated class,
+	 * what would seem to be "equivalent" handlers are actually not considered "equal" when
+	 * the the lookup is "by type".
+	 */
+	@Test  // gh-33925
+	void isNotEqualToWithSameByTypeLookupMetadataFromFieldAndClassLevel() {
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(ClassLevelStringMockByType1.class);
+		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler2).isNotEqualTo(handler1);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
+	}
+
 	@Test
 	void isNotEqualEqualToByTypeLookupWithSameMetadataButDifferentField() {
 		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
@@ -122,6 +192,11 @@ class MockitoBeanOverrideHandlerTests {
 		return new MockitoBeanOverrideHandler(field, ResolvableType.forClass(field.getType()), annotation);
 	}
 
+	private MockitoBeanOverrideHandler createHandler(Class<?> clazz) {
+		MockitoBean annotation = AnnotatedElementUtils.getMergedAnnotation(clazz, MockitoBean.class);
+		return new MockitoBeanOverrideHandler(null, ResolvableType.forClass(annotation.types()[0]), annotation);
+	}
+
 
 	static class SampleOneMock {
 
@@ -157,6 +232,30 @@ class MockitoBeanOverrideHandlerTests {
 
 		@MockitoBean(serializable = true)
 		private String service7;
+	}
+
+	@MockitoBean(name = "beanToMock", types = String.class)
+	static class ClassLevelStringMockByName1 {
+	}
+
+	@MockitoBean(name = "beanToMock", types = String.class)
+	static class ClassLevelStringMockByName2 {
+	}
+
+	@MockitoBean(name = "otherBeanToMock", types = String.class)
+	static class ClassLevelStringMockByName3 {
+	}
+
+	@MockitoBean(types = String.class)
+	static class ClassLevelStringMockByType1 {
+	}
+
+	@MockitoBean(types = String.class)
+	static class ClassLevelStringMockByType2 {
+	}
+
+	@MockitoBean(types = Integer.class)
+	static class ClassLevelStringMockByType3 {
 	}
 
 }
