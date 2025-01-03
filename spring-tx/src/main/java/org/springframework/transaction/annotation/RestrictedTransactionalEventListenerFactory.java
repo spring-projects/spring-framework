@@ -18,8 +18,10 @@ package org.springframework.transaction.annotation;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.transaction.config.TransactionalEventErrorHandler;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
 /**
@@ -34,6 +36,10 @@ import org.springframework.transaction.event.TransactionalEventListenerFactory;
  * @see Transactional
  */
 public class RestrictedTransactionalEventListenerFactory extends TransactionalEventListenerFactory {
+
+	public RestrictedTransactionalEventListenerFactory(@Nullable TransactionalEventErrorHandler errorHandler) {
+		super(errorHandler);
+	}
 
 	@Override
 	public ApplicationListener<?> createApplicationListener(String beanName, Class<?> type, Method method) {
