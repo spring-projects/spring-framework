@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.util;
 
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
@@ -125,14 +127,7 @@ class PropertyPlaceholderHelperTests {
 		private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", null, true);
 
 		@ParameterizedTest(name = "{0} -> {1}")
-		@CsvSource(delimiterString = "->", textBlock = """
-				${invalid:test}                   -> test
-				${invalid:${one}}                 -> 1
-				${invalid:${one}${two}}           -> 12
-				${invalid:${one}:${two}}          -> 1:2
-				${invalid:${also_invalid:test}}   -> test
-				${invalid:${also_invalid:${one}}} -> 1
-				""")
+		@MethodSource("defaultValues")
 		void defaultValueIsApplied(String text, String value) {
 			Properties properties = new Properties();
 			properties.setProperty("one", "1");
@@ -148,17 +143,32 @@ class PropertyPlaceholderHelperTests {
 			verify(resolver, never()).resolvePlaceholder("two");
 		}
 
+		static Stream<Arguments> defaultValues() {
+			return Stream.of(
+					Arguments.of("${invalid:test}", "test"),
+					Arguments.of("${invalid:${one}}", "1"),
+					Arguments.of("${invalid:${one}${two}}", "12"),
+					Arguments.of("${invalid:${one}:${two}}", "1:2"),
+					Arguments.of("${invalid:${also_invalid:test}}", "test"),
+					Arguments.of("${invalid:${also_invalid:${one}}}", "1")
+			);
+		}
+
 		@ParameterizedTest(name = "{0} -> {1}")
-		@CsvSource(delimiterString = "->", textBlock = """
-				${prefix://my-service} -> example-service
-				${p1}                  -> example-service
-				""")
+		@MethodSource("exactMatchPlaceholders")
 		void placeholdersWithExactMatchAreConsidered(String text, String expected) {
 			Properties properties = new Properties();
 			properties.setProperty("prefix://my-service", "example-service");
 			properties.setProperty("px", "prefix");
 			properties.setProperty("p1", "${prefix://my-service}");
 			assertThat(this.helper.replacePlaceholders(text, properties)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> exactMatchPlaceholders() {
+			return Stream.of(
+					Arguments.of("${prefix://my-service}", "example-service"),
+					Arguments.of("${p1}", "example-service")
+			);
 		}
 	}
 
