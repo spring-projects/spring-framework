@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +44,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  * @since 3.1
  * @see UriComponentsBuilder
  */
@@ -144,7 +147,9 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Replace all URI template variables with the values from a given map.
 	 * <p>The given map keys represent variable names; the corresponding values
-	 * represent variable values. The order of variables is not significant.
+	 * represent variable values, if the variable value is {@link Supplier} or
+	 * {@link Function}, then the value to use is applied base on the variable name.
+	 * The order of variables is not significant.
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI components
 	 */
@@ -233,6 +238,7 @@ public abstract class UriComponents implements Serializable {
 		return expandUriComponent(source, uriVariables, null);
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	static @Nullable String expandUriComponent(@Nullable String source, UriTemplateVariables uriVariables,
 			@Nullable UnaryOperator<String> encoder) {
 
@@ -253,6 +259,12 @@ public abstract class UriComponents implements Serializable {
 			Object varValue = uriVariables.getValue(varName);
 			if (UriTemplateVariables.SKIP_VALUE.equals(varValue)) {
 				continue;
+			}
+			if (varValue instanceof Supplier supplier) {
+				varValue = supplier.get();
+			}
+			else if (varValue instanceof Function function) {
+				varValue = function.apply(varName);
 			}
 			String formatted = getVariableValueAsString(varValue);
 			formatted = encoder != null ? encoder.apply(formatted) : Matcher.quoteReplacement(formatted);

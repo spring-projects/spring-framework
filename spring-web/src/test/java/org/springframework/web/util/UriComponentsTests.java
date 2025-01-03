@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +45,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
  * @author Arjen Poutsma
  * @author Phillip Webb
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  */
 class UriComponentsTests {
 
@@ -264,6 +268,26 @@ class UriComponentsTests {
 		assertThat(uric1).isEqualTo(uric1);
 		assertThat(uric1).isEqualTo(uric2);
 		assertThat(uric1).isNotEqualTo(uric3);
+	}
+
+	@Test
+	void expandSupplier() {
+		String key = "partition";
+		Map<String, String> holder = Map.of(key, "p0");
+		UriComponents uri = UriComponentsBuilder.fromUriString("http://{" + key + "}.example.com")
+			.uriVariables(Map.of(key, (Supplier<String>) () -> holder.get(key))).build();
+
+		assertThat(uri.toString()).isEqualTo("http://p0.example.com");
+	}
+
+	@Test
+	void expandFunction() {
+		String key = "partition";
+		Map<String, String> holder = Map.of(key, "p0");
+		UriComponents uri = UriComponentsBuilder.fromUriString("http://{" + key + "}.example.com")
+			.uriVariables(Map.of(key, (Function<String, String>) holder::get)).build();
+
+		assertThat(uri.toString()).isEqualTo("http://p0.example.com");
 	}
 
 }
