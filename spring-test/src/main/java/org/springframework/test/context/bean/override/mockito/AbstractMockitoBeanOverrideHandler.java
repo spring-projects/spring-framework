@@ -57,20 +57,20 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 
 	@Override
 	protected void trackOverrideInstance(Object mock, SingletonBeanRegistry trackingBeanRegistry) {
-		getMockitoBeans(trackingBeanRegistry).add(mock);
+		getMockBeans(trackingBeanRegistry).add(mock);
 	}
 
-	private static MockitoBeans getMockitoBeans(SingletonBeanRegistry trackingBeanRegistry) {
-		String beanName = MockitoBeans.class.getName();
-		MockitoBeans mockitoBeans = null;
+	private static MockBeans getMockBeans(SingletonBeanRegistry trackingBeanRegistry) {
+		String beanName = MockBeans.class.getName();
+		MockBeans mockBeans = null;
 		if (trackingBeanRegistry.containsSingleton(beanName)) {
-			mockitoBeans = (MockitoBeans) trackingBeanRegistry.getSingleton(beanName);
+			mockBeans = (MockBeans) trackingBeanRegistry.getSingleton(beanName);
 		}
-		if (mockitoBeans == null) {
-			mockitoBeans = new MockitoBeans();
-			trackingBeanRegistry.registerSingleton(beanName, mockitoBeans);
+		if (mockBeans == null) {
+			mockBeans = new MockBeans();
+			trackingBeanRegistry.registerSingleton(beanName, mockBeans);
 		}
-		return mockitoBeans;
+		return mockBeans;
 	}
 
 	@Override

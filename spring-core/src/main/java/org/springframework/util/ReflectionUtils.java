@@ -710,8 +710,7 @@ public abstract class ReflectionUtils {
 		// Keep backing up the inheritance hierarchy.
 		Class<?> targetClass = clazz;
 		do {
-			Field[] fields = getDeclaredFields(targetClass);
-			for (Field field : fields) {
+			for (Field field : getDeclaredFields(targetClass)) {
 				if (ff != null && !ff.matches(field)) {
 					continue;
 				}

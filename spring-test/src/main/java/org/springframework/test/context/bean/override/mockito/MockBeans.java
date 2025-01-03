@@ -28,7 +28,7 @@ import org.mockito.Mockito;
  * @author Sam Brannen
  * @since 6.2
  */
-class MockitoBeans {
+class MockBeans {
 
 	private final List<Object> beans = new ArrayList<>();
 

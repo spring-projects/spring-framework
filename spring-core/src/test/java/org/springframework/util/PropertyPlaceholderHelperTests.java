@@ -17,13 +17,11 @@
 package org.springframework.util;
 
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
@@ -43,6 +41,7 @@ import static org.mockito.Mockito.verify;
 class PropertyPlaceholderHelperTests {
 
 	private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}");
+
 
 	@Test
 	void withProperties() {
@@ -116,8 +115,8 @@ class PropertyPlaceholderHelperTests {
 		props.setProperty("foo", "bar");
 
 		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, null, false);
-		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
-				helper.replacePlaceholders(text, props));
+		assertThatExceptionOfType(PlaceholderResolutionException.class)
+				.isThrownBy(() -> helper.replacePlaceholders(text, props));
 	}
 
 	@Nested
@@ -126,7 +125,14 @@ class PropertyPlaceholderHelperTests {
 		private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", null, true);
 
 		@ParameterizedTest(name = "{0} -> {1}")
-		@MethodSource("defaultValues")
+		@CsvSource(delimiterString = "->", textBlock = """
+				${invalid:test}                   -> test
+				${invalid:${one}}                 -> 1
+				${invalid:${one}${two}}           -> 12
+				${invalid:${one}:${two}}          -> 1:2
+				${invalid:${also_invalid:test}}   -> test
+				${invalid:${also_invalid:${one}}} -> 1
+				""")
 		void defaultValueIsApplied(String text, String value) {
 			Properties properties = new Properties();
 			properties.setProperty("one", "1");
@@ -142,24 +148,26 @@ class PropertyPlaceholderHelperTests {
 			verify(resolver, never()).resolvePlaceholder("two");
 		}
 
-		static Stream<Arguments> defaultValues() {
-			return Stream.of(
-					Arguments.of("${invalid:test}", "test"),
-					Arguments.of("${invalid:${one}}", "1"),
-					Arguments.of("${invalid:${one}${two}}", "12"),
-					Arguments.of("${invalid:${one}:${two}}", "1:2"),
-					Arguments.of("${invalid:${also_invalid:test}}", "test"),
-					Arguments.of("${invalid:${also_invalid:${one}}}", "1")
-			);
+		@ParameterizedTest(name = "{0} -> {1}")
+		@CsvSource(delimiterString = "->", textBlock = """
+				${prefix://my-service} -> example-service
+				${p1}                  -> example-service
+				""")
+		void placeholdersWithExactMatchAreConsidered(String text, String expected) {
+			Properties properties = new Properties();
+			properties.setProperty("prefix://my-service", "example-service");
+			properties.setProperty("px", "prefix");
+			properties.setProperty("p1", "${prefix://my-service}");
+			assertThat(this.helper.replacePlaceholders(text, properties)).isEqualTo(expected);
 		}
-
 	}
 
-	PlaceholderResolver mockPlaceholderResolver(String... pairs) {
+
+	private static PlaceholderResolver mockPlaceholderResolver(String... pairs) {
 		if (pairs.length % 2 == 1) {
 			throw new IllegalArgumentException("size must be even, it is a set of key=value pairs");
 		}
-		PlaceholderResolver resolver = mock(PlaceholderResolver.class);
+		PlaceholderResolver resolver = mock();
 		for (int i = 0; i < pairs.length; i += 2) {
 			String key = pairs[i];
 			String value = pairs[i + 1];
@@ -167,6 +175,5 @@ class PropertyPlaceholderHelperTests {
 		}
 		return resolver;
 	}
-
 
 }

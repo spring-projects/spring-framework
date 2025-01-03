@@ -113,7 +113,7 @@ public class TestBeanTests {
 	}
 
 	@Test
-	void contextCustomizerCannotBeCreatedWitCompetingOverrideMethods() {
+	void contextCustomizerCannotBeCreatedWithCompetingOverrideMethods() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("bean", String.class, () -> "example");
 		assertThatIllegalStateException()
