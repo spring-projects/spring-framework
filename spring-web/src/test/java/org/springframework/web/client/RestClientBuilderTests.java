@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jspecify.annotations.Nullable;
@@ -44,6 +46,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Nicklas Wiegandt
+ * @author Yanming Zhou
  */
 public class RestClientBuilderTests {
 
@@ -108,6 +111,23 @@ public class RestClientBuilderTests {
 		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
 
 		assertThat(fieldValue("baseUrl", defaultBuilder)).isEqualTo(baseUrl.toString());
+	}
+
+	@Test
+	void baseUriWithDynamicDefaultUriVariables() {
+		String key = "partition";
+		String baseUrl = "http://{" + key + "}.example.com";
+		Map<String, String> holder = new HashMap<>();
+		RestClient restClient = RestClient.builder().baseUrl(baseUrl)
+			.defaultUriVariables(Map.of(key, (Function<String, String>) holder::get)).build();
+
+		holder.put(key, "p0");
+		assertThat(fieldValue("uri", restClient.get().uri("/{foo}.html", Map.of("foo", "index")))
+			.toString()).isEqualTo("http://p0.example.com/index.html");
+
+		holder.put(key, "p1");
+		assertThat(fieldValue("uri", restClient.get().uri("/{bar}.html", Map.of("bar", "index")))
+			.toString()).isEqualTo("http://p1.example.com/index.html");
 	}
 
 	@Test
@@ -272,6 +292,19 @@ public class RestClientBuilderTests {
 	private static @Nullable Object fieldValue(String name, RestClient instance) {
 		try {
 			Field field = DefaultRestClient.class.getDeclaredField(name);
+			field.setAccessible(true);
+
+			return field.get(instance);
+		}
+		catch (NoSuchFieldException | IllegalAccessException ex) {
+			fail(ex.getMessage(), ex);
+			return null;
+		}
+	}
+
+	private static @Nullable Object fieldValue(String name, Object instance) {
+		try {
+			Field field = instance.getClass().getDeclaredField(name);
 			field.setAccessible(true);
 
 			return field.get(instance);
