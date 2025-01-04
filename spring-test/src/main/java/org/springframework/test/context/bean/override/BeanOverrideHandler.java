@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,25 @@ public abstract class BeanOverrideHandler {
 	 */
 	public static List<BeanOverrideHandler> forTestClass(Class<?> testClass) {
 		List<BeanOverrideHandler> handlers = new LinkedList<>();
-		ReflectionUtils.doWithFields(testClass, field -> processField(field, testClass, handlers));
+		findHandlers(testClass, testClass, handlers);
 		return handlers;
+	}
+
+	/**
+	 * Find handlers using tail recursion to ensure that "locally declared"
+	 * bean overrides take precedence over inherited bean overrides.
+	 * @since 6.2.2
+	 */
+	private static void findHandlers(Class<?> clazz, Class<?> testClass, List<BeanOverrideHandler> handlers) {
+		if (clazz == null || clazz == Object.class) {
+			return;
+		}
+
+		// 1) Search type hierarchy.
+		findHandlers(clazz.getSuperclass(), testClass, handlers);
+
+		// 2) Process fields in current class.
+		ReflectionUtils.doWithLocalFields(clazz, field -> processField(field, testClass, handlers));
 	}
 
 	private static void processField(Field field, Class<?> testClass, List<BeanOverrideHandler> handlers) {

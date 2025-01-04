@@ -38,14 +38,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.2
  */
-public class TestBeanForInheritanceIntegrationTests {
+@SpringJUnitConfig
+public class TestBeanInheritanceIntegrationTests {
+
+	@TestBean
+	Pojo puzzleBean;
+
+	static Pojo puzzleBean() {
+		return new FakePojo("puzzle in enclosing class");
+	}
 
 	static Pojo enclosingClassBean() {
 		return new FakePojo("in enclosing test class");
 	}
 
-	@SpringJUnitConfig
-	abstract static class AbstractTestBeanIntegrationTestCase {
+	abstract static class AbstractTestCase {
 
 		@TestBean
 		Pojo someBean;
@@ -56,6 +63,9 @@ public class TestBeanForInheritanceIntegrationTests {
 		@TestBean("thirdBean")
 		Pojo anotherBean;
 
+		@TestBean
+		Pojo enigmaBean;
+
 		static Pojo otherBean() {
 			return new FakePojo("other in superclass");
 		}
@@ -64,44 +74,18 @@ public class TestBeanForInheritanceIntegrationTests {
 			return new FakePojo("third in superclass");
 		}
 
+		static Pojo enigmaBean() {
+			return new FakePojo("enigma in superclass");
+		}
+
 		static Pojo commonBean() {
 			return new FakePojo("common in superclass");
 		}
-
-		@Configuration(proxyBeanMethods = false)
-		static class Config {
-
-			@Bean
-			Pojo someBean() {
-				return new ProdPojo();
-			}
-
-			@Bean
-			Pojo otherBean() {
-				return new ProdPojo();
-			}
-
-			@Bean
-			Pojo thirdBean() {
-				return new ProdPojo();
-			}
-
-			@Bean
-			Pojo pojo() {
-				return new ProdPojo();
-			}
-
-			@Bean
-			Pojo pojo2() {
-				return new ProdPojo();
-			}
-		}
-
 	}
 
 	@Nested
 	@DisplayName("Nested, concrete inherited tests with correct @TestBean setup")
-	class NestedConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
+	class NestedTests extends AbstractTestCase {
 
 		@Autowired
 		ApplicationContext ctx;
@@ -111,6 +95,21 @@ public class TestBeanForInheritanceIntegrationTests {
 
 		@TestBean(name = "pojo2", methodName = "enclosingClassBean")
 		Pojo pojo2;
+
+		@TestBean(methodName = "localEnigmaBean")
+		Pojo enigmaBean;
+
+		@TestBean
+		Pojo puzzleBean;
+
+
+		static Pojo puzzleBean() {
+			return new FakePojo("puzzle in nested class");
+		}
+
+		static Pojo localEnigmaBean() {
+			return new FakePojo("enigma in subclass");
+		}
 
 		static Pojo someBean() {
 			return new FakePojo("someBeanOverride");
@@ -149,6 +148,57 @@ public class TestBeanForInheritanceIntegrationTests {
 		void fieldInNestedClassWithFactoryMethodInEnclosingClass() {
 			assertThat(ctx.getBean("pojo2")).as("applicationContext").hasToString("in enclosing test class");
 			assertThat(this.pojo2.value()).as("injection point").isEqualTo("in enclosing test class");
+		}
+
+		@Test  // gh-34194
+		void testBeanInSubclassOverridesTestBeanInSuperclass() {
+			assertThat(ctx.getBean("enigmaBean")).as("applicationContext").hasToString("enigma in subclass");
+			assertThat(this.enigmaBean.value()).as("injection point").isEqualTo("enigma in subclass");
+		}
+
+		@Test  // gh-34194
+		void testBeanInNestedClassOverridesTestBeanInEnclosingClass() {
+			assertThat(ctx.getBean("puzzleBean")).as("applicationContext").hasToString("puzzle in nested class");
+			assertThat(this.puzzleBean.value()).as("injection point").isEqualTo("puzzle in nested class");
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class Config {
+
+		@Bean
+		Pojo someBean() {
+			return new ProdPojo();
+		}
+
+		@Bean
+		Pojo otherBean() {
+			return new ProdPojo();
+		}
+
+		@Bean
+		Pojo thirdBean() {
+			return new ProdPojo();
+		}
+
+		@Bean
+		Pojo enigmaBean() {
+			return new ProdPojo();
+		}
+
+		@Bean
+		Pojo puzzleBean() {
+			return new ProdPojo();
+		}
+
+		@Bean
+		Pojo pojo() {
+			return new ProdPojo();
+		}
+
+		@Bean
+		Pojo pojo2() {
+			return new ProdPojo();
 		}
 	}
 
