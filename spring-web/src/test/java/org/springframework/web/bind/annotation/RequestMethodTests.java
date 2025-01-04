@@ -41,6 +41,10 @@ class RequestMethodTests {
 	@Test
 	void resolveHttpMethod() {
 		for (HttpMethod httpMethod : HttpMethod.values()) {
+			if (HttpMethod.CONNECT.equals(httpMethod)) {
+				assertThat(RequestMethod.resolve(httpMethod)).isNull();
+				continue;
+			}
 			RequestMethod requestMethod = RequestMethod.resolve(httpMethod);
 			assertThat(requestMethod).isNotNull();
 			assertThat(requestMethod.name()).isEqualTo(httpMethod.name());
