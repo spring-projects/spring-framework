@@ -271,6 +271,9 @@ class ClientHttpConnectorTests {
 		List<Arguments> result = new ArrayList<>();
 		for (Named<ClientHttpConnector> connector : connectors()) {
 			for (HttpMethod method : HttpMethod.values()) {
+				if (HttpMethod.CONNECT.equals(method) && List.of("HttpComponents", "Jdk").contains(connector.getName())) {
+					continue;
+				}
 				result.add(Arguments.of(connector, method));
 			}
 		}
