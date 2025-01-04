@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.bean.override.convention.TestBeanForInheritanceIntegrationTests.AbstractTestBeanIntegrationTestCase.FakePojo;
-import org.springframework.test.context.bean.override.convention.TestBeanForInheritanceIntegrationTests.AbstractTestBeanIntegrationTestCase.Pojo;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,59 +40,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestBeanForInheritanceIntegrationTests {
 
-	static Pojo enclosingClassBeanOverride() {
+	static Pojo enclosingClassBean() {
 		return new FakePojo("in enclosing test class");
 	}
 
 	@SpringJUnitConfig
-	public abstract static class AbstractTestBeanIntegrationTestCase {
+	abstract static class AbstractTestBeanIntegrationTestCase {
 
-		@TestBean(name = "someBean")
+		@TestBean
 		Pojo someBean;
 
-		@TestBean(name = "otherBean")
+		@TestBean("otherBean")
 		Pojo otherBean;
 
-		@TestBean(name = "thirdBean")
+		@TestBean("thirdBean")
 		Pojo anotherBean;
 
 		static Pojo otherBean() {
-			return new FakePojo("otherBean in superclass");
+			return new FakePojo("other in superclass");
 		}
 
 		static Pojo thirdBean() {
 			return new FakePojo("third in superclass");
 		}
 
-		static Pojo commonBeanOverride() {
-			return new FakePojo("in superclass");
-		}
-
-		public interface Pojo {
-
-			default String getValue() {
-				return "Prod";
-			}
-		}
-
-		static class ProdPojo implements Pojo { }
-
-		static class FakePojo implements Pojo {
-			final String value;
-
-			protected FakePojo(String value) {
-				this.value = value;
-			}
-
-			@Override
-			public String getValue() {
-				return this.value;
-			}
-
-			@Override
-			public String toString() {
-				return getValue();
-			}
+		static Pojo commonBean() {
+			return new FakePojo("common in superclass");
 		}
 
 		@Configuration(proxyBeanMethods = false)
@@ -104,18 +75,22 @@ public class TestBeanForInheritanceIntegrationTests {
 			Pojo someBean() {
 				return new ProdPojo();
 			}
+
 			@Bean
 			Pojo otherBean() {
 				return new ProdPojo();
 			}
+
 			@Bean
 			Pojo thirdBean() {
 				return new ProdPojo();
 			}
+
 			@Bean
 			Pojo pojo() {
 				return new ProdPojo();
 			}
+
 			@Bean
 			Pojo pojo2() {
 				return new ProdPojo();
@@ -131,42 +106,72 @@ public class TestBeanForInheritanceIntegrationTests {
 		@Autowired
 		ApplicationContext ctx;
 
-		@TestBean(name = "pojo", methodName = "commonBeanOverride")
+		@TestBean(methodName = "commonBean")
 		Pojo pojo;
 
-		@TestBean(name = "pojo2", methodName = "enclosingClassBeanOverride")
+		@TestBean(name = "pojo2", methodName = "enclosingClassBean")
 		Pojo pojo2;
 
 		static Pojo someBean() {
 			return new FakePojo("someBeanOverride");
 		}
 
-		// Hides otherBean() defined in AbstractTestBeanIntegrationTestCase.
+		// "Overrides" otherBean() defined in AbstractTestBeanIntegrationTestCase.
 		static Pojo otherBean() {
-			return new FakePojo("otherBean in subclass");
+			return new FakePojo("other in subclass");
 		}
 
 		@Test
-		void fieldInSubtypeWithFactoryMethodInSupertype() {
-			assertThat(ctx.getBean("pojo")).as("applicationContext").hasToString("in superclass");
-			assertThat(this.pojo.getValue()).as("injection point").isEqualTo("in superclass");
+		void fieldInSuperclassWithFactoryMethodInSuperclass() {
+			assertThat(ctx.getBean("thirdBean")).as("applicationContext").hasToString("third in superclass");
+			assertThat(super.anotherBean.value()).as("injection point").isEqualTo("third in superclass");
 		}
 
 		@Test
-		void fieldInSupertypeWithFactoryMethodInSubtype() {
+		void fieldInSuperclassWithFactoryMethodInSubclass() {
 			assertThat(ctx.getBean("someBean")).as("applicationContext").hasToString("someBeanOverride");
-			assertThat(this.someBean.getValue()).as("injection point").isEqualTo("someBeanOverride");
+			assertThat(super.someBean.value()).as("injection point").isEqualTo("someBeanOverride");
 		}
 
 		@Test
-		void fieldInSupertypeWithPrioritizedFactoryMethodInSubtype() {
-			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("otherBean in subclass");
-			assertThat(super.otherBean.getValue()).as("injection point").isEqualTo("otherBean in subclass");
+		void fieldInSuperclassWithFactoryMethodInSupeclassAndInSubclass() {
+			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("other in subclass");
+			assertThat(super.otherBean.value()).as("injection point").isEqualTo("other in subclass");
 		}
+
+		@Test
+		void fieldInSubclassWithFactoryMethodInSuperclass() {
+			assertThat(ctx.getBean("pojo")).as("applicationContext").hasToString("common in superclass");
+			assertThat(this.pojo.value()).as("injection point").isEqualTo("common in superclass");
+		}
+
 		@Test
 		void fieldInNestedClassWithFactoryMethodInEnclosingClass() {
 			assertThat(ctx.getBean("pojo2")).as("applicationContext").hasToString("in enclosing test class");
-			assertThat(this.pojo2.getValue()).as("injection point").isEqualTo("in enclosing test class");
+			assertThat(this.pojo2.value()).as("injection point").isEqualTo("in enclosing test class");
+		}
+	}
+
+	interface Pojo {
+
+		default String value() {
+			return "prod";
+		}
+	}
+
+	static class ProdPojo implements Pojo {
+
+		@Override
+		public String toString() {
+			return value();
+		}
+	}
+
+	record FakePojo(String value) implements Pojo {
+
+		@Override
+		public String toString() {
+			return value();
 		}
 	}
 
