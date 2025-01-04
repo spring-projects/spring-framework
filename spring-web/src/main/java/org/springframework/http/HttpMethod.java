@@ -37,25 +37,25 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	/**
 	 * The HTTP method {@code GET}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.3">HTTP 1.1, section 9.3</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.1">RFC 9110, section 9.3.1</a>
 	 */
 	public static final HttpMethod GET = new HttpMethod("GET");
 
 	/**
 	 * The HTTP method {@code HEAD}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4">HTTP 1.1, section 9.4</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.2">RFC 9110, section 9.3.2</a>
 	 */
 	public static final HttpMethod HEAD = new HttpMethod("HEAD");
 
 	/**
 	 * The HTTP method {@code POST}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.5">HTTP 1.1, section 9.5</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.3">RFC 9110, section 9.3.3</a>
 	 */
 	public static final HttpMethod POST = new HttpMethod("POST");
 
 	/**
 	 * The HTTP method {@code PUT}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.6">HTTP 1.1, section 9.6</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.4">RFC 9110, section 9.3.4</a>
 	 */
 	public static final HttpMethod PUT = new HttpMethod("PUT");
 
@@ -67,19 +67,19 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	/**
 	 * The HTTP method {@code DELETE}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7">HTTP 1.1, section 9.7</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.5">RFC 9110, section 9.3.5</a>
 	 */
 	public static final HttpMethod DELETE = new HttpMethod("DELETE");
 
 	/**
 	 * The HTTP method {@code OPTIONS}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.2">HTTP 1.1, section 9.2</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.7">RFC 9110, section 9.3.7</a>
 	 */
 	public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS");
 
 	/**
 	 * The HTTP method {@code TRACE}.
-	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.8">HTTP 1.1, section 9.8</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.8">RFC 9110, section 9.3.8</a>
 	 */
 	public static final HttpMethod TRACE = new HttpMethod("TRACE");
 
