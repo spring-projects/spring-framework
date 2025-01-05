@@ -517,7 +517,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			Set<HttpMethod> result = CollectionUtils.newLinkedHashSet(declaredMethods.size());
 			if (declaredMethods.isEmpty()) {
 				for (HttpMethod method : HttpMethod.values()) {
-					if (method != HttpMethod.TRACE) {
+					if (method != HttpMethod.TRACE && method != HttpMethod.CONNECT) {
 						result.add(method);
 					}
 				}

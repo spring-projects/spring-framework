@@ -146,7 +146,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		if (this.supportedMethods == null) {
 			allowedMethods = new ArrayList<>(HttpMethod.values().length - 1);
 			for (HttpMethod method : HttpMethod.values()) {
-				if (method != HttpMethod.TRACE) {
+				if (method != HttpMethod.TRACE && method != HttpMethod.CONNECT) {
 					allowedMethods.add(method.name());
 				}
 			}
