@@ -337,7 +337,14 @@ class ReactiveTypeHandler {
 						logger.debug("Send for " + this.emitter + " failed: " + ex);
 					}
 					terminate();
-					this.emitter.completeWithError(ex);
+					try {
+						this.emitter.completeWithError(ex);
+					}
+					catch (Exception ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failure from emitter completeWithError: " + ex2);
+						}
+					}
 					return;
 				}
 			}
@@ -350,13 +357,27 @@ class ReactiveTypeHandler {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Publisher for " + this.emitter + " failed: " + ex);
 					}
-					this.emitter.completeWithError(ex);
+					try {
+						this.emitter.completeWithError(ex);
+					}
+					catch (Exception ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failure from emitter completeWithError: " + ex2);
+						}
+					}
 				}
 				else {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Publisher for " + this.emitter + " completed");
 					}
-					this.emitter.complete();
+					try {
+						this.emitter.complete();
+					}
+					catch (Exception ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failure from emitter complete: " + ex2);
+						}
+					}
 				}
 				return;
 			}
