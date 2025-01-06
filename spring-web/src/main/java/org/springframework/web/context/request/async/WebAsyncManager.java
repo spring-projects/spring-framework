@@ -436,10 +436,7 @@ public final class WebAsyncManager {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest));
 			}
 			try {
-				if (!interceptorChain.triggerAfterError(this.asyncWebRequest, deferredResult, ex)) {
-					return;
-				}
-				deferredResult.setErrorResult(ex);
+				interceptorChain.triggerAfterError(this.asyncWebRequest, deferredResult, ex);
 			}
 			catch (Throwable interceptorEx) {
 				setConcurrentResultAndDispatch(interceptorEx);
