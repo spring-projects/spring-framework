@@ -26,7 +26,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
 
 import javax.sql.DataSource;
 
@@ -463,7 +465,7 @@ public abstract class AbstractJdbcInsert {
 			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING
 			// clause while HSQL uses a second query that has to be executed with the same connection.
 
-			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
+			if (keyQuery.toUpperCase(Locale.ROOT).startsWith("RETURNING")) {
 				Long key = getJdbcTemplate().queryForObject(
 						getInsertString() + " " + keyQuery, Long.class, values.toArray());
 				Map<String, Object> keys = new HashMap<>(2);

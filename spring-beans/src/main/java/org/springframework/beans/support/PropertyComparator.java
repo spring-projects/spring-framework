@@ -19,6 +19,7 @@ package org.springframework.beans.support;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,8 +78,8 @@ public class PropertyComparator<T> implements Comparator<T> {
 		Object v1 = getPropertyValue(o1);
 		Object v2 = getPropertyValue(o2);
 		if (this.sortDefinition.isIgnoreCase() && (v1 instanceof String) && (v2 instanceof String)) {
-			v1 = ((String) v1).toLowerCase();
-			v2 = ((String) v2).toLowerCase();
+			v1 = ((String) v1).toLowerCase(Locale.ROOT);
+			v2 = ((String) v2).toLowerCase(Locale.ROOT);
 		}
 
 		int result;

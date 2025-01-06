@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import org.springframework.lang.Nullable;
 
@@ -45,7 +46,7 @@ public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 		// Use current user schema if no schema specified...
 		String userName = getUserName();
-		return (userName != null ? userName.toUpperCase() : null);
+		return (userName != null ? userName.toUpperCase(Locale.ROOT) : null);
 	}
 
 }

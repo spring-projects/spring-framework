@@ -19,6 +19,7 @@ package org.springframework.scheduling.quartz;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -155,7 +156,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource,
 					DatabaseMetaData::getDatabaseProductName);
 			productName = JdbcUtils.commonDatabaseName(productName);
-			if (productName != null && productName.toLowerCase().contains("hsql")) {
+			if (productName != null && productName.toLowerCase(Locale.ROOT).contains("hsql")) {
 				setUseDBLocks(false);
 				setLockHandler(new SimpleSemaphore());
 			}

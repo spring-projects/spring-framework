@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.namedparam;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
@@ -115,7 +116,7 @@ public abstract class SqlParameterSourceUtils {
 		String[] paramNames = parameterSource.getParameterNames();
 		if (paramNames != null) {
 			for (String name : paramNames) {
-				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
+				caseInsensitiveParameterNames.put(name.toLowerCase(Locale.ROOT), name);
 			}
 		}
 		return caseInsensitiveParameterNames;

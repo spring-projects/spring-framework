@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.core.convert.converter.Converter;
@@ -55,7 +56,7 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 		if (value.isEmpty()) {
 			return null;
 		}
-		value = value.toLowerCase();
+		value = value.toLowerCase(Locale.ROOT);
 		if (trueValues.contains(value)) {
 			return Boolean.TRUE;
 		}

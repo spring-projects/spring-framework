@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -192,11 +193,11 @@ public class TableMetaDataContext {
 		}
 		Set<String> keys = new LinkedHashSet<>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
-			keys.add(key.toUpperCase());
+			keys.add(key.toUpperCase(Locale.ROOT));
 		}
 		List<String> columns = new ArrayList<>();
 		for (TableParameterMetaData meta : obtainMetaDataProvider().getTableParameterMetaData()) {
-			if (!keys.contains(meta.getParameterName().toUpperCase())) {
+			if (!keys.contains(meta.getParameterName().toUpperCase(Locale.ROOT))) {
 				columns.add(meta.getParameterName());
 			}
 		}
@@ -218,7 +219,7 @@ public class TableMetaDataContext {
 				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, column));
 			}
 			else {
-				String lowerCaseName = column.toLowerCase();
+				String lowerCaseName = column.toLowerCase(Locale.ROOT);
 				if (parameterSource.hasValue(lowerCaseName)) {
 					values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
 				}
@@ -251,7 +252,7 @@ public class TableMetaDataContext {
 		for (String column : this.tableColumns) {
 			Object value = inParameters.get(column);
 			if (value == null) {
-				value = inParameters.get(column.toLowerCase());
+				value = inParameters.get(column.toLowerCase(Locale.ROOT));
 				if (value == null) {
 					for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
 						if (column.equalsIgnoreCase(entry.getKey())) {
@@ -274,7 +275,7 @@ public class TableMetaDataContext {
 	public String createInsertString(String... generatedKeyNames) {
 		Set<String> keys = new LinkedHashSet<>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
-			keys.add(key.toUpperCase());
+			keys.add(key.toUpperCase(Locale.ROOT));
 		}
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
@@ -286,7 +287,7 @@ public class TableMetaDataContext {
 		insertStatement.append(" (");
 		int columnCount = 0;
 		for (String columnName : getTableColumns()) {
-			if (!keys.contains(columnName.toUpperCase())) {
+			if (!keys.contains(columnName.toUpperCase(Locale.ROOT))) {
 				columnCount++;
 				if (columnCount > 1) {
 					insertStatement.append(", ");
@@ -326,7 +327,7 @@ public class TableMetaDataContext {
 		List<TableParameterMetaData> parameters = obtainMetaDataProvider().getTableParameterMetaData();
 		Map<String, TableParameterMetaData> parameterMap = CollectionUtils.newLinkedHashMap(parameters.size());
 		for (TableParameterMetaData tpmd : parameters) {
-			parameterMap.put(tpmd.getParameterName().toUpperCase(), tpmd);
+			parameterMap.put(tpmd.getParameterName().toUpperCase(Locale.ROOT), tpmd);
 		}
 		int typeIndx = 0;
 		for (String column : getTableColumns()) {
@@ -334,7 +335,7 @@ public class TableMetaDataContext {
 				types[typeIndx] = SqlTypeValue.TYPE_UNKNOWN;
 			}
 			else {
-				TableParameterMetaData tpmd = parameterMap.get(column.toUpperCase());
+				TableParameterMetaData tpmd = parameterMap.get(column.toUpperCase(Locale.ROOT));
 				if (tpmd != null) {
 					types[typeIndx] = tpmd.getSqlType();
 				}

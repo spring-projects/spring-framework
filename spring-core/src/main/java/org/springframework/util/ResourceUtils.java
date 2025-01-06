@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Locale;
 
 import org.springframework.lang.Nullable;
 
@@ -295,7 +296,7 @@ public abstract class ResourceUtils {
 	 */
 	public static boolean isJarFileURL(URL url) {
 		return (URL_PROTOCOL_FILE.equals(url.getProtocol()) &&
-				url.getPath().toLowerCase().endsWith(JAR_FILE_EXTENSION));
+				url.getPath().toLowerCase(Locale.ROOT).endsWith(JAR_FILE_EXTENSION));
 	}
 
 	/**

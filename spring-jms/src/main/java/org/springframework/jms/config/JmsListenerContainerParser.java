@@ -16,6 +16,8 @@
 
 package org.springframework.jms.config;
 
+import java.util.Locale;
+
 import javax.jms.Session;
 
 import org.w3c.dom.Element;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+
 
 /**
  * Parser for the JMS {@code <listener-container>} element.
@@ -154,7 +157,7 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 				}
 			}
 			else {
-				properties.add("cacheLevelName", "CACHE_" + cache.toUpperCase());
+				properties.add("cacheLevelName", "CACHE_" + cache.toUpperCase(Locale.ROOT));
 			}
 		}
 

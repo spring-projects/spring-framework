@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -151,7 +152,7 @@ public @interface TestConstructor {
 				return null;
 			}
 			try {
-				return AutowireMode.valueOf(name.trim().toUpperCase());
+				return AutowireMode.valueOf(name.trim().toUpperCase(Locale.ROOT));
 			}
 			catch (IllegalArgumentException ex) {
 				Log logger = LogFactory.getLog(AutowireMode.class);
