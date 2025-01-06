@@ -253,7 +253,7 @@ public abstract class AopProxyUtils {
 	 * @return a cloned argument array, or the original if no adaptation is needed
 	 * @since 4.2.3
 	 */
-	static Object[] adaptArgumentsIfNecessary(Method method, Object @Nullable [] arguments) {
+	static @Nullable Object[] adaptArgumentsIfNecessary(Method method, @Nullable Object[] arguments) {
 		if (ObjectUtils.isEmpty(arguments)) {
 			return new Object[0];
 		}

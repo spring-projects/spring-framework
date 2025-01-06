@@ -347,7 +347,7 @@ public abstract class AopUtils {
 	 * @throws Throwable if thrown by the target method
 	 * @throws org.springframework.aop.AopInvocationException in case of a reflection error
 	 */
-	public static @Nullable Object invokeJoinpointUsingReflection(@Nullable Object target, Method method, Object[] args)
+	public static @Nullable Object invokeJoinpointUsingReflection(@Nullable Object target, Method method, @Nullable Object[] args)
 			throws Throwable {
 
 		// Use reflection to invoke the method.
@@ -377,7 +377,7 @@ public abstract class AopUtils {
 	 */
 	private static class KotlinDelegate {
 
-		public static Object invokeSuspendingFunction(Method method, @Nullable Object target, Object... args) {
+		public static Object invokeSuspendingFunction(Method method, @Nullable Object target, @Nullable Object... args) {
 			Continuation<?> continuation = (Continuation<?>) args[args.length -1];
 			Assert.state(continuation != null, "No Continuation available");
 			CoroutineContext context = continuation.getContext().minusKey(Job.Key);

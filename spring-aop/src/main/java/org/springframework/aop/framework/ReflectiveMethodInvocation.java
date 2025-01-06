@@ -67,7 +67,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	protected final Method method;
 
-	protected Object[] arguments;
+	protected @Nullable Object[] arguments;
 
 	private final @Nullable Class<?> targetClass;
 
@@ -103,7 +103,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
 	protected ReflectiveMethodInvocation(
-			Object proxy, @Nullable Object target, Method method, Object @Nullable [] arguments,
+			Object proxy, @Nullable Object target, Method method, @Nullable Object[] arguments,
 			@Nullable Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 
 		this.proxy = proxy;
@@ -141,12 +141,13 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	@Override
-	public final Object[] getArguments() {
+	public final @Nullable Object[] getArguments() {
 		return this.arguments;
 	}
 
 	@Override
-	public void setArguments(Object... arguments) {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
+	public void setArguments(@Nullable Object... arguments) {
 		this.arguments = arguments;
 	}
 
@@ -218,7 +219,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	public MethodInvocation invocableClone(Object... arguments) {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
+	public MethodInvocation invocableClone(@Nullable Object... arguments) {
 		// Force initialization of the user attributes Map,
 		// for having a shared Map reference in the clone.
 		if (this.userAttributes == null) {

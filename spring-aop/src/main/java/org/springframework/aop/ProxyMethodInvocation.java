@@ -58,14 +58,14 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	 * @return an invocable clone of this invocation.
 	 * {@code proceed()} can be called once per clone.
 	 */
-	MethodInvocation invocableClone(Object... arguments);
+	MethodInvocation invocableClone(@Nullable Object... arguments);
 
 	/**
 	 * Set the arguments to be used on subsequent invocations in the any advice
 	 * in this chain.
 	 * @param arguments the argument array
 	 */
-	void setArguments(Object... arguments);
+	void setArguments(@Nullable Object... arguments);
 
 	/**
 	 * Add the specified user attribute with the given value to this invocation.
