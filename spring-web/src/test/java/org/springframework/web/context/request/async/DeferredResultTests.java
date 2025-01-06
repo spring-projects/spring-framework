@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<>();
 		result.onCompletion(() -> sb.append("completion event"));
 
-		result.getInterceptor().afterCompletion(null, null);
+		result.getLifecycleInterceptor().afterCompletion(null, null);
 
 		assertThat(result.isSetOrExpired()).isTrue();
 		assertThat(sb.toString()).isEqualTo("completion event");
@@ -109,7 +109,7 @@ class DeferredResultTests {
 		result.setResultHandler(handler);
 		result.onTimeout(() -> sb.append("timeout event"));
 
-		result.getInterceptor().handleTimeout(null, null);
+		result.getLifecycleInterceptor().handleTimeout(null, null);
 
 		assertThat(sb.toString()).isEqualTo("timeout event");
 		assertThat(result.setResult("hello")).as("Should not be able to set result a second time").isFalse();
@@ -127,7 +127,7 @@ class DeferredResultTests {
 		Exception e = new Exception();
 		result.onError(t -> sb.append("error event"));
 
-		result.getInterceptor().handleError(null, null, e);
+		result.getLifecycleInterceptor().handleError(null, null, e);
 
 		assertThat(sb.toString()).isEqualTo("error event");
 		assertThat(result.setResult("hello")).as("Should not be able to set result a second time").isFalse();

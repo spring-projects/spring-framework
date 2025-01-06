@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,11 +350,18 @@ class ReactiveTypeHandler {
 					this.subscription.request(1);
 				}
 				catch (final Throwable ex) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Send for " + this.emitter + " failed: " + ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Send for " + this.emitter + " failed: " + ex);
 					}
 					terminate();
-					this.emitter.completeWithError(ex);
+					try {
+						this.emitter.completeWithError(ex);
+					}
+					catch (Exception ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failure from emitter completeWithError: " + ex2);
+						}
+					}
 					return;
 				}
 			}
@@ -364,16 +371,30 @@ class ReactiveTypeHandler {
 				Throwable ex = this.error;
 				this.error = null;
 				if (ex != null) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Publisher for " + this.emitter + " failed: " + ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Publisher for " + this.emitter + " failed: " + ex);
 					}
-					this.emitter.completeWithError(ex);
+					try {
+						this.emitter.completeWithError(ex);
+					}
+					catch (Exception ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failure from emitter completeWithError: " + ex2);
+						}
+					}
 				}
 				else {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Publisher for " + this.emitter + " completed");
 					}
-					this.emitter.complete();
+					try {
+						this.emitter.complete();
+					}
+					catch (Exception ex2) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failure from emitter complete: " + ex2);
+						}
+					}
 				}
 				return;
 			}
