@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -218,6 +220,23 @@ class InitBinderBindingContextTests {
 
 		Map<String, Object> map = binder.getValuesToBind(exchange).block();
 		assertThat(map).containsExactlyInAnyOrderEntriesOf(Map.of("someIntArray", "1", "Some-Int-Array", "1"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"Accept", "Authorization", "Connection",
+			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade"})
+	void filteredHeaders(String headerName) throws Exception {
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header(headerName, "u1")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
+		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+
+		Map<String, Object> map = binder.getValuesToBind(exchange).block();
+		assertThat(map).isEmpty();
 	}
 
 	private BindingContext createBindingContext(String methodName, Class<?>... parameterTypes) throws Exception {
