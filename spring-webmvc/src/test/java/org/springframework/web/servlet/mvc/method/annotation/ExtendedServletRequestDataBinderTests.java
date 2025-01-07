@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Map;
 import jakarta.servlet.ServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -102,6 +104,19 @@ class ExtendedServletRequestDataBinderTests {
 
 		assertThat(target.getName()).isEqualTo("John");
 		assertThat(target.getAge()).isEqualTo(25);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"Accept", "Authorization", "Connection",
+			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade"})
+	void filteredHeaders(String headerName) {
+		TestBinder binder = new TestBinder();
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		request.addHeader(headerName, "u1");
+		binder.addBindValues(mpvs, request);
+
+		assertThat(mpvs).isEmpty();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 
-	private static final Set<String> FILTERED_HEADER_NAMES = Set.of("Priority");
+	private static final Set<String> FILTERED_HEADER_NAMES = Set.of("Accept", "Authorization", "Connection",
+			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade");
 
 
 	private Predicate<String> headerPredicate = name -> !FILTERED_HEADER_NAMES.contains(name);
