@@ -146,7 +146,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public void setArguments(@Nullable Object... arguments) {
 		this.arguments = arguments;
 	}
@@ -219,7 +218,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public MethodInvocation invocableClone(@Nullable Object... arguments) {
 		// Force initialization of the user attributes Map,
 		// for having a shared Map reference in the clone.

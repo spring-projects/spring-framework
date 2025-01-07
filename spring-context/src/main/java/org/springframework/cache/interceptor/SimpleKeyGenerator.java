@@ -43,7 +43,6 @@ import org.springframework.core.KotlinDetector;
 public class SimpleKeyGenerator implements KeyGenerator {
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public Object generate(Object target, Method method, @Nullable Object... params) {
 		return generateKey((KotlinDetector.isSuspendingFunction(method) ?
 				Arrays.copyOf(params, params.length - 1) : params));

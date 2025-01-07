@@ -84,7 +84,6 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public Object generate(Object target, Method method, @Nullable Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
 		if (!(operation instanceof AbstractJCacheKeyOperation)) {

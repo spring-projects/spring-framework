@@ -107,7 +107,6 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public CacheInvocationParameter[] getAllParameters(@Nullable Object... values) {
 		if (this.allParameterDetails.size() != values.length) {
 			throw new IllegalStateException("Values mismatch, operation has " +

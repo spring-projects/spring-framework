@@ -35,7 +35,6 @@ public class SimpleAsyncUncaughtExceptionHandler implements AsyncUncaughtExcepti
 
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1113
 	public void handleUncaughtException(Throwable ex, Method method, @Nullable Object... params) {
 		if (logger.isErrorEnabled()) {
 			logger.error("Unexpected exception occurred invoking async method: " + method, ex);
