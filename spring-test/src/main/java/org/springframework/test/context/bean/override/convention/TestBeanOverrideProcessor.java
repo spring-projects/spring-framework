@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		Method factoryMethod;
 		if (!methodName.isBlank()) {
 			// If the user specified an explicit method name, search for that.
-			factoryMethod = findTestBeanFactoryMethod(testClass, field.getType(), methodName);
+			factoryMethod = findTestBeanFactoryMethod(field.getDeclaringClass(), field.getType(), methodName);
 		}
 		else {
 			// Otherwise, search for candidate factory methods whose names match either
@@ -78,7 +78,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			if (beanName != null) {
 				candidateMethodNames.add(beanName);
 			}
-			factoryMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
+			factoryMethod = findTestBeanFactoryMethod(field.getDeclaringClass(), field.getType(), candidateMethodNames);
 		}
 
 		return new TestBeanOverrideHandler(

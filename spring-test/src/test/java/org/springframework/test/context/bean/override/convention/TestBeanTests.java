@@ -26,9 +26,10 @@ import org.springframework.test.context.bean.override.BeanOverrideContextCustomi
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for {@link TestBean}.
+ * Tests for {@link TestBean @TestBean}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public class TestBeanTests {
 
@@ -109,7 +110,7 @@ public class TestBeanTests {
 				.isThrownBy(() -> BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(
 						FailureOverrideInParentWithoutFactoryMethod.class, context))
 				.withMessage("No static method found named beanToOverride() in %s with return type %s",
-						FailureOverrideInParentWithoutFactoryMethod.class.getName(), String.class.getName());
+						AbstractByNameLookup.class.getName(), String.class.getName());
 	}
 
 	@Test
@@ -149,8 +150,7 @@ public class TestBeanTests {
 		@TestBean(name = "beanToOverride")
 		private String example;
 
-		// Expected static String example() { ... }
-		// or static String beanToOverride() { ... }
+		// No example() or beanToOverride() method
 	}
 
 	static class FailureMissingExplicitOverrideMethod {
@@ -158,24 +158,21 @@ public class TestBeanTests {
 		@TestBean(methodName = "createExample")
 		private String example;
 
-		// Expected static String createExample() { ... }
+		// NO createExample() method
 	}
 
 	abstract static class AbstractByNameLookup {
 
-		@TestBean(methodName = "beanToOverride")
-		protected String beanToOverride;
-	}
-
-	static class FailureOverrideInParentWithoutFactoryMethod extends AbstractByNameLookup {
+		@TestBean
+		String beanToOverride;
 
 		// No beanToOverride() method
 	}
 
-	abstract static class AbstractCompetingMethods {
+	static class FailureOverrideInParentWithoutFactoryMethod extends AbstractByNameLookup {
+	}
 
-		@TestBean(name = "beanToOverride")
-		protected String example;
+	abstract static class AbstractCompetingMethods {
 
 		static String example() {
 			throw new IllegalStateException("Should not be called");
@@ -183,6 +180,9 @@ public class TestBeanTests {
 	}
 
 	static class FailureCompetingOverrideMethods extends AbstractCompetingMethods {
+
+		@TestBean(name = "beanToOverride")
+		String example;
 
 		static String beanToOverride() {
 			throw new IllegalStateException("Should not be called");

@@ -44,24 +44,24 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * you can set the {@link #enforceOverride() enforceOverride} attribute to {@code true}
  * &mdash; for example,  {@code @TestBean(enforceOverride = true)}.
  *
- * <p>The instance is created from a zero-argument static factory method in the
- * test class whose return type is compatible with the annotated field. In the
- * case of a nested test class, the enclosing class hierarchy is also searched.
- * Similarly, if the test class extends from a base class or implements any
- * interfaces, the entire type hierarchy is searched. Alternatively, a factory
- * method in an external class can be referenced via its fully-qualified method
- * name following the syntax {@code <fully-qualified class name>#<method name>}
- * &mdash; for example,
+ * <p>The instance is created from a zero-argument static factory method whose
+ * return type is compatible with the annotated field. The factory method can be
+ * declared directly in the class which declares the {@code @TestBean} field or
+ * within the type hierarchy above that class, including implemented interfaces.
+ * If the {@code @TestBean} field is declared in a nested test class, the enclosing
+ * class hierarchy is also searched. Alternatively, a factory method in an external
+ * class can be referenced via its fully-qualified method name following the syntax
+ * {@code <fully-qualified class name>#<method name>} &mdash; for example,
  * {@code @TestBean(methodName = "org.example.TestUtils#createCustomerRepository")}.
  *
  * <p>The factory method is deduced as follows.
  *
  * <ul>
- * <li>If the {@link #methodName()} is specified, look for a static method with
- * that name.</li>
- * <li>If a method name is not specified, look for exactly one static method
- * named with either the name of the annotated field or the name of the bean
- * (if specified).</li>
+ * <li>If the {@link #methodName methodName} is specified, Spring looks for a static
+ * method with that name.</li>
+ * <li>If a method name is not specified, Spring looks for exactly one static method
+ * whose name is either the name of the annotated field or the {@link #name() name}
+ * of the bean (if specified).</li>
  * </ul>
  *
  * <p>Consider the following example.
@@ -146,15 +146,17 @@ public @interface TestBean {
 	/**
 	 * Name of the static factory method that will be used to instantiate the bean
 	 * to override.
-	 * <p>A search will be performed to find the factory method in the test class,
-	 * in one of its superclasses, or in any implemented interfaces. In the case
-	 * of a nested test class, the enclosing class hierarchy will also be searched.
+	 * <p>A search will be performed to find the factory method in the class in
+	 * which the {@code @TestBean} field is declared, in one of its superclasses,
+	 * or in any implemented interfaces. If the {@code @TestBean} field is declared
+	 * in a nested test class, the enclosing class hierarchy will also be searched.
 	 * <p>Alternatively, a factory method in an external class can be referenced
 	 * via its fully-qualified method name following the syntax
 	 * {@code <fully-qualified class name>#<method name>} &mdash; for example,
 	 * {@code @TestBean(methodName = "org.example.TestUtils#createCustomerRepository")}.
 	 * <p>If left unspecified, the name of the factory method will be detected
-	 * based either on the name of the annotated field or the name of the bean.
+	 * based either on the name of the {@code @TestBean} field or the {@link #name() name}
+	 * of the bean.
 	 */
 	String methodName() default "";
 
