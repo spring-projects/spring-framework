@@ -65,10 +65,6 @@ follow-up reports will need to be created as new issues with a fresh description
 
 #### Submit a Pull Request
 
-1. If you have not previously done so, please sign the
-[Contributor License Agreement](https://cla.spring.io/sign/spring). You will be reminded
-automatically when you submit the PR.
-
 1. Should you create an issue first? No, just create the pull request and use the
 description to provide context and motivation, as you would for an issue. If you want
 to start a discussion first or have already created an issue, once a pull request is
@@ -84,6 +80,11 @@ the fix version in the issue tracker.
 multiple edits or corrections of the same logical change. See
 [Rewriting History section of Pro Git](https://git-scm.com/book/en/Git-Tools-Rewriting-History)
 for an overview of streamlining the commit history.
+
+1. All commits must include a _Signed-off-by_ trailer at the end of each commit message
+to indicate that the contributor agrees to the Developer Certificate of Origin.
+For additional details, please refer to the blog post
+[Hello DCO, Goodbye CLA: Simplifying Contributions to Spring](https://spring.io/blog/2025/01/06/hello-dco-goodbye-cla-simplifying-contributions-to-spring).
 
 1. Format commit messages using 55 characters for the subject line, 72 characters per line
 for the description, followed by the issue fixed, for example, `Closes gh-22276`. See the
