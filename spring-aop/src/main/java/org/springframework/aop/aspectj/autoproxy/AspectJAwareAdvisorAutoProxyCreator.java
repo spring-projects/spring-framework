@@ -119,7 +119,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			if (skip == null) {
 				skip = super.shouldSkip(beanClass, beanName);
 			}
-			this.skippedBeans.put(beanName, skip);
+			this.skippedBeans.put(cacheKey, skip);
 		}
 		return skip;
 	}
