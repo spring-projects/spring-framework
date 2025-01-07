@@ -92,8 +92,10 @@ Java::
 
 [TIP]
 ====
-Spring searches for the factory method to invoke in the test class, in the test class
-hierarchy, and in the enclosing class hierarchy for a `@Nested` test class.
+To locate the factory method to invoke, Spring searches in the class in which the
+`@TestBean` field is declared, in one of its superclasses, or in any implemented
+interfaces. If the `@TestBean` field is declared in a `@Nested` test class, the enclosing
+class hierarchy will also be searched.
 
 Alternatively, a factory method in an external class can be referenced via its
 fully-qualified method name following the syntax `<fully-qualified class name>#<method name>`

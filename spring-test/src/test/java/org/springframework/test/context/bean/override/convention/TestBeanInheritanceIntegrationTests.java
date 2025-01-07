@@ -48,19 +48,16 @@ public class TestBeanInheritanceIntegrationTests {
 		return new FakePojo("puzzle in enclosing class");
 	}
 
-	static Pojo enclosingClassBean() {
+	static Pojo enclosingClassFactoryMethod() {
 		return new FakePojo("in enclosing test class");
 	}
 
 	abstract static class AbstractTestCase {
 
-		@TestBean
-		Pojo someBean;
-
 		@TestBean("otherBean")
 		Pojo otherBean;
 
-		@TestBean("thirdBean")
+		@TestBean
 		Pojo anotherBean;
 
 		@TestBean
@@ -70,8 +67,8 @@ public class TestBeanInheritanceIntegrationTests {
 			return new FakePojo("other in superclass");
 		}
 
-		static Pojo thirdBean() {
-			return new FakePojo("third in superclass");
+		static Pojo anotherBean() {
+			return new FakePojo("another in superclass");
 		}
 
 		static Pojo enigmaBean() {
@@ -93,49 +90,42 @@ public class TestBeanInheritanceIntegrationTests {
 		@TestBean(methodName = "commonBean")
 		Pojo pojo;
 
-		@TestBean(name = "pojo2", methodName = "enclosingClassBean")
+		@TestBean(name = "pojo2", methodName = "enclosingClassFactoryMethod")
 		Pojo pojo2;
 
-		@TestBean(methodName = "localEnigmaBean")
+		@TestBean
 		Pojo enigmaBean;
 
 		@TestBean
 		Pojo puzzleBean;
 
 
+		// "Overrides" puzzleBean() defined in TestBeanInheritanceIntegrationTests.
 		static Pojo puzzleBean() {
 			return new FakePojo("puzzle in nested class");
 		}
 
-		static Pojo localEnigmaBean() {
+		// "Overrides" enigmaBean() defined in AbstractTestCase.
+		static Pojo enigmaBean() {
 			return new FakePojo("enigma in subclass");
 		}
 
-		static Pojo someBean() {
-			return new FakePojo("someBeanOverride");
-		}
-
-		// "Overrides" otherBean() defined in AbstractTestBeanIntegrationTestCase.
 		static Pojo otherBean() {
 			return new FakePojo("other in subclass");
 		}
 
 		@Test
 		void fieldInSuperclassWithFactoryMethodInSuperclass() {
-			assertThat(ctx.getBean("thirdBean")).as("applicationContext").hasToString("third in superclass");
-			assertThat(super.anotherBean.value()).as("injection point").isEqualTo("third in superclass");
+			assertThat(ctx.getBean("anotherBean")).as("applicationContext").hasToString("another in superclass");
+			assertThat(super.anotherBean.value()).as("injection point").isEqualTo("another in superclass");
 		}
 
-		@Test
-		void fieldInSuperclassWithFactoryMethodInSubclass() {
-			assertThat(ctx.getBean("someBean")).as("applicationContext").hasToString("someBeanOverride");
-			assertThat(super.someBean.value()).as("injection point").isEqualTo("someBeanOverride");
-		}
-
-		@Test
-		void fieldInSuperclassWithFactoryMethodInSupeclassAndInSubclass() {
-			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("other in subclass");
-			assertThat(super.otherBean.value()).as("injection point").isEqualTo("other in subclass");
+		@Test  // gh-34204
+		void fieldInSuperclassWithFactoryMethodInSuperclassAndInSubclass() {
+			// We do not expect "other in subclass", because the @TestBean declaration in
+			// AbstractTestCase cannot "see" the otherBean() factory method in the subclass.
+			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("other in superclass");
+			assertThat(super.otherBean.value()).as("injection point").isEqualTo("other in superclass");
 		}
 
 		@Test
@@ -150,13 +140,13 @@ public class TestBeanInheritanceIntegrationTests {
 			assertThat(this.pojo2.value()).as("injection point").isEqualTo("in enclosing test class");
 		}
 
-		@Test  // gh-34194
+		@Test  // gh-34194, gh-34204
 		void testBeanInSubclassOverridesTestBeanInSuperclass() {
 			assertThat(ctx.getBean("enigmaBean")).as("applicationContext").hasToString("enigma in subclass");
 			assertThat(this.enigmaBean.value()).as("injection point").isEqualTo("enigma in subclass");
 		}
 
-		@Test  // gh-34194
+		@Test  // gh-34194, gh-34204
 		void testBeanInNestedClassOverridesTestBeanInEnclosingClass() {
 			assertThat(ctx.getBean("puzzleBean")).as("applicationContext").hasToString("puzzle in nested class");
 			assertThat(this.puzzleBean.value()).as("injection point").isEqualTo("puzzle in nested class");
@@ -167,17 +157,12 @@ public class TestBeanInheritanceIntegrationTests {
 	static class Config {
 
 		@Bean
-		Pojo someBean() {
-			return new ProdPojo();
-		}
-
-		@Bean
 		Pojo otherBean() {
 			return new ProdPojo();
 		}
 
 		@Bean
-		Pojo thirdBean() {
+		Pojo anotherBean() {
 			return new ProdPojo();
 		}
 
