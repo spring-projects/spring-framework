@@ -19,6 +19,8 @@ package org.springframework.aop.aspectj.autoproxy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.aop.Advice;
 import org.aspectj.util.PartialOrder;
@@ -52,6 +54,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 	private static final Comparator<Advisor> DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();
 
+	private final Map<Object, Boolean> skippedBeans = new ConcurrentHashMap<>(256);
 
 	/**
 	 * Sort the supplied {@link Advisor} instances according to AspectJ precedence.
@@ -101,15 +104,24 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 	@Override
 	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-		// TODO: Consider optimization by caching the list of the aspect names
-		List<Advisor> candidateAdvisors = findCandidateAdvisors();
-		for (Advisor advisor : candidateAdvisors) {
-			if (advisor instanceof AspectJPointcutAdvisor pointcutAdvisor &&
-					pointcutAdvisor.getAspectName().equals(beanName)) {
-				return true;
+		Object cacheKey = getCacheKey(beanClass, beanName);
+
+		Boolean skip = this.skippedBeans.get(cacheKey);
+		if (skip == null) {
+			List<Advisor> candidateAdvisors = findCandidateAdvisors();
+			for (Advisor advisor : candidateAdvisors) {
+				if (advisor instanceof AspectJPointcutAdvisor pointcutAdvisor &&
+						pointcutAdvisor.getAspectName().equals(beanName)) {
+					skip = true;
+					break;
+				}
 			}
+			if (skip == null) {
+				skip = super.shouldSkip(beanClass, beanName);
+			}
+			this.skippedBeans.put(beanName, skip);
 		}
-		return super.shouldSkip(beanClass, beanName);
+		return skip;
 	}
 
 	@Override
