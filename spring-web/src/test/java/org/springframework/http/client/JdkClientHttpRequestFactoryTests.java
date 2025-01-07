@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	private static @Nullable String originalPropertyValue;
 
+
 	@BeforeAll
 	static void setProperty() {
 		originalPropertyValue = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
@@ -55,6 +56,7 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		}
 	}
 
+
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
 		return new JdkClientHttpRequestFactory();
@@ -69,7 +71,8 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Test
 	void customizeDisallowedHeaders() throws IOException {
-		ClientHttpRequest request = this.factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
+		URI uri = URI.create(this.baseUrl + "/status/299");
+		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.PUT);
 		request.getHeaders().set("Expect", "299");
 
 		try (ClientHttpResponse response = request.execute()) {
@@ -79,8 +82,9 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Test // gh-31451
 	public void contentLength0() throws IOException {
-		BufferingClientHttpRequestFactory bufferingFactory = new BufferingClientHttpRequestFactory(this.factory);
-		ClientHttpRequest request = bufferingFactory.createRequest(URI.create(this.baseUrl + "/methods/get"), HttpMethod.GET);
+		URI uri = URI.create(this.baseUrl + "/methods/get");
+		ClientHttpRequest request =
+				new BufferingClientHttpRequestFactory(this.factory).createRequest(uri, HttpMethod.GET);
 
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);

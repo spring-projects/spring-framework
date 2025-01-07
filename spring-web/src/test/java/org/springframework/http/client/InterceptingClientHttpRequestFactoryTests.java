@@ -56,7 +56,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void shouldInvokeInterceptors() throws Exception {
+	void invokeInterceptors() throws Exception {
 		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(new NoOpInterceptor());
 		interceptors.add(new NoOpInterceptor());
@@ -74,7 +74,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void shouldSkipIntercetor() throws Exception {
+	void skipInterceptor() throws Exception {
 		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add((request, body, execution) -> responseMock);
 		interceptors.add(new NoOpInterceptor());
@@ -89,7 +89,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void interceptorShouldUpdateRequestHeader() throws Exception {
+	void updateRequestHeader() throws Exception {
 		final String headerName = "Foo";
 		final String headerValue = "Bar";
 		final String otherValue = "Baz";
@@ -115,7 +115,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void interceptorShouldUpdateRequestAttribute() throws Exception {
+	void updateRequestAttribute() throws Exception {
 		final String attrName = "Foo";
 		final String attrValue = "Bar";
 
@@ -137,7 +137,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void interceptorShouldUpdateRequestURI() throws Exception {
+	void updateRequestURI() throws Exception {
 		final URI changedUri = URI.create("https://example.com/2");
 
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> execution.execute(new HttpRequestWrapper(request) {
@@ -161,7 +161,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void interceptorShouldUpdateRequestMethod() throws Exception {
+	void updateRequestMethod() throws Exception {
 		final HttpMethod changedMethod = HttpMethod.POST;
 
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> execution.execute(new HttpRequestWrapper(request) {
@@ -185,7 +185,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void interceptorShouldUpdateRequestBody() throws Exception {
+	void updateRequestBody() throws Exception {
 		final byte[] changedBody = "Foo".getBytes();
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> execution.execute(request, changedBody);
 		requestFactory = new InterceptingClientHttpRequestFactory(requestFactoryMock, Collections.singletonList(interceptor));
@@ -197,7 +197,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void interceptorShouldAlwaysExecuteNextInterceptor() throws Exception {
+	void multipleExecutions() throws Exception {
 		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(new MultipleExecutionInterceptor());
 		interceptors.add(new NoOpInterceptor());
@@ -217,18 +217,21 @@ class InterceptingClientHttpRequestFactoryTests {
 		private int invocationCount = 0;
 
 		@Override
-		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-				throws IOException {
+		public ClientHttpResponse intercept(
+				HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
 			invocationCount++;
 			return execution.execute(request, body);
 		}
 	}
 
+
 	private static class MultipleExecutionInterceptor implements ClientHttpRequestInterceptor {
 
 		@Override
-		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-				throws IOException {
+		public ClientHttpResponse intercept(
+				HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
 			// execute another request first
 			execution.execute(new MockClientHttpRequest(), body);
 			return execution.execute(request, body);
