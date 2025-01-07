@@ -2,12 +2,12 @@
 = Null-safety
 
 Although Java does not let you express null-safety with its type system, the Spring Framework codebase is annotated with
-https://jspecify.dev/docs/start-here/[JSpecify] annotations to declare the nullability of APIs, fields and related type
+https://jspecify.dev/docs/start-here/[JSpecify] annotations to declare the nullness of APIs, fields and related type
 usages. Reading the https://jspecify.dev/docs/user-guide/[JSpecify user guide] is highly recommended in order to get
 familiar with those annotations and semantics.
 
 The primary goal of this explicit null-safety arrangement is to prevent `NullPointerException` to be thrown at runtime via
-build time checks and to turn explicit nullability into a way to express the possible absence of value. It is useful in
+build time checks and to turn explicit nullness into a way to express the possible absence of value. It is useful in
 both Java by leveraging some tooling (https://github.com/uber/NullAway[NullAway] or IDEs supporting null-safety
 annotations such as IntelliJ IDEA or Eclipse) and Kotlin where JSpecify annotations are automatically translated to
 {kotlin-docs}/null-safety.html[Kotlin's null safety].
@@ -40,7 +40,7 @@ to enforce null-safety during build time at application level.
 The purpose of this section is to share some guidelines proposed for using JSpecify annotations in the context of
 Spring-related libraries or applications.
 
-The key points to understand is that by default, the nullability of types is unknown in Java, and that non-null type
+The key points to understand is that by default, the nullness of types is unknown in Java, and that non-null type
 usages are by far more frequent than nullable ones. In order to keep codebases readable, we typically want to define
 that by default, type usages are non-null unless marked as nullable for a specific scope. This is exactly the purpose of
 https://jspecify.dev/docs/api/org/jspecify/annotations/NullMarked.html[`@NullMarked`] that is typically set with Spring
@@ -75,11 +75,11 @@ public static @Nullable String buildMessage(@Nullable String message,
 }
 ----
 
-When overriding a method, nullability annotations are not inherited from the superclass method. That means those
-nullability annotations should be repeated if you just want to override the implementation and keep the same API
-nullability.
+When overriding a method, nullness annotations are not inherited from the superclass method. That means those
+nullness annotations should be repeated if you just want to override the implementation and keep the same API
+nullness.
 
-With arrays and varargs, you need to be able to differentiate the nullability of the elements from the nullability of
+With arrays and varargs, you need to be able to differentiate the nullness of the elements from the nullness of
 the array itself. Pay attention to the syntax
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.7.4[defined by the Java specification] which may be
 initially surprising:
@@ -101,7 +101,7 @@ typical use cases.
 The {spring-framework-api}/lang/Contract.html[@Contract] annotation in the `org.springframework.lang` package
 can be used to express complementary semantics to avoid non-relevant null-safety warnings in your codebase.
 
-NOTE: Complementary to nullability annotations, the {spring-framework-api}/lang/CheckReturnValue.html[@CheckReturnValue]
+NOTE: Complementary to nullness annotations, the {spring-framework-api}/lang/CheckReturnValue.html[@CheckReturnValue]
 annotation in the `org.springframework.lang` package can be used to specify that the method return value must be used.
 
 [[null-safety-migrating]]
@@ -115,12 +115,12 @@ introduced in Spring Framework 5 when JSpecify did not exist and the best option
 but widespread JSR) meta-annotations. They are deprecated as of Spring Framework 7 in favor of
 https://jspecify.dev/docs/start-here/[JSpecify] annotations, which provide significant enhancements such as properly
 defined specifications, a canonical dependency with no split-package issue, better tooling, better Kotlin integration
-and the capability to specify the nullability more precisely for more use cases.
+and the capability to specify the nullness more precisely for more use cases.
 
 A key difference is that Spring null-safety annotations, following JSR 305 semantics, apply to fields,
 parameters and return values while JSpecify annotations apply to type usages. This subtle difference
-is in practice pretty significant, as it allows for example to differentiate the nullability of elements from the
-nullability of arrays/varargs as well as defining the nullability of generic types.
+is in practice pretty significant, as it allows for example to differentiate the nullness of elements from the
+nullness of arrays/varargs as well as defining the nullness of generic types.
 
 That means array and varargs null-safety declarations have to be updated to keep the same semantic. For example
 `@Nullable Object[] array` with Spring annotations needs to be changed to `Object @Nullable [] array` with JSpecify
