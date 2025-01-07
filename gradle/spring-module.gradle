@@ -13,7 +13,7 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
-	errorprone 'com.uber.nullaway:nullaway:0.12.2'
+	errorprone 'com.uber.nullaway:nullaway:0.12.3'
 	errorprone 'com.google.errorprone:error_prone_core:2.35.1'
 }
 
@@ -116,9 +116,8 @@ components.java.withVariantsFromConfiguration(configurations.testFixturesRuntime
 tasks.withType(JavaCompile).configureEach {
     options.errorprone {
     	disableAllChecks = true
-        option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
-        // TODO Replace by proper flag when supported, see https://github.com/uber/NullAway/issues/574
-		option("NullAway:AnnotatedPackages", "")
+		option("NullAway:OnlyNullMarked", "true")
+		option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
     }
 }
 tasks.compileJava {
