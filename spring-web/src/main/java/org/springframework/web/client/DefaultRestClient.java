@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -48,6 +49,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -75,6 +77,7 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 6.1
  * @see RestClient#create()
  * @see RestClient#create(String)
@@ -97,6 +100,8 @@ final class DefaultRestClient implements RestClient {
 
 	private final @Nullable List<ClientHttpRequestInterceptor> interceptors;
 
+	private final @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
+
 	private final UriBuilderFactory uriBuilderFactory;
 
 	private final @Nullable HttpHeaders defaultHeaders;
@@ -118,6 +123,7 @@ final class DefaultRestClient implements RestClient {
 
 	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory,
 			@Nullable List<ClientHttpRequestInterceptor> interceptors,
+			@Nullable BiPredicate<URI, HttpMethod> bufferingPredicate,
 			@Nullable List<ClientHttpRequestInitializer> initializers,
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
@@ -132,6 +138,7 @@ final class DefaultRestClient implements RestClient {
 		this.clientRequestFactory = clientRequestFactory;
 		this.initializers = initializers;
 		this.interceptors = interceptors;
+		this.bufferingPredicate = bufferingPredicate;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
@@ -643,9 +650,13 @@ final class DefaultRestClient implements RestClient {
 				factory = DefaultRestClient.this.interceptingRequestFactory;
 				if (factory == null) {
 					factory = new InterceptingClientHttpRequestFactory(
-							DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.interceptors);
+							DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.interceptors,
+							DefaultRestClient.this.bufferingPredicate);
 					DefaultRestClient.this.interceptingRequestFactory = factory;
 				}
+			}
+			else if (DefaultRestClient.this.bufferingPredicate != null) {
+				factory = new BufferingClientHttpRequestFactory(DefaultRestClient.this.clientRequestFactory);
 			}
 			else {
 				factory = DefaultRestClient.this.clientRequestFactory;

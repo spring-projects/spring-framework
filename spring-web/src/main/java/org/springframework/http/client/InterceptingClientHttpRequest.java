@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -42,14 +43,18 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final URI uri;
 
+	private final BiPredicate<URI, HttpMethod> bufferingPredicate;
+
 
 	protected InterceptingClientHttpRequest(ClientHttpRequestFactory requestFactory,
-			List<ClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod method) {
+			List<ClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod method,
+			BiPredicate<URI, HttpMethod> bufferingPredicate) {
 
 		this.requestFactory = requestFactory;
 		this.interceptors = interceptors;
 		this.method = method;
 		this.uri = uri;
+		this.bufferingPredicate = bufferingPredicate;
 	}
 
 
@@ -76,6 +81,10 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				.orElse(execution);
 	}
 
+	private boolean shouldBufferResponse(HttpRequest request) {
+		return this.bufferingPredicate.test(request.getURI(), request.getMethod());
+	}
+
 
 	private class EndOfChainRequestExecution implements ClientHttpRequestExecution {
 
@@ -90,7 +99,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			ClientHttpRequest delegate = this.requestFactory.createRequest(request.getURI(), request.getMethod());
 			request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
 			request.getAttributes().forEach((key, value) -> delegate.getAttributes().put(key, value));
-			return executeWithRequest(delegate, body, false);
+			return executeWithRequest(delegate, body, shouldBufferResponse(request));
 		}
 	}
 

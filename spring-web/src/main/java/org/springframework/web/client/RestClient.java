@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -383,6 +384,15 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		Builder requestInterceptors(Consumer<List<ClientHttpRequestInterceptor>> interceptorsConsumer);
+
+		/**
+		 * Enable buffering of request and response content making it possible to
+		 * read the request and the response body multiple times.
+		 * @param predicate to determine whether to buffer for the given request
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder bufferContent(BiPredicate<URI, HttpMethod> predicate);
 
 		/**
 		 * Add the given request initializer to the end of the initializer chain.

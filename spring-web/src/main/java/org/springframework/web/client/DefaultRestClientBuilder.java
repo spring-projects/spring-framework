@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -30,6 +31,7 @@ import io.micrometer.observation.ObservationRegistry;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -137,6 +139,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private @Nullable List<ClientHttpRequestInterceptor> interceptors;
 
+	private @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
+
 	private @Nullable List<ClientHttpRequestInitializer> initializers;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
@@ -172,6 +176,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				new ArrayList<>(other.messageConverters) : null);
 
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
+		this.bufferingPredicate = other.bufferingPredicate;
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
 		this.observationRegistry = other.observationRegistry;
 		this.observationConvention = other.observationConvention;
@@ -348,6 +353,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
+	public RestClient.Builder bufferContent(BiPredicate<URI, HttpMethod> predicate) {
+		this.bufferingPredicate = predicate;
+		return this;
+	}
+
+	@Override
 	public RestClient.Builder requestInitializer(ClientHttpRequestInitializer initializer) {
 		Assert.notNull(initializer, "Initializer must not be null");
 		initInitializers().add(initializer);
@@ -463,7 +474,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				(this.messageConverters != null ? this.messageConverters : initMessageConverters());
 
 		return new DefaultRestClient(
-				requestFactory, this.interceptors, this.initializers,
+				requestFactory, this.interceptors, this.bufferingPredicate, this.initializers,
 				uriBuilderFactory, defaultHeaders, defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,

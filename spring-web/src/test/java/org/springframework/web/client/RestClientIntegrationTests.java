@@ -51,6 +51,7 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -809,6 +810,59 @@ class RestClientIntegrationTests {
 
 		expectRequestCount(1);
 		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
+	}
+
+	@ParameterizedRestClientTest
+	void requestInterceptorWithResponseBuffering(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response ->
+				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+
+		RestClient interceptedClient = this.restClient.mutate()
+				.requestInterceptor((request, body, execution) -> {
+					ClientHttpResponse response = execution.execute(request, body);
+					byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
+					assertThat(result).isEqualTo("Hello Spring!".getBytes(UTF_8));
+					return response;
+				})
+				.bufferContent((uri, httpMethod) -> true)
+				.build();
+
+		String result = interceptedClient.get()
+				.uri("/greeting")
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+	}
+
+	@ParameterizedRestClientTest
+	void bufferContent(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response ->
+				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+
+		RestClient bufferingClient = this.restClient.mutate()
+				.bufferContent((uri, httpMethod) -> true)
+				.build();
+
+		String result = bufferingClient.get()
+				.uri("/greeting")
+				.exchange((request, response) -> {
+					byte[] bytes = FileCopyUtils.copyToByteArray(response.getBody());
+					assertThat(bytes).isEqualTo("Hello Spring!".getBytes(UTF_8));
+					bytes = FileCopyUtils.copyToByteArray(response.getBody());
+					assertThat(bytes).isEqualTo("Hello Spring!".getBytes(UTF_8));
+					return new String(bytes, UTF_8);
+				});
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
 	}
 
 	@ParameterizedRestClientTest
