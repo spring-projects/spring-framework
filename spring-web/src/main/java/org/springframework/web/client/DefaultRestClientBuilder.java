@@ -133,15 +133,15 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private @Nullable List<StatusHandler> statusHandlers;
 
-	private @Nullable ClientHttpRequestFactory requestFactory;
-
-	private @Nullable List<HttpMessageConverter<?>> messageConverters;
-
 	private @Nullable List<ClientHttpRequestInterceptor> interceptors;
 
 	private @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
 
 	private @Nullable List<ClientHttpRequestInitializer> initializers;
+
+	private @Nullable ClientHttpRequestFactory requestFactory;
+
+	private @Nullable List<HttpMessageConverter<?>> messageConverters;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
@@ -155,10 +155,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		Assert.notNull(other, "Other must not be null");
 
 		this.baseUrl = other.baseUrl;
-		this.defaultUriVariables = (other.defaultUriVariables != null ?
-				new LinkedHashMap<>(other.defaultUriVariables) : null);
+		this.defaultUriVariables = (other.defaultUriVariables != null ? new LinkedHashMap<>(other.defaultUriVariables) : null);
 		this.uriBuilderFactory = other.uriBuilderFactory;
-
 		if (other.defaultHeaders != null) {
 			this.defaultHeaders = new HttpHeaders();
 			this.defaultHeaders.putAll(other.defaultHeaders);
@@ -166,18 +164,14 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		else {
 			this.defaultHeaders = null;
 		}
-		this.defaultCookies = (other.defaultCookies != null ?
-				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new ArrayList<>(other.statusHandlers) : null);
-
-		this.requestFactory = other.requestFactory;
-		this.messageConverters = (other.messageConverters != null ?
-				new ArrayList<>(other.messageConverters) : null);
-
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
 		this.bufferingPredicate = other.bufferingPredicate;
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
+		this.requestFactory = other.requestFactory;
+		this.messageConverters = (other.messageConverters != null ? new ArrayList<>(other.messageConverters) : null);
 		this.observationRegistry = other.observationRegistry;
 		this.observationConvention = other.observationConvention;
 	}
@@ -188,16 +182,14 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.uriBuilderFactory = getUriBuilderFactory(restTemplate);
 		this.statusHandlers = new ArrayList<>();
 		this.statusHandlers.add(StatusHandler.fromErrorHandler(restTemplate.getErrorHandler()));
-
-		this.requestFactory = getRequestFactory(restTemplate);
-		this.messageConverters = new ArrayList<>(restTemplate.getMessageConverters());
-
 		if (!CollectionUtils.isEmpty(restTemplate.getInterceptors())) {
 			this.interceptors = new ArrayList<>(restTemplate.getInterceptors());
 		}
 		if (!CollectionUtils.isEmpty(restTemplate.getClientHttpRequestInitializers())) {
 			this.initializers = new ArrayList<>(restTemplate.getClientHttpRequestInitializers());
 		}
+		this.requestFactory = getRequestFactory(restTemplate);
+		this.messageConverters = new ArrayList<>(restTemplate.getMessageConverters());
 		this.observationRegistry = restTemplate.getObservationRegistry();
 		this.observationConvention = restTemplate.getObservationConvention();
 	}
