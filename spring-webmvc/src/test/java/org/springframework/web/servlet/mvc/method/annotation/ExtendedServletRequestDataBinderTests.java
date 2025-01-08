@@ -89,6 +89,30 @@ class ExtendedServletRequestDataBinderTests {
 	}
 
 	@Test
+	void createBinderViaConstructorNested() {
+		request.addHeader("Nested-Test-Bean.Some-Int-Array", "1");
+		request.addHeader("Nested-Test-Bean.Some-Int-Array", "2");
+
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(null);
+		binder.setTargetType(ResolvableType.forClass(SimpleBean.class));
+		binder.setNameResolver(new BindParamNameResolver());
+		binder.construct(request);
+
+		SimpleBean bean = (SimpleBean) binder.getTarget();
+
+		assertThat(bean.nestedTestBean()).isNotNull();
+		assertThat(bean.nestedTestBean().someIntArray()).containsExactly(1, 2);
+	}
+
+	private record SimpleBean(@BindParam("Nested-Test-Bean") NestedTestBean nestedTestBean) {
+
+	}
+
+	private record NestedTestBean(@BindParam("Some-Int-Array") Integer[] someIntArray) {
+
+	}
+
+	@Test
 	void uriVarsAndHeadersAddedConditionally() {
 		request.addParameter("name", "John");
 		request.addParameter("age", "25");

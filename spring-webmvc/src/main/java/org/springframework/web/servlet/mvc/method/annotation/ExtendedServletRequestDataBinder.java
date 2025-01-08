@@ -124,7 +124,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 				String name = names.nextElement();
 				Object value = getHeaderValue(httpRequest, name);
 				if (value != null) {
-					name = StringUtils.uncapitalize(name.replace("-", ""));
+					name = transformedHeaderName(name);
 					addValueIfNotPresent(mpvs, "Header", name, value);
 				}
 			}
@@ -145,6 +145,10 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		else {
 			mpvs.addPropertyValue(name, value);
 		}
+	}
+
+	private static String transformedHeaderName(String headerName) {
+		return StringUtils.uncapitalize(headerName.replace("-", ""));
 	}
 
 	private @Nullable Object getHeaderValue(HttpServletRequest request, String name) {
@@ -206,7 +210,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 				Enumeration<String> enumeration = httpServletRequest.getHeaderNames();
 				while (enumeration.hasMoreElements()) {
 					String headerName = enumeration.nextElement();
-					set.add(headerName.replaceAll("-", ""));
+					set.add(headerName);
 				}
 			}
 			return set;
