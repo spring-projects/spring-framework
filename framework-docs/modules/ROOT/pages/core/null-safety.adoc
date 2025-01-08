@@ -37,8 +37,12 @@ to enforce null-safety during build time at application level.
 [[null-safety-guidelines]]
 == Guidelines
 
-The purpose of this section is to share some guidelines proposed for using JSpecify annotations in the context of
-Spring-related libraries or applications.
+The purpose of this section is to share some guidelines proposed for specifying explicitly the nullness of Spring-related
+libraries or applications.
+
+
+[[null-safety-guidelines-jpecify]]
+=== JSpecify
 
 The key points to understand is that by default, the nullness of types is unknown in Java, and that non-null type
 usages are by far more frequent than nullable ones. In order to keep codebases readable, we typically want to define
@@ -98,11 +102,40 @@ https://jspecify.dev/docs/api/org/jspecify/annotations/NonNull.html[`@NonNull`] 
 https://jspecify.dev/docs/api/org/jspecify/annotations/NullUnmarked.html[`@NullUnmarked`] should rarely be needed for
 typical use cases.
 
-The {spring-framework-api}/lang/Contract.html[@Contract] annotation in the `org.springframework.lang` package
+[[null-safety-guidelines-nullaway]]
+=== NullAway
+
+=== Configuration
+
+The recommended configuration is:
+
+ - `NullAway:OnlyNullMarked=true` in order to perform nullness checks only for packages annotated with `@NullMarked`.
+ - `NullAway:CustomContractAnnotations=org.springframework.lang.Contract` which makes NullAway aware of the
+{spring-framework-api}/lang/Contract.html[@Contract] annotation in the `org.springframework.lang` package which
 can be used to express complementary semantics to avoid non-relevant null-safety warnings in your codebase.
 
-NOTE: Complementary to nullness annotations, the {spring-framework-api}/lang/CheckReturnValue.html[@CheckReturnValue]
-annotation in the `org.springframework.lang` package can be used to specify that the method return value must be used.
+A good example of `@Contract` benefits is
+{spring-framework-api}/util/Assert.html#notNull(java.lang.Object,java.lang.String)[`Assert#notnull`] which is annotated
+with `@Contract("null, _ -> fail")`. With the configuration above, NullAway will understand that after a successful
+invocation, the value passed as a parameter is not null.
+
+=== Warnings suppression
+
+There are a few valid use cases where NullAway will wrongly detect nullness problems. In such case, it is recommended
+to suppress related warnings and to document the reason:
+
+ - `@SuppressWarnings("NullAway.Init")` at field, constructor or class level can be used to avoid unnecessary warnings
+due to the lazy initialization of fields, for example due to a class implementing
+{spring-framework-api}/beans/factory/InitializingBean.html[`InitializingBean`].
+ - `@SuppressWarnings("NullAway") // Dataflow analysis limitation` can be used when NullAway dataflow analysis is not
+able to detect that the path involving a nullness problem will never happen.
+ - `@SuppressWarnings("NullAway") // Lambda` can be used when NullAway does not take into account assertions performed
+outside of a lambda for the code path within the lambda.
+- `@SuppressWarnings("NullAway") // Reflection` can be used for some reflection operations that are known returning
+non-null values even if that can't be expressed by the API.
+- `@SuppressWarnings("NullAway") // Well-known map keys` can be used when `Map#get` invocations are done with keys known
+to be present and non-null related values inserted previously.
+
 
 [[null-safety-migrating]]
 == Migrating from Spring null-safety annotations
