@@ -79,24 +79,28 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 
 	/** Package-protected to allow direct access for efficiency. */
+	@SuppressWarnings("serial")
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
 	/** Whether the Advisors are already filtered for the specific target class. */
 	private boolean preFiltered = false;
 
 	/** The AdvisorChainFactory to use. */
+	@SuppressWarnings("serial")
 	private AdvisorChainFactory advisorChainFactory = DefaultAdvisorChainFactory.INSTANCE;
 
 	/**
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
 	 * of registration, to create JDK proxy with specified order of interfaces.
 	 */
+	@SuppressWarnings("serial")
 	private List<Class<?>> interfaces = new ArrayList<>();
 
 	/**
 	 * List of Advisors. If an Advice is added, it will be wrapped
 	 * in an Advisor before being added to this List.
 	 */
+	@SuppressWarnings("serial")
 	private List<Advisor> advisors = new ArrayList<>();
 
 	/**
@@ -105,6 +109,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @since 6.0.10
 	 * @see #reduceToAdvisorKey
 	 */
+	@SuppressWarnings("serial")
 	private List<Advisor> advisorKey = this.advisors;
 
 	/** Cache with Method as key and advisor chain List as value. */

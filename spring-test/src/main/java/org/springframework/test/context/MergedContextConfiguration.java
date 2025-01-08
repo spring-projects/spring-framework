@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,20 +89,25 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final Class<?>[] classes;
 
+	@SuppressWarnings("serial")
 	private final Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses;
 
 	private final String[] activeProfiles;
 
+	@SuppressWarnings("serial")
 	private final List<PropertySourceDescriptor> propertySourceDescriptors;
 
 	private final String[] propertySourceLocations;
 
 	private final String[] propertySourceProperties;
 
+	@SuppressWarnings("serial")
 	private final Set<ContextCustomizer> contextCustomizers;
 
+	@SuppressWarnings("serial")
 	private final ContextLoader contextLoader;
 
+	@SuppressWarnings("serial")
 	private final @Nullable CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 	private final @Nullable MergedContextConfiguration parent;

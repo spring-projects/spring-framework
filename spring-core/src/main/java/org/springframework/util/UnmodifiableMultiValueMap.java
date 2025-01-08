@@ -47,6 +47,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 	private static final long serialVersionUID = -8697084563854098920L;
 
+	@SuppressWarnings("serial")
 	private final MultiValueMap<K, V> delegate;
 
 	private transient @Nullable Set<K> keySet;
@@ -264,6 +265,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		private static final long serialVersionUID = 2407578793783925203L;
 
+		@SuppressWarnings("serial")
 		private final Set<Entry<K, List<V>>> delegate;
 
 		@SuppressWarnings("unchecked")
@@ -512,6 +514,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		private static final long serialVersionUID = 5518377583904339588L;
 
+		@SuppressWarnings("serial")
 		private final Collection<List<V>> delegate;
 
 		public UnmodifiableValueCollection(Collection<List<V>> delegate) {
