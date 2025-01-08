@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.function.BiPredicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
 
 /**
@@ -38,26 +40,37 @@ import org.springframework.http.HttpMethod;
  */
 public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequestFactoryWrapper {
 
+	private final BiPredicate<URI, HttpMethod> bufferingPredicate;
+
+
 	/**
 	 * Create a buffering wrapper for the given {@link ClientHttpRequestFactory}.
 	 * @param requestFactory the target request factory to wrap
 	 */
 	public BufferingClientHttpRequestFactory(ClientHttpRequestFactory requestFactory) {
+		this(requestFactory, null);
+	}
+
+	/**
+	 * Constructor variant with an additional predicate to decide whether to
+	 * buffer the response.
+	 */
+	public BufferingClientHttpRequestFactory(
+			ClientHttpRequestFactory requestFactory,
+			@Nullable BiPredicate<URI, HttpMethod> bufferingPredicate) {
+
 		super(requestFactory);
+		this.bufferingPredicate = (bufferingPredicate != null ? bufferingPredicate : (uri, method) -> true);
 	}
 
 
+
 	@Override
-	protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod, ClientHttpRequestFactory requestFactory)
-			throws IOException {
+	protected ClientHttpRequest createRequest(
+			URI uri, HttpMethod httpMethod, ClientHttpRequestFactory requestFactory) throws IOException {
 
 		ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
-		if (shouldBuffer(uri, httpMethod)) {
-			return new BufferingClientHttpRequestWrapper(request);
-		}
-		else {
-			return request;
-		}
+		return (shouldBuffer(uri, httpMethod) ? new BufferingClientHttpRequestWrapper(request) : request);
 	}
 
 	/**
@@ -70,7 +83,7 @@ public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequest
 	 * @return {@code true} if the exchange should be buffered; {@code false} otherwise
 	 */
 	protected boolean shouldBuffer(URI uri, HttpMethod httpMethod) {
-		return true;
+		return this.bufferingPredicate.test(uri, httpMethod);
 	}
 
 }

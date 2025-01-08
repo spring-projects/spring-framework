@@ -656,7 +656,8 @@ final class DefaultRestClient implements RestClient {
 				}
 			}
 			else if (DefaultRestClient.this.bufferingPredicate != null) {
-				factory = new BufferingClientHttpRequestFactory(DefaultRestClient.this.clientRequestFactory);
+				factory = new BufferingClientHttpRequestFactory(
+						DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.bufferingPredicate);
 			}
 			else {
 				factory = DefaultRestClient.this.clientRequestFactory;
