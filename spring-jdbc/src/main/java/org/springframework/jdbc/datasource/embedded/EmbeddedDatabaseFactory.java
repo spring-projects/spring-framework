@@ -159,7 +159,7 @@ public class EmbeddedDatabaseFactory {
 	 * Factory method that returns the {@linkplain EmbeddedDatabase embedded database}
 	 * instance, which is also a {@link DataSource}.
 	 */
-	@SuppressWarnings("NullAway") // Lazy initialization
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public EmbeddedDatabase getDatabase() {
 		if (this.dataSource == null) {
 			initDatabase();

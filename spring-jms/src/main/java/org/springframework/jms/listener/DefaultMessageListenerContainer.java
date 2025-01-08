@@ -1434,7 +1434,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 
-		@SuppressWarnings("NullAway") // Lazy initialization
+		@SuppressWarnings("NullAway") // Dataflow analysis limitation
 		private void initResourcesIfNecessary() throws JMSException {
 			if (getCacheLevel() <= CACHE_CONNECTION) {
 				updateRecoveryMarker();
