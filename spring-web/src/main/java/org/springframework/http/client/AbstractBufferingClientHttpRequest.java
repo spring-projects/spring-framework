@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FastByteArrayOutputStream;
+import org.springframework.util.StreamUtils;
 
 /**
  * Base implementation of {@link ClientHttpRequest} that buffers output
@@ -59,5 +61,43 @@ abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequ
 	protected abstract ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput)
 			throws IOException;
 
+	/**
+	 * Execute with the given request and body.
+	 * @param request the request to execute with
+	 * @param body the body to send
+	 * @param bufferResponse whether to buffer the response
+	 * @return the resulting response
+	 * @throws IOException in case of I/O errors from execution
+	 * @since 7.0
+	 */
+	protected ClientHttpResponse executeWithRequest(
+			ClientHttpRequest request, byte[] body, boolean bufferResponse) throws IOException {
+
+		if (body.length > 0) {
+			long contentLength = request.getHeaders().getContentLength();
+			if (contentLength > -1 && contentLength != body.length) {
+				request.getHeaders().setContentLength(body.length);
+			}
+			if (request instanceof StreamingHttpOutputMessage streamingOutputMessage) {
+				streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+					@Override
+					public void writeTo(OutputStream outputStream) throws IOException {
+						StreamUtils.copy(body, outputStream);
+					}
+
+					@Override
+					public boolean repeatable() {
+						return true;
+					}
+				});
+			}
+			else {
+				StreamUtils.copy(body, request.getBody());
+			}
+		}
+
+		ClientHttpResponse response = request.execute();
+		return (bufferResponse ? new BufferingClientHttpResponseWrapper(response) : response);
+	}
 
 }
