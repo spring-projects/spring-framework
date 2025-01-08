@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class JavaConventions {
 	private void applyJavaCompileConventions(Project project) {
 		project.getExtensions().getByType(JavaPluginExtension.class).toolchain(toolchain -> {
 			toolchain.getVendor().set(JvmVendorSpec.BELLSOFT);
-			toolchain.getLanguageVersion().set(JavaLanguageVersion.of(17));
+			toolchain.getLanguageVersion().set(JavaLanguageVersion.of(23));
 		});
 		SpringFrameworkExtension frameworkExtension = project.getExtensions().getByType(SpringFrameworkExtension.class);
 		project.afterEvaluate(p -> {
@@ -83,6 +83,7 @@ public class JavaConventions {
 						compileTask.getOptions().setCompilerArgs(COMPILER_ARGS);
 						compileTask.getOptions().getCompilerArgumentProviders().add(frameworkExtension.asArgumentProvider());
 						compileTask.getOptions().setEncoding("UTF-8");
+						setJavaRelease(compileTask);
 					});
 			p.getTasks().withType(JavaCompile.class)
 					.matching(compileTask -> compileTask.getName().startsWith(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
@@ -91,9 +92,23 @@ public class JavaConventions {
 						compileTask.getOptions().setCompilerArgs(TEST_COMPILER_ARGS);
 						compileTask.getOptions().getCompilerArgumentProviders().add(frameworkExtension.asArgumentProvider());
 						compileTask.getOptions().setEncoding("UTF-8");
+						setJavaRelease(compileTask);
 					});
 
 		});
+	}
+
+	private void setJavaRelease(JavaCompile task) {
+		int defaultVersion = 17;
+		int releaseVersion = defaultVersion;
+		int compilerVersion = task.getJavaCompiler().get().getMetadata().getLanguageVersion().asInt();
+		for (int version = defaultVersion ; version <= compilerVersion ; version++) {
+			if (task.getName().contains("Java" + version)) {
+				releaseVersion = version;
+				break;
+			}
+		}
+		task.getOptions().getRelease().set(releaseVersion);
 	}
 
 }
