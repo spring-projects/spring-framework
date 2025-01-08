@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.BindException;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
@@ -136,7 +135,6 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			HttpMessageNotReadableException.class,
 			HttpMessageNotWritableException.class,
 			MethodValidationException.class,
-			BindException.class,
 			AsyncRequestNotUsableException.class
 		})
 	@Nullable
