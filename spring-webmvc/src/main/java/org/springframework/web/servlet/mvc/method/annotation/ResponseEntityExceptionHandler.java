@@ -33,7 +33,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.validation.BindException;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
@@ -134,7 +133,6 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			HttpMessageNotReadableException.class,
 			HttpMessageNotWritableException.class,
 			MethodValidationException.class,
-			BindException.class,
 			AsyncRequestNotUsableException.class
 		})
 	public final @Nullable ResponseEntity<Object> handleException(Exception ex, WebRequest request) throws Exception {
