@@ -270,6 +270,7 @@ By default, the following `KeyValues` are created:
 == HTTP Client Instrumentation
 
 HTTP client exchange observations are created with the name `"http.client.requests"` for blocking and reactive clients.
+This observation measures the entire HTTP request/response exchange, from connection establishment up to body deserialization.
 Unlike their server counterparts, the instrumentation is implemented directly in the client so the only required step is to configure an `ObservationRegistry` on the client.
 
 [[observability.http-client.resttemplate]]
