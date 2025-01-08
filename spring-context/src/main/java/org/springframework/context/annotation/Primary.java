@@ -29,7 +29,8 @@ import java.lang.annotation.Target;
  *
  * <p>Primary beans only have an effect when finding multiple candidates
  * for single injection points. All type-matching beans are included when
- * autowiring arrays, collections, maps, or ObjectProvider streams.
+ * autowiring arrays, collections, maps, or ObjectProvider streams,
+ * this annotation doesn't affect the sorting of beans.
  *
  * <p>This annotation is semantically equivalent to the {@code <bean>} element's
  * {@code primary} attribute in Spring XML.

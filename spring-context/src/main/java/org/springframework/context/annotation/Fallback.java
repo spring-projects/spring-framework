@@ -32,7 +32,8 @@ import java.lang.annotation.Target;
  * <p>Just like primary beans, fallback beans only have an effect when
  * finding multiple candidates for single injection points.
  * All type-matching beans are included when autowiring arrays,
- * collections, maps, or ObjectProvider streams.
+ * collections, maps, or ObjectProvider streams, this annotation
+ * doesn't affect the sorting of beans.
  *
  * @author Juergen Hoeller
  * @since 6.2
