@@ -265,7 +265,7 @@ class CorsAbstractHandlerMappingTests {
 	private static class SimpleHandler extends WebContentGenerator implements HttpRequestHandler {
 
 		SimpleHandler() {
-			super(METHOD_GET);
+			super(HttpMethod.GET.name());
 		}
 
 		@Override
