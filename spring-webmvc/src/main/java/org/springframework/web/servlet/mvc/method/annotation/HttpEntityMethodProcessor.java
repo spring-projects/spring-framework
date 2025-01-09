@@ -31,11 +31,11 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -250,7 +250,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				}
 			}
 			else if (httpStatusCode.is3xxRedirection()) {
-				String location = outputHeaders.getFirst("location");
+				String location = outputHeaders.getFirst(HttpHeaders.LOCATION);
 				if (location != null) {
 					saveFlashAttributes(mavContainer, webRequest, location);
 				}
