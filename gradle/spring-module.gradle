@@ -76,9 +76,9 @@ javadoc {
 	options.header = project.name
 	options.use = true
 	options.links(project.ext.javadocLinks)
-	// Check for syntax during linting. 'none' doesn't seem to work in suppressing
-	// all linting warnings all the time (see/link references most notably).
-	options.addStringOption("Xdoclint:syntax", "-quiet")
+	// Check for syntax during linting.
+	options.setOutputLevel(JavadocOutputLevel.QUIET)
+	options.addBooleanOption("Xdoclint:syntax", true)
 
 	// Suppress warnings due to cross-module @see and @link references.
 	// Note that global 'api' task does display all warnings, and

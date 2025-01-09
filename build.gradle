@@ -86,7 +86,6 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			"https://jakarta.ee/specifications/platform/11/apidocs/",
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
-			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://fasterxml.github.io/jackson-core/javadoc/2.14/",
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.14/",
