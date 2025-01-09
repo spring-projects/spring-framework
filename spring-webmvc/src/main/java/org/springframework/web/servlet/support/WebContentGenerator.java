@@ -60,18 +60,6 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
-	/** HTTP method "GET". */
-	public static final String METHOD_GET = "GET";
-
-	/** HTTP method "HEAD". */
-	public static final String METHOD_HEAD = "HEAD";
-
-	/** HTTP method "POST". */
-	public static final String METHOD_POST = "POST";
-
-	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
-
-
 	/** Set of supported HTTP methods. */
 	private @Nullable Set<String> supportedMethods;
 
@@ -103,9 +91,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	public WebContentGenerator(boolean restrictDefaultSupportedMethods) {
 		if (restrictDefaultSupportedMethods) {
 			this.supportedMethods = CollectionUtils.newLinkedHashSet(3);
-			this.supportedMethods.add(METHOD_GET);
-			this.supportedMethods.add(METHOD_HEAD);
-			this.supportedMethods.add(METHOD_POST);
+			this.supportedMethods.add(HttpMethod.GET.name());
+			this.supportedMethods.add(HttpMethod.HEAD.name());
+			this.supportedMethods.add(HttpMethod.POST.name());
 		}
 		initAllowHeader();
 	}
@@ -292,7 +280,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 		if (this.varyByRequestHeaders != null) {
 			for (String value : getVaryRequestHeadersToAdd(response, this.varyByRequestHeaders)) {
-				response.addHeader("Vary", value);
+				response.addHeader(HttpHeaders.VARY, value);
 			}
 		}
 	}
@@ -307,7 +295,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		String ccValue = cacheControl.getHeaderValue();
 		if (ccValue != null) {
 			// Set computed HTTP 1.1 Cache-Control header
-			response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+			response.setHeader(HttpHeaders.CACHE_CONTROL, ccValue);
 		}
 	}
 
