@@ -76,8 +76,8 @@ javadoc {
 	options.header = project.name
 	options.use = true
 	options.links(project.ext.javadocLinks)
-	// Check for syntax during linting.
 	options.setOutputLevel(JavadocOutputLevel.QUIET)
+	// Check for syntax during linting.
 	options.addBooleanOption("Xdoclint:syntax", true)
 
 	// Suppress warnings due to cross-module @see and @link references.
