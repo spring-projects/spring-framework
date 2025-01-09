@@ -6,6 +6,7 @@ apply plugin: "kotlinx-serialization"
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
+	compileOnly("jakarta.validation:jakarta.validation-api")
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
 	optional("com.fasterxml.jackson.core:jackson-databind")

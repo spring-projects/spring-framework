@@ -12,6 +12,7 @@ dependencies {
 	api(project(":spring-core"))
 	api(project(":spring-expression"))
 	api("io.micrometer:micrometer-observation")
+	compileOnly("com.google.code.findbugs:jsr305") // for Micrometer context-propagation
 	optional(project(":spring-instrument"))
 	optional("io.micrometer:context-propagation")
 	optional("io.projectreactor:reactor-core")
