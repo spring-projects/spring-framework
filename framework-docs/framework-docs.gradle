@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+
 plugins {
 	id 'kotlin'
 	id 'io.spring.antora.generate-antora-yml' version '0.0.1'
@@ -42,10 +44,8 @@ repositories {
 }
 
 // To avoid a redeclaration error with Kotlin compiler
-sourceSets {
-	main {
-		java.exclude("org/springframework/docs/**/*.java")
-	}
+tasks.named('compileKotlin', KotlinCompilationTask.class) {
+    javaSources.from = []
 }
 
 dependencies {
