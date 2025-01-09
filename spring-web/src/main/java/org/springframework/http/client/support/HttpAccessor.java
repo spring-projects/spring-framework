@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -57,6 +60,8 @@ public abstract class HttpAccessor {
 
 	private final List<ClientHttpRequestInitializer> clientHttpRequestInitializers = new ArrayList<>();
 
+	private @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
+
 
 	/**
 	 * Set the request factory that this accessor uses for obtaining client request handles.
@@ -78,9 +83,10 @@ public abstract class HttpAccessor {
 	 * Return the request factory that this accessor uses for obtaining client request handles.
 	 */
 	public ClientHttpRequestFactory getRequestFactory() {
-		return this.requestFactory;
+		return (this.bufferingPredicate != null ?
+				new BufferingClientHttpRequestFactory(this.requestFactory, this.bufferingPredicate) :
+				this.requestFactory);
 	}
-
 
 	/**
 	 * Set the request initializers that this accessor should use.
@@ -109,6 +115,25 @@ public abstract class HttpAccessor {
 	 */
 	public List<ClientHttpRequestInitializer> getClientHttpRequestInitializers() {
 		return this.clientHttpRequestInitializers;
+	}
+
+	/**
+	 * Enable buffering of request and response, aggregating all content before
+	 * it is sent, and making it possible to read the response body repeatedly.
+	 * @param predicate to determine whether to buffer for the given request
+	 * @since 7.0
+	 */
+	public void setBufferingPredicate(@Nullable BiPredicate<URI, HttpMethod> predicate) {
+		this.bufferingPredicate = predicate;
+	}
+
+	/**
+	 * Return the {@link #setBufferingPredicate(BiPredicate) configured} predicate
+	 * to determine whether to buffer request and response content.
+	 * @since 7.0
+	 */
+	public @Nullable BiPredicate<URI, HttpMethod> getBufferingPredicate() {
+		return this.bufferingPredicate;
 	}
 
 	/**

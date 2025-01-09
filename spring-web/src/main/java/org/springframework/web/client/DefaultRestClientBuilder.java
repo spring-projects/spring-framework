@@ -185,6 +185,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		if (!CollectionUtils.isEmpty(restTemplate.getInterceptors())) {
 			this.interceptors = new ArrayList<>(restTemplate.getInterceptors());
 		}
+		this.bufferingPredicate = restTemplate.getBufferingPredicate();
 		if (!CollectionUtils.isEmpty(restTemplate.getClientHttpRequestInitializers())) {
 			this.initializers = new ArrayList<>(restTemplate.getClientHttpRequestInitializers());
 		}
