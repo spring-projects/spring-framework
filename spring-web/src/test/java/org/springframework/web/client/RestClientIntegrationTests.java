@@ -834,9 +834,8 @@ class RestClientIntegrationTests {
 				.retrieve()
 				.body(String.class);
 
-		assertThat(result).isEqualTo("Hello Spring!");
-
 		expectRequestCount(1);
+		assertThat(result).isEqualTo("Hello Spring!");
 	}
 
 	@ParameterizedRestClientTest
@@ -860,9 +859,8 @@ class RestClientIntegrationTests {
 					return new String(bytes, UTF_8);
 				});
 
-		assertThat(result).isEqualTo("Hello Spring!");
-
 		expectRequestCount(1);
+		assertThat(result).isEqualTo("Hello Spring!");
 	}
 
 	@ParameterizedRestClientTest

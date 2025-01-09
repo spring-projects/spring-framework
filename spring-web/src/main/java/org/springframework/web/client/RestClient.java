@@ -386,8 +386,8 @@ public interface RestClient {
 		Builder requestInterceptors(Consumer<List<ClientHttpRequestInterceptor>> interceptorsConsumer);
 
 		/**
-		 * Enable buffering of request and response content making it possible to
-		 * read the request and the response body multiple times.
+		 * Enable buffering of request and response, aggregating all content before
+		 * it is sent, and making it possible to read the response body repeatedly.
 		 * @param predicate to determine whether to buffer for the given request
 		 * @return this builder
 		 * @since 7.0

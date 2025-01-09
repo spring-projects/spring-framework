@@ -54,6 +54,7 @@ public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequest
 	/**
 	 * Constructor variant with an additional predicate to decide whether to
 	 * buffer the response.
+	 * @since 7.0
 	 */
 	public BufferingClientHttpRequestFactory(
 			ClientHttpRequestFactory requestFactory,
