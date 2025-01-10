@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketCreator;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer;
 import org.eclipse.jetty.websocket.api.Configurable;
 import org.jspecify.annotations.Nullable;
 
@@ -45,7 +45,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A {@link RequestUpgradeStrategy} for Jetty 12 EE10.
+ * A {@link RequestUpgradeStrategy} for Jetty 12 EE11.
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4

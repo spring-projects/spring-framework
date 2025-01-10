@@ -24,7 +24,7 @@ dependencies {
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 	}
-	optional("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server") {
+	optional("org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	optional("org.eclipse.jetty.websocket:jetty-websocket-jetty-client")

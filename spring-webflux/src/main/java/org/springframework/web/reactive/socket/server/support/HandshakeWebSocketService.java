@@ -85,7 +85,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	static {
 		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
 		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer", classLoader);
+				"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer", classLoader);
 		jettyCoreWsPresent = ClassUtils.isPresent(
 				"org.eclipse.jetty.websocket.server.ServerWebSocketContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(

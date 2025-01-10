@@ -19,7 +19,7 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
