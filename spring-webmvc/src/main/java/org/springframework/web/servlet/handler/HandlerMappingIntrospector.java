@@ -90,7 +90,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
+ * @deprecated in favor of using just {@link PathPatternParser}; when
+ * {@link #allHandlerMappingsUsePathPatternParser} returns true, it is sufficient
+ * to use that to align with handler mappings.
  */
+@SuppressWarnings("removal")
+@Deprecated(since = "7.0", forRemoval = true)
 public class HandlerMappingIntrospector
 		implements CorsConfigurationSource, PreFlightRequestHandler, ApplicationContextAware, InitializingBean {
 

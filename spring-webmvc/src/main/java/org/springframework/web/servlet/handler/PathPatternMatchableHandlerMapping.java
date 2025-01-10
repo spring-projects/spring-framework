@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,10 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 5.3
+ * @deprecated together with {@link HandlerMappingIntrospector} without a replacement.
  */
+@SuppressWarnings("removal")
+@Deprecated(since = "7.0", forRemoval = true)
 class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 
 	private static final int MAX_PATTERNS = 1024;

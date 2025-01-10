@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,6 +280,7 @@ public abstract class MvcNamespaceUtils {
 	 * Registers an {@link HandlerMappingIntrospector} under a well-known name
 	 * unless already registered.
 	 */
+	@SuppressWarnings("removal")
 	private static void registerHandlerMappingIntrospector(ParserContext context, @Nullable Object source) {
 		if (!context.getRegistry().containsBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME)) {
 			RootBeanDefinition beanDef = new RootBeanDefinition(HandlerMappingIntrospector.class);

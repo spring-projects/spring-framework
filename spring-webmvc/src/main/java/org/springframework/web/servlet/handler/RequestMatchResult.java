@@ -34,7 +34,10 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
+ * @deprecated together with {@link HandlerMappingIntrospector} without a replacement.
  */
+@SuppressWarnings("removal")
+@Deprecated(since = "7.0", forRemoval = true)
 public class RequestMatchResult {
 
 	private final @Nullable PathPattern pathPattern;

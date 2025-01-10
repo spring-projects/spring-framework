@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
- * @see HandlerMappingIntrospector
+ * @deprecated together with {@link HandlerMappingIntrospector} without a replacement.
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public interface MatchableHandlerMapping extends HandlerMapping {
 
 	/**
@@ -55,6 +56,7 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * for use at runtime in web modules in favor of parsed patterns with
 	 * {@link PathPatternParser}.
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
 	@Nullable RequestMatchResult match(HttpServletRequest request, String pattern);
 
