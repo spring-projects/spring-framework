@@ -53,7 +53,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	 * Constructor with the client to use and a handler to handle messages with.
 	 */
 	public WebSocketConnectionManager(WebSocketClient client,
-			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
+			WebSocketHandler webSocketHandler, String uriTemplate, @Nullable Object... uriVariables) {
 
 		super(uriTemplate, uriVariables);
 		this.client = client;

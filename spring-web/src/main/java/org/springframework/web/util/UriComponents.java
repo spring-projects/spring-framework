@@ -148,7 +148,7 @@ public abstract class UriComponents implements Serializable {
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI components
 	 */
-	public final UriComponents expand(Map<String, ?> uriVariables) {
+	public final UriComponents expand(Map<String, ? extends @Nullable Object> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
 		return expandInternal(new MapTemplateVariables(uriVariables));
 	}
@@ -159,7 +159,7 @@ public abstract class UriComponents implements Serializable {
 	 * @param uriVariableValues the URI variable values
 	 * @return the expanded URI components
 	 */
-	public final UriComponents expand(Object... uriVariableValues) {
+	public final UriComponents expand(@Nullable Object... uriVariableValues) {
 		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
 		return expandInternal(new VarArgsTemplateVariables(uriVariableValues));
 	}
@@ -324,9 +324,9 @@ public abstract class UriComponents implements Serializable {
 	 */
 	private static class MapTemplateVariables implements UriTemplateVariables {
 
-		private final Map<String, ?> uriVariables;
+		private final Map<String, ? extends @Nullable Object> uriVariables;
 
-		public MapTemplateVariables(Map<String, ?> uriVariables) {
+		public MapTemplateVariables(Map<String, ? extends @Nullable Object> uriVariables) {
 			this.uriVariables = uriVariables;
 		}
 
@@ -347,7 +347,7 @@ public abstract class UriComponents implements Serializable {
 
 		private final Iterator<Object> valueIterator;
 
-		public VarArgsTemplateVariables(Object... uriVariableValues) {
+		public VarArgsTemplateVariables(@Nullable Object... uriVariableValues) {
 			this.valueIterator = Arrays.asList(uriVariableValues).iterator();
 		}
 

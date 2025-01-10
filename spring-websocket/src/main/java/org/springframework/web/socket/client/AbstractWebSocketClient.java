@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	@Override
 	public CompletableFuture<WebSocketSession> execute(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVars) {
+			String uriTemplate, @Nullable Object... uriVars) {
 
 		Assert.notNull(uriTemplate, "'uriTemplate' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();

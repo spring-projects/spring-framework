@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -98,7 +99,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param uriVars zero or more URI variables to populate the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestToUriTemplate(String expectedUri, Object... uriVars) {
+	public static RequestMatcher requestToUriTemplate(String expectedUri, @Nullable Object... uriVars) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(expectedUri).buildAndExpand(uriVars).encode().toUri();
 		return requestTo(uri);

@@ -235,7 +235,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a CompletableFuture for access to the session when ready for use
 	 * @since 6.0
 	 */
-	public CompletableFuture<StompSession> connectAsync(String url, StompSessionHandler handler, Object... uriVars) {
+	public CompletableFuture<StompSession> connectAsync(String url, StompSessionHandler handler, @Nullable Object... uriVars) {
 		return connectAsync(url, null, handler, uriVars);
 	}
 
@@ -251,7 +251,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @since 6.0
 	 */
 	public CompletableFuture<StompSession> connectAsync(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
-			StompSessionHandler handler, Object... uriVariables) {
+			StompSessionHandler handler, @Nullable Object... uriVariables) {
 
 		return connectAsync(url, handshakeHeaders, null, handler, uriVariables);
 	}
@@ -270,7 +270,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @since 6.0
 	 */
 	public CompletableFuture<StompSession> connectAsync(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
-			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
+			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, @Nullable Object... uriVariables) {
 
 		Assert.notNull(url, "'url' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(uriVariables).encode().toUri();

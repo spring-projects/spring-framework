@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -304,7 +304,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder method(HttpMethod method, String uriTemplate, Object... uriVariables) {
+	public static BodyBuilder method(HttpMethod method, String uriTemplate, @Nullable Object... uriVariables) {
 		return new DefaultBodyBuilder(method, uriTemplate, uriVariables);
 	}
 
@@ -336,7 +336,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> get(String uriTemplate, Object... uriVariables) {
+	public static HeadersBuilder<?> get(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.GET, uriTemplate, uriVariables);
 	}
 
@@ -356,7 +356,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> head(String uriTemplate, Object... uriVariables) {
+	public static HeadersBuilder<?> head(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.HEAD, uriTemplate, uriVariables);
 	}
 
@@ -376,7 +376,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder post(String uriTemplate, Object... uriVariables) {
+	public static BodyBuilder post(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.POST, uriTemplate, uriVariables);
 	}
 
@@ -396,7 +396,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder put(String uriTemplate, Object... uriVariables) {
+	public static BodyBuilder put(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.PUT, uriTemplate, uriVariables);
 	}
 
@@ -416,7 +416,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder patch(String uriTemplate, Object... uriVariables) {
+	public static BodyBuilder patch(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.PATCH, uriTemplate, uriVariables);
 	}
 
@@ -436,7 +436,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> delete(String uriTemplate, Object... uriVariables) {
+	public static HeadersBuilder<?> delete(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.DELETE, uriTemplate, uriVariables);
 	}
 
@@ -456,7 +456,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> options(String uriTemplate, Object... uriVariables) {
+	public static HeadersBuilder<?> options(String uriTemplate, @Nullable Object... uriVariables) {
 		return method(HttpMethod.OPTIONS, uriTemplate, uriVariables);
 	}
 
@@ -601,9 +601,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		private final @Nullable String uriTemplate;
 
-		private final Object @Nullable [] uriVarsArray;
+		private final @Nullable Object @Nullable [] uriVarsArray;
 
-		private final @Nullable Map<String, ?> uriVarsMap;
+		private final @Nullable Map<String, ? extends @Nullable Object> uriVarsMap;
 
 		DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -613,7 +613,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			this.uriVarsMap = null;
 		}
 
-		DefaultBodyBuilder(HttpMethod method, String uriTemplate, Object... uriVars) {
+		DefaultBodyBuilder(HttpMethod method, String uriTemplate, @Nullable Object... uriVars) {
 			this.method = method;
 			this.uri = null;
 			this.uriTemplate = uriTemplate;
@@ -621,7 +621,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			this.uriVarsMap = null;
 		}
 
-		DefaultBodyBuilder(HttpMethod method, String uriTemplate, Map<String, ?> uriVars) {
+		DefaultBodyBuilder(HttpMethod method, String uriTemplate, Map<String, ? extends @Nullable Object> uriVars) {
 			this.method = method;
 			this.uri = null;
 			this.uriTemplate = uriTemplate;

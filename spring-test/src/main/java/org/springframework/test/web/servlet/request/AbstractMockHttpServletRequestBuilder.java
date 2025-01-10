@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	/**
 	 * Specify the URI for the request using a URI template and URI variables.
 	 */
-	public B uri(String uriTemplate, Object... uriVariables) {
+	public B uri(String uriTemplate, @Nullable Object... uriVariables) {
 		return updateUri(initUri(uriTemplate, uriVariables), uriTemplate);
 	}
 
@@ -161,7 +161,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		return self();
 	}
 
-	private static URI initUri(String uri, Object[] vars) {
+	private static URI initUri(String uri, @Nullable Object[] vars) {
 		Assert.notNull(uri, "'uri' must not be null");
 		Assert.isTrue(uri.isEmpty() || uri.startsWith("/") || uri.startsWith("http://") || uri.startsWith("https://"),
 				() -> "'uri' should start with a path or be a complete HTTP URI: " + uri);

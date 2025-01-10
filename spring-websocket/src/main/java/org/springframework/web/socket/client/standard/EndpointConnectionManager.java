@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,14 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 	private volatile @Nullable Session session;
 
 
-	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
+	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, @Nullable Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		Assert.notNull(endpoint, "endpoint must not be null");
 		this.endpoint = endpoint;
 		this.endpointProvider = null;
 	}
 
-	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
+	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, @Nullable Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass must not be null");
 		this.endpoint = null;

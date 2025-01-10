@@ -337,17 +337,17 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param uriVariableValues the URI variable values
 	 * @return the URI components with expanded values
 	 */
-	public UriComponents buildAndExpand(Object... uriVariableValues) {
+	public UriComponents buildAndExpand(@Nullable Object... uriVariableValues) {
 		return build().expand(uriVariableValues);
 	}
 
 	@Override
-	public URI build(Object... uriVariables) {
+	public URI build(@Nullable Object... uriVariables) {
 		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
 	@Override
-	public URI build(Map<String, ?> uriVariables) {
+	public URI build(Map<String, ? extends @Nullable Object> uriVariables) {
 		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 

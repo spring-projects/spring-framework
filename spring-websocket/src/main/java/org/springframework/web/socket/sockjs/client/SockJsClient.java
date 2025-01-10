@@ -218,7 +218,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	@Override
 	public CompletableFuture<WebSocketSession> execute(
-			WebSocketHandler handler, String uriTemplate, Object... uriVars) {
+			WebSocketHandler handler, String uriTemplate, @Nullable Object... uriVars) {
 
 		Assert.notNull(uriTemplate, "uriTemplate must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();

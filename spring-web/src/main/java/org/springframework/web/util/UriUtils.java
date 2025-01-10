@@ -325,7 +325,7 @@ public abstract class UriUtils {
 	 * @return the encoded String
 	 * @since 5.0
 	 */
-	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
+	public static Map<String, String> encodeUriVariables(Map<String, ? extends @Nullable Object> uriVariables) {
 		Map<String, String> result = CollectionUtils.newLinkedHashMap(uriVariables.size());
 		uriVariables.forEach((key, value) -> {
 			String stringValue = (value != null ? value.toString() : "");
@@ -341,7 +341,7 @@ public abstract class UriUtils {
 	 * @return the encoded String
 	 * @since 5.0
 	 */
-	public static Object[] encodeUriVariables(Object... uriVariables) {
+	public static Object[] encodeUriVariables(@Nullable Object... uriVariables) {
 		return Arrays.stream(uriVariables)
 				.map(value -> {
 					String stringValue = (value != null ? value.toString() : "");

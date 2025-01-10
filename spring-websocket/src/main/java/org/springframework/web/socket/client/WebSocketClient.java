@@ -46,7 +46,7 @@ public interface WebSocketClient {
 	 * @since 6.0
 	 */
 	CompletableFuture<WebSocketSession> execute(WebSocketHandler webSocketHandler,
-				String uriTemplate, Object... uriVariables);
+				String uriTemplate, @Nullable Object... uriVariables);
 
 	/**
 	 * Execute a handshake request to the given url and handle the resulting

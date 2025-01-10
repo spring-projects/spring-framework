@@ -305,7 +305,7 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
+		public RequestBodySpec uri(String uriTemplate, @Nullable Object... uriVariables) {
 			UriBuilder uriBuilder = uriBuilderFactory.uriString(uriTemplate);
 			attribute(URI_TEMPLATE_ATTRIBUTE, uriBuilder.toUriString());
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));

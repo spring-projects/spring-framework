@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,13 +51,13 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 	private volatile @Nullable Session session;
 
 
-	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {
+	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, @Nullable Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		this.endpoint = endpoint;
 		this.endpointProvider = null;
 	}
 
-	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
+	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, @Nullable Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		this.endpoint = null;
 		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);

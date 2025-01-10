@@ -36,7 +36,7 @@ import kotlin.reflect.KClass
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T> RestOperations.getForObject(url: String, vararg uriVariables: Any): T =
+inline fun <reified T> RestOperations.getForObject(url: String, vararg uriVariables: Any?): T =
 		getForObject(url, T::class.java as Class<*>, *uriVariables) as T
 
 /**
@@ -92,7 +92,7 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: URI): ResponseEntit
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriVariables: Any): ResponseEntity<T> =
+inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriVariables: Any?): ResponseEntity<T> =
 		getForEntity(url, T::class.java, *uriVariables)
 
 /**
@@ -119,7 +119,7 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, uriVariable
  */
 @Throws(RestClientException::class)
 inline fun <reified T> RestOperations.patchForObject(url: String, request: Any? = null,
-														  vararg uriVariables: Any): T =
+														  vararg uriVariables: Any?): T =
 		patchForObject(url, request, T::class.java as Class<*>, *uriVariables) as T
 
 /**
@@ -161,7 +161,7 @@ inline fun <reified T> RestOperations.patchForObject(url: URI, request: Any? = n
  */
 @Throws(RestClientException::class)
 inline fun <reified T> RestOperations.postForObject(url: String, request: Any? = null,
-														 vararg uriVariables: Any): T =
+														 vararg uriVariables: Any?): T =
 		postForObject(url, request, T::class.java as Class<*>, *uriVariables) as T
 
 /**
@@ -205,7 +205,7 @@ inline fun <reified T> RestOperations.postForObject(url: URI, request: Any? = nu
  */
 @Throws(RestClientException::class)
 inline fun <reified T : Any> RestOperations.postForEntity(url: String, request: Any? = null,
-		vararg uriVariables: Any): ResponseEntity<T> =
+		vararg uriVariables: Any?): ResponseEntity<T> =
 		postForEntity(url, request, T::class.java, *uriVariables)
 
 /**
@@ -248,7 +248,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any?
  */
 @Throws(RestClientException::class)
 inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod,
-		requestEntity: HttpEntity<*>? = null, vararg uriVariables: Any): ResponseEntity<T> =
+		requestEntity: HttpEntity<*>? = null, vararg uriVariables: Any?): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, *uriVariables)
 
 /**

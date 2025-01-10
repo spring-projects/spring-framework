@@ -261,7 +261,7 @@ public interface UriBuilder {
 	 * @param uriVariables the map of URI variables
 	 * @return the URI
 	 */
-	URI build(Object... uriVariables);
+	URI build(@Nullable Object... uriVariables);
 
 	/**
 	 * Build a {@link URI} instance and replaces URI template variables
@@ -269,7 +269,7 @@ public interface UriBuilder {
 	 * @param uriVariables the map of URI variables
 	 * @return the URI
 	 */
-	URI build(Map<String, ?> uriVariables);
+	URI build(Map<String, ? extends @Nullable Object> uriVariables);
 
 	/**
 	 * Return a String representation of the URI by concatenating all URI
