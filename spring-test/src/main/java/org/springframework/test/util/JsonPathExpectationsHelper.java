@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,18 @@ public class JsonPathExpectationsHelper {
 		this.expression = expression;
 		this.jsonPath = JsonPath.compile(this.expression);
 		this.configuration = (configuration != null) ? configuration : Configuration.defaultConfiguration();
+	}
+
+	/**
+	 * Construct a new {@code JsonPathExpectationsHelper}.
+	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
+	 * @param args arguments to parameterize the {@code JsonPath} expression with,
+	 * using formatting specifiers defined in {@link String#format(String, Object...)}
+	 * @deprecated in favor of calling {@link String#formatted(Object...)} upfront
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
+	public JsonPathExpectationsHelper(String expression, Object... args) {
+		this(expression.formatted(args), (Configuration) null);
 	}
 
 
