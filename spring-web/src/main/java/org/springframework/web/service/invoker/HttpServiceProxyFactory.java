@@ -47,6 +47,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * {@link Builder Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  * @since 6.0
  * @see org.springframework.web.client.support.RestClientAdapter
  * @see org.springframework.web.reactive.function.client.support.WebClientAdapter
@@ -210,6 +211,7 @@ public final class HttpServiceProxyFactory {
 			resolvers.add(new UrlArgumentResolver());
 			resolvers.add(new UriBuilderFactoryArgumentResolver());
 			resolvers.add(new HttpMethodArgumentResolver());
+			resolvers.add(new HttpHeadersArgumentResolver());
 
 			return resolvers;
 		}

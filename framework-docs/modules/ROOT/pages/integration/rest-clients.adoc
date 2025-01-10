@@ -937,6 +937,9 @@ method parameters:
 | `HttpMethod`
 | Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
 
+| `HttpHeaders`
+| Add request headers. Header values are added and do not override already added header values.
+
 | `@RequestHeader`
 | Add a request header or multiple headers. The argument may be a single value,
   a `Collection<?>` of values, `Map<String, ?>`,`MultiValueMap<String, ?>`.
