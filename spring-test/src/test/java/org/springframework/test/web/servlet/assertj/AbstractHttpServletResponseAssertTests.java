@@ -175,6 +175,51 @@ class AbstractHttpServletResponseAssertTests {
 		}
 	}
 
+	@Nested
+	class HttpStatusTests {
+
+		@Test
+		void testStatusOk() {
+			assertThat(createResponse(200))
+					.httpStatus()
+					.isOk();
+		}
+
+		@Test
+		void testStatusBadRequest() {
+			assertThat(createResponse(400))
+					.httpStatus()
+					.isBadRequest();
+		}
+
+		@Test
+		void testStatusInternalServerError() {
+			assertThat(createResponse(500))
+					.httpStatus()
+					.isInternalServerError();
+		}
+
+		@Test
+		void testStatusFamilyRedirect() {
+			assertThat(createResponse(302))
+					.httpStatus()
+					.is3xxRedirection();
+		}
+
+		@Test
+		void testStatusFamilyClientError() {
+			assertThat(createResponse(401))
+					.httpStatus()
+					.is4xxClientError();
+		}
+
+		private MockHttpServletResponse createResponse(int status) {
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			response.setStatus(status);
+			return response;
+		}
+	}
+
 
 	private static ResponseAssert assertThat(HttpServletResponse response) {
 		return new ResponseAssert(response);

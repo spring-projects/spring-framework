@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatus.Series;
 import org.springframework.http.MediaType;
 import org.springframework.test.http.HttpHeadersAssert;
+import org.springframework.test.http.HttpStatusAssert;
 import org.springframework.test.http.MediaTypeAssert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -54,6 +55,8 @@ public abstract class AbstractHttpServletResponseAssert<R extends HttpServletRes
 
 	private final Supplier<HttpHeadersAssert> headersAssertSupplier;
 
+	private final Supplier<HttpStatusAssert> statusAssertSupplier;
+
 	private final Supplier<AbstractIntegerAssert<?>> statusAssert;
 
 
@@ -62,6 +65,7 @@ public abstract class AbstractHttpServletResponseAssert<R extends HttpServletRes
 		this.contentTypeAssertSupplier = SingletonSupplier.of(() -> new MediaTypeAssert(getResponse().getContentType()));
 		this.headersAssertSupplier = SingletonSupplier.of(() -> new HttpHeadersAssert(getHttpHeaders(getResponse())));
 		this.statusAssert = SingletonSupplier.of(() -> Assertions.assertThat(getResponse().getStatus()).as("HTTP status code"));
+		this.statusAssertSupplier = SingletonSupplier.of(() -> new HttpStatusAssert(getResponse().getStatus()));
 	}
 
 	private static HttpHeaders getHttpHeaders(HttpServletResponse response) {
@@ -101,6 +105,10 @@ public abstract class AbstractHttpServletResponseAssert<R extends HttpServletRes
 	 */
 	public HttpHeadersAssert headers() {
 		return this.headersAssertSupplier.get();
+	}
+
+	public HttpStatusAssert httpStatus() {
+		return this.statusAssertSupplier.get();
 	}
 
 	// Content-type shortcuts
