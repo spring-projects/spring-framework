@@ -63,7 +63,7 @@ public interface ResponseErrorHandler {
 	 * @throws IOException in case of I/O errors
 	 * @deprecated in favor of {@link #handleError(URI, HttpMethod, ClientHttpResponse)}
 	 */
-	@Deprecated(since = "6.2.1", forRemoval = true)
+	@Deprecated(since = "6.2.2", forRemoval = true)
 	default void handleError(ClientHttpResponse response) throws IOException {
 	}
 
