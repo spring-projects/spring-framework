@@ -284,7 +284,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components
 	 */
 	public UriComponents build() {
-		return build(false);
+		return build(false, true);
 	}
 
 	/**
@@ -297,11 +297,31 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * characters that should have been encoded.
 	 */
 	public UriComponents build(boolean encoded) {
-		return buildInternal(encoded ? EncodingHint.FULLY_ENCODED :
-				(this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE));
+		return build(encoded, true);
+	}
+
+	/**
+	 * Variant of {@link #build()} to create a {@link UriComponents} instance
+	 * when components are already fully encoded. In addition, this method allows
+	 * to control whether the double slashes in the path should be replaced with
+	 * a single slash.
+	 * @param encoded whether the components in this builder are already encoded
+	 * @param sanitizePath whether the double slashes should be replaced with single slash
+	 * @return the URI components
+	 * @throws IllegalArgumentException if any of the components contain illegal
+	 * characters that should have been encoded.
+	 */
+	public UriComponents build(boolean encoded, boolean sanitizePath) {
+		EncodingHint hint = encoded ? EncodingHint.FULLY_ENCODED :
+				(this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE);
+		return buildInternal(hint, sanitizePath);
 	}
 
 	private UriComponents buildInternal(EncodingHint hint) {
+		return buildInternal(hint, true);
+	}
+
+	private UriComponents buildInternal(EncodingHint hint, boolean sanitizePath) {
 		UriComponents result;
 		if (this.ssp != null) {
 			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
@@ -309,7 +329,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		else {
 			MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(this.queryParams);
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
-					this.userInfo, this.host, this.port, this.pathBuilder.build(), queryParams,
+					this.userInfo, this.host, this.port, this.pathBuilder.build(sanitizePath), queryParams,
 					hint == EncodingHint.FULLY_ENCODED);
 			result = (hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric);
 		}
@@ -771,7 +791,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private interface PathComponentBuilder {
 
-		@Nullable PathComponent build();
+		@Nullable PathComponent build(boolean sanitizePath);
 
 		PathComponentBuilder cloneBuilder();
 	}
@@ -823,11 +843,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		public PathComponent build() {
+		public PathComponent build(boolean sanitizePath) {
 			int size = this.builders.size();
 			List<PathComponent> components = new ArrayList<>(size);
 			for (PathComponentBuilder componentBuilder : this.builders) {
-				PathComponent pathComponent = componentBuilder.build();
+				PathComponent pathComponent = componentBuilder.build(sanitizePath);
 				if (pathComponent != null) {
 					components.add(pathComponent);
 				}
@@ -861,12 +881,12 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		public @Nullable PathComponent build() {
+		public @Nullable PathComponent build(boolean sanitizePath) {
 			if (this.path.isEmpty()) {
 				return null;
 			}
-			String sanitized = getSanitizedPath(this.path);
-			return new HierarchicalUriComponents.FullPathComponent(sanitized);
+			String path = sanitizePath ? getSanitizedPath(this.path) : this.path.toString();
+			return new HierarchicalUriComponents.FullPathComponent(path);
 		}
 
 		private static String getSanitizedPath(final StringBuilder path) {
@@ -911,7 +931,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		public @Nullable PathComponent build() {
+		public @Nullable PathComponent build(boolean sanitizePath) {
 			return (this.pathSegments.isEmpty() ? null :
 					new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments));
 		}

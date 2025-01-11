@@ -849,8 +849,20 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // gh-26012
-	void verifyDoubleSlashReplacedWithSingleOne() {
+	void verifyDoubleSlashReplacedWithSingleDefault() {
 		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build().getPath();
+		assertThat(path).isEqualTo("/home/path");
+	}
+
+	@Test  // gh-34076
+	void verifyDoubleSlashNotReplacedAsSingleSlash() {
+		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build(true, false).getPath();
+		assertThat(path).isEqualTo("/home//path");
+	}
+
+	@Test  // gh-34076
+	void verifyDoubleSlashReplacedAsSingleSlashWithConfig() {
+		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build(true, true).getPath();
 		assertThat(path).isEqualTo("/home/path");
 	}
 

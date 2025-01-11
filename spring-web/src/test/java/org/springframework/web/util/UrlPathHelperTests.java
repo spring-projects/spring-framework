@@ -110,6 +110,20 @@ class UrlPathHelperTests {
 		assertThat(helper.getRequestUri(request)).isEqualTo("/home/path");
 	}
 
+	@Test // gh-34076
+	void getRequestUriWithSanitizingDisabled() {
+		helper.setSanitizePath(false);
+		request.setRequestURI("/home/" + "/path");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/home//path");
+	}
+
+	@Test // gh-34076
+	void getRequestUriWithSanitizingEnabled() {
+		helper.setSanitizePath(true);
+		request.setRequestURI("/home/" + "/path");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/home/path");
+	}
+
 	@Test
 	void getRequestRemoveSemicolonContent() {
 		helper.setRemoveSemicolonContent(true);

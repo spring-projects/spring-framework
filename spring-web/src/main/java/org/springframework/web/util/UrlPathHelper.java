@@ -79,6 +79,8 @@ public class UrlPathHelper {
 
 	private boolean removeSemicolonContent = true;
 
+	private boolean sanitizePath = true;
+
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	private boolean readOnly = false;
@@ -143,6 +145,22 @@ public class UrlPathHelper {
 	 */
 	public boolean shouldRemoveSemicolonContent() {
 		return this.removeSemicolonContent;
+	}
+
+	/**
+	 * Set if double slashes to be replaced by single slash in the request URI.
+	 * <p>Default is "true".
+	 */
+	public void setSanitizePath(boolean sanitizePath) {
+		checkReadOnly();
+		this.sanitizePath = sanitizePath;
+	}
+
+	/**
+	 * Whether configured to replace double slashes with single slash from the request URI.
+	 */
+	public boolean shouldSanitizePath() {
+		return this.sanitizePath;
 	}
 
 	/**
@@ -392,12 +410,16 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Sanitize the given path. Uses the following rules:
+	 * Sanitize the given path if {code shouldSanitizePath()} is true.
+	 * Uses the following rules:
 	 * <ul>
 	 * <li>replace all "//" by "/"</li>
 	 * </ul>
 	 */
-	private static String getSanitizedPath(final String path) {
+	private String getSanitizedPath(final String path) {
+		if (!shouldSanitizePath()) {
+			return path;
+		}
 		int start = path.indexOf("//");
 		if (start == -1) {
 			return path;
