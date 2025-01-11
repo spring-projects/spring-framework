@@ -242,7 +242,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 		@Override
 		public boolean isEmpty() {
-			return (this.part.getSize() == 0);
+			return (getSize() == 0);
 		}
 
 		@Override
@@ -252,7 +252,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 		@Override
 		public byte[] getBytes() throws IOException {
-			return FileCopyUtils.copyToByteArray(this.part.getInputStream());
+			return FileCopyUtils.copyToByteArray(getInputStream());
 		}
 
 		@Override
@@ -270,13 +270,8 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 				// At least we offloaded the file from memory storage; it'll get deleted
 				// from the temp dir eventually in any case. And for our user's purposes,
 				// we can manually copy it to the requested location as a fallback.
-				FileCopyUtils.copy(this.part.getInputStream(), Files.newOutputStream(dest.toPath()));
+				FileCopyUtils.copy(getInputStream(), Files.newOutputStream(dest.toPath()));
 			}
-		}
-
-		@Override
-		public void transferTo(Path dest) throws IOException, IllegalStateException {
-			FileCopyUtils.copy(this.part.getInputStream(), Files.newOutputStream(dest));
 		}
 	}
 
