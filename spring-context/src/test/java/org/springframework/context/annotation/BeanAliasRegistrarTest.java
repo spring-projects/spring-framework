@@ -1,6 +1,7 @@
 package org.springframework.context.annotation;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -23,33 +24,41 @@ class BeanAliasRegistrarTest {
 		context.register(ConfigFromOtherProject.class);
 		context.refresh();
 
-		Object bean0 = context.getBean("bean0");
-		assertThat(bean0).isNotNull();
+		Object beanCreateByOtherProject = context.getBean("beanCreateByOtherProject");
+		assertThat(beanCreateByOtherProject).isNotNull();
+		Object driver = context.getBean("driver");
+		assertThat(driver).isNotNull();
+		assertThat(driver).isSameAs(beanCreateByOtherProject);
 		Object bean1 = context.getBean("bean1");
 		assertThat(bean1).isNotNull();
-		assertThat(bean1).isSameAs(bean0);
+		assertThat(bean1).isSameAs(beanCreateByOtherProject);
 		Object bean2 = context.getBean("bean2");
 		assertThat(bean2).isNotNull();
-		assertThat(bean2).isSameAs(bean0);
-		Object bean3 = context.getBean("bean3");
-		assertThat(bean3).isNotNull();
-		assertThat(bean3).isSameAs(bean0);
+		assertThat(bean2).isSameAs(beanCreateByOtherProject);
+		Object beanCreateInThisProject = context.getBean("beanCreateInThisProject");
+		assertThat(beanCreateInThisProject).isNotNull();
+		assertThat(beanCreateInThisProject).isEqualTo("working with otherProjectDriver");
 	}
 
-	@BeanAlias(name = "bean0", alias = "bean1")
+	@BeanAlias(name = "beanCreateByOtherProject", alias = "driver")
 	@BeanAliases({
-			@BeanAlias(name = "bean0", alias = "bean2"),
-			@BeanAlias(name = "bean0", alias = "bean3")
+			@BeanAlias(name = "beanCreateByOtherProject", alias = "bean1"),
+			@BeanAlias(name = "beanCreateByOtherProject", alias = "bean2")
 	})
 	static class ConfigOfThisProject {
+
+		@Bean
+		String beanCreateInThisProject(@Qualifier("driver") String driver) {
+			return "working with " + driver;
+		}
 
 	}
 
 	static class ConfigFromOtherProject {
 
 		@Bean
-		String bean0() {
-			return "";
+		String beanCreateByOtherProject() {
+			return "otherProjectDriver";
 		}
 
 	}
