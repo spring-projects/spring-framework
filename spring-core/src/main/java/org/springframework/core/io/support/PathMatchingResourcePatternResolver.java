@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -645,13 +645,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					}
 				}
 				if (currentPrefix != null) {
-					// A prefix match found, potentially to be turned into a common parent cache entry.
-					if (commonPrefix == null || !commonUnique || currentPrefix.length() > commonPrefix.length()) {
-						commonPrefix = currentPrefix;
-						existingPath = path;
-					}
-					else if (currentPrefix.equals(commonPrefix)) {
-						commonUnique = false;
+					if (checkPathWithinPackage(path.substring(currentPrefix.length()))) {
+						// A prefix match found, potentially to be turned into a common parent cache entry.
+						if (commonPrefix == null || !commonUnique || currentPrefix.length() > commonPrefix.length()) {
+							commonPrefix = currentPrefix;
+							existingPath = path;
+						}
+						else if (currentPrefix.equals(commonPrefix)) {
+							commonUnique = false;
+						}
 					}
 				}
 				else if (actualRootPath == null || path.length() > actualRootPath.length()) {
@@ -1101,6 +1103,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private static String stripLeadingSlash(String path) {
 		return (path.startsWith("/") ? path.substring(1) : path);
+	}
+
+	private static boolean checkPathWithinPackage(String path) {
+		return (path.contains("/") && !path.contains(ResourceUtils.JAR_URL_SEPARATOR));
 	}
 
 
