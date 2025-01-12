@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -642,13 +643,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					}
 				}
 				if (currentPrefix != null) {
-					// A prefix match found, potentially to be turned into a common parent cache entry.
-					if (commonPrefix == null || !commonUnique || currentPrefix.length() > commonPrefix.length()) {
-						commonPrefix = currentPrefix;
-						existingPath = path;
-					}
-					else if (currentPrefix.equals(commonPrefix)) {
-						commonUnique = false;
+					if (checkPathWithinPackage(path.substring(currentPrefix.length()))) {
+						// A prefix match found, potentially to be turned into a common parent cache entry.
+						if (commonPrefix == null || !commonUnique || currentPrefix.length() > commonPrefix.length()) {
+							commonPrefix = currentPrefix;
+							existingPath = path;
+						}
+						else if (currentPrefix.equals(commonPrefix)) {
+							commonUnique = false;
+						}
 					}
 				}
 				else if (actualRootPath == null || path.length() > actualRootPath.length()) {
@@ -801,7 +804,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (separatorIndex == -1) {
 			separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
 		}
-		if (separatorIndex != -1) {
+		if (separatorIndex >= 0) {
 			jarFileUrl = urlFile.substring(0, separatorIndex);
 			rootEntryPath = urlFile.substring(separatorIndex + 2);  // both separators are 2 chars
 			NavigableSet<String> entriesCache = this.jarEntriesCache.get(jarFileUrl);
@@ -828,11 +831,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		if (con instanceof JarURLConnection jarCon) {
 			// Should usually be the case for traditional JAR files.
-			jarFile = jarCon.getJarFile();
-			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
-			JarEntry jarEntry = jarCon.getJarEntry();
-			rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
-			closeJarFile = !jarCon.getUseCaches();
+			try {
+				jarFile = jarCon.getJarFile();
+				jarFileUrl = jarCon.getJarFileURL().toExternalForm();
+				JarEntry jarEntry = jarCon.getJarEntry();
+				rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
+				closeJarFile = !jarCon.getUseCaches();
+			}
+			catch (FileNotFoundException ex) {
+				// Happens in case of cached root directory without specific subdirectory present.
+				return Collections.emptySet();
+			}
 		}
 		else {
 			// No JarURLConnection -> need to resort to URL file parsing.
@@ -869,7 +878,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			Set<Resource> result = new LinkedHashSet<>(64);
 			NavigableSet<String> entriesCache = new TreeSet<>();
-			for (String entryPath : jarFile.stream().map(JarEntry::getName).sorted().toList()) {
+			Iterator<String> entryIterator = jarFile.stream().map(JarEntry::getName).sorted().iterator();
+			while (entryIterator.hasNext()) {
+				String entryPath = entryIterator.next();
+				int entrySeparatorIndex = entryPath.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				if (entrySeparatorIndex >= 0) {
+					entryPath = entryPath.substring(entrySeparatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+				}
 				entriesCache.add(entryPath);
 				if (entryPath.startsWith(rootEntryPath)) {
 					String relativePath = entryPath.substring(rootEntryPath.length());
@@ -1097,6 +1112,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private static String stripLeadingSlash(String path) {
 		return (path.startsWith("/") ? path.substring(1) : path);
+	}
+
+	private static boolean checkPathWithinPackage(String path) {
+		return (path.contains("/") && !path.contains(ResourceUtils.JAR_URL_SEPARATOR));
 	}
 
 

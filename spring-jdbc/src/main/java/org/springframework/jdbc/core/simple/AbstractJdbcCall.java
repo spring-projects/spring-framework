@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sql.DataSource;
 
@@ -65,6 +67,9 @@ public abstract class AbstractJdbcCall {
 
 	/** List of RefCursor/ResultSet RowMapper objects. */
 	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<>();
+
+	/** Lock for the compilation step. */
+	private final Lock compilationLock = new ReentrantLock();
 
 	/**
 	 * Has this operation been compiled? Compilation means at least checking
@@ -278,23 +283,29 @@ public abstract class AbstractJdbcCall {
 	 * @throws org.springframework.dao.InvalidDataAccessApiUsageException if the object hasn't
 	 * been correctly initialized, for example if no DataSource has been provided
 	 */
-	public final synchronized void compile() throws InvalidDataAccessApiUsageException {
-		if (!isCompiled()) {
-			if (getProcedureName() == null) {
-				throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");
+	public final void compile() throws InvalidDataAccessApiUsageException {
+		this.compilationLock.lock();
+		try {
+			if (!isCompiled()) {
+				if (getProcedureName() == null) {
+					throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");
+				}
+				try {
+					this.jdbcTemplate.afterPropertiesSet();
+				}
+				catch (IllegalArgumentException ex) {
+					throw new InvalidDataAccessApiUsageException(ex.getMessage());
+				}
+				compileInternal();
+				this.compiled = true;
+				if (logger.isDebugEnabled()) {
+					logger.debug("SqlCall for " + (isFunction() ? "function" : "procedure") +
+							" [" + getProcedureName() + "] compiled");
+				}
 			}
-			try {
-				this.jdbcTemplate.afterPropertiesSet();
-			}
-			catch (IllegalArgumentException ex) {
-				throw new InvalidDataAccessApiUsageException(ex.getMessage());
-			}
-			compileInternal();
-			this.compiled = true;
-			if (logger.isDebugEnabled()) {
-				logger.debug("SqlCall for " + (isFunction() ? "function" : "procedure") +
-						" [" + getProcedureName() + "] compiled");
-			}
+		}
+		finally {
+			this.compilationLock.unlock();
 		}
 	}
 

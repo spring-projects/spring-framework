@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,6 +180,13 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		}
 		catch (SQLFeatureNotSupportedException ex) {
 			// typically on Oracle - ignore
+		}
+		catch (SQLException ex) {
+			// ignore Microsoft SQLServerException: This operation is not supported.
+			String msg = ex.getMessage();
+			if (msg == null || !msg.contains("not supported")) {
+				throw new TransactionSystemException("Could not explicitly release JDBC savepoint", ex);
+			}
 		}
 		catch (Throwable ex) {
 			throw new TransactionSystemException("Could not explicitly release JDBC savepoint", ex);
