@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -806,7 +807,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (separatorIndex == -1) {
 			separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
 		}
-		if (separatorIndex != -1) {
+		if (separatorIndex >= 0) {
 			jarFileUrl = urlFile.substring(0, separatorIndex);
 			rootEntryPath = urlFile.substring(separatorIndex + 2);  // both separators are 2 chars
 			NavigableSet<String> entriesCache = this.jarEntriesCache.get(jarFileUrl);
@@ -874,7 +875,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			Set<Resource> result = new LinkedHashSet<>(64);
 			NavigableSet<String> entriesCache = new TreeSet<>();
-			for (String entryPath : jarFile.stream().map(JarEntry::getName).sorted().toList()) {
+			Iterator<String> entryIterator = jarFile.stream().map(JarEntry::getName).sorted().iterator();
+			while (entryIterator.hasNext()) {
+				String entryPath = entryIterator.next();
+				int entrySeparatorIndex = entryPath.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				if (entrySeparatorIndex >= 0) {
+					entryPath = entryPath.substring(entrySeparatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+				}
 				entriesCache.add(entryPath);
 				if (entryPath.startsWith(rootEntryPath)) {
 					String relativePath = entryPath.substring(rootEntryPath.length());
