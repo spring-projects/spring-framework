@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
@@ -82,7 +84,7 @@ public class SimplePropertyRowMapper<T> implements RowMapper<T> {
 
 	private final Constructor<T> mappedConstructor;
 
-	private final String[] constructorParameterNames;
+	private final @Nullable String[] constructorParameterNames;
 
 	private final TypeDescriptor[] constructorParameterTypes;
 
@@ -122,7 +124,7 @@ public class SimplePropertyRowMapper<T> implements RowMapper<T> {
 
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
-		Object[] args = new Object[this.constructorParameterNames.length];
+		@Nullable Object[] args = new Object[this.constructorParameterNames.length];
 		Set<Integer> usedIndex = new HashSet<>();
 		for (int i = 0; i < args.length; i++) {
 			String name = this.constructorParameterNames[i];

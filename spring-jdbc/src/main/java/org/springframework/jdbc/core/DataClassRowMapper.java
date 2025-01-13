@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 
 	private @Nullable Constructor<T> mappedConstructor;
 
-	private String @Nullable [] constructorParameterNames;
+	private @Nullable String @Nullable [] constructorParameterNames;
 
 	private TypeDescriptor @Nullable [] constructorParameterTypes;
 
@@ -108,7 +108,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	protected T constructMappedInstance(ResultSet rs, TypeConverter tc) throws SQLException {
 		Assert.state(this.mappedConstructor != null, "Mapped constructor was not initialized");
 
-		Object[] args;
+		@Nullable Object[] args;
 		if (this.constructorParameterNames != null && this.constructorParameterTypes != null) {
 			args = new Object[this.constructorParameterNames.length];
 			for (int i = 0; i < args.length; i++) {

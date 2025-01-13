@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -370,7 +370,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
+						@Nullable Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
 						pscf.newPreparedStatementSetter(values).setValues(ps);
 					}
 					@Override
@@ -407,12 +407,12 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		else {
 			pscf.setReturnGeneratedKeys(true);
 		}
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
 		PreparedStatementCreator psc = pscf.newPreparedStatementCreator(params);
 		return getJdbcOperations().batchUpdate(psc, new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
+				@Nullable Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
 				pscf.newPreparedStatementSetter(values).setValues(ps);
 			}
 
@@ -460,7 +460,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		if (customizer != null) {
 			customizer.accept(pscf);
 		}
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
 		return pscf.newPreparedStatementCreator(params);
 	}
 

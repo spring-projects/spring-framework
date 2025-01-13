@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,10 +348,10 @@ public abstract class NamedParameterUtils {
 	 * be built into the value array in the form of SqlParameterValue objects.
 	 * @return the array of values
 	 */
-	public static Object[] buildValueArray(
+	public static @Nullable Object[] buildValueArray(
 			ParsedSql parsedSql, SqlParameterSource paramSource, @Nullable List<SqlParameter> declaredParams) {
 
-		Object[] paramArray = new Object[parsedSql.getTotalParameterCount()];
+		@Nullable Object[] paramArray = new Object[parsedSql.getTotalParameterCount()];
 		if (parsedSql.getNamedParameterCount() > 0 && parsedSql.getUnnamedParameterCount() > 0) {
 			throw new InvalidDataAccessApiUsageException(
 					"Not allowed to mix named and traditional ? placeholders. You have " +
@@ -497,7 +497,7 @@ public abstract class NamedParameterUtils {
 	 * @param paramMap the Map of parameters
 	 * @return the array of values
 	 */
-	public static Object[] buildValueArray(String sql, Map<String, ?> paramMap) {
+	public static @Nullable Object[] buildValueArray(String sql, Map<String, ?> paramMap) {
 		ParsedSql parsedSql = parseSqlStatement(sql);
 		return buildValueArray(parsedSql, new MapSqlParameterSource(paramMap), null);
 	}

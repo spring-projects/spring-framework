@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,7 +261,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @param propertyName the property name (as used by property descriptors)
 	 * @since 5.3.9
 	 */
-	protected void suppressProperty(String propertyName) {
+	protected void suppressProperty(@Nullable String propertyName) {
 		if (this.mappedProperties != null) {
 			this.mappedProperties.remove(lowerCaseName(propertyName));
 			this.mappedProperties.remove(underscoreName(propertyName));
@@ -296,7 +296,10 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @since 4.2
 	 * @see #underscoreName
 	 */
-	protected String lowerCaseName(String name) {
+	protected String lowerCaseName(@Nullable String name) {
+		if (!StringUtils.hasLength(name)) {
+			return "";
+		}
 		return name.toLowerCase(Locale.US);
 	}
 
@@ -308,7 +311,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @since 4.2
 	 * @see JdbcUtils#convertPropertyNameToUnderscoreName
 	 */
-	protected String underscoreName(String name) {
+	protected String underscoreName(@Nullable String name) {
 		return JdbcUtils.convertPropertyNameToUnderscoreName(name);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementSetter newPreparedStatementSetter(Object @Nullable [] params) {
+	protected final PreparedStatementSetter newPreparedStatementSetter(@Nullable Object @Nullable [] params) {
 		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
 	}
@@ -104,7 +104,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(Object @Nullable [] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(@Nullable Object @Nullable [] params) {
 		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
@@ -116,7 +116,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * the factory's, for example because of named parameter expanding)
 	 * @param params the parameter array (may be {@code null})
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object @Nullable [] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, @Nullable Object @Nullable [] params) {
 		Assert.state(this.preparedStatementFactory != null, "No PreparedStatementFactory available");
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);
 	}

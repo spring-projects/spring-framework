@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,7 +227,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 		ParsedSql parsedSql = getParsedSql();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
 		RowMapper<T> rowMapper = newRowMapper(params, context);
 		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
 	}
@@ -238,7 +238,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
 	 * type. The ordering of parameters is not significant.
 	 */
-	public List<T> executeByNamedParam(Map<String, ?> paramMap) throws DataAccessException {
+	public List<T> executeByNamedParam(Map<String, ? extends @Nullable Object> paramMap) throws DataAccessException {
 		return executeByNamedParam(paramMap, null);
 	}
 
@@ -361,6 +361,6 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute
 	 */
-	protected abstract RowMapper<T> newRowMapper(Object @Nullable [] parameters, @Nullable Map<?, ?> context);
+	protected abstract RowMapper<T> newRowMapper(@Nullable Object @Nullable [] parameters, @Nullable Map<?, ?> context);
 
 }
