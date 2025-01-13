@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,13 +215,13 @@ final class RSocketServiceMethod {
 		return this.method;
 	}
 
-	public @Nullable Object invoke(Object[] arguments) {
+	public @Nullable Object invoke(@Nullable Object[] arguments) {
 		RSocketRequestValues.Builder requestValues = RSocketRequestValues.builder(this.route);
 		applyArguments(requestValues, arguments);
 		return this.responseFunction.apply(requestValues.build());
 	}
 
-	private void applyArguments(RSocketRequestValues.Builder requestValues, Object[] arguments) {
+	private void applyArguments(RSocketRequestValues.Builder requestValues, @Nullable Object[] arguments) {
 		Assert.isTrue(arguments.length == this.parameters.length, "Method argument mismatch");
 		for (int i = 0; i < arguments.length; i++) {
 			Object value = arguments[i];

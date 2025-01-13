@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,13 +422,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	private SimpMessageMappingInfo createMessageMappingCondition(String[] destinations) {
-		String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
+		@Nullable String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
 				new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
 	}
 
 	private SimpMessageMappingInfo createSubscribeMappingCondition(String[] destinations) {
-		String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
+		@Nullable String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
 				new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
 	}
@@ -438,11 +438,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * @return a new array with updated destinations
 	 * @since 4.2
 	 */
-	protected String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
+	protected @Nullable String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
 		if (this.valueResolver == null) {
 			return destinations;
 		}
-		String[] result = new String[destinations.length];
+		@Nullable String[] result = new String[destinations.length];
 		for (int i = 0; i < destinations.length; i++) {
 			result[i] = this.valueResolver.resolveStringValue(destinations[i]);
 		}
