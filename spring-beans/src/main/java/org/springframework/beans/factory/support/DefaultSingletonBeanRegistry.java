@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,7 +277,25 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
-				beforeSingletonCreation(beanName);
+
+				try {
+					beforeSingletonCreation(beanName);
+				}
+				catch (BeanCurrentlyInCreationException ex) {
+					if (locked) {
+						throw ex;
+					}
+					// Try late locking for waiting on specific bean to be finished.
+					this.singletonLock.lock();
+					locked = true;
+					// Singleton object should have appeared in the meantime.
+					singletonObject = this.singletonObjects.get(beanName);
+					if (singletonObject != null) {
+						return singletonObject;
+					}
+					beforeSingletonCreation(beanName);
+				}
+
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (locked && this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
