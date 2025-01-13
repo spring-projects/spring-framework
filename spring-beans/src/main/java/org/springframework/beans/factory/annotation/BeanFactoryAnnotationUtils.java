@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public abstract class BeanFactoryAnnotationUtils {
 			// Full qualifier matching supported.
 			return qualifiedBeanOfType(lbf, beanType, qualifier);
 		}
-		else if (beanFactory.containsBean(qualifier)) {
+		else if (beanFactory.containsBean(qualifier) && beanFactory.isTypeMatch(qualifier, beanType)) {
 			// Fallback: target bean at least found by bean name.
 			return beanFactory.getBean(qualifier, beanType);
 		}
@@ -111,16 +111,16 @@ public abstract class BeanFactoryAnnotationUtils {
 	/**
 	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a qualifier
 	 * (for example, {@code <qualifier>} or {@code @Qualifier}) matching the given qualifier).
-	 * @param bf the factory to get the target bean from
+	 * @param beanFactory the factory to get the target bean from
 	 * @param beanType the type of bean to retrieve
 	 * @param qualifier the qualifier for selecting between multiple bean matches
 	 * @return the matching bean of type {@code T} (never {@code null})
 	 */
-	private static <T> T qualifiedBeanOfType(ListableBeanFactory bf, Class<T> beanType, String qualifier) {
-		String[] candidateBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(bf, beanType);
+	private static <T> T qualifiedBeanOfType(ListableBeanFactory beanFactory, Class<T> beanType, String qualifier) {
+		String[] candidateBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, beanType);
 		String matchingBean = null;
 		for (String beanName : candidateBeans) {
-			if (isQualifierMatch(qualifier::equals, beanName, bf)) {
+			if (isQualifierMatch(qualifier::equals, beanName, beanFactory)) {
 				if (matchingBean != null) {
 					throw new NoUniqueBeanDefinitionException(beanType, matchingBean, beanName);
 				}
@@ -128,11 +128,11 @@ public abstract class BeanFactoryAnnotationUtils {
 			}
 		}
 		if (matchingBean != null) {
-			return bf.getBean(matchingBean, beanType);
+			return beanFactory.getBean(matchingBean, beanType);
 		}
-		else if (bf.containsBean(qualifier)) {
+		else if (beanFactory.containsBean(qualifier) && beanFactory.isTypeMatch(qualifier, beanType)) {
 			// Fallback: target bean at least found by bean name - probably a manually registered singleton.
-			return bf.getBean(qualifier, beanType);
+			return beanFactory.getBean(qualifier, beanType);
 		}
 		else {
 			throw new NoSuchBeanDefinitionException(qualifier, "No matching " + beanType.getSimpleName() +

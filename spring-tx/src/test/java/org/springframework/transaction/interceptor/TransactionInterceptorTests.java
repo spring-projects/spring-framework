@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -296,6 +296,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 	private PlatformTransactionManager associateTransactionManager(BeanFactory beanFactory, String name) {
 		PlatformTransactionManager transactionManager = mock();
 		given(beanFactory.containsBean(name)).willReturn(true);
+		given(beanFactory.isTypeMatch(name, TransactionManager.class)).willReturn(true);
 		given(beanFactory.getBean(name, TransactionManager.class)).willReturn(transactionManager);
 		return transactionManager;
 	}
