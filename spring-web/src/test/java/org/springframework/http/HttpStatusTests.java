@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,6 @@ class HttpStatusTests {
 	@SuppressWarnings("deprecation")
 	static List<Arguments> codesWithAliases() {
 		return List.of(
-				arguments(103, HttpStatus.EARLY_HINTS, HttpStatus.CHECKPOINT),
 				arguments(302, HttpStatus.FOUND, HttpStatus.MOVED_TEMPORARILY),
 				arguments(413, HttpStatus.PAYLOAD_TOO_LARGE, HttpStatus.REQUEST_ENTITY_TOO_LARGE),
 				arguments(414, HttpStatus.URI_TOO_LONG, HttpStatus.REQUEST_URI_TOO_LONG)

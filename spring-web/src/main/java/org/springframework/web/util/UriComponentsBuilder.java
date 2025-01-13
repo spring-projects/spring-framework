@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,27 +214,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				yield builder.whatWgUrlRecord(record);
 			}
 		};
-	}
-
-	/**
-	 * Create a URI components builder from the given HTTP URL String.
-	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
-	 * correct parsing of the URI string. For example if a query parameter
-	 * contains {@code '='} or {@code '&'} characters, the query string cannot
-	 * be parsed unambiguously. Such values should be substituted for URI
-	 * variables to enable correct parsing:
-	 * <pre class="code">
-	 * String urlString = &quot;https://example.com/hotels/42?filter={value}&quot;;
-	 * UriComponentsBuilder.fromHttpUrl(urlString).buildAndExpand(&quot;hot&amp;cold&quot;);
-	 * </pre>
-	 * @param httpUrl the source URI
-	 * @return the URI components of the URI
-	 * @deprecated as of 6.2, in favor of {@link #fromUriString(String)};
-	 * scheduled for removal in 7.0.
-	 */
-	@Deprecated(since = "6.2")
-	public static UriComponentsBuilder fromHttpUrl(String httpUrl) throws InvalidUrlException {
-		return fromUriString(httpUrl);
 	}
 
 

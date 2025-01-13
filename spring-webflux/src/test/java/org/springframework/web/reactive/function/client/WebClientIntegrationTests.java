@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1150,7 +1150,6 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
-	@SuppressWarnings("deprecation")
 	void exchangeForUnknownStatusCode(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -1165,7 +1164,7 @@ class WebClientIntegrationTests {
 				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)
-				.consumeNextWith(entity -> assertThat(entity.getStatusCodeValue()).isEqualTo(555))
+				.consumeNextWith(entity -> assertThat(entity.getStatusCode().value()).isEqualTo(555))
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 

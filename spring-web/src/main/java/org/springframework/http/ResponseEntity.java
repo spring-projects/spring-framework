@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,18 +181,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	public HttpStatusCode getStatusCode() {
 		return this.status;
-	}
-
-	/**
-	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an int value
-	 * @since 4.3
-	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}; scheduled
-	 * for removal in 7.0
-	 */
-	@Deprecated(since = "6.0")
-	public int getStatusCodeValue() {
-		return getStatusCode().value();
 	}
 
 
