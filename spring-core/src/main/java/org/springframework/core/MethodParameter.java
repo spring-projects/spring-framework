@@ -706,7 +706,7 @@ public class MethodParameter {
 		}
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {
-			String[] parameterNames = null;
+			@Nullable String[] parameterNames = null;
 			if (this.executable instanceof Method method) {
 				parameterNames = discoverer.getParameterNames(method);
 			}
@@ -865,7 +865,7 @@ public class MethodParameter {
 	 * @return the corresponding MethodParameter instance
 	 * @since 6.1
 	 */
-	public static MethodParameter forFieldAwareConstructor(Constructor<?> ctor, int parameterIndex, String fieldName) {
+	public static MethodParameter forFieldAwareConstructor(Constructor<?> ctor, int parameterIndex, @Nullable String fieldName) {
 		return new FieldAwareConstructorParameter(ctor, parameterIndex, fieldName);
 	}
 
@@ -877,7 +877,7 @@ public class MethodParameter {
 
 		private volatile Annotation @Nullable [] combinedAnnotations;
 
-		public FieldAwareConstructorParameter(Constructor<?> constructor, int parameterIndex, String fieldName) {
+		public FieldAwareConstructorParameter(Constructor<?> constructor, int parameterIndex, @Nullable String fieldName) {
 			super(constructor, parameterIndex);
 			this.parameterName = fieldName;
 		}

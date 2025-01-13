@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ package org.springframework.core;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Publisher;
@@ -380,13 +383,13 @@ public class ReactiveAdapterRegistry {
 						io.smallrye.mutiny.groups.MultiCreate.class, "publisher", Flow.Publisher.class);
 				registry.registerReactiveType(uniDesc,
 						uni -> FlowAdapters.toPublisher((Flow.Publisher<Object>)
-								ReflectionUtils.invokeMethod(uniToPublisher, ((io.smallrye.mutiny.Uni<?>) uni).convert())),
-						publisher -> ReflectionUtils.invokeMethod(uniPublisher, io.smallrye.mutiny.Uni.createFrom(),
-								FlowAdapters.toFlowPublisher(publisher)));
+								Objects.requireNonNull(ReflectionUtils.invokeMethod(uniToPublisher, ((Uni<?>) uni).convert()))),
+						publisher -> Objects.requireNonNull(ReflectionUtils.invokeMethod(uniPublisher, Uni.createFrom(),
+								FlowAdapters.toFlowPublisher(publisher))));
 				registry.registerReactiveType(multiDesc,
 						multi -> FlowAdapters.toPublisher((Flow.Publisher<Object>) multi),
-						publisher -> ReflectionUtils.invokeMethod(multiPublisher, io.smallrye.mutiny.Multi.createFrom(),
-								FlowAdapters.toFlowPublisher(publisher)));
+						publisher -> Objects.requireNonNull(ReflectionUtils.invokeMethod(multiPublisher, Multi.createFrom(),
+								FlowAdapters.toFlowPublisher(publisher))));
 			}
 			else {
 				// Mutiny 1 based on Reactive Streams

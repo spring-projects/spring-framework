@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
+
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -83,10 +85,10 @@ class CompositeCollection<E> implements Collection<E> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T[] toArray(T[] a) {
+	@SuppressWarnings({"unchecked","NullAway"}) // Overridden method does not define nullness
+	public <T> @Nullable T[] toArray(@Nullable T[] a) {
 		int size = this.size();
-		T[] result;
+		@Nullable T[] result;
 		if (a.length >= size) {
 			result = a;
 		}

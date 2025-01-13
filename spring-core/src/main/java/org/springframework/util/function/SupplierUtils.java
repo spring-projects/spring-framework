@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
+
 /**
  * Convenience utilities for {@link java.util.function.Supplier} handling.
  *
@@ -35,6 +37,7 @@ public abstract class SupplierUtils {
 	 * @param supplier the supplier to resolve
 	 * @return the supplier's result, or {@code null} if none
 	 */
+	@Contract("null -> null; !null -> !null")
 	public static <T> @Nullable T resolve(@Nullable Supplier<T> supplier) {
 		return (supplier != null ? supplier.get() : null);
 	}

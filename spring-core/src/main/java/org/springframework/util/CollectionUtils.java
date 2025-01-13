@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public abstract class CollectionUtils {
 	 * @return whether the given Collection is empty
 	 */
 	@Contract("null -> true")
-	public static boolean isEmpty(@Nullable Collection<?> collection) {
+	public static boolean isEmpty(@Nullable Collection<? extends @Nullable Object> collection) {
 		return (collection == null || collection.isEmpty());
 	}
 
@@ -75,7 +75,7 @@ public abstract class CollectionUtils {
 	 * @return whether the given Map is empty
 	 */
 	@Contract("null -> true")
-	public static boolean isEmpty(@Nullable Map<?, ?> map) {
+	public static boolean isEmpty(@Nullable Map<?, ? extends @Nullable Object> map) {
 		return (map == null || map.isEmpty());
 	}
 

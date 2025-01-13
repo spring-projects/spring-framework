@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,11 +250,13 @@ final class AttributeMethods {
 		return cache.computeIfAbsent(annotationType, AttributeMethods::compute);
 	}
 
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private static AttributeMethods compute(Class<? extends Annotation> annotationType) {
 		Method[] methods = annotationType.getDeclaredMethods();
 		int size = methods.length;
 		for (int i = 0; i < methods.length; i++) {
 			if (!isAttributeMethod(methods[i])) {
+				//noinspection DataFlowIssue
 				methods[i] = null;
 				size--;
 			}

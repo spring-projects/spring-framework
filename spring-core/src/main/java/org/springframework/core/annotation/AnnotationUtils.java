@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -773,7 +773,7 @@ public abstract class AnnotationUtils {
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
-	public static Map<String, Object> getAnnotationAttributes(Annotation annotation) {
+	public static Map<String, @Nullable Object> getAnnotationAttributes(Annotation annotation) {
 		return getAnnotationAttributes(null, annotation);
 	}
 
@@ -791,7 +791,7 @@ public abstract class AnnotationUtils {
 	 * corresponding attribute values as values (never {@code null})
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
 	 */
-	public static Map<String, Object> getAnnotationAttributes(
+	public static Map<String, @Nullable Object> getAnnotationAttributes(
 			Annotation annotation, boolean classValuesAsString) {
 
 		return getAnnotationAttributes(annotation, classValuesAsString, false);

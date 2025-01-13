@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
-	public @Nullable Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+	public @Nullable Map<String, @Nullable Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		if (this.nestedAnnotationsAsMap) {
 			return MethodMetadata.super.getAnnotationAttributes(annotationName, classValuesAsString);
 		}
@@ -140,7 +140,8 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
-	public @Nullable MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+	@SuppressWarnings("NullAway") // Null-safety of Java super method not yet managed
+	public @Nullable MultiValueMap<String, @Nullable Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		if (this.nestedAnnotationsAsMap) {
 			return MethodMetadata.super.getAllAnnotationAttributes(annotationName, classValuesAsString);
 		}

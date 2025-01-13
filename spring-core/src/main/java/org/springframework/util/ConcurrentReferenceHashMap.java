@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -456,7 +456,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * Array of references indexed using the low order bits from the hash.
 		 * This property should only be set along with {@code resizeThreshold}.
 		 */
-		private volatile Reference<K, V>[] references;
+		private volatile @Nullable Reference<K, V>[] references;
 
 		/**
 		 * The total number of references contained in this segment. This includes chained
@@ -485,7 +485,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return null;
 			}
 			// Use a local copy to protect against other threads writing
-			Reference<K, V>[] references = this.references;
+			@Nullable Reference<K, V>[] references = this.references;
 			int index = getIndex(hash, references);
 			Reference<K, V> head = references[index];
 			return findInChain(head, key, hash);
@@ -641,7 +641,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			}
 		}
 
-		private @Nullable Reference<K, V> findInChain(Reference<K, V> ref, @Nullable Object key, int hash) {
+		private @Nullable Reference<K, V> findInChain(@Nullable Reference<K, V> ref, @Nullable Object key, int hash) {
 			Reference<K, V> currRef = ref;
 			while (currRef != null) {
 				if (currRef.getHash() == hash) {
@@ -663,7 +663,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			return new Reference[size];
 		}
 
-		private int getIndex(int hash, Reference<K, V>[] references) {
+		private int getIndex(int hash, @Nullable Reference<K, V>[] references) {
 			return (hash & (references.length - 1));
 		}
 
@@ -879,7 +879,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		private int referenceIndex;
 
-		private Reference<K, V> @Nullable [] references;
+		private @Nullable Reference<K, V> @Nullable [] references;
 
 		private @Nullable Reference<K, V> reference;
 

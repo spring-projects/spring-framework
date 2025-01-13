@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.ReflectionUtils;
  */
 abstract class AnnotationsScanner {
 
-	private static final Annotation[] NO_ANNOTATIONS = {};
+	private static final @Nullable Annotation[] NO_ANNOTATIONS = {};
 
 	private static final Method[] NO_METHODS = {};
 
@@ -55,7 +55,7 @@ abstract class AnnotationsScanner {
 	private static final Map<AnnotatedElement, Annotation[]> declaredAnnotationCache =
 			new ConcurrentReferenceHashMap<>(256);
 
-	private static final Map<Class<?>, Method[]> baseTypeMethodsCache =
+	private static final Map<Class<?>, @Nullable Method[]> baseTypeMethodsCache =
 			new ConcurrentReferenceHashMap<>(256);
 
 
@@ -114,7 +114,7 @@ abstract class AnnotationsScanner {
 			if (isWithoutHierarchy(source, Search.never)) {
 				return processElement(context, source, processor);
 			}
-			Annotation[] relevant = null;
+			@Nullable Annotation[] relevant = null;
 			int remaining = Integer.MAX_VALUE;
 			int aggregateIndex = 0;
 			Class<?> root = source;
@@ -123,7 +123,7 @@ abstract class AnnotationsScanner {
 				if (result != null) {
 					return result;
 				}
-				Annotation[] declaredAnns = getDeclaredAnnotations(source, true);
+				@Nullable Annotation[] declaredAnns = getDeclaredAnnotations(source, true);
 				if (declaredAnns.length > 0) {
 					if (relevant == null) {
 						relevant = root.getAnnotations();
@@ -133,6 +133,7 @@ abstract class AnnotationsScanner {
 						if (declaredAnns[i] != null) {
 							boolean isRelevant = false;
 							for (int relevantIndex = 0; relevantIndex < relevant.length; relevantIndex++) {
+								//noinspection DataFlowIssue
 								if (relevant[relevantIndex] != null &&
 										declaredAnns[i].annotationType() == relevant[relevantIndex].annotationType()) {
 									isRelevant = true;
@@ -181,7 +182,7 @@ abstract class AnnotationsScanner {
 			if (hasPlainJavaAnnotationsOnly(source)) {
 				return null;
 			}
-			Annotation[] annotations = getDeclaredAnnotations(source, false);
+			@Nullable Annotation[] annotations = getDeclaredAnnotations(source, false);
 			result = processor.doWithAnnotations(context, aggregateIndex[0], source, annotations);
 			if (result != null) {
 				return result;
@@ -320,16 +321,18 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	private static <C> Method[] getBaseTypeMethods(C context, Class<?> baseType) {
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	private static <C> @Nullable Method[] getBaseTypeMethods(C context, Class<?> baseType) {
 		if (baseType == Object.class || hasPlainJavaAnnotationsOnly(baseType)) {
 			return NO_METHODS;
 		}
 
-		Method[] methods = baseTypeMethodsCache.get(baseType);
+		@Nullable Method[] methods = baseTypeMethodsCache.get(baseType);
 		if (methods == null) {
 			methods = ReflectionUtils.getDeclaredMethods(baseType);
 			int cleared = 0;
 			for (int i = 0; i < methods.length; i++) {
+				//noinspection DataFlowIssue
 				if (Modifier.isPrivate(methods[i].getModifiers()) ||
 						hasPlainJavaAnnotationsOnly(methods[i]) ||
 						getDeclaredAnnotations(methods[i], false).length == 0) {
@@ -385,14 +388,14 @@ abstract class AnnotationsScanner {
 	private static <C, R> @Nullable R processMethodAnnotations(C context, int aggregateIndex, Method source,
 			AnnotationsProcessor<C, R> processor) {
 
-		Annotation[] annotations = getDeclaredAnnotations(source, false);
+		@Nullable Annotation[] annotations = getDeclaredAnnotations(source, false);
 		R result = processor.doWithAnnotations(context, aggregateIndex, source, annotations);
 		if (result != null) {
 			return result;
 		}
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(source);
 		if (bridgedMethod != source) {
-			Annotation[] bridgedAnnotations = getDeclaredAnnotations(bridgedMethod, true);
+			@Nullable Annotation[] bridgedAnnotations = getDeclaredAnnotations(bridgedMethod, true);
 			for (int i = 0; i < bridgedAnnotations.length; i++) {
 				if (ObjectUtils.containsElement(annotations, bridgedAnnotations[i])) {
 					bridgedAnnotations[i] = null;
@@ -419,7 +422,7 @@ abstract class AnnotationsScanner {
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> @Nullable A getDeclaredAnnotation(AnnotatedElement source, Class<A> annotationType) {
-		Annotation[] annotations = getDeclaredAnnotations(source, false);
+		@Nullable Annotation[] annotations = getDeclaredAnnotations(source, false);
 		for (Annotation annotation : annotations) {
 			if (annotation != null && annotationType == annotation.annotationType()) {
 				return (A) annotation;
@@ -428,9 +431,10 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	static Annotation[] getDeclaredAnnotations(AnnotatedElement source, boolean defensive) {
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	static @Nullable Annotation[] getDeclaredAnnotations(AnnotatedElement source, boolean defensive) {
 		boolean cached = false;
-		Annotation[] annotations = declaredAnnotationCache.get(source);
+		@Nullable Annotation[] annotations = declaredAnnotationCache.get(source);
 		if (annotations != null) {
 			cached = true;
 		}
@@ -440,6 +444,7 @@ abstract class AnnotationsScanner {
 				boolean allIgnored = true;
 				for (int i = 0; i < annotations.length; i++) {
 					Annotation annotation = annotations[i];
+					//noinspection DataFlowIssue
 					if (isIgnorable(annotation.annotationType()) ||
 							!AttributeMethods.forAnnotationType(annotation.annotationType()).canLoad(annotation)) {
 						annotations[i] = null;
@@ -450,6 +455,7 @@ abstract class AnnotationsScanner {
 				}
 				annotations = (allIgnored ? NO_ANNOTATIONS : annotations);
 				if (source instanceof Class || source instanceof Member) {
+					//noinspection NullableProblems
 					declaredAnnotationCache.put(source, annotations);
 					cached = true;
 				}

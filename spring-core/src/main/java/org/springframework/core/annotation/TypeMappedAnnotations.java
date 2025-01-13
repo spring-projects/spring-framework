@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -309,7 +310,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 		@Override
 		public @Nullable Boolean doWithAnnotations(Object requiredType, int aggregateIndex,
-				@Nullable Object source, Annotation[] annotations) {
+				@Nullable Object source, @Nullable Annotation[] annotations) {
 
 			for (Annotation annotation : annotations) {
 				if (annotation != null) {
@@ -388,7 +389,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 		@Override
 		public @Nullable MergedAnnotation<A> doWithAnnotations(Object type, int aggregateIndex,
-				@Nullable Object source, Annotation[] annotations) {
+				@Nullable Object source, @Nullable Annotation[] annotations) {
 
 			for (Annotation annotation : annotations) {
 				if (annotation != null && !annotationFilter.matches(annotation)) {
@@ -450,24 +451,24 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 		@Override
 		public @Nullable List<Aggregate> doWithAnnotations(Object criteria, int aggregateIndex,
-				@Nullable Object source, Annotation[] annotations) {
+				@Nullable Object source, @Nullable Annotation[] annotations) {
 
 			this.aggregates.add(createAggregate(aggregateIndex, source, annotations));
 			return null;
 		}
 
-		private Aggregate createAggregate(int aggregateIndex, @Nullable Object source, Annotation[] annotations) {
+		private Aggregate createAggregate(int aggregateIndex, @Nullable Object source, @Nullable Annotation[] annotations) {
 			List<Annotation> aggregateAnnotations = getAggregateAnnotations(annotations);
 			return new Aggregate(aggregateIndex, source, aggregateAnnotations);
 		}
 
-		private List<Annotation> getAggregateAnnotations(Annotation[] annotations) {
+		private List<Annotation> getAggregateAnnotations(@Nullable Annotation[] annotations) {
 			List<Annotation> result = new ArrayList<>(annotations.length);
 			addAggregateAnnotations(result, annotations);
 			return result;
 		}
 
-		private void addAggregateAnnotations(List<Annotation> aggregateAnnotations, Annotation[] annotations) {
+		private void addAggregateAnnotations(List<Annotation> aggregateAnnotations, @Nullable Annotation[] annotations) {
 			for (Annotation annotation : annotations) {
 				if (annotation != null && !annotationFilter.matches(annotation)) {
 					Annotation[] repeatedAnnotations = repeatableContainers.findRepeatedAnnotations(annotation);
@@ -482,7 +483,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		}
 
 		@Override
-		public List<Aggregate> finish(@Nullable List<Aggregate> processResult) {
+		public @NonNull List<Aggregate> finish(@Nullable List<Aggregate> processResult) {
 			return this.aggregates;
 		}
 	}

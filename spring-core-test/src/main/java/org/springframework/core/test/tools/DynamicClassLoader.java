@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class DynamicClassLoader extends ClassLoader {
 					"setClassResourceLookup", Function.class);
 			ReflectionUtils.makeAccessible(setClassResourceLookupMethod);
 			ReflectionUtils.invokeMethod(setClassResourceLookupMethod,
-					getParent(), (Function<String, byte[]>) this::findClassBytes);
+					getParent(), (Function<String, byte @Nullable []>) this::findClassBytes);
 			this.defineClassMethod = lookupMethod(parentClass,
 					"defineDynamicClass", String.class, byte[].class, int.class, int.class);
 			ReflectionUtils.makeAccessible(this.defineClassMethod);

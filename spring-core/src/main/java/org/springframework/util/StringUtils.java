@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1038,12 +1038,12 @@ public abstract class StringUtils {
 	 * @param array the original {@code String} array (potentially empty)
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
-	public static String[] trimArrayElements(String[] array) {
+	public static @Nullable String[] trimArrayElements(@Nullable String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
 			return array;
 		}
 
-		String[] result = new String[array.length];
+		@Nullable String[] result = new String[array.length];
 		for (int i = 0; i < array.length; i++) {
 			String element = array[i];
 			result[i] = (element != null ? element.trim() : null);

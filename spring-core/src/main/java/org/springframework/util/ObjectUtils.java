@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@ public abstract class ObjectUtils {
 	 * @param element the element to check for
 	 * @return whether the element has been found in the given array
 	 */
-	public static boolean containsElement(Object @Nullable [] array, Object element) {
+	public static boolean containsElement(@Nullable Object @Nullable [] array, @Nullable Object element) {
 		if (array == null) {
 			return false;
 		}
@@ -266,7 +266,7 @@ public abstract class ObjectUtils {
 	 * @return the new array (of the same component type; never {@code null})
 	 * @since 6.0
 	 */
-	public static <A, O extends A> A[] addObjectToArray(A @Nullable [] array, @Nullable O obj, int position) {
+	public static <A, O extends A> @Nullable A[] addObjectToArray(A @Nullable [] array, @Nullable O obj, int position) {
 		Class<?> componentType = Object.class;
 		if (array != null) {
 			componentType = array.getClass().componentType();
@@ -276,7 +276,7 @@ public abstract class ObjectUtils {
 		}
 		int newArrayLength = (array != null ? array.length + 1 : 1);
 		@SuppressWarnings("unchecked")
-		A[] newArray = (A[]) Array.newInstance(componentType, newArrayLength);
+		@Nullable A[] newArray = (A[]) Array.newInstance(componentType, newArrayLength);
 		if (array != null) {
 			System.arraycopy(array, 0, newArray, 0, position);
 			System.arraycopy(array, position, newArray, position + 1, array.length - position);
@@ -651,7 +651,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(Object @Nullable [] array) {
+	public static String nullSafeToString(@Nullable Object @Nullable [] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
