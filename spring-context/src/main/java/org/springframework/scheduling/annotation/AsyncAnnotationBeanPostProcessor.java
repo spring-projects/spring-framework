@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,9 +77,9 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private @Nullable Supplier<Executor> executor;
+	private @Nullable Supplier<? extends @Nullable Executor> executor;
 
-	private @Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler;
+	private @Nullable Supplier<? extends @Nullable AsyncUncaughtExceptionHandler> exceptionHandler;
 
 	private @Nullable Class<? extends Annotation> asyncAnnotationType;
 
@@ -95,8 +95,8 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 	 * applying the corresponding default if a supplier is not resolvable.
 	 * @since 5.1
 	 */
-	public void configure(@Nullable Supplier<Executor> executor,
-			@Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler) {
+	public void configure(@Nullable Supplier<? extends @Nullable Executor> executor,
+			@Nullable Supplier<? extends @Nullable AsyncUncaughtExceptionHandler> exceptionHandler) {
 
 		this.executor = executor;
 		this.exceptionHandler = exceptionHandler;

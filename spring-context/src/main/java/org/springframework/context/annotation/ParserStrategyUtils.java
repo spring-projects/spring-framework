@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ abstract class ParserStrategyUtils {
 		if (constructors.length == 1 && constructors[0].getParameterCount() > 0) {
 			try {
 				Constructor<?> constructor = constructors[0];
-				Object[] args = resolveArgs(constructor.getParameterTypes(),
+				@Nullable Object[] args = resolveArgs(constructor.getParameterTypes(),
 						environment, resourceLoader, registry, classLoader);
 				return BeanUtils.instantiateClass(constructor, args);
 			}
@@ -87,11 +87,11 @@ abstract class ParserStrategyUtils {
 		return BeanUtils.instantiateClass(clazz);
 	}
 
-	private static Object[] resolveArgs(Class<?>[] parameterTypes,
+	private static @Nullable Object[] resolveArgs(Class<?>[] parameterTypes,
 			Environment environment, ResourceLoader resourceLoader,
 			BeanDefinitionRegistry registry, @Nullable ClassLoader classLoader) {
 
-			Object[] parameters = new Object[parameterTypes.length];
+			@Nullable Object[] parameters = new Object[parameterTypes.length];
 			for (int i = 0; i < parameterTypes.length; i++) {
 				parameters[i] = resolveParameter(parameterTypes[i], environment,
 						resourceLoader, registry, classLoader);

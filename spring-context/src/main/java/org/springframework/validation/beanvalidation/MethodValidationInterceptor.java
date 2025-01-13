@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 		Object target = getTarget(invocation);
 		Method method = invocation.getMethod();
-		Object[] arguments = invocation.getArguments();
+		@Nullable Object[] arguments = invocation.getArguments();
 		Class<?>[] groups = determineValidationGroups(invocation);
 
 		if (reactorPresent) {
@@ -239,9 +239,9 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 				ReactiveAdapterRegistry.getSharedInstance();
 
 
-		static Object[] insertAsyncValidation(
+		static @Nullable Object[] insertAsyncValidation(
 				Supplier<SpringValidatorAdapter> validatorAdapterSupplier, boolean adaptViolations,
-				Object target, Method method, Object[] arguments) {
+				Object target, Method method, @Nullable Object[] arguments) {
 
 			for (int i = 0; i < method.getParameterCount(); i++) {
 				if (arguments[i] == null) {

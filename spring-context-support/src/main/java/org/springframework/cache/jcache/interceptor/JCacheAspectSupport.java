@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 	}
 
 
-	protected @Nullable Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
+	protected @Nullable Object execute(CacheOperationInvoker invoker, Object target, Method method, @Nullable Object[] args) {
 		// Check whether aspect is enabled to cope with cases where the AJ is pulled in automatically
 		if (this.initialized) {
 			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
@@ -113,7 +113,7 @@ public class JCacheAspectSupport extends AbstractCacheInvoker implements Initial
 
 	@SuppressWarnings("unchecked")
 	private CacheOperationInvocationContext<?> createCacheOperationInvocationContext(
-			Object target, Object[] args, JCacheOperation<?> operation) {
+			Object target, @Nullable Object[] args, JCacheOperation<?> operation) {
 
 		return new DefaultCacheInvocationContext<>(
 				(JCacheOperation<Annotation>) operation, target, args);

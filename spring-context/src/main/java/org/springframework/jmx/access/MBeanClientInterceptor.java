@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -507,7 +507,7 @@ public class MBeanClientInterceptor
 	 * @param args the invocation arguments
 	 * @return the value returned by the method invocation.
 	 */
-	private Object invokeOperation(Method method, Object[] args) throws JMException, IOException {
+	private Object invokeOperation(Method method, @Nullable Object[] args) throws JMException, IOException {
 		Assert.state(this.serverToUse != null, "No MBeanServerConnection available");
 
 		MethodCacheKey key = new MethodCacheKey(method.getName(), method.getParameterTypes());

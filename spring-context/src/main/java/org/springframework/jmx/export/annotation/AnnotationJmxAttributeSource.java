@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,10 +172,10 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T[] copyPropertiesToBeanArray(
+	private static <T> @Nullable T[] copyPropertiesToBeanArray(
 			List<MergedAnnotation<? extends Annotation>> anns, Class<T> beanClass) {
 
-		T[] beans = (T[]) Array.newInstance(beanClass, anns.size());
+		@Nullable T[] beans = (T[]) Array.newInstance(beanClass, anns.size());
 		int i = 0;
 		for (MergedAnnotation<? extends Annotation> ann : anns) {
 			beans[i++] = copyPropertiesToBean(ann, beanClass);

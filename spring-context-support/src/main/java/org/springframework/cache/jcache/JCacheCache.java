@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cache.jcache;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
@@ -134,7 +135,8 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 		private static final PutIfAbsentEntryProcessor INSTANCE = new PutIfAbsentEntryProcessor();
 
 		@Override
-		public @Nullable Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
+		@SuppressWarnings("NullAway") // Overridden method does not define nullness
+		public @Nullable Object process(MutableEntry<Object, @Nullable Object> entry, @Nullable Object... arguments) throws EntryProcessorException {
 			Object existingValue = entry.getValue();
 			if (existingValue == null) {
 				entry.setValue(arguments[0]);
@@ -146,11 +148,11 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 
 	private static final class ValueLoaderEntryProcessor implements EntryProcessor<Object, Object, Object> {
 
-		private final Function<Object, Object> fromStoreValue;
+		private final Function<Object, @Nullable Object> fromStoreValue;
 
 		private final Function<Object, Object> toStoreValue;
 
-		private ValueLoaderEntryProcessor(Function<Object, Object> fromStoreValue,
+		private ValueLoaderEntryProcessor(Function<Object, @Nullable Object> fromStoreValue,
 				Function<Object, Object> toStoreValue) {
 
 			this.fromStoreValue = fromStoreValue;
@@ -158,16 +160,16 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public @Nullable Object process(MutableEntry<Object, Object> entry, Object... arguments) throws EntryProcessorException {
+		@SuppressWarnings({"unchecked","NullAway"}) // Overridden method does not define nullness
+		public @Nullable Object process(MutableEntry<Object, @Nullable Object> entry, @Nullable Object... arguments) throws EntryProcessorException {
 			Callable<Object> valueLoader = (Callable<Object>) arguments[0];
 			if (entry.exists()) {
-				return this.fromStoreValue.apply(entry.getValue());
+				return this.fromStoreValue.apply(Objects.requireNonNull(entry.getValue()));
 			}
 			else {
 				Object value;
 				try {
-					value = valueLoader.call();
+					value = Objects.requireNonNull(valueLoader).call();
 				}
 				catch (Exception ex) {
 					throw new EntryProcessorException("Value loader '" + valueLoader + "' failed " +

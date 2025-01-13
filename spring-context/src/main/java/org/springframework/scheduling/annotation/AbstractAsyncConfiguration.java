@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 
 	protected @Nullable AnnotationAttributes enableAsync;
 
-	protected @Nullable Supplier<Executor> executor;
+	protected @Nullable Supplier<? extends @Nullable Executor> executor;
 
-	protected @Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler;
+	protected @Nullable Supplier<? extends @Nullable AsyncUncaughtExceptionHandler> exceptionHandler;
 
 
 	@Override
@@ -67,8 +67,9 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
 	@Autowired
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
-		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
+		SingletonSupplier<AsyncConfigurer> configurer = SingletonSupplier.ofNullable(() -> {
 			List<AsyncConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
@@ -82,7 +83,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 		this.exceptionHandler = adapt(configurer, AsyncConfigurer::getAsyncUncaughtExceptionHandler);
 	}
 
-	private <T> Supplier<T> adapt(Supplier<AsyncConfigurer> supplier, Function<AsyncConfigurer, T> provider) {
+	private <T> Supplier<@Nullable T> adapt(SingletonSupplier<AsyncConfigurer> supplier, Function<AsyncConfigurer, @Nullable T> provider) {
 		return () -> {
 			AsyncConfigurer configurer = supplier.get();
 			return (configurer != null ? provider.apply(configurer) : null);

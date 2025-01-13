@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class JCacheInterceptor extends JCacheAspectSupport implements MethodInte
 	 * applying the default error handler if the supplier is not resolvable
 	 * @since 5.1
 	 */
-	public JCacheInterceptor(@Nullable Supplier<CacheErrorHandler> errorHandler) {
+	public JCacheInterceptor(@Nullable Supplier<? extends @Nullable CacheErrorHandler> errorHandler) {
 		this.errorHandler = new SingletonSupplier<>(errorHandler, SimpleCacheErrorHandler::new);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "NullAway"}) // TODO NullAway bug?
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void afterPropertiesSet() {
 		Configuration<?> configuration;
 		if (this.providerClass != null) {
@@ -332,13 +332,13 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		configuration.parameterNameProvider(new ParameterNameProvider() {
 			@Override
 			public List<String> getParameterNames(Constructor<?> constructor) {
-				String[] paramNames = discoverer.getParameterNames(constructor);
+				@Nullable String[] paramNames = discoverer.getParameterNames(constructor);
 				return (paramNames != null ? Arrays.asList(paramNames) :
 						defaultProvider.getParameterNames(constructor));
 			}
 			@Override
 			public List<String> getParameterNames(Method method) {
-				String[] paramNames = discoverer.getParameterNames(method);
+				@Nullable String[] paramNames = discoverer.getParameterNames(method);
 				return (paramNames != null ? Arrays.asList(paramNames) :
 						defaultProvider.getParameterNames(method));
 			}

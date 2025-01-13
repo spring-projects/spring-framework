@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,8 +154,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @since 5.1
 	 */
 	public void configure(
-			@Nullable Supplier<CacheErrorHandler> errorHandler, @Nullable Supplier<KeyGenerator> keyGenerator,
-			@Nullable Supplier<CacheResolver> cacheResolver, @Nullable Supplier<CacheManager> cacheManager) {
+			@Nullable Supplier<? extends @Nullable CacheErrorHandler> errorHandler, @Nullable Supplier<? extends @Nullable KeyGenerator> keyGenerator,
+			@Nullable Supplier<? extends @Nullable CacheResolver> cacheResolver, @Nullable Supplier<? extends @Nullable CacheManager> cacheManager) {
 
 		this.errorHandler = new SingletonSupplier<>(errorHandler, SimpleCacheErrorHandler::new);
 		this.keyGenerator = new SingletonSupplier<>(keyGenerator, SimpleKeyGenerator::new);
@@ -317,7 +317,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	protected CacheOperationContext getOperationContext(
-			CacheOperation operation, Method method, Object[] args, Object target, Class<?> targetClass) {
+			CacheOperation operation, Method method, @Nullable Object[] args, Object target, Class<?> targetClass) {
 
 		CacheOperationMetadata metadata = getCacheOperationMetadata(operation, method, targetClass);
 		return new CacheOperationContext(metadata, args, target);
@@ -391,7 +391,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		this.evaluator.clear();
 	}
 
-	protected @Nullable Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
+	protected @Nullable Object execute(CacheOperationInvoker invoker, Object target, Method method, @Nullable Object[] args) {
 		// Check whether aspect is enabled (to cope with cases where the AJ is pulled in automatically)
 		if (this.initialized) {
 			Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
@@ -726,7 +726,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		boolean processed;
 
 		public CacheOperationContexts(Collection<? extends CacheOperation> operations, Method method,
-				Object[] args, Object target, Class<?> targetClass) {
+				@Nullable Object[] args, Object target, Class<?> targetClass) {
 
 			this.contexts = new LinkedMultiValueMap<>(operations.size());
 			for (CacheOperation op : operations) {

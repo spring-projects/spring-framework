@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,7 +236,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	@Override
 	public final MethodValidationResult validateArguments(
 			Object target, Method method, MethodParameter @Nullable [] parameters,
-			Object[] arguments, Class<?>[] groups) {
+			@Nullable Object[] arguments, Class<?>[] groups) {
 
 		Set<ConstraintViolation<Object>> violations =
 				invokeValidatorForArguments(target, method, arguments, groups);
@@ -254,7 +254,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * Invoke the validator, and return the resulting violations.
 	 */
 	public final Set<ConstraintViolation<Object>> invokeValidatorForArguments(
-			Object target, Method method, Object[] arguments, Class<?>[] groups) {
+			Object target, Method method, @Nullable Object[] arguments, Class<?>[] groups) {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		try {
@@ -298,7 +298,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	private MethodValidationResult adaptViolations(
 			Object target, Method method, Set<ConstraintViolation<Object>> violations,
 			Function<Integer, MethodParameter> parameterFunction,
-			Function<Integer, Object> argumentFunction) {
+			Function<Integer, @Nullable Object> argumentFunction) {
 
 		Map<Path.Node, ParamValidationResultBuilder> paramViolations = new LinkedHashMap<>();
 		Map<Path.Node, ParamErrorsBuilder> nestedViolations = new LinkedHashMap<>();

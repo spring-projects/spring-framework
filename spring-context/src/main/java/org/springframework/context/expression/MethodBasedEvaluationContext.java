@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 		}
 
 		// Expose indexed variables as well as parameter names (if discoverable)
-		String[] paramNames = this.parameterNameDiscoverer.getParameterNames(this.method);
+		@Nullable String[] paramNames = this.parameterNameDiscoverer.getParameterNames(this.method);
 		int paramCount = (paramNames != null ? paramNames.length : this.method.getParameterCount());
 		int argsCount = this.arguments.length;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -908,9 +908,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 		else {
 			// A single data class constructor -> resolve constructor arguments from request parameters.
-			String[] paramNames = BeanUtils.getParameterNames(ctor);
+			@Nullable String[] paramNames = BeanUtils.getParameterNames(ctor);
 			Class<?>[] paramTypes = ctor.getParameterTypes();
-			Object[] args = new Object[paramTypes.length];
+			@Nullable Object[] args = new Object[paramTypes.length];
 			Set<String> failedParamNames = new HashSet<>(4);
 
 			for (int i = 0; i < paramNames.length; i++) {
@@ -1067,14 +1067,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <V> V @Nullable [] createArray(String paramPath, ResolvableType type, ValueResolver valueResolver) {
+	private <V> @Nullable V @Nullable [] createArray(String paramPath, ResolvableType type, ValueResolver valueResolver) {
 		ResolvableType elementType = type.getNested(2);
 		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
 		if (indexes == null) {
 			return null;
 		}
 		int size = (indexes.last() < this.autoGrowCollectionLimit ? indexes.last() + 1: 0);
-		V[] array = (V[]) Array.newInstance(elementType.resolve(), size);
+		@Nullable V[] array = (V[]) Array.newInstance(elementType.resolve(), size);
 		for (int index : indexes) {
 			array[index] = (V) createObject(elementType, paramPath + "[" + index + "].", valueResolver);
 		}
@@ -1096,7 +1096,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	private void validateConstructorArgument(
-			Class<?> constructorClass, String nestedPath, String name, @Nullable Object value) {
+			Class<?> constructorClass, String nestedPath, @Nullable String name, @Nullable Object value) {
 
 		Object[] hints = null;
 		if (this.targetType != null && this.targetType.getSource() instanceof MethodParameter parameter) {
