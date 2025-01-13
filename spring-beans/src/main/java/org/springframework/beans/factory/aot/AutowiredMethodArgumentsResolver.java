@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 		Assert.isInstanceOf(AutowireCapableBeanFactory.class, beanFactory);
 		AutowireCapableBeanFactory autowireCapableBeanFactory = (AutowireCapableBeanFactory) beanFactory;
 		int argumentCount = method.getParameterCount();
-		Object[] arguments = new Object[argumentCount];
+		@Nullable Object[] arguments = new Object[argumentCount];
 		Set<String> autowiredBeanNames = CollectionUtils.newLinkedHashSet(argumentCount);
 		TypeConverter typeConverter = beanFactory.getTypeConverter();
 		for (int i = 0; i < argumentCount; i++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		this.valueCodeGenerator = ValueCodeGenerator.with(allDelegates).scoped(generatedMethods);
 	}
 
-
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	CodeBlock generateCode(RootBeanDefinition beanDefinition) {
 		CodeBlock.Builder code = CodeBlock.builder();
 		addStatementForValue(code, beanDefinition, BeanDefinition::getScope,
@@ -344,7 +344,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private <B extends BeanDefinition, T> void addStatementForValue(
-			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, T> getter, String format) {
+			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, @Nullable T> getter, String format) {
 
 		addStatementForValue(code, beanDefinition, getter,
 				(defaultValue, actualValue) -> !Objects.equals(defaultValue, actualValue), format);
@@ -352,14 +352,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private <B extends BeanDefinition, T> void addStatementForValue(
 			CodeBlock.Builder code, BeanDefinition beanDefinition,
-			Function<B, T> getter, BiPredicate<T, T> filter, String format) {
+			Function<B, @Nullable T> getter, BiPredicate<T, T> filter, String format) {
 
 		addStatementForValue(code, beanDefinition, getter, filter, format, actualValue -> actualValue);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "NullAway"})
 	private <B extends BeanDefinition, T> void addStatementForValue(
-			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, T> getter,
+			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, @Nullable T> getter,
 			BiPredicate<T, T> filter, String format, Function<T, Object> formatter) {
 
 		T defaultValue = getter.apply((B) DEFAULT_BEAN_DEFINITION);

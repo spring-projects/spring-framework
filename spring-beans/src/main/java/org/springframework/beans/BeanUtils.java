@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,7 +196,7 @@ public abstract class BeanUtils {
 					return ctor.newInstance();
 				}
 				Class<?>[] parameterTypes = ctor.getParameterTypes();
-				Object[] argsWithDefaultValues = new Object[args.length];
+				@Nullable Object[] argsWithDefaultValues = new Object[args.length];
 				for (int i = 0 ; i < args.length; i++) {
 					if (args[i] == null) {
 						Class<?> parameterType = parameterTypes[i];
@@ -654,9 +654,10 @@ public abstract class BeanUtils {
 	 * @see ConstructorProperties
 	 * @see DefaultParameterNameDiscoverer
 	 */
-	public static String[] getParameterNames(Constructor<?> ctor) {
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	public static @Nullable String[] getParameterNames(Constructor<?> ctor) {
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
-		String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
+		@Nullable String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
 		Assert.state(paramNames.length == ctor.getParameterCount(),
 				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);

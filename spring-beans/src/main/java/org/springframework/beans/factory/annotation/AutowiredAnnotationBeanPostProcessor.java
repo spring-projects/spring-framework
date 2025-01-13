@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -812,7 +812,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				return;
 			}
 			Method method = (Method) this.member;
-			Object[] arguments;
+			@Nullable Object[] arguments;
 			if (this.cached) {
 				try {
 					arguments = resolveCachedArguments(beanName, this.cachedMethodArguments);
@@ -838,20 +838,20 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 		}
 
-		private Object @Nullable [] resolveCachedArguments(@Nullable String beanName, Object @Nullable [] cachedMethodArguments) {
+		private @Nullable Object @Nullable [] resolveCachedArguments(@Nullable String beanName, Object @Nullable [] cachedMethodArguments) {
 			if (cachedMethodArguments == null) {
 				return null;
 			}
-			Object[] arguments = new Object[cachedMethodArguments.length];
+			@Nullable Object[] arguments = new Object[cachedMethodArguments.length];
 			for (int i = 0; i < arguments.length; i++) {
 				arguments[i] = resolveCachedArgument(beanName, cachedMethodArguments[i]);
 			}
 			return arguments;
 		}
 
-		private Object @Nullable [] resolveMethodArguments(Method method, Object bean, @Nullable String beanName) {
+		private @Nullable Object @Nullable [] resolveMethodArguments(Method method, Object bean, @Nullable String beanName) {
 			int argumentCount = method.getParameterCount();
-			Object[] arguments = new Object[argumentCount];
+			@Nullable Object[] arguments = new Object[argumentCount];
 			DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
 			Set<String> autowiredBeanNames = CollectionUtils.newLinkedHashSet(argumentCount);
 			Assert.state(beanFactory != null, "No BeanFactory available");

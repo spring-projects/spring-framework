@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		String[] array = StringUtils.delimitedListToStringArray(text, this.separator, this.charsToDelete);
+		@Nullable String[] array = StringUtils.delimitedListToStringArray(text, this.separator, this.charsToDelete);
 		if (this.emptyArrayAsNull && array.length == 0) {
 			setValue(null);
 		}

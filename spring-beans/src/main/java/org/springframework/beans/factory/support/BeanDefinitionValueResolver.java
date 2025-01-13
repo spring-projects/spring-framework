@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,7 +287,7 @@ public class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof String[] values) {
 			boolean actuallyResolved = false;
-			Object[] resolvedValues = new Object[values.length];
+			@Nullable Object[] resolvedValues = new Object[values.length];
 			for (int i = 0; i < values.length; i++) {
 				String originalValue = values[i];
 				Object resolvedValue = doEvaluate(originalValue);
