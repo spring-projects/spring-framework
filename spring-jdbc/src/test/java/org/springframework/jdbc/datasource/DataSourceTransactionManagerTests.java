@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -1757,6 +1758,12 @@ public class DataSourceTransactionManagerTests {
 		verify(con).close();
 	}
 
+	@Test
+	void testTransactionManagerThrowsExceptionWhenDataSourceIsNull() {
+		assertThatThrownBy(() -> createTransactionManager(null))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Property 'dataSource' is required");
+	}
 
 	private static class TestTransactionSynchronization implements TransactionSynchronization {
 
