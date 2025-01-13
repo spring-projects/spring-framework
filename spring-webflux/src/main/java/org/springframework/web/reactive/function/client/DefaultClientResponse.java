@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,8 @@ class DefaultClientResponse implements ClientResponse {
 				});
 	}
 
-	private Function<ResolvableType, ?> initDecodeFunction(byte[] body, @Nullable MediaType contentType) {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	private Function<ResolvableType, ? extends @Nullable Object> initDecodeFunction(byte[] body, @Nullable MediaType contentType) {
 		return targetType -> {
 			if (ObjectUtils.isEmpty(body)) {
 				return null;
