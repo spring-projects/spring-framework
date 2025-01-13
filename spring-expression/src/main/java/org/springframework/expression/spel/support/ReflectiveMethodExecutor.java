@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 
 
 	@Override
-	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
+	public TypedValue execute(EvaluationContext context, Object target, @Nullable Object... arguments) throws AccessException {
 		try {
 			this.argumentConversionOccurred = ReflectionHelper.convertArguments(
 					context.getTypeConverter(), arguments, this.originalMethod, this.varargsPosition);

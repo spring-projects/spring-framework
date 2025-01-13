@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @throws EvaluationException if there is any problem invoking the method
 	 */
 	private TypedValue executeFunctionViaMethod(ExpressionState state, Method method) throws EvaluationException {
-		Object[] functionArgs = getArguments(state);
+		@Nullable Object[] functionArgs = getArguments(state);
 
 		if (!method.isVarArgs()) {
 			int declaredParamCount = method.getParameterCount();
@@ -175,7 +175,7 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @since 6.1
 	 */
 	private TypedValue executeFunctionViaMethodHandle(ExpressionState state, MethodHandle methodHandle) throws EvaluationException {
-		Object[] functionArgs = getArguments(state);
+		@Nullable Object[] functionArgs = getArguments(state);
 		MethodType declaredParams = methodHandle.type();
 		int spelParamCount = functionArgs.length;
 		int declaredParamCount = declaredParams.parameterCount();
@@ -280,9 +280,9 @@ public class FunctionReference extends SpelNodeImpl {
 	 * Compute the arguments to the function, they are the children of this expression node.
 	 * @return an array of argument values for the function call
 	 */
-	private Object[] getArguments(ExpressionState state) throws EvaluationException {
+	private @Nullable Object[] getArguments(ExpressionState state) throws EvaluationException {
 		// Compute arguments to the function
-		Object[] arguments = new Object[getChildCount()];
+		@Nullable Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
 			arguments[i] = this.children[i].getValueInternal(state).getValue();
 		}
