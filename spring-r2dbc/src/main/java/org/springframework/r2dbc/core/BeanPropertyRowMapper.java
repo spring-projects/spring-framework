@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	 * Remove the specified property from the mapped properties.
 	 * @param propertyName the property name (as used by property descriptors)
 	 */
-	protected void suppressProperty(String propertyName) {
+	protected void suppressProperty(@Nullable String propertyName) {
 		this.mappedProperties.remove(lowerCaseName(propertyName));
 		this.mappedProperties.remove(underscoreName(propertyName));
 	}
@@ -136,7 +136,10 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	 * @param name the original name
 	 * @return the converted name
 	 */
-	protected String lowerCaseName(String name) {
+	protected String lowerCaseName(@Nullable String name) {
+		if (!StringUtils.hasLength(name)) {
+			return "";
+		}
 		return name.toLowerCase(Locale.US);
 	}
 
@@ -147,7 +150,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	 * @return the converted name
 	 * @see #lowerCaseName
 	 */
-	protected String underscoreName(String name) {
+	protected String underscoreName(@Nullable String name) {
 		if (!StringUtils.hasLength(name)) {
 			return "";
 		}
