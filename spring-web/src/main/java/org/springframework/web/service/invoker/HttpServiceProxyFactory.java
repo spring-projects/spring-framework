@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,7 +233,7 @@ public final class HttpServiceProxyFactory {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
 			if (httpServiceMethod != null) {
-				Object[] arguments = KotlinDetector.isSuspendingFunction(method) ?
+				@Nullable Object[] arguments = KotlinDetector.isSuspendingFunction(method) ?
 						resolveCoroutinesArguments(invocation.getArguments()) : invocation.getArguments();
 				return httpServiceMethod.invoke(arguments);
 			}
@@ -246,7 +246,7 @@ public final class HttpServiceProxyFactory {
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
 
-		private static Object[] resolveCoroutinesArguments(Object[] args) {
+		private static Object[] resolveCoroutinesArguments(@Nullable Object[] args) {
 			Object[] functionArgs = new Object[args.length - 1];
 			System.arraycopy(args, 0, functionArgs, 0, args.length - 1);
 			return functionArgs;

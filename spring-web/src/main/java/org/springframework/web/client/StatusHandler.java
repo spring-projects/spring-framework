@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,8 @@ final class StatusHandler {
 				});
 	}
 
-	private static Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
+	@SuppressWarnings("NullAway")
+	private static Function<ResolvableType, ? extends @Nullable Object> initBodyConvertFunction(ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 		Assert.state(!CollectionUtils.isEmpty(messageConverters), "Expected message converters");
 		return resolvableType -> {
 			try {

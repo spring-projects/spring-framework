@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,13 +127,13 @@ final class HttpServiceMethod {
 	}
 
 
-	public @Nullable Object invoke(Object[] arguments) {
+	public @Nullable Object invoke(@Nullable Object[] arguments) {
 		HttpRequestValues.Builder requestValues = this.requestValuesInitializer.initializeRequestValuesBuilder();
 		applyArguments(requestValues, arguments);
 		return this.responseFunction.execute(requestValues.build());
 	}
 
-	private void applyArguments(HttpRequestValues.Builder requestValues, Object[] arguments) {
+	private void applyArguments(HttpRequestValues.Builder requestValues, @Nullable Object[] arguments) {
 		Assert.isTrue(arguments.length == this.parameters.length, "Method argument mismatch");
 		for (int i = 0; i < arguments.length; i++) {
 			Object value = arguments[i];
@@ -383,10 +383,10 @@ final class HttpServiceMethod {
 	}
 
 	private record ExchangeResponseFunction(
-			Function<HttpRequestValues, Object> responseFunction) implements ResponseFunction {
+			Function<HttpRequestValues, @Nullable Object> responseFunction) implements ResponseFunction {
 
 		@Override
-		public Object execute(HttpRequestValues requestValues) {
+		public @Nullable Object execute(HttpRequestValues requestValues) {
 			return this.responseFunction.apply(requestValues);
 		}
 
@@ -403,7 +403,7 @@ final class HttpServiceMethod {
 			MethodParameter param = new MethodParameter(method, -1).nestedIfOptional();
 			Class<?> paramType = param.getNestedParameterType();
 
-			Function<HttpRequestValues, Object> responseFunction;
+			Function<HttpRequestValues, @Nullable Object> responseFunction;
 			if (ClassUtils.isVoidType(paramType)) {
 				responseFunction = requestValues -> {
 					client.exchange(requestValues);

@@ -738,14 +738,14 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		private final String uriTemplate;
 
-		private final Object @Nullable [] uriVarsArray;
+		private final @Nullable Object @Nullable [] uriVarsArray;
 
-		private final @Nullable Map<String, ?> uriVarsMap;
+		private final @Nullable Map<String, ? extends @Nullable Object> uriVarsMap;
 
 		UriTemplateRequestEntity(
 				@Nullable T body, @Nullable HttpHeaders headers,
 				@Nullable HttpMethod method, @Nullable Type type, String uriTemplate,
-				Object @Nullable [] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
+				@Nullable Object @Nullable [] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
 
 			super(body, headers, method, null, type);
 			this.uriTemplate = uriTemplate;
@@ -757,11 +757,11 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return this.uriTemplate;
 		}
 
-		public Object @Nullable [] getVars() {
+		public @Nullable Object @Nullable [] getVars() {
 			return this.uriVarsArray;
 		}
 
-		public @Nullable Map<String, ?> getVarsMap() {
+		public @Nullable Map<String, ? extends @Nullable Object> getVarsMap() {
 			return this.uriVarsMap;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class RestClientResponseException extends RestClientException {
 
 	private final @Nullable String responseCharset;
 
-	private transient @Nullable Function<ResolvableType, ?> bodyConvertFunction;
+	private transient @Nullable Function<ResolvableType, ? extends @Nullable Object> bodyConvertFunction;
 
 
 	/**
@@ -200,7 +200,7 @@ public class RestClientResponseException extends RestClientException {
 	 * @param bodyConvertFunction the function to use
 	 * @since 6.0
 	 */
-	public void setBodyConvertFunction(Function<ResolvableType, ?> bodyConvertFunction) {
+	public void setBodyConvertFunction(Function<ResolvableType, ? extends @Nullable Object> bodyConvertFunction) {
 		this.bodyConvertFunction = bodyConvertFunction;
 	}
 

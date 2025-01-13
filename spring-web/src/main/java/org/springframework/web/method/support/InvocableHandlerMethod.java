@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,9 +172,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @see #doInvoke
 	 */
 	public @Nullable Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
-			Object... providedArgs) throws Exception {
+			@Nullable Object... providedArgs) throws Exception {
 
-		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
+		@Nullable Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
@@ -200,15 +200,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * <p>The resulting array will be passed into {@link #doInvoke}.
 	 * @since 5.1.2
 	 */
-	protected Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
-			Object... providedArgs) throws Exception {
+	protected @Nullable Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
+			@Nullable Object... providedArgs) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
 		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
 
-		Object[] args = new Object[parameters.length];
+		@Nullable Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
@@ -239,7 +239,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
-	protected @Nullable Object doInvoke(Object... args) throws Exception {
+	protected @Nullable Object doInvoke(@Nullable Object... args) throws Exception {
 		Method method = getBridgedMethod();
 		try {
 			if (KotlinDetector.isKotlinReflectPresent()) {
@@ -285,7 +285,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * instead.
 	 * @since 6.0
 	 */
-	protected Object invokeSuspendingFunction(Method method, Object target, Object[] args) {
+	protected Object invokeSuspendingFunction(Method method, Object target, @Nullable Object[] args) {
 		Object result = CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 		return (result instanceof Mono<?> mono ? mono.handle(KotlinDelegate::handleResult) : result);
 	}
@@ -297,7 +297,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static class KotlinDelegate {
 
 		@SuppressWarnings("DataFlowIssue")
-		public static @Nullable Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		public static @Nullable Object invokeFunction(Method method, Object target, @Nullable Object[] args) throws
+				InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			// For property accessors
 			if (function == null) {

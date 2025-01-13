@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -357,7 +357,7 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * beans, and others). {@code @Controller}'s that require proxying should prefer
 	 * class-based proxy mechanisms.
 	 */
-	protected void assertTargetBean(Method method, Object targetBean, Object[] args) {
+	protected void assertTargetBean(Method method, Object targetBean, @Nullable Object[] args) {
 		Class<?> methodDeclaringClass = method.getDeclaringClass();
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
@@ -369,11 +369,14 @@ public class HandlerMethod extends AnnotatedMethod {
 		}
 	}
 
-	protected String formatInvokeError(String text, Object[] args) {
+	protected String formatInvokeError(String text, @Nullable Object[] args) {
 		String formattedArgs = IntStream.range(0, args.length)
-				.mapToObj(i -> (args[i] != null ?
-						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
-						"[" + i + "] [null]"))
+				.mapToObj(i -> {
+					Object arg = args[i];
+					return (arg != null ?
+							"[" + i + "] [type=" +arg.getClass().getName() + "] [value=" + arg + "]" :
+							"[" + i + "] [null]");
+				})
 				.collect(Collectors.joining(",\n", " ", " "));
 		return text + "\n" +
 				"Controller [" + getBeanType().getName() + "]\n" +

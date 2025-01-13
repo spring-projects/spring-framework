@@ -140,6 +140,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * with a Map of variables.
 	 * @param defaultUriVariables default URI variable values
 	 */
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 	public void setDefaultUriVariables(@Nullable Map<String, ? extends @Nullable Object> defaultUriVariables) {
 		if (defaultUriVariables != null) {
 			if (this.defaultUriVariables == null) {
@@ -431,6 +432,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 		public URI build(Map<String, ?> uriVars) {
 			if (!CollectionUtils.isEmpty(defaultUriVariables)) {
 				Map<String, Object> map = new HashMap<>(defaultUriVariables.size() + uriVars.size());
@@ -446,6 +448,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 		public URI build(@Nullable Object... uriVars) {
 			if (ObjectUtils.isEmpty(uriVars) && !CollectionUtils.isEmpty(defaultUriVariables)) {
 				return build(Collections.emptyMap());
