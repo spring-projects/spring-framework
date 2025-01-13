@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,11 @@ public class FlightRecorderApplicationStartup implements ApplicationStartup {
 
 	@Override
 	public StartupStep start(String name) {
+		Long parentId = this.currentSteps.getFirst();
 		long sequenceId = this.currentSequenceId.incrementAndGet();
 		this.currentSteps.offerFirst(sequenceId);
 		return new FlightRecorderStartupStep(sequenceId, name,
-				this.currentSteps.getFirst(), committedStep -> this.currentSteps.removeFirstOccurrence(sequenceId));
+				parentId, committedStep -> this.currentSteps.removeFirstOccurrence(sequenceId));
 	}
 
 }
