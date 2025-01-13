@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 	private final ProxyMethodInvocation methodInvocation;
 
-	private Object @Nullable [] args;
+	private @Nullable Object @Nullable [] args;
 
 	/** Lazily initialized signature object. */
 	private @Nullable Signature signature;
@@ -114,7 +114,8 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	@Override
-	public Object[] getArgs() {
+	@SuppressWarnings("NullAway") // Overridden method does not define nullness
+	public @Nullable Object[] getArgs() {
 		if (this.args == null) {
 			this.args = this.methodInvocation.getArguments().clone();
 		}
@@ -174,7 +175,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 */
 	private class MethodSignatureImpl implements MethodSignature {
 
-		private volatile String @Nullable [] parameterNames;
+		private volatile @Nullable String @Nullable [] parameterNames;
 
 		@Override
 		public String getName() {
@@ -212,8 +213,9 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		}
 
 		@Override
-		public String @Nullable [] getParameterNames() {
-			String[] parameterNames = this.parameterNames;
+		@SuppressWarnings("NullAway") // Overridden method does not define nullness
+		public @Nullable String @Nullable [] getParameterNames() {
+			@Nullable String[] parameterNames = this.parameterNames;
 			if (parameterNames == null) {
 				parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
 				this.parameterNames = parameterNames;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -258,10 +259,11 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * or in an advice annotation.
 	 * @param argumentNames list of argument names
 	 */
-	public void setArgumentNamesFromStringArray(String... argumentNames) {
+	public void setArgumentNamesFromStringArray(@Nullable String... argumentNames) {
 		this.argumentNames = new String[argumentNames.length];
 		for (int i = 0; i < argumentNames.length; i++) {
-			this.argumentNames[i] = argumentNames[i].strip();
+			String argumentName = argumentNames[i];
+			this.argumentNames[i] = argumentName != null ? argumentName.strip() : null;
 			if (!isVariableName(this.argumentNames[i])) {
 				throw new IllegalArgumentException(
 						"'argumentNames' property of AbstractAspectJAdvice contains an argument name '" +
@@ -274,7 +276,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			if (firstArgType == JoinPoint.class ||
 					firstArgType == ProceedingJoinPoint.class ||
 					firstArgType == JoinPoint.StaticPart.class) {
-				String[] oldNames = this.argumentNames;
+				@Nullable String[] oldNames = this.argumentNames;
 				this.argumentNames = new String[oldNames.length + 1];
 				this.argumentNames[0] = "THIS_JOIN_POINT";
 				System.arraycopy(oldNames, 0, this.argumentNames, 1, oldNames.length);
@@ -346,7 +348,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.discoveredThrowingType;
 	}
 
-	private static boolean isVariableName(String name) {
+	@Contract("null -> false")
+	private static boolean isVariableName(@Nullable String name) {
 		return AspectJProxyUtils.isVariableName(name);
 	}
 
@@ -456,6 +459,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return discoverer;
 	}
 
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private void bindExplicitArguments(int numArgumentsLeftToBind) {
 		Assert.state(this.argumentNames != null, "No argument names available");
 		this.argumentBindings = new HashMap<>();
@@ -623,8 +627,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return invokeAdviceMethodWithGivenArgs(argBinding(jp, jpMatch, returnValue, t));
 	}
 
-	protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
-		Object[] actualArgs = args;
+	protected Object invokeAdviceMethodWithGivenArgs(@Nullable Object[] args) throws Throwable {
+		@Nullable Object[] actualArgs = args;
 		if (this.aspectJAdviceMethod.getParameterCount() == 0) {
 			actualArgs = null;
 		}

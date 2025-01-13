@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,8 +116,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * applying the corresponding default if a supplier is not resolvable.
 	 * @since 5.1
 	 */
-	public void configure(@Nullable Supplier<Executor> defaultExecutor,
-			@Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler) {
+	public void configure(@Nullable Supplier<? extends @Nullable Executor> defaultExecutor,
+			@Nullable Supplier<? extends @Nullable AsyncUncaughtExceptionHandler> exceptionHandler) {
 
 		this.defaultExecutor = new SingletonSupplier<>(defaultExecutor, () -> getDefaultExecutor(this.beanFactory));
 		this.exceptionHandler = new SingletonSupplier<>(exceptionHandler, SimpleAsyncUncaughtExceptionHandler::new);
