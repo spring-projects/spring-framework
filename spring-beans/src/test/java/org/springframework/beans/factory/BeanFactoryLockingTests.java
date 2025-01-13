@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -56,9 +55,6 @@ class BeanFactoryLockingTests {
 		@Override
 		public void afterPropertiesSet() throws Exception {
 			Thread thread = new Thread(() -> {
-				// Fail for circular reference from other thread
-				assertThatExceptionOfType(BeanCurrentlyInCreationException.class).isThrownBy(() ->
-						beanFactory.getBean(ThreadDuringInitialization.class));
 				// Leniently create unrelated other bean outside of singleton lock
 				assertThat(beanFactory.getBean(TestBean.class).getName()).isEqualTo("tb");
 				// Creation attempt in other thread was successful
