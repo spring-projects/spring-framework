@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 					.accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(Employee.class)
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);
-			assertThat(RuntimeHintsPredicates.reflection().onMethod(Employee.class, "preRemove"))
+			assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(Employee.class, "preRemove"))
 					.accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeId.class)
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);

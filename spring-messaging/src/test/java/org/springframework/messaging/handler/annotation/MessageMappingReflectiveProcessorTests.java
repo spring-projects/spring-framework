@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,14 +123,14 @@ class MessageMappingReflectiveProcessorTests {
 	void registerReflectiveHintsForMethodWithSubscribeMapping() throws NoSuchMethodException {
 		Method method = SampleController.class.getDeclaredMethod("handleSubscribe");
 		processor.registerReflectionHints(hints.reflection(), method);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleController.class, "handleSubscribe")).accepts(hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleController.class, "handleSubscribe")).accepts(hints);
 	}
 
 	@Test
 	void registerReflectiveHintsForMethodWithMessageExceptionHandler() throws NoSuchMethodException {
 		Method method = SampleController.class.getDeclaredMethod("handleIOException");
 		processor.registerReflectionHints(hints.reflection(), method);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleController.class, "handleIOException")).accepts(hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleController.class, "handleIOException")).accepts(hints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(IOException.class)).accepts(hints);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,13 @@ class ObjectToObjectConverterRuntimeHintsTests {
 
 	@Test
 	void javaSqlDateHasHints() throws NoSuchMethodException {
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(java.sql.Date.class, "toLocalDate")).accepts(this.hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(java.sql.Date.class.getMethod("valueOf", LocalDate.class))).accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(java.sql.Date.class, "toLocalDate")).accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(java.sql.Date.class.getMethod("valueOf", LocalDate.class))).accepts(this.hints);
 	}
 
 	@Test
 	void uriHasHints() throws NoSuchMethodException {
-		assertThat(RuntimeHintsPredicates.reflection().onConstructor(URI.class.getConstructor(String.class))).accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(URI.class)).accepts(this.hints);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,19 @@ class RSocketExchangeReflectiveProcessorTests {
 		processor.registerReflectionHints(hints.reflection(), method);
 
 		assertThat(reflection().onType(SampleService.class)).accepts(hints);
-		assertThat(reflection().onMethod(SampleService.class, "get")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(SampleService.class, "get")).accepts(hints);
 		assertThat(reflection().onType(Response.class)).accepts(hints);
-		assertThat(reflection().onMethod(Response.class, "getMessage")).accepts(hints);
-		assertThat(reflection().onMethod(Response.class, "setMessage")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Response.class, "getMessage")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Response.class, "setMessage")).accepts(hints);
 		assertThat(reflection().onType(Request.class)).accepts(hints);
-		assertThat(reflection().onMethod(Request.class, "getMessage")).accepts(hints);
-		assertThat(reflection().onMethod(Request.class, "setMessage")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Request.class, "getMessage")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Request.class, "setMessage")).accepts(hints);
 		assertThat(reflection().onType(Variable.class)).accepts(hints);
-		assertThat(reflection().onMethod(Variable.class, "getValue")).accepts(hints);
-		assertThat(reflection().onMethod(Variable.class, "setValue")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Variable.class, "getValue")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Variable.class, "setValue")).accepts(hints);
 		assertThat(reflection().onType(Metadata.class)).accepts(hints);
-		assertThat(reflection().onMethod(Metadata.class, "getValue")).accepts(hints);
-		assertThat(reflection().onMethod(Metadata.class, "setValue")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Metadata.class, "getValue")).accepts(hints);
+		assertThat(reflection().onMethodInvocation(Metadata.class, "setValue")).accepts(hints);
 	}
 
 

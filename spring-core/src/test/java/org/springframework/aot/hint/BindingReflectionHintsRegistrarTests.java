@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ class BindingReflectionHintsRegistrarTests {
 	@Test
 	void registerTypeForSerializationWithRecordWithProperty() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithProperty.class);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleRecordWithProperty.class, "getNameProperty"))
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleRecordWithProperty.class, "getNameProperty"))
 				.accepts(this.hints);
 	}
 
@@ -267,18 +267,18 @@ class BindingReflectionHintsRegistrarTests {
 	@Test
 	void registerTypeForJacksonAnnotations() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithJsonProperty.class);
-		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
+		assertThat(RuntimeHintsPredicates.reflection().onFieldInvocation(SampleClassWithJsonProperty.class, "privateField"))
 				.accepts(this.hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithJsonProperty.class, "packagePrivateMethod").invoke())
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleClassWithJsonProperty.class, "packagePrivateMethod"))
 				.accepts(this.hints);
 	}
 
 	@Test
 	void registerTypeForInheritedJacksonAnnotations() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithInheritedJsonProperty.class);
-		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
+		assertThat(RuntimeHintsPredicates.reflection().onFieldInvocation(SampleClassWithJsonProperty.class, "privateField"))
 				.accepts(this.hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithJsonProperty.class, "packagePrivateMethod").invoke())
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleClassWithJsonProperty.class, "packagePrivateMethod"))
 				.accepts(this.hints);
 	}
 

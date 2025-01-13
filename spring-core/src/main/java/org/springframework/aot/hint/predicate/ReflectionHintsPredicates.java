@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,10 +81,24 @@ public class ReflectionHintsPredicates {
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param constructor the constructor
 	 * @return the {@link RuntimeHints} predicate
+	 * @deprecated since 7.0 in favor of {@link #onConstructorInvocation(Constructor)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public ConstructorHintPredicate onConstructor(Constructor<?> constructor) {
 		Assert.notNull(constructor, "'constructor' must not be null");
 		return new ConstructorHintPredicate(constructor);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the given constructor.
+	 * @param constructor the constructor
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onConstructorInvocation(Constructor<?> constructor) {
+		Assert.notNull(constructor, "'constructor' must not be null");
+		return new ConstructorHintPredicate(constructor).invoke();
 	}
 
 	/**
@@ -93,10 +107,24 @@ public class ReflectionHintsPredicates {
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param method the method
 	 * @return the {@link RuntimeHints} predicate
+	 * @deprecated since 7.0 in favor of {@link #onMethodInvocation(Method)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MethodHintPredicate onMethod(Method method) {
 		Assert.notNull(method, "'method' must not be null");
 		return new MethodHintPredicate(method);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the given method.
+	 * @param method the method
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onMethodInvocation(Method method) {
+		Assert.notNull(method, "'method' must not be null");
+		return new MethodHintPredicate(method).invoke();
 	}
 
 	/**
@@ -108,11 +136,29 @@ public class ReflectionHintsPredicates {
 	 * @param methodName the method name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @deprecated since 7.0 in favor of {@link #onMethodInvocation(Class, String)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MethodHintPredicate onMethod(Class<?> type, String methodName) {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.hasText(methodName, "'methodName' must not be empty");
 		return new MethodHintPredicate(getMethod(type, methodName));
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the method that matches the given selector.
+	 * This looks up a method on the given type with the expected name, if unique.
+	 * @param type the type holding the method
+	 * @param methodName the method name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onMethodInvocation(Class<?> type, String methodName) {
+		Assert.notNull(type, "'type' must not be null");
+		Assert.hasText(methodName, "'methodName' must not be empty");
+		return new MethodHintPredicate(getMethod(type, methodName)).invoke();
 	}
 
 	/**
@@ -125,11 +171,30 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws ClassNotFoundException if the class cannot be resolved.
 	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @deprecated since 7.0 in favor of {@link #onMethodInvocation(String, String)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MethodHintPredicate onMethod(String className, String methodName) throws ClassNotFoundException {
 		Assert.hasText(className, "'className' must not be empty");
 		Assert.hasText(methodName, "'methodName' must not be empty");
 		return onMethod(Class.forName(className), methodName);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the method that matches the given selector.
+	 * This looks up a method on the given type with the expected name, if unique.
+	 * @param className the name of the class holding the method
+	 * @param methodName the method name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onMethodInvocation(String className, String methodName) throws ClassNotFoundException {
+		Assert.hasText(className, "'className' must not be empty");
+		Assert.hasText(methodName, "'methodName' must not be empty");
+		return onMethod(Class.forName(className), methodName).invoke();
 	}
 
 	private Method getMethod(Class<?> type, String methodName) {
@@ -155,7 +220,10 @@ public class ReflectionHintsPredicates {
 	 * @param fieldName the field name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(Class, String)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public FieldHintPredicate onField(Class<?> type, String fieldName) {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.hasText(fieldName, "'fieldName' must not be empty");
@@ -164,6 +232,25 @@ public class ReflectionHintsPredicates {
 			throw new IllegalArgumentException("No field named '%s' on class %s".formatted(fieldName, type.getName()));
 		}
 		return new FieldHintPredicate(field);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the field that matches the given selector.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * @param type the type holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldInvocation(Class<?> type, String fieldName) {
+		Assert.notNull(type, "'type' must not be null");
+		Assert.hasText(fieldName, "'fieldName' must not be empty");
+		Field field = ReflectionUtils.findField(type, fieldName);
+		if (field == null) {
+			throw new IllegalArgumentException("No field named '%s' on class %s".formatted(fieldName, type.getName()));
+		}
+		return new FieldHintPredicate(field).invocation();
 	}
 
 	/**
@@ -176,11 +263,30 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws ClassNotFoundException if the class cannot be resolved.
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(String, String)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public FieldHintPredicate onField(String className, String fieldName) throws ClassNotFoundException {
 		Assert.hasText(className, "'className' must not be empty");
 		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		return onField(Class.forName(className), fieldName);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the field that matches the given selector.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * @param className the name of the class holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldInvocation(String className, String fieldName) throws ClassNotFoundException {
+		Assert.hasText(className, "'className' must not be empty");
+		Assert.hasText(fieldName, "'fieldName' must not be empty");
+		return onField(Class.forName(className), fieldName).invocation();
 	}
 
 	/**
@@ -189,10 +295,24 @@ public class ReflectionHintsPredicates {
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param field the field
 	 * @return the {@link RuntimeHints} predicate
+	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(Field)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public FieldHintPredicate onField(Field field) {
 		Assert.notNull(field, "'field' must not be null");
 		return new FieldHintPredicate(field);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the given field.
+	 * @param field the field
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldInvocation(Field field) {
+		Assert.notNull(field, "'field' must not be null");
+		return new FieldHintPredicate(field).invocation();
 	}
 
 

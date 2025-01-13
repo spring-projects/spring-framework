@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,146 +157,79 @@ class ReflectionHintsPredicatesTests {
 	class ReflectionOnConstructor {
 
 		@Test
-		void constructorIntrospectionDoesNotMatchMissingHint() {
-			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
-		void constructorIntrospectionMatchesTypeHint() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
-		void constructorIntrospectionMatchesConstructorHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withConstructor(Collections.emptyList(), ExecutableMode.INTROSPECT));
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
-		void constructorIntrospectionMatchesIntrospectPublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
-		void constructorIntrospectionMatchesInvokePublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
-		void constructorIntrospectionMatchesIntrospectDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
-		void constructorIntrospectionMatchesInvokeDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
-		}
-
-		@Test
 		void constructorInvocationDoesNotMatchConstructorHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.
 					withConstructor(Collections.emptyList(), ExecutableMode.INTROSPECT));
-			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(publicConstructor));
 		}
 
 		@Test
 		void constructorInvocationMatchesConstructorInvocationHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.
 					withConstructor(Collections.emptyList(), ExecutableMode.INVOKE));
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).invoke());
+			assertPredicateMatches(reflection.onConstructorInvocation(publicConstructor));
 		}
 
 		@Test
 		void constructorInvocationDoesNotMatchIntrospectPublicConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
-			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(publicConstructor));
 		}
 
 		@Test
 		void constructorInvocationMatchesInvokePublicConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).invoke());
+			assertPredicateMatches(reflection.onConstructorInvocation(publicConstructor));
 		}
 
 		@Test
 		void constructorInvocationDoesNotMatchIntrospectDeclaredConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
-			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(publicConstructor));
 		}
 
 		@Test
 		void constructorInvocationMatchesInvokeDeclaredConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(publicConstructor).invoke());
-		}
-
-		@Test
-		void privateConstructorIntrospectionMatchesTypeHint() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateMatches(reflection.onConstructor(privateConstructor).introspect());
-		}
-
-		@Test
-		void privateConstructorIntrospectionMatchesConstructorHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withConstructor(TypeReference.listOf(String.class), ExecutableMode.INTROSPECT));
-			assertPredicateMatches(reflection.onConstructor(privateConstructor).introspect());
-		}
-
-		@Test
-		void privateConstructorIntrospectionMatchesIntrospectDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(privateConstructor).introspect());
-		}
-
-		@Test
-		void privateConstructorIntrospectionMatchesInvokeDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(privateConstructor).introspect());
+			assertPredicateMatches(reflection.onConstructorInvocation(publicConstructor));
 		}
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchConstructorHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
 					typeHint.withConstructor(TypeReference.listOf(String.class), ExecutableMode.INTROSPECT));
-			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(privateConstructor));
 		}
 
 		@Test
 		void privateConstructorInvocationMatchesConstructorInvocationHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
 					typeHint.withConstructor(TypeReference.listOf(String.class), ExecutableMode.INVOKE));
-			assertPredicateMatches(reflection.onConstructor(privateConstructor).invoke());
+			assertPredicateMatches(reflection.onConstructorInvocation(privateConstructor));
 		}
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchIntrospectPublicConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
-			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(privateConstructor));
 		}
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchInvokePublicConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
-			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(privateConstructor));
 		}
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchIntrospectDeclaredConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
-			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
+			assertPredicateDoesNotMatch(reflection.onConstructorInvocation(privateConstructor));
 		}
 
 		@Test
 		void privateConstructorInvocationMatchesInvokeDeclaredConstructors() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-			assertPredicateMatches(reflection.onConstructor(privateConstructor).invoke());
+			assertPredicateMatches(reflection.onConstructorInvocation(privateConstructor));
 		}
 
 	}
@@ -448,7 +381,7 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void shouldFailForUnknownClass() {
-			assertThatThrownBy(() -> reflection.onField("com.example.DoesNotExist", "missingField"))
+			assertThatThrownBy(() -> reflection.onFieldInvocation("com.example.DoesNotExist", "missingField"))
 					.isInstanceOf(ClassNotFoundException.class);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -568,7 +568,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
 		assertThat(methodNames).allMatch(methodName -> RuntimeHintsPredicates.reflection()
-				.onMethod(beanType, methodName).invoke()
+				.onMethodInvocation(beanType, methodName)
 				.test(this.generationContext.getRuntimeHints()));
 	}
 
