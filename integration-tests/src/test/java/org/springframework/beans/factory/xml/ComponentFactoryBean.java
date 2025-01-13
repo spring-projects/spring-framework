@@ -35,7 +35,7 @@ public class ComponentFactoryBean implements FactoryBean<Component> {
 
 	@Override
 	public Component getObject() {
-		if (this.children != null && this.children.size() > 0) {
+		if (this.children != null && !this.children.isEmpty()) {
 			for (Component child : children) {
 				this.parent.addComponent(child);
 			}

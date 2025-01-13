@@ -372,7 +372,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 					uriTemplateVariables.putAll(decodedVars);
 				}
 			}
-			if (logger.isTraceEnabled() && uriTemplateVariables.size() > 0) {
+			if (logger.isTraceEnabled() && !uriTemplateVariables.isEmpty()) {
 				logger.trace("URI variables " + uriTemplateVariables);
 			}
 			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
