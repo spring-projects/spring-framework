@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,10 +150,11 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 		}
 		RequestConditionHolder[] matchingConditions = new RequestConditionHolder[getLength()];
 		for (int i = 0; i < getLength(); i++) {
-			matchingConditions[i] = this.requestConditions[i].getMatchingCondition(request);
-			if (matchingConditions[i] == null) {
+			RequestConditionHolder matchingCondition = this.requestConditions[i].getMatchingCondition(request);
+			if (matchingCondition == null) {
 				return null;
 			}
+			matchingConditions[i] = matchingCondition;
 		}
 		return new CompositeRequestCondition(matchingConditions);
 	}

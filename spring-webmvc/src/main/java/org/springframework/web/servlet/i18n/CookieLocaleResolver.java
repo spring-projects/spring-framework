@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 		return (defaultLocale != null ? defaultLocale : request.getLocale());
 	};
 
-	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
+	private Function<HttpServletRequest, @Nullable TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
 
 
 	/**
@@ -280,7 +280,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	 * @since 6.0
 	 * @see #setDefaultTimeZone
 	 */
-	public void setDefaultTimeZoneFunction(Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction) {
+	public void setDefaultTimeZoneFunction(Function<HttpServletRequest, @Nullable TimeZone> defaultTimeZoneFunction) {
 		Assert.notNull(defaultTimeZoneFunction, "defaultTimeZoneFunction must not be null");
 		this.defaultTimeZoneFunction = defaultTimeZoneFunction;
 	}

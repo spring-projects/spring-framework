@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.beans.PropertyEditor;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
@@ -60,7 +61,7 @@ public class BindStatus {
 
 	private final @Nullable Errors errors;
 
-	private final String[] errorCodes;
+	private final @Nullable String[] errorCodes;
 
 	private String @Nullable [] errorMessages;
 
@@ -163,8 +164,8 @@ public class BindStatus {
 	/**
 	 * Extract the error codes from the ObjectError list.
 	 */
-	private static String[] initErrorCodes(List<? extends ObjectError> objectErrors) {
-		String[] errorCodes = new String[objectErrors.size()];
+	private static @Nullable String[] initErrorCodes(List<? extends ObjectError> objectErrors) {
+		@Nullable String[] errorCodes = new String[objectErrors.size()];
 		for (int i = 0; i < objectErrors.size(); i++) {
 			ObjectError error = objectErrors.get(i);
 			errorCodes[i] = error.getCode();
@@ -247,7 +248,7 @@ public class BindStatus {
 	 * Return the error codes for the field or object, if any.
 	 * Returns an empty array instead of null if none.
 	 */
-	public String[] getErrorCodes() {
+	public @Nullable String[] getErrorCodes() {
 		return this.errorCodes;
 	}
 
@@ -255,7 +256,8 @@ public class BindStatus {
 	 * Return the first error codes for the field or object, if any.
 	 */
 	public String getErrorCode() {
-		return (this.errorCodes.length > 0 ? this.errorCodes[0] : "");
+		return (this.errorCodes.length > 0 ? Objects.requireNonNull(this.errorCodes[0],
+				"Error code must not be null") : "");
 	}
 
 	/**
