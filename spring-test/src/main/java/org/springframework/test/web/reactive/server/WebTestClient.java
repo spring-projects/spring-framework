@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -918,26 +918,26 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body is equal to the given value.
 		 */
-		<T extends S> T isEqualTo(B expected);
+		<T extends S> T isEqualTo(@Nullable B expected);
 
 		/**
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Matcher<? super B> matcher);
+		<T extends S> T value(Matcher<? super @Nullable B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher);
+		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Consumer<B> consumer);
+		<T extends S> T value(Consumer<@Nullable B> consumer);
 
 		/**
 		 * Assert the exchange result with the given {@link Consumer}.
@@ -957,7 +957,7 @@ public interface WebTestClient {
 	 *
 	 * @param <E> the body list element type
 	 */
-	interface ListBodySpec<E> extends BodySpec<List<E>, ListBodySpec<E>> {
+	interface ListBodySpec<E> extends BodySpec<List<@Nullable E>, ListBodySpec<E>> {
 
 		/**
 		 * Assert the extracted list of values is of the given size.
@@ -970,14 +970,14 @@ public interface WebTestClient {
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> contains(E... elements);
+		ListBodySpec<E> contains(@Nullable E... elements);
 
 		/**
 		 * Assert the extracted list of values doesn't contain the given elements.
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> doesNotContain(E... elements);
+		ListBodySpec<E> doesNotContain(@Nullable E... elements);
 	}
 
 

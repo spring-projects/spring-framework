@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ final class MockMvcFilterDecorator implements Filter {
 
 	private final Filter delegate;
 
-	private final @Nullable Function<ServletContext, FilterConfig> filterConfigInitializer;
+	private final @Nullable Function<@Nullable ServletContext, FilterConfig> filterConfigInitializer;
 
 	private final @Nullable EnumSet<DispatcherType> dispatcherTypes;
 
@@ -103,7 +103,7 @@ final class MockMvcFilterDecorator implements Filter {
 		this.hasPatterns = initPatterns(urlPatterns);
 	}
 
-	private static Function<ServletContext, FilterConfig> getFilterConfigInitializer(
+	private static Function<@Nullable ServletContext, FilterConfig> getFilterConfigInitializer(
 			Filter delegate, @Nullable String filterName, @Nullable Map<String, String> initParams) {
 
 		String className = delegate.getClass().getName();

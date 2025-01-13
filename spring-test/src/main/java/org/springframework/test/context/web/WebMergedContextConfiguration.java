@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], List, String[], Set, String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}
 	 */
 	@Deprecated(since = "6.1")
-	public WebMergedContextConfiguration(Class<?> testClass, String @Nullable [] locations, @Nullable Class<?>[] classes,
+	public WebMergedContextConfiguration(Class<?> testClass, String @Nullable [] locations, Class<?> @Nullable [] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			String @Nullable [] activeProfiles, String @Nullable [] propertySourceLocations, String @Nullable [] propertySourceProperties,
 			String resourceBasePath, ContextLoader contextLoader,
