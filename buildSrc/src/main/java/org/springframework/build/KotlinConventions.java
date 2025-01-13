@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,12 @@ public class KotlinConventions {
 			options.getJvmTarget().set(JvmTarget.JVM_17);
 			options.getJavaParameters().set(true);
 			options.getAllWarningsAsErrors().set(true);
-			options.getFreeCompilerArgs().addAll("-Xsuppress-version-warnings", "-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn");
+			options.getFreeCompilerArgs().addAll(
+					"-Xsuppress-version-warnings",
+					"-Xjsr305=strict", // For dependencies using JSR 305
+					"-opt-in=kotlin.RequiresOptIn",
+					"-Xjdk-release=17" // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
+			);
 		});
 	}
 
