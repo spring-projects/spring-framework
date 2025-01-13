@@ -118,6 +118,7 @@ tasks.withType(JavaCompile).configureEach {
     	disableAllChecks = true
 		option("NullAway:OnlyNullMarked", "true")
 		option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
+		option("NullAway:JSpecifyMode", "true")
     }
 }
 tasks.compileJava {
