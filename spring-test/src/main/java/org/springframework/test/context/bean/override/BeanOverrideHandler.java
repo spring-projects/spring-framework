@@ -243,6 +243,8 @@ public abstract class BeanOverrideHandler {
 				!Objects.equals(this.strategy, that.strategy)) {
 			return false;
 		}
+
+		// by-name lookup
 		if (this.beanName != null) {
 			return true;
 		}

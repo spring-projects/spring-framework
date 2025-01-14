@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
+import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,14 +37,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MockitoSpyBeanOverrideHandlerTests {
 
 	@Test
-	void forTestClassSetsNameToNullIfAnnotationNameIsNull() {
-		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneSpy.class);
+	void beanNameIsSetToNullIfAnnotationNameIsEmpty() {
+		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneSpy.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isNull());
 	}
 
 	@Test
-	void forTestClassSetsNameToAnnotationName() {
-		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneSpyWithName.class);
+	void beanNameIsSetToAnnotationName() {
+		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneSpyWithName.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isEqualTo("anotherService"));
 	}
 

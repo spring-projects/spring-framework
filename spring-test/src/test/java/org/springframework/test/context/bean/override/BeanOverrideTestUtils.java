@@ -14,41 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito;
+package org.springframework.test.context.bean.override;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.mockito.Mockito;
-
 /**
- * Beans created using Mockito.
+ * Test utilities for Bean Overrides.
  *
- * @author Andy Wilkinson
  * @author Sam Brannen
- * @since 6.2
+ * @since 6.2.2
  */
-class MockBeans {
+public abstract class BeanOverrideTestUtils {
 
-	private final List<Object> beans = new ArrayList<>();
-
-
-	void add(Object bean) {
-		this.beans.add(bean);
-	}
-
-	/**
-	 * Reset all Mockito beans configured with the supplied {@link MockReset} strategy.
-	 * <p>No mocks will be reset if the supplied strategy is {@link MockReset#NONE}.
-	 */
-	void resetAll(MockReset reset) {
-		if (reset != MockReset.NONE) {
-			for (Object bean : this.beans) {
-				if (reset == MockReset.get(bean)) {
-					Mockito.reset(bean);
-				}
-			}
-		}
+	public static List<BeanOverrideHandler> findHandlers(Class<?> testClass) {
+		return BeanOverrideHandler.forTestClass(testClass);
 	}
 
 }

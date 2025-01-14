@@ -26,6 +26,7 @@ import org.mockito.Answers;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
+import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,87 +35,89 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link MockitoBeanOverrideHandler}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
+ * @since 6.2
  */
 class MockitoBeanOverrideHandlerTests {
 
 	@Test
-	void forTestClassSetsNameToNullIfAnnotationNameIsNull() {
-		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneMock.class);
+	void beanNameIsSetToNullIfAnnotationNameIsEmpty() {
+		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneMock.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isNull());
 	}
 
 	@Test
-	void forTestClassSetsNameToAnnotationName() {
-		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneMockWithName.class);
+	void beanNameIsSetToAnnotationName() {
+		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneMockWithName.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isEqualTo("anotherService"));
 	}
 
 	@Test
-	void isEqualToWithSameInstance() {
-		MockitoBeanOverrideHandler handler = createBeanOverrideHandler(sampleField("service"));
+	void isEqualToWithSameInstanceFromField() {
+		MockitoBeanOverrideHandler handler = createHandler(sampleField("service"));
 		assertThat(handler).isEqualTo(handler);
 		assertThat(handler).hasSameHashCodeAs(handler);
 	}
 
 	@Test
-	void isEqualToWithSameMetadata() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service"));
+	void isEqualToWithSameMetadataFromField() {
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service"));
 		assertThat(handler1).isEqualTo(handler2);
 		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
 	@Test
 	void isNotEqualEqualToByTypeLookupWithSameMetadataButDifferentField() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service2"));
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service2"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isEqualEqualToByNameLookupWithSameMetadataButDifferentField() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service3"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service4"));
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service3"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service4"));
 		assertThat(handler1).isEqualTo(handler2);
 		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentBeanName() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service3"));
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service3"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentExtraInterfaces() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service5"));
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service5"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentAnswers() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service6"));
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service6"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentSerializableFlag() {
-		MockitoBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
-		MockitoBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service7"));
+		MockitoBeanOverrideHandler handler1 = createHandler(sampleField("service"));
+		MockitoBeanOverrideHandler handler2 = createHandler(sampleField("service7"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 
-	private Field sampleField(String fieldName) {
+	private static Field sampleField(String fieldName) {
 		Field field = ReflectionUtils.findField(Sample.class, fieldName);
 		assertThat(field).isNotNull();
 		return field;
 	}
 
-	private MockitoBeanOverrideHandler createBeanOverrideHandler(Field field) {
+	private static MockitoBeanOverrideHandler createHandler(Field field) {
 		MockitoBean annotation = AnnotatedElementUtils.getMergedAnnotation(field, MockitoBean.class);
 		return new MockitoBeanOverrideHandler(field, ResolvableType.forClass(field.getType()), annotation);
 	}
@@ -124,14 +127,12 @@ class MockitoBeanOverrideHandlerTests {
 
 		@MockitoBean
 		String service;
-
 	}
 
 	static class SampleOneMockWithName {
 
 		@MockitoBean("anotherService")
 		String service;
-
 	}
 
 	static class Sample {
@@ -156,7 +157,6 @@ class MockitoBeanOverrideHandlerTests {
 
 		@MockitoBean(serializable = true)
 		private String service7;
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -395,7 +395,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 	private static AnnotationConfigApplicationContext createContext(Class<?> testClass) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>(BeanOverrideHandler.forTestClass(testClass));
+		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>(BeanOverrideTestUtils.findHandlers(testClass));
 		new BeanOverrideContextCustomizer(handlers).customizeContext(context, mock(MergedContextConfiguration.class));
 		return context;
 	}
