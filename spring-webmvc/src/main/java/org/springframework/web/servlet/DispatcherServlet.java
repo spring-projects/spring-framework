@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,12 +124,6 @@ import org.springframework.web.util.WebUtils;
  * Out-of-the-box implementations work via HTTP accept header, cookie, or session.
  * The LocaleResolver bean name is "localeResolver"; default is
  * {@link org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver}.
- *
- * <li>Its theme resolution strategy is determined by a {@link ThemeResolver}.
- * Implementations for a fixed theme and for cookie and session storage are included.
- * The ThemeResolver bean name is "themeResolver"; default is
- * {@link org.springframework.web.servlet.theme.FixedThemeResolver}.
- * Theme support is deprecated as of 6.0 with no direct replacement.
  * </ul>
  *
  * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed if a
@@ -168,13 +162,6 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** Well-known name for the LocaleResolver object in the bean factory for this namespace. */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
-
-	/**
-	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
-	 * @deprecated as of 6.0, with no direct replacement
-	 */
-	@Deprecated
-	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
@@ -226,22 +213,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
-
-	/**
-	 * Request attribute to hold the current ThemeResolver, retrievable by views.
-	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
-	 * @deprecated as of 6.0, with no direct replacement
-	 */
-	@Deprecated
-	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
-
-	/**
-	 * Request attribute to hold the current ThemeSource, retrievable by views.
-	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
-	 * @deprecated as of 6.0, with no direct replacement
-	 */
-	@Deprecated
-	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
 
 	/**
 	 * Name of request attribute that holds a read-only {@code Map<String,?>}
@@ -311,10 +282,6 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** LocaleResolver used by this servlet. */
 	private @Nullable LocaleResolver localeResolver;
-
-	/** ThemeResolver used by this servlet. */
-	@Deprecated
-	private @Nullable ThemeResolver themeResolver;
 
 	/** List of HandlerMappings used by this servlet. */
 	private @Nullable List<HandlerMapping> handlerMappings;
@@ -475,7 +442,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void initStrategies(ApplicationContext context) {
 		initMultipartResolver(context);
 		initLocaleResolver(context);
-		initThemeResolver(context);
 		initHandlerMappings(context);
 		initHandlerAdapters(context);
 		initHandlerExceptionResolvers(context);
@@ -529,32 +495,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No LocaleResolver '" + LOCALE_RESOLVER_BEAN_NAME +
 						"': using default [" + this.localeResolver.getClass().getSimpleName() + "]");
-			}
-		}
-	}
-
-	/**
-	 * Initialize the ThemeResolver used by this class.
-	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
-	 * we default to a FixedThemeResolver.
-	 */
-	@Deprecated
-	private void initThemeResolver(ApplicationContext context) {
-		try {
-			this.themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.themeResolver);
-			}
-			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.themeResolver.getClass().getSimpleName());
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
-			this.themeResolver = getDefaultStrategy(context, ThemeResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No ThemeResolver '" + THEME_RESOLVER_BEAN_NAME +
-						"': using default [" + this.themeResolver.getClass().getSimpleName() + "]");
 			}
 		}
 	}
@@ -774,19 +714,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Return this servlet's ThemeSource, if any; else return {@code null}.
-	 * <p>Default is to return the WebApplicationContext as ThemeSource,
-	 * provided that it implements the ThemeSource interface.
-	 * @return the ThemeSource, if any
-	 * @see #getWebApplicationContext()
-	 */
-	@Deprecated
-	public final org.springframework.ui.context.@Nullable ThemeSource getThemeSource() {
-		return (getWebApplicationContext() instanceof org.springframework.ui.context.ThemeSource themeSource ?
-				themeSource : null);
-	}
-
-	/**
 	 * Obtain this servlet's MultipartResolver, if any.
 	 * @return the MultipartResolver used by this servlet, or {@code null} if none
 	 * (indicating that no multipart support is available)
@@ -920,8 +847,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
-		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
-		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
 		if (this.flashMapManager != null) {
 			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);

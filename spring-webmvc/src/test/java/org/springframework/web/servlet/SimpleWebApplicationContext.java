@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.context.support.StaticMessageSource;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.SimpleTheme;
-import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -53,8 +47,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 		addMessage("testArgs", Locale.ENGLISH, "test {0} message {1}");
 		addMessage("testArgsFormat", Locale.ENGLISH, "test {0} message {1,number,#.##} X");
-
-		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class);
 
 		registerSingleton("handlerMapping", BeanNameUrlHandlerMapping.class);
 		registerSingleton("viewResolver", InternalResourceViewResolver.class);
@@ -88,28 +80,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		@Override
 		public long getLastModified(HttpServletRequest request) {
 			return 1427846400000L;
-		}
-	}
-
-
-	public static class DummyThemeSource implements ThemeSource {
-
-		private final StaticMessageSource messageSource;
-
-		public DummyThemeSource() {
-			this.messageSource = new StaticMessageSource();
-			this.messageSource.addMessage("themetest", Locale.ENGLISH, "theme test message");
-			this.messageSource.addMessage("themetestArgs", Locale.ENGLISH, "theme test message {0}");
-		}
-
-		@Override
-		public Theme getTheme(String themeName) {
-			if (AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(themeName)) {
-				return new SimpleTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME, this.messageSource);
-			}
-			else {
-				return null;
-			}
 		}
 	}
 

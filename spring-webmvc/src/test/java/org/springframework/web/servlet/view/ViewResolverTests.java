@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
@@ -177,7 +176,6 @@ class ViewResolverTests {
 
 		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		this.request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		this.request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		Map<String, Object> model = new HashMap<>();
 		TestBean tb = new TestBean();
 		model.put("tb", tb);
@@ -422,7 +420,6 @@ class ViewResolverTests {
 
 		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		this.request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		this.request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		view1.render(model, this.request, this.response);
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
 		assertThat(this.request.getAttribute("test1")).as("Correct test1 attribute").isEqualTo("testvalue1");
@@ -431,7 +428,6 @@ class ViewResolverTests {
 		this.request.clearAttributes();
 		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		this.request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		this.request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		view2.render(model, this.request, this.response);
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
 		assertThat(this.request.getAttribute("test1")).as("Correct test1 attribute").isEqualTo("testvalue1");

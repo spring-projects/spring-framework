@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -48,11 +45,6 @@ import org.springframework.web.context.ServletContextAware;
  * the web application root. Absolute paths &mdash; for example, for files outside
  * the web app root &mdash; can be accessed via {@code file:} URLs, as implemented
  * by {@code AbstractApplicationContext}.
- *
- * <p>In addition to the special beans detected by
- * {@link org.springframework.context.support.AbstractApplicationContext AbstractApplicationContext},
- * this class detects a {@link ThemeSource} bean in the context, with the name "themeSource".
- * Theme support is deprecated as of 6.0 with no direct replacement.
  *
  * <p>If you wish to register annotated <em>component classes</em> with a
  * {@code GenericWebApplicationContext}, you can use an
@@ -78,13 +70,10 @@ import org.springframework.web.context.ServletContextAware;
  * @author Sam Brannen
  * @since 1.2
  */
-@SuppressWarnings("deprecation")
 public class GenericWebApplicationContext extends GenericApplicationContext
-		implements ConfigurableWebApplicationContext, ThemeSource {
+		implements ConfigurableWebApplicationContext {
 
 	private @Nullable ServletContext servletContext;
-
-	private @Nullable ThemeSource themeSource;
 
 
 	/**
@@ -190,14 +179,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	/**
-	 * Initialize the theme capability.
-	 */
-	@Override
-	protected void onRefresh() {
-		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 * <p>Replace {@code Servlet}-related property sources.
 	 */
@@ -207,13 +188,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		if (env instanceof ConfigurableWebEnvironment configurableWebEnv) {
 			configurableWebEnv.initPropertySources(this.servletContext, null);
 		}
-	}
-
-	@Override
-	@Deprecated
-	public @Nullable Theme getTheme(String themeName) {
-		Assert.state(this.themeSource != null, "No ThemeSource available");
-		return this.themeSource.getTheme(themeName);
 	}
 
 

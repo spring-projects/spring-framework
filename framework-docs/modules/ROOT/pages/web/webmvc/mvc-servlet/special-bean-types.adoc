@@ -43,10 +43,6 @@ The following table lists the special beans detected by the `DispatcherServlet`:
 | Resolve the `Locale` a client is using and possibly their time zone, in order to be able
   to offer internationalized views. See xref:web/webmvc/mvc-servlet/localeresolver.adoc[Locale].
 
-| xref:web/webmvc/mvc-servlet/themeresolver.adoc[`ThemeResolver`]
-| Resolve themes your web application can use -- for example, to offer personalized layouts.
-  See xref:web/webmvc/mvc-servlet/themeresolver.adoc[Themes].
-
 | xref:web/webmvc/mvc-servlet/multipart.adoc[`MultipartResolver`]
 | Abstraction for parsing a multi-part request (for example, browser form file upload) with
   the help of some multipart parsing library. See xref:web/webmvc/mvc-servlet/multipart.adoc[Multipart Resolver].

@@ -160,7 +160,6 @@
 **** xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[]
 **** xref:web/webmvc/mvc-servlet/viewresolver.adoc[]
 **** xref:web/webmvc/mvc-servlet/localeresolver.adoc[]
-**** xref:web/webmvc/mvc-servlet/themeresolver.adoc[]
 **** xref:web/webmvc/mvc-servlet/multipart.adoc[]
 **** xref:web/webmvc/mvc-servlet/logging.adoc[]
 *** xref:web/webmvc/filters.adoc[]

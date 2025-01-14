@@ -1185,12 +1185,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	@Bean
-	@Deprecated
-	public org.springframework.web.servlet.ThemeResolver themeResolver() {
-		return new org.springframework.web.servlet.theme.FixedThemeResolver();
-	}
-
-	@Bean
 	public FlashMapManager flashMapManager() {
 		return new SessionFlashMapManager();
 	}

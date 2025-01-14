@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -57,7 +56,7 @@ public class InterceptorRegistryTests {
 
 	private final HandlerInterceptor interceptor1 = new LocaleChangeInterceptor();
 
-	private final HandlerInterceptor interceptor2 = new ThemeChangeInterceptor();
+	private final HandlerInterceptor interceptor2 = new LocaleChangeInterceptor();
 
 	private TestWebRequestInterceptor webInterceptor1;
 

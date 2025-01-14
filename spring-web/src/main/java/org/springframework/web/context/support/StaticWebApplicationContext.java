@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
@@ -46,27 +43,17 @@ import org.springframework.web.context.ServletContextAware;
  * can be accessed via "file:" URLs, as implemented by
  * {@link org.springframework.core.io.DefaultResourceLoader}.
  *
- * <p>In addition to the special beans detected by
- * {@link org.springframework.context.support.AbstractApplicationContext},
- * this class detects a bean of type {@link org.springframework.ui.context.ThemeSource}
- * in the context, under the special bean name "themeSource".
- * Theme support is deprecated as of 6.0 with no direct replacement.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.ui.context.ThemeSource
  */
-@SuppressWarnings("deprecation")
 public class StaticWebApplicationContext extends StaticApplicationContext
-		implements ConfigurableWebApplicationContext, ThemeSource {
+		implements ConfigurableWebApplicationContext {
 
 	private @Nullable ServletContext servletContext;
 
 	private @Nullable ServletConfig servletConfig;
 
 	private @Nullable String namespace;
-
-	private @Nullable ThemeSource themeSource;
 
 
 	public StaticWebApplicationContext() {
@@ -177,25 +164,10 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		return new StandardServletEnvironment();
 	}
 
-	/**
-	 * Initialize the theme capability.
-	 */
-	@Override
-	protected void onRefresh() {
-		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	}
-
 	@Override
 	protected void initPropertySources() {
 		WebApplicationContextUtils.initServletPropertySources(getEnvironment().getPropertySources(),
 				this.servletContext, this.servletConfig);
-	}
-
-	@Override
-	@Deprecated
-	public @Nullable Theme getTheme(String themeName) {
-		Assert.state(this.themeSource != null, "No ThemeSource available");
-		return this.themeSource.getTheme(themeName);
 	}
 
 }

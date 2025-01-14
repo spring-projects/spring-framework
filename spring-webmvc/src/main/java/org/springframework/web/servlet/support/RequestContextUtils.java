@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,51 +171,6 @@ public abstract class RequestContextUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Return the ThemeResolver that has been bound to the request by the
-	 * DispatcherServlet.
-	 * @param request current HTTP request
-	 * @return the current ThemeResolver, or {@code null} if not found
-	 * @deprecated as of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0")
-	public static org.springframework.web.servlet.@Nullable ThemeResolver getThemeResolver(HttpServletRequest request) {
-		return (org.springframework.web.servlet.ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
-	}
-
-	/**
-	 * Return the ThemeSource that has been bound to the request by the
-	 * DispatcherServlet.
-	 * @param request current HTTP request
-	 * @return the current ThemeSource
-	 * @deprecated as of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0")
-	public static org.springframework.ui.context.@Nullable ThemeSource getThemeSource(HttpServletRequest request) {
-		return (org.springframework.ui.context.ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
-	}
-
-	/**
-	 * Retrieve the current theme from the given request, using the ThemeResolver
-	 * and ThemeSource bound to the request by the DispatcherServlet.
-	 * @param request current HTTP request
-	 * @return the current theme, or {@code null} if not found
-	 * @see #getThemeResolver
-	 * @deprecated as of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0")
-	public static org.springframework.ui.context.@Nullable Theme getTheme(HttpServletRequest request) {
-		org.springframework.web.servlet.ThemeResolver themeResolver = getThemeResolver(request);
-		org.springframework.ui.context.ThemeSource themeSource = getThemeSource(request);
-		if (themeResolver != null && themeSource != null) {
-			String themeName = themeResolver.resolveThemeName(request);
-			return themeSource.getTheme(themeName);
-		}
-		else {
-			return null;
-		}
 	}
 
 	/**

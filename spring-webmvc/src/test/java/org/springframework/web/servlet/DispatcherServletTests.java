@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -391,31 +391,6 @@ class DispatcherServletTests {
 		request.addUserRole("role2");
 		request.addParameter("locale", "en");
 		request.addParameter("locale2", "en_CA");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
-	}
-
-	@Test
-	void themeChangeInterceptor1() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
-		request.addPreferredLocale(Locale.CANADA);
-		request.addUserRole("role1");
-		request.addParameter("theme", "mytheme");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexDispatcherServlet.service(request, response);
-		assertThat(response.getStatus()).isEqualTo(200);
-		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed0.jsp");
-		assertThat(request.getAttribute("exception").getClass().equals(ServletException.class)).as("Exception exposed").isTrue();
-	}
-
-	@Test
-	void themeChangeInterceptor2() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
-		request.addPreferredLocale(Locale.CANADA);
-		request.addUserRole("role1");
-		request.addParameter("theme", "mytheme");
-		request.addParameter("theme2", "theme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();

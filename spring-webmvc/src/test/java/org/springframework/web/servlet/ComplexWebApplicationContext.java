@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,29 +74,19 @@ import org.springframework.web.util.WebUtils;
 public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void refresh() throws BeansException {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
-		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME,
-				org.springframework.web.servlet.theme.SessionThemeResolver.class);
 
 		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
 		LocaleChangeInterceptor interceptor2 = new LocaleChangeInterceptor();
 		interceptor2.setParamName("locale2");
-		org.springframework.web.servlet.theme.ThemeChangeInterceptor interceptor3 =
-				new org.springframework.web.servlet.theme.ThemeChangeInterceptor();
-		org.springframework.web.servlet.theme.ThemeChangeInterceptor interceptor4 =
-				new org.springframework.web.servlet.theme.ThemeChangeInterceptor();
-		interceptor4.setParamName("theme2");
-		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
-		interceptor5.setAuthorizedRoles("role1", "role2");
+		UserRoleAuthorizationInterceptor interceptor3 = new UserRoleAuthorizationInterceptor();
+		interceptor3.setAuthorizedRoles("role1", "role2");
 
 		List<Object> interceptors = new ArrayList<>();
-		interceptors.add(interceptor5);
+		interceptors.add(interceptor3);
 		interceptors.add(interceptor1);
 		interceptors.add(interceptor2);
-		interceptors.add(interceptor3);
-		interceptors.add(interceptor4);
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
 		interceptors.add(new MyWebRequestInterceptor());
@@ -457,16 +447,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (!TimeZone.getDefault().equals(LocaleContextHolder.getTimeZone())) {
 				throw new ServletException("Incorrect TimeZone");
 			}
-			if (!(RequestContextUtils.getThemeResolver(request)
-					instanceof org.springframework.web.servlet.theme.SessionThemeResolver)) {
-				throw new ServletException("Incorrect ThemeResolver");
-			}
-			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
-				throw new ServletException("Incorrect theme name");
-			}
 			RequestContext rc = new RequestContext(request);
 			rc.changeLocale(Locale.US, TimeZone.getTimeZone("GMT+1"));
-			rc.changeTheme("theme2");
 			if (!Locale.US.equals(RequestContextUtils.getLocale(request))) {
 				throw new ServletException("Incorrect Locale");
 			}
@@ -478,9 +460,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 			if (!TimeZone.getTimeZone("GMT+1").equals(LocaleContextHolder.getTimeZone())) {
 				throw new ServletException("Incorrect TimeZone");
-			}
-			if (!"theme2".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
-				throw new ServletException("Incorrect theme name");
 			}
 		}
 

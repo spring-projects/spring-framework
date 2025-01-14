@@ -19,7 +19,6 @@
 
 	<mvc:interceptors>
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
-		<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 	</mvc:interceptors>
 
 </beans>

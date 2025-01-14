@@ -14,7 +14,6 @@
  * <li>{@link org.springframework.web.servlet.tags.MessageTag The message tag}
  * <li>{@link org.springframework.web.servlet.tags.NestedPathTag The nestedPath tag}
  * <li>{@link org.springframework.web.servlet.tags.ParamTag The param tag}
- * <li>{@link org.springframework.web.servlet.tags.ThemeTag The theme tag}
  * <li>{@link org.springframework.web.servlet.tags.TransformTag The transform tag}
  * <li>{@link org.springframework.web.servlet.tags.UrlTag The url tag}
  * </ul>
