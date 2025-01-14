@@ -11,7 +11,7 @@ dependencies {
 	api(platform("io.micrometer:micrometer-bom:1.14.3"))
 	api(platform("io.netty:netty-bom:4.1.115.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
-	api(platform("io.projectreactor:reactor-bom:2024.0.2-SNAPSHOT"))
+	api(platform("io.projectreactor:reactor-bom:2024.0.2"))
 	api(platform("io.rsocket:rsocket-bom:1.1.4"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.24"))
 	api(platform("org.apache.logging.log4j:log4j-bom:3.0.0-beta3"))
