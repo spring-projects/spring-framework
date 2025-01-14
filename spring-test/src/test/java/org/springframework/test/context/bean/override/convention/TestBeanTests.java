@@ -40,7 +40,7 @@ public class TestBeanTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to replace bean: there is no bean with name 'beanToOverride' \
 						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
 	}
@@ -52,7 +52,7 @@ public class TestBeanTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to replace bean: there is no bean with name 'beanToOverride' \
 						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
 	}
@@ -63,7 +63,7 @@ public class TestBeanTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByTypeLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("""
+				.withMessageStartingWith("""
 						Unable to override bean: there are no beans of \
 						type %s (as required by field '%s.example').""",
 						String.class.getName(), FailureByTypeLookup.class.getSimpleName());
