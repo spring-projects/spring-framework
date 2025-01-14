@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,7 @@ import org.springframework.util.function.SupplierUtils;
  * @author Sam Brannen
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 3.1
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
@@ -444,6 +445,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		CacheOperationContext context = contexts.get(CacheableOperation.class).iterator().next();
 		if (isConditionPassing(context, CacheOperationExpressionEvaluator.NO_RESULT)) {
 			Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
+			if (key instanceof Optional<?> optional) {
+				if (optional.isEmpty()) {
+					return null;
+				}
+				else {
+					key = optional.get();
+				}
+			}
 			Cache cache = context.getCaches().iterator().next();
 			if (CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
 				return doRetrieve(cache, key, () -> (CompletableFuture<?>) invokeOperation(invoker));
@@ -481,6 +490,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (CacheOperationContext context : contexts.get(CacheableOperation.class)) {
 			if (isConditionPassing(context, CacheOperationExpressionEvaluator.NO_RESULT)) {
 				Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
+				if (key instanceof Optional<?> optional) {
+					if (optional.isEmpty()) {
+						return null;
+					}
+					else {
+						key = optional.get();
+					}
+				}
 				Object cached = findInCaches(context, key, invoker, method, contexts);
 				if (cached != null) {
 					if (logger.isTraceEnabled()) {
@@ -660,6 +677,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					else {
 						if (key == null) {
 							key = generateKey(context, result);
+						}
+						if (key instanceof Optional<?> optional) {
+							if (optional.isEmpty()) {
+								return;
+							}
+							else {
+								key = optional.get();
+							}
 						}
 						logInvalidating(context, operation, key);
 						doEvict(cache, key, operation.isBeforeInvocation());
@@ -1020,6 +1045,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				Object key = this.context.getGeneratedKey();
 				if (key == null) {
 					key = generateKey(this.context, value);
+				}
+				if (key instanceof Optional<?> optional) {
+					if (optional.isEmpty()) {
+						return;
+					}
+					else {
+						key = optional.get();
+					}
 				}
 				if (logger.isTraceEnabled()) {
 					logger.trace("Creating cache entry for key '" + key + "' in cache(s) " +

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 3.1
  * @see CacheConfig
  */
@@ -75,6 +76,7 @@ public @interface CachePut {
 	 * Spring Expression Language (SpEL) expression for computing the key dynamically.
 	 * <p>Default is {@code ""}, meaning all method parameters are considered as a key,
 	 * unless a custom {@link #keyGenerator} has been set.
+	 * Cache is not involved if evaluated result is an empty {@link java.util.Optional}.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
 	 * <ul>

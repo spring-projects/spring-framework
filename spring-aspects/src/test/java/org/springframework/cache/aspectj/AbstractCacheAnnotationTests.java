@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 public abstract class AbstractCacheAnnotationTests {
 
@@ -281,6 +282,19 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(r4).isNotSameAs(r2);
 	}
 
+	protected void testEvictWithOptionalKey(CacheableService<?> service) {
+		Object o1 = new Object();
+		Object r1 = service.cache(o1);
+
+		service.evictWithOptionalKey(null);
+		Object r2 = service.cache(o1);
+		assertThat(r2).isSameAs(r1);
+
+		service.evictWithOptionalKey(o1);
+		Object r3 = service.cache(o1);
+		assertThat(r3).isNotSameAs(r1);
+	}
+
 	protected void testConditionalExpression(CacheableService<?> service) {
 		Object r1 = service.conditional(4);
 		Object r2 = service.conditional(4);
@@ -301,6 +315,31 @@ public abstract class AbstractCacheAnnotationTests {
 
 		Object r3 = service.conditionalSync(3);
 		Object r4 = service.conditionalSync(3);
+
+		assertThat(r4).isSameAs(r3);
+	}
+
+
+	protected void testOptionalKey(CacheableService<?> service) {
+		Object r1 = service.optional(4);
+		Object r2 = service.optional(4);
+
+		assertThat(r2).isNotSameAs(r1);
+
+		Object r3 = service.optional(3);
+		Object r4 = service.optional(3);
+
+		assertThat(r4).isSameAs(r3);
+	}
+
+	protected void testOptionalKeySync(CacheableService<?> service) {
+		Object r1 = service.optionalSync(4);
+		Object r2 = service.optionalSync(4);
+
+		assertThat(r2).isNotSameAs(r1);
+
+		Object r3 = service.optionalSync(3);
+		Object r4 = service.optionalSync(3);
 
 		assertThat(r4).isSameAs(r3);
 	}
@@ -420,6 +459,18 @@ public abstract class AbstractCacheAnnotationTests {
 		assertThat(cache.get(one)).isNull();
 
 		assertThat(Integer.parseInt(service.conditionalUpdate(three).toString())).isEqualTo(three);
+		assertThat(Integer.parseInt(cache.get(three).get().toString())).isEqualTo(three);
+	}
+
+	protected void testOptionalCacheUpdate(CacheableService<?> service) {
+		int one = 1;
+		int three = 3;
+
+		Cache cache = this.cm.getCache("testCache");
+		assertThat(Integer.parseInt(service.optionalUpdate(one).toString())).isEqualTo(one);
+		assertThat(cache.get(one)).isNull();
+
+		assertThat(Integer.parseInt(service.optionalUpdate(three).toString())).isEqualTo(three);
 		assertThat(Integer.parseInt(cache.get(three).get().toString())).isEqualTo(three);
 	}
 
@@ -611,8 +662,18 @@ public abstract class AbstractCacheAnnotationTests {
 	}
 
 	@Test
+	void testEvictWithOptionalKey() {
+		testEvictWithOptionalKey(this.cs);
+	}
+
+	@Test
 	void testConditionalExpression() {
 		testConditionalExpression(this.cs);
+	}
+
+	@Test
+	void testOptionalKey() {
+		testOptionalKey(this.cs);
 	}
 
 	@Test
@@ -817,6 +878,16 @@ public abstract class AbstractCacheAnnotationTests {
 	@Test
 	void testClassConditionalUpdate() {
 		testConditionalCacheUpdate(this.ccs);
+	}
+
+	@Test
+	void testOptionalUpdate() {
+		testOptionalCacheUpdate(this.cs);
+	}
+
+	@Test
+	void testClassOptionalUpdate() {
+		testOptionalCacheUpdate(this.ccs);
 	}
 
 	@Test

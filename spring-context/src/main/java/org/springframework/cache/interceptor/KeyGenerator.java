@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.jspecify.annotations.Nullable;
  * @author Costin Leau
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 3.1
  */
 @FunctionalInterface
@@ -34,6 +35,7 @@ public interface KeyGenerator {
 
 	/**
 	 * Generate a key for the given method and its parameters.
+	 * <p>Cache is not involved if generated key is an empty {@link java.util.Optional}.
 	 * @param target the target instance
 	 * @param method the method being called
 	 * @param params the method parameters (with any var-args expanded)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cache.config;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Copy of the shared {@code CacheableService}: necessary
  * due to issues with Gradle test fixtures and AspectJ configuration
@@ -26,6 +28,7 @@ package org.springframework.cache.config;
  * @author Costin Leau
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 public interface CacheableService<T> {
 
@@ -47,9 +50,15 @@ public interface CacheableService<T> {
 
 	void evictAllEarly(Object arg1);
 
+	void evictWithOptionalKey(@Nullable Object arg1);
+
 	T conditional(int field);
 
 	T conditionalSync(int field);
+
+	T optional(int field);
+
+	T optionalSync(int field);
 
 	T unless(int arg);
 
@@ -63,7 +72,9 @@ public interface CacheableService<T> {
 
 	T update(Object arg1);
 
-	T conditionalUpdate(Object arg2);
+	T conditionalUpdate(Object arg);
+
+	T optionalUpdate(Object arg);
 
 	Number nullInvocations();
 

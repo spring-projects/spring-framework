@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cache.config;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,6 +36,7 @@ import org.springframework.cache.annotation.Caching;
  * @author Costin Leau
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 public class DefaultCacheableService implements CacheableService<Long> {
 
@@ -95,6 +98,11 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "testCache", key = "T(java.util.Optional).ofNullable(#p0 != null ? #p0 : null)")
+	public void evictWithOptionalKey(@Nullable Object arg1) {
+	}
+
+	@Override
 	@Cacheable(cacheNames = "testCache", condition = "#p0 == 3")
 	public Long conditional(int classField) {
 		return this.counter.getAndIncrement();
@@ -103,6 +111,18 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable(cacheNames = "testCache", sync = true, condition = "#p0 == 3")
 	public Long conditionalSync(int classField) {
+		return this.counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", key = "T(java.util.Optional).ofNullable(#p0 == 3 ? #p0 : null)")
+	public Long optional(int classField) {
+		return this.counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true, key = "T(java.util.Optional).ofNullable(#p0 == 3 ? #p0 : null)")
+	public Long optionalSync(int classField) {
 		return this.counter.getAndIncrement();
 	}
 
@@ -169,6 +189,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@CachePut(cacheNames = "testCache", condition = "#arg.equals(3)")
 	public Long conditionalUpdate(Object arg) {
+		return Long.valueOf(arg.toString());
+	}
+
+	@Override
+	@CachePut(cacheNames = "testCache", key = "T(java.util.Optional).ofNullable(#p0 == 3 ? #arg : null)")
+	public Long optionalUpdate(Object arg) {
 		return Long.valueOf(arg.toString());
 	}
 

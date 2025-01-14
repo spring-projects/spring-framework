@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cache.config;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -32,6 +34,7 @@ import org.springframework.cache.annotation.Caching;
  * @author Costin Leau
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 @Cacheable("testCache")
 public class AnnotatedClassCacheableService implements CacheableService<Object> {
@@ -74,6 +77,16 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
+	public Object optional(int field) {
+		return null;
+	}
+
+	@Override
+	public Object optionalSync(int field) {
+		return null;
+	}
+
+	@Override
 	@Cacheable(cacheNames = "testCache", unless = "#result > 10")
 	public Object unless(int arg) {
 		return arg;
@@ -105,6 +118,11 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@CacheEvict(cacheNames = "testCache", allEntries = true, beforeInvocation = true)
 	public void evictAllEarly(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should still occur");
+	}
+
+	@Override
+	@CacheEvict(cacheNames = "testCache", key = "T(java.util.Optional).ofNullable(#name != null ? #p0 : null)")
+	public void evictWithOptionalKey(@Nullable Object arg1) {
 	}
 
 	@Override
@@ -164,6 +182,12 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@CachePut(cacheNames = "testCache", condition = "#arg.equals(3)")
 	public Object conditionalUpdate(Object arg) {
+		return arg;
+	}
+
+	@Override
+	@CachePut(cacheNames = "testCache", key = "T(java.util.Optional).ofNullable(#p0 == 3 ? #arg : null)")
+	public Object optionalUpdate(Object arg) {
 		return arg;
 	}
 
