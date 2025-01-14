@@ -374,7 +374,7 @@ public class ReflectionHintsPredicates {
 		}
 	}
 
-
+	@Deprecated(since = "7.0", forRemoval = true)
 	@SuppressWarnings("removal")
 	public abstract static class ExecutableHintPredicate<T extends Executable> implements Predicate<RuntimeHints> {
 
@@ -420,6 +420,7 @@ public class ReflectionHintsPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	@SuppressWarnings("removal")
 	public static class ConstructorHintPredicate extends ExecutableHintPredicate<Constructor<?>> {
 
@@ -454,6 +455,7 @@ public class ReflectionHintsPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	@SuppressWarnings("removal")
 	public static class MethodHintPredicate extends ExecutableHintPredicate<Method> {
 
@@ -489,6 +491,7 @@ public class ReflectionHintsPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	public static class FieldHintPredicate implements Predicate<RuntimeHints> {
 
 		private final Field field;
