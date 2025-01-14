@@ -19,7 +19,6 @@ package org.springframework.test.context.bean.override;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -73,7 +72,7 @@ public abstract class BeanOverrideHandler {
 
 	private final Field field;
 
-	private final Set<Annotation> fieldAnnotations;
+	private final Set<Annotation> qualifierAnnotations;
 
 	private final ResolvableType beanType;
 
@@ -86,7 +85,7 @@ public abstract class BeanOverrideHandler {
 			BeanOverrideStrategy strategy) {
 
 		this.field = field;
-		this.fieldAnnotations = annotationSet(field);
+		this.qualifierAnnotations = getQualifierAnnotations(field);
 		this.beanType = beanType;
 		this.beanName = beanName;
 		this.strategy = strategy;
@@ -242,20 +241,22 @@ public abstract class BeanOverrideHandler {
 				!Objects.equals(this.strategy, that.strategy)) {
 			return false;
 		}
+
+		// by-name lookup
 		if (this.beanName != null) {
 			return true;
 		}
 
 		// by-type lookup
 		return (Objects.equals(this.field.getName(), that.field.getName()) &&
-				this.fieldAnnotations.equals(that.fieldAnnotations));
+				this.qualifierAnnotations.equals(that.qualifierAnnotations));
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.strategy);
 		return (this.beanName != null ? hash : hash +
-				Objects.hash(this.field.getName(), this.fieldAnnotations));
+				Objects.hash(this.field.getName(), this.qualifierAnnotations));
 	}
 
 	@Override
@@ -268,9 +269,24 @@ public abstract class BeanOverrideHandler {
 				.toString();
 	}
 
-	private static Set<Annotation> annotationSet(Field field) {
-		Annotation[] annotations = field.getAnnotations();
-		return (annotations.length != 0 ? new HashSet<>(Arrays.asList(annotations)) : Collections.emptySet());
+
+	private static Set<Annotation> getQualifierAnnotations(Field field) {
+		Annotation[] candidates = field.getDeclaredAnnotations();
+		if (candidates.length == 0) {
+			return Collections.emptySet();
+		}
+		Set<Annotation> annotations = new HashSet<>(candidates.length - 1);
+		for (Annotation candidate : candidates) {
+			// Assume all non-BeanOverride annotations are "qualifiers".
+			if (!isBeanOverrideAnnotation(candidate.annotationType())) {
+				annotations.add(candidate);
+			}
+		}
+		return annotations;
+	}
+
+	private static boolean isBeanOverrideAnnotation(Class<? extends Annotation> type) {
+		return MergedAnnotations.from(type).isPresent(BeanOverride.class);
 	}
 
 }

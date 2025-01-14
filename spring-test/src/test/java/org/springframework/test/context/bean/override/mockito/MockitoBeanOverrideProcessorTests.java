@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,55 +24,58 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
-import org.springframework.test.context.bean.override.example.ExampleService;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for {@link MockitoBeanOverrideProcessorTests}
+ * Tests for {@link MockitoBeanOverrideProcessor}.
+ *
+ * @author Simon Baslé
+ * @author Sam Brannen
+ * @since 6.2
  */
-public class MockitoBeanOverrideProcessorTests {
+class MockitoBeanOverrideProcessorTests {
 
 	private final MockitoBeanOverrideProcessor processor = new MockitoBeanOverrideProcessor();
 
+
+	private final Field field = ReflectionUtils.findField(TestCase.class, "number");
+
+
 	@Test
-	void mockAnnotationCreatesMockitoBeanOverrideHandler() throws NoSuchFieldException {
+	void mockAnnotationCreatesMockitoBeanOverrideHandler() {
 		MockitoBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoBean.class);
-		Class<?> clazz = MockitoConf.class;
-		Field field = clazz.getField("a");
-		BeanOverrideHandler object = this.processor.createHandler(annotation, clazz, field);
+		BeanOverrideHandler object = processor.createHandler(annotation, TestCase.class, field);
 
 		assertThat(object).isExactlyInstanceOf(MockitoBeanOverrideHandler.class);
 	}
 
 	@Test
-	void spyAnnotationCreatesMockitoSpyBeanOverrideHandler() throws NoSuchFieldException {
+	void spyAnnotationCreatesMockitoSpyBeanOverrideHandler() {
 		MockitoSpyBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoSpyBean.class);
-		Class<?> clazz = MockitoConf.class;
-		Field field = clazz.getField("a");
-		BeanOverrideHandler object = this.processor.createHandler(annotation, clazz, field);
+		BeanOverrideHandler object = processor.createHandler(annotation, TestCase.class, field);
 
 		assertThat(object).isExactlyInstanceOf(MockitoSpyBeanOverrideHandler.class);
 	}
 
 	@Test
-	void otherAnnotationThrows() throws NoSuchFieldException {
-		Class<?> clazz = MockitoConf.class;
-		Field field = clazz.getField("a");
+	void otherAnnotationThrows() {
 		Annotation annotation = field.getAnnotation(Nullable.class);
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> this.processor.createHandler(annotation, clazz, field))
+				.isThrownBy(() -> processor.createHandler(annotation, TestCase.class, field))
 				.withMessage("Invalid annotation passed to MockitoBeanOverrideProcessor: expected either " +
 						"@MockitoBean or @MockitoSpyBean on field %s.%s", field.getDeclaringClass().getName(),
 						field.getName());
 	}
 
-	static class MockitoConf {
+	static class TestCase {
+
 		@MockitoBean
 		@MockitoSpyBean
-		public @Nullable ExampleService a;
+		public @Nullable Integer number;
 	}
 
 }

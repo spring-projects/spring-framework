@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
+import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -42,21 +43,21 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class TestBeanOverrideHandlerTests {
 
 	@Test
-	void setsBeanNameToNullIfAnnotationNameIsNull() {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(SampleOneOverride.class);
+	void beanNameIsSetToNullIfAnnotationNameIsEmpty() {
+		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(SampleOneOverride.class);
 		assertThat(handlers).singleElement().extracting(BeanOverrideHandler::getBeanName).isNull();
 	}
 
 	@Test
-	void setsBeanNameToAnnotationName() {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(SampleOneOverrideWithName.class);
+	void beanNameIsSetToAnnotationName() {
+		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(SampleOneOverrideWithName.class);
 		assertThat(handlers).singleElement().extracting(BeanOverrideHandler::getBeanName).isEqualTo("anotherBean");
 	}
 
 	@Test
 	void failsWithMissingMethod() {
 		assertThatIllegalStateException()
-				.isThrownBy(() -> BeanOverrideHandler.forTestClass(SampleMissingMethod.class))
+				.isThrownBy(() -> BeanOverrideTestUtils.findHandlers(SampleMissingMethod.class))
 				.withMessage("No static method found named message() in %s with return type %s",
 						SampleMissingMethod.class.getName(), String.class.getName());
 	}

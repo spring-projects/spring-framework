@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,14 +51,14 @@ class BeanOverrideHandlerTests {
 
 	@Test
 	void forTestClassWithSingleField() {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(SingleAnnotation.class);
+		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(SingleAnnotation.class);
 		assertThat(handlers).singleElement().satisfies(hasBeanOverrideHandler(
 				field(SingleAnnotation.class, "message"), String.class, null));
 	}
 
 	@Test
 	void forTestClassWithMultipleFields() {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(MultipleAnnotations.class);
+		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(MultipleAnnotations.class);
 		assertThat(handlers).hasSize(2)
 				.anySatisfy(hasBeanOverrideHandler(
 						field(MultipleAnnotations.class, "message"), String.class, null))
@@ -68,7 +68,7 @@ class BeanOverrideHandlerTests {
 
 	@Test
 	void forTestClassWithMultipleFieldsWithIdenticalMetadata() {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(MultipleAnnotationsDuplicate.class);
+		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(MultipleAnnotationsDuplicate.class);
 		assertThat(handlers).hasSize(2)
 				.anySatisfy(hasBeanOverrideHandler(
 						field(MultipleAnnotationsDuplicate.class, "message1"), String.class, "messageBean"))
@@ -81,7 +81,7 @@ class BeanOverrideHandlerTests {
 	void forTestClassWithCompetingBeanOverrideAnnotationsOnSameField() {
 		Field faultyField = field(MultipleAnnotationsOnSameField.class, "message");
 		assertThatIllegalStateException()
-				.isThrownBy(() -> BeanOverrideHandler.forTestClass(MultipleAnnotationsOnSameField.class))
+				.isThrownBy(() -> BeanOverrideTestUtils.findHandlers(MultipleAnnotationsOnSameField.class))
 				.withMessageStartingWith("Multiple @BeanOverride annotations found")
 				.withMessageContaining(faultyField.toString());
 	}
@@ -90,7 +90,7 @@ class BeanOverrideHandlerTests {
 	void forTestClassWithStaticBeanOverrideField() {
 		Field staticField = field(StaticBeanOverrideField.class, "message");
 		assertThatIllegalStateException()
-				.isThrownBy(() -> BeanOverrideHandler.forTestClass(StaticBeanOverrideField.class))
+				.isThrownBy(() -> BeanOverrideTestUtils.findHandlers(StaticBeanOverrideField.class))
 				.withMessage("@BeanOverride field must not be static: " + staticField);
 	}
 
