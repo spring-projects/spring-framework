@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -237,9 +239,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		if (httpEntity instanceof ResponseEntity<?> responseEntity) {
-			int returnStatus = responseEntity.getStatusCode().value();
-			outputMessage.getServletResponse().setStatus(returnStatus);
-			if (returnStatus == 200) {
+			HttpStatusCode returnStatus = responseEntity.getStatusCode();
+			outputMessage.getServletResponse().setStatus(returnStatus.value());
+			if (returnStatus.value() == HttpStatus.OK.value()) {
 				HttpMethod method = inputMessage.getMethod();
 				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
 						&& isResourceNotModified(inputMessage, outputMessage)) {
@@ -247,8 +249,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 					return;
 				}
 			}
-			else if (returnStatus / 100 == 3) {
-				String location = outputHeaders.getFirst("location");
+			else if (returnStatus.is3xxRedirection()) {
+				String location = outputHeaders.getFirst(HttpHeaders.LOCATION);
 				if (location != null) {
 					saveFlashAttributes(mavContainer, webRequest, location);
 				}
