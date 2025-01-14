@@ -119,6 +119,14 @@ A good example of `@Contract` benefits is
 with `@Contract("null, _ -> fail")`. With the configuration above, NullAway will understand that after a successful
 invocation, the value passed as a parameter is not null.
 
+Optionally, it is possible to set `NullAway:JSpecifyMode=true` to enable
+https://github.com/uber/NullAway/wiki/JSpecify-Support[checks on the full JSpecify semantics], including annotations on
+generic types. Be aware that this mode is
+https://github.com/uber/NullAway/issues?q=is%3Aissue+is%3Aopen+label%3Ajspecify[still under development] and requires
+using JDK 22 or later (typically combined with the `--release` Java compiler flag to configure the
+expected baseline). It is recommended to enable the JSpecify mode only as a second step, after making sure the codebase
+generates no warning with the recommended configuration mentioned above.
+
 === Warnings suppression
 
 There are a few valid use cases where NullAway will wrongly detect nullness problems. In such case, it is recommended
@@ -135,6 +143,8 @@ outside of a lambda for the code path within the lambda.
 non-null values even if that can't be expressed by the API.
 - `@SuppressWarnings("NullAway") // Well-known map keys` can be used when `Map#get` invocations are done with keys known
 to be present and non-null related values inserted previously.
+- `@SuppressWarnings("NullAway") // Overridden method does not define nullness` can be used when the super class does
+not define nullness (typically when the super class is coming from a dependency).
 
 
 [[null-safety-migrating]]
