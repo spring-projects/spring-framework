@@ -546,7 +546,7 @@ class ForwardedHeaderUtilsTests {
 		headers.add("X-Forwarded-For", "fd00:fefe:1::4, 192.168.0.1");
 
 		InetSocketAddress address =
-				ForwardedHeaderUtils.parseForwardedFor(URI.create("http://example.com"), headers, null);
+				ForwardedHeaderUtils.parseForwardedFor(URI.create("https://example.com"), headers, null);
 
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
 	}
