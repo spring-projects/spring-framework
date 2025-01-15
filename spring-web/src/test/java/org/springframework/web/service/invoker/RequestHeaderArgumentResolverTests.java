@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  */
 class RequestHeaderArgumentResolverTests {
 
@@ -49,6 +51,12 @@ class RequestHeaderArgumentResolverTests {
 		assertRequestHeaders("id", "test");
 	}
 
+	@Test
+	void doesNotOverrideAnnotationHeaders() {
+		this.service.executeWithAnnotationHeaders("2");
+		assertRequestHeaders("myHeader", "1", "2");
+	}
+
 	private void assertRequestHeaders(String key, String... values) {
 		List<String> actualValues = this.client.getRequestValues().getHeaders().get(key);
 		if (ObjectUtils.isEmpty(values)) {
@@ -64,6 +72,9 @@ class RequestHeaderArgumentResolverTests {
 
 		@GetExchange
 		void execute(@RequestHeader String id);
+
+		@HttpExchange(method = "GET", headers = "myHeader=1")
+		void executeWithAnnotationHeaders(@RequestHeader String myHeader);
 
 	}
 

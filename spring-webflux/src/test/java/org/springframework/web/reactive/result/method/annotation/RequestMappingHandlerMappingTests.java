@@ -430,7 +430,8 @@ class RequestMappingHandlerMappingTests {
 		@PostExchange(url = "/custom", contentType = "application/json", accept = "text/plain;charset=UTF-8")
 		public void customValuesExchange(){}
 
-		@HttpExchange(method="GET", url = "/headers",
+		@HttpExchange(
+				method="GET", url = "/headers",
 				headers = {"h1=hv1", "!h2", "Accept=application/ignored"})
 		public String customHeadersExchange() {
 			return "info";

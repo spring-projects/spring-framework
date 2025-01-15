@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,8 +348,10 @@ class HttpServiceMethodTests {
 		@PostExchange(url = "/url", contentType = APPLICATION_JSON_VALUE, accept = APPLICATION_JSON_VALUE)
 		void performPost();
 
-		@HttpExchange(contentType = APPLICATION_JSON_VALUE, headers = {"CustomHeader=a,b, c",
-				"Content-Type=" + APPLICATION_NDJSON_VALUE}, method = "GET")
+		@HttpExchange(
+				method = "GET",
+				contentType = APPLICATION_JSON_VALUE,
+				headers = {"CustomHeader=a,b, c", "Content-Type=" + APPLICATION_NDJSON_VALUE})
 		void performGetWithHeaders();
 
 	}

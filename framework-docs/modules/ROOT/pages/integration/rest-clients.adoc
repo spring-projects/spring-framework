@@ -938,10 +938,10 @@ method parameters:
 | Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
 
 | `@RequestHeader`
-| Add a request header or multiple headers. The argument may be a `Map<String, ?>` or
-  `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
-  individual value. Type conversion is supported for non-String values. This overrides
-  the annotation's `headers` attribute.
+| Add a request header or multiple headers. The argument may be a single value,
+  a `Collection<?>` of values, `Map<String, ?>`,`MultiValueMap<String, ?>`.
+  Type conversion is supported for non-String values. Header values are added and
+  do not override already added header values.
 
 | `@PathVariable`
 | Add a variable for expand a placeholder in the request URL. The argument may be a
