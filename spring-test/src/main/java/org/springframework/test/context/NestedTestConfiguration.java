@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,9 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link ActiveProfiles @ActiveProfiles}</li>
  * <li>{@link TestPropertySource @TestPropertySource}</li>
  * <li>{@link DynamicPropertySource @DynamicPropertySource}</li>
+ * <li>{@link org.springframework.test.context.bean.override.convention.TestBean @TestBean}</li>
+ * <li>{@link org.springframework.test.context.bean.override.mockito.MockitoBean @MockitoBean}</li>
+ * <li>{@link org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean}</li>
  * <li>{@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}</li>
  * <li>{@link org.springframework.transaction.annotation.Transactional @Transactional}</li>
  * <li>{@link org.springframework.test.annotation.Rollback @Rollback}</li>

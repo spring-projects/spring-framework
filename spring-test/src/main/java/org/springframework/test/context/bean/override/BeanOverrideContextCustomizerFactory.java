@@ -24,7 +24,6 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizerFactory;
-import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -52,10 +51,7 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	}
 
 	private void findBeanOverrideHandlers(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
-		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
-			findBeanOverrideHandlers(testClass.getEnclosingClass(), handlers);
-		}
-		BeanOverrideHandler.forTestClass(testClass).forEach(handler ->
+		BeanOverrideHandler.findAllHandlers(testClass).forEach(handler ->
 				Assert.state(handlers.add(handler), () ->
 						"Duplicate BeanOverrideHandler discovered in test class %s: %s"
 							.formatted(testClass.getName(), handler)));

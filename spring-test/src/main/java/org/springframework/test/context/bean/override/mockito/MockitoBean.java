@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -29,17 +30,37 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * {@code @MockitoBean} is an annotation that can be applied to a non-static field
- * in a test class to override a bean in the test's
+ * {@code @MockitoBean} is an annotation that can be used in test classes to
+ * override beans in a test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * using a Mockito mock.
+ * using Mockito mocks.
  *
- * <p>By default, the bean to mock is inferred from the type of the annotated
- * field. If multiple candidates exist, a {@code @Qualifier} annotation can be
- * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
- * the name of the annotated field will be used as a fallback qualifier.
- * Alternatively, you can explicitly specify a bean name to mock by setting the
- * {@link #value() value} or {@link #name() name} attribute.
+ * <p>{@code @MockitoBean} can be applied in the following ways.
+ * <ul>
+ * <li>On a non-static field in a test class or any of its superclasses.</li>
+ * <li>On a non-static field in an enclosing class for a {@code @Nested} test class
+ * or in any class in the type hierarchy or enclosing class hierarchy above the
+ * {@code @Nested} test class.</li>
+ * <li>At the type level on a test class or any superclass or implemented interface
+ * in the type hierarchy above the test class.</li>
+ * <li>At the type level on an enclosing class for a {@code @Nested} test class
+ * or on any class or interface in the type hierarchy or enclosing class hierarchy
+ * above the {@code @Nested} test class.</li>
+ * </ul>
+ *
+ * <p>When {@code @MockitoBean} is declared on a field, the bean to mock is inferred
+ * from the type of the annotated field. If multiple candidates exist, a
+ * {@code @Qualifier} annotation can be declared on the field to help disambiguate.
+ * In the absence of a {@code @Qualifier} annotation, the name of the annotated
+ * field will be used as a fallback qualifier. Alternatively, you can explicitly
+ * specify a bean name to mock by setting the {@link #value() value} or
+ * {@link #name() name} attribute.
+ *
+ * <p>When {@code @MockitoBean} is declared at the type level, the type of bean
+ * to mock must be supplied via the {@link #types() types} attribute. If multiple
+ * candidates exist, you can explicitly specify a bean name to mock by setting the
+ * {@link #name() name} attribute. Note, however, that the {@code types} attribute
+ * must contain a single type if an explicit bean {@code name} is configured.
  *
  * <p>A bean will be created if a corresponding bean does not exist. However, if
  * you would like for the test to fail when a corresponding bean does not exist,
@@ -63,15 +84,29 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * (default visibility), or {@code private} depending on the needs or coding
  * practices of the project.
  *
+ * <p>{@code @MockitoBean} fields and type-level {@code @MockitoBean} declarations
+ * will be inherited from an enclosing test class by default. See
+ * {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
+ * for details.
+ *
+ * <p>{@code @MockitoBean} may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> &mdash; for example, to define common mock
+ * configuration in a single annotation that can be reused across a test suite.
+ * {@code @MockitoBean} can also be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation at the type level &mdash; for example, to mock several beans by
+ * {@link #name() name}.
+ *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
+ * @see org.springframework.test.context.bean.override.mockito.MockitoBeans @MockitoBeans
  * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean
  * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Repeatable(MockitoBeans.class)
 @BeanOverride(MockitoBeanOverrideProcessor.class)
 public @interface MockitoBean {
 
@@ -87,12 +122,26 @@ public @interface MockitoBean {
 	/**
 	 * Name of the bean to mock.
 	 * <p>If left unspecified, the bean to mock is selected according to the
-	 * annotated field's type, taking qualifiers into account if necessary. See
-	 * the {@linkplain MockitoBean class-level documentation} for details.
+	 * configured {@link #types() types} or the annotated field's type, taking
+	 * qualifiers into account if necessary. See the {@linkplain MockitoBean
+	 * class-level documentation} for details.
 	 * @see #value()
 	 */
 	@AliasFor("value")
 	String name() default "";
+
+	/**
+	 * One or more types to mock.
+	 * <p>Defaults to none.
+	 * <p>Each type specified will result in a mock being created and registered
+	 * with the {@code ApplicationContext}.
+	 * <p>Types must be omitted when the annotation is used on a field.
+	 * <p>When {@code @MockitoBean} also defines a {@link #name}, this attribute
+	 * can only contain a single value.
+	 * @return the types to mock
+	 * @since 6.2.2
+	 */
+	Class<?>[] types() default {};
 
 	/**
 	 * Extra interfaces that should also be declared by the mock.
