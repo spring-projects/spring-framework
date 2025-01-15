@@ -110,7 +110,10 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 
 	/**
-	 * Returns {@code 1000}.
+	 * Returns {@code 1000}, which ensures that the {@code ServletTestExecutionListener}
+	 * is ordered before the
+	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * DirtiesContextBeforeModesTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
