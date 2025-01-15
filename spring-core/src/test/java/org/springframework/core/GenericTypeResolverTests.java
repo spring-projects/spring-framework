@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,6 +211,14 @@ class GenericTypeResolverTests {
 		assertThat(ResolvableType.forType(resolved).getGeneric(0).getGeneric(0).resolve()).isEqualTo(String.class);
 	}
 
+	@Test
+	void resolvedTypeWithBase() {
+		Type type = method(WithBaseTypes.class, "get").getGenericReturnType();
+		Type resolvedType = resolveType(type, WithBaseTypes.class);
+		ParameterizedTypeReference<List<A>> reference = new ParameterizedTypeReference<>() {};
+		assertThat(resolvedType).isEqualTo(reference.getType());
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -396,6 +404,14 @@ class GenericTypeResolverTests {
 	}
 
 	public interface StringListOfListSupplier extends ListOfListSupplier<String> {
+	}
+
+	static class WithBaseTypes {
+
+		<T extends A> List<T> get() {
+			return List.of();
+		}
+
 	}
 
 }
