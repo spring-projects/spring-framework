@@ -117,12 +117,12 @@ class RequestMappingInfoHandlerMappingTests {
 
 
 	@PathPatternsParameterizedTest
-	void getMappingPathPatterns(TestRequestMappingInfoHandlerMapping mapping) {
+	void getDirectPaths(TestRequestMappingInfoHandlerMapping mapping) {
 		String[] patterns = {"/foo/*", "/foo", "/bar/*", "/bar"};
 		RequestMappingInfo info = mapping.createInfo(patterns);
-		Set<String> actual = mapping.getMappingPathPatterns(info);
+		Set<String> actual = mapping.getDirectPaths(info);
 
-		assertThat(actual).isEqualTo(new HashSet<>(Arrays.asList(patterns)));
+		assertThat(actual).containsExactly("/foo", "/bar");
 	}
 
 	@PathPatternsParameterizedTest

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,21 +71,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private @Nullable Supplier<Map<String, Object>> attributesSupplier;
 
-
-	/**
-	 * Constructor with the method, URI and headers for the request.
-	 * @param method the HTTP method for the request
-	 * @param uri the URI for the request
-	 * @param contextPath the context path for the request
-	 * @param headers the headers for the request (as {@link MultiValueMap})
-	 * @since 6.0.8
-	 * @deprecated Use {@link #AbstractServerHttpRequest(HttpMethod, URI, String, HttpHeaders)}
-	 */
-	@Deprecated
-	public AbstractServerHttpRequest(HttpMethod method, URI uri, @Nullable String contextPath,
-			MultiValueMap<String, String> headers) {
-		this(method, uri, contextPath, new HttpHeaders(headers));
-	}
 
 	/**
 	 * Constructor with the method, URI and headers for the request.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,34 +218,6 @@ public final class MappedInterceptor implements HandlerInterceptor {
 		}
 		for (PatternAdapter adapter : this.includePatterns) {
 			if (adapter.match(path, isPathContainer, this.pathMatcher)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Determine if there is a match for the given lookup path.
-	 * @param lookupPath the current request path
-	 * @param pathMatcher a path matcher for path pattern matching
-	 * @return {@code true} if the interceptor applies to the given request path
-	 * @deprecated as of 5.3 in favor of {@link #matches(HttpServletRequest)}
-	 */
-	@Deprecated(since = "5.3")
-	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
-		pathMatcher = (this.pathMatcher != defaultPathMatcher ? this.pathMatcher : pathMatcher);
-		if (!ObjectUtils.isEmpty(this.excludePatterns)) {
-			for (PatternAdapter adapter : this.excludePatterns) {
-				if (pathMatcher.match(adapter.getPatternString(), lookupPath)) {
-					return false;
-				}
-			}
-		}
-		if (ObjectUtils.isEmpty(this.includePatterns)) {
-			return true;
-		}
-		for (PatternAdapter adapter : this.includePatterns) {
-			if (pathMatcher.match(adapter.getPatternString(), lookupPath)) {
 				return true;
 			}
 		}

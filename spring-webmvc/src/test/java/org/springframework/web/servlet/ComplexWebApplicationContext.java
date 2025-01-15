@@ -64,6 +64,7 @@ import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -118,10 +119,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("noviewController", NoViewController.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.add("order", 0);
-		pvs.add("basename", "org.springframework.web.servlet.complexviews");
-		registerSingleton("viewResolver",
-				org.springframework.web.servlet.view.ResourceBundleViewResolver.class, pvs);
+		registerSingleton("viewResolver", TestViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
 		pvs.add("suffix", ".jsp");
@@ -507,6 +505,25 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new IllegalStateException("Already cleaned up");
 			}
 			request.setAttribute("cleanedUp", Boolean.TRUE);
+		}
+	}
+
+
+	private static class TestViewResolver implements ViewResolver, Ordered {
+
+		@Override
+		public int getOrder() {
+			return 0;
+		}
+
+		@Override
+		public @Nullable View resolveViewName(String viewName, Locale locale) throws Exception {
+			if (viewName.equalsIgnoreCase("form")) {
+				InternalResourceView view = new InternalResourceView("myform.jsp");
+				view.setRequestContextAttribute("rc");
+				return view;
+			}
+			return null;
 		}
 	}
 

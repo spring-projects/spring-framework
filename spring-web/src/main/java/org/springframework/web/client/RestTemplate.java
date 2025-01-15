@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -818,24 +818,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	@Override
 	public <T> @Nullable T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
-			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
-
-		return doExecute(url, null, method, requestCallback, responseExtractor);
-	}
-
-	/**
-	 * Execute the given method on the provided URI.
-	 * <p>The {@link ClientHttpRequest} is processed using the {@link RequestCallback};
-	 * the response with the {@link ResponseExtractor}.
-	 * @param url the fully-expanded URL to connect to
-	 * @param method the HTTP method to execute (GET, POST, etc.)
-	 * @param requestCallback object that prepares the request (can be {@code null})
-	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
-	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
-	 * @deprecated in favor of {@link #doExecute(URI, String, HttpMethod, RequestCallback, ResponseExtractor)}
-	 */
-	@Deprecated
-	protected <T> @Nullable T doExecute(URI url, @Nullable HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		return doExecute(url, null, method, requestCallback, responseExtractor);

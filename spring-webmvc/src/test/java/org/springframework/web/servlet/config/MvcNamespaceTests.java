@@ -316,6 +316,7 @@ public class MvcNamespaceTests {
 		doTestCustomValidator("mvc-config-custom-validator.xml");
 	}
 
+	@SuppressWarnings("removal")
 	private void doTestCustomValidator(String xml) throws Exception {
 		loadBeanDefinitions(xml);
 

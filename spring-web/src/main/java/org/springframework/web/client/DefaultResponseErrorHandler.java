@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,25 +95,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	protected boolean hasError(HttpStatusCode statusCode) {
 		return statusCode.isError();
-	}
-
-	/**
-	 * Template method called from {@link #hasError(ClientHttpResponse)}.
-	 * <p>The default implementation checks if the given status code is
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
-	 * Can be overridden in subclasses.
-	 * @param statusCode the HTTP status code as raw value
-	 * @return {@code true} if the response indicates an error; {@code false} otherwise
-	 * @since 4.3.21
-	 * @see org.springframework.http.HttpStatus.Series#CLIENT_ERROR
-	 * @see org.springframework.http.HttpStatus.Series#SERVER_ERROR
-	 * @deprecated in favor of {@link #hasError(HttpStatusCode)}
-	 */
-	@Deprecated
-	protected boolean hasError(int statusCode) {
-		HttpStatus.Series series = HttpStatus.Series.resolve(statusCode);
-		return (series == HttpStatus.Series.CLIENT_ERROR || series == HttpStatus.Series.SERVER_ERROR);
 	}
 
 	/**

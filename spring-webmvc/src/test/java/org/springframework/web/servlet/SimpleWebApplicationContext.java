@@ -24,7 +24,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -36,7 +35,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Juergen Hoeller
  * @since 21.05.2003
  */
-@SuppressWarnings("deprecation")
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
@@ -51,14 +49,11 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("handlerMapping", BeanNameUrlHandlerMapping.class);
 		registerSingleton("viewResolver", InternalResourceViewResolver.class);
 
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
-		registerSingleton("viewResolver2", org.springframework.web.servlet.view.XmlViewResolver.class, pvs);
-
 		super.refresh();
 	}
 
 
+	@SuppressWarnings("deprecation")
 	public static class LocaleChecker implements Controller, org.springframework.web.servlet.mvc.LastModified {
 
 		@Override

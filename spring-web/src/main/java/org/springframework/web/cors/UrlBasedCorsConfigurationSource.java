@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,6 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	private UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
 	private PathMatcher pathMatcher = defaultPathMatcher;
-
-	private @Nullable String lookupPathAttributeName;
 
 	private boolean allowInitLookupPath = true;
 
@@ -181,19 +179,6 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	}
 
 	/**
-	 * Configure the name of the attribute that holds the lookupPath extracted
-	 * via {@link UrlPathHelper#getLookupPathForRequest(HttpServletRequest)}.
-	 * <p>By default this is {@link UrlPathHelper#PATH_ATTRIBUTE}.
-	 * @param name the request attribute to check
-	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of {@link UrlPathHelper#PATH_ATTRIBUTE}.
-	 */
-	@Deprecated
-	public void setLookupPathAttributeName(String name) {
-		this.lookupPathAttributeName = name;
-	}
-
-	/**
 	 * Configure a {@code PathMatcher} to use for pattern matching.
 	 * <p>This is an advanced property that should be used only when a
 	 * customized {@link AntPathMatcher} or a custom PathMatcher is required.
@@ -262,12 +247,9 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	private Object resolvePath(HttpServletRequest request) {
 		if (this.allowInitLookupPath && !ServletRequestPathUtils.hasCachedPath(request)) {
-			return (this.lookupPathAttributeName != null ?
-					this.urlPathHelper.getLookupPathForRequest(request, this.lookupPathAttributeName) :
-					this.urlPathHelper.getLookupPathForRequest(request));
+			return this.urlPathHelper.getLookupPathForRequest(request);
 		}
 		Object lookupPath = ServletRequestPathUtils.getCachedPath(request);
 		if (this.pathMatcher != defaultPathMatcher) {

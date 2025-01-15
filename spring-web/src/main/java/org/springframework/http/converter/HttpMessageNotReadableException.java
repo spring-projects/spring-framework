@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,29 +34,6 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 
 	private final @Nullable HttpInputMessage httpInputMessage;
 
-
-	/**
-	 * Create a new HttpMessageNotReadableException.
-	 * @param msg the detail message
-	 * @deprecated as of 5.1, in favor of {@link #HttpMessageNotReadableException(String, HttpInputMessage)}
-	 */
-	@Deprecated
-	public HttpMessageNotReadableException(String msg) {
-		super(msg);
-		this.httpInputMessage = null;
-	}
-
-	/**
-	 * Create a new HttpMessageNotReadableException.
-	 * @param msg the detail message
-	 * @param cause the root cause (if any)
-	 * @deprecated as of 5.1, in favor of {@link #HttpMessageNotReadableException(String, Throwable, HttpInputMessage)}
-	 */
-	@Deprecated
-	public HttpMessageNotReadableException(String msg, @Nullable Throwable cause) {
-		super(msg, cause);
-		this.httpInputMessage = null;
-	}
 
 	/**
 	 * Create a new HttpMessageNotReadableException.

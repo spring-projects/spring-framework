@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,27 +207,6 @@ public class UrlPathHelper {
 		String lookupPath = (String) request.getAttribute(PATH_ATTRIBUTE);
 		Assert.notNull(lookupPath, () -> "Expected lookupPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return lookupPath;
-	}
-
-	/**
-	 * Variant of {@link #getLookupPathForRequest(HttpServletRequest)} that
-	 * automates checking for a previously computed lookupPath saved as a
-	 * request attribute. The attribute is only used for lookup purposes.
-	 * @param request current HTTP request
-	 * @param name the request attribute that holds the lookupPath
-	 * @return the lookup path
-	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of using
-	 * {@link #resolveAndCacheLookupPath(HttpServletRequest)} and
-	 * {@link #getResolvedLookupPath(ServletRequest)}.
-	 */
-	@Deprecated
-	public String getLookupPathForRequest(HttpServletRequest request, @Nullable String name) {
-		String result = null;
-		if (name != null) {
-			result = (String) request.getAttribute(name);
-		}
-		return (result != null ? result : getLookupPathForRequest(request));
 	}
 
 	/**

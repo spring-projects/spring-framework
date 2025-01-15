@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ public abstract class CorsUtils {
 	 * Returns {@code true} if the request is a valid CORS one by checking {@code Origin}
 	 * header presence and ensuring that origins are different via {@link #isSameOrigin}.
 	 */
-	@SuppressWarnings("deprecation")
 	public static boolean isCorsRequest(ServerHttpRequest request) {
 		return request.getHeaders().containsHeader(HttpHeaders.ORIGIN) && !isSameOrigin(request);
 	}
@@ -66,10 +65,8 @@ public abstract class CorsUtils {
 	 * to extract and use, or to discard such headers.
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of a cross-origin request
-	 * @deprecated as of 5.2, same-origin checks are performed directly by {@link #isCorsRequest}
 	 */
-	@Deprecated
-	public static boolean isSameOrigin(ServerHttpRequest request) {
+	private static boolean isSameOrigin(ServerHttpRequest request) {
 		String origin = request.getHeaders().getOrigin();
 		if (origin == null) {
 			return true;

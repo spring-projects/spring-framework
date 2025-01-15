@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -512,29 +511,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract @Nullable T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
-	 * Extract and return the URL paths contained in the supplied mapping.
-	 * @deprecated as of 5.3 in favor of providing non-pattern mappings via
-	 * {@link #getDirectPaths(Object)} instead
-	 */
-	@Deprecated
-	protected Set<String> getMappingPathPatterns(T mapping) {
-		return Collections.emptySet();
-	}
-
-	/**
 	 * Return the request mapping paths that are not patterns.
 	 * @since 5.3
 	 */
-	@SuppressWarnings("removal")
 	protected Set<String> getDirectPaths(T mapping) {
-		Set<String> urls = Collections.emptySet();
-		for (String path : getMappingPathPatterns(mapping)) {
-			if (!getPathMatcher().isPattern(path)) {
-				urls = (urls.isEmpty() ? new HashSet<>(1) : urls);
-				urls.add(path);
-			}
-		}
-		return urls;
+		return Collections.emptySet();
 	}
 
 	/**

@@ -69,6 +69,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
@@ -261,9 +262,8 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void httpMessageNotReadable() {
-		testException(new HttpMessageNotReadableException("message"));
+		testException(new HttpMessageNotReadableException("message", new MockHttpInputMessage(new byte[0])));
 	}
 
 	@Test

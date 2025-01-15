@@ -26,8 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
+import org.springframework.http.server.RequestPath;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
@@ -37,6 +37,7 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -178,12 +179,13 @@ public class InterceptorRegistryTests {
 	}
 
 
-	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
-		PathMatcher pathMatcher = new AntPathMatcher();
+	private List<HandlerInterceptor> getInterceptorsForPath(@Nullable String lookupPath) {
+		lookupPath = (lookupPath != null ? lookupPath : "");
+		this.request.setAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE, RequestPath.parse(lookupPath, null));
 		List<HandlerInterceptor> result = new ArrayList<>();
 		for (Object interceptor : this.registry.getInterceptors()) {
 			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
-				if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
+				if (mappedInterceptor.matches(this.request)) {
 					result.add(mappedInterceptor.getInterceptor());
 				}
 			}

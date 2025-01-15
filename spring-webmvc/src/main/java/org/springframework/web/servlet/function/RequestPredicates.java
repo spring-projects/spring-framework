@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1048,7 +1048,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String toString() {
-			return "!" + this.delegate.toString();
+			return "!" + this.delegate;
 		}
 	}
 
@@ -1143,12 +1143,6 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		@Deprecated
-		public String methodName() {
-			return this.delegate.methodName();
-		}
-
-		@Override
 		public URI uri() {
 			return this.delegate.uri();
 		}
@@ -1161,12 +1155,6 @@ public abstract class RequestPredicates {
 		@Override
 		public String path() {
 			return this.delegate.path();
-		}
-
-		@Override
-		@Deprecated
-		public PathContainer pathContainer() {
-			return this.delegate.pathContainer();
 		}
 
 		@Override
@@ -1382,12 +1370,6 @@ public abstract class RequestPredicates {
 		@Override
 		public String path() {
 			return this.requestPath.pathWithinApplication().value();
-		}
-
-		@Override
-		@Deprecated
-		public PathContainer pathContainer() {
-			return this.requestPath;
 		}
 	}
 }

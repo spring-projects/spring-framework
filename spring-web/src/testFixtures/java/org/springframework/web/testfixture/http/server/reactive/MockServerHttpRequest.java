@@ -43,7 +43,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -208,22 +207,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 */
 	public static BodyBuilder method(HttpMethod method, String uri, @Nullable Object... vars) {
 		return method(method, toUri(uri, vars));
-	}
-
-	/**
-	 * Create a builder with a raw HTTP method value that is outside the
-	 * range of {@link HttpMethod} enum values.
-	 * @param httpMethod the HTTP methodValue value
-	 * @param uri the URI template for target the URL
-	 * @param vars variables to expand into the template
-	 * @return the created builder
-	 * @since 5.2.7
-	 * @deprecated in favor of {@link #method(HttpMethod, String, Object...)}
-	 */
-	@Deprecated
-	public static BodyBuilder method(String httpMethod, String uri, @Nullable Object... vars) {
-		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
-		return new DefaultBodyBuilder(HttpMethod.valueOf(httpMethod), toUri(uri, vars));
 	}
 
 	private static URI toUri(String uri, @Nullable Object[] vars) {

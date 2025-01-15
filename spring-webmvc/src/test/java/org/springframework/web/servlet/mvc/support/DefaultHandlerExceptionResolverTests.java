@@ -49,6 +49,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -153,9 +154,8 @@ class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void handleHttpMessageNotReadable() {
-		HttpMessageNotReadableException ex = new HttpMessageNotReadableException("foo");
+		HttpMessageNotReadableException ex = new HttpMessageNotReadableException("foo", new MockHttpInputMessage(new byte[0]));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();

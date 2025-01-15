@@ -123,25 +123,6 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 
 
 	/**
-	 * Set the name of cookie created by this resolver.
-	 * @param cookieName the cookie name
-	 * @deprecated as of 6.0 in favor of {@link #CookieLocaleResolver(String)}
-	 */
-	@Deprecated
-	public void setCookieName(String cookieName) {
-		Assert.notNull(cookieName, "cookieName must not be null");
-		this.cookie = ResponseCookie.from(cookieName)
-				.maxAge(this.cookie.getMaxAge())
-				.domain(this.cookie.getDomain())
-				.path(this.cookie.getPath())
-				.secure(this.cookie.isSecure())
-				.httpOnly(this.cookie.isHttpOnly())
-				.sameSite(this.cookie.getSameSite())
-				.build();
-
-	}
-
-	/**
 	 * Set the cookie "Max-Age" attribute.
 	 * <p>By default, this is set to -1 in which case the cookie persists until
 	 * browser shutdown.
@@ -151,15 +132,6 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	public void setCookieMaxAge(Duration cookieMaxAge) {
 		Assert.notNull(cookieMaxAge, "'cookieMaxAge' must not be null");
 		this.cookie = this.cookie.mutate().maxAge(cookieMaxAge).build();
-	}
-
-	/**
-	 * Variant of {@link #setCookieMaxAge(Duration)} with a value in seconds.
-	 * @deprecated as of 6.0 in favor of {@link #setCookieMaxAge(Duration)}
-	 */
-	@Deprecated
-	public void setCookieMaxAge(@Nullable Integer cookieMaxAge) {
-		setCookieMaxAge(Duration.ofSeconds((cookieMaxAge != null) ? cookieMaxAge : -1));
 	}
 
 	/**
@@ -409,38 +381,6 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	 */
 	protected String toLocaleValue(Locale locale) {
 		return (isLanguageTagCompliant() ? locale.toLanguageTag() : locale.toString());
-	}
-
-	/**
-	 * Determine the default locale for the given request, called if no locale
-	 * cookie has been found.
-	 * <p>The default implementation returns the configured default locale, if any,
-	 * and otherwise falls back to the request's {@code Accept-Language} header
-	 * locale or the default locale for the server.
-	 * @param request the request to resolve the locale for
-	 * @return the default locale (never {@code null})
-	 * @see #setDefaultLocale
-	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
-	 * @deprecated as of 6.0, in favor of {@link #setDefaultLocaleFunction(Function)}
-	 */
-	@Deprecated(since = "6.0")
-	protected Locale determineDefaultLocale(HttpServletRequest request) {
-		return this.defaultLocaleFunction.apply(request);
-	}
-
-	/**
-	 * Determine the default time zone for the given request, called if no locale
-	 * cookie has been found.
-	 * <p>The default implementation returns the configured default time zone,
-	 * if any, or {@code null} otherwise.
-	 * @param request the request to resolve the time zone for
-	 * @return the default time zone (or {@code null} if none defined)
-	 * @see #setDefaultTimeZone
-	 * @deprecated as of 6.0, in favor of {@link #setDefaultTimeZoneFunction(Function)}
-	 */
-	@Deprecated(since = "6.0")
-	protected @Nullable TimeZone determineDefaultTimeZone(HttpServletRequest request) {
-		return this.defaultTimeZoneFunction.apply(request);
 	}
 
 }

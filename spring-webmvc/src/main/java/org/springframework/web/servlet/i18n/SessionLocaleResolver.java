@@ -193,38 +193,4 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 		WebUtils.setSessionAttribute(request, this.timeZoneAttributeName, timeZone);
 	}
 
-
-	/**
-	 * Determine the default locale for the given request, called if no
-	 * {@link Locale} session attribute has been found.
-	 * <p>The default implementation returns the configured
-	 * {@linkplain #setDefaultLocale(Locale) default locale}, if any, and otherwise
-	 * falls back to the request's {@code Accept-Language} header locale or the
-	 * default locale for the server.
-	 * @param request the request to resolve the locale for
-	 * @return the default locale (never {@code null})
-	 * @see #setDefaultLocale
-	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
-	 * @deprecated as of 6.0, in favor of {@link #setDefaultLocaleFunction(Function)}
-	 */
-	@Deprecated(since = "6.0")
-	protected Locale determineDefaultLocale(HttpServletRequest request) {
-		return this.defaultLocaleFunction.apply(request);
-	}
-
-	/**
-	 * Determine the default time zone for the given request, called if no
-	 * {@link TimeZone} session attribute has been found.
-	 * <p>The default implementation returns the configured default time zone,
-	 * if any, or {@code null} otherwise.
-	 * @param request the request to resolve the time zone for
-	 * @return the default time zone (or {@code null} if none defined)
-	 * @see #setDefaultTimeZone
-	 * @deprecated as of 6.0, in favor of {@link #setDefaultTimeZoneFunction(Function)}
-	 */
-	@Deprecated(since = "6.0")
-	protected @Nullable TimeZone determineDefaultTimeZone(HttpServletRequest request) {
-		return this.defaultTimeZoneFunction.apply(request);
-	}
-
 }
