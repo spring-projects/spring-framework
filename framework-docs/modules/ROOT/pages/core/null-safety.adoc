@@ -105,7 +105,7 @@ typical use cases.
 [[null-safety-guidelines-nullaway]]
 === NullAway
 
-=== Configuration
+==== Configuration
 
 The recommended configuration is:
 
@@ -127,7 +127,7 @@ using JDK 22 or later (typically combined with the `--release` Java compiler fla
 expected baseline). It is recommended to enable the JSpecify mode only as a second step, after making sure the codebase
 generates no warning with the recommended configuration mentioned above.
 
-=== Warnings suppression
+==== Warnings suppression
 
 There are a few valid use cases where NullAway will wrongly detect nullness problems. In such case, it is recommended
 to suppress related warnings and to document the reason:
