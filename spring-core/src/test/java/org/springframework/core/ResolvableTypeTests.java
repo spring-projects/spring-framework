@@ -1784,8 +1784,6 @@ class ResolvableTypeTests {
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
 	}
 
-	public interface Consumer<T> {
-	}
 
 	public interface Consumer<T> {
 	}
