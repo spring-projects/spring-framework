@@ -53,8 +53,8 @@ class RequestHeaderArgumentResolverTests {
 
 	@Test
 	void doesNotOverrideAnnotationHeaders() {
-		this.service.executeWithAnnotationHeaders("test");
-		assertRequestHeaders("id", "default", "test");
+		this.service.executeWithAnnotationHeaders("2");
+		assertRequestHeaders("myHeader", "1", "2");
 	}
 
 	private void assertRequestHeaders(String key, String... values) {
@@ -73,8 +73,8 @@ class RequestHeaderArgumentResolverTests {
 		@GetExchange
 		void execute(@RequestHeader String id);
 
-		@HttpExchange(method = "GET", headers = "id=default")
-		void executeWithAnnotationHeaders(@RequestHeader String id);
+		@HttpExchange(method = "GET", headers = "myHeader=1")
+		void executeWithAnnotationHeaders(@RequestHeader String myHeader);
 
 	}
 
