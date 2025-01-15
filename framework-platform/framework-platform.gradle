@@ -9,7 +9,7 @@ javaPlatform {
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.18.2"))
 	api(platform("io.micrometer:micrometer-bom:1.14.3"))
-	api(platform("io.netty:netty-bom:4.1.115.Final"))
+	api(platform("io.netty:netty-bom:4.1.117.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
 	api(platform("io.projectreactor:reactor-bom:2024.0.2"))
 	api(platform("io.rsocket:rsocket-bom:1.1.4"))
@@ -31,7 +31,7 @@ dependencies {
 		api("com.google.code.findbugs:findbugs:3.0.1")
 		api("com.google.code.findbugs:jsr305:3.0.2")
 		api("com.google.code.gson:gson:2.11.0")
-		api("com.google.protobuf:protobuf-java-util:4.28.3")
+		api("com.google.protobuf:protobuf-java-util:4.29.3")
 		api("com.h2database:h2:2.3.232")
 		api("com.jayway.jsonpath:json-path:2.9.0")
 		api("com.networknt:json-schema-validator:1.5.3")
