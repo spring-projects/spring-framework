@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1189,10 +1189,11 @@ class ResolvableTypeTests {
 	}
 
 	@Test
-	void isAssignableFromForUnresolvedWildcards() {
+	void isAssignableFromForUnresolvedWildcard() {
 		ResolvableType wildcard = ResolvableType.forInstance(new Wildcard<>());
 		ResolvableType wildcardFixed = ResolvableType.forInstance(new WildcardFixed());
-		ResolvableType wildcardConcrete = ResolvableType.forClassWithGenerics(Wildcard.class, Number.class);
+		ResolvableType wildcardConcrete = ResolvableType.forClassWithGenerics(Wildcard.class, CharSequence.class);
+		ResolvableType wildcardConsumer = ResolvableType.forInstance(new WildcardConsumer<>());
 
 		assertThat(wildcard.isAssignableFrom(wildcardFixed)).isTrue();
 		assertThat(wildcard.isAssignableFromResolvedPart(wildcardFixed)).isTrue();
@@ -1206,6 +1207,38 @@ class ResolvableTypeTests {
 		assertThat(wildcardConcrete.isAssignableFromResolvedPart(wildcard)).isTrue();
 		assertThat(wildcardConcrete.isAssignableFrom(wildcardFixed)).isFalse();
 		assertThat(wildcardConcrete.isAssignableFromResolvedPart(wildcardFixed)).isFalse();
+		assertThat(wildcardConsumer.as(Consumer.class).getGeneric().isAssignableFrom(wildcard)).isFalse();
+		assertThat(wildcardConsumer.as(Consumer.class).getGeneric().isAssignableFromResolvedPart(wildcard)).isTrue();
+	}
+
+	@Test
+	void isAssignableFromForUnresolvedDoubleWildcard() {
+		ResolvableType wildcard = ResolvableType.forInstance(new DoubleWildcard<>());
+		ResolvableType wildcardFixed = ResolvableType.forInstance(new DoubleWildcardFixed());
+		ResolvableType wildcardConsumer = ResolvableType.forInstance(new DoubleWildcardConsumer<>());
+
+		assertThat(wildcard.isAssignableFrom(wildcardFixed)).isTrue();
+		assertThat(wildcard.isAssignableFromResolvedPart(wildcardFixed)).isTrue();
+		assertThat(wildcardFixed.isAssignableFrom(wildcard)).isFalse();
+		assertThat(wildcardFixed.isAssignableFromResolvedPart(wildcard)).isFalse();
+		assertThat(wildcardConsumer.as(Consumer.class).getGeneric().isAssignableFrom(wildcard)).isTrue();
+		assertThat(wildcardConsumer.as(Consumer.class).getGeneric().isAssignableFromResolvedPart(wildcard)).isTrue();
+	}
+
+	@Test
+	void strictGenericsMatching() {
+		ResolvableType consumerUnresolved = ResolvableType.forClass(Consumer.class);
+		ResolvableType consumerObject = ResolvableType.forClassWithGenerics(Consumer.class, Object.class);
+		ResolvableType consumerNestedUnresolved = ResolvableType.forClassWithGenerics(Consumer.class, ResolvableType.forClass(Consumer.class));
+
+		assertThat(consumerUnresolved.isAssignableFrom(consumerObject)).isTrue();
+		assertThat(consumerUnresolved.isAssignableFromResolvedPart(consumerObject)).isTrue();
+		assertThat(consumerObject.isAssignableFrom(consumerUnresolved)).isTrue();
+		assertThat(consumerObject.isAssignableFromResolvedPart(consumerUnresolved)).isTrue();
+		assertThat(consumerUnresolved.isAssignableFrom(consumerNestedUnresolved)).isTrue();
+		assertThat(consumerUnresolved.isAssignableFromResolvedPart(consumerNestedUnresolved)).isTrue();
+		assertThat(consumerObject.isAssignableFrom(consumerNestedUnresolved)).isFalse();
+		assertThat(consumerObject.isAssignableFromResolvedPart(consumerNestedUnresolved)).isFalse();
 	}
 
 	@Test
@@ -1752,11 +1785,25 @@ class ResolvableTypeTests {
 	}
 
 
-	public class Wildcard<T extends Number> {
+	public class Wildcard<T extends CharSequence> {
 	}
 
-	public class WildcardFixed extends Wildcard<Integer> {
+	public class WildcardFixed extends Wildcard<String> {
 	}
+
+	public class WildcardConsumer<T extends CharSequence & Serializable> implements Consumer<Wildcard<T>> {
+	}
+
+
+	public class DoubleWildcard<T extends CharSequence & Serializable> {
+	}
+
+	public class DoubleWildcardFixed extends DoubleWildcard<String> {
+	}
+
+	public class DoubleWildcardConsumer<T extends CharSequence & Serializable> implements Consumer<DoubleWildcard<T>> {
+	}
+
 
 
 	interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {

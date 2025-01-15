@@ -401,8 +401,9 @@ public class ResolvableType implements Serializable {
 				}
 				matchedBefore.put(this.type, other.type);
 				for (int i = 0; i < ourGenerics.length; i++) {
-					if (!ourGenerics[i].isAssignableFrom(otherGenerics[i],
-							!other.hasUnresolvableGenerics(), matchedBefore, upUntilUnresolvable)) {
+					ResolvableType otherGeneric = otherGenerics[i];
+					if (!ourGenerics[i].isAssignableFrom(otherGeneric,
+							!otherGeneric.isUnresolvableTypeVariable(), matchedBefore, upUntilUnresolvable)) {
 						return false;
 					}
 				}
@@ -1710,8 +1711,16 @@ public class ResolvableType implements Serializable {
 		 * @return {@code true} if these bounds are assignable from all types
 		 */
 		public boolean isAssignableFrom(ResolvableType[] types, @Nullable Map<Type, Type> matchedBefore) {
-			for (ResolvableType type : types) {
-				if (!isAssignableFrom(type, matchedBefore)) {
+			for (ResolvableType bound : this.bounds) {
+				boolean matched = false;
+				for (ResolvableType type : types) {
+					if (this.kind == Kind.UPPER ? bound.isAssignableFrom(type, false, matchedBefore, false) :
+							type.isAssignableFrom(bound, false, matchedBefore, false)) {
+						matched = true;
+						break;
+					}
+				}
+				if (!matched) {
 					return false;
 				}
 			}
