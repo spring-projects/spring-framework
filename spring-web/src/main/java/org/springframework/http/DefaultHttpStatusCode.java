@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
  * Default implementation of {@link HttpStatusCode}.
  *
  * @author Arjen Poutsma
+ * @author Mengqi Xu
  * @since 6.0
  */
 final class DefaultHttpStatusCode implements HttpStatusCode, Comparable<HttpStatusCode>, Serializable {
@@ -32,9 +33,12 @@ final class DefaultHttpStatusCode implements HttpStatusCode, Comparable<HttpStat
 
 	private final int value;
 
+	private final HttpStatus.Series series;
+
 
 	public DefaultHttpStatusCode(int value) {
 		this.value = value;
+		this.series = HttpStatus.Series.resolve(value);
 	}
 
 	@Override
@@ -44,37 +48,40 @@ final class DefaultHttpStatusCode implements HttpStatusCode, Comparable<HttpStat
 
 	@Override
 	public boolean is1xxInformational() {
-		return hundreds() == 1;
+		return series() == HttpStatus.Series.INFORMATIONAL;
 	}
 
 	@Override
 	public boolean is2xxSuccessful() {
-		return hundreds() == 2;
+		return series() == HttpStatus.Series.SUCCESSFUL;
 	}
 
 	@Override
 	public boolean is3xxRedirection() {
-		return hundreds() == 3;
+		return series() == HttpStatus.Series.REDIRECTION;
 	}
 
 	@Override
 	public boolean is4xxClientError() {
-		return hundreds() == 4;
+		return series() == HttpStatus.Series.CLIENT_ERROR;
 	}
 
 	@Override
 	public boolean is5xxServerError() {
-		return hundreds() == 5;
+		return series() == HttpStatus.Series.SERVER_ERROR;
 	}
 
 	@Override
 	public boolean isError() {
-		int hundreds = hundreds();
-		return hundreds == 4 || hundreds == 5;
+		return (is4xxClientError() || is5xxServerError());
 	}
 
-	private int hundreds() {
-		return this.value / 100;
+	/**
+	 * Return the HTTP status series of this status code.
+	 * @see HttpStatus.Series
+	 */
+	private HttpStatus.Series series() {
+		return this.series;
 	}
 
 
