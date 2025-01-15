@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,8 +116,9 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 * Verify that the actual HTTP headers do not contain any of the headers
 	 * with the given {@code names}.
 	 * @param names the names of HTTP headers that should not be present
+	 * @since 6.2.2
 	 */
-	public HttpHeadersAssert doesNotContainsHeaders(String... names) {
+	public HttpHeadersAssert doesNotContainHeaders(String... names) {
 		this.namesAssert
 				.as("check headers does not contain HTTP headers '%s'", Arrays.toString(names))
 				.doesNotContain(names);

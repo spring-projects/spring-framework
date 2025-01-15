@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,14 +78,14 @@ class HttpHeadersAssertTests {
 	@Test
 	void doesNotContainHeaders() {
 		assertThat(Map.of("first", "1", "third", "3"))
-				.doesNotContainsHeaders("second", "fourth");
+				.doesNotContainHeaders("second", "fourth");
 	}
 
 	@Test
 	void doesNotContainHeadersWithSeveralNamesPresent() {
 		Map<String, String> map = Map.of("first", "1", "second", "2", "third", "3");
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).doesNotContainsHeaders("first", "another-wrong-name", "second"))
+				.isThrownBy(() -> assertThat(map).doesNotContainHeaders("first", "another-wrong-name", "second"))
 				.withMessageContainingAll("HTTP headers", "first", "second");
 	}
 
