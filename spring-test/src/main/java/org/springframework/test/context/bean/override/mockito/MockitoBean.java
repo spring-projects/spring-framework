@@ -63,6 +63,10 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * (default visibility), or {@code private} depending on the needs or coding
  * practices of the project.
  *
+ * <p>{@code @MockitoBean} fields will be inherited from an enclosing test class by default.
+ * See {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
+ * for details.
+ *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
