@@ -126,7 +126,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 
 	/**
-	 * Returns {@code 5000}.
+	 * Returns {@code 5000}, which ensures that the {@code SqlScriptsTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+	 * TransactionalTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.event.EventPublishingTestExecutionListener
+	 * EventPublishingTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {

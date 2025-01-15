@@ -98,7 +98,10 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 public class EventPublishingTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 10000}.
+	 * Returns {@code 10000}, which ensures that the {@code EventPublishingTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+	 * SqlScriptsTestExecutionListener}
 	 */
 	@Override
 	public final int getOrder() {

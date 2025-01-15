@@ -61,7 +61,12 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 
 
 	/**
-	 * Returns {@code 1800}.
+	 * Returns {@code 1800}, which ensures that the {@code ApplicationEventsTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * DirtiesContextBeforeModesTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
+	 * BeanOverrideTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
