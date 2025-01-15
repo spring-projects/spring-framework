@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 import org.assertj.core.api.AbstractAssert;
 import org.junit.jupiter.api.Test;
@@ -1785,6 +1784,8 @@ class ResolvableTypeTests {
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
 	}
 
+	public interface Consumer<T> {
+	}
 
 	public class Wildcard<T extends CharSequence> {
 	}
