@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.web.method.HandlerMethod;
  * <p>A HandlerInterceptor gets called before the appropriate HandlerAdapter
  * triggers the execution of the handler itself. This mechanism can be used
  * for a large field of preprocessing aspects, or common handler behavior
- * like locale or theme changes. Its main purpose is to allow for factoring
+ * like locale changes. Its main purpose is to allow for factoring
  * out repetitive handler code.
  *
  * <p>In an asynchronous processing scenario, the handler may be executed in a
@@ -75,7 +75,6 @@ import org.springframework.web.method.HandlerMethod;
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setInterceptors
  * @see org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor
  * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
- * @see org.springframework.web.servlet.theme.ThemeChangeInterceptor
  * @see jakarta.servlet.Filter
  */
 public interface HandlerInterceptor {

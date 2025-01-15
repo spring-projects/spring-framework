@@ -46,7 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * set by the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * <p>Supports lookup of current WebApplicationContext, LocaleResolver,
- * Locale, ThemeResolver, Theme, and MultipartResolver.
+ * Locale, and MultipartResolver.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev

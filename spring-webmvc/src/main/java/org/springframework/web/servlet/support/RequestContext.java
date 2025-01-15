@@ -54,7 +54,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Context holder for request-specific state, like current web application context, current locale,
- * current theme, and potential binding errors. Provides easy access to localized messages and
+ * and potential binding errors. Provides easy access to localized messages and
  * Errors instances.
  *
  * <p>Suitable for exposition to views, and usage within JSP's "useBean" tag, JSP scriptlets, JSTL EL,

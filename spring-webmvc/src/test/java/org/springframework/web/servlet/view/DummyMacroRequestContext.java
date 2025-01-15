@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,6 @@ public class DummyMacroRequestContext {
 
 	private Map<String, String> messageMap;
 
-	private Map<String, String> themeMessageMap;
-
 	private String contextPath;
 
 
@@ -52,10 +50,6 @@ public class DummyMacroRequestContext {
 
 	public void setMessageMap(Map<String, String> messageMap) {
 		this.messageMap = messageMap;
-	}
-
-	public void setThemeMessageMap(Map<String, String> themeMessageMap) {
-		this.themeMessageMap = themeMessageMap;
 	}
 
 
@@ -86,36 +80,6 @@ public class DummyMacroRequestContext {
 	 */
 	public String getMessage(String code, List<?> args, String defaultMsg) {
 		String msg = this.messageMap.get(code);
-		return (msg != null ? msg + args : defaultMsg);
-	}
-
-	/**
-	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String)
-	 */
-	public String getThemeMessage(String code) {
-		return this.themeMessageMap.get(code);
-	}
-
-	/**
-	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String, String)
-	 */
-	public String getThemeMessage(String code, String defaultMsg) {
-		String msg = this.themeMessageMap.get(code);
-		return (msg != null ? msg : defaultMsg);
-	}
-
-	/**
-	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String, List)
-	 */
-	public String getThemeMessage(String code, List<?> args) {
-		return this.themeMessageMap.get(code) + args;
-	}
-
-	/**
-	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String, List, String)
-	 */
-	public String getThemeMessage(String code, List<?> args, String defaultMsg) {
-		String msg = this.themeMessageMap.get(code);
 		return (msg != null ? msg + args : defaultMsg);
 	}
 

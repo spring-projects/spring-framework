@@ -11,8 +11,6 @@ The `DispatcherServlet` processes requests as follows:
 * The locale resolver is bound to the request to let elements in the process
   resolve the locale to use when processing the request (rendering the view, preparing
   data, and so on). If you do not need locale resolving, you do not need the locale resolver.
-* The theme resolver is bound to the request to let elements such as views determine
-  which theme to use. If you do not use themes, you can ignore it.
 * If you specify a multipart file resolver, the request is inspected for multiparts. If
   multiparts are found, the request is wrapped in a `MultipartHttpServletRequest` for
   further processing by other elements in the process. See xref:web/webmvc/mvc-servlet/multipart.adoc[Multipart Resolver] for further

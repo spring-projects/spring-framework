@@ -21,18 +21,6 @@ MESSAGEARGS
 MESSAGEARGSWITHDEFAULTMESSAGE
 <@spring.messageArgsText "no.such.code", msgArgs, "Hi"/>
 
-THEME
-<@spring.theme "hello"/> <@spring.theme "world"/>
-
-DEFAULTTHEME
-<@spring.themeText "no.such.code", "hi!"/> <@spring.themeText "no.such.code", "planet!"/>
-
-THEMEARGS
-<@spring.themeArgs "hello", msgArgs/>
-
-THEMEARGSWITHDEFAULTMESSAGE
-<@spring.themeArgsText "no.such.code", msgArgs, "Hi!"/>
-
 URL
 <@spring.url "/aftercontext.html"/>
 

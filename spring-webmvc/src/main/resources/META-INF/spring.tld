@@ -130,7 +130,7 @@
 
 	<tag>
 		<description>Argument tag based on the JSTL fmt:param tag. The purpose is to
-		support arguments inside the spring:message and spring:theme tags.</description>
+		support arguments inside the spring:message tags.</description>
 		<name>argument</name>
 		<tag-class>org.springframework.web.servlet.tags.ArgumentTag</tag-class>
 		<body-content>JSP</body-content>

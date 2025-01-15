@@ -96,9 +96,7 @@ Kotlin::
 The following code snippet is similar to the one we saw earlier for a request-scoped
 bean. However, this time, the `userService` bean has a dependency on a session-scoped
 `userPreferences` bean. Note that the `UserPreferences` bean is instantiated by using a
-SpEL expression that retrieves the theme from the current HTTP session. In our test, we
-need to configure a theme in the mock session managed by the TestContext framework. The
-following example shows how to do so:
+SpEL expression that retrieves an attribute from the current HTTP session.
 
 .Session-scoped bean configuration
 [source,xml,indent=0,subs="verbatim,quotes"]

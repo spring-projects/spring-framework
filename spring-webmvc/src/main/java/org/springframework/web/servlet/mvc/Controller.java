@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <h3><a name="workflow">Workflow</a></h3>
  *
  * <p>After a {@code DispatcherServlet} has received a request and has
- * done its work to resolve locales, themes, and suchlike, it then tries
+ * done its work to resolve locales, and suchlike, it then tries
  * to resolve a Controller, using a
  * {@link org.springframework.web.servlet.HandlerMapping HandlerMapping}.
  * When a Controller has been found to handle the request, the

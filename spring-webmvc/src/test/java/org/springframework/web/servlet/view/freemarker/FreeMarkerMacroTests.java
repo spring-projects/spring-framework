@@ -172,26 +172,6 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	void testTheme() throws Exception {
-		assertThat(getMacroOutput("THEME")).isEqualTo("Howdy! Mundo!");
-	}
-
-	@Test
-	void testDefaultTheme() throws Exception {
-		assertThat(getMacroOutput("DEFAULTTHEME")).isEqualTo("hi! planet!");
-	}
-
-	@Test
-	void testThemeArgs() throws Exception {
-		assertThat(getMacroOutput("THEMEARGS")).isEqualTo("Howdy![World]");
-	}
-
-	@Test
-	void testThemeArgsWithDefaultMessage() throws Exception {
-		assertThat(getMacroOutput("THEMEARGSWITHDEFAULTMESSAGE")).isEqualTo("Hi!");
-	}
-
-	@Test
 	void testUrl() throws Exception {
 		assertThat(getMacroOutput("URL")).isEqualTo("/springtest/aftercontext.html");
 	}
@@ -291,10 +271,6 @@ public class FreeMarkerMacroTests {
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
 		rc.setMessageMap(msgMap);
-		Map<String, String> themeMsgMap = new HashMap<>();
-		themeMsgMap.put("hello", "Howdy!");
-		themeMsgMap.put("world", "Mundo!");
-		rc.setThemeMessageMap(themeMsgMap);
 		rc.setContextPath("/springtest");
 
 		TestBean darren = new TestBean("Darren", 99);

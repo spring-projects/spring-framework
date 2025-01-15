@@ -14,7 +14,9 @@
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<mvc:exclude-mapping path="/admin/**"/>
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
+			<bean class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
+				<property name="authorizedRoles" value="ROLE_USER"/>
+			</bean>
 		</mvc:interceptor>
 	</mvc:interceptors>
 	<!-- end::snippet[] -->
