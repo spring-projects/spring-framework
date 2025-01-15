@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,6 +181,7 @@ public abstract class ForwardedHeaderUtils {
 		String forHeader = headers.getFirst("X-Forwarded-For");
 		if (StringUtils.hasText(forHeader)) {
 			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
+			host = (!host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
 			return InetSocketAddress.createUnresolved(host, port);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,7 @@ class ForwardedHeaderTransformerTests {
 
 		request = this.requestMutator.apply(request);
 		assertThat(request.getRemoteAddress()).isNotNull();
-		assertThat(request.getRemoteAddress().getHostName()).isEqualTo("203.0.113.195");
+		assertThat(request.getRemoteAddress().getHostName()).isEqualTo("[203.0.113.195]");
 	}
 
 
