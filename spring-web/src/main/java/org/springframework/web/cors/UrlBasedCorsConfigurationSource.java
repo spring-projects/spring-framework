@@ -93,7 +93,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@link #setUrlPathHelper(UrlPathHelper)}, if at all. For further details,
 	 * please see {@link #setAllowInitLookupPath(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		initUrlPathHelper();
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
@@ -107,7 +107,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@link #setUrlPathHelper(UrlPathHelper)}, if at all. For further details,
 	 * please see {@link #setAllowInitLookupPath(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public void setUrlDecode(boolean urlDecode) {
 		initUrlPathHelper();
 		this.urlPathHelper.setUrlDecode(urlDecode);
@@ -121,7 +121,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@link #setUrlPathHelper(UrlPathHelper)}, if at all. For further details,
 	 * please see {@link #setAllowInitLookupPath(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		initUrlPathHelper();
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);

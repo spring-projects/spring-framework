@@ -133,10 +133,9 @@ class HeadersAdaptersTests {
 		assertThat(headers2.get("TestHeader")).as("TestHeader")
 				.containsExactly("first", "second", "third");
 		// Ordering and casing are not guaranteed using the entrySet+put approach
-		assertThat(headers2.asMultiValueMap()).as("two keys")
-				.containsKey("testheader")
-				.containsKey("secondheader")
-				.hasSize(2);
+		assertThat(headers2.containsHeader("testheader")).isTrue();
+		assertThat(headers2.containsHeader("secondheader")).isTrue();
+		assertThat(headers2.size()).isEqualTo(2);
 		assertThat(headers2.toString()).as("no 'with native headers' dump")
 				.doesNotContain("with native headers");
 	}
@@ -150,10 +149,9 @@ class HeadersAdaptersTests {
 		assertThat(headers2.get("TestHeader")).as("TestHeader")
 				.containsExactly("first", "second", "third");
 		// Ordering and casing are not guaranteed using the putAll approach
-		assertThat(headers2.asMultiValueMap()).as("two keys")
-				.containsKey("testheader")
-				.containsKey("secondheader")
-				.hasSize(2);
+		assertThat(headers2.containsHeader("testheader")).isTrue();
+		assertThat(headers2.containsHeader("secondheader")).isTrue();
+		assertThat(headers2.size()).isEqualTo(2);
 		assertThat(headers2.toString()).as("similar toString, no 'with native headers' dump")
 				.isEqualToIgnoringCase(headers.toString().substring(0, headers.toString().indexOf(']') + 1));
 	}

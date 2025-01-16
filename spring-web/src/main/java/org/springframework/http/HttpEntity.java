@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,9 +107,9 @@ public class HttpEntity<T> {
 	/**
 	 * Create a new {@code HttpEntity} with the given headers and no body.
 	 * @param headers the entity headers
-	 * @deprecated Use {@link #HttpEntity(HttpHeaders)}
+	 * @deprecated in favor of {@link #HttpEntity(HttpHeaders)}
 	 */
-	@Deprecated
+	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(MultiValueMap<String, String> headers) {
 		this(null, headers);
 	}
@@ -118,9 +118,9 @@ public class HttpEntity<T> {
 	 * Create a new {@code HttpEntity} with the given body and headers.
 	 * @param body the entity body
 	 * @param headers the entity headers
-	 * @deprecated Use {@link #HttpEntity(Object, HttpHeaders)}
+	 * @deprecated in favor of {@link #HttpEntity(Object, HttpHeaders)}
 	 */
-	@Deprecated
+	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
 		this.body = body;
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? new HttpHeaders(headers) : new HttpHeaders());

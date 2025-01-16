@@ -1847,11 +1847,11 @@ public class HttpHeaders implements Serializable {
 	 * casing variants of a given header name, see {@link #asMultiValueMap()}
 	 * javadoc.
 	 * @return a single value representation of these headers
-	 * @deprecated Use {@link #toSingleValueMap()} which performs a copy but
+	 * @deprecated in favor of {@link #toSingleValueMap()} which performs a copy but
 	 * ensures that collection-iterating methods like {@code entrySet()} are
 	 * case-insensitive
 	 */
-	@Deprecated
+	@Deprecated(since = "7.0", forRemoval = true)
 	public Map<String, String> asSingleValueMap() {
 		return this.headers.asSingleValueMap();
 	}
@@ -1870,7 +1870,7 @@ public class HttpHeaders implements Serializable {
 	 * that would only accept maps. Generally avoid using HttpHeaders as a Map
 	 * or MultiValueMap.
 	 */
-	@Deprecated
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MultiValueMap<String, String> asMultiValueMap() {
 		return this.headers;
 	}

@@ -282,9 +282,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add the given header values.
 		 * @param headers the header values
-		 * @deprecated Use {@link #headers(HttpHeaders)}
+		 * @deprecated in favor of {@link #headers(HttpHeaders)}
 		 */
-		@Deprecated
+		@Deprecated(since = "7.0", forRemoval = true)
 		B headers(MultiValueMap<String, String> headers);
 
 		/**
@@ -483,7 +483,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "7.0", forRemoval = true)
 		public BodyBuilder headers(MultiValueMap<String, String> headers) {
 			this.headers.putAll(headers);
 			return this;

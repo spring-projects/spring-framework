@@ -152,9 +152,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
-	 * @deprecated Use {@link #RequestEntity(HttpHeaders, HttpMethod, URI)}
+	 * @deprecated in favor of {@link #RequestEntity(HttpHeaders, HttpMethod, URI)}
 	 */
-	@Deprecated
+	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		this(null, headers, method, url, null);
 	}
@@ -165,10 +165,11 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param headers the headers
 	 * @param method the method
 	 * @param url the URL
-	 * @deprecated Use {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI)}
+	 * @deprecated in favor of {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI)}
 	 */
-	@Deprecated
-	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+	@Deprecated(since = "7.0", forRemoval = true)
+	public RequestEntity(
+			@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, URI url) {
 
 		this(body, headers, method, url, null);
@@ -182,9 +183,10 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @param type the type used for generic type resolution
 	 * @since 4.3
-	 * @deprecated Use {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI, Type)}
+	 * @deprecated in favor of {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI, Type)}
 	 */
-	@Deprecated
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
 

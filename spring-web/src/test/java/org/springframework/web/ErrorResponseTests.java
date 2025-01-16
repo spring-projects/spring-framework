@@ -16,13 +16,10 @@
 
 package org.springframework.web;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -33,15 +30,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ErrorResponseTests {
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void createWithHttpHeader() {
-		ErrorResponse response = ErrorResponse.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
-				.header("header", "value").build();
-		assertThat(response.getHeaders().asMultiValueMap()).containsOnly(entry("header", List.of("value")));
+		ErrorResponse response = ErrorResponse
+				.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
+				.header("header", "value")
+				.build();
+		assertThat(response.getHeaders().containsHeaderValue("header", "value")).isTrue();
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void createWithHttpHeadersConsumer() {
 		ErrorResponse response = ErrorResponse.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
 				.header("header", "value")
@@ -49,8 +46,8 @@ class ErrorResponseTests {
 					headers.add("header", "value2");
 					headers.add("another", "value3");
 				}).build();
-		assertThat(response.getHeaders().asMultiValueMap()).containsOnly(entry("header", List.of("value", "value2")),
-				entry("another", List.of("value3")));
+		assertThat(response.getHeaders().get("header")).containsExactly("value", "value2");
+		assertThat(response.getHeaders().get("another")).containsExactly("value3");
 	}
 
 }
