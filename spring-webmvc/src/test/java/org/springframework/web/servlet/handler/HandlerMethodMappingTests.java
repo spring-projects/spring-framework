@@ -183,7 +183,7 @@ public class HandlerMethodMappingTests {
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain.com");
-		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET,HEAD");
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET,QUERY,HEAD");
 	}
 
 	@Test
