@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -479,14 +479,6 @@ public interface ServerResponse {
 		 * @return the built response
 		 */
 		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
-
-		/**
-		 * Set the response body to the given {@code Object} and return it.
-		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
-		 */
-		@Deprecated
-		Mono<ServerResponse> syncBody(Object body);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

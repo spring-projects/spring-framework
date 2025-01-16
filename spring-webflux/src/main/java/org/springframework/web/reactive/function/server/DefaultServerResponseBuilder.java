@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,12 +258,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
 		return Mono.just(new BodyInserterResponse<>(
 				this.statusCode, this.headers, this.cookies, inserter, this.hints));
-	}
-
-	@Override
-	@Deprecated
-	public Mono<ServerResponse> syncBody(Object body) {
-		return bodyValue(body);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
@@ -73,14 +72,6 @@ public interface ServerRequest {
 	HttpMethod method();
 
 	/**
-	 * Get the name of the HTTP method.
-	 * @return the HTTP method as a String
-	 * @deprecated as of 6.0, in favor of {@link #method()}
-	 */
-	@Deprecated(since = "6.0")
-	String methodName();
-
-	/**
 	 * Get the request URI.
 	 */
 	URI uri();
@@ -101,15 +92,6 @@ public interface ServerRequest {
 	 */
 	default String path() {
 		return requestPath().pathWithinApplication().value();
-	}
-
-	/**
-	 * Get the request path as a {@code PathContainer}.
-	 * @deprecated as of 5.3, in favor on {@link #requestPath()}
-	 */
-	@Deprecated
-	default PathContainer pathContainer() {
-		return requestPath();
 	}
 
 	/**

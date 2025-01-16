@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,35 +133,6 @@ public class DefaultWebClientTests {
 		ClientRequest request = verifyAndGetRequest();
 		assertThat(request.headers().getFirst("Accept")).isEqualTo("application/json");
 		assertThat(request.cookies().getFirst("id")).isEqualTo("123");
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void contextFromThreadLocal() {
-		WebClient client = this.builder
-				.filter((request, next) ->
-						// Async, continue on different thread
-						Mono.delay(Duration.ofMillis(10)).then(next.exchange(request)))
-				.filter((request, next) ->
-						Mono.deferContextual(contextView -> {
-							String fooValue = contextView.get("foo");
-							return next.exchange(ClientRequest.from(request).header("foo", fooValue).build());
-						}))
-				.build();
-
-		ThreadLocal<String> fooHolder = new ThreadLocal<>();
-		fooHolder.set("bar");
-		try {
-			client.get().uri("/path")
-					.context(context -> context.put("foo", fooHolder.get()))
-					.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
-		}
-		finally {
-			fooHolder.remove();
-		}
-
-		ClientRequest request = verifyAndGetRequest();
-		assertThat(request.headers().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test

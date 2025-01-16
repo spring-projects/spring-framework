@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,28 +71,6 @@ public class HandshakeInfo {
 	 */
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, @Nullable String protocol) {
 		this(uri, headers, EMPTY_COOKIES, principal, protocol, null, Collections.emptyMap(), null);
-	}
-
-	/**
-	 * Constructor targeting server-side use with extra information such as
-	 * the remote address, attributes, and a log prefix.
-	 * @param uri the endpoint URL
-	 * @param headers server request headers
-	 * @param principal the principal for the session
-	 * @param protocol the negotiated sub-protocol (may be {@code null})
-	 * @param remoteAddress the remote address of the client
-	 * @param attributes initial attributes for the WebSocket session
-	 * @param logPrefix the log prefix for the handshake request.
-	 * @since 5.1
-	 * @deprecated as of 5.3.5 in favor of
-	 * {@link #HandshakeInfo(URI, HttpHeaders, MultiValueMap, Mono, String, InetSocketAddress, Map, String)}
-	 */
-	@Deprecated
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
-				@Nullable String protocol, @Nullable InetSocketAddress remoteAddress,
-				Map<String, Object> attributes, @Nullable String logPrefix) {
-
-		this(uri, headers, EMPTY_COOKIES, principal, protocol, remoteAddress, attributes, logPrefix);
 	}
 
 	/**

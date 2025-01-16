@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,16 +93,6 @@ class WebClientExtensionsTests {
 	fun `bodyToFlow with reified type parameters`() {
 		responseSpec.bodyToFlow<List<Foo>>()
 		verify { responseSpec.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
-	}
-
-	@Test
-	@Suppress("DEPRECATION")
-	fun awaitExchange() {
-		val response = mockk<ClientResponse>()
-		every { requestBodySpec.exchange() } returns Mono.just(response)
-		runBlocking {
-			assertThat(requestBodySpec.awaitExchange()).isEqualTo(response)
-		}
 	}
 
 	@Test

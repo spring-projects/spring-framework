@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,64 +92,6 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 			builder.handlePing(this.handlePing);
 		}
 		return builder.build();
-	}
-
-	/**
-	 * Configure the maximum allowable frame payload length. Setting this value
-	 * to your application's requirement may reduce denial of service attacks
-	 * using long data frames.
-	 * <p>Corresponds to the argument with the same name in the constructor of
-	 * {@link io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
-	 * WebSocketServerHandshakerFactory} in Netty.
-	 * <p>By default set to 65536 (64K).
-	 * @param maxFramePayloadLength the max length for frames.
-	 * @since 5.1
-	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link reactor.netty.http.server.WebsocketServerSpec.Builder} with a
-	 * constructor argument
-	 */
-	@Deprecated
-	public void setMaxFramePayloadLength(Integer maxFramePayloadLength) {
-		this.maxFramePayloadLength = maxFramePayloadLength;
-	}
-
-	/**
-	 * Return the configured max length for frames.
-	 * @since 5.1
-	 * @deprecated as of 5.2.6 in favor of {@link #getWebsocketServerSpec()}
-	 */
-	@Deprecated
-	public int getMaxFramePayloadLength() {
-		return getWebsocketServerSpec().maxFramePayloadLength();
-	}
-
-	/**
-	 * Configure whether to let ping frames through to be handled by the
-	 * {@link WebSocketHandler} given to the upgrade method. By default, Reactor
-	 * Netty automatically replies with pong frames in response to pings. This is
-	 * useful in a proxy for allowing ping and pong frames through.
-	 * <p>By default this is set to {@code false} in which case ping frames are
-	 * handled automatically by Reactor Netty. If set to {@code true}, ping
-	 * frames will be passed through to the {@link WebSocketHandler}.
-	 * @param handlePing whether to let Ping frames through for handling
-	 * @since 5.2.4
-	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link reactor.netty.http.server.WebsocketServerSpec.Builder} with a
-	 * constructor argument
-	 */
-	@Deprecated
-	public void setHandlePing(boolean handlePing) {
-		this.handlePing = handlePing;
-	}
-
-	/**
-	 * Return the configured {@link #setHandlePing(boolean)}.
-	 * @since 5.2.4
-	 * @deprecated as of 5.2.6 in favor of {@link #getWebsocketServerSpec()}
-	 */
-	@Deprecated
-	public boolean getHandlePing() {
-		return getWebsocketServerSpec().handlePing();
 	}
 
 

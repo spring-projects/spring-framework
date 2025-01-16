@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,18 +131,6 @@ public interface ClientRequest {
 	 */
 	static Builder from(ClientRequest other) {
 		return new DefaultClientRequestBuilder(other);
-	}
-
-	/**
-	 * Create a builder with the given HTTP method and url.
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param url the url (as a URI instance)
-	 * @return the created builder
-	 * @deprecated in favor of {@link #create(HttpMethod, URI)}
-	 */
-	@Deprecated
-	static Builder method(HttpMethod method, URI url) {
-		return new DefaultClientRequestBuilder(method, url);
 	}
 
 	/**

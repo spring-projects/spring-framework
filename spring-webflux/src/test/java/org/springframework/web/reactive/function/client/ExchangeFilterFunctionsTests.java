@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,44 +121,6 @@ class ExchangeFilterFunctionsTests {
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9").filter(request, exchange));
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void basicAuthenticationAttributes() {
-		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL)
-				.attributes(org.springframework.web.reactive.function.client.ExchangeFilterFunctions
-						.Credentials.basicAuthenticationCredentials("foo", "bar"))
-				.build();
-		ClientResponse response = mock();
-
-		ExchangeFunction exchange = r -> {
-			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isTrue();
-			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).startsWith("Basic ");
-			return Mono.just(response);
-		};
-
-		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication();
-		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
-		ClientResponse result = auth.filter(request, exchange).block();
-		assertThat(result).isEqualTo(response);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void basicAuthenticationAbsentAttributes() {
-		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock();
-
-		ExchangeFunction exchange = r -> {
-			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
-			return Mono.just(response);
-		};
-
-		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication();
-		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
-		ClientResponse result = auth.filter(request, exchange).block();
-		assertThat(result).isEqualTo(response);
 	}
 
 	@Test

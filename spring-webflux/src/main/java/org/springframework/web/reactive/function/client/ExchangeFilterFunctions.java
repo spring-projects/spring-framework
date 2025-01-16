@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -40,13 +37,6 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 public abstract class ExchangeFilterFunctions {
-
-	/**
-	 * Name of the request attribute with {@link Credentials} for {@link #basicAuthentication()}.
-	 */
-	private static final String BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE =
-			ExchangeFilterFunctions.class.getName() + ".basicAuthenticationCredentials";
-
 
 	/**
 	 * Consume up to the specified number of bytes from the response body and
@@ -98,83 +88,6 @@ public abstract class ExchangeFilterFunctions {
 				next.exchange(ClientRequest.from(request)
 						.headers(headers -> headers.setBasicAuth(encodedCredentials))
 						.build());
-	}
-
-	/**
-	 * Variant of {@link #basicAuthentication(String, String)} that looks up
-	 * the {@link Credentials Credentials} in a
-	 * {@link #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE request attribute}.
-	 * @return the filter to use
-	 * @see Credentials
-	 * @deprecated as of Spring 5.1 in favor of using
-	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
-	 */
-	@Deprecated
-	public static ExchangeFilterFunction basicAuthentication() {
-		return (request, next) -> {
-			Object attr = request.attributes().get(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE);
-			if (attr instanceof Credentials cred) {
-				return next.exchange(ClientRequest.from(request)
-						.headers(headers -> headers.setBasicAuth(cred.username, cred.password))
-						.build());
-			}
-			else {
-				return next.exchange(request);
-			}
-		};
-	}
-
-
-	/**
-	 * Stores username and password for HTTP basic authentication.
-	 * @deprecated as of Spring 5.1 in favor of using
-	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
-	 */
-	@Deprecated
-	public static final class Credentials {
-
-		private final String username;
-
-		private final String password;
-
-		/**
-		 * Create a new {@code Credentials} instance with the given username and password.
-		 * @param username the username
-		 * @param password the password
-		 */
-		public Credentials(String username, String password) {
-			Assert.notNull(username, "'username' must not be null");
-			Assert.notNull(password, "'password' must not be null");
-			this.username = username;
-			this.password = password;
-		}
-
-		/**
-		 * Return a {@literal Consumer} that stores the given username and password
-		 * as a request attribute of type {@code Credentials} that is in turn
-		 * used by {@link ExchangeFilterFunctions#basicAuthentication()}.
-		 * @param username the username
-		 * @param password the password
-		 * @return a consumer that can be passed into
-		 * {@linkplain ClientRequest.Builder#attributes(java.util.function.Consumer)}
-		 * @see ClientRequest.Builder#attributes(java.util.function.Consumer)
-		 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
-		 */
-		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String username, String password) {
-			Credentials credentials = new Credentials(username, password);
-			return (map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials));
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other ||(other instanceof Credentials that &&
-					this.username.equals(that.username) && this.password.equals(that.password)));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.username.hashCode() * 31 + this.password.hashCode();
-		}
 	}
 
 }

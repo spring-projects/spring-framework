@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,42 +91,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private final BuilderConfiguration options;
 
-
-	/**
-	 * Full constructor with a mapping name.
-	 * @deprecated as of 5.3.4 in favor using {@link RequestMappingInfo.Builder} via {@link #paths(String...)}.
-	 */
-	@Deprecated
-	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
-			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
-			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
-			@Nullable ProducesRequestCondition produces, @Nullable RequestCondition<?> custom) {
-
-		this(name, patterns, methods, params, headers, consumes, produces, custom, new BuilderConfiguration());
-	}
-
-	/**
-	 * Create an instance with the given conditions.
-	 * @deprecated as of 5.3.4 in favor using {@link RequestMappingInfo.Builder} via {@link #paths(String...)}.
-	 */
-	@Deprecated
-	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns,
-			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
-			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
-			@Nullable ProducesRequestCondition produces, @Nullable RequestCondition<?> custom) {
-
-		this(null, patterns, methods, params, headers, consumes, produces, custom);
-	}
-
-	/**
-	 * Re-create a RequestMappingInfo with the given custom request condition.
-	 * @deprecated since 5.3.4 in favor of using a {@link Builder} via {@link #mutate()}.
-	 */
-	@Deprecated
-	public RequestMappingInfo(RequestMappingInfo info, @Nullable RequestCondition<?> customRequestCondition) {
-		this(info.name, info.patternsCondition, info.methodsCondition, info.paramsCondition, info.headersCondition,
-				info.consumesCondition, info.producesCondition, customRequestCondition);
-	}
 
 	private RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,

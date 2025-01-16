@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,27 +127,6 @@ public abstract class BodyInserters {
 				"'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forType(bodyType), null);
-	}
-
-	/**
-	 * Inserter to write the given object.
-	 * <p>Alternatively, consider using the {@code bodyValue(Object)} shortcuts on
-	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
-	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
-	 * @param body the body to write to the response
-	 * @param <T> the type of the body
-	 * @return the inserter to write a single object
-	 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
-	 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
-	 * for which {@link #fromPublisher(Publisher, Class)} or
-	 * {@link #fromProducer(Object, Class)} should be used.
-	 * @see #fromPublisher(Publisher, Class)
-	 * @see #fromProducer(Object, Class)
-	 * @deprecated As of Spring Framework 5.2, in favor of {@link #fromValue(Object)}
-	 */
-	@Deprecated
-	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
-		return fromValue(body);
 	}
 
 	/**
