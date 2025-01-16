@@ -140,7 +140,7 @@ dependencies {
 		api("org.quartz-scheduler:quartz:2.3.2")
 		api("org.seleniumhq.selenium:htmlunit3-driver:4.26.0")
 		api("org.seleniumhq.selenium:selenium-java:4.26.0")
-		api("org.skyscreamer:jsonassert:1.5.3")
+		api("org.skyscreamer:jsonassert:2.0-rc1")
 		api("org.testng:testng:7.10.2")
 		api("org.webjars:underscorejs:1.8.3")
 		api("org.webjars:webjars-locator-lite:1.0.0")
