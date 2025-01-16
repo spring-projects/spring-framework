@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestClientException;
 
 /**
  * Utility methods to assist with identifying and logging exceptions that indicate
@@ -32,6 +33,7 @@ import org.springframework.util.Assert;
  * and a full stacktrace at TRACE level.
  *
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  * @since 6.1
  */
 public class DisconnectedClientHelper {
@@ -83,6 +85,13 @@ public class DisconnectedClientHelper {
 	 * </ul>
 	 */
 	public static boolean isClientDisconnectedException(Throwable ex) {
+		Throwable cause = ex;
+		while (cause != null) {
+			if (cause instanceof RestClientException) {
+				return false;
+			}
+			cause = cause.getCause();
+		}
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
 		if (message != null) {
 			String text = message.toLowerCase(Locale.ROOT);

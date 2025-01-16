@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.support;
 
 import java.lang.reflect.Method;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -42,6 +43,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -60,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  */
 class DefaultHandlerExceptionResolverTests {
 
@@ -246,6 +249,24 @@ class DefaultHandlerExceptionResolverTests {
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(413);
 		assertThat(response.getErrorMessage()).isEqualTo("Maximum upload size exceeded");
+	}
+
+	@Test
+	void handleClientDisconnectedException() {
+		SocketException ex = new SocketException("Connection reset");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+	}
+
+	@Test
+	void handleRestClientExceptionHasConnectionResetMessage() {
+		RestClientException ex = new RestClientException("I/O error", new SocketException("Connection reset"));
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("ModelAndView is returned").isNull();
+
+		Exception exception = new Exception(ex.getMessage(), ex);
+		mav = exceptionResolver.resolveException(request, response, null, exception);
+		assertThat(mav).as("ModelAndView is returned").isNull();
 	}
 
 	@Test
