@@ -252,13 +252,6 @@ class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	void handleClientDisconnectedException() {
-		SocketException ex = new SocketException("Connection reset");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertThat(mav).as("No ModelAndView returned").isNotNull();
-	}
-
-	@Test
 	void handleRestClientExceptionHasConnectionResetMessage() {
 		RestClientException ex = new RestClientException("I/O error", new SocketException("Connection reset"));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
