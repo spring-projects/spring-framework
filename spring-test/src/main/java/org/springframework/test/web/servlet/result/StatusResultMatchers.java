@@ -147,16 +147,6 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Assert the response status code is {@code HttpStatus.CHECKPOINT} (103).
-	 * @see #isEarlyHints()
-	 * @deprecated in favor of {@link #isEarlyHints()}
-	 */
-	@Deprecated(since = "6.0.5")
-	public ResultMatcher isCheckpoint() {
-		return isEarlyHints();
-	}
-
-	/**
 	 * Assert the response status code is {@code HttpStatus.EARLY_HINTS} (103).
 	 * @since 6.0.5
 	 */

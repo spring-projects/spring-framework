@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.mock.http.server.reactive;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -27,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,15 +74,12 @@ class MockServerHttpRequestTests {
 			.withMessageContaining("HTTP method is required.");
 	}
 
-	@SuppressWarnings("deprecation")
 	static Stream<Named<ThrowingCallable>> httpMethodNotNullOrEmpty() {
 		String uriTemplate = "/foo bar?a=b";
+		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build().toUri();
 		return Stream.of(
-				named("null HttpMethod, URI", () -> MockServerHttpRequest.method(null, UriComponentsBuilder.fromUriString(uriTemplate).build("")).build()),
-				named("null HttpMethod, uriTemplate", () -> MockServerHttpRequest.method((HttpMethod) null, uriTemplate).build()),
-				named("null String, uriTemplate", () -> MockServerHttpRequest.method((String) null, uriTemplate).build()),
-				named("empty String, uriTemplate", () -> MockServerHttpRequest.method("", uriTemplate).build()),
-				named("blank String, uriTemplate", () -> MockServerHttpRequest.method("   ", uriTemplate).build())
+				named("null HttpMethod, URI", () -> MockServerHttpRequest.method(null, uri).build()),
+				named("null HttpMethod, uriTemplate", () -> MockServerHttpRequest.method(null, uriTemplate).build())
 		);
 	}
 

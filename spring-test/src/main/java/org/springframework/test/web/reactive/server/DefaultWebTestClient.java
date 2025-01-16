@@ -348,12 +348,6 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@Deprecated
-		public RequestHeadersSpec<?> syncBody(Object body) {
-			return bodyValue(body);
-		}
-
-		@Override
 		public ResponseSpec exchange() {
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :

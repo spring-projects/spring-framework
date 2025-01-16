@@ -209,22 +209,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return method(method, toUri(uri, vars));
 	}
 
-	/**
-	 * Create a builder with a raw HTTP method value that is outside the
-	 * range of {@link HttpMethod} enum values.
-	 * @param httpMethod the HTTP methodValue value
-	 * @param uri the URI template for target the URL
-	 * @param vars variables to expand into the template
-	 * @return the created builder
-	 * @since 5.2.7
-	 * @deprecated as of Spring Framework 6.0 in favor of {@link #method(HttpMethod, String, Object...)}
-	 */
-	@Deprecated(since = "6.0")
-	public static BodyBuilder method(String httpMethod, String uri, @Nullable Object... vars) {
-		Assert.hasText(httpMethod, "HTTP method is required.");
-		return new DefaultBodyBuilder(HttpMethod.valueOf(httpMethod), toUri(uri, vars));
-	}
-
 	private static URI toUri(String uri, @Nullable Object[] vars) {
 		return UriComponentsBuilder.fromUriString(uri).buildAndExpand(vars).encode().toUri();
 	}
@@ -294,14 +278,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see HttpHeaders#add(String, String)
 		 */
 		B header(String headerName, String... headerValues);
-
-		/**
-		 * Add the given header values.
-		 * @param headers the header values
-		 * @deprecated Use {@link #headers(HttpHeaders)}
-		 */
-		@Deprecated
-		B headers(MultiValueMap<String, String> headers);
 
 		/**
 		 * Add the given header values.
@@ -488,13 +464,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
 			}
-			return this;
-		}
-
-		@Override
-		@Deprecated
-		public BodyBuilder headers(MultiValueMap<String, String> headers) {
-			this.headers.putAll(headers);
 			return this;
 		}
 
