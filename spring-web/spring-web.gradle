@@ -8,6 +8,7 @@ dependencies {
 	api(project(":spring-core"))
 	api("io.micrometer:micrometer-observation")
 	compileOnly("io.projectreactor.tools:blockhound")
+	compileOnly("com.google.code.findbugs:jsr305") // for Reactor
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))

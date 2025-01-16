@@ -7,6 +7,7 @@ dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
 	compileOnly("jakarta.validation:jakarta.validation-api")
+	compileOnly("com.google.code.findbugs:jsr305") // for Reactor
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
 	optional("com.fasterxml.jackson.core:jackson-databind")
