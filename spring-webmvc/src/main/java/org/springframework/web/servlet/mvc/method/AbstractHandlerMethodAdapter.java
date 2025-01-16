@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,25 +98,5 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	 */
 	protected abstract @Nullable ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception;
-
-	/**
-	 * This implementation expects the handler to be an {@link HandlerMethod}.
-	 */
-	@Override
-	@SuppressWarnings("deprecation")
-	public final long getLastModified(HttpServletRequest request, Object handler) {
-		return getLastModifiedInternal(request, (HandlerMethod) handler);
-	}
-
-	/**
-	 * Same contract as for {@link jakarta.servlet.http.HttpServlet#getLastModified(HttpServletRequest)}.
-	 * @param request current HTTP request
-	 * @param handlerMethod handler method to use
-	 * @return the lastModified value for the given handler
-	 * @deprecated as of 5.3.9 along with
-	 * {@link org.springframework.web.servlet.mvc.LastModified}.
-	 */
-	@Deprecated
-	protected abstract long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod);
 
 }

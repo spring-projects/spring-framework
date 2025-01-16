@@ -40,6 +40,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.HttpRequestHandler;
@@ -72,6 +73,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -196,7 +198,6 @@ class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
 		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("Wed, 01 Apr 2015 00:00:00 GMT");
 	}
 
 	@Test
@@ -226,7 +227,6 @@ class DispatcherServletTests {
 		assertThat(request.getAttribute("test3")).isNotNull();
 		assertThat(request.getAttribute("test3x")).isNotNull();
 		assertThat(request.getAttribute("test3y")).isNotNull();
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("Wed, 01 Apr 2015 00:00:01 GMT");
 	}
 
 	@Test
@@ -789,8 +789,7 @@ class DispatcherServletTests {
 		ConfigurableEnvironment env1 = new StandardServletEnvironment();
 		servlet.setEnvironment(env1); // should succeed
 		assertThat(servlet.getEnvironment()).isSameAs(env1);
-		assertThatIllegalArgumentException().as("non-configurable Environment").isThrownBy(() ->
-				servlet.setEnvironment(new DummyEnvironment()));
+		assertThatIllegalArgumentException().isThrownBy(() -> servlet.setEnvironment(mock(Environment.class)));
 		class CustomServletEnvironment extends StandardServletEnvironment { }
 		DispatcherServlet custom = new DispatcherServlet() {
 			@Override

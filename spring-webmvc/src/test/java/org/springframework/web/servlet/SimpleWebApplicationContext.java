@@ -53,8 +53,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 	}
 
 
-	@SuppressWarnings("deprecation")
-	public static class LocaleChecker implements Controller, org.springframework.web.servlet.mvc.LastModified {
+	public static class LocaleChecker implements Controller {
 
 		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
@@ -70,11 +69,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 				throw new ServletException("Incorrect Locale");
 			}
 			return null;
-		}
-
-		@Override
-		public long getLastModified(HttpServletRequest request) {
-			return 1427846400000L;
 		}
 	}
 

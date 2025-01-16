@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Adapter to use the plain {@link Controller} workflow interface with
  * the generic {@link org.springframework.web.servlet.DispatcherServlet}.
- * Supports handlers that implement the {@link LastModified} interface.
  *
  * <p>This is an SPI class, not used directly by application code.
  *
@@ -48,15 +47,6 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 			throws Exception {
 
 		return ((Controller) handler).handleRequest(request, response);
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public long getLastModified(HttpServletRequest request, Object handler) {
-		if (handler instanceof LastModified lastModified) {
-			return lastModified.getLastModified(request);
-		}
-		return -1L;
 	}
 
 }

@@ -261,12 +261,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			((MyHandler) delegate).doSomething(request);
 			return null;
 		}
-
-		@Deprecated
-		@Override
-		public long getLastModified(HttpServletRequest request, Object delegate) {
-			return ((MyHandler) delegate).lastModified();
-		}
 	}
 
 
@@ -281,12 +275,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
 			throws IOException, ServletException {
 			throw new ServletException("dummy");
-		}
-
-		@Deprecated
-		@Override
-		public long getLastModified(HttpServletRequest request, Object delegate) {
-			return -1;
 		}
 	}
 

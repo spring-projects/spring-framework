@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,24 +332,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			cControl = CacheControl.empty();
 		}
 		applyCacheControl(response, cControl);
-	}
-
-
-	/**
-	 * Check and prepare the given request and response according to the settings
-	 * of this generator.
-	 * @see #checkRequest(HttpServletRequest)
-	 * @see #applyCacheSeconds(HttpServletResponse, int)
-	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
-	 * with a must-revalidate header only generated if explicitly configured
-	 */
-	@Deprecated
-	protected final void checkAndPrepare(
-			HttpServletRequest request, HttpServletResponse response, int cacheSeconds, boolean lastModified)
-			throws ServletException {
-
-		checkRequest(request);
-		applyCacheSeconds(response, cacheSeconds);
 	}
 
 	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response, String[] varyByRequestHeaders) {

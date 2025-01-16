@@ -72,7 +72,6 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
@@ -861,17 +860,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return mav;
 	}
 
-	/**
-	 * This implementation always returns -1. An {@code @RequestMapping} method can
-	 * calculate the lastModified value, call {@link WebRequest#checkNotModified(long)},
-	 * and return {@code null} if the result of that call is {@code true}.
-	 */
-	@Override
-	@SuppressWarnings("deprecation")
-	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
-		return -1;
-	}
-
 
 	/**
 	 * Return the {@link SessionAttributesHandler} instance for the given handler type
@@ -889,7 +877,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @since 4.2
 	 * @see #createInvocableHandlerMethod(HandlerMethod)
 	 */
-	@SuppressWarnings("deprecation")
 	protected @Nullable ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 

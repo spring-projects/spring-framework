@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,17 +74,5 @@ public interface HandlerAdapter {
 	 * @throws Exception in case of errors
 	 */
 	@Nullable ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
-
-	/**
-	 * Same contract as for HttpServlet's {@code getLastModified} method.
-	 * Can simply return -1 if there's no support in the handler class.
-	 * @param request current HTTP request
-	 * @param handler the handler to use
-	 * @return the lastModified value for the given handler
-	 * @deprecated as of 5.3.9 along with
-	 * {@link org.springframework.web.servlet.mvc.LastModified}.
-	 */
-	@Deprecated
-	long getLastModified(HttpServletRequest request, Object handler);
 
 }
