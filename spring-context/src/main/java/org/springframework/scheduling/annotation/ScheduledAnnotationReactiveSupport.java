@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * Kotlin coroutines bridge are not present at runtime
 	 */
 	public static boolean isReactive(Method method) {
-		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+		if (KotlinDetector.isSuspendingFunction(method)) {
 			// Note that suspending functions declared without args have a single Continuation
 			// parameter in reflective inspection
 			Assert.isTrue(method.getParameterCount() == 1,
@@ -138,7 +138,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * to a {@code Flux} with a checkpoint String, allowing for better debugging.
 	 */
 	static Publisher<?> getPublisherFor(Method method, Object bean) {
-		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+		if (KotlinDetector.isSuspendingFunction(method)) {
 			return CoroutinesUtils.invokeSuspendingFunction(method, bean, (Object[]) method.getParameters());
 		}
 

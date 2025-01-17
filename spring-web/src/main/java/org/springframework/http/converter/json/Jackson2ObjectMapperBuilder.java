@@ -868,8 +868,7 @@ public class Jackson2ObjectMapperBuilder {
 			// jackson-datatype-jsr310 not available
 		}
 
-		// Kotlin present?
-		if (KotlinDetector.isKotlinPresent()) {
+		if (KotlinDetector.isKotlinReflectPresent()) {
 			try {
 				Class<? extends Module> kotlinModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);

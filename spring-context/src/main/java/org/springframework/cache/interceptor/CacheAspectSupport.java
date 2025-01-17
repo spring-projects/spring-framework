@@ -1092,7 +1092,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 									() -> Mono.from(adapter.toPublisher(invokeOperation(invoker))).toFuture())));
 				}
 			}
-			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isSuspendingFunction(method)) {
+			if (KotlinDetector.isSuspendingFunction(method)) {
 				return Mono.fromFuture(cache.retrieve(key, () -> {
 					Mono<?> mono = ((Mono<?>) invokeOperation(invoker));
 					if (mono == null) {

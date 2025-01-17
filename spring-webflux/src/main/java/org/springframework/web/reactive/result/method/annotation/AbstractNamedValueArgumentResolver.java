@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		WebDataBinder binder = bindingContext.createDataBinder(exchange, namedValueInfo.name);
 		Class<?> parameterType = parameter.getParameterType();
-		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isInlineClass(parameterType)) {
+		if (KotlinDetector.isInlineClass(parameterType)) {
 			Constructor<?> ctor = BeanUtils.findPrimaryConstructor(parameterType);
 			if (ctor != null) {
 				parameterType = ctor.getParameterTypes()[0];
@@ -222,8 +222,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		return Mono.fromSupplier(() -> {
 			Object value = null;
-			boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent() &&
-					KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
+			boolean hasDefaultValue = KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
 					KotlinDelegate.hasDefaultValue(parameter);
 			if (namedValueInfo.defaultValue != null) {
 				value = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);

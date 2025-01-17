@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,12 +191,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			Method method = getBridgedMethod();
 			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
-				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-					value = KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange);
-				}
-				else {
-					value = method.invoke(getBean(), args);
-				}
+				value = (KotlinDetector.isKotlinType(method.getDeclaringClass()) ?
+						KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange) :
+						method.invoke(getBean(), args));
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);

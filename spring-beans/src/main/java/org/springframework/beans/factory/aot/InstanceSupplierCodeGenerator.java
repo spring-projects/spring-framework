@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class InstanceSupplierCodeGenerator {
 				registeredBean.getBeanName(), constructor, registeredBean.getBeanClass());
 
 		Class<?> publicType = descriptor.publicType();
-		if (KotlinDetector.isKotlinReflectPresent() && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
+		if (KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
@@ -408,13 +408,11 @@ public class InstanceSupplierCodeGenerator {
 	private static class KotlinDelegate {
 
 		public static boolean hasConstructorWithOptionalParameter(Class<?> beanClass) {
-			if (KotlinDetector.isKotlinType(beanClass)) {
-				KClass<?> kClass = JvmClassMappingKt.getKotlinClass(beanClass);
-				for (KFunction<?> constructor : kClass.getConstructors()) {
-					for (KParameter parameter : constructor.getParameters()) {
-						if (parameter.isOptional()) {
-							return true;
-						}
+			KClass<?> kClass = JvmClassMappingKt.getKotlinClass(beanClass);
+			for (KFunction<?> constructor : kClass.getConstructors()) {
+				for (KParameter parameter : constructor.getParameters()) {
+					if (parameter.isOptional()) {
+						return true;
 					}
 				}
 			}

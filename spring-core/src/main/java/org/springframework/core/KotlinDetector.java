@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * A common delegate for detecting Kotlin's presence and for identifying Kotlin types.
+ * A common delegate for detecting Kotlin's presence and for identifying Kotlin types. All the methods of this class
+ * can be safely used without any preliminary classpath checks.
  *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
@@ -37,6 +38,8 @@ public abstract class KotlinDetector {
 
 	private static final @Nullable Class<? extends Annotation> kotlinJvmInline;
 
+	private static final @Nullable Class<?> kotlinCoroutineContinuation;
+
 	// For ConstantFieldFeature compliance, otherwise could be deduced from kotlinMetadata
 	private static final boolean kotlinPresent;
 
@@ -46,6 +49,7 @@ public abstract class KotlinDetector {
 		ClassLoader classLoader = KotlinDetector.class.getClassLoader();
 		Class<?> metadata = null;
 		Class<?> jvmInline = null;
+		Class<?> coroutineContinuation = null;
 		try {
 			metadata = ClassUtils.forName("kotlin.Metadata", classLoader);
 			try {
@@ -54,14 +58,21 @@ public abstract class KotlinDetector {
 			catch (ClassNotFoundException ex) {
 				// JVM inline support not available
 			}
+			try {
+				coroutineContinuation = ClassUtils.forName("kotlin.coroutines.Continuation", classLoader);
+			}
+			catch (ClassNotFoundException ex) {
+				// Coroutines support not available
+			}
 		}
 		catch (ClassNotFoundException ex) {
 			// Kotlin API not available - no Kotlin support
 		}
 		kotlinMetadata = (Class<? extends Annotation>) metadata;
 		kotlinPresent = (kotlinMetadata != null);
-		kotlinReflectPresent = kotlinPresent && ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
+		kotlinReflectPresent = ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
 		kotlinJvmInline = (Class<? extends Annotation>) jvmInline;
+		kotlinCoroutineContinuation = coroutineContinuation;
 	}
 
 
@@ -89,7 +100,7 @@ public abstract class KotlinDetector {
 	 * as invokedynamic has become the default method for lambda generation.
 	 */
 	public static boolean isKotlinType(Class<?> clazz) {
-		return (kotlinMetadata != null && clazz.getDeclaredAnnotation(kotlinMetadata) != null);
+		return (kotlinPresent && clazz.getDeclaredAnnotation(kotlinMetadata) != null);
 	}
 
 	/**
@@ -97,13 +108,11 @@ public abstract class KotlinDetector {
 	 * @since 5.3
 	 */
 	public static boolean isSuspendingFunction(Method method) {
-		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-			Class<?>[] types = method.getParameterTypes();
-			if (types.length > 0 && "kotlin.coroutines.Continuation".equals(types[types.length - 1].getName())) {
-				return true;
-			}
+		if (kotlinCoroutineContinuation == null) {
+			return false;
 		}
-		return false;
+		int parameterCount = method.getParameterCount();
+		return (parameterCount > 0 && method.getParameterTypes()[parameterCount - 1] == kotlinCoroutineContinuation);
 	}
 
 	/**

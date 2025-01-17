@@ -242,13 +242,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	protected @Nullable Object doInvoke(@Nullable Object... args) throws Exception {
 		Method method = getBridgedMethod();
 		try {
-			if (KotlinDetector.isKotlinReflectPresent()) {
+			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 				if (KotlinDetector.isSuspendingFunction(method)) {
 					return invokeSuspendingFunction(method, getBean(), args);
 				}
-				else if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-					return KotlinDelegate.invokeFunction(method, getBean(), args);
-				}
+				return KotlinDelegate.invokeFunction(method, getBean(), args);
 			}
 			return method.invoke(getBean(), args);
 		}

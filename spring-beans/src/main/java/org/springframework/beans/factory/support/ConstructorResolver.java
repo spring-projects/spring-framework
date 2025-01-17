@@ -624,7 +624,7 @@ class ConstructorResolver {
 						"Invalid factory method '" + mbd.getFactoryMethodName() + "' on class [" +
 						factoryClass.getName() + "]: needs to have a non-void return type!");
 			}
-			else if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(factoryMethodToUse)) {
+			else if (KotlinDetector.isSuspendingFunction(factoryMethodToUse)) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Invalid factory method '" + mbd.getFactoryMethodName() + "' on class [" +
 								factoryClass.getName() + "]: suspending functions are not supported!");
