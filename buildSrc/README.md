@@ -9,7 +9,8 @@ The `org.springframework.build.conventions` plugin applies all conventions to th
 
 * Configuring the Java compiler, see `JavaConventions`
 * Configuring the Kotlin compiler, see `KotlinConventions`
-* Configuring testing in the build with `TestConventions` 
+* Configuring testing in the build with `TestConventions`
+* Configuring the ArchUnit rules for the project, see `org.springframework.build.architecture.ArchitectureRules`
 
 This plugin also provides a DSL extension to optionally enable Java preview features for
 compiling and testing sources in a module. This can be applied with the following in a

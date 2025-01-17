@@ -20,16 +20,6 @@
 	<!-- TreeWalker Checks -->
 	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
 
-		<!-- Package-level null-safety annotations -->
-		<module name="RegexpSinglelineJavaCheck">
-			<property name="id" value="packageLevelNullMarkedAnnotation"/>
-			<property name="format" value="@NullMarked"/>
-			<property name="minimum" value="1"/>
-			<property name="maximum" value="1"/>
-			<property name="message" value="package-info.java is missing required null-safety annotation @NullMarked."/>
-			<property name="ignoreComments" value="true"/>
-		</module>
-
 		<!-- Annotations -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationUseStyleCheck">
 			<property name="elementStyle" value="compact"/>
@@ -143,11 +133,6 @@
 			<property name="regexp" value="true"/>
 			<property name="illegalClasses" value="^org\.hamcrest\..+"/>
 		</module>
-		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
-			<property name="id" value="bannedJetbrainsAnnotationsImports"/>
-			<property name="regexp" value="true"/>
-			<property name="illegalClasses" value="^org\.jetbrains\.annotations\..+"/>
-		</module>
 
 		<!-- Javadoc Comments -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck">
@@ -218,22 +203,6 @@
 			<property name="maximum" value="0"/>
 			<property name="format" value="(Boolean|Character|Byte|Short|Integer|Long|Float|Double|Void)\.TYPE"/>
 			<property name="message" value="Please use class literals for primitives and void -- for example, int.class instead of Integer.TYPE."/>
-			<property name="ignoreComments" value="true"/>
-		</module>
-		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
-			<property name="id" value="toLowerCaseWithoutLocale"/>
-			<property name="format" value="\.toLowerCase\(\)"/>
-			<property name="maximum" value="0"/>
-			<property name="message"
-					  value="String.toLowerCase() should be String.toLowerCase(Locale.ROOT)"/>
-			<property name="ignoreComments" value="true"/>
-		</module>
-		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
-			<property name="id" value="toUpperCaseWithoutLocale"/>
-			<property name="format" value="\.toUpperCase\(\)"/>
-			<property name="maximum" value="0"/>
-			<property name="message"
-					  value="String.toUpperCase() should be String.toUpperCase(Locale.ROOT)"/>
 			<property name="ignoreComments" value="true"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
