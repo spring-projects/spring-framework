@@ -16,6 +16,7 @@
 
 package org.springframework.build.architecture;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
@@ -66,8 +67,14 @@ abstract class ArchitectureRules {
 
 	static ArchRule javaClassesShouldNotImportKotlinAnnotations() {
 		return ArchRuleDefinition.noClasses()
-				.that().haveSimpleNameNotEndingWith("Kt")
-				.and().haveSimpleNameNotEndingWith("Dsl")
+				.that(new DescribedPredicate<JavaClass>("is not a Kotlin class") {
+						  @Override
+						  public boolean test(JavaClass javaClass) {
+							  return javaClass.getSourceCodeLocation()
+									  .getSourceFileName().endsWith(".java");
+						  }
+					  }
+				)
 				.should().dependOnClassesThat()
 				.resideInAnyPackage("org.jetbrains.annotations..")
 				.allowEmptyShould(true);
