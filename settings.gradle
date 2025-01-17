@@ -1,5 +1,5 @@
 plugins {
-	id "com.gradle.develocity" version "3.17.2"
+	id "com.gradle.develocity" version "3.19"
 	id "io.spring.ge.conventions" version "0.0.17"
 	id "org.gradle.toolchains.foojay-resolver-convention" version "0.7.0"
 }
