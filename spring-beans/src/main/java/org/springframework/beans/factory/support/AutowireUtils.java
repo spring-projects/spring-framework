@@ -66,7 +66,9 @@ abstract class AutowireUtils {
 	 * @param constructors the constructor array to sort
 	 */
 	public static void sortConstructors(Constructor<?>[] constructors) {
-		Arrays.sort(constructors, EXECUTABLE_COMPARATOR);
+		if (constructors.length > 1) {
+			Arrays.sort(constructors, EXECUTABLE_COMPARATOR);
+		}
 	}
 
 	/**
@@ -77,7 +79,9 @@ abstract class AutowireUtils {
 	 * @param factoryMethods the factory method array to sort
 	 */
 	public static void sortFactoryMethods(Method[] factoryMethods) {
-		Arrays.sort(factoryMethods, EXECUTABLE_COMPARATOR);
+		if (factoryMethods.length > 1) {
+			Arrays.sort(factoryMethods, EXECUTABLE_COMPARATOR);
+		}
 	}
 
 	/**

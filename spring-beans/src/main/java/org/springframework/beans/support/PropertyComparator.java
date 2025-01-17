@@ -147,7 +147,7 @@ public class PropertyComparator<T> implements Comparator<T> {
 	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
 	 */
 	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
-		if (StringUtils.hasText(sortDefinition.getProperty())) {
+		if (source.length > 1 && StringUtils.hasText(sortDefinition.getProperty())) {
 			Arrays.sort(source, new PropertyComparator<>(sortDefinition));
 		}
 	}

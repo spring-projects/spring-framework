@@ -1028,7 +1028,9 @@ public abstract class StringUtils {
 			return array;
 		}
 
-		Arrays.sort(array);
+		if (array.length > 1) {
+			Arrays.sort(array);
+		}
 		return array;
 	}
 

@@ -264,7 +264,9 @@ final class AttributeMethods {
 		if (size == 0) {
 			return NONE;
 		}
-		Arrays.sort(methods, methodComparator);
+		if (methods.length > 1) {
+			Arrays.sort(methods, methodComparator);
+		}
 		Method[] attributeMethods = Arrays.copyOf(methods, size);
 		return new AttributeMethods(annotationType, attributeMethods);
 	}

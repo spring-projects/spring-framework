@@ -254,7 +254,9 @@ public class EmitUtils {
         for (Iterator it = buckets.keySet().iterator(); it.hasNext();) {
             keys[index++] = ((Integer)it.next());
         }
-        Arrays.sort(keys);
+        if (keys.length > 1) {
+			Arrays.sort(keys);
+		}
         return keys;
     }
 

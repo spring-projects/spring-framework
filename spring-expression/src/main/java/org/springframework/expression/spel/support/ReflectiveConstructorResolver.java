@@ -65,7 +65,9 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Class<?> type = context.getTypeLocator().findType(typeName);
 			Constructor<?>[] ctors = type.getConstructors();
 
-			Arrays.sort(ctors, Comparator.comparingInt(Constructor::getParameterCount));
+			if (ctors.length > 1) {
+				Arrays.sort(ctors, Comparator.comparingInt(Constructor::getParameterCount));
+			}
 
 			Constructor<?> closeMatch = null;
 			Constructor<?> matchRequiringConversion = null;
