@@ -78,8 +78,7 @@ public abstract class BeanOverrideHandler {
 			Comparator.<MergedAnnotation<? extends Annotation>> comparingInt(MergedAnnotation::getDistance).reversed();
 
 
-	@Nullable
-	private final Field field;
+	private final @Nullable Field field;
 
 	private final Set<Annotation> qualifierAnnotations;
 
@@ -213,8 +212,7 @@ public abstract class BeanOverrideHandler {
 	/**
 	 * Get the annotated {@link Field}.
 	 */
-	@Nullable
-	public final Field getField() {
+	public final @Nullable Field getField() {
 		return this.field;
 	}
 
