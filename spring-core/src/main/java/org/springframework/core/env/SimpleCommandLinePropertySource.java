@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link CommandLinePropertySource} implementation backed by a simple String array.
+ * {@link CommandLinePropertySource} implementation backed by an instance of
+ * {@link CommandLineArgs}.
  *
  * <h3>Purpose</h3>
  * <p>This {@code CommandLinePropertySource} implementation aims to provide the simplest
@@ -41,7 +42,9 @@ import org.springframework.util.StringUtils;
  * <p>That is, options must be prefixed with "{@code --}" and may or may not
  * specify a value. If a value is specified, the name and value must be separated
  * <em>without spaces</em> by an equals sign ("="). The value may optionally be
- * an empty string.
+ * an empty string. If an option is present multiple times with different values
+ * &mdash; for example, {@code --foo=bar --foo=baz} &mdash; all supplied values
+ * will be stored for the option.
  *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
@@ -50,14 +53,14 @@ import org.springframework.util.StringUtils;
  * --foo=""
  * --foo=bar
  * --foo="bar then baz"
- * --foo=bar,baz,biz</pre>
+ * --foo=bar,baz,biz
+ * --foo=bar --foo=baz --foo=biz</pre>
  *
  * <h4>Invalid examples of option arguments</h4>
  * <pre class="code">
  * -foo
  * --foo bar
- * --foo = bar
- * --foo=bar --foo=baz --foo=biz</pre>
+ * --foo = bar</pre>
  *
  * <h3>End of option arguments</h3>
  * <p>The underlying parser supports the POSIX "end of options" delimiter, meaning
