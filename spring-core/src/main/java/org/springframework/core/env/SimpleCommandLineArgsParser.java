@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ package org.springframework.core.env;
  * <p>That is, options must be prefixed with "{@code --}" and may or may not
  * specify a value. If a value is specified, the name and value must be separated
  * <em>without spaces</em> by an equals sign ("="). The value may optionally be
- * an empty string. if the option is present and has multiple values (e. g. "--foo=bar --foo=baz"),
-* the values are parsed as a collection.
+ * an empty string. If an option is present multiple times with different values
+ * &mdash; for example, {@code --foo=bar --foo=baz} &mdash; all supplied values
+ * will be stored for the option.
  *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
