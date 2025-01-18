@@ -40,7 +40,8 @@ import org.springframework.util.StringUtils;
  * <p>That is, options must be prefixed with "{@code --}" and may or may not
  * specify a value. If a value is specified, the name and value must be separated
  * <em>without spaces</em> by an equals sign ("="). The value may optionally be
- * an empty string.
+ * an empty string. if the option is present and has multiple values (e. g. "--foo=bar --foo=baz"),
+ * the values are parsed as a collection.
  *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
@@ -49,14 +50,14 @@ import org.springframework.util.StringUtils;
  * --foo=""
  * --foo=bar
  * --foo="bar then baz"
- * --foo=bar,baz,biz</pre>
+ * --foo=bar,baz,biz
+ * --foo=bar --foo=baz --foo=biz</pre>
  *
  * <h4>Invalid examples of option arguments</h4>
  * <pre class="code">
  * -foo
  * --foo bar
- * --foo = bar
- * --foo=bar --foo=baz --foo=biz</pre>
+ * --foo = bar</pre>
  *
  * <h3>End of option arguments</h3>
  * <p>The underlying parser supports the POSIX "end of options" delimiter, meaning
