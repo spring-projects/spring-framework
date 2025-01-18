@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void submitListenableRunnable() {
 		TestTask task = new TestTask(this.testName, 1);
 		// Act
@@ -156,7 +156,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void submitFailingListenableRunnable() {
 		TestTask task = new TestTask(this.testName, 0);
 		org.springframework.util.concurrent.ListenableFuture<?> future = executor.submitListenable(task);
@@ -185,7 +185,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void submitListenableRunnableWithGetAfterShutdown() throws Exception {
 		org.springframework.util.concurrent.ListenableFuture<?> future1 = executor.submitListenable(new TestTask(this.testName, -1));
 		org.springframework.util.concurrent.ListenableFuture<?> future2 = executor.submitListenable(new TestTask(this.testName, -1));
@@ -252,7 +252,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void submitListenableCallable() {
 		TestCallable task = new TestCallable(this.testName, 1);
 		// Act
@@ -267,7 +267,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void submitFailingListenableCallable() {
 		TestCallable task = new TestCallable(this.testName, 0);
 		// Act
@@ -283,7 +283,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void submitListenableCallableWithGetAfterShutdown() throws Exception {
 		org.springframework.util.concurrent.ListenableFuture<?> future1 = executor.submitListenable(new TestCallable(this.testName, -1));
 		org.springframework.util.concurrent.ListenableFuture<?> future2 = executor.submitListenable(new TestCallable(this.testName, -1));
