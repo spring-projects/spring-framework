@@ -40,7 +40,7 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 
 
 	protected AbstractMockitoBeanOverrideHandler(@Nullable Field field, ResolvableType beanType,
-			@Nullable String beanName, BeanOverrideStrategy strategy, @Nullable MockReset reset) {
+			@Nullable String beanName, BeanOverrideStrategy strategy, MockReset reset) {
 
 		super(field, beanType, beanName, strategy);
 		this.reset = (reset != null ? reset : MockReset.AFTER);
