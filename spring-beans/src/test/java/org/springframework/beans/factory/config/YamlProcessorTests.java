@@ -99,7 +99,7 @@ class YamlProcessorTests {
 	void integerKeyBehaves() {
 		setYaml("foo: bar\n1: bar");
 		this.processor.process((properties, map) -> {
-			assertThat(properties.get("[1]")).isEqualTo("bar");
+			assertThat(properties.get("1")).isEqualTo("bar");
 			assertThat(properties).hasSize(2);
 		});
 	}
@@ -108,7 +108,7 @@ class YamlProcessorTests {
 	void integerDeepKeyBehaves() {
 		setYaml("foo:\n  1: bar");
 		this.processor.process((properties, map) -> {
-			assertThat(properties.get("foo[1]")).isEqualTo("bar");
+			assertThat(properties.get("foo.1")).isEqualTo("bar");
 			assertThat(properties).hasSize(1);
 		});
 	}

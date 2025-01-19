@@ -245,13 +245,7 @@ public abstract class YamlProcessor {
 			if (value instanceof Map) {
 				value = asMap(value);
 			}
-			if (key instanceof CharSequence) {
-				result.put(key.toString(), value);
-			}
-			else {
-				// It has to be a map key in this case
-				result.put("[" + key.toString() + "]", value);
-			}
+			result.put(key.toString(), value);
 		});
 		return result;
 	}

@@ -180,7 +180,8 @@ class YamlPropertiesFactoryBeanTests {
 				new ByteArrayResource("indexed2:\n  - \"[a]\": foo\n    \"[b]\": bar".getBytes()),
 				new ByteArrayResource("only-left-bracket:\n  \"[/key1/\": foo".getBytes()),
 				new ByteArrayResource("only-right-bracket:\n  \"/key1/]\": foo".getBytes()),
-				new ByteArrayResource("special-bracket:\n  \"][/key1/][\": foo".getBytes()));
+				new ByteArrayResource("special-bracket:\n  \"][/key1/][\": foo".getBytes()),
+				new ByteArrayResource("number-key:\n  1: foo".getBytes()));
 
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].username")).isEqualTo("foo");
@@ -195,6 +196,8 @@ class YamlPropertiesFactoryBeanTests {
 		assertThat(properties.getProperty("only-left-bracket[[/key1/]")).isEqualTo("foo");
 		assertThat(properties.getProperty("only-right-bracket[/key1/]]")).isEqualTo("foo");
 		assertThat(properties.getProperty("special-bracket.][/key1/][")).isEqualTo("foo");
+
+		assertThat(properties.getProperty("number-key.1")).isEqualTo("foo");
 	}
 
 
