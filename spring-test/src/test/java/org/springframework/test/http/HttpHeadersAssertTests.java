@@ -84,7 +84,7 @@ class HttpHeadersAssertTests {
 		headers.add("name2", "value2");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).containsOnlyHeaders("name1", "name2", "name3"))
-				.withMessageContainingAll("check headers contains only HTTP headers",
+				.withMessageContainingAll("check headers contain only HTTP headers",
 						"could not find the following element(s)", "[\"name3\"]");
 	}
 
@@ -96,7 +96,7 @@ class HttpHeadersAssertTests {
 		headers.add("name3", "value3");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).containsOnlyHeaders("name1", "name2"))
-				.withMessageContainingAll("check headers contains only HTTP headers",
+				.withMessageContainingAll("check headers contain only HTTP headers",
 						"the following element(s) were unexpected", "[\"name3\"]");
 	}
 
@@ -259,7 +259,7 @@ class HttpHeadersAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasSingleValue("header", "first"))
 				.withMessage("Expected HTTP header 'header' to be present without secondary values, " +
-						"but found <2> secondary values");
+						"but found <2> secondary value(s)");
 	}
 
 	@Test
@@ -276,7 +276,7 @@ class HttpHeadersAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasSingleValue("header", 123))
 				.withMessage("Expected HTTP header 'header' to be present without secondary values, " +
-						"but found <2> secondary values");
+						"but found <2> secondary value(s)");
 	}
 
 	@Test
@@ -296,7 +296,7 @@ class HttpHeadersAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasSingleValue("header", instant.minusSeconds(30)))
 				.withMessage("Expected HTTP header 'header' to be present without secondary values, " +
-						"but found <1> secondary values");
+						"but found <1> secondary value(s)");
 	}
 
 	@Test
