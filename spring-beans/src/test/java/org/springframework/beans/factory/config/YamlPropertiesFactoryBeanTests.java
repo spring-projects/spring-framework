@@ -177,7 +177,7 @@ class YamlPropertiesFactoryBeanTests {
 		factory.setResources(
 				new ByteArrayResource(yaml.getBytes()),
 				new ByteArrayResource("indexed:\n  \"[0]\": foo\n  \"[1]\": bar".getBytes()),
-				new ByteArrayResource("indexed:\n  - \"[a]\": foo\n    \"[b]\": bar".getBytes()),
+				new ByteArrayResource("indexed2:\n  - \"[a]\": foo\n    \"[b]\": bar".getBytes()),
 				new ByteArrayResource("only-left-bracket:\n  \"[/key1/\": foo".getBytes()),
 				new ByteArrayResource("only-right-bracket:\n  \"/key1/]\": foo".getBytes()),
 				new ByteArrayResource("special-bracket:\n  \"][/key1/][\": foo".getBytes()));
@@ -188,8 +188,9 @@ class YamlPropertiesFactoryBeanTests {
 
 		assertThat(properties.getProperty("indexed[[0]]")).isEqualTo("foo");
 		assertThat(properties.getProperty("indexed[[1]]")).isEqualTo("bar");
-		assertThat(properties.getProperty("indexed[0][[a]]")).isEqualTo("foo");
-		assertThat(properties.getProperty("indexed[0][[b]]")).isEqualTo("bar");
+
+		assertThat(properties.getProperty("indexed2[0][[a]]")).isEqualTo("foo");
+		assertThat(properties.getProperty("indexed2[0][[b]]")).isEqualTo("bar");
 
 		assertThat(properties.getProperty("only-left-bracket[[/key1/]")).isEqualTo("foo");
 		assertThat(properties.getProperty("only-right-bracket[/key1/]]")).isEqualTo("foo");
