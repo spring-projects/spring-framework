@@ -100,7 +100,7 @@ public class HttpHeadersAssert extends AbstractMapAssert<HttpHeadersAssert, Http
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
 	 * {@code name} and {@link String} {@code value}.
-	 * @param name the name of the cookie
+	 * @param name the name of the header
 	 * @param value the expected value of the header
 	 */
 	public HttpHeadersAssert hasValue(String name, String value) {
@@ -113,8 +113,8 @@ public class HttpHeadersAssert extends AbstractMapAssert<HttpHeadersAssert, Http
 
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
-	 * {@code name} and {@link Long} {@code value}.
-	 * @param name the name of the cookie
+	 * {@code name} and {@code long} {@code value}.
+	 * @param name the name of the header
 	 * @param value the expected value of the header
 	 */
 	public HttpHeadersAssert hasValue(String name, long value) {
@@ -128,7 +128,7 @@ public class HttpHeadersAssert extends AbstractMapAssert<HttpHeadersAssert, Http
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
 	 * {@code name} and {@link Instant} {@code value}.
-	 * @param name the name of the cookie
+	 * @param name the name of the header
 	 * @param value the expected value of the header
 	 */
 	public HttpHeadersAssert hasValue(String name, Instant value) {
