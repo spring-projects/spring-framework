@@ -135,10 +135,10 @@ class HttpHeadersAssertTests {
 
 	@Test
 	void hasValueWithNonPresentHeader() {
-		HttpHeaders map = new HttpHeaders();
-		map.add("test-header", "a");
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("test-header", "a");
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", "a"))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", "a"))
 				.withMessageContainingAll("HTTP headers", "test-header", "wrong-name");
 	}
 
@@ -151,19 +151,19 @@ class HttpHeadersAssertTests {
 
 	@Test
 	void hasValueWithLongMatchOnSecondaryValue() {
-		HttpHeaders map = new HttpHeaders();
-		map.addAll("header", List.of("123", "456", "789"));
+		HttpHeaders headers = new HttpHeaders();
+		headers.addAll("header", List.of("123", "456", "789"));
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("header", 456))
+				.isThrownBy(() -> assertThat(headers).hasValue("header", 456))
 				.withMessageContainingAll("check primary long value for HTTP header 'header'", "123", "456");
 	}
 
 	@Test
 	void hasValueWithNoLongMatch() {
-		HttpHeaders map = new HttpHeaders();
-		map.addAll("header", List.of("123", "456", "789"));
+		HttpHeaders headers = new HttpHeaders();
+		headers.addAll("header", List.of("123", "456", "789"));
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", 456))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", 456))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}
 
@@ -178,20 +178,20 @@ class HttpHeadersAssertTests {
 	@Test
 	void hasValueWithNoInstantMatch() {
 		Instant instant = Instant.now();
-		HttpHeaders map = new HttpHeaders();
-		map.setInstant("header", instant);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setInstant("header", instant);
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(30)))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", instant.minusSeconds(30)))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}
 
 	@Test
 	void hasValueWithNoInstantMatchOneSecOfDifference() {
 		Instant instant = Instant.now();
-		HttpHeaders map = new HttpHeaders();
-		map.setInstant("header", instant);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setInstant("header", instant);
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(1)))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", instant.minusSeconds(1)))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}
 
