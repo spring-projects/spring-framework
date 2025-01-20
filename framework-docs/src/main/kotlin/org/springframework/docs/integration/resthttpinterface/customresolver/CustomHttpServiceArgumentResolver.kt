@@ -44,11 +44,12 @@ class CustomHttpServiceArgumentResolver {
 				.builderFor(adapter)
 				.customArgumentResolver(SearchQueryArgumentResolver())
 				.build()
-			val repositoryService = factory.createClient<RepositoryService?>(RepositoryService::class.java)
+			val repositoryService = factory.createClient<RepositoryService>(RepositoryService::class.java)
 
 			val search = Search(owner = "spring-projects", language = "java", query = "rest")
 			val repositories = repositoryService.searchRepository(search)
 			// end::usage[]
+			repositories.size
 		}
 	}
 
