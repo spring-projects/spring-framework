@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,6 @@ public abstract class ClassUtils {
 
 	/** Suffix for array class names: {@code "[]"}. */
 	public static final String ARRAY_SUFFIX = "[]";
-
-	/** Prefix for internal array class names: {@code "["}. */
-	private static final String INTERNAL_ARRAY_PREFIX = "[";
-
-	/** Prefix for internal non-primitive array class names: {@code "[L"}. */
-	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
 	/** A reusable empty class array constant. */
 	private static final Class<?>[] EMPTY_CLASS_ARRAY = {};
@@ -294,20 +288,6 @@ public abstract class ClassUtils {
 		if (name.endsWith(ARRAY_SUFFIX)) {
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
 			Class<?> elementClass = forName(elementClassName, classLoader);
-			return elementClass.arrayType();
-		}
-
-		// "[Ljava.lang.String;" style arrays
-		if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
-			String elementName = name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(), name.length() - 1);
-			Class<?> elementClass = forName(elementName, classLoader);
-			return elementClass.arrayType();
-		}
-
-		// "[[I" or "[[Ljava.lang.String;" style arrays
-		if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
-			String elementName = name.substring(INTERNAL_ARRAY_PREFIX.length());
-			Class<?> elementClass = forName(elementName, classLoader);
 			return elementClass.arrayType();
 		}
 
