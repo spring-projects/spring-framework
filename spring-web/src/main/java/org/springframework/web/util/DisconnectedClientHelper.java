@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,11 @@ import org.springframework.util.Assert;
  */
 public class DisconnectedClientHelper {
 
+	// Look for server response connection issues (aborted), not onward connections
+	// to other servers (500 errors).
+
 	private static final Set<String> EXCEPTION_PHRASES =
-			Set.of("broken pipe", "connection reset");
+			Set.of("broken pipe", "connection reset by peer");
 
 	private static final Set<String> EXCEPTION_TYPE_NAMES =
 			Set.of("AbortedException", "ClientAbortException",
@@ -79,7 +82,6 @@ public class DisconnectedClientHelper {
 	 * <li>ClientAbortException or EOFException for Tomcat
 	 * <li>EofException for Jetty
 	 * <li>IOException "Broken pipe" or "connection reset by peer"
-	 * <li>SocketException "Connection reset"
 	 * </ul>
 	 */
 	public static boolean isClientDisconnectedException(Throwable ex) {
