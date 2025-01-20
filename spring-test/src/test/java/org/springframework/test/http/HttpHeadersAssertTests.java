@@ -84,7 +84,7 @@ class HttpHeadersAssertTests {
 		headers.add("name2", "value2");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).containsOnlyHeaders("name1", "name2", "name3"))
-				.withMessageContainingAll("check headers contains only HTTP headers",
+				.withMessageContainingAll("check headers contain only HTTP headers",
 						"could not find the following element(s)", "[\"name3\"]");
 	}
 
@@ -96,7 +96,7 @@ class HttpHeadersAssertTests {
 		headers.add("name3", "value3");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).containsOnlyHeaders("name1", "name2"))
-				.withMessageContainingAll("check headers contains only HTTP headers",
+				.withMessageContainingAll("check headers contain only HTTP headers",
 						"the following element(s) were unexpected", "[\"name3\"]");
 	}
 
@@ -185,10 +185,10 @@ class HttpHeadersAssertTests {
 
 	@Test
 	void hasValueWithNonPresentHeader() {
-		HttpHeaders map = new HttpHeaders();
-		map.add("test-header", "a");
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("test-header", "a");
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", "a"))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", "a"))
 				.withMessageContainingAll("HTTP header", "test-header", "wrong-name");
 	}
 
@@ -201,19 +201,19 @@ class HttpHeadersAssertTests {
 
 	@Test
 	void hasValueWithLongMatchOnSecondaryValue() {
-		HttpHeaders map = new HttpHeaders();
-		map.addAll("header", List.of("123", "456", "789"));
+		HttpHeaders headers = new HttpHeaders();
+		headers.addAll("header", List.of("123", "456", "789"));
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("header", 456))
+				.isThrownBy(() -> assertThat(headers).hasValue("header", 456))
 				.withMessageContainingAll("check primary long value for HTTP header 'header'", "123", "456");
 	}
 
 	@Test
 	void hasValueWithNoLongMatch() {
-		HttpHeaders map = new HttpHeaders();
-		map.addAll("header", List.of("123", "456", "789"));
+		HttpHeaders headers = new HttpHeaders();
+		headers.addAll("header", List.of("123", "456", "789"));
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", 456))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", 456))
 				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
@@ -228,20 +228,20 @@ class HttpHeadersAssertTests {
 	@Test
 	void hasValueWithNoInstantMatch() {
 		Instant instant = Instant.now();
-		HttpHeaders map = new HttpHeaders();
-		map.setInstant("header", instant);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setInstant("header", instant);
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(30)))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", instant.minusSeconds(30)))
 				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
 	@Test
 	void hasValueWithNoInstantMatchOneSecOfDifference() {
 		Instant instant = Instant.now();
-		HttpHeaders map = new HttpHeaders();
-		map.setInstant("header", instant);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setInstant("header", instant);
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(1)))
+				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", instant.minusSeconds(1)))
 				.withMessageContainingAll("HTTP header", "header", "wrong-name");
 	}
 
@@ -259,7 +259,7 @@ class HttpHeadersAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasSingleValue("header", "first"))
 				.withMessage("Expected HTTP header 'header' to be present without secondary values, " +
-						"but found <2> secondary values");
+						"but found <2> secondary value(s)");
 	}
 
 	@Test
@@ -276,7 +276,7 @@ class HttpHeadersAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasSingleValue("header", 123))
 				.withMessage("Expected HTTP header 'header' to be present without secondary values, " +
-						"but found <2> secondary values");
+						"but found <2> secondary value(s)");
 	}
 
 	@Test
@@ -296,7 +296,7 @@ class HttpHeadersAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasSingleValue("header", instant.minusSeconds(30)))
 				.withMessage("Expected HTTP header 'header' to be present without secondary values, " +
-						"but found <1> secondary values");
+						"but found <1> secondary value(s)");
 	}
 
 	@Test
