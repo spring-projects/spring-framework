@@ -988,6 +988,27 @@ parameter annotation) is set to `false`, or the parameter is marked optional as 
 
 
 
+[[rest-http-interface.custom-resolver]]
+=== Custom argument resolver
+
+For more complex cases, HTTP interfaces do not support `RequestEntity` types as method parameters.
+This would take over the entire HTTP request and not improve the semantics of the interface.
+Instead of adding many method parameters, developers can combine them into a custom type
+and configure a dedicated `HttpServiceArgumentResolver` implementation.
+
+In the following HTTP interface, we are using a custom `Search` type as a parameter:
+
+include-code::./CustomHttpServiceArgumentResolver[tag=httpinterface,indent=0]
+
+We can implement our own `HttpServiceArgumentResolver` that supports our custom `Search` type
+and writes its data in the outgoing HTTP request.
+
+include-code::./CustomHttpServiceArgumentResolver[tag=argumentresolver,indent=0]
+
+Finally, we can use this argument resolver during the setup and use our HTTP interface.
+
+include-code::./CustomHttpServiceArgumentResolver[tag=usage,indent=0]
+
 [[rest-http-interface-return-values]]
 === Return Values
 
