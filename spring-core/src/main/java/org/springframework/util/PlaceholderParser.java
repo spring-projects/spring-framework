@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,9 +173,8 @@ final class PlaceholderParser {
 	}
 
 	private SimplePlaceholderPart createSimplePlaceholderPart(String text) {
-		String[] keyAndDefault = splitKeyAndDefault(text);
-		return ((keyAndDefault != null) ? new SimplePlaceholderPart(text, keyAndDefault[0], keyAndDefault[1]) :
-				new SimplePlaceholderPart(text, text, null));
+		ParsedSection section = parseSection(text);
+		return new SimplePlaceholderPart(text, section.key(), section.fallback());
 	}
 
 	private NestedPlaceholderPart createNestedPlaceholderPart(String text, List<Part> parts) {
@@ -191,27 +190,32 @@ final class PlaceholderParser {
 			}
 			else {
 				String candidate = part.text();
-				String[] keyAndDefault = splitKeyAndDefault(candidate);
-				if (keyAndDefault != null) {
-					keyParts.add(new TextPart(keyAndDefault[0]));
-					if (keyAndDefault[1] != null) {
-						defaultParts.add(new TextPart(keyAndDefault[1]));
-					}
+				ParsedSection section = parseSection(candidate);
+				keyParts.add(new TextPart(section.key()));
+				if (section.fallback() != null) {
+					defaultParts.add(new TextPart(section.fallback()));
 					defaultParts.addAll(parts.subList(i + 1, parts.size()));
 					return new NestedPlaceholderPart(text, keyParts, defaultParts);
 				}
-				else {
-					keyParts.add(part);
-				}
 			}
 		}
-		// No separator found
-		return new NestedPlaceholderPart(text, parts, null);
+		return new NestedPlaceholderPart(text, keyParts, null);
 	}
 
-	private String @Nullable [] splitKeyAndDefault(String value) {
+	/**
+	 * Parse an input value that may contain a separator character and return a
+	 * {@link ParsedValue}. If a valid separator character has been identified, the
+	 * given {@code value} is split between a {@code key} and a {@code fallback}. If not,
+	 * only the {@code key} is set.
+	 * <p>
+	 * The returned key may be different from the original value as escaped
+	 * separators, if any, are resolved.
+	 * @param value the value to parse
+	 * @return the parsed section
+	 */
+	private ParsedSection parseSection(String value) {
 		if (this.separator == null || !value.contains(this.separator)) {
-			return null;
+			return new ParsedSection(value, null);
 		}
 		int position = 0;
 		int index = value.indexOf(this.separator, position);
@@ -228,11 +232,11 @@ final class PlaceholderParser {
 				buffer.append(value, position, index);
 				String key = buffer.toString();
 				String fallback = value.substring(index + this.separator.length());
-				return new String[] { key, fallback };
+				return new ParsedSection(key, fallback);
 			}
 		}
 		buffer.append(value, position, value.length());
-		return new String[] { buffer.toString(), null };
+		return new ParsedSection(buffer.toString(), null);
 	}
 
 	private static void addText(String value, int start, int end, LinkedList<Part> parts) {
@@ -288,6 +292,10 @@ final class PlaceholderParser {
 
 	private boolean isEscaped(String value, int index) {
 		return (this.escape != null && index > 0 && value.charAt(index - 1) == this.escape);
+	}
+
+	record ParsedSection(String key, @Nullable String fallback) {
+
 	}
 
 
