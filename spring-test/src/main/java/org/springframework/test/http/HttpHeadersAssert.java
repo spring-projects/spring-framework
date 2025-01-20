@@ -44,6 +44,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 
 	private static final ZoneId GMT = ZoneId.of("GMT");
 
+
 	private final AbstractCollectionAssert<?, Collection<? extends String>, String, ObjectAssert<String>> namesAssert;
 
 
@@ -53,6 +54,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 		this.namesAssert = Assertions.assertThat(actual.headerNames())
 				.as("HTTP header names");
 	}
+
 
 	/**
 	 * Verify that the actual HTTP headers contain a header with the given
@@ -180,7 +182,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	 * {@code name} and {@link String} primary {@code value}.
 	 * <p>This assertion fails if the header has secondary values.
 	 * @param name the name of the header
-	 * @param value the expected only value of the header
+	 * @param value the expected value of the header
 	 * @since 7.0
 	 */
 	public HttpHeadersAssert hasSingleValue(String name, String value) {
@@ -214,7 +216,6 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 		return hasValue(name, value);
 	}
 
-
 	/**
 	 * Verify that the given header has a full list of values exactly equal to
 	 * the given list of values, and in the same order.
@@ -246,7 +247,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	}
 
 	/**
-	 * Verify that headers are empty and no headers are present.
+	 * Verify that the actual HTTP headers are empty and no header is present.
 	 */
 	public HttpHeadersAssert isEmpty() {
 		this.namesAssert
@@ -256,7 +257,8 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 	}
 
 	/**
-	 * Verify that headers are not empty and at least one header is present.
+	 * Verify that the actual HTTP headers are not empty and at least one header
+	 * is present.
 	 */
 	public HttpHeadersAssert isNotEmpty() {
 		this.namesAssert
