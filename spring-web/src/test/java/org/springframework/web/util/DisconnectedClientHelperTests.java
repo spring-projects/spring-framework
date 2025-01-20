@@ -28,7 +28,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import reactor.netty.channel.AbortedException;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,6 +67,27 @@ public class DisconnectedClientHelperTests {
 		return List.of(
 				new AbortedException(""), new ClientAbortException(""),
 				new EOFException(), new EofException(), new AsyncRequestNotUsableException(""));
+	}
+
+	@Test // gh-33064
+	void nestedDisconnectedException() {
+		Exception ex = new HttpMessageNotReadableException(
+				"I/O error while reading input message", new ClientAbortException(),
+				new MockHttpInputMessage(new byte[0]));
+
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isTrue();
+	}
+
+	@Test // gh-34264
+	void onwardClientDisconnectedExceptionPhrase() {
+		Exception ex = new ResourceAccessException("I/O error", new EOFException("Connection reset by peer"));
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isFalse();
+	}
+
+	@Test
+	void onwardClientDisconnectedExceptionType() {
+		Exception ex = new ResourceAccessException("I/O error", new EOFException());
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isFalse();
 	}
 
 }

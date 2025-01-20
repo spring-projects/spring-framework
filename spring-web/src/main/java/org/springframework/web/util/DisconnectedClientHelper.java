@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -24,20 +25,19 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
- * Utility methods to assist with identifying and logging exceptions that indicate
- * the client has gone away. Such exceptions fill logs with unnecessary stack
- * traces. The utility methods help to log a single line message at DEBUG level,
- * and a full stacktrace at TRACE level.
+ * Utility methods to assist with identifying and logging exceptions that
+ * indicate the server response connection is lost, for example because the
+ * client has gone away. This class helps to identify such exceptions and
+ * minimize logging to a single line at DEBUG level, while making the full
+ * error stacktrace at TRACE level.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
  */
 public class DisconnectedClientHelper {
-
-	// Look for server response connection issues (aborted), not onward connections
-	// to other servers (500 errors).
 
 	private static final Set<String> EXCEPTION_PHRASES =
 			Set.of("broken pipe", "connection reset by peer");
@@ -45,6 +45,22 @@ public class DisconnectedClientHelper {
 	private static final Set<String> EXCEPTION_TYPE_NAMES =
 			Set.of("AbortedException", "ClientAbortException",
 					"EOFException", "EofException", "AsyncRequestNotUsableException");
+
+	private static final Set<Class<?>> CLIENT_EXCEPTION_TYPES = new HashSet<>(2);
+
+	static {
+		try {
+			ClassLoader classLoader = DisconnectedClientHelper.class.getClassLoader();
+			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(
+					"org.springframework.web.client.RestClientException", classLoader));
+			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(
+					"org.springframework.web.reactive.function.client.WebClientException", classLoader));
+		}
+		catch (ClassNotFoundException ex) {
+			// ignore
+		}
+	}
+
 
 	private final Log logger;
 
@@ -85,6 +101,22 @@ public class DisconnectedClientHelper {
 	 * </ul>
 	 */
 	public static boolean isClientDisconnectedException(Throwable ex) {
+		Throwable currentEx = ex;
+		Throwable lastEx = null;
+		while (currentEx != null && currentEx != lastEx) {
+			// Ignore onward connection issues to other servers (500 error)
+			for (Class<?> exceptionType : CLIENT_EXCEPTION_TYPES) {
+				if (exceptionType.isInstance(currentEx)) {
+					return false;
+				}
+			}
+			if (EXCEPTION_TYPE_NAMES.contains(currentEx.getClass().getSimpleName())) {
+				return true;
+			}
+			lastEx = currentEx;
+			currentEx = currentEx.getCause();
+		}
+
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
 		if (message != null) {
 			String text = message.toLowerCase(Locale.ROOT);
@@ -94,7 +126,8 @@ public class DisconnectedClientHelper {
 				}
 			}
 		}
-		return EXCEPTION_TYPE_NAMES.contains(ex.getClass().getSimpleName());
+
+		return false;
 	}
 
 }
