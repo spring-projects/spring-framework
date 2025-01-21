@@ -12,8 +12,9 @@ both Java by leveraging some tooling (https://github.com/uber/NullAway[NullAway]
 annotations such as IntelliJ IDEA or Eclipse) and Kotlin where JSpecify annotations are automatically translated to
 {kotlin-docs}/null-safety.html[Kotlin's null safety].
 
-`@Nullable` annotations are also used at runtime to infer if a parameter is optional or not, for example via
-{spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
+The {spring-framework-api}/core/Nullness.html[`Nullness` Spring API] can be used at runtime to detect the nullness of a
+type usage, a field, a method return type or a parameter. It provides full support for JSpecify annotations and
+Kotlin null safety, as well as a pragmatic check on any `@Nullable` annotation (regardless of the package).
 
 [[null-safety-libraries]]
 == Annotating libraries with JSpecify annotations
