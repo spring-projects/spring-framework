@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -565,6 +565,22 @@ class GenericConversionServiceTests {
 		assertThat(conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection")))).isEqualTo(Collections.singleton("testX"));
 	}
 
+	@Test
+	void stringListToListOfSubclassOfUnboundGenericClass() {
+		conversionService.addConverter(new StringListToAListConverter());
+		conversionService.addConverter(new StringListToBListConverter());
+
+		List<ARaw> aList = (List<ARaw>) conversionService.convert(List.of("foo"),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ARaw.class)));
+		assertThat(aList).allMatch(e -> e instanceof ARaw);
+
+		List<BRaw> bList = (List<BRaw>) conversionService.convert(List.of("foo"),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(BRaw.class)));
+		assertThat(bList).allMatch(e -> e instanceof BRaw);
+	}
+
 
 	@ExampleAnnotation(active = true)
 	public String annotatedString;
@@ -739,6 +755,7 @@ class GenericConversionServiceTests {
 			return converter.getMatchAttempts();
 		}
 	}
+
 
 	private interface MyEnumBaseInterface {
 		String getBaseCode();
@@ -921,4 +938,33 @@ class GenericConversionServiceTests {
 			return Color.decode(source.substring(0, 6));
 		}
 	}
+
+
+	private static class GenericBaseClass<T> {
+	}
+
+	private static class ARaw extends GenericBaseClass {
+	}
+
+	private static class BRaw extends GenericBaseClass {
+	}
+
+
+	private static class StringListToAListConverter implements Converter<List<String>, List<ARaw>> {
+
+		@Override
+		public List<ARaw> convert(List<String> source) {
+			return List.of(new ARaw());
+		}
+	}
+
+
+	private static class StringListToBListConverter implements Converter<List<String>, List<BRaw>> {
+
+		@Override
+		public List<BRaw> convert(List<String> source) {
+			return List.of(new BRaw());
+		}
+	}
+
 }
