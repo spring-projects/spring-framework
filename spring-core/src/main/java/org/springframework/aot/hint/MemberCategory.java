@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,19 @@ import java.lang.reflect.Method;
 public enum MemberCategory {
 
 	/**
-	 * A category that represents public {@linkplain Field fields}.
-	 * @see Class#getFields()
+	 * A category that represents reflective field access on public {@linkplain Field fields}.
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
 	 */
 	PUBLIC_FIELDS,
 
 	/**
-	 * A category that represents {@linkplain Class#getDeclaredFields() declared
-	 * fields}: all fields defined by the class but not inherited fields.
+	 * A category that represents reflective field access on
+	 * {@linkplain Class#getDeclaredFields() declared fields}: all fields defined by the
+	 * class but not inherited fields.
 	 * @see Class#getDeclaredFields()
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
 	 */
 	DECLARED_FIELDS,
 
