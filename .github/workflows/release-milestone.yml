@@ -49,6 +49,23 @@ jobs:
       repository-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
       repository-username: ${{ secrets.ARTIFACTORY_USERNAME }}
       token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+  sync-to-maven-central:
+    name: Sync to Maven Central
+    needs:
+      - build-and-stage-release
+      - verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Sync to Maven Central
+        uses: ./.github/actions/sync-to-maven-central
+        with:
+          jfrog-cli-config-token: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+          ossrh-s01-staging-profile: ${{ secrets.OSSRH_S01_STAGING_PROFILE }}
+          ossrh-s01-token-password: ${{ secrets.OSSRH_S01_TOKEN_PASSWORD }}
+          ossrh-s01-token-username: ${{ secrets.OSSRH_S01_TOKEN_USERNAME }}
+          spring-framework-version: ${{ needs.build-and-stage-release.outputs.version }}
   promote-release:
     name: Promote Release
     needs:
