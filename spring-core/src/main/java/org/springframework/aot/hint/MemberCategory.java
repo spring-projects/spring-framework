@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,22 +32,22 @@ import java.lang.reflect.Method;
 public enum MemberCategory {
 
 	/**
-	 * A category that represents introspection on public {@linkplain Field fields}.
-	 * @deprecated with no replacement since introspection is included
-	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
-	 * Use {@link #INVOKE_PUBLIC_FIELDS} if getting/setting field values is required.
-	 * @see Class#getFields()
+	 * A category that represents reflective field access on public {@linkplain Field fields}.
+	 * @deprecated in favor of @link #INVOKE_PUBLIC_FIELDS} with similar semantics.
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	PUBLIC_FIELDS,
 
 	/**
-	 * A category that represents introspection on {@linkplain Class#getDeclaredFields() declared
-	 * fields}: all fields defined by the class but not inherited fields.
-	 * @deprecated with no replacement since introspection is included
-	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
-	 * Use {@link #INVOKE_DECLARED_FIELDS} if getting/setting field values is required.
+	 * A category that represents reflective field access on
+	 * {@linkplain Class#getDeclaredFields() declared fields}: all fields defined by the
+	 * class but not inherited fields.
+	 * @deprecated in favor of @link #INVOKE_DECLARED_FIELDS} with similar semantics.
 	 * @see Class#getDeclaredFields()
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	DECLARED_FIELDS,

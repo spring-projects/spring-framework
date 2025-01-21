@@ -290,9 +290,7 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether a reflection hint is registered for the given field.
-	 * By default, unsafe or write access is not considered.
-	 * <p>The returned type exposes additional methods that refine the predicate behavior.
+	 * Return a predicate that checks whether a reflective field access hint is registered for the given field.
 	 * @param field the field
 	 * @return the {@link RuntimeHints} predicate
 	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(Field)}
