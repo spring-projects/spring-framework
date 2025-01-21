@@ -36,4 +36,6 @@ public interface JSpecifyProcessor {
 
 	@NullMarked
 	@NonNull String nonNullMarkedProcess();
+
+	void voidProcess();
 }

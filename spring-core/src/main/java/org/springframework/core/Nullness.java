@@ -41,8 +41,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>The nullness applies to a type usage, a field, a method return type or a parameter.
  * <a href="https://jspecify.dev/docs/user-guide/">JSpecify annotations</a> are fully supported, as well as
- * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a> and {@code @Nullable} annotations
- * regardless of their package (from Spring, JSR-305 or Jakarta set of annotations for example).
+ * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a>, {@code @Nullable} annotations
+ * regardless of their package (from Spring, JSR-305 or Jakarta set of annotations for example) and Java primitive
+ * types.
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -50,7 +51,7 @@ import org.jspecify.annotations.Nullable;
 public enum Nullness {
 
 	/**
-	 * Unspecified nullness (Java and JSpecify {@code @NullUnmarked} defaults).
+	 * Unspecified nullness (Java default for non-primitive types and JSpecify {@code @NullUnmarked} code).
 	 */
 	UNSPECIFIED,
 
@@ -60,7 +61,7 @@ public enum Nullness {
 	NULLABLE,
 
 	/**
-	 * Will not include null (Kotlin and JSpecify {@code @NullMarked} defaults).
+	 * Will not include null (Kotlin default and JSpecify {@code @NullMarked} code).
 	 */
 	NON_NULL;
 
@@ -130,6 +131,9 @@ public enum Nullness {
 	}
 
 	private static Nullness jSpecifyNullness(AnnotatedElement annotatedElement, Class<?> declaringClass, AnnotatedType annotatedType) {
+		if (annotatedType.getType() instanceof Class<?> clazz && clazz.isPrimitive()) {
+			return (clazz != void.class ? Nullness.NON_NULL : Nullness.UNSPECIFIED);
+		}
 		if (annotatedType.isAnnotationPresent(Nullable.class)) {
 			return Nullness.NULLABLE;
 		}

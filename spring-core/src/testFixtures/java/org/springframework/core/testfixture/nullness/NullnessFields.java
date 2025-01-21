@@ -26,4 +26,6 @@ public class NullnessFields {
 
 	@org.springframework.core.testfixture.nullness.custom.Nullable
 	public String customNullableField;
+
+	public int primitiveField = 0;
 }

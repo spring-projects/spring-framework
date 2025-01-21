@@ -377,4 +377,20 @@ public class NullnessTests {
 		Assertions.assertThat(nullness).isEqualTo(Nullness.NULLABLE);
 	}
 
+	// Primitive types
+
+	@Test
+	void primitiveField() throws NoSuchFieldException {
+		var field = NullnessFields.class.getDeclaredField("primitiveField");
+		var nullness = Nullness.forField(field);
+		Assertions.assertThat(nullness).isEqualTo(Nullness.NON_NULL);
+	}
+
+	@Test
+	void voidMethod() throws NoSuchMethodException {
+		var method = JSpecifyProcessor.class.getMethod("voidProcess");
+		var nullness = Nullness.forMethodReturnType(method);
+		Assertions.assertThat(nullness).isEqualTo(Nullness.UNSPECIFIED);
+	}
+
 }
