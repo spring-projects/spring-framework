@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@ package org.springframework.web.client;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * Base class for exceptions thrown by {@link RestTemplate} in case a request
- * fails because of a server error response, as determined via
- * {@link ResponseErrorHandler#hasError(ClientHttpResponse)}, failure to decode
+ * Base class for exceptions thrown by {@link RestClient} and {@link RestTemplate}
+ * in case a request fails because of a server error response, a failure to decode
  * the response, or a low level I/O error.
+ *
+ * <p>Server error responses are determined by
+ * {@link RestClient.ResponseSpec#onStatus status handlers} for {@code RestClient},
+ * and by {@link ResponseErrorHandler} for {@code RestTemplate}.
  *
  * @author Arjen Poutsma
  * @since 3.0

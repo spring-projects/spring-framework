@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * Strategy interface used by the {@link RestTemplate} to determine
- * whether a particular response has an error or not.
+ * Strategy interface used by the {@link RestTemplate} and {@link RestClient} to
+ * determine whether a particular response has an error or not.
+ *
+ * <p>Note that {@code RestClient} also supports and recommends use of
+ * {@link RestClient.ResponseSpec#onStatus status handlers}.
  *
  * @author Arjen Poutsma
  * @since 3.0
