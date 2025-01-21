@@ -44,7 +44,7 @@ public abstract class ClassHintUtils {
 	private static final Consumer<TypeHint.Builder> asClassBasedProxy = hint ->
 			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 					MemberCategory.INVOKE_DECLARED_METHODS,
-					MemberCategory.INVOKE_DECLARED_FIELDS);
+					MemberCategory.ACCESS_DECLARED_FIELDS);
 
 	private static final Consumer<TypeHint.Builder> asProxiedUserClass = hint ->
 			hint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS,

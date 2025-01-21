@@ -233,7 +233,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			ReflectionHints hints = generationContext.getRuntimeHints().reflection();
 			for (Class<?> validatedClass : this.validatedClasses) {
-				hints.registerType(validatedClass, MemberCategory.INVOKE_DECLARED_FIELDS);
+				hints.registerType(validatedClass, MemberCategory.ACCESS_DECLARED_FIELDS);
 			}
 			for (Class<? extends ConstraintValidator<?, ?>> constraintValidatorClass : this.constraintValidatorClasses) {
 				hints.registerType(constraintValidatorClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);

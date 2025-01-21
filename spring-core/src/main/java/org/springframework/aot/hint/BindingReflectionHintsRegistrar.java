@@ -100,7 +100,7 @@ public class BindingReflectionHintsRegistrar {
 						typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
 								MemberCategory.INVOKE_PUBLIC_METHODS);
 					}
-					typeHint.withMembers(MemberCategory.INVOKE_DECLARED_FIELDS,
+					typeHint.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS,
 							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 					for (Method method : clazz.getMethods()) {
 						String methodName = method.getName();

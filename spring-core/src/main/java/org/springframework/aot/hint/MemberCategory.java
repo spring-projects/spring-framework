@@ -33,7 +33,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that represents reflective field access on public {@linkplain Field fields}.
-	 * @deprecated in favor of @link #INVOKE_PUBLIC_FIELDS} with similar semantics.
+	 * @deprecated in favor of {@link #ACCESS_PUBLIC_FIELDS} with similar semantics.
 	 * @see Field#get(Object)
 	 * @see Field#set(Object, Object)
 	 */
@@ -44,7 +44,7 @@ public enum MemberCategory {
 	 * A category that represents reflective field access on
 	 * {@linkplain Class#getDeclaredFields() declared fields}: all fields defined by the
 	 * class but not inherited fields.
-	 * @deprecated in favor of @link #INVOKE_DECLARED_FIELDS} with similar semantics.
+	 * @deprecated in favor of {@link #ACCESS_DECLARED_FIELDS} with similar semantics.
 	 * @see Class#getDeclaredFields()
 	 * @see Field#get(Object)
 	 * @see Field#set(Object, Object)
@@ -53,20 +53,23 @@ public enum MemberCategory {
 	DECLARED_FIELDS,
 
 	/**
-	 * A category that represents getting/setting values on public {@linkplain Field fields}.
+	 * A category that represents reflective field access on public {@linkplain Field fields}..
 	 * @see Field#get(Object)
 	 * @see Field#set(Object, Object)
 	 * @since 7.0
 	 */
-	INVOKE_PUBLIC_FIELDS,
+	ACCESS_PUBLIC_FIELDS,
 
 	/**
-	 * A category that represents getting/setting values on declared {@linkplain Field fields}.
+	 * A category that represents reflective field access on
+	 * {@linkplain Class#getDeclaredFields() declared fields}: all fields defined by the
+	 * class but not inherited fields.
+	 * @see Class#getDeclaredFields()
 	 * @see Field#get(Object)
 	 * @see Field#set(Object, Object)
 	 * @since 7.0
 	 */
-	INVOKE_DECLARED_FIELDS,
+	ACCESS_DECLARED_FIELDS,
 
 	/**
 	 * A category that defines public {@linkplain Constructor constructors} can

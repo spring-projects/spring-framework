@@ -243,13 +243,13 @@ enum InstrumentedMethod {
 	 * {@link Field#get(Object)}.
 	 */
 	FIELD_GET(Field.class, "get", HintType.REFLECTION,
-			invocation -> reflection().onFieldInvocation(invocation.getInstance())),
+			invocation -> reflection().onFieldAccess(invocation.getInstance())),
 
 	/**
 	 * {@link Field#set(Object, Object)}.
 	 */
 	FIELD_SET(Field.class, "set", HintType.REFLECTION,
-			invocation -> reflection().onFieldInvocation(invocation.getInstance())),
+			invocation -> reflection().onFieldAccess(invocation.getInstance())),
 
 
 	/*

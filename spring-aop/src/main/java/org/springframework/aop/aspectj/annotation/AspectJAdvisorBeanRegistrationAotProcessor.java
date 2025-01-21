@@ -74,7 +74,7 @@ class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
-			generationContext.getRuntimeHints().reflection().registerType(this.beanClass, MemberCategory.INVOKE_DECLARED_FIELDS);
+			generationContext.getRuntimeHints().reflection().registerType(this.beanClass, MemberCategory.ACCESS_DECLARED_FIELDS);
 		}
 	}
 

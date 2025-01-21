@@ -105,7 +105,7 @@ class FileNativeConfigurationWriterTests {
 		ReflectionHints reflectionHints = hints.reflection();
 		reflectionHints.registerType(StringDecoder.class, builder -> builder
 				.onReachableType(String.class)
-				.withMembers(MemberCategory.INVOKE_PUBLIC_FIELDS, MemberCategory.INVOKE_DECLARED_FIELDS,
+				.withMembers(MemberCategory.ACCESS_PUBLIC_FIELDS, MemberCategory.ACCESS_DECLARED_FIELDS,
 						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS)
 				.withField("DEFAULT_CHARSET")

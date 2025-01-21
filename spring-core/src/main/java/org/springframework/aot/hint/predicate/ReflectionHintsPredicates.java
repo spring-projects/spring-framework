@@ -212,19 +212,29 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
 	 * This looks up a field on the given type with the expected name, if present.
-	 * By default, unsafe or write access is not considered.
-	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param type the type holding the field
 	 * @param fieldName the field name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
-	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(Class, String)}
-	 * or {@link #onType(Class)}.
+	 * @deprecated since 7.0 in favor of {@link #onFieldAccess(Class, String)} with similar semantics.
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
-	public FieldHintPredicate onField(Class<?> type, String fieldName) {
+	public Predicate<RuntimeHints> onField(Class<?> type, String fieldName) {
+		return onFieldAccess(type, fieldName);
+	}
+
+	/**
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * @param type the type holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldAccess(Class<?> type, String fieldName) {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		Field field = ReflectionUtils.findField(type, fieldName);
@@ -235,46 +245,22 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether an invocation hint is registered for the field that matches the given selector.
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
 	 * This looks up a field on the given type with the expected name, if present.
-	 * @param type the type holding the field
-	 * @param fieldName the field name
-	 * @return the {@link RuntimeHints} predicate
-	 * @throws IllegalArgumentException if a field cannot be found with the given name.
-	 * @since 7.0
-	 */
-	public Predicate<RuntimeHints> onFieldInvocation(Class<?> type, String fieldName) {
-		Assert.notNull(type, "'type' must not be null");
-		Assert.hasText(fieldName, "'fieldName' must not be empty");
-		Field field = ReflectionUtils.findField(type, fieldName);
-		if (field == null) {
-			throw new IllegalArgumentException("No field named '%s' on class %s".formatted(fieldName, type.getName()));
-		}
-		return new FieldHintPredicate(field).invocation();
-	}
-
-	/**
-	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
-	 * This looks up a field on the given type with the expected name, if present.
-	 * By default, unsafe or write access is not considered.
-	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param className the name of the class holding the field
 	 * @param fieldName the field name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws ClassNotFoundException if the class cannot be resolved.
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
-	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(String, String)}
-	 * or {@link #onType(Class)}.
+	 * @deprecated since 7.0 in favor of {@link #onFieldAccess(String, String)} with similar semantics.
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
-	public FieldHintPredicate onField(String className, String fieldName) throws ClassNotFoundException {
-		Assert.hasText(className, "'className' must not be empty");
-		Assert.hasText(fieldName, "'fieldName' must not be empty");
-		return onField(Class.forName(className), fieldName);
+	public Predicate<RuntimeHints> onField(String className, String fieldName) throws ClassNotFoundException {
+		return onFieldAccess(className, fieldName);
 	}
 
 	/**
-	 * Return a predicate that checks whether an invocation hint is registered for the field that matches the given selector.
+	 * Return a predicate that checks whether an invocation hint is registered for the field.
 	 * This looks up a field on the given type with the expected name, if present.
 	 * @param className the name of the class holding the field
 	 * @param fieldName the field name
@@ -283,23 +269,21 @@ public class ReflectionHintsPredicates {
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
 	 * @since 7.0
 	 */
-	public Predicate<RuntimeHints> onFieldInvocation(String className, String fieldName) throws ClassNotFoundException {
+	public Predicate<RuntimeHints> onFieldAccess(String className, String fieldName) throws ClassNotFoundException {
 		Assert.hasText(className, "'className' must not be empty");
 		Assert.hasText(fieldName, "'fieldName' must not be empty");
-		return onField(Class.forName(className), fieldName).invocation();
+		return onFieldAccess(Class.forName(className), fieldName);
 	}
 
 	/**
 	 * Return a predicate that checks whether a reflective field access hint is registered for the given field.
 	 * @param field the field
 	 * @return the {@link RuntimeHints} predicate
-	 * @deprecated since 7.0 in favor of {@link #onFieldInvocation(Field)}
-	 * or {@link #onType(Class)}.
+	 * @deprecated since 7.0 in favor of {@link #onFieldAccess(Field)} with similar semantics.
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
-	public FieldHintPredicate onField(Field field) {
-		Assert.notNull(field, "'field' must not be null");
-		return new FieldHintPredicate(field);
+	public Predicate<RuntimeHints> onField(Field field) {
+		return onFieldAccess(field);
 	}
 
 	/**
@@ -308,9 +292,9 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 * @since 7.0
 	 */
-	public Predicate<RuntimeHints> onFieldInvocation(Field field) {
+	public Predicate<RuntimeHints> onFieldAccess(Field field) {
 		Assert.notNull(field, "'field' must not be null");
-		return new FieldHintPredicate(field).invocation();
+		return new FieldHintPredicate(field);
 	}
 
 
@@ -494,39 +478,34 @@ public class ReflectionHintsPredicates {
 
 		private final Field field;
 
-		private @Nullable ExecutableMode executableMode;
-
 		FieldHintPredicate(Field field) {
 			this.field = field;
-		}
-
-		/**
-		 * Refine the current predicate to only match if an invocation hint is registered for this field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @since 7.0
-		 */
-		public FieldHintPredicate invocation() {
-			this.executableMode = ExecutableMode.INVOKE;
-			return this;
 		}
 
 		@Override
 		public boolean test(RuntimeHints runtimeHints) {
 			TypeHint typeHint = runtimeHints.reflection().getTypeHint(this.field.getDeclaringClass());
-			if (typeHint != null) {
-				if (this.executableMode == ExecutableMode.INVOKE) {
-					if (Modifier.isPublic(this.field.getModifiers())) {
-						return typeHint.getMemberCategories().contains(MemberCategory.INVOKE_PUBLIC_FIELDS);
-					}
-					else {
-						return typeHint.getMemberCategories().contains(MemberCategory.INVOKE_DECLARED_FIELDS);
-					}
-				}
-				else {
-					return true;
-				}
+			if (typeHint == null) {
+				return false;
 			}
-			return false;
+			return memberCategoryMatch(typeHint) || exactMatch(typeHint);
+		}
+
+		@SuppressWarnings("removal")
+		private boolean memberCategoryMatch(TypeHint typeHint) {
+			if (Modifier.isPublic(this.field.getModifiers())) {
+				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_PUBLIC_FIELDS)
+						|| typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS);
+			}
+			else {
+				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_DECLARED_FIELDS)
+						|| typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
+			}
+		}
+
+		private boolean exactMatch(TypeHint typeHint) {
+			return typeHint.fields().anyMatch(fieldHint ->
+					this.field.getName().equals(fieldHint.getName()));
 		}
 	}
 

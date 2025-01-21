@@ -534,7 +534,7 @@ class AnnotationConfigApplicationContextTests {
 		TypeReference cglibType = TypeReference.of(CglibConfiguration.class.getName() + "$$SpringCGLIB$$0");
 		assertThat(RuntimeHintsPredicates.reflection().onType(cglibType)
 				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_FIELDS))
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.ACCESS_DECLARED_FIELDS))
 				.accepts(runtimeHints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(CglibConfiguration.class)
 				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))

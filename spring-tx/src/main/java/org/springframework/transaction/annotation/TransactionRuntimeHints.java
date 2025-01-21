@@ -38,7 +38,7 @@ class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection().registerTypes(
 				TypeReference.listOf(Isolation.class, Propagation.class),
-				TypeHint.builtWith(MemberCategory.INVOKE_DECLARED_FIELDS));
+				TypeHint.builtWith(MemberCategory.ACCESS_DECLARED_FIELDS));
 	}
 
 }

@@ -54,7 +54,7 @@ class MessageMappingReflectiveProcessorTests {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(OutgoingMessage.class));
 					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
 							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-							MemberCategory.INVOKE_DECLARED_FIELDS);
+							MemberCategory.ACCESS_DECLARED_FIELDS);
 					assertThat(typeHint.methods()).satisfiesExactlyInAnyOrder(
 							hint -> assertThat(hint.getName()).isEqualTo("getMessage"),
 							hint -> assertThat(hint.getName()).isEqualTo("setMessage"));
@@ -72,7 +72,7 @@ class MessageMappingReflectiveProcessorTests {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IncomingMessage.class));
 					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
 							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-							MemberCategory.INVOKE_DECLARED_FIELDS);
+							MemberCategory.ACCESS_DECLARED_FIELDS);
 					assertThat(typeHint.methods()).satisfiesExactlyInAnyOrder(
 							hint -> assertThat(hint.getName()).isEqualTo("getMessage"),
 							hint -> assertThat(hint.getName()).isEqualTo("setMessage"));

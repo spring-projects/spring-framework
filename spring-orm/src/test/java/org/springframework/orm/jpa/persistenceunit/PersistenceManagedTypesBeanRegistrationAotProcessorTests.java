@@ -85,18 +85,18 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 		context.registerBean(JpaDomainConfiguration.class);
 		contributeHints(context, hints -> {
 			assertThat(RuntimeHintsPredicates.reflection().onType(DriversLicense.class)
-					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);
+					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(Person.class)
-					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);
+					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(PersonListener.class)
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS))
 					.accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(Employee.class)
-					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);
+					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(Employee.class, "preRemove"))
 					.accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeId.class)
-					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);
+					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeLocationConverter.class)
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeCategoryConverter.class)
@@ -104,7 +104,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeKindConverter.class)
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeLocation.class)
-					.withMemberCategories(MemberCategory.INVOKE_DECLARED_FIELDS)).accepts(hints);
+					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
 		});
 	}
 

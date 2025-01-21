@@ -381,68 +381,56 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void shouldFailForUnknownClass() {
-			assertThatThrownBy(() -> reflection.onFieldInvocation("com.example.DoesNotExist", "missingField"))
+			assertThatThrownBy(() -> reflection.onFieldAccess("com.example.DoesNotExist", "missingField"))
 					.isInstanceOf(ClassNotFoundException.class);
 		}
 
 		@Test
-		void fieldReflectionMatchesTypeHint() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
-		}
-
-		@Test
-		void fieldReflectionMatchesFieldHint() {
+		void publicFieldAccessMatchesFieldHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField"));
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
-		void fieldReflectionMatchesPublicFieldsHint() {
+		void publicFieldAccessMatchesPublicFieldsHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.PUBLIC_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
-		void fieldInvocationMatchesPublicFieldsHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_FIELDS);
-			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").invocation());
+		void publicFieldAccessMatchesAccessPublicFieldsHint() {
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.ACCESS_PUBLIC_FIELDS);
+			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
-		void fieldInvocationDoesNotMatchTypeHint() {
+		void fieldAccessDoesNotMatchTypeHint() {
 			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").invocation());
+			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
-		void privateFieldReflectionMatchesTypeHint() {
+		void privateFieldAccessDoesNotMatchTypeHint() {
 			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
+			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 		@Test
-		void privateFieldReflectionMatchesFieldHint() {
+		void privateFieldAccessMatchesFieldHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("privateField"));
 			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 		@Test
-		void privateFieldReflectionMatchesDeclaredFieldsHint() {
+		void privateFieldAccessMatchesDeclaredFieldsHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.DECLARED_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 		@Test
-		void privateFieldInvocationMatchesDeclaredFieldsHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_FIELDS);
-			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField").invocation());
-		}
-
-		@Test
-		void privateFieldInvocationDoesNotMatchTypeHint() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "privateField").invocation());
+		void privateFieldAccessMatchesAccessDeclaredFieldsHint() {
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.ACCESS_DECLARED_FIELDS);
+			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 	}
