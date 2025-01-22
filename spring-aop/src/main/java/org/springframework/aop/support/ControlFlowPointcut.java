@@ -144,7 +144,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, Class<?> targetClass, @Nullable Object... args) {
 		incrementEvaluationCount();
 
 		for (StackTraceElement element : new Throwable().getStackTrace()) {

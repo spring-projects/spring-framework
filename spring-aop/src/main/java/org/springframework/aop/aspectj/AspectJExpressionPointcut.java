@@ -340,7 +340,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, Class<?> targetClass, @Nullable Object... args) {
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,

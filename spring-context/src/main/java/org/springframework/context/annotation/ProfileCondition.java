@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.MultiValueMap;
 
@@ -33,7 +35,7 @@ class ProfileCondition implements Condition {
 	@Override
 	@SuppressWarnings("NullAway") // Reflection
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
+		MultiValueMap<String, @Nullable Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
 		if (attrs != null) {
 			for (Object value : attrs.get("value")) {
 				if (context.getEnvironment().matchesProfiles((String[]) value)) {

@@ -63,7 +63,7 @@ final class BeanMethod extends ConfigurationMethod {
 			return;
 		}
 
-		Map<String, Object> attributes =
+		Map<String, @Nullable Object> attributes =
 				getConfigurationClass().getMetadata().getAnnotationAttributes(Configuration.class.getName());
 		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods") && !getMetadata().isOverridable()) {
 			// instance @Bean methods within @Configuration classes must be overridable to accommodate CGLIB

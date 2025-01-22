@@ -16,6 +16,8 @@
 
 package org.springframework.expression;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A {@code ConstructorExecutor} is built by a {@link ConstructorResolver} and
  * can be cached by the infrastructure to repeat an operation quickly without
@@ -49,6 +51,6 @@ public interface ConstructorExecutor {
 	 * @throws AccessException if there is a problem executing the constructor or
 	 * if this {@code ConstructorExecutor} has become stale
 	 */
-	TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException;
+	TypedValue execute(EvaluationContext context, @Nullable Object... arguments) throws AccessException;
 
 }

@@ -18,6 +18,8 @@ package org.springframework.aop;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Part of a {@link Pointcut}: Checks whether the target method is eligible for advice.
  *
@@ -94,7 +96,7 @@ public interface MethodMatcher {
 	 * @return whether there's a runtime match
 	 * @see #matches(Method, Class)
 	 */
-	boolean matches(Method method, Class<?> targetClass, Object... args);
+	boolean matches(Method method, Class<?> targetClass, @Nullable Object... args);
 
 
 	/**

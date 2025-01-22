@@ -140,7 +140,7 @@ class ConstructorResolver {
 
 		Constructor<?> constructorToUse = null;
 		ArgumentsHolder argsHolderToUse = null;
-		Object[] argsToUse = null;
+		@Nullable Object[] argsToUse = null;
 
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
@@ -227,7 +227,7 @@ class ConstructorResolver {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (resolvedValues != null) {
 					try {
-						String[] paramNames = null;
+						@Nullable String[] paramNames = null;
 						if (resolvedValues.containsNamedArgument()) {
 							paramNames = ConstructorPropertiesChecker.evaluate(candidate, parameterCount);
 							if (paramNames == null) {
@@ -437,7 +437,7 @@ class ConstructorResolver {
 			argsToUse = explicitArgs;
 		}
 		else {
-			Object[] argsToResolve = null;
+			@Nullable Object[] argsToResolve = null;
 			synchronized (mbd.constructorArgumentLock) {
 				factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
 				if (factoryMethodToUse != null && mbd.constructorArgumentsResolved) {
@@ -536,7 +536,7 @@ class ConstructorResolver {
 					else {
 						// Resolved constructor arguments: type conversion and/or autowiring necessary.
 						try {
-							String[] paramNames = null;
+							@Nullable String[] paramNames = null;
 							if (resolvedValues != null && resolvedValues.containsNamedArgument()) {
 								ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
 								if (pnd != null) {
@@ -719,7 +719,7 @@ class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, @Nullable ConstructorArgumentValues resolvedValues,
-			BeanWrapper bw, Class<?>[] paramTypes, String @Nullable [] paramNames, Executable executable,
+			BeanWrapper bw, Class<?>[] paramTypes, @Nullable String @Nullable [] paramNames, Executable executable,
 			boolean autowiring, boolean fallback) throws UnsatisfiedDependencyException {
 
 		TypeConverter customConverter = this.beanFactory.getCustomTypeConverter();

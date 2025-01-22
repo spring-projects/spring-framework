@@ -422,7 +422,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return resolved;
 			}
 			@Override
-			public T getObject(Object... args) throws BeansException {
+			public T getObject(@Nullable Object... args) throws BeansException {
 				T resolved = resolveBean(requiredType, args, false);
 				if (resolved == null) {
 					throw new NoSuchBeanDefinitionException(requiredType);
@@ -2147,7 +2147,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Create an {@link Optional} wrapper for the specified dependency.
 	 */
 	private Optional<?> createOptionalDependency(
-			DependencyDescriptor descriptor, @Nullable String beanName, final Object... args) {
+			DependencyDescriptor descriptor, @Nullable String beanName, final @Nullable Object... args) {
 
 		DependencyDescriptor descriptorToUse = new NestedDependencyDescriptor(descriptor) {
 			@Override
@@ -2317,7 +2317,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
-		public Object getObject(final Object... args) throws BeansException {
+		public Object getObject(final @Nullable Object... args) throws BeansException {
 			if (this.optional) {
 				return createOptionalDependency(this.descriptor, this.beanName, args);
 			}

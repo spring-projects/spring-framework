@@ -139,7 +139,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public org.springframework.jmx.export.metadata.ManagedOperationParameter[] getManagedOperationParameters(Method method)
+	public org.springframework.jmx.export.metadata.@Nullable ManagedOperationParameter[] getManagedOperationParameters(Method method)
 			throws InvalidMetadataException {
 
 		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(
@@ -149,7 +149,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public org.springframework.jmx.export.metadata.ManagedNotification[] getManagedNotifications(Class<?> clazz)
+	public org.springframework.jmx.export.metadata.@Nullable ManagedNotification[] getManagedNotifications(Class<?> clazz)
 			throws InvalidMetadataException {
 
 		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(

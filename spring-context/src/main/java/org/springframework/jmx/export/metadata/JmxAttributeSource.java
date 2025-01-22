@@ -80,7 +80,7 @@ public interface JmxAttributeSource {
 	 * @return the parameter information.
 	 * @throws InvalidMetadataException in the case of invalid attributes.
 	 */
-	ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException;
+	@Nullable ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException;
 
 	/**
 	 * Implementations should return an array of {@link ManagedNotification ManagedNotifications}
@@ -90,7 +90,7 @@ public interface JmxAttributeSource {
 	 * @return the notification information
 	 * @throws InvalidMetadataException in the case of invalid metadata
 	 */
-	ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException;
+	@Nullable ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException;
 
 
 

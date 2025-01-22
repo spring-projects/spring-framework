@@ -289,7 +289,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, Object... args) {
+		public boolean matches(Method method, Class<?> targetClass, @Nullable Object... args) {
 			// This can match only on declared pointcut.
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass, args));
 		}

@@ -69,12 +69,12 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void addAll(String key, List<? extends String> values) {
+		public void addAll(String key, List<? extends @Nullable String> values) {
 			values.forEach(value -> add(key, value));
 		}
 
 		@Override
-		public void addAll(MultiValueMap<String, String> values) {
+		public void addAll(MultiValueMap<String, @Nullable String> values) {
 			values.forEach(this::addAll);
 		}
 
@@ -84,12 +84,12 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void setAll(Map<String, String> values) {
+		public void setAll(Map<String, @Nullable String> values) {
 			values.forEach(this::set);
 		}
 
 		@Override
-		public Map<String, String> toSingleValueMap() {
+		public Map<String, @Nullable String> toSingleValueMap() {
 			Map<String, String> map = CollectionUtils.newLinkedHashMap(size());
 			this.message.headerIterator().forEachRemaining(h -> map.putIfAbsent(h.getName(), h.getValue()));
 			return map;
@@ -274,12 +274,12 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void addAll(String key, List<? extends String> values) {
+		public void addAll(String key, List<? extends @Nullable String> values) {
 			values.forEach(value -> add(key, value));
 		}
 
 		@Override
-		public void addAll(MultiValueMap<String, String> values) {
+		public void addAll(MultiValueMap<String, @Nullable String> values) {
 			values.forEach(this::addAll);
 		}
 
@@ -295,7 +295,7 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void setAll(Map<String, String> values) {
+		public void setAll(Map<String, @Nullable String> values) {
 			values.forEach(this::set);
 		}
 
@@ -566,12 +566,12 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void addAll(String key, List<? extends String> values) {
+		public void addAll(String key, List<? extends @Nullable String> values) {
 			this.headers.add(key, values);
 		}
 
 		@Override
-		public void addAll(MultiValueMap<String, String> values) {
+		public void addAll(MultiValueMap<String, @Nullable String> values) {
 			values.forEach(this.headers::add);
 		}
 
@@ -583,7 +583,7 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void setAll(Map<String, String> values) {
+		public void setAll(Map<String, @Nullable String> values) {
 			values.forEach(this.headers::set);
 		}
 
@@ -809,12 +809,12 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void addAll(String key, List<? extends String> values) {
+		public void addAll(String key, List<? extends @Nullable String> values) {
 			this.headers.add(key, values);
 		}
 
 		@Override
-		public void addAll(MultiValueMap<String, String> values) {
+		public void addAll(MultiValueMap<String, @Nullable String> values) {
 			values.forEach(this.headers::add);
 		}
 
@@ -826,7 +826,7 @@ class HeadersAdaptersBaseline {
 		}
 
 		@Override
-		public void setAll(Map<String, String> values) {
+		public void setAll(Map<String, @Nullable String> values) {
 			values.forEach(this.headers::set);
 		}
 

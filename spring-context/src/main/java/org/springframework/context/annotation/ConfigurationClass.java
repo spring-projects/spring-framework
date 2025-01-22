@@ -220,7 +220,7 @@ final class ConfigurationClass {
 
 	@SuppressWarnings("NullAway") // Reflection
 	void validate(ProblemReporter problemReporter) {
-		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
+		Map<String, @Nullable Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
 
 		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
 		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods") && this.metadata.isFinal()) {

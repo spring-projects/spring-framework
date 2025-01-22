@@ -301,7 +301,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				}
 			}
 			@Override
-			public T getObject(Object... args) throws BeansException {
+			public T getObject(@Nullable Object... args) throws BeansException {
 				String[] beanNames = getBeanNamesForType(requiredType);
 				if (beanNames.length == 1) {
 					return (T) getBean(beanNames[0], args);

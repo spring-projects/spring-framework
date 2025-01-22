@@ -77,7 +77,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
-	default T getObject(Object... args) throws BeansException {
+	default T getObject(@Nullable Object... args) throws BeansException {
 		throw new UnsupportedOperationException("Retrieval with arguments not supported -" +
 				"for custom ObjectProvider classes, implement getObject(Object...) for your purposes");
 	}

@@ -162,7 +162,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 				return getBean(requiredType);
 			}
 			@Override
-			public T getObject(Object... args) throws BeansException {
+			public T getObject(@Nullable Object... args) throws BeansException {
 				return getBean(requiredType, args);
 			}
 			@Override
