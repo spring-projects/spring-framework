@@ -42,8 +42,11 @@ import org.jspecify.annotations.Nullable;
  * <p>The nullness applies to a type usage, a field, a method return type or a parameter.
  * <a href="https://jspecify.dev/docs/user-guide/">JSpecify annotations</a> are fully supported, as well as
  * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a>, {@code @Nullable} annotations
- * regardless of their package (from Spring, JSR-305 or Jakarta set of annotations for example) and Java primitive
- * types.
+ * regardless of their package and Java primitive types.
+ *
+ * <p>JSR-305 annotations as well as Spring ones in the {@code org.springframework.lang} packages such as
+ * {@code @NonNullApi}, {@code @NonNullFields} and {@code @NonNull} are not supported by this API, except
+ * {@code @Nullable} which is supported via the package-less check. Migrating to JSpecify is recommended.
  *
  * @author Sebastien Deleuze
  * @since 7.0
