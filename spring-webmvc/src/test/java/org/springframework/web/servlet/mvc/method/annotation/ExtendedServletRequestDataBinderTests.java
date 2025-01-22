@@ -120,6 +120,23 @@ class ExtendedServletRequestDataBinderTests {
 	}
 
 	@Test
+	void headerPredicateWithConstructorArgs() {
+		ExtendedServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(null);
+		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Some-Int-Array"));
+		binder.setTargetType(ResolvableType.forClass(DataBean.class));
+		binder.setNameResolver(new BindParamNameResolver());
+
+		request.addHeader("Some-Int-Array", "1");
+		request.addHeader("Some-Int-Array", "2");
+
+		binder.construct(request);
+
+		DataBean bean = (DataBean) binder.getTarget();
+
+		assertThat(bean.someIntArray()).isNull();
+	}
+
+	@Test
 	void headerPredicate() {
 		TestBinder binder = new TestBinder();
 		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));

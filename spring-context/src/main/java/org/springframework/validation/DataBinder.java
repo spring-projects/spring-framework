@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1412,6 +1412,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 		/**
 		 * Return the names of all property values.
+		 * <p>Useful for proactive checks whether there are property values nested
+		 * further below the path for a constructor arg. If not then the
+		 * constructor arg can be considered missing and not to be instantiated.
 		 * @since 6.1.2
 		 */
 		Set<String> getNames();
