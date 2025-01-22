@@ -105,6 +105,18 @@ class ExtendedServletRequestDataBinderTests {
 				.hasMessage("Failed to parse index from 'foo'");
 	}
 
+	@Test  // gh-34205
+	void createBinderViaConstructorWithChooseConstructor() {
+		request.addParameter("Some-Int-Array[0]", "1");
+
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(null);
+		binder.setTargetType(ResolvableType.forClass(DataBean.class));
+		binder.setNameResolver(new BindParamNameResolver());
+		assertThatThrownBy(() -> binder.construct(request))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessage("No primary or single unique constructor found for class java.lang.Integer");
+	}
+
 	@Test
 	void uriVarsAndHeadersAddedConditionally() {
 		request.addParameter("name", "John");
