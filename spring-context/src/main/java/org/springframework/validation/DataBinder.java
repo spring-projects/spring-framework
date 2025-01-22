@@ -116,6 +116,7 @@ import org.springframework.validation.annotation.ValidationAnnotationUtils;
  * @author Stephane Nicoll
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Mengqi Xu
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -1087,7 +1088,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			if (name.startsWith(paramPath + "[")) {
 				int endIndex = name.indexOf(']', paramPath.length() + 1);
 				String rawIndex = name.substring(paramPath.length() + 1, endIndex);
-				int index = Integer.parseInt(rawIndex);
+				int index;
+				try {
+					index = Integer.parseInt(rawIndex);
+				}
+				catch (NumberFormatException ex) {
+					throw new IllegalArgumentException("Failed to parse index from '" + rawIndex + "'", ex);
+				}
 				indexes = (indexes != null ? indexes : new TreeSet<>());
 				indexes.add(index);
 			}

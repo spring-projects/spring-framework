@@ -34,11 +34,13 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test fixture for {@link ExtendedServletRequestDataBinder}.
  *
  * @author Rossen Stoyanchev
+ * @author Mengqi Xu
  */
 class ExtendedServletRequestDataBinderTests {
 
@@ -88,6 +90,19 @@ class ExtendedServletRequestDataBinderTests {
 		assertThat(bean.name()).isEqualTo("John");
 		assertThat(bean.age()).isEqualTo(25);
 		assertThat(bean.someIntArray()).containsExactly(1, 2);
+	}
+
+	@Test  // gh-34205
+	void createBinderViaConstructorWithInvalidIndex() {
+		request.addParameter("Some-Int-Array[foo]", "1");
+
+		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(null);
+		binder.setTargetType(ResolvableType.forClass(DataBean.class));
+		binder.setNameResolver(new BindParamNameResolver());
+
+		assertThatThrownBy(() -> binder.construct(request))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Failed to parse index from 'foo'");
 	}
 
 	@Test
