@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +48,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Mengqi Xu
  * @since 3.1.3
  * @see <a href="https://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -1089,6 +1091,9 @@ final class HierarchicalUriComponents extends UriComponents {
 			Object value = this.delegate.getValue(name);
 			if (ObjectUtils.isArray(value)) {
 				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));
+			}
+			if (value instanceof Collection<?> coll) {
+				value = StringUtils.collectionToCommaDelimitedString(coll);
 			}
 			return value;
 		}

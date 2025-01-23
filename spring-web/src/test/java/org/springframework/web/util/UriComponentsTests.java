@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +43,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
  * @author Arjen Poutsma
  * @author Phillip Webb
  * @author Rossen Stoyanchev
+ * @author Mengqi Xu
  */
 class UriComponentsTests {
 
@@ -151,6 +153,26 @@ class UriComponentsTests {
 				.expand("example.com", "foo", "bar");
 
 		assertThat(uri.toUriString()).isEqualTo("https://example.com/foo#bar");
+	}
+
+	@Test
+	void expandQueryParamWithArray() {
+		UriComponents uri = UriComponentsBuilder.fromPath("/hello")
+				.queryParam("name", "{name}")
+				.build();
+		uri = uri.expand(Collections.singletonMap("name", new String[]{"foo", "bar"}));
+
+		assertThat(uri.toString()).hasToString("/hello?name=foo,bar");
+	}
+
+	@Test
+	void expandQueryParamWithList() {
+		UriComponents uri = UriComponentsBuilder.fromPath("/hello")
+				.queryParam("name", "{name}")
+				.build();
+		uri = uri.expand(Collections.singletonMap("name", List.of("foo", "bar")));
+
+		assertThat(uri.toString()).hasToString("/hello?name=foo,bar");
 	}
 
 	@ParameterizedTest // SPR-12123
