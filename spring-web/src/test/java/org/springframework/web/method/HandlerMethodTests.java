@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,13 @@ class HandlerMethodTests {
 		Object target = new MyValidatedClass();
 		testValidateArgs(target, List.of("addPerson"), false);
 		testValidateReturnValue(target, List.of("getPerson"), false);
+	}
+
+	@Test // gh-34277
+	void createWithResolvedBeanSameInstance() {
+		MyClass target = new MyClass();
+		HandlerMethod handlerMethod = getHandlerMethod(target, "addPerson");
+		assertThat(handlerMethod.createWithResolvedBean()).isSameAs(handlerMethod);
 	}
 
 	private static void testValidateArgs(Object target, List<String> methodNames, boolean expected) {
