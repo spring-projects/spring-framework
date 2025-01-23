@@ -71,7 +71,7 @@ public class DestinationPatternsMessageCondition
 	 * @param patterns the URL patterns to match to, or if 0 then always match
 	 * @param matcher the {@code PathMatcher} to use
 	 */
-	public DestinationPatternsMessageCondition(@Nullable String[] patterns, @Nullable PathMatcher matcher) {
+	public DestinationPatternsMessageCondition(String[] patterns, @Nullable PathMatcher matcher) {
 		this(patterns, new SimpleRouteMatcher(matcher != null ? matcher : new AntPathMatcher()));
 	}
 
@@ -81,14 +81,13 @@ public class DestinationPatternsMessageCondition
 	 * @param routeMatcher the {@code RouteMatcher} to use
 	 * @since 5.2
 	 */
-	public DestinationPatternsMessageCondition(@Nullable String[] patterns, RouteMatcher routeMatcher) {
+	public DestinationPatternsMessageCondition(String[] patterns, RouteMatcher routeMatcher) {
 		this(Collections.unmodifiableSet(prependLeadingSlash(patterns, routeMatcher)), routeMatcher);
 	}
 
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1125
-	private static Set<@Nullable String> prependLeadingSlash(@Nullable String[] patterns, RouteMatcher routeMatcher) {
+	private static Set<String> prependLeadingSlash(String[] patterns, RouteMatcher routeMatcher) {
 		boolean slashSeparator = routeMatcher.combine("a", "a").equals("a/a");
-		Set<@Nullable String> result = CollectionUtils.newLinkedHashSet(patterns.length);
+		Set<String> result = CollectionUtils.newLinkedHashSet(patterns.length);
 		for (String pattern : patterns) {
 			if (slashSeparator && StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 				pattern = "/" + pattern;
