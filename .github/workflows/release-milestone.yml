@@ -8,8 +8,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   build-and-stage-release:
-    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     name: Build and Stage Release
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Code
@@ -18,7 +18,7 @@ jobs:
         id: build-and-publish
         uses: ./.github/actions/build
         with:
-          develocity-access-key: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           publish: true
       - name: Stage Release
         uses: spring-io/artifactory-deploy-action@26bbe925a75f4f863e1e529e85be2d0093cac116 # v0.0.1
@@ -41,14 +41,14 @@ jobs:
     name: Verify
     needs: build-and-stage-release
     uses: ./.github/workflows/verify.yml
-    with:
-      staging: true
-      version: ${{ needs.build-and-stage-release.outputs.version }}
     secrets:
       google-chat-webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
       repository-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
       repository-username: ${{ secrets.ARTIFACTORY_USERNAME }}
       token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+    with:
+      staging: true
+      version: ${{ needs.build-and-stage-release.outputs.version }}
   sync-to-maven-central:
     name: Sync to Maven Central
     needs:
@@ -70,11 +70,11 @@ jobs:
     name: Promote Release
     needs:
       - build-and-stage-release
-      - verify
+      - sync-to-maven-central
     runs-on: ubuntu-latest
     steps:
       - name: Set up JFrog CLI
-        uses: jfrog/setup-jfrog-cli@9fe0f98bd45b19e6e931d457f4e98f8f84461fb5 # v4.4.1
+        uses: jfrog/setup-jfrog-cli@dff217c085c17666e8849ebdbf29c8fe5e3995e6 # v4.5.2
         env:
           JF_ENV_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Promote build
