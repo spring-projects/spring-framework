@@ -37,16 +37,20 @@ import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Constants that indicate the nullness, as well as related utility methods.
+ * Constants that indicate nullness, as well as related utility methods.
  *
- * <p>The nullness applies to a type usage, a field, a method return type or a parameter.
- * <a href="https://jspecify.dev/docs/user-guide/">JSpecify annotations</a> are fully supported, as well as
- * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a>, {@code @Nullable} annotations
- * regardless of their package and Java primitive types.
+ * <p>Nullness applies to type usage, a field, a method return type, or a parameter.
+ * <a href="https://jspecify.dev/docs/user-guide/">JSpecify annotations</a> are
+ * fully supported, as well as
+ * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a>,
+ * {@code @Nullable} annotations regardless of their package, and Java primitive
+ * types.
  *
- * <p>JSR-305 annotations as well as Spring ones in the {@code org.springframework.lang} packages such as
- * {@code @NonNullApi}, {@code @NonNullFields} and {@code @NonNull} are not supported by this API, except
- * {@code @Nullable} which is supported via the package-less check. Migrating to JSpecify is recommended.
+ * <p>JSR-305 annotations as well as Spring null safety annotations in the
+ * {@code org.springframework.lang} package such as {@code @NonNullApi},
+ * {@code @NonNullFields}, and {@code @NonNull} are not supported by this API.
+ * However, {@code @Nullable} is supported via the package-less check. Migrating
+ * to JSpecify is recommended.
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -54,7 +58,8 @@ import org.jspecify.annotations.Nullable;
 public enum Nullness {
 
 	/**
-	 * Unspecified nullness (Java default for non-primitive types and JSpecify {@code @NullUnmarked} code).
+	 * Unspecified nullness (Java default for non-primitive types and JSpecify
+	 * {@code @NullUnmarked} code).
 	 */
 	UNSPECIFIED,
 
@@ -70,7 +75,7 @@ public enum Nullness {
 
 
 	/**
-	 * Return the nullness of the given method return type.
+	 * Return the nullness of the return type for the given method.
 	 * @param method the source for the method return type
 	 * @return the corresponding nullness
 	 */
@@ -123,7 +128,8 @@ public enum Nullness {
 	}
 
 
-	// Check method and parameter level @Nullable annotations regardless of the package (including Spring and JSR 305 annotations)
+	// Check method and parameter level @Nullable annotations regardless of the package
+	// (including Spring and JSR 305 annotations)
 	private static boolean hasNullableAnnotation(AnnotatedElement element) {
 		for (Annotation annotation : element.getDeclaredAnnotations()) {
 			if ("Nullable".equals(annotation.annotationType().getSimpleName())) {
@@ -133,7 +139,9 @@ public enum Nullness {
 		return false;
 	}
 
-	private static Nullness jSpecifyNullness(AnnotatedElement annotatedElement, Class<?> declaringClass, AnnotatedType annotatedType) {
+	private static Nullness jSpecifyNullness(
+			AnnotatedElement annotatedElement, Class<?> declaringClass, AnnotatedType annotatedType) {
+
 		if (annotatedType.getType() instanceof Class<?> clazz && clazz.isPrimitive()) {
 			return (clazz != void.class ? Nullness.NON_NULL : Nullness.UNSPECIFIED);
 		}
@@ -170,7 +178,6 @@ public enum Nullness {
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
 	private static class KotlinDelegate {
-
 
 		public static Nullness forMethodReturnType(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
