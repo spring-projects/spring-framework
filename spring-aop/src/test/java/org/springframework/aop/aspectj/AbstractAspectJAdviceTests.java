@@ -45,13 +45,17 @@ class AbstractAspectJAdviceTests {
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsLastParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsLastParameter");
-		assertArgumentNamesFromStringArray(advice);
+		assertThat(getArgumentNames(advice)[0]).isEqualTo("arg1");
+		assertThat(getArgumentNames(advice)[1]).isEqualTo("arg2");
+		assertThat(getArgumentNames(advice)[2]).isEqualTo("THIS_JOIN_POINT");
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsMiddleParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsMiddleParameter");
-		assertArgumentNamesFromStringArray(advice);
+		assertThat(getArgumentNames(advice)[0]).isEqualTo("arg1");
+		assertThat(getArgumentNames(advice)[1]).isEqualTo("THIS_JOIN_POINT");
+		assertThat(getArgumentNames(advice)[2]).isEqualTo("arg2");
 	}
 
 	@Test
