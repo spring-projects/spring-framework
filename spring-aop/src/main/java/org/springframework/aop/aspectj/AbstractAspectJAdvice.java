@@ -281,6 +281,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 					this.argumentNames = new String[oldNames.length + 1];
 					this.argumentNames[0] = "THIS_JOIN_POINT";
 					System.arraycopy(oldNames, 0, this.argumentNames, 1, oldNames.length);
+					break;
 				}
 			}
 		}
