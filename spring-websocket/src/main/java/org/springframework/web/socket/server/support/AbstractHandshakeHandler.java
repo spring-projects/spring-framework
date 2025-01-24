@@ -255,7 +255,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
 		if (logger.isErrorEnabled()) {
-			String version = request.getHeaders().getFirst("Sec-WebSocket-Version");
+			String version = request.getHeaders().getFirst(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION);
 			logger.error(LogFormatUtils.formatValue(
 					"Handshake failed due to unsupported WebSocket version: " + version +
 							". Supported versions: " + Arrays.toString(getSupportedVersions()), -1, true));
