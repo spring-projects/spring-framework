@@ -206,9 +206,6 @@ public final class CronExpression {
 	 * @since 5.3.8
 	 */
 	public static boolean isValidExpression(@Nullable String expression) {
-		if (expression == null) {
-			return false;
-		}
 		try {
 			parse(expression);
 			return true;
