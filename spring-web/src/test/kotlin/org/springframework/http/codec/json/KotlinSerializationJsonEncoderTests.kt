@@ -145,10 +145,24 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		assertThat(encoder.canEncode(ResolvableType.forClass(BigDecimal::class.java), null)).isFalse()
 	}
 
+	@Test
+	fun encodeProperty() {
+		val input = Mono.just(value)
+		val method = this::class.java.getDeclaredMethod("getValue")
+		val methodParameter = MethodParameter.forExecutable(method, -1)
+		testEncode(input, ResolvableType.forMethodParameter(methodParameter), null, null) {
+			it.consumeNextWith(expectString("42"))
+				.verifyComplete()
+		}
+	}
+
 
 	@Serializable
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
 
 	fun handleMapWithNullable(map: Map<String, String?>) = map
+
+	val value: Int
+		get() = 42
 
 }
