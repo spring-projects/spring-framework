@@ -570,12 +570,12 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new StringListToAListConverter());
 		conversionService.addConverter(new StringListToBListConverter());
 
-		List<ARaw> aList = (List<ARaw>) conversionService.convert(List.of("foo"),
+		List<?> aList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ARaw.class)));
 		assertThat(aList).allMatch(e -> e instanceof ARaw);
 
-		List<BRaw> bList = (List<BRaw>) conversionService.convert(List.of("foo"),
+		List<?> bList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(BRaw.class)));
 		assertThat(bList).allMatch(e -> e instanceof BRaw);
@@ -943,9 +943,11 @@ class GenericConversionServiceTests {
 	private static class GenericBaseClass<T> {
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static class ARaw extends GenericBaseClass {
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static class BRaw extends GenericBaseClass {
 	}
 
