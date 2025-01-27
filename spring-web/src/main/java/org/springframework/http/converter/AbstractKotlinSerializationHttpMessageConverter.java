@@ -149,24 +149,25 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 			Assert.notNull(method, "Method must not be null");
 			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-				Assert.notNull(function, "Kotlin function must not be null");
-				KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
-						KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
-				KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
-				if (serializer == null) {
-					try {
-						serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
-					}
-					catch (IllegalArgumentException ignored) {
-					}
-					if (serializer != null) {
-						if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-							return null;
+				if (function != null) {
+					KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
+							KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
+					KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
+					if (serializer == null) {
+						try {
+							serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
 						}
-						this.kTypeSerializerCache.put(type, serializer);
+						catch (IllegalArgumentException ignored) {
+						}
+						if (serializer != null) {
+							if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
+								return null;
+							}
+							this.kTypeSerializerCache.put(type, serializer);
+						}
 					}
+					return serializer;
 				}
-				return serializer;
 			}
 		}
 		Type type = resolvableType.getType();
