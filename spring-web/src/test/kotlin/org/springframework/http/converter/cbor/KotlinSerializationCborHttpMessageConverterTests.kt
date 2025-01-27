@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,8 +170,7 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/cbor")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -182,8 +181,7 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/cbor")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -193,8 +191,7 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(serializableBeanArray, null, outputMessage)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/cbor")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -205,8 +202,7 @@ class KotlinSerializationCborHttpMessageConverterTests {
 
 		this.converter.write(listOf(serializableBean), ResolvableType.forType(typeOf<List<SerializableBean>>().javaType), null, outputMessage, null)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/cbor"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/cbor")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 

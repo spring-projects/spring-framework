@@ -255,8 +255,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result)
 				.contains("\"bytes\":[1,2]")
 				.contains("\"array\":[\"Foo\",\"Bar\"]")
@@ -275,8 +274,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result)
 				.contains("\"bytes\":[1,2]")
 				.contains("\"array\":[\"Foo\",\"Bar\"]")
@@ -298,8 +296,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo(expectedJson)
 	}
 
@@ -317,8 +314,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo(expectedJson)
 	}
 
@@ -332,8 +328,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf(contentType.toString()))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", contentType.toString())).isTrue()
 		assertThat(result).isEqualTo("\"H\u00e9llo W\u00f6rld\"")
 	}
 
@@ -369,8 +364,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo("1.0")
 	}
 
@@ -387,8 +381,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo(expectedJson)
 	}
 
@@ -401,8 +394,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		this.converter.write(value, ResolvableType.forMethodParameter(methodParameter), null, outputMessage, null)
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		@Suppress("DEPRECATION")
-		assertThat(outputMessage.headers.asMultiValueMap()).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo("42")
 	}
 
