@@ -16,18 +16,11 @@
 
 package org.springframework.http.converter.json
 
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.nio.charset.StandardCharsets
-
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
-import kotlin.reflect.javaType
-import kotlin.reflect.typeOf
-
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
@@ -35,8 +28,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.http.customJson
 import org.springframework.web.testfixture.http.MockHttpInputMessage
 import org.springframework.web.testfixture.http.MockHttpOutputMessage
+import java.lang.reflect.ParameterizedType
 import java.math.BigDecimal
+import java.nio.charset.StandardCharsets
+import kotlin.reflect.javaType
 import kotlin.reflect.jvm.javaMethod
+import kotlin.reflect.typeOf
 
 /**
  * Tests for the JSON conversion using kotlinx.serialization.
@@ -388,6 +385,19 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(result).isEqualTo(expectedJson)
 	}
 
+	@Test
+	fun writeProperty() {
+		val outputMessage = MockHttpOutputMessage()
+		val method = this::class.java.getDeclaredMethod("getValue")
+		val methodParameter = MethodParameter.forExecutable(method, -1)
+
+		this.converter.write(value, ResolvableType.forMethodParameter(methodParameter), null, outputMessage, null)
+		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
+
+		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(result).isEqualTo("42")
+	}
+
 
 	@Serializable
 	@Suppress("ArrayInDataClass")
@@ -412,5 +422,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 	}
 
 	fun handleMapWithNullable(map: Map<String, String?>) = map
+
+	val value: Int
+		get() = 42
 
 }
