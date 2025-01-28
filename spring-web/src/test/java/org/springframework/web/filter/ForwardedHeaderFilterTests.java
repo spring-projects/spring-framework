@@ -481,7 +481,7 @@ class ForwardedHeaderFilterTests {
 			request.addHeader(X_FORWARDED_FOR, "203.0.113.195");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[203.0.113.195]");
+			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 
@@ -490,7 +490,7 @@ class ForwardedHeaderFilterTests {
 			request.addHeader(X_FORWARDED_FOR, "203.0.113.195, 70.41.3.18, 150.172.238.178");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[203.0.113.195]");
+			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 

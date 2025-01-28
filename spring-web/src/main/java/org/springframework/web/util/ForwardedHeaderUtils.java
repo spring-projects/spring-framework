@@ -181,7 +181,8 @@ public abstract class ForwardedHeaderUtils {
 		String forHeader = headers.getFirst("X-Forwarded-For");
 		if (StringUtils.hasText(forHeader)) {
 			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
-			host = (!host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
+			boolean ipv6 = (host.indexOf(':') != -1);
+			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
 			return InetSocketAddress.createUnresolved(host, port);
 		}
 
