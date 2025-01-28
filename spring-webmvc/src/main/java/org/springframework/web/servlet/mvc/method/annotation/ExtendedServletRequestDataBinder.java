@@ -125,7 +125,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 				String name = names.nextElement();
 				Object value = getHeaderValue(httpRequest, name);
 				if (value != null) {
-					name = StringUtils.uncapitalize(name.replace("-", ""));
+					name = normalizeHeaderName(name);
 					addValueIfNotPresent(mpvs, "Header", name, value);
 				}
 			}
@@ -171,6 +171,10 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		return values;
 	}
 
+	private static String normalizeHeaderName(String name) {
+		return StringUtils.uncapitalize(name.replace("-", ""));
+	}
+
 
 	/**
 	 * Resolver of values that looks up URI path variables.
@@ -206,8 +210,10 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 			if (request instanceof HttpServletRequest httpServletRequest) {
 				Enumeration<String> enumeration = httpServletRequest.getHeaderNames();
 				while (enumeration.hasMoreElements()) {
-					String headerName = enumeration.nextElement();
-					set.add(headerName.replaceAll("-", ""));
+					String name = enumeration.nextElement();
+					if (headerPredicate.test(name)) {
+						set.add(normalizeHeaderName(name));
+					}
 				}
 			}
 			return set;

@@ -1379,6 +1379,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 		/**
 		 * Return the names of all property values.
+		 * <p>Useful for proactive checks whether there are property values nested
+		 * further below the path for a constructor arg. If not then the
+		 * constructor arg can be considered missing and not to be instantiated.
 		 * @since 6.1.2
 		 */
 		Set<String> getNames();
