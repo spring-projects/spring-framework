@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,12 +149,10 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 			HttpHeaders headers, final URI uri, List<String> protocols,
 			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
 
-		int port = getPort(uri);
-		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
-		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), port);
+		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), getPort(uri));
 
-		StandardWebSocketSession session = new StandardWebSocketSession(headers,
-				attributes, localAddress, remoteAddress);
+		StandardWebSocketSession session =
+				new StandardWebSocketSession(headers, attributes, null, remoteAddress);
 
 		ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
 				.configurator(new StandardWebSocketClientConfigurator(headers))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,18 +60,11 @@ class StandardWebSocketClientTests {
 	void getLocalAddress() throws Exception {
 		URI uri = URI.create("ws://localhost/abc");
 		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
+		assertThat(session.getLocalAddress()).isNull();
 
-		assertThat(session.getLocalAddress()).isNotNull();
-		assertThat(session.getLocalAddress().getPort()).isEqualTo(80);
-	}
-
-	@Test
-	void getLocalAddressWss() throws Exception {
-		URI uri = URI.create("wss://localhost/abc");
-		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
-
-		assertThat(session.getLocalAddress()).isNotNull();
-		assertThat(session.getLocalAddress().getPort()).isEqualTo(443);
+		uri = URI.create("wss://localhost/abc");
+		session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
+		assertThat(session.getLocalAddress()).isNull();
 	}
 
 	@Test
@@ -88,7 +81,7 @@ class StandardWebSocketClientTests {
 
 		assertThat(session.getRemoteAddress()).isNotNull();
 		assertThat(session.getRemoteAddress().getHostName()).isEqualTo("localhost");
-		assertThat(session.getLocalAddress().getPort()).isEqualTo(443);
+		assertThat(session.getLocalAddress()).isNull();
 	}
 
 	@Test

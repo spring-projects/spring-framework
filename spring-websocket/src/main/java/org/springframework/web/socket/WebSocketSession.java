@@ -73,11 +73,9 @@ public interface WebSocketSession extends Closeable {
 	/**
 	 * Return the address on which the request was received.
 	 * <p><strong>Note:</strong> The localAddress is not always possible to access,
-	 * which is the case with the Standard WebSocket client. In 6.2.x
+	 * which is the case with the Standard WebSocket client API, and accordingly
 	 * {@link org.springframework.web.socket.client.standard.StandardWebSocketClient}
-	 * returns an address based on the local host and the port of the target
-	 * address (not the same as the local port). In 7.0, the same will return
-	 * {@code null} instead.
+	 * returns {@code null}.
 	 */
 	@Nullable InetSocketAddress getLocalAddress();
 
