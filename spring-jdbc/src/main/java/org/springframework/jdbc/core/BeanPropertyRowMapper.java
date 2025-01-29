@@ -297,7 +297,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @see #underscoreName
 	 */
 	protected String lowerCaseName(@Nullable String name) {
-		if (!StringUtils.hasLength(name)) {
+		if (!StringUtils.hasText(name)) {
 			return "";
 		}
 		return name.toLowerCase(Locale.US);
