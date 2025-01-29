@@ -280,7 +280,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 			Iterator<String> itr = (sessionIds != null ? sessionIds.iterator() : null);
 
 			for (String target : destinationResult.getTargetDestinations()) {
-				String sessionId = (itr != null ? itr.next() : null);
+				String sessionId = (itr != null && itr.hasNext() ? itr.next() : null);
 				getTemplateToUse(sessionId).send(target, message);
 			}
 		}
