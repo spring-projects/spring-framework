@@ -16,10 +16,8 @@
 
 package org.springframework.web.socket.client.standard;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -184,15 +182,6 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 			result.add(new WebSocketToStandardExtensionAdapter(extension));
 		}
 		return result;
-	}
-
-	private static InetAddress getLocalHost() {
-		try {
-			return InetAddress.getLocalHost();
-		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
-		}
 	}
 
 	private static int getPort(URI uri) {
