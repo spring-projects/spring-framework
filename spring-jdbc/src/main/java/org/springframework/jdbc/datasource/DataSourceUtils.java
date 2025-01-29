@@ -80,7 +80,10 @@ public abstract class DataSourceUtils {
 		try {
 			return doGetConnection(dataSource);
 		}
-		catch (SQLException | IllegalStateException ex) {
+		catch (SQLException ex) {
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
+		}
+		catch (IllegalStateException ex) {
 			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
 		}
 	}
