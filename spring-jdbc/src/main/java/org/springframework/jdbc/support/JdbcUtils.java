@@ -509,7 +509,7 @@ public abstract class JdbcUtils {
 	 * @see #convertUnderscoreNameToPropertyName
 	 */
 	public static String convertPropertyNameToUnderscoreName(@Nullable String name) {
-		if (!StringUtils.hasLength(name)) {
+		if (!StringUtils.hasText(name)) {
 			return "";
 		}
 
@@ -535,7 +535,7 @@ public abstract class JdbcUtils {
 	 * @see #convertPropertyNameToUnderscoreName
 	 */
 	public static String convertUnderscoreNameToPropertyName(@Nullable String name) {
-		if (!StringUtils.hasLength(name)) {
+		if (!StringUtils.hasText(name)) {
 			return "";
 		}
 
