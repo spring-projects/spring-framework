@@ -224,7 +224,7 @@ class InitBinderBindingContextTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"Accept", "Authorization", "Connection",
-			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade"})
+			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade", "priority"})
 	void filteredHeaders(String headerName) throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
 				.header(headerName, "u1")
