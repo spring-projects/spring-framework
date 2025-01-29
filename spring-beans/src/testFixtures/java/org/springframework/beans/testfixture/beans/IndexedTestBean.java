@@ -181,6 +181,7 @@ public class IndexedTestBean {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class IterableMap<K,V> extends LinkedHashMap<K,V> implements Iterable<V> {
 
 		@Override
