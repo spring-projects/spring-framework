@@ -115,11 +115,15 @@ Finally, the body can be set to a callback function that writes to an `OutputStr
 
 ==== Retrieving the response
 
-Once the request has been set up, the HTTP response is accessed by invoking `retrieve()`.
-The response body can be accessed by using `body(Class)` or `body(ParameterizedTypeReference)` for parameterized types like lists.
+Once the request has been set up, it can be sent by chaining method calls after `retrieve()`.
+For example, the response body can be accessed by using `retrieve().body(Class)` or `retrieve().body(ParameterizedTypeReference)` for parameterized types like lists.
 The `body` method converts the response contents into various types – for instance, bytes can be converted into a `String`, JSON can be converted into objects using Jackson, and so on (see <<rest-message-conversion>>).
 
-The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body.
+The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body, with `retrieve().toEntity(Class)`
+
+NOTE: Calling `retrieve()` by itself is a no-op and returns a `ResponseSpec`.
+Applications must invoke a terminal operation on the `ResponseSpec` to have any side effect.
+If consuming the response has no interest for your use case, you can use `retrieve().toBodilessEntity()`.
 
 This sample shows how `RestClient` can be used to perform a simple `GET` request.
 
