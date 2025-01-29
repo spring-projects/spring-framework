@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,6 +139,7 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.isReadableProperty("list")).isTrue();
 		assertThat(accessor.isReadableProperty("set")).isTrue();
 		assertThat(accessor.isReadableProperty("map")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap")).isTrue();
 		assertThat(accessor.isReadableProperty("myTestBeans")).isTrue();
 		assertThat(accessor.isReadableProperty("xxx")).isFalse();
 
@@ -146,6 +147,7 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.isWritableProperty("list")).isTrue();
 		assertThat(accessor.isWritableProperty("set")).isTrue();
 		assertThat(accessor.isWritableProperty("map")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap")).isTrue();
 		assertThat(accessor.isWritableProperty("myTestBeans")).isTrue();
 		assertThat(accessor.isWritableProperty("xxx")).isFalse();
 
@@ -161,6 +163,14 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.isReadableProperty("map[key4][0].name")).isTrue();
 		assertThat(accessor.isReadableProperty("map[key4][1]")).isTrue();
 		assertThat(accessor.isReadableProperty("map[key4][1].name")).isTrue();
+		assertThat(accessor.isReadableProperty("map[key999]")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key1]")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key1].name")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key2][0]")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key2][0].name")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key2][1]")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key2][1].name")).isTrue();
+		assertThat(accessor.isReadableProperty("iterableMap[key999]")).isTrue();
 		assertThat(accessor.isReadableProperty("myTestBeans[0]")).isTrue();
 		assertThat(accessor.isReadableProperty("myTestBeans[1]")).isFalse();
 		assertThat(accessor.isReadableProperty("array[key1]")).isFalse();
@@ -177,6 +187,14 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.isWritableProperty("map[key4][0].name")).isTrue();
 		assertThat(accessor.isWritableProperty("map[key4][1]")).isTrue();
 		assertThat(accessor.isWritableProperty("map[key4][1].name")).isTrue();
+		assertThat(accessor.isWritableProperty("map[key999]")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key1]")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key1].name")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key2][0]")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key2][0].name")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key2][1]")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key2][1].name")).isTrue();
+		assertThat(accessor.isWritableProperty("iterableMap[key999]")).isTrue();
 		assertThat(accessor.isReadableProperty("myTestBeans[0]")).isTrue();
 		assertThat(accessor.isReadableProperty("myTestBeans[1]")).isFalse();
 		assertThat(accessor.isWritableProperty("array[key1]")).isFalse();
@@ -1395,6 +1413,9 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.getPropertyValue("map[key5[foo]].name")).isEqualTo("name8");
 		assertThat(accessor.getPropertyValue("map['key5[foo]'].name")).isEqualTo("name8");
 		assertThat(accessor.getPropertyValue("map[\"key5[foo]\"].name")).isEqualTo("name8");
+		assertThat(accessor.getPropertyValue("iterableMap[key1].name")).isEqualTo("nameC");
+		assertThat(accessor.getPropertyValue("iterableMap[key2][0].name")).isEqualTo("nameA");
+		assertThat(accessor.getPropertyValue("iterableMap[key2][1].name")).isEqualTo("nameB");
 		assertThat(accessor.getPropertyValue("myTestBeans[0].name")).isEqualTo("nameZ");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -1409,6 +1430,9 @@ abstract class AbstractPropertyAccessorTests {
 		pvs.add("map[key4][0].name", "nameA");
 		pvs.add("map[key4][1].name", "nameB");
 		pvs.add("map[key5[foo]].name", "name10");
+		pvs.add("iterableMap[key1].name", "newName1");
+		pvs.add("iterableMap[key2][0].name", "newName2A");
+		pvs.add("iterableMap[key2][1].name", "newName2B");
 		pvs.add("myTestBeans[0].name", "nameZZ");
 		accessor.setPropertyValues(pvs);
 		assertThat(tb0.getName()).isEqualTo("name5");
@@ -1428,6 +1452,9 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.getPropertyValue("map[key4][0].name")).isEqualTo("nameA");
 		assertThat(accessor.getPropertyValue("map[key4][1].name")).isEqualTo("nameB");
 		assertThat(accessor.getPropertyValue("map[key5[foo]].name")).isEqualTo("name10");
+		assertThat(accessor.getPropertyValue("iterableMap[key1].name")).isEqualTo("newName1");
+		assertThat(accessor.getPropertyValue("iterableMap[key2][0].name")).isEqualTo("newName2A");
+		assertThat(accessor.getPropertyValue("iterableMap[key2][1].name")).isEqualTo("newName2B");
 		assertThat(accessor.getPropertyValue("myTestBeans[0].name")).isEqualTo("nameZZ");
 	}
 

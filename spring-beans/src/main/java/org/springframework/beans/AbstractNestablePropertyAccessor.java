@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -649,6 +649,14 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						growCollectionIfNecessary(list, index, indexedPropertyName.toString(), ph, i + 1);
 						value = list.get(index);
 					}
+					else if (value instanceof Map map) {
+						Class<?> mapKeyType = ph.getResolvableType().getNested(i + 1).asMap().resolveGeneric(0);
+						// IMPORTANT: Do not pass full property name in here - property editors
+						// must not kick in for map keys but rather only for map values.
+						TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
+						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
+						value = map.get(convertedMapKey);
+					}
 					else if (value instanceof Iterable iterable) {
 						// Apply index to Iterator in case of a Set/Collection/Iterable.
 						int index = Integer.parseInt(key);
@@ -675,14 +683,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 									"Cannot get element with index " + index + " from Iterable of size " +
 											currIndex + ", accessed using property path '" + propertyName + "'");
 						}
-					}
-					else if (value instanceof Map map) {
-						Class<?> mapKeyType = ph.getResolvableType().getNested(i + 1).asMap().resolveGeneric(0);
-						// IMPORTANT: Do not pass full property name in here - property editors
-						// must not kick in for map keys but rather only for map values.
-						TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
-						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
-						value = map.get(convertedMapKey);
 					}
 					else {
 						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
