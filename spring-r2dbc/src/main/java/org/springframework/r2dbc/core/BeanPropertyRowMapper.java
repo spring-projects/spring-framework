@@ -36,6 +36,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
