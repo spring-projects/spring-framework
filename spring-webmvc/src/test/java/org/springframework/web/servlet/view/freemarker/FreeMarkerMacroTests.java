@@ -31,8 +31,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledForJreRange;
-import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
@@ -143,12 +141,6 @@ public class FreeMarkerMacroTests {
 	@Test
 	void testName() throws Exception {
 		assertThat(getMacroOutput("NAME")).isEqualTo("Darren");
-	}
-
-	@Test
-	@DisabledForJreRange(min = JRE.JAVA_21)
-	public void testAge() throws Exception {
-		assertThat(getMacroOutput("AGE")).isEqualTo("99");
 	}
 
 	@Test

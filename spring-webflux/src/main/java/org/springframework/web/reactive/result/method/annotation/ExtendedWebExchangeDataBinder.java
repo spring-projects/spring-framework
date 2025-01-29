@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -43,11 +44,11 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 
-	private static final Set<String> FILTERED_HEADER_NAMES = Set.of("Accept", "Authorization", "Connection",
-			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade");
+	private static final Set<String> FILTERED_HEADER_NAMES = Set.of("accept", "authorization", "connection",
+			"cookie", "from", "host", "origin", "priority", "range", "referer", "upgrade");
 
 
-	private Predicate<String> headerPredicate = name -> !FILTERED_HEADER_NAMES.contains(name);
+	private Predicate<String> headerPredicate = name -> !FILTERED_HEADER_NAMES.contains(name.toLowerCase(Locale.ROOT));
 
 
 	public ExtendedWebExchangeDataBinder(@Nullable Object target, String objectName) {
