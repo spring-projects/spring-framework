@@ -49,7 +49,6 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	@SuppressWarnings("serial")
 	private @Nullable List<MediaType> cachedAccept;
 
-
 	ReadOnlyHttpHeaders(MultiValueMap<String, String> headers) {
 		super(headers);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,22 @@ class HttpHeadersTests {
 		HttpHeaders firewallHeaders = new HttpHeaders(originalExchangeHeaders);
 		HttpHeaders writeable = new HttpHeaders(firewallHeaders);
 		writeable.setContentType(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void copyOfCopiesHeaders() {
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add("X-Project", "Spring");
+		headers.add("X-Project", "Framework");
+		HttpHeaders readOnly = HttpHeaders.readOnlyHttpHeaders(headers);
+		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+
+		HttpHeaders writable = HttpHeaders.copyOf(readOnly);
+		writable.setContentType(MediaType.TEXT_PLAIN);
+		// content-type value is cached by ReadOnlyHttpHeaders
+		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(writable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(writable.get("X-Project")).contains("Spring", "Framework");
 	}
 
 	@Test
