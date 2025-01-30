@@ -70,7 +70,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	private static HttpHeaders createHeaders(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		UndertowHeadersAdapter headersMap = new UndertowHeadersAdapter(exchange.getResponseHeaders());
-		return new HttpHeaders(headersMap);
+		return HttpHeaders.backedBy(headersMap);
 	}
 
 

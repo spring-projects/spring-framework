@@ -68,7 +68,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 		super(HttpMethod.valueOf(request.method().name()),
 				ReactorUriHelper.createUri(request), request.forwardedPrefix(),
-				new HttpHeaders(new Netty4HeadersAdapter(request.requestHeaders())));
+				HttpHeaders.backedBy(new Netty4HeadersAdapter(request.requestHeaders())));
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;

@@ -96,7 +96,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, requestFacade);
 			Assert.state(connectorRequest != null, "No Tomcat connector request");
 			Request tomcatRequest = connectorRequest.getCoyoteRequest();
-			return new HttpHeaders(new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders()));
+			return HttpHeaders.backedBy(new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders()));
 		}
 
 		private static RequestFacade getRequestFacade(HttpServletRequest request) {
@@ -140,7 +140,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			Assert.state(connectorResponse != null, "No Tomcat connector response");
 			Response tomcatResponse = connectorResponse.getCoyoteResponse();
 			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatResponse.getMimeHeaders());
-			return new HttpHeaders(headers);
+			return HttpHeaders.backedBy(headers);
 		}
 
 		private static ResponseFacade getResponseFacade(HttpServletResponse response) {

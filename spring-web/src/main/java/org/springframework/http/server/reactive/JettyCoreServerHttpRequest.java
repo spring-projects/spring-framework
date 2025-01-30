@@ -56,7 +56,7 @@ class JettyCoreServerHttpRequest extends AbstractServerHttpRequest {
 		super(HttpMethod.valueOf(request.getMethod()),
 				request.getHttpURI().toURI(),
 				request.getContext().getContextPath(),
-				new HttpHeaders(new JettyHeadersAdapter(request.getHeaders())));
+				HttpHeaders.backedBy(new JettyHeadersAdapter(request.getHeaders())));
 		this.dataBufferFactory = dataBufferFactory;
 		this.request = request;
 	}

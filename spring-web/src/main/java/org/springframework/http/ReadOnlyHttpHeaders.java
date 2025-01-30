@@ -36,6 +36,7 @@ import org.springframework.util.MultiValueMap;
  * <p>This caches the parsed representations of the "Accept" and "Content-Type" headers
  * and will get out of sync with the backing map it is mutated at runtime.
  *
+ * @implNote This does NOT make the underlying MultiValueMap readonly.
  * @author Brian Clozel
  * @author Sam Brannen
  * @since 5.1.1
@@ -48,7 +49,6 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	@SuppressWarnings("serial")
 	private @Nullable List<MediaType> cachedAccept;
-
 
 	ReadOnlyHttpHeaders(MultiValueMap<String, String> headers) {
 		super(headers);

@@ -57,24 +57,79 @@ class HttpHeadersTests {
 
 	final HttpHeaders headers = new HttpHeaders();
 
+	/**
+	 * Not the different behaviors found in {@link HttpHeaders#backedBy(HttpHeaders)) {@link HttpHeaders#HttpHeaders(HttpHeaders)}
+	 * versus the {@link HttpHeaders#copyOf(HttpHeaders)} methods.
+	 */
 	@Test
-	void constructorUnwrapsReadonly() {
+	void backedByFactoryUnwrapsReadonly() {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpHeaders readOnly = HttpHeaders.readOnlyHttpHeaders(headers);
+
 		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		HttpHeaders writable = new HttpHeaders(readOnly);
+		HttpHeaders writable = HttpHeaders.backedBy(readOnly);
 		writable.setContentType(MediaType.TEXT_PLAIN);
+
 		// content-type value is cached by ReadOnlyHttpHeaders
-		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		assertThat(writable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(readOnly.getContentType())
+				.describedAs("readOnly HttpHeaders should NOT have updated content-type value")
+				.isEqualTo(MediaType.APPLICATION_JSON); // Note that the content type was cached by the previous assertion
+		assertThat(writable.getContentType())
+				.describedAs("writable HttpHeaders should have updated content-type value")
+				.isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(headers.getContentType())
+				.describedAs("initial HttpHeaders should have updated content-type value")
+				.isEqualTo(MediaType.TEXT_PLAIN); // Note that both writable and the original changed because the backing map is shared
 	}
 
 	@Test
-	void writableHttpHeadersUnwrapsMultiple() {
-		HttpHeaders originalExchangeHeaders = HttpHeaders.readOnlyHttpHeaders(new HttpHeaders());
-		HttpHeaders firewallHeaders = new HttpHeaders(originalExchangeHeaders);
-		HttpHeaders writeable = new HttpHeaders(firewallHeaders);
-		writeable.setContentType(MediaType.APPLICATION_JSON);
+	void backedByFactoryUnwrapsMultipleHeaders() {
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders readonlyOriginalExchangeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+		HttpHeaders firewallHeaders = HttpHeaders.backedBy(readonlyOriginalExchangeHeaders);
+		HttpHeaders writeable = HttpHeaders.backedBy(firewallHeaders);
+		writeable.setContentType(MediaType.TEXT_PLAIN);
+
+		// If readonly headers are unwrapped multiple times, the content-type value should be updated
+		assertThat(writeable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN); // Note that all changed because the backing map is shared
+		assertThat(firewallHeaders.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(readonlyOriginalExchangeHeaders.getContentType()).isEqualTo(MediaType.TEXT_PLAIN); // Note that the content type was not cached because there was no previous call to getContentType
+		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+	}
+
+	@Test
+	void copyOfFactoryUnwrapsReadonly() {
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders readOnly = HttpHeaders.readOnlyHttpHeaders(headers);
+
+		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		HttpHeaders writable = HttpHeaders.copyOf(readOnly);
+		writable.setContentType(MediaType.TEXT_PLAIN);
+
+		// content-type value is cached by ReadOnlyHttpHeaders
+		assertThat(readOnly.getContentType())
+				.describedAs("readOnly HttpHeaders should NOT have updated content-type value")
+				.isEqualTo(MediaType.APPLICATION_JSON); // Note that the content type was cached by the previous assertion
+		assertThat(writable.getContentType())
+				.describedAs("writable HttpHeaders should have updated content-type value")
+				.isEqualTo(MediaType.TEXT_PLAIN); // Note that only the copy is changed, because the backing map is a new instance
+		assertThat(headers.getContentType())
+				.describedAs("initial HttpHeaders should have updated content-type value")
+				.isEqualTo(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void copyOfFactoryUnwrapsMultipleHeaders() {
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders readonlyOriginalExchangeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+		HttpHeaders firewallHeaders = HttpHeaders.copyOf(readonlyOriginalExchangeHeaders);
+		HttpHeaders writeable = HttpHeaders.copyOf(firewallHeaders);
+		writeable.setContentType(MediaType.TEXT_PLAIN);
+
+		assertThat(writeable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN); // Note that only the copy is changed, because the backing map is a new instance
+		assertThat(firewallHeaders.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(readonlyOriginalExchangeHeaders.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test

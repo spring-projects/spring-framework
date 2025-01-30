@@ -66,7 +66,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(HttpMethod.valueOf(exchange.getRequestMethod().toString()), initUri(exchange), "",
-				new HttpHeaders(new UndertowHeadersAdapter(exchange.getRequestHeaders())));
+				HttpHeaders.backedBy(new UndertowHeadersAdapter(exchange.getRequestHeaders())));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);

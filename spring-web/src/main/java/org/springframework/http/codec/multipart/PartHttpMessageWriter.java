@@ -91,7 +91,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 	}
 
 	private <T> Flux<DataBuffer> encodePart(byte[] boundary, Part part, DataBufferFactory bufferFactory) {
-		HttpHeaders headers = new HttpHeaders(part.headers());
+		HttpHeaders headers = HttpHeaders.backedBy(part.headers());
 
 		String name = part.name();
 		if (!headers.containsHeader(HttpHeaders.CONTENT_DISPOSITION)) {

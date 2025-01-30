@@ -491,6 +491,49 @@ public class HttpHeaders implements Serializable {
 		}
 	}
 
+	/**
+	 * Construct a new {@code HttpHeaders} instance backed by an existing map.
+	 * <p>This factory method is available as an optimization for adapting to existing
+	 * headers map structures, primarily for internal use within the framework.
+	 * @param headers the headers map (expected to operate with case-insensitive keys)
+	 * @see #HttpHeaders(MultiValueMap)
+	 */
+	public static HttpHeaders backedBy(MultiValueMap<String, String> headers) {
+		return new HttpHeaders(headers);
+	}
+
+	/**
+	 * Construct a new {@code HttpHeaders} instance by removing any read-only
+	 * wrapper that may have been previously applied around the given
+	 * {@code HttpHeaders} via {@link #readOnlyHttpHeaders(HttpHeaders)}.
+	 * <p>Once the writable instance is mutated, the read-only instance is
+	 * likely to be out of sync and should be discarded.
+	 * @param httpHeaders the headers to expose
+	 * @see #HttpHeaders(HttpHeaders)
+	 */
+	public static HttpHeaders backedBy(HttpHeaders httpHeaders) {
+		return new HttpHeaders(httpHeaders);
+	}
+
+	/**
+	 * Constructs a new {@code HttpHeaders} instance with the given headers with a new underlying map.
+	 * Changes made to this new instance will NOT be reflected in the original headers.
+	 * @param headers The headers to copy
+	 */
+	public static HttpHeaders copyOf(MultiValueMap<String, String> headers) {
+		HttpHeaders httpHeadersCopy = new HttpHeaders();
+		headers.forEach((key, values) -> httpHeadersCopy.put(key, new ArrayList<>(values)));
+		return httpHeadersCopy;
+	}
+
+	/**
+	 * Constructs a new {@code HttpHeaders} instance with the given headers with a new underlying map.
+	 * Changes made to this new instance will NOT be reflected in the original headers.
+	 * @param httpHeaders The headers to copy
+	 */
+	public static HttpHeaders copyOf(HttpHeaders httpHeaders) {
+		return copyOf(httpHeaders.headers);
+	}
 
 	/**
 	 * Get the list of header values for the given header name, if any.
