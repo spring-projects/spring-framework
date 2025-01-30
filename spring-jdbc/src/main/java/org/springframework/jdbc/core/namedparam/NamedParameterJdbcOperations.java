@@ -267,7 +267,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramSource container of arguments to bind to the query
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
-	 * {@link RowMapper} returned {@code} null)
+	 * {@link RowMapper} returned {@code null})
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
@@ -284,7 +284,7 @@ public interface NamedParameterJdbcOperations {
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
-	 * {@link RowMapper} returned {@code} null)
+	 * {@link RowMapper} returned {@code null})
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails

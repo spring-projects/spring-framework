@@ -124,7 +124,7 @@ public interface AotTestAttributes {
 	 * Retrieve the attribute value for the given name as a {@code boolean}.
 	 * @param name the unique attribute name
 	 * @return {@code true} if the attribute is set to "true" (ignoring case),
-	 * {@code} false otherwise
+	 * {@code false} otherwise
 	 * @see #getString(String)
 	 * @see #setAttribute(String, String)
 	 * @see Boolean#parseBoolean(String)

@@ -163,7 +163,7 @@ public interface JdbcOperations {
 	 * @param sql the SQL query to execute
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
-	 * {@link RowMapper} returned {@code} null)
+	 * {@link RowMapper} returned {@code null})
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if there is any problem executing the query
@@ -598,7 +598,7 @@ public interface JdbcOperations {
 	 * (constants from {@code java.sql.Types})
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
-	 * {@link RowMapper} returned {@code} null)
+	 * {@link RowMapper} returned {@code null})
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
@@ -617,7 +617,7 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
-	 * {@link RowMapper} returned {@code} null)
+	 * {@link RowMapper} returned {@code null})
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
@@ -637,7 +637,7 @@ public interface JdbcOperations {
 	 * may also contain {@link SqlParameterValue} objects which indicate not
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the single mapped object (may be {@code null} if the given
-	 * {@link RowMapper} returned {@code} null)
+	 * {@link RowMapper} returned {@code null})
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails

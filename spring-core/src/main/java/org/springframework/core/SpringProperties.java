@@ -123,7 +123,7 @@ public final class SpringProperties {
 	 * Retrieve the flag for the given property key.
 	 * @param key the property key
 	 * @return {@code true} if the property is set to the string "true"
-	 * (ignoring case), {@code} false otherwise
+	 * (ignoring case), {@code false} otherwise
 	 */
 	public static boolean getFlag(String key) {
 		return Boolean.parseBoolean(getProperty(key));

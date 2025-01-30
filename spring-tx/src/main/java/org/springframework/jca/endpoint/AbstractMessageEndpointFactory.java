@@ -144,7 +144,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 
 	/**
 	 * Implementation of the JCA 1.7 {@code #getEndpointClass()} method,
-	 * returning {@code} null in order to indicate a synthetic endpoint type.
+	 * returning {@code null} in order to indicate a synthetic endpoint type.
 	 */
 	@Override
 	public @Nullable Class<?> getEndpointClass() {

@@ -66,7 +66,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param request the current request
 	 * @param resource the resource being transformed
 	 * @param transformerChain the transformer chain
-	 * @return the resolved URL, or {@code} if not resolvable
+	 * @return the resolved URL, or {@code null} if not resolvable
 	 */
 	protected @Nullable String resolveUrlPath(String resourcePath, HttpServletRequest request,
 			Resource resource, ResourceTransformerChain transformerChain) {
