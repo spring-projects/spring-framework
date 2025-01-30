@@ -212,11 +212,18 @@ class GenericTypeResolverTests {
 	}
 
 	@Test
-	void resolvedTypeWithBase() {
-		Type type = method(WithBaseTypes.class, "get").getGenericReturnType();
-		Type resolvedType = resolveType(type, WithBaseTypes.class);
+	void resolveTypeWithElementBounds() {
+		Type type = method(WithElementBounds.class, "get").getGenericReturnType();
+		Type resolvedType = resolveType(type, WithElementBounds.class);
 		ParameterizedTypeReference<List<A>> reference = new ParameterizedTypeReference<>() {};
 		assertThat(resolvedType).isEqualTo(reference.getType());
+	}
+
+	@Test
+	void resolveTypeWithUnresolvableElement() {
+		Type type = method(WithUnresolvableElement.class, "get").getGenericReturnType();
+		Type resolvedType = resolveType(type, WithUnresolvableElement.class);
+		assertThat(resolvedType.toString()).isEqualTo("java.util.List<E>");
 	}
 
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
@@ -224,6 +231,7 @@ class GenericTypeResolverTests {
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
 		return method;
 	}
+
 
 	public interface MyInterfaceType<T> {
 	}
@@ -348,9 +356,9 @@ class GenericTypeResolverTests {
 	static class GenericClass<T> {
 	}
 
-	class A{}
+	class A {}
 
-	class B<T>{}
+	class B<T> {}
 
 	class C extends A {}
 
@@ -358,23 +366,25 @@ class GenericTypeResolverTests {
 
 	class E extends C {}
 
-	class TestIfc<T>{}
+	class TestIfc<T> {}
 
-	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
+	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T> {
 	}
 
 	abstract static class BiGenericClass<T extends B<?>, V extends A> {}
 
-	abstract static class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U>{}
+	abstract static class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U> {}
 
 	static class TypeFixedBiGenericClass extends SpecializedBiGenericClass<E> {}
 
 	static class TopLevelClass<T> {
+
 		class Nested<X> {
 		}
 	}
 
 	static class TypedTopLevelClass extends TopLevelClass<Integer> {
+
 		class TypedNested extends Nested<Long> {
 		}
 	}
@@ -394,24 +404,31 @@ class GenericTypeResolverTests {
 	}
 
 	static class WithMethodParameter {
+
 		public void nestedGenerics(List<Map<String, Integer>> input) {
 		}
 	}
 
-	public interface ListOfListSupplier<T> {
+	interface ListOfListSupplier<T> {
 
 		List<List<T>> get();
 	}
 
-	public interface StringListOfListSupplier extends ListOfListSupplier<String> {
+	interface StringListOfListSupplier extends ListOfListSupplier<String> {
 	}
 
-	static class WithBaseTypes {
+	static class WithElementBounds {
 
 		<T extends A> List<T> get() {
 			return List.of();
 		}
+	}
 
+	static class WithUnresolvableElement<T> {
+
+		List<T> get() {
+			return List.of();
+		}
 	}
 
 }

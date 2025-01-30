@@ -954,14 +954,6 @@ public class ResolvableType implements Serializable {
 	}
 
 	@Nullable
-	private Type resolveBounds(Type[] bounds) {
-		if (bounds.length == 0 || bounds[0] == Object.class) {
-			return null;
-		}
-		return bounds[0];
-	}
-
-	@Nullable
 	private ResolvableType resolveVariable(TypeVariable<?> variable) {
 		if (this.type instanceof TypeVariable) {
 			return resolveType().resolveVariable(variable);
@@ -1464,6 +1456,24 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Return a {@code ResolvableType} for the bounds of the specified {@link TypeVariable}.
+	 * @param typeVariable the type variable
+	 * @return a {@code ResolvableType} for the specified bounds
+	 * @since 6.2.3
+	 */
+	static ResolvableType forVariableBounds(TypeVariable<?> typeVariable) {
+		return forType(resolveBounds(typeVariable.getBounds()));
+	}
+
+	@Nullable
+	private static Type resolveBounds(Type[] bounds) {
+		if (bounds.length == 0 || bounds[0] == Object.class) {
+			return null;
+		}
+		return bounds[0];
+	}
+
+	/**
 	 * Return a {@code ResolvableType} for the specified {@link Type}.
 	 * <p>Note: The resulting {@code ResolvableType} instance may not be {@link Serializable}.
 	 * @param type the source type (potentially {@code null})
@@ -1490,7 +1500,6 @@ public class ResolvableType implements Serializable {
 		}
 		return forType(type, variableResolver);
 	}
-
 
 	/**
 	 * Return a {@code ResolvableType} for the specified {@link ParameterizedTypeReference}.
