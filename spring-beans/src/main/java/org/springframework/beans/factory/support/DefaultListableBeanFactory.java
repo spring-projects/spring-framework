@@ -1072,8 +1072,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"without bootstrap executor configured - falling back to mainline initialization");
 			}
 		}
+
 		if (!mbd.isLazyInit()) {
-			instantiateSingleton(beanName);
+			try {
+				instantiateSingleton(beanName);
+			}
+			catch (BeanCurrentlyInCreationException ex) {
+				logger.info("Bean '" + beanName + "' marked for pre-instantiation (not lazy-init) " +
+						"but currently initialized by other thread - skipping it in mainline thread");
+			}
 		}
 		return null;
 	}
