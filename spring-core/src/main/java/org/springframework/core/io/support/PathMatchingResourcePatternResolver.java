@@ -810,6 +810,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			NavigableSet<String> entriesCache = this.jarEntriesCache.get(jarFileUrl);
 			if (entriesCache != null) {
 				Set<Resource> result = new LinkedHashSet<>(64);
+				// Clean root entry path to match jar entries format without "!" separators
+				rootEntryPath = rootEntryPath.replace(ResourceUtils.JAR_URL_SEPARATOR, "/");
 				// Search sorted entries from first entry with rootEntryPath prefix
 				for (String entryPath : entriesCache.tailSet(rootEntryPath, false)) {
 					if (!entryPath.startsWith(rootEntryPath)) {
