@@ -19,6 +19,6 @@ from where they are handled according to their destination prefix. As the channe
 a `ThreadPoolExecutor`, messages are processed in different threads, and the resulting sequence
 of handling may not match the exact order in which they were received.
 
-To enable ordered publishing, set the `setPreserveReceiveOrder` flag as follows:
+To enable ordered receiving, set the `setPreserveReceiveOrder` flag as follows:
 
 include-code::./ReceiveOrderWebSocketConfiguration[tag=snippet,indent=0]
