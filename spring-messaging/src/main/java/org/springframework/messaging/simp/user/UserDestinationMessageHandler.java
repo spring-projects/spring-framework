@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -276,8 +275,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 		}
 
 		public void send(UserDestinationResult destinationResult, Message<?> message) throws MessagingException {
-			Set<String> sessionIds = destinationResult.getSessionIds();
-			Iterator<String> itr = (sessionIds != null ? sessionIds.iterator() : null);
+			Iterator<String> itr = destinationResult.getSessionIds().iterator();
 
 			for (String target : destinationResult.getTargetDestinations()) {
 				String sessionId = (itr != null && itr.hasNext() ? itr.next() : null);
