@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -585,5 +586,17 @@ public interface NamedParameterJdbcOperations {
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
 			String[] keyColumnNames);
+
+	/**
+	 * Executes the specified SQL update statement in multiple batches using the provided batch arguments.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the collection of {@link SqlParameterSource} containing arguments for the query
+	 * @param batchSize batch size
+	 * @return a two-dimensional array containing results for each batch execution.
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	int[][] batchUpdate(String sql, Collection<SqlParameterSource> batchArgs, int batchSize);
 
 }
