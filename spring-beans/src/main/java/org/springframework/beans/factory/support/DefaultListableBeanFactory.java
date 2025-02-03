@@ -497,6 +497,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				Stream<T> stream = matchingBeans.values().stream();
 				return stream.sorted(adaptOrderComparator(matchingBeans));
 			}
+			@SuppressWarnings("unchecked")
+			@Override
+			public Stream<T> stream(Predicate<Class<?>> customFilter) {
+				return Arrays.stream(getBeanNamesForTypedStream(requiredType, allowEagerInit))
+						.filter(name -> customFilter.test(getType(name)))
+						.map(name -> (T) getBean(name))
+						.filter(bean -> !(bean instanceof NullBean));
+			}
+			@SuppressWarnings("unchecked")
+			@Override
+			public Stream<T> orderedStream(Predicate<Class<?>> customFilter) {
+				String[] beanNames = getBeanNamesForTypedStream(requiredType, allowEagerInit);
+				if (beanNames.length == 0) {
+					return Stream.empty();
+				}
+				Map<String, T> matchingBeans = CollectionUtils.newLinkedHashMap(beanNames.length);
+				for (String beanName : beanNames) {
+					if (customFilter.test(getType(beanName))) {
+						Object beanInstance = getBean(beanName);
+						if (!(beanInstance instanceof NullBean)) {
+							matchingBeans.put(beanName, (T) beanInstance);
+						}
+					}
+				}
+				return matchingBeans.values().stream().sorted(adaptOrderComparator(matchingBeans));
+			}
 		};
 	}
 
@@ -1865,8 +1891,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				candidates.put(candidateName, beanInstance);
 			}
 		}
-		else if (containsSingleton(candidateName) || (descriptor instanceof StreamDependencyDescriptor streamDescriptor &&
-				streamDescriptor.isOrdered())) {
+		else if (containsSingleton(candidateName) ||
+				(descriptor instanceof StreamDependencyDescriptor streamDescriptor && streamDescriptor.isOrdered())) {
 			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
 			candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
 		}
@@ -2449,6 +2475,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, ordered);
 			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
 			return (result instanceof Stream stream ? stream : Stream.of(result));
+		}
+
+		@Override
+		public Stream<Object> stream(Predicate<Class<?>> customFilter) {
+			return Arrays.stream(getBeanNamesForTypedStream(this.descriptor.getResolvableType(), true))
+					.filter(name -> customFilter.test(getType(name)))
+					.map(name -> getBean(name))
+					.filter(bean -> !(bean instanceof NullBean));
+		}
+
+		@Override
+		public Stream<Object> orderedStream(Predicate<Class<?>> customFilter) {
+			String[] beanNames = getBeanNamesForTypedStream(this.descriptor.getResolvableType(), true);
+			if (beanNames.length == 0) {
+				return Stream.empty();
+			}
+			Map<String, Object> matchingBeans = CollectionUtils.newLinkedHashMap(beanNames.length);
+			for (String beanName : beanNames) {
+				if (customFilter.test(getType(beanName))) {
+					Object beanInstance = getBean(beanName);
+					if (!(beanInstance instanceof NullBean)) {
+						matchingBeans.put(beanName, beanInstance);
+					}
+				}
+			}
+			return matchingBeans.values().stream().sorted(adaptOrderComparator(matchingBeans));
 		}
 	}
 

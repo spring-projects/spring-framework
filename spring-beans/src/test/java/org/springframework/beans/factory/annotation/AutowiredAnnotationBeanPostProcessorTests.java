@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.IndexedTestBean;
 import org.springframework.beans.testfixture.beans.NestedTestBean;
@@ -1605,7 +1606,11 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(testBeans).containsExactly(bf.getBean("testBean1", TestBean.class), bf.getBean("testBean2", TestBean.class));
 		testBeans = bean.streamTestBeans();
 		assertThat(testBeans).containsExactly(bf.getBean("testBean1", TestBean.class), bf.getBean("testBean2", TestBean.class));
-		testBeans = bean.sortedTestBeans();
+		testBeans = bean.streamTestBeansInOrder();
+		assertThat(testBeans).containsExactly(bf.getBean("testBean1", TestBean.class), bf.getBean("testBean2", TestBean.class));
+		testBeans = bean.allTestBeans();
+		assertThat(testBeans).containsExactly(bf.getBean("testBean1", TestBean.class), bf.getBean("testBean2", TestBean.class));
+		testBeans = bean.allTestBeansInOrder();
 		assertThat(testBeans).containsExactly(bf.getBean("testBean1", TestBean.class), bf.getBean("testBean2", TestBean.class));
 	}
 
@@ -1632,7 +1637,13 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		testBeans = bean.streamTestBeans();
 		assertThat(testBeans).hasSize(1);
 		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
-		testBeans = bean.sortedTestBeans();
+		testBeans = bean.streamTestBeansInOrder();
+		assertThat(testBeans).hasSize(1);
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
+		testBeans = bean.allTestBeans();
+		assertThat(testBeans).hasSize(1);
+		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
+		testBeans = bean.allTestBeansInOrder();
 		assertThat(testBeans).hasSize(1);
 		assertThat(testBeans).contains(bf.getBean("testBean", TestBean.class));
 	}
@@ -1656,7 +1667,11 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(testBeans).isEmpty();
 		testBeans = bean.streamTestBeans();
 		assertThat(testBeans).isEmpty();
-		testBeans = bean.sortedTestBeans();
+		testBeans = bean.streamTestBeansInOrder();
+		assertThat(testBeans).isEmpty();
+		testBeans = bean.allTestBeans();
+		assertThat(testBeans).isEmpty();
+		testBeans = bean.allTestBeansInOrder();
 		assertThat(testBeans).isEmpty();
 	}
 
@@ -1678,7 +1693,9 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.iterateTestBeans()).containsExactly(testBean1, testBean2);
 		assertThat(bean.forEachTestBeans()).containsExactly(testBean1, testBean2);
 		assertThat(bean.streamTestBeans()).containsExactly(testBean1, testBean2);
-		assertThat(bean.sortedTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.streamTestBeansInOrder()).containsExactly(testBean1, testBean2);
+		assertThat(bean.allTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.allTestBeansInOrder()).containsExactly(testBean1, testBean2);
 	}
 
 	@Test
@@ -1706,7 +1723,9 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.iterateTestBeans()).containsExactly(testBean1, testBean2);
 		assertThat(bean.forEachTestBeans()).containsExactly(testBean1, testBean2);
 		assertThat(bean.streamTestBeans()).containsExactly(testBean1, testBean2);
-		assertThat(bean.sortedTestBeans()).containsExactly(testBean2, testBean1);
+		assertThat(bean.streamTestBeansInOrder()).containsExactly(testBean2, testBean1);
+		assertThat(bean.allTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.allTestBeansInOrder()).containsExactly(testBean2, testBean1);
 	}
 
 	@Test
@@ -1722,8 +1741,47 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean2", tb2);
 
 		ObjectProviderInjectionBean bean = bf.getBean("annotatedBean", ObjectProviderInjectionBean.class);
-		assertThat(bean.sortedTestBeans()).containsExactly(bf.getBean("testBean2", TestBean.class),
+		assertThat(bean.streamTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
 				bf.getBean("testBean1", TestBean.class));
+		assertThat(bean.allTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
+				bf.getBean("testBean1", TestBean.class));
+	}
+
+	@Test
+	void objectProviderInjectionWithNonCandidatesInStream() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
+		RootBeanDefinition tb1 = new RootBeanDefinition(TestBeanFactory.class);
+		tb1.setFactoryMethodName("newTestBean1");
+		bf.registerBeanDefinition("testBean1", tb1);
+		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
+		tb2.setFactoryMethodName("newTestBean2");
+		bf.registerBeanDefinition("testBean2", tb2);
+		RootBeanDefinition tb3 = new RootBeanDefinition(TestBean.class);
+		tb3.setAutowireCandidate(false);
+		tb3.setLazyInit(true);
+		bf.registerBeanDefinition("testBean3", tb3);
+		RootBeanDefinition tb4 = new RootBeanDefinition(DerivedTestBean.class);
+		tb4.setDefaultCandidate(false);
+		tb4.setLazyInit(true);
+		bf.registerBeanDefinition("testBean4", tb4);
+
+		ObjectProviderInjectionBean bean = bf.getBean("annotatedBean", ObjectProviderInjectionBean.class);
+		assertThat(bean.streamTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
+				bf.getBean("testBean2", TestBean.class));
+		assertThat(bean.streamTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
+				bf.getBean("testBean1", TestBean.class));
+		assertThat(bf.containsSingleton("testBean3")).isFalse();
+		assertThat(bean.plainTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
+				bf.getBean("testBean2", TestBean.class), bf.getBean("testBean3", TestBean.class));
+		assertThat(bean.plainTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
+				bf.getBean("testBean1", TestBean.class), bf.getBean("testBean3", TestBean.class));
+		assertThat(bf.containsSingleton("testBean4")).isFalse();
+		assertThat(bean.allTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
+				bf.getBean("testBean2", TestBean.class), bf.getBean("testBean3", TestBean.class),
+				bf.getBean("testBean4", TestBean.class));
+		assertThat(bean.allTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
+				bf.getBean("testBean1", TestBean.class), bf.getBean("testBean3", TestBean.class),
+				bf.getBean("testBean4", TestBean.class));
 	}
 
 	@Test
@@ -3304,8 +3362,24 @@ class AutowiredAnnotationBeanPostProcessorTests {
 			return this.testBean.stream().toList();
 		}
 
-		public List<TestBean> sortedTestBeans() {
+		public List<TestBean> streamTestBeansInOrder() {
 			return this.testBean.orderedStream().toList();
+		}
+
+		public List<TestBean> plainTestBeans() {
+			return this.testBean.stream(clazz -> !DerivedTestBean.class.isAssignableFrom(clazz)).toList();
+		}
+
+		public List<TestBean> plainTestBeansInOrder() {
+			return this.testBean.orderedStream(clazz -> !DerivedTestBean.class.isAssignableFrom(clazz)).toList();
+		}
+
+		public List<TestBean> allTestBeans() {
+			return this.testBean.stream(ObjectProvider.UNFILTERED).toList();
+		}
+
+		public List<TestBean> allTestBeansInOrder() {
+			return this.testBean.orderedStream(ObjectProvider.UNFILTERED).toList();
 		}
 	}
 
