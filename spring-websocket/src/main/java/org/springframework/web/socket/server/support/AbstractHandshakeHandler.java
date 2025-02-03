@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,6 +67,10 @@ import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeSt
  * @since 4.2
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
+
+	// For WebSocket upgrades in HTTP/2 (see RFC 8441)
+	private static final HttpMethod CONNECT_METHOD = HttpMethod.valueOf("CONNECT");
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -169,11 +174,12 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			logger.trace("Processing request " + request.getURI() + " with headers=" + headers);
 		}
 		try {
-			if (HttpMethod.GET != request.getMethod()) {
+			HttpMethod httpMethod = request.getMethod();
+			if (HttpMethod.GET != httpMethod && CONNECT_METHOD != httpMethod) {
 				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
-				response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
+				response.getHeaders().setAllow(Set.of(HttpMethod.GET, CONNECT_METHOD));
 				if (logger.isErrorEnabled()) {
-					logger.error("Handshake failed due to unexpected HTTP method: " + request.getMethod());
+					logger.error("Handshake failed due to unexpected HTTP method: " + httpMethod);
 				}
 				return false;
 			}
@@ -255,7 +261,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
 		if (logger.isErrorEnabled()) {
-			String version = request.getHeaders().getFirst("Sec-WebSocket-Version");
+			String version = request.getHeaders().getFirst(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION);
 			logger.error(LogFormatUtils.formatValue(
 					"Handshake failed due to unsupported WebSocket version: " + version +
 							". Supported versions: " + Arrays.toString(getSupportedVersions()), -1, true));
