@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1515,12 +1515,16 @@ class DefaultListableBeanFactoryTests {
 		bd1.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
 		lbf.registerBeanDefinition("bean1", bd1);
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
-		bd2.setBeanClass(TestBean.class);
+		bd2.setBeanClass(DerivedTestBean.class);
 		bd2.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "highest"))));
 		bd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
 		lbf.registerBeanDefinition("bean2", bd2);
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
 				.containsExactly("highest", "lowest");
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED).map(TestBean::getName))
+				.containsExactly("highest", "lowest");
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(clazz -> !DerivedTestBean.class.isAssignableFrom(clazz))
+				.map(TestBean::getName)).containsExactly("lowest");
 	}
 
 	@Test
@@ -1539,6 +1543,8 @@ class DefaultListableBeanFactoryTests {
 		bd2.setFactoryBeanName("lowestPrecedenceFactory");
 		lbf.registerBeanDefinition("bean2", bd2);
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
+				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED).map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
 	}
 
@@ -1934,6 +1940,11 @@ class DefaultListableBeanFactoryTests {
 		assertThat(resolved).hasSize(2);
 		assertThat(resolved).contains(lbf.getBean("bd1"));
 		assertThat(resolved).contains(lbf.getBean("bd2"));
+
+		resolved = provider.stream(ObjectProvider.UNFILTERED).collect(Collectors.toSet());
+		assertThat(resolved).hasSize(2);
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
 	}
 
 	@Test
@@ -1980,6 +1991,11 @@ class DefaultListableBeanFactoryTests {
 		assertThat(resolved).contains(lbf.getBean("bd2"));
 
 		resolved = provider.stream().collect(Collectors.toSet());
+		assertThat(resolved).hasSize(2);
+		assertThat(resolved).contains(lbf.getBean("bd1"));
+		assertThat(resolved).contains(lbf.getBean("bd2"));
+
+		resolved = provider.stream(ObjectProvider.UNFILTERED).collect(Collectors.toSet());
 		assertThat(resolved).hasSize(2);
 		assertThat(resolved).contains(lbf.getBean("bd1"));
 		assertThat(resolved).contains(lbf.getBean("bd2"));
@@ -2378,11 +2394,20 @@ class DefaultListableBeanFactoryTests {
 		parentBf.registerBeanDefinition("highPriorityTestBean", bd2);
 
 		ObjectProvider<TestBean> testBeanProvider = lbf.getBeanProvider(ResolvableType.forClass(TestBean.class));
-		List<TestBean> resolved = testBeanProvider.orderedStream().toList();
-		assertThat(resolved).containsExactly(
+		assertThat(testBeanProvider.orderedStream()).containsExactly(
 				lbf.getBean("highPriorityTestBean", TestBean.class),
 				lbf.getBean("lowPriorityTestBean", TestBean.class),
 				lbf.getBean("plainTestBean", TestBean.class));
+		assertThat(testBeanProvider.orderedStream(clazz -> clazz != TestBean.class).toList()).containsExactly(
+				lbf.getBean("highPriorityTestBean", TestBean.class),
+				lbf.getBean("lowPriorityTestBean", TestBean.class));
+		assertThat(testBeanProvider.stream()).containsExactly(
+				lbf.getBean("plainTestBean", TestBean.class),
+				lbf.getBean("lowPriorityTestBean", TestBean.class),
+				lbf.getBean("highPriorityTestBean", TestBean.class));
+		assertThat(testBeanProvider.orderedStream(clazz -> clazz != TestBean.class).toList()).containsExactly(
+				lbf.getBean("lowPriorityTestBean", TestBean.class),
+				lbf.getBean("highPriorityTestBean", TestBean.class));
 	}
 
 	@Test
