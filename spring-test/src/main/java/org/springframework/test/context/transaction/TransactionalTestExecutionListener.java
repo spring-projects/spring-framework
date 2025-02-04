@@ -175,7 +175,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 
 	/**
-	 * Returns {@code 4000}.
+	 * Returns {@code 4000}, which ensures that the {@code TransactionalTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.CommonCachesTestExecutionListener
+	 * CommonCachesTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+	 * SqlScriptsTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {

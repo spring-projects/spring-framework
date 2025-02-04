@@ -106,7 +106,12 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 
 
 	/**
-	 * Returns {@code 2500}.
+	 * Returns {@code 2500}, which ensures that the {@code MicrometerObservationRegistryTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+	 * DependencyInjectionTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
+	 * DirtiesContextTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {

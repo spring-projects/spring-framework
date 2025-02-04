@@ -63,7 +63,12 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 
 	/**
-	 * Returns {@code 2000}.
+	 * Returns {@code 2000}, which ensures that the {@code ApplicationEventsTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
+	 * BeanOverrideTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
+	 * DirtiesContextTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {

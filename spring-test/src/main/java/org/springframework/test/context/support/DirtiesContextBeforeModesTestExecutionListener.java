@@ -55,7 +55,12 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFO
 public class DirtiesContextBeforeModesTestExecutionListener extends AbstractDirtiesContextTestExecutionListener {
 
 	/**
-	 * Returns {@code 1500}.
+	 * Returns {@code 1500}, which ensures that the {@code DirtiesContextBeforeModesTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.web.ServletTestExecutionListener
+	 * ServletTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
+	 * BeanOverrideTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {

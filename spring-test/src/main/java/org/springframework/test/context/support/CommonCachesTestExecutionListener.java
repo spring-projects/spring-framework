@@ -36,7 +36,12 @@ import org.springframework.test.context.TestContext;
 public class CommonCachesTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 3005}.
+	 * Returns {@code 3005}, which ensures that the {@code CommonCachesTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
+	 * DirtiesContextTestExecutionListener} and just before the
+	 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+	 * TransactionalTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
