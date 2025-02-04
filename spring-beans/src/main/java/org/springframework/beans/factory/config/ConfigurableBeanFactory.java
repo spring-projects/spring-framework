@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * on the given registry, fresh for each bean creation attempt. This avoids
 	 * the need for synchronization on custom editors; hence, it is generally
 	 * preferable to use this method instead of {@link #registerCustomEditor}.
+	 * <p>If the given registrar implements
+	 * {@link PropertyEditorRegistrar#overridesDefaultEditors()} to return {@code true},
+	 * it will be applied lazily (only when default editors are actually needed).
 	 * @param registrar the PropertyEditorRegistrar to register
+	 * @see PropertyEditorRegistrar#overridesDefaultEditors()
 	 */
 	void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
 

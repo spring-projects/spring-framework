@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private boolean configValueEditorsActive = false;
 
+	private @Nullable PropertyEditorRegistrar defaultEditorRegistrar;
+
 	@SuppressWarnings("NullAway.Init")
 	private Map<Class<?>, PropertyEditor> defaultEditors;
 
@@ -150,6 +152,19 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	}
 
 	/**
+	 * Set a registrar for default editors, as a lazy way of overriding default editors.
+	 * <p>This is expected to be a collaborator with {@link PropertyEditorRegistrySupport},
+	 * downcasting the given {@link PropertyEditorRegistry} accordingly and calling
+	 * {@link #overrideDefaultEditor} for registering additional default editors on it.
+	 * @param registrar the registrar to call when default editors are actually needed
+	 * @since 6.2.3
+	 * @see #overrideDefaultEditor
+	 */
+	public void setDefaultEditorRegistrar(PropertyEditorRegistrar registrar) {
+		this.defaultEditorRegistrar = registrar;
+	}
+
+	/**
 	 * Override the default editor for the specified type with the given property editor.
 	 * <p>Note that this is different from registering a custom editor in that the editor
 	 * semantically still is a default editor. A ConversionService will override such a
@@ -175,6 +190,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	public @Nullable PropertyEditor getDefaultEditor(Class<?> requiredType) {
 		if (!this.defaultEditorsActive) {
 			return null;
+		}
+		if (this.overriddenDefaultEditors == null && this.defaultEditorRegistrar != null) {
+			this.defaultEditorRegistrar.registerCustomEditors(this);
 		}
 		if (this.overriddenDefaultEditors != null) {
 			PropertyEditor editor = this.overriddenDefaultEditors.get(requiredType);

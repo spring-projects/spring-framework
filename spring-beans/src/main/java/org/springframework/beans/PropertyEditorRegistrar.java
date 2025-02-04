@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,5 +44,19 @@ public interface PropertyEditorRegistrar {
 	 * custom {@code PropertyEditors} with
 	 */
 	void registerCustomEditors(PropertyEditorRegistry registry);
+
+	/**
+	 * Indicate whether this registrar exclusively overrides default editors
+	 * rather than registering custom editors, intended to be applied lazily.
+	 * <p>This has an impact on registrar handling in a bean factory: see
+	 * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory#addPropertyEditorRegistrar}.
+	 * @since 6.2.3
+	 * @see PropertyEditorRegistry#registerCustomEditor
+	 * @see PropertyEditorRegistrySupport#overrideDefaultEditor
+	 * @see PropertyEditorRegistrySupport#setDefaultEditorRegistrar
+	 */
+	default boolean overridesDefaultEditors() {
+		return false;
+	}
 
 }
