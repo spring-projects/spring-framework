@@ -56,7 +56,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 
 
 	public JettyCoreServerHttpResponse(Response response, JettyDataBufferFactory dataBufferFactory) {
-		super(dataBufferFactory, new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
+		super(dataBufferFactory, HttpHeaders.backedBy(new JettyHeadersAdapter(response.getHeaders())));
 		this.response = response;
 
 		// remove all existing cookies from the response and add them to the cookie map, to be added back later

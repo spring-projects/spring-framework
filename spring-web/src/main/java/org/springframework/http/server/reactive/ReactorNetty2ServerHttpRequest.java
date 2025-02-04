@@ -71,7 +71,7 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 			throws URISyntaxException {
 
 		super(HttpMethod.valueOf(request.method().name()), initUri(request), "",
-				new HttpHeaders(new Netty5HeadersAdapter(request.requestHeaders())));
+				HttpHeaders.backedBy(new Netty5HeadersAdapter(request.requestHeaders())));
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;

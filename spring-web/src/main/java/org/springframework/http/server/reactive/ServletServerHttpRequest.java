@@ -168,7 +168,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			String requestContentType = request.getContentType();
 			if (StringUtils.hasLength(requestContentType)) {
 				contentType = MediaType.parseMediaType(requestContentType);
-				headers = new HttpHeaders(headerValues);
+				headers = HttpHeaders.backedBy(headerValues);
 				headers.setContentType(contentType);
 			}
 		}
@@ -184,7 +184,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		if (headerValues.getFirst(HttpHeaders.CONTENT_TYPE) == null) {
 			int contentLength = request.getContentLength();
 			if (contentLength != -1) {
-				headers = (headers != null ? headers : new HttpHeaders(headerValues));
+				headers = (headers != null ? headers : HttpHeaders.backedBy(headerValues));
 				headers.setContentLength(contentLength);
 			}
 		}
