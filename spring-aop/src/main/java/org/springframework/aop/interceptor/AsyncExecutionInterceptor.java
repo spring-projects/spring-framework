@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -61,7 +60,6 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Stephane Nicoll
- * @author Bao Ngo
  * @since 3.0
  * @see org.springframework.scheduling.annotation.Async
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
@@ -127,16 +125,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			return null;
 		};
 
-		return doSubmit( task, executor, determineReturnType( invocation, userMethod ) );
-	}
-
-	private static Class<?> determineReturnType(MethodInvocation invocation, Method userMethod) {
-		Method originalMethod = invocation.getMethod();
-		if( Modifier.isAbstract( originalMethod.getModifiers() ) ) {
-			return userMethod.getReturnType();
-		}
-
-		return originalMethod.getReturnType();
+		return doSubmit(task, executor, userMethod.getReturnType());
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,32 +43,31 @@ import static org.mockito.Mockito.verify;
 class AsyncExecutionInterceptorTests {
 
 	@Test
-	public void testInvokeOnInterface() throws Throwable {
-		AsyncExecutionInterceptor interceptor = spy( new AsyncExecutionInterceptor( null ) );
-		Impl impl = new Impl();
-		ArgumentCaptor<Class<?>> classArgumentCaptor = ArgumentCaptor.forClass( Class.class );
+	@SuppressWarnings("unchecked")
+	void invokeOnInterfaceWithGeneric() throws Throwable {
+		AsyncExecutionInterceptor interceptor = spy(new AsyncExecutionInterceptor(null));
+		FutureRunner impl = new FutureRunner();
 		MethodInvocation mi = mock();
-		given( mi.getThis() ).willReturn( impl );
-		given( mi.getMethod() ).willReturn( I.class.getMethod( "doSomeThing" ) );
-		interceptor.invoke( mi );
-		verify( interceptor ).doSubmit(
-				any( Callable.class ),
-				any( AsyncTaskExecutor.class ),
-				classArgumentCaptor.capture()
-		);
-		assertThat( classArgumentCaptor.getValue() ).isEqualTo( Future.class );
+		given(mi.getThis()).willReturn(impl);
+		given(mi.getMethod()).willReturn(GenericRunner.class.getMethod("run"));
+
+		interceptor.invoke(mi);
+		ArgumentCaptor<Class<?>> classArgumentCaptor = ArgumentCaptor.forClass(Class.class);
+		verify(interceptor).doSubmit(any(Callable.class), any(AsyncTaskExecutor.class), classArgumentCaptor.capture());
+		assertThat(classArgumentCaptor.getValue()).isEqualTo(Future.class);
 	}
 
 
-	private interface I<O> {
-		O doSomeThing();
+	interface GenericRunner<O> {
+
+		O run();
 	}
 
-	private static final class Impl implements I<Future<Void>> {
+	static class FutureRunner implements GenericRunner<Future<Void>> {
 		@Override
-		public Future<Void> doSomeThing() {
-			return CompletableFuture.runAsync( () -> {
-			} );
+		public Future<Void> run() {
+			return CompletableFuture.runAsync(() -> {
+			});
 		}
 	}
 }
