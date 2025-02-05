@@ -17,9 +17,12 @@
 package org.springframework.web.socket.server;
 
 import java.security.Principal;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -34,6 +37,25 @@ import org.springframework.web.socket.WebSocketHandler;
  * @see org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy
  */
 public interface RequestUpgradeStrategy {
+
+	enum OpeningHandshake {
+		RFC6455(HttpMethod.GET),
+		RFC8441(HttpMethod.valueOf("CONNECT"));
+
+		private final HttpMethod method;
+
+		OpeningHandshake(HttpMethod method) {
+			this.method = method;
+		}
+
+		public HttpMethod getMethod() {
+			return method;
+		}
+	}
+
+	default Set<OpeningHandshake> getSupportedOpeningHandshake() {
+		return EnumSet.of(OpeningHandshake.RFC6455);
+	}
 
 	/**
 	 * Return the supported WebSocket protocol versions.

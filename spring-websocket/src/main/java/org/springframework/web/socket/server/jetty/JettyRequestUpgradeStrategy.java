@@ -19,8 +19,10 @@ package org.springframework.web.socket.server.jetty;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.Principal;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
@@ -58,6 +60,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 	@Nullable
 	private Consumer<Configurable> webSocketConfigurer;
 
+
+	@Override
+	public Set<OpeningHandshake> getSupportedOpeningHandshake() {
+		return EnumSet.of(OpeningHandshake.RFC6455, OpeningHandshake.RFC8441);
+	}
 
 	@Override
 	public String[] getSupportedVersions() {

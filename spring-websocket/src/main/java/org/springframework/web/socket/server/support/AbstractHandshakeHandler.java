@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +49,7 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
+import org.springframework.web.socket.server.RequestUpgradeStrategy.OpeningHandshake;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy;
@@ -77,9 +79,6 @@ import org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStr
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
-
-	// For WebSocket upgrades in HTTP/2 (see RFC 8441)
-	private static final HttpMethod CONNECT_METHOD = HttpMethod.valueOf("CONNECT");
 
 	private static final boolean tomcatWsPresent;
 
@@ -215,15 +214,16 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		}
 		try {
 			HttpMethod httpMethod = request.getMethod();
-			if (HttpMethod.GET != httpMethod && !CONNECT_METHOD.equals(httpMethod)) {
-				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
-				response.getHeaders().setAllow(Set.of(HttpMethod.GET, CONNECT_METHOD));
-				if (logger.isErrorEnabled()) {
-					logger.error("Handshake failed due to unexpected HTTP method: " + httpMethod);
+			Set<OpeningHandshake> supportedHandshakes = requestUpgradeStrategy.getSupportedOpeningHandshake();
+			OpeningHandshake handshake = null;
+			for (OpeningHandshake h : supportedHandshakes) {
+				if (h.getMethod().equals(httpMethod)) {
+					handshake = h;
+					break;
 				}
-				return false;
 			}
-			if (HttpMethod.GET == httpMethod) {
+
+			if (handshake == OpeningHandshake.RFC6455) {
 				if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
 					handleInvalidUpgradeHeader(request, response);
 					return false;
@@ -232,16 +232,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 					handleInvalidConnectHeader(request, response);
 					return false;
 				}
-			}
-			if (!isWebSocketVersionSupported(headers)) {
-				handleWebSocketVersionNotSupported(request, response);
-				return false;
-			}
-			if (!isValidOrigin(request)) {
-				response.setStatusCode(HttpStatus.FORBIDDEN);
-				return false;
-			}
-			if (HttpMethod.GET == httpMethod) {
 				String wsKey = headers.getSecWebSocketKey();
 				if (wsKey == null) {
 					if (logger.isErrorEnabled()) {
@@ -250,6 +240,24 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 					response.setStatusCode(HttpStatus.BAD_REQUEST);
 					return false;
 				}
+			} else if (handshake == null) {
+				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
+				Set<HttpMethod> methods = supportedHandshakes.stream()
+						.map(OpeningHandshake::getMethod)
+						.collect(Collectors.toUnmodifiableSet());
+				response.getHeaders().setAllow(methods);
+				if (logger.isErrorEnabled()) {
+					logger.error("Handshake failed due to unexpected HTTP method: " + httpMethod);
+				}
+				return false;
+			}
+			if (!isWebSocketVersionSupported(headers)) {
+				handleWebSocketVersionNotSupported(request, response);
+				return false;
+			}
+			if (!isValidOrigin(request)) {
+				response.setStatusCode(HttpStatus.FORBIDDEN);
+				return false;
 			}
 		}
 		catch (IOException ex) {
