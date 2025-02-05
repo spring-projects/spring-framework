@@ -893,16 +893,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	private Object newValue(Class<?> type, @Nullable TypeDescriptor desc, String name) {
 		try {
 			if (type.isArray()) {
-				Class<?> componentType = type.componentType();
-				// TODO - only handles 2-dimensional arrays
-				if (componentType.isArray()) {
-					Object array = Array.newInstance(componentType, 1);
-					Array.set(array, 0, Array.newInstance(componentType.componentType(), 0));
-					return array;
-				}
-				else {
-					return Array.newInstance(componentType, 0);
-				}
+				return createArray(type);
 			}
 			else if (Collection.class.isAssignableFrom(type)) {
 				TypeDescriptor elementDesc = (desc != null ? desc.getElementTypeDescriptor() : null);
@@ -923,6 +914,24 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		catch (Throwable ex) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
 					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path", ex);
+		}
+	}
+
+	/**
+	 * Create the array for the given array type.
+	 * @param arrayType the desired type of the target array
+	 * @return a new array instance
+	 */
+	private static Object createArray(Class<?> arrayType) {
+		Assert.notNull(arrayType, "Array type must not be null");
+		Class<?> componentType = arrayType.componentType();
+		if (componentType.isArray()) {
+			Object array = Array.newInstance(componentType, 1);
+			Array.set(array, 0, createArray(componentType));
+			return array;
+		}
+		else {
+			return Array.newInstance(componentType, 0);
 		}
 	}
 
