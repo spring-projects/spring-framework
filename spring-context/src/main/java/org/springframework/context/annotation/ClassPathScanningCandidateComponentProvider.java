@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -531,9 +531,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
-	 * Determine whether the given bean definition qualifies as candidate.
-	 * <p>The default implementation checks whether the class is not an interface
-	 * and not dependent on an enclosing class.
+	 * Determine whether the given bean definition qualifies as a candidate component.
+	 * <p>The default implementation checks whether the class is not dependent on an
+	 * enclosing class as well as whether the class is either concrete (and therefore
+	 * not an interface) or has {@link Lookup @Lookup} methods.
 	 * <p>Can be overridden in subclasses.
 	 * @param beanDefinition the bean definition to check
 	 * @return whether the bean definition qualifies as a candidate component
