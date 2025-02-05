@@ -120,8 +120,6 @@ dynamically generate a subclass that overrides the method.
   subclasses cannot be `final`, and the method to be overridden cannot be `final`, either.
 * Unit-testing a class that has an `abstract` method requires you to subclass the class
   yourself and to supply a stub implementation of the `abstract` method.
-* Concrete methods are also necessary for component scanning, which requires concrete
-  classes to pick up.
 * A further key limitation is that lookup methods do not work with factory methods and
   in particular not with `@Bean` methods in configuration classes, since, in that case,
   the container is not in charge of creating the instance and therefore cannot create
@@ -292,11 +290,6 @@ Kotlin::
 	}
 ----
 ======
-
-Note that you should typically declare such annotated lookup methods with a concrete
-stub implementation, in order for them to be compatible with Spring's component
-scanning rules where abstract classes get ignored by default. This limitation does not
-apply to explicitly registered or explicitly imported bean classes.
 
 [TIP]
 ====
