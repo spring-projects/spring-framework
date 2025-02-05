@@ -113,7 +113,7 @@ public class UserDestinationResult {
 	/**
 	 * Return the session id for the targetDestination.
 	 */
-	public @Nullable Set<String> getSessionIds() {
+	public Set<String> getSessionIds() {
 		return this.sessionIds;
 	}
 
