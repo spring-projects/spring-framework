@@ -103,17 +103,17 @@ class DataBinderConstructTests {
 	}
 
 	@Test
-	void listBinding() {
+	void dataClassWithListBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of(
 				"dataClassList[0].param1", "value1", "dataClassList[0].param2", "true",
 				"dataClassList[1].param1", "value2", "dataClassList[1].param2", "true",
 				"dataClassList[2].param1", "value3", "dataClassList[2].param2", "true"));
 
-		DataBinder binder = initDataBinder(ListDataClass.class);
+		DataBinder binder = initDataBinder(DataClassListRecord.class);
 		binder.construct(valueResolver);
 
-		ListDataClass dataClass = getTarget(binder);
-		List<DataClass> list = dataClass.dataClassList();
+		DataClassListRecord target = getTarget(binder);
+		List<DataClass> list = target.dataClassList();
 
 		assertThat(list).hasSize(3);
 		assertThat(list.get(0).param1()).isEqualTo("value1");
@@ -122,17 +122,17 @@ class DataBinderConstructTests {
 	}
 
 	@Test // gh-34145
-	void listBindingWithNonconsecutiveIndices() {
+	void dataClassWithListBindingWithNonconsecutiveIndices() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of(
 				"dataClassList[0].param1", "value1", "dataClassList[0].param2", "true",
 				"dataClassList[1].param1", "value2", "dataClassList[1].param2", "true",
 				"dataClassList[3].param1", "value3", "dataClassList[3].param2", "true"));
 
-		DataBinder binder = initDataBinder(ListDataClass.class);
+		DataBinder binder = initDataBinder(DataClassListRecord.class);
 		binder.construct(valueResolver);
 
-		ListDataClass dataClass = getTarget(binder);
-		List<DataClass> list = dataClass.dataClassList();
+		DataClassListRecord target = getTarget(binder);
+		List<DataClass> list = target.dataClassList();
 
 		assertThat(list.get(0).param1()).isEqualTo("value1");
 		assertThat(list.get(1).param1()).isEqualTo("value2");
@@ -140,17 +140,17 @@ class DataBinderConstructTests {
 	}
 
 	@Test
-	void mapBinding() {
+	void dataClassWithMapBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of(
 				"dataClassMap[a].param1", "value1", "dataClassMap[a].param2", "true",
 				"dataClassMap[b].param1", "value2", "dataClassMap[b].param2", "true",
 				"dataClassMap['c'].param1", "value3", "dataClassMap['c'].param2", "true"));
 
-		DataBinder binder = initDataBinder(MapDataClass.class);
+		DataBinder binder = initDataBinder(DataClassMapRecord.class);
 		binder.construct(valueResolver);
 
-		MapDataClass dataClass = getTarget(binder);
-		Map<String, DataClass> map = dataClass.dataClassMap();
+		DataClassMapRecord target = getTarget(binder);
+		Map<String, DataClass> map = target.dataClassMap();
 
 		assertThat(map).hasSize(3);
 		assertThat(map.get("a").param1()).isEqualTo("value1");
@@ -159,23 +159,57 @@ class DataBinderConstructTests {
 	}
 
 	@Test
-	void arrayBinding() {
+	void dataClassWithArrayBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of(
 				"dataClassArray[0].param1", "value1", "dataClassArray[0].param2", "true",
 				"dataClassArray[1].param1", "value2", "dataClassArray[1].param2", "true",
 				"dataClassArray[2].param1", "value3", "dataClassArray[2].param2", "true"));
 
-		DataBinder binder = initDataBinder(ArrayDataClass.class);
+		DataBinder binder = initDataBinder(DataClassArrayRecord.class);
 		binder.construct(valueResolver);
 
-		ArrayDataClass dataClass = getTarget(binder);
-		DataClass[] array = dataClass.dataClassArray();
+		DataClassArrayRecord target = getTarget(binder);
+		DataClass[] array = target.dataClassArray();
 
 		assertThat(array).hasSize(3);
 		assertThat(array[0].param1()).isEqualTo("value1");
 		assertThat(array[1].param1()).isEqualTo("value2");
 		assertThat(array[2].param1()).isEqualTo("value3");
 	}
+
+	@Test
+	void simpleListBinding() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[0]", "1", "integerList[1]", "2"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).containsExactly(1, 2);
+	}
+
+	@Test
+	void simpleMapBinding() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerMap[a]", "1", "integerMap[b]", "2"));
+
+		DataBinder binder = initDataBinder(IntegerMapRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerMapRecord target = getTarget(binder);
+		assertThat(target.integerMap()).hasSize(2).containsEntry("a", 1).containsEntry("b", 2);
+	}
+
+	@Test
+	void simpleArrayBinding() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerArray[0]", "1", "integerArray[1]", "2"));
+
+		DataBinder binder = initDataBinder(IntegerArrayRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerArrayRecord target = getTarget(binder);
+		assertThat(target.integerArray()).containsExactly(1, 2);
+	}
+
 
 	@SuppressWarnings("SameParameterValue")
 	private static DataBinder initDataBinder(Class<?> targetType) {
@@ -246,15 +280,27 @@ class DataBinderConstructTests {
 	}
 
 
-	private record ListDataClass(List<DataClass> dataClassList) {
+	private record DataClassListRecord(List<DataClass> dataClassList) {
 	}
 
 
-	private record MapDataClass(Map<String, DataClass> dataClassMap) {
+	private record DataClassMapRecord(Map<String, DataClass> dataClassMap) {
 	}
 
 
-	private record ArrayDataClass(DataClass[] dataClassArray) {
+	private record DataClassArrayRecord(DataClass[] dataClassArray) {
+	}
+
+
+	private record IntegerListRecord(List<Integer> integerList) {
+	}
+
+
+	private record IntegerMapRecord(Map<String, Integer> integerMap) {
+	}
+
+
+	private record IntegerArrayRecord(Integer[] integerArray) {
 	}
 
 

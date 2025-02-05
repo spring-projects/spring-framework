@@ -40,6 +40,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -184,8 +185,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		return getMethodArgumentValuesOnScheduler(exchange, bindingContext, providedArgs).flatMap(args -> {
 			if (shouldValidateArguments() && this.methodValidator != null) {
-				this.methodValidator.applyArgumentValidation(
-						getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
+				try {
+					LocaleContextHolder.setLocaleContext(exchange.getLocaleContext());
+					this.methodValidator.applyArgumentValidation(
+							getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
+				}
+				finally {
+					LocaleContextHolder.resetLocaleContext();
+				}
 			}
 			Object value;
 			Method method = getBridgedMethod();
