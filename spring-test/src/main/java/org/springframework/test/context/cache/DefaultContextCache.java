@@ -23,13 +23,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jspecify.annotations.Nullable;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
@@ -57,11 +58,12 @@ public class DefaultContextCache implements ContextCache {
 
 	private static final Log statsLogger = LogFactory.getLog(CONTEXT_CACHE_LOGGING_CATEGORY);
 
+	ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()); //TODO: Make this parametric
 
 	/**
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
-	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
+	private final Map<MergedContextConfiguration, Future<ApplicationContext>> contextMap =
 			Collections.synchronizedMap(new LruCache(32, 0.75f));
 
 	/**
@@ -120,25 +122,69 @@ public class DefaultContextCache implements ContextCache {
 		return this.contextMap.containsKey(key);
 	}
 
-	@Override
+	@Override//TODO: This is not used anymore in spring but make sense to keep it for retro compatibility, right?
 	public @Nullable ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
-		ApplicationContext context = this.contextMap.get(key);
+
+		try {
+			Future<ApplicationContext> context = this.contextMap.get(key);
+
 		if (context == null) {
 			this.missCount.incrementAndGet();
+
+				return null;
 		}
 		else {
 			this.hitCount.incrementAndGet();
+
+				return context.get();
 		}
-		return context;
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);//FIXME: fix the message
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);//FIXME: fix the message
+		}
 	}
 
+
+	@Override
+	public Future<ApplicationContext> computeIfAbsent(MergedContextConfiguration key, Function<MergedContextConfiguration, ApplicationContext> mappingFunction) {
+		Assert.notNull(key, "Key must not be null");
+
+		if(contextMap.containsKey(key)) {
+			this.hitCount.incrementAndGet();
+		}
+
+		return contextMap.computeIfAbsent(key, (k) ->
+				{
+					this.missCount.incrementAndGet();
+					return CompletableFuture.supplyAsync(() -> mappingFunction.apply(k), executorService)
+							.thenApply(
+									(contextLoaded) -> {
+										MergedContextConfiguration child = key;
+										MergedContextConfiguration parent = child.getParent();
+										while (parent != null) {
+											Set<MergedContextConfiguration> list = this.hierarchyMap.computeIfAbsent(parent, k2 -> new HashSet<>());
+											list.add(child);
+											child = parent;
+											parent = child.getParent();
+										}
+
+										return contextLoaded;
+									}
+							);
+
+				}
+		);
+	}
+
+	//TODO: This is not used anymore in spring but make sense to keep it for retro compatibility, right?
 	@Override
 	public void put(MergedContextConfiguration key, ApplicationContext context) {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");
 
-		this.contextMap.put(key, context);
+		this.contextMap.put(key, CompletableFuture.completedFuture(context));
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
@@ -198,10 +244,19 @@ public class DefaultContextCache implements ContextCache {
 
 		// Physically remove and close leaf nodes first (i.e., on the way back up the
 		// stack as opposed to prior to the recursive call).
-		ApplicationContext context = this.contextMap.remove(key);
+		Future<ApplicationContext> contextLoader = this.contextMap.remove(key);
+
+		try {
+			ApplicationContext context = contextLoader.get();
 		if (context instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e); //FIXME: fix the message
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e); //FIXME: fix the message
+		}
+
 		removedContexts.add(key);
 	}
 
@@ -303,7 +358,7 @@ public class DefaultContextCache implements ContextCache {
 	 * @since 4.3
 	 */
 	@SuppressWarnings("serial")
-	private class LruCache extends LinkedHashMap<MergedContextConfiguration, ApplicationContext> {
+	private class LruCache extends LinkedHashMap<MergedContextConfiguration, Future<ApplicationContext>> {
 
 		/**
 		 * Create a new {@code LruCache} with the supplied initial capacity
@@ -316,7 +371,7 @@ public class DefaultContextCache implements ContextCache {
 		}
 
 		@Override
-		protected boolean removeEldestEntry(Map.Entry<MergedContextConfiguration, ApplicationContext> eldest) {
+		protected boolean removeEldestEntry(Map.Entry<MergedContextConfiguration, Future<ApplicationContext>> eldest) {
 			if (this.size() > DefaultContextCache.this.getMaxSize()) {
 				// Do NOT delete "DefaultContextCache.this."; otherwise, we accidentally
 				// invoke java.util.Map.remove(Object, Object).
