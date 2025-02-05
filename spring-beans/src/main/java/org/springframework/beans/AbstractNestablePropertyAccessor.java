@@ -933,21 +933,16 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param arrayType the desired type of the target array
 	 * @return a new array instance
 	 */
-	private Object createArray(Class<?> arrayType) {
+	private static Object createArray(Class<?> arrayType) {
 		Assert.notNull(arrayType, "Array type must not be null");
-		if (arrayType.isArray()) {
-			Class<?> componentType = arrayType.componentType();
-			if (componentType.isArray()) {
-				Object array = Array.newInstance(componentType, 1);
-				Array.set(array, 0, createArray(componentType));
-				return array;
-			}
-			else {
-				return Array.newInstance(componentType, 0);
-			}
+		Class<?> componentType = arrayType.componentType();
+		if (componentType.isArray()) {
+			Object array = Array.newInstance(componentType, 1);
+			Array.set(array, 0, createArray(componentType));
+			return array;
 		}
 		else {
-			throw new IllegalArgumentException("Unsupported Array type: " + arrayType.getName());
+			return Array.newInstance(componentType, 0);
 		}
 	}
 
