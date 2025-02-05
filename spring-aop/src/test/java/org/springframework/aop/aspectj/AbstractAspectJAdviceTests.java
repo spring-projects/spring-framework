@@ -16,14 +16,13 @@
 
 package org.springframework.aop.aspectj;
 
-import java.io.Serial;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.jetbrains.annotations.NotNull;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,74 +32,70 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link AbstractAspectJAdvice}.
  *
  * @author Joshua Chen
+ * @author Stephane Nicoll
  */
 class AbstractAspectJAdviceTests {
 
 	@Test
+	void setArgumentNamesFromStringArray_withoutJoinPointParameter() {
+		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithNoJoinPoint");
+		assertThat(advice).satisfies(hasArgumentNames("arg1", "arg2"));
+	}
+
+	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsFirstParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsFirstParameter");
-		assertArgumentNamesFromStringArray(advice);
+		assertThat(advice).satisfies(hasArgumentNames("THIS_JOIN_POINT", "arg1", "arg2"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsLastParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsLastParameter");
-		assertThat(getArgumentNames(advice)[0]).isEqualTo("arg1");
-		assertThat(getArgumentNames(advice)[1]).isEqualTo("arg2");
-		assertThat(getArgumentNames(advice)[2]).isEqualTo("THIS_JOIN_POINT");
+		assertThat(advice).satisfies(hasArgumentNames("arg1", "arg2", "THIS_JOIN_POINT"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsMiddleParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsMiddleParameter");
-		assertThat(getArgumentNames(advice)[0]).isEqualTo("arg1");
-		assertThat(getArgumentNames(advice)[1]).isEqualTo("THIS_JOIN_POINT");
-		assertThat(getArgumentNames(advice)[2]).isEqualTo("arg2");
+		assertThat(advice).satisfies(hasArgumentNames("arg1", "THIS_JOIN_POINT", "arg2"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withProceedingJoinPoint() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithProceedingJoinPoint");
-		assertArgumentNamesFromStringArray(advice);
+		assertThat(advice).satisfies(hasArgumentNames("THIS_JOIN_POINT", "arg1", "arg2"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withStaticPart() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithStaticPart");
-		assertArgumentNamesFromStringArray(advice);
+		assertThat(advice).satisfies(hasArgumentNames("THIS_JOIN_POINT", "arg1", "arg2"));
 	}
 
-	private void assertArgumentNamesFromStringArray(AbstractAspectJAdvice advice) {
-		assertThat(getArgumentNames(advice)[0]).isEqualTo("THIS_JOIN_POINT");
-		assertThat(getArgumentNames(advice)[1]).isEqualTo("arg1");
-		assertThat(getArgumentNames(advice)[2]).isEqualTo("arg2");
+	private Consumer<AbstractAspectJAdvice> hasArgumentNames(String... argumentNames) {
+		return advice -> assertThat(advice).extracting("argumentNames")
+				.asInstanceOf(InstanceOfAssertFactories.array(String[].class))
+				.containsExactly(argumentNames);
 	}
 
-	private @NotNull AbstractAspectJAdvice getAspectJAdvice(final String methodName) {
-		AbstractAspectJAdvice advice = new TestAspectJAdvice(getMethod(methodName), mock(AspectJExpressionPointcut.class), mock(AspectInstanceFactory.class));
+	private AbstractAspectJAdvice getAspectJAdvice(final String methodName) {
+		AbstractAspectJAdvice advice = new TestAspectJAdvice(getMethod(methodName),
+				mock(AspectJExpressionPointcut.class), mock(AspectInstanceFactory.class));
 		advice.setArgumentNamesFromStringArray("arg1", "arg2");
 		return advice;
 	}
 
-	private Method getMethod(final String name) {
-		return Arrays.stream(this.getClass().getDeclaredMethods()).filter(m -> m.getName().equals(name)).findFirst().orElseThrow();
+	private Method getMethod(final String methodName) {
+		return Arrays.stream(Sample.class.getDeclaredMethods())
+				.filter(method -> method.getName().equals(methodName)).findFirst()
+				.orElseThrow();
 	}
 
-	private String[] getArgumentNames(final AbstractAspectJAdvice advice) {
-		try {
-			Field field = AbstractAspectJAdvice.class.getDeclaredField("argumentNames");
-			field.setAccessible(true);
-			return (String[]) field.get(advice);
-		}
-		catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+	@SuppressWarnings("serial")
 	public static class TestAspectJAdvice extends AbstractAspectJAdvice {
-		@Serial private static final long serialVersionUID = 1L;
 
-		public TestAspectJAdvice(Method aspectJAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aspectInstanceFactory) {
+		public TestAspectJAdvice(Method aspectJAdviceMethod, AspectJExpressionPointcut pointcut,
+				AspectInstanceFactory aspectInstanceFactory) {
 			super(aspectJAdviceMethod, pointcut, aspectInstanceFactory);
 		}
 
@@ -115,18 +110,26 @@ class AbstractAspectJAdviceTests {
 		}
 	}
 
-	void methodWithJoinPointAsFirstParameter(JoinPoint joinPoint, String arg1, String arg2) {
+	@SuppressWarnings("unused")
+	static class Sample {
+
+		void methodWithNoJoinPoint(String arg1, String arg2) {
+		}
+
+		void methodWithJoinPointAsFirstParameter(JoinPoint joinPoint, String arg1, String arg2) {
+		}
+
+		void methodWithJoinPointAsLastParameter(String arg1, String arg2, JoinPoint joinPoint) {
+		}
+
+		void methodWithJoinPointAsMiddleParameter(String arg1, JoinPoint joinPoint, String arg2) {
+		}
+
+		void methodWithProceedingJoinPoint(ProceedingJoinPoint joinPoint, String arg1, String arg2) {
+		}
+
+		void methodWithStaticPart(JoinPoint.StaticPart staticPart, String arg1, String arg2) {
+		}
 	}
 
-	void methodWithJoinPointAsLastParameter(String arg1, String arg2, JoinPoint joinPoint) {
-	}
-
-	void methodWithJoinPointAsMiddleParameter(String arg1, JoinPoint joinPoint, String arg2) {
-	}
-
-	void methodWithProceedingJoinPoint(ProceedingJoinPoint joinPoint, String arg1, String arg2) {
-	}
-
-	void methodWithStaticPart(JoinPoint.StaticPart staticPart, String arg1, String arg2) {
-	}
 }
