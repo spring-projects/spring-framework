@@ -455,18 +455,7 @@ public class HttpHeaders implements Serializable {
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
 		Assert.notNull(headers, "MultiValueMap must not be null");
-		if (headers == EMPTY) {
-			this.headers = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
-		}
-		else if (headers instanceof HttpHeaders httpHeaders) {
-			while (httpHeaders.headers instanceof HttpHeaders wrapped) {
-				httpHeaders = wrapped;
-			}
-			this.headers = httpHeaders.headers;
-		}
-		else {
-			this.headers = headers;
-		}
+		this.headers = headers;
 	}
 
 	/**
