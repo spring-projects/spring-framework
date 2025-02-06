@@ -714,22 +714,20 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class CracResourceAdapter implements org.crac.Resource {
 
-		private @Nullable CyclicBarrier barrier;
+		private CyclicBarrier stepToRestore = new CyclicBarrier(2);
+		private CyclicBarrier finishRestore = new CyclicBarrier(2);
+
+		private void preventShutdown() {
+			waitBarrier(this.stepToRestore);
+			// Checkpoint happens here
+			waitBarrier(this.finishRestore);
+		}
 
 		@Override
 		public void beforeCheckpoint(org.crac.Context<? extends org.crac.Resource> context) {
-			// A non-daemon thread for preventing an accidental JVM shutdown before the checkpoint
-			this.barrier = new CyclicBarrier(2);
-
-			Thread thread = new Thread(() -> {
-				awaitPreventShutdownBarrier();
-				// Checkpoint happens here
-				awaitPreventShutdownBarrier();
-			}, "prevent-shutdown");
-
+			Thread thread = new Thread(this::preventShutdown, "prevent-shutdown");
 			thread.setDaemon(false);
 			thread.start();
-			awaitPreventShutdownBarrier();
 
 			logger.debug("Stopping Spring-managed lifecycle beans before JVM checkpoint");
 			stopForRestart();
@@ -737,11 +735,24 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		@Override
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
+			// Unlock barrier for beforeCheckpoint
+			try {
+				this.stepToRestore.await();
+			}
+			catch (Exception ex) {
+				logger.trace("Exception from stepToRestore barrier", ex);
+			}
+
 			logger.info("Restarting Spring-managed lifecycle beans after JVM restore");
 			restartAfterStop();
 
-			// Barrier for prevent-shutdown thread not needed anymore
-			this.barrier = null;
+			// Unlock barrier for afterRestore to shutdown "prevent-shutdown" thread
+			try {
+				this.finishRestore.await();
+			}
+			catch (Exception ex) {
+				logger.trace("Exception from stepToRestore barrier", ex);
+			}
 
 			if (!checkpointOnRefresh) {
 				logger.info("Spring-managed lifecycle restart completed (restored JVM running for " +
@@ -749,11 +760,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 
-		private void awaitPreventShutdownBarrier() {
+		private void waitBarrier(CyclicBarrier barrier) {
 			try {
-				if (this.barrier != null) {
-					this.barrier.await();
-				}
+				barrier.await();
 			}
 			catch (Exception ex) {
 				logger.trace("Exception from prevent-shutdown barrier", ex);
