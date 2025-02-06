@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,8 +318,16 @@ final class QuartzCronField extends CronField {
 	private static TemporalAdjuster dayOfWeekInMonth(int ordinal, DayOfWeek dayOfWeek) {
 		TemporalAdjuster adjuster = TemporalAdjusters.dayOfWeekInMonth(ordinal, dayOfWeek);
 		return temporal -> {
-			Temporal result = adjuster.adjustInto(temporal);
-			return rollbackToMidnight(temporal, result);
+			// TemporalAdjusters can overflow to a different month
+			// in this case, attempt the same adjustment with the next/previous month
+			for (int i = 0; i < 12; i++) {
+				Temporal result = adjuster.adjustInto(temporal);
+				if (result.get(ChronoField.MONTH_OF_YEAR) == temporal.get(ChronoField.MONTH_OF_YEAR)) {
+					return rollbackToMidnight(temporal, result);
+				}
+				temporal = result;
+			}
+			return null;
 		};
 	}
 
