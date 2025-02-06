@@ -18,7 +18,7 @@ dependencies {
 	api(platform("org.assertj:assertj-bom:3.27.3"))
 	api(platform("org.eclipse.jetty:jetty-bom:12.1.0.alpha1"))
 	api(platform("org.eclipse.jetty.ee11:jetty-ee11-bom:12.1.0.alpha1"))
-	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0"))
+	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.1"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.7.3"))
 	api(platform("org.junit:junit-bom:5.11.4"))
 	api(platform("org.mockito:mockito-bom:5.15.2"))
