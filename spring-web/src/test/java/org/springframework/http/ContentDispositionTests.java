@@ -181,6 +181,14 @@ class ContentDispositionTests {
 	}
 
 	@Test
+	void parseAttributesCaseIgnore() {
+		ContentDisposition cd = ContentDisposition.parse("form-data; Name=\"foo\"; FileName=\"bar.txt\"");
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("bar.txt");
+		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"bar.txt\"");
+	}
+
+	@Test
 	void parseEmpty() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse(""));
 	}
@@ -300,14 +308,6 @@ class ContentDispositionTests {
 		String rfc5987Filename = parts[0] + "; " + parts[2];
 		assertThat(ContentDisposition.parse(rfc5987Filename).getFilename())
 				.isEqualTo(filename);
-	}
-
-	@Test
-	void parseAttributesCaseIgnore() {
-		ContentDisposition cd = ContentDisposition.parse("form-data; Name=\"foo\"; FileName=\"bar.txt\"");
-		assertThat(cd.getName()).isEqualTo("foo");
-		assertThat(cd.getFilename()).isEqualTo("bar.txt");
-		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"bar.txt\"");
 	}
 
 }
