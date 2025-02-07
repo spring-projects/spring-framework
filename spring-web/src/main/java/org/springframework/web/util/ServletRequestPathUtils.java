@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,6 +179,25 @@ public abstract class ServletRequestPathUtils {
 				request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) != null);
 	}
 
+	/**
+	 * Check if the Servlet is mapped by a path prefix, and if so return that
+	 * path prefix.
+	 * @param request the current request
+	 * @return the prefix, or {@code null} if the Servlet is not mapped by prefix
+	 * @since 6.2.3
+	 */
+	public static @Nullable String getServletPathPrefix(HttpServletRequest request) {
+		HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
+		mapping = (mapping != null ? mapping : request.getHttpServletMapping());
+		if (ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {
+			String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+			servletPath = (servletPath != null ? servletPath : request.getServletPath());
+			servletPath = (servletPath.endsWith("/") ? servletPath.substring(0, servletPath.length() - 1) : servletPath);
+			return servletPath;
+		}
+		return null;
+	}
+
 
 	/**
 	 * Simple wrapper around the default {@link RequestPath} implementation that
@@ -251,21 +270,11 @@ public abstract class ServletRequestPathUtils {
 			String requestUri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 			requestUri = (requestUri != null ? requestUri : request.getRequestURI());
 			String servletPathPrefix = getServletPathPrefix(request);
-			return (StringUtils.hasText(servletPathPrefix) ?
-					new ServletRequestPath(new PathElements(requestUri, request.getContextPath(), servletPathPrefix)) :
-					RequestPath.parse(requestUri, request.getContextPath()));
-		}
-
-		private static @Nullable String getServletPathPrefix(HttpServletRequest request) {
-			HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
-			mapping = (mapping != null ? mapping : request.getHttpServletMapping());
-			if (ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {
-				String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
-				servletPath = (servletPath != null ? servletPath : request.getServletPath());
-				servletPath = (servletPath.endsWith("/") ? servletPath.substring(0, servletPath.length() - 1) : servletPath);
-				return UriUtils.encodePath(servletPath, StandardCharsets.UTF_8);
+			if (!StringUtils.hasLength(servletPathPrefix)) {
+				return RequestPath.parse(requestUri, request.getContextPath());
 			}
-			return null;
+			servletPathPrefix = UriUtils.encodePath(servletPathPrefix, StandardCharsets.UTF_8);
+			return new ServletRequestPath(new PathElements(requestUri, request.getContextPath(), servletPathPrefix));
 		}
 
 		record PathElements(String rawPath, @Nullable String contextPath, String servletPathPrefix) {
