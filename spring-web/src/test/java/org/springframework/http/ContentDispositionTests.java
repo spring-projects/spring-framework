@@ -302,4 +302,12 @@ class ContentDispositionTests {
 				.isEqualTo(filename);
 	}
 
+	@Test
+	void parseAttributesCaseInsensitive() {
+		ContentDisposition cd = ContentDisposition.parse("form-data; Name=\"foo\"; FileName=\"bar.txt\"");
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("bar.txt");
+		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"bar.txt\"");
+	}
+
 }
