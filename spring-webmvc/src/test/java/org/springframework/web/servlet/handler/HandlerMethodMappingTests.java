@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,6 +292,23 @@ public class HandlerMethodMappingTests {
 		HandlerMethod handlerMethod = this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
 	}
 
+	@Test
+	void registerCustomHandlerMethod() throws Exception {
+		this.mapping.setCustomerHandlerMethod(true);
+		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
+		request.addParameter("abort", "true");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		HandlerExecutionChain chain = this.mapping.getHandler(request);
+
+		assertThat(chain).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(200);
+	}
 
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
@@ -301,6 +318,8 @@ public class HandlerMethodMappingTests {
 		private final PathMatcher pathMatcher = new AntPathMatcher();
 
 		private final List<String> matches = new ArrayList<>();
+
+		private boolean customerHandlerMethod;
 
 		public MyHandlerMethodMapping() {
 			setHandlerMethodMappingNamingStrategy(new SimpleMappingNamingStrategy());
@@ -324,6 +343,16 @@ public class HandlerMethodMappingTests {
 		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
+		}
+
+		public void setCustomerHandlerMethod(boolean customerHandlerMethod) {
+			this.customerHandlerMethod = customerHandlerMethod;
+		}
+
+		@Override
+		protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+			return (this.customerHandlerMethod ?
+					new CustomHandlerMethod(handler, method) : super.createHandlerMethod(handler, method));
 		}
 
 		@Override
@@ -355,6 +384,7 @@ public class HandlerMethodMappingTests {
 
 	}
 
+
 	private static class SimpleMappingNamingStrategy implements HandlerMethodMappingNamingStrategy<String> {
 
 		@Override
@@ -362,6 +392,16 @@ public class HandlerMethodMappingTests {
 			return handlerMethod.getMethod().getName();
 		}
 	}
+
+
+	private static class CustomHandlerMethod extends HandlerMethod {
+
+		public CustomHandlerMethod(Object bean, Method method) {
+			super(bean, method);
+		}
+
+	}
+
 
 	@Controller
 	static class MyHandler {
