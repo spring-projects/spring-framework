@@ -16,11 +16,16 @@
 
 package org.springframework.web.util;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.MappingMatch;
@@ -110,6 +115,14 @@ public abstract class ServletRequestPathUtils {
 		request.removeAttribute(PATH_ATTRIBUTE);
 	}
 
+	/**
+	 * Provide a {@link Filter} that manages the parsing and caching of a {@link RequestPath}.
+	 * @return the described {@link Filter}
+	 * @since 6.2.3
+	 */
+	public static Filter getParsedRequestPathCacheFilter() {
+		return new RequestPathCacheFilter();
+	}
 
 	// Methods to select either parsed RequestPath or resolved String lookupPath
 
@@ -312,4 +325,20 @@ public abstract class ServletRequestPathUtils {
 		}
 	}
 
+	private static final class RequestPathCacheFilter implements Filter {
+		public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+			if (!(req instanceof HttpServletRequest request)) {
+				chain.doFilter(req, res);
+				return;
+			}
+			RequestPath previousRequestPath = (RequestPath) request.getAttribute(PATH_ATTRIBUTE);
+			try {
+				parseAndCache(request);
+				chain.doFilter(req, res);
+			}
+			finally {
+				setParsedRequestPath(previousRequestPath, request);
+			}
+		}
+	}
 }

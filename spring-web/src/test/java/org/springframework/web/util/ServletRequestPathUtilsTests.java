@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package org.springframework.web.util;
 
+import java.io.IOException;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.MappingMatch;
 import org.junit.jupiter.api.Test;
 
@@ -88,6 +94,35 @@ class ServletRequestPathUtilsTests {
 				.withMessage("Invalid contextPath '/persons/': must start with '/' and not end with '/'");
 	}
 
+	@Test
+	void filterParsesAndCachesThenCleansUp() throws IOException, ServletException {
+		MockHttpServletRequest request = createRequest("/servlet/request", "", "/servlet", "/request");
+		Filter filter = ServletRequestPathUtils.getParsedRequestPathCacheFilter();
+		filter.doFilter(request, null, (req, res) -> {
+			RequestPath currentPath = ServletRequestPathUtils.getParsedRequestPath(request);
+			assertThat(currentPath.pathWithinApplication().value()).isEqualTo("/request");
+		});
+		assertThat(ServletRequestPathUtils.hasParsedRequestPath(request)).isFalse();
+	}
+
+	@Test
+	void filterParsesCachesAndThenRestores() throws IOException, ServletException {
+		MockHttpServletRequest request = createRequest("/servlet/request", "", "/servlet", "/request");
+		RequestPath requestPath = ServletRequestPathUtils.parseAndCache(request);
+
+		HttpServletMapping mapping = new MockHttpServletMapping("/include", "", "myServlet", MappingMatch.PATH);
+		request.setAttribute(RequestDispatcher.INCLUDE_MAPPING, mapping);
+		request.setAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE, "/servlet");
+		request.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "/servlet/include");
+
+		Filter filter = ServletRequestPathUtils.getParsedRequestPathCacheFilter();
+		filter.doFilter(request, null, (req, res) -> {
+			RequestPath currentPath = ServletRequestPathUtils.getParsedRequestPath(request);
+			assertThat(currentPath.pathWithinApplication().value()).isEqualTo("/include");
+		});
+		assertThat(requestPath).isEqualTo(ServletRequestPathUtils.getParsedRequestPath(request));
+	}
+
 	private void testParseAndCache(
 			String requestUri, String contextPath, String servletPath, String pathWithinApplication) {
 
@@ -100,13 +135,19 @@ class ServletRequestPathUtilsTests {
 	private static RequestPath createRequestPath(
 			String requestUri, String contextPath, String servletPath, String pathWithinApplication) {
 
+		MockHttpServletRequest request = createRequest(requestUri, contextPath, servletPath, pathWithinApplication);
+		return ServletRequestPathUtils.parseAndCache(request);
+	}
+
+	private static MockHttpServletRequest createRequest(
+			String requestUri, String contextPath, String servletPath, String pathWithinApplication) {
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestUri);
 		request.setContextPath(contextPath);
 		request.setServletPath(servletPath);
 		request.setHttpServletMapping(new MockHttpServletMapping(
 				pathWithinApplication, contextPath, "myServlet", MappingMatch.PATH));
-
-		return ServletRequestPathUtils.parseAndCache(request);
+		return request;
 	}
 
 }
