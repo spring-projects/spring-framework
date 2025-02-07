@@ -1137,7 +1137,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <V> @Nullable V createIndexedValue(
+	@Nullable
+	private <V> V createIndexedValue(
 			String paramPath, Class<?> paramType, ResolvableType elementType,
 			String indexedPath, ValueResolver valueResolver) {
 
