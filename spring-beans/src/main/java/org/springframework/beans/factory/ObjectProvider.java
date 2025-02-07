@@ -55,10 +55,13 @@ import org.springframework.lang.Nullable;
 public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 
 	/**
-	 * A predicate for unfiltered type matches.
+	 * A predicate for unfiltered type matches, including non-default candidates
+	 * but still excluding non-autowire candidates when used on injection points.
 	 * @since 6.2.3
 	 * @see #stream(Predicate)
 	 * @see #orderedStream(Predicate)
+	 * @see org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()
+	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#isDefaultCandidate()
 	 */
 	Predicate<Class<?>> UNFILTERED = (clazz -> true);
 
@@ -210,7 +213,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * without specific ordering guarantees (but typically in registration order).
 	 * <p>Note: The result may be filtered by default according to qualifiers on the
 	 * injection point versus target beans and the general autowire candidate status
-	 * of matching beans. For custom filtering against the raw type matches, use
+	 * of matching beans. For custom filtering against type-matching candidates, use
 	 * {@link #stream(Predicate)} instead (potentially with {@link #UNFILTERED}).
 	 * @since 5.1
 	 * @see #iterator()
@@ -235,7 +238,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * if necessary.
 	 * <p>Note: The result may be filtered by default according to qualifiers on the
 	 * injection point versus target beans and the general autowire candidate status
-	 * of matching beans. For custom filtering against the raw type matches, use
+	 * of matching beans. For custom filtering against type-matching candidates, use
 	 * {@link #stream(Predicate)} instead (potentially with {@link #UNFILTERED}).
 	 * @since 5.1
 	 * @see #stream()
