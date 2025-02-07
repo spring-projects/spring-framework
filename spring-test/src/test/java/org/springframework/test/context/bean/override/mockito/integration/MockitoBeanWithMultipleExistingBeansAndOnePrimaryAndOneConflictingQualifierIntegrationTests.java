@@ -20,67 +20,80 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.bean.override.example.ExampleGenericServiceCaller;
-import org.springframework.test.context.bean.override.example.IntegerExampleGenericService;
-import org.springframework.test.context.bean.override.example.StringExampleGenericService;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
-import static org.springframework.test.mockito.MockitoAssertions.assertMockName;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsNotMock;
 
 /**
  * Tests that {@link MockitoBean @MockitoBean} can be used to mock a bean when
- * there are multiple candidates and one is primary.
+ * there are multiple candidates; one is primary; and the field name matches
+ * the name of a candidate which is not the primary candidate.
  *
  * @author Sam Brannen
- * @author Phillip Webb
- * @since 6.2
- * @see MockitoBeanWithMultipleExistingBeansAndOnePrimaryAndOneConflictingQualifierIntegrationTests
+ * @since 6.2.3
+ * @see MockitoBeanWithMultipleExistingBeansAndOnePrimaryIntegrationTests
  * @see MockitoBeanWithMultipleExistingBeansAndExplicitBeanNameIntegrationTests
  * @see MockitoBeanWithMultipleExistingBeansAndExplicitQualifierIntegrationTests
  */
 @ExtendWith(SpringExtension.class)
-class MockitoBeanWithMultipleExistingBeansAndOnePrimaryIntegrationTests {
+class MockitoBeanWithMultipleExistingBeansAndOnePrimaryAndOneConflictingQualifierIntegrationTests {
 
+	// The name of this field must be "baseService" to match the name of the non-primary candidate.
 	@MockitoBean
-	StringExampleGenericService mock;
+	BaseService baseService;
 
 	@Autowired
-	ExampleGenericServiceCaller caller;
+	Client client;
 
 
-	@Test
-	void test() {
-		assertIsMock(mock);
-		assertMockName(mock, "two");
+	@Test  // gh-34374
+	void test(ApplicationContext context) {
+		assertIsMock(baseService, "baseService field");
+		assertIsMock(context.getBean("extendedService"), "extendedService bean");
+		assertIsNotMock(context.getBean("baseService"), "baseService bean");
 
-		given(mock.greeting()).willReturn("mocked");
-		assertThat(caller.sayGreeting()).isEqualTo("I say mocked 123");
-		then(mock).should().greeting();
+		client.callService();
+
+		then(baseService).should().doSomething();
 	}
 
 
 	@Configuration(proxyBeanMethods = false)
-	@Import({ ExampleGenericServiceCaller.class, IntegerExampleGenericService.class })
+	@Import({ BaseService.class, ExtendedService.class, Client.class })
 	static class Config {
+	}
 
-		@Bean
-		StringExampleGenericService one() {
-			return new StringExampleGenericService("one");
+	@Component("baseService")
+	static class BaseService {
+
+		public void doSomething() {
+		}
+	}
+
+	@Primary
+	@Component("extendedService")
+	static class ExtendedService extends BaseService {
+	}
+
+	@Component("client")
+	static class Client {
+
+		private final BaseService baseService;
+
+		public Client(BaseService baseService) {
+			this.baseService = baseService;
 		}
 
-		@Bean
-		@Primary
-		StringExampleGenericService two() {
-			return new StringExampleGenericService("two");
+		public void callService() {
+			this.baseService.doSomething();
 		}
 	}
 

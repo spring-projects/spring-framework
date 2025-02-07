@@ -250,26 +250,21 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		if (beanName == null) {
 			// We are wrapping an existing bean by-type.
 			Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, handler, true);
-			int candidateCount = candidateNames.size();
-			if (candidateCount == 1) {
-				beanName = candidateNames.iterator().next();
+			String uniqueCandidate = determineUniqueCandidate(beanFactory, candidateNames, beanType, field);
+			if (uniqueCandidate != null) {
+				beanName = uniqueCandidate;
 			}
 			else {
-				String primaryCandidate = determinePrimaryCandidate(beanFactory, candidateNames, beanType.toClass());
-				if (primaryCandidate != null) {
-					beanName = primaryCandidate;
+				String message = "Unable to select a bean to wrap: ";
+				int candidateCount = candidateNames.size();
+				if (candidateCount == 0) {
+					message += "there are no beans of type %s%s.".formatted(beanType, requiredByField(field));
 				}
 				else {
-					String message = "Unable to select a bean to wrap: ";
-					if (candidateCount == 0) {
-						message += "there are no beans of type %s%s.".formatted(beanType, requiredByField(field));
-					}
-					else {
-						message += "found %d beans of type %s%s: %s"
-								.formatted(candidateCount, beanType, requiredByField(field), candidateNames);
-					}
-					throw new IllegalStateException(message);
+					message += "found %d beans of type %s%s: %s"
+							.formatted(candidateCount, beanType, requiredByField(field), candidateNames);
 				}
+				throw new IllegalStateException(message);
 			}
 			beanName = BeanFactoryUtils.transformedBeanName(beanName);
 		}
@@ -287,18 +282,20 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		this.beanOverrideRegistry.registerBeanOverrideHandler(handler, beanName);
 	}
 
-	private @Nullable String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
+	private static @Nullable String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
 			boolean requireExistingBean) {
 
 		Field field = handler.getField();
 		ResolvableType beanType = handler.getBeanType();
 
 		Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, handler, true);
-		int candidateCount = candidateNames.size();
-		if (candidateCount == 1) {
-			return candidateNames.iterator().next();
+		String uniqueCandidate = determineUniqueCandidate(beanFactory, candidateNames, beanType, field);
+		if (uniqueCandidate != null) {
+			return uniqueCandidate;
 		}
-		else if (candidateCount == 0) {
+
+		int candidateCount = candidateNames.size();
+		if (candidateCount == 0) {
 			if (requireExistingBean) {
 				throw new IllegalStateException(
 						"Unable to override bean: there are no beans of type %s%s."
@@ -307,18 +304,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			return null;
 		}
 
-		String primaryCandidate = determinePrimaryCandidate(beanFactory, candidateNames, beanType.toClass());
-		if (primaryCandidate != null) {
-			return primaryCandidate;
-		}
-
 		throw new IllegalStateException(
 				"Unable to select a bean to override: found %d beans of type %s%s: %s"
 					.formatted(candidateCount, beanType, requiredByField(field), candidateNames));
 	}
 
-	private Set<String> getExistingBeanNamesByType(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
-			boolean checkAutowiredCandidate) {
+	private static Set<String> getExistingBeanNamesByType(ConfigurableListableBeanFactory beanFactory,
+			BeanOverrideHandler handler, boolean checkAutowiredCandidate) {
 
 		Field field = handler.getField();
 		ResolvableType resolvableType = handler.getBeanType();
@@ -345,24 +337,54 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		// Filter out scoped proxy targets.
 		beanNames.removeIf(ScopedProxyUtils::isScopedTarget);
 
-		// In case of multiple matches, fall back on the field's name as a last resort.
-		if (field != null && beanNames.size() > 1) {
+		return beanNames;
+	}
+
+	/**
+	 * Determine the unique candidate in the given set of bean names.
+	 * <p>Honors both <em>primary</em> and <em>fallback</em> semantics, and
+	 * otherwise matches against the field name as a <em>fallback qualifier</em>.
+	 * @return the name of the unique candidate, or {@code null} if none found
+	 * @since 6.2.3
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#determineAutowireCandidate
+	 */
+	private static @Nullable String determineUniqueCandidate(ConfigurableListableBeanFactory beanFactory,
+			Set<String> candidateNames, ResolvableType beanType, @Nullable Field field) {
+
+		// Step 0: none or only one
+		int candidateCount = candidateNames.size();
+		if (candidateCount == 0) {
+			return null;
+		}
+		if (candidateCount == 1) {
+			return candidateNames.iterator().next();
+		}
+
+		// Step 1: check primary candidate
+		String primaryCandidate = determinePrimaryCandidate(beanFactory, candidateNames, beanType.toClass());
+		if (primaryCandidate != null) {
+			return primaryCandidate;
+		}
+
+		// Step 2: use the field name as a fallback qualifier
+		if (field != null) {
 			String fieldName = field.getName();
-			if (beanNames.contains(fieldName)) {
-				return Set.of(fieldName);
+			if (candidateNames.contains(fieldName)) {
+				return fieldName;
 			}
 		}
-		return beanNames;
+
+		return null;
 	}
 
 	/**
 	 * Determine the primary candidate in the given set of bean names.
 	 * <p>Honors both <em>primary</em> and <em>fallback</em> semantics.
 	 * @return the name of the primary candidate, or {@code null} if none found
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#determinePrimaryCandidate(Map, Class)
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#determinePrimaryCandidate
 	 */
-	private static @Nullable String determinePrimaryCandidate(
-			ConfigurableListableBeanFactory beanFactory, Set<String> candidateBeanNames, Class<?> beanType) {
+	private static @Nullable String determinePrimaryCandidate(ConfigurableListableBeanFactory beanFactory,
+			Set<String> candidateBeanNames, Class<?> beanType) {
 
 		if (candidateBeanNames.isEmpty()) {
 			return null;
