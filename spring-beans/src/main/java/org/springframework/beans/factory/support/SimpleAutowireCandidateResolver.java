@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.beans.factory.support;
 
-import org.jspecify.annotations.Nullable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * {@link AutowireCandidateResolver} implementation to use when no annotation
@@ -37,42 +40,6 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	 */
 	public static final SimpleAutowireCandidateResolver INSTANCE = new SimpleAutowireCandidateResolver();
 
-
-	@Override
-	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
-		return bdHolder.getBeanDefinition().isAutowireCandidate();
-	}
-
-	@Override
-	public boolean isRequired(DependencyDescriptor descriptor) {
-		return descriptor.isRequired();
-	}
-
-	@Override
-	public boolean hasQualifier(DependencyDescriptor descriptor) {
-		return false;
-	}
-
-	@Override
-	public @Nullable String getSuggestedName(DependencyDescriptor descriptor) {
-		return null;
-	}
-
-	@Override
-	public @Nullable Object getSuggestedValue(DependencyDescriptor descriptor) {
-		return null;
-	}
-
-	@Override
-	public @Nullable Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
-		return null;
-	}
-
-	@Override
-	public @Nullable Class<?> getLazyResolutionProxyClass(DependencyDescriptor descriptor, @Nullable String beanName) {
-		return null;
-	}
-
 	/**
 	 * This implementation returns {@code this} as-is.
 	 * @see #INSTANCE
@@ -80,6 +47,33 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	@Override
 	public AutowireCandidateResolver cloneIfNecessary() {
 		return this;
+	}
+
+
+	/**
+	 * Resolve a map of all beans of the given type, also picking up beans defined in
+	 * ancestor bean factories, with the specific condition that each bean actually
+	 * has autowire candidate status. This matches simple injection point resolution
+	 * as implemented by this {@link AutowireCandidateResolver} strategy, including
+	 * beans which are not marked as default candidates but excluding beans which
+	 * are not even marked as autowire candidates.
+	 * @param lbf the bean factory
+	 * @param type the type of bean to match
+	 * @return the Map of matching bean instances, or an empty Map if none
+	 * @throws BeansException if a bean could not be created
+	 * @since 6.2.3
+	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
+	 * @see org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()
+	 * @see AbstractBeanDefinition#isDefaultCandidate()
+	 */
+	public static <T> Map<String, T> resolveAutowireCandidates(ConfigurableListableBeanFactory lbf, Class<T> type) {
+		Map<String, T> candidates = new LinkedHashMap<>();
+		for (String beanName : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(lbf, type)) {
+			if (AutowireUtils.isAutowireCandidate(lbf, beanName)) {
+				candidates.put(beanName, lbf.getBean(beanName, type));
+			}
+		}
+		return candidates;
 	}
 
 }

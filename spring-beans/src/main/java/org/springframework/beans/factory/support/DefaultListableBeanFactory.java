@@ -2480,6 +2480,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Override
 		public Stream<Object> stream(Predicate<Class<?>> customFilter) {
 			return Arrays.stream(getBeanNamesForTypedStream(this.descriptor.getResolvableType(), true))
+					.filter(name -> AutowireUtils.isAutowireCandidate(DefaultListableBeanFactory.this, name))
 					.filter(name -> customFilter.test(getType(name)))
 					.map(name -> getBean(name))
 					.filter(bean -> !(bean instanceof NullBean));
@@ -2493,7 +2494,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			Map<String, Object> matchingBeans = CollectionUtils.newLinkedHashMap(beanNames.length);
 			for (String beanName : beanNames) {
-				if (customFilter.test(getType(beanName))) {
+				if (AutowireUtils.isAutowireCandidate(DefaultListableBeanFactory.this, beanName) &&
+						customFilter.test(getType(beanName))) {
 					Object beanInstance = getBean(beanName);
 					if (!(beanInstance instanceof NullBean)) {
 						matchingBeans.put(beanName, beanInstance);

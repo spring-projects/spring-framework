@@ -49,6 +49,7 @@ import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -65,6 +66,7 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.SimpleAutowireCandidateResolver;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.IndexedTestBean;
@@ -1756,14 +1758,17 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
 		tb2.setFactoryMethodName("newTestBean2");
 		bf.registerBeanDefinition("testBean2", tb2);
+
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		RootBeanDefinition tb3 = new RootBeanDefinition(TestBean.class);
 		tb3.setAutowireCandidate(false);
 		tb3.setLazyInit(true);
-		bf.registerBeanDefinition("testBean3", tb3);
+		parent.registerBeanDefinition("testBean3", tb3);
 		RootBeanDefinition tb4 = new RootBeanDefinition(DerivedTestBean.class);
 		tb4.setDefaultCandidate(false);
 		tb4.setLazyInit(true);
-		bf.registerBeanDefinition("testBean4", tb4);
+		parent.registerBeanDefinition("testBean4", tb4);
+		bf.setParentBeanFactory(parent);
 
 		ObjectProviderInjectionBean bean = bf.getBean("annotatedBean", ObjectProviderInjectionBean.class);
 		assertThat(bean.streamTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
@@ -1772,16 +1777,19 @@ class AutowiredAnnotationBeanPostProcessorTests {
 				bf.getBean("testBean1", TestBean.class));
 		assertThat(bf.containsSingleton("testBean3")).isFalse();
 		assertThat(bean.plainTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
-				bf.getBean("testBean2", TestBean.class), bf.getBean("testBean3", TestBean.class));
+				bf.getBean("testBean2", TestBean.class));
 		assertThat(bean.plainTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
-				bf.getBean("testBean1", TestBean.class), bf.getBean("testBean3", TestBean.class));
+				bf.getBean("testBean1", TestBean.class));
 		assertThat(bf.containsSingleton("testBean4")).isFalse();
 		assertThat(bean.allTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
-				bf.getBean("testBean2", TestBean.class), bf.getBean("testBean3", TestBean.class),
-				bf.getBean("testBean4", TestBean.class));
+				bf.getBean("testBean2", TestBean.class), bf.getBean("testBean4", TestBean.class));
 		assertThat(bean.allTestBeansInOrder()).containsExactly(bf.getBean("testBean2", TestBean.class),
-				bf.getBean("testBean1", TestBean.class), bf.getBean("testBean3", TestBean.class),
-				bf.getBean("testBean4", TestBean.class));
+				bf.getBean("testBean1", TestBean.class), bf.getBean("testBean4", TestBean.class));
+
+		Map<String, TestBean> typeMatches = BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, TestBean.class);
+		assertThat(typeMatches.remove("testBean3")).isNotNull();
+		Map<String, TestBean> candidates = SimpleAutowireCandidateResolver.resolveAutowireCandidates(bf, TestBean.class);
+		assertThat(candidates).containsExactlyEntriesOf(candidates);
 	}
 
 	@Test
