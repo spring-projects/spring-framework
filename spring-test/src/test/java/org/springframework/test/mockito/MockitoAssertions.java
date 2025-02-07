@@ -42,7 +42,7 @@ public abstract class MockitoAssertions {
 	}
 
 	public static void assertIsNotMock(Object obj, String message) {
-		assertThat(isSpy(obj)).as("%s is a Mockito mock", message).isFalse();
+		assertThat(isMock(obj)).as("%s is a Mockito mock", message).isFalse();
 	}
 
 	public static void assertIsSpy(Object obj) {
