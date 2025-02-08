@@ -100,6 +100,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		return Flux.create(sink -> {
 			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize, headersCharset);
 			sink.onCancel(parser::onSinkCancel);
+			sink.onRequest(l -> parser.requestBuffer());
 			buffers.subscribe(parser);
 		});
 	}
