@@ -90,7 +90,7 @@ class MockitoBeansByTypeIntegrationTests implements TestInterface01 {
 
 
 	@MockitoBean(types = Service09.class)
-	static class BaseTestCase implements TestInterface08 {
+	class BaseTestCase implements TestInterface08 {
 
 		@Autowired
 		Service08 service08;
