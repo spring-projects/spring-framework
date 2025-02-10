@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
@@ -41,6 +43,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -143,16 +146,26 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType,
 						key -> getMetaAnnotationTypes(mergedAnnotation));
 				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
-					Object value = attributes.get("value");
+					Object value = attributes.get(MergedAnnotation.VALUE);
 					if (value instanceof String currentName && !currentName.isBlank()) {
 						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
 								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
-							logger.warn("""
-									Support for convention-based stereotype names is deprecated and will \
-									be removed in a future version of the framework. Please annotate the \
-									'value' attribute in @%s with @AliasFor(annotation=Component.class) \
-									to declare an explicit alias for @Component's 'value' attribute."""
-										.formatted(annotationType));
+							if (hasExplicitlyAliasedValueAttribute(mergedAnnotation.getType())) {
+								logger.warn("""
+										Although the 'value' attribute in @%s declares @AliasFor for an attribute \
+										other than @Component's 'value' attribute, the value is still used as the \
+										@Component name based on convention. As of Spring Framework 7.0, such a \
+										'value' attribute will no longer be used as the @Component name."""
+											.formatted(annotationType));
+							}
+							else {
+								logger.warn("""
+										Support for convention-based @Component names is deprecated and will \
+										be removed in a future version of the framework. Please annotate the \
+										'value' attribute in @%s with @AliasFor(annotation=Component.class) \
+										to declare an explicit alias for @Component's 'value' attribute."""
+											.formatted(annotationType));
+							}
 						}
 						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
@@ -216,7 +229,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		boolean isStereotype = metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
 				annotationType.equals("jakarta.inject.Named");
 
-		return (isStereotype && attributes.containsKey("value"));
+		return (isStereotype && attributes.containsKey(MergedAnnotation.VALUE));
 	}
 
 	/**
@@ -245,6 +258,16 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		Assert.state(beanClassName != null, "No bean class name set");
 		String shortClassName = ClassUtils.getShortName(beanClassName);
 		return StringUtils.uncapitalizeAsProperty(shortClassName);
+	}
+
+	/**
+	 * Determine if the supplied annotation type declares a {@code value()} attribute
+	 * with an explicit alias configured via {@link AliasFor @AliasFor}.
+	 * @since 6.2.3
+	 */
+	private static boolean hasExplicitlyAliasedValueAttribute(Class<? extends Annotation> annotationType) {
+		Method valueAttribute = ReflectionUtils.findMethod(annotationType, MergedAnnotation.VALUE);
+		return (valueAttribute != null && valueAttribute.isAnnotationPresent(AliasFor.class));
 	}
 
 }
