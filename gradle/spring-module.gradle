@@ -14,7 +14,7 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
 	errorprone 'com.uber.nullaway:nullaway:0.12.3'
-	errorprone 'com.google.errorprone:error_prone_core:2.35.1'
+	errorprone 'com.google.errorprone:error_prone_core:2.36.0'
 }
 
 pluginManager.withPlugin("kotlin") {
