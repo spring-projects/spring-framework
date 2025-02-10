@@ -175,7 +175,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		}
 		try {
 			HttpMethod httpMethod = request.getMethod();
-			if (HttpMethod.GET != httpMethod && CONNECT_METHOD != httpMethod) {
+			if (HttpMethod.GET != httpMethod && !CONNECT_METHOD.equals(httpMethod)) {
 				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 				response.getHeaders().setAllow(Set.of(HttpMethod.GET, CONNECT_METHOD));
 				if (logger.isErrorEnabled()) {
@@ -183,13 +183,24 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 				}
 				return false;
 			}
-			if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
-				handleInvalidUpgradeHeader(request, response);
-				return false;
-			}
-			if (!headers.getConnection().contains("Upgrade") && !headers.getConnection().contains("upgrade")) {
-				handleInvalidConnectHeader(request, response);
-				return false;
+			if (HttpMethod.GET == httpMethod) {
+				if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
+					handleInvalidUpgradeHeader(request, response);
+					return false;
+				}
+				List<String> connectionValue = headers.getConnection();
+				if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
+					handleInvalidConnectHeader(request, response);
+					return false;
+				}
+				String key = headers.getSecWebSocketKey();
+				if (key == null) {
+					if (logger.isErrorEnabled()) {
+						logger.error("Missing \"Sec-WebSocket-Key\" header");
+					}
+					response.setStatusCode(HttpStatus.BAD_REQUEST);
+					return false;
+				}
 			}
 			if (!isWebSocketVersionSupported(headers)) {
 				handleWebSocketVersionNotSupported(request, response);
@@ -197,14 +208,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			}
 			if (!isValidOrigin(request)) {
 				response.setStatusCode(HttpStatus.FORBIDDEN);
-				return false;
-			}
-			String wsKey = headers.getSecWebSocketKey();
-			if (wsKey == null) {
-				if (logger.isErrorEnabled()) {
-					logger.error("Missing \"Sec-WebSocket-Key\" header");
-				}
-				response.setStatusCode(HttpStatus.BAD_REQUEST);
 				return false;
 			}
 		}

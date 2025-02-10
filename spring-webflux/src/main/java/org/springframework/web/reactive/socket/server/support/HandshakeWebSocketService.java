@@ -198,23 +198,25 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		HttpMethod method = request.getMethod();
 		HttpHeaders headers = request.getHeaders();
 
-		if (HttpMethod.GET != method && CONNECT_METHOD != method) {
+		if (HttpMethod.GET != method && !CONNECT_METHOD.equals(method)) {
 			return Mono.error(new MethodNotAllowedException(
 					request.getMethod(), Set.of(HttpMethod.GET, CONNECT_METHOD)));
 		}
 
-		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
-			return handleBadRequest(exchange, "Invalid 'Upgrade' header: " + headers);
-		}
+		if (HttpMethod.GET == method) {
+			if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
+				return handleBadRequest(exchange, "Invalid 'Upgrade' header: " + headers);
+			}
 
-		List<String> connectionValue = headers.getConnection();
-		if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
-			return handleBadRequest(exchange, "Invalid 'Connection' header: " + headers);
-		}
+			List<String> connectionValue = headers.getConnection();
+			if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
+				return handleBadRequest(exchange, "Invalid 'Connection' header: " + headers);
+			}
 
-		String key = headers.getFirst(SEC_WEBSOCKET_KEY);
-		if (key == null) {
-			return handleBadRequest(exchange, "Missing \"Sec-WebSocket-Key\" header");
+			String key = headers.getFirst(SEC_WEBSOCKET_KEY);
+			if (key == null) {
+				return handleBadRequest(exchange, "Missing \"Sec-WebSocket-Key\" header");
+			}
 		}
 
 		String protocol = selectProtocol(headers, handler);

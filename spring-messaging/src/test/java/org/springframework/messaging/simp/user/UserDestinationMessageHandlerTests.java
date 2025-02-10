@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.user;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,26 @@ class UserDestinationMessageHandlerTests {
 		given(this.registry.getUser("joe")).willReturn(simpUser);
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
+
+		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+		Mockito.verify(this.brokerChannel).send(captor.capture());
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(captor.getValue());
+		assertThat(accessor.getDestination()).isEqualTo("/queue/foo-user123");
+		assertThat(accessor.getFirstNativeHeader(ORIGINAL_DESTINATION)).isEqualTo("/user/queue/foo");
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	void handleMessageWithoutSessionIds() {
+		UserDestinationResolver resolver = mock();
+		Message message = createWith(SimpMessageType.MESSAGE, "joe", null, "/user/joe/queue/foo");
+		UserDestinationResult result = new UserDestinationResult("/queue/foo-user123", Set.of("/queue/foo-user123"), "/user/queue/foo", "joe");
+		given(resolver.resolveDestination(message)).willReturn(result);
+
+		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
+		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, resolver);
+		handler.handleMessage(message);
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		Mockito.verify(this.brokerChannel).send(captor.capture());

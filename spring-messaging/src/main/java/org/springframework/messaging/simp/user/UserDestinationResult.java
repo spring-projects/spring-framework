@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,11 @@ public class UserDestinationResult {
 	private final Set<String> sessionIds;
 
 
-	public UserDestinationResult(String sourceDestination, Set<String> targetDestinations,
+	/**
+	 * Main constructor.
+	 */
+	public UserDestinationResult(
+			String sourceDestination, Set<String> targetDestinations,
 			String subscribeDestination, @Nullable String user) {
 
 		this(sourceDestination, targetDestinations, subscribeDestination, user, null);
@@ -113,7 +117,7 @@ public class UserDestinationResult {
 	/**
 	 * Return the session id for the targetDestination.
 	 */
-	public @Nullable Set<String> getSessionIds() {
+	public Set<String> getSessionIds() {
 		return this.sessionIds;
 	}
 
