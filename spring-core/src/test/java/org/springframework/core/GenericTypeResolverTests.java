@@ -18,20 +18,25 @@ package org.springframework.core;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.GenericTypeResolver.getTypeVariableMap;
+import static org.springframework.core.GenericTypeResolver.resolveParameterType;
+import static org.springframework.core.GenericTypeResolver.resolveReturnType;
 import static org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument;
 import static org.springframework.core.GenericTypeResolver.resolveType;
 import static org.springframework.core.GenericTypeResolver.resolveTypeArgument;
+import static org.springframework.core.GenericTypeResolver.resolveTypeArguments;
 import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
@@ -106,25 +111,25 @@ class GenericTypeResolverTests {
 	void testGetTypeVariableMap() {
 		Map<TypeVariable, Type> map;
 
-		map = GenericTypeResolver.getTypeVariableMap(MySimpleInterfaceType.class);
+		map = getTypeVariableMap(MySimpleInterfaceType.class);
 		assertThat(map.toString()).isEqualTo("{T=class java.lang.String}");
 
-		map = GenericTypeResolver.getTypeVariableMap(MyCollectionInterfaceType.class);
+		map = getTypeVariableMap(MyCollectionInterfaceType.class);
 		assertThat(map.toString()).isEqualTo("{T=java.util.Collection<java.lang.String>}");
 
-		map = GenericTypeResolver.getTypeVariableMap(MyCollectionSuperclassType.class);
+		map = getTypeVariableMap(MyCollectionSuperclassType.class);
 		assertThat(map.toString()).isEqualTo("{T=java.util.Collection<java.lang.String>}");
 
-		map = GenericTypeResolver.getTypeVariableMap(MySimpleTypeWithMethods.class);
+		map = getTypeVariableMap(MySimpleTypeWithMethods.class);
 		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
 
-		map = GenericTypeResolver.getTypeVariableMap(TopLevelClass.class);
+		map = getTypeVariableMap(TopLevelClass.class);
 		assertThat(map.toString()).isEqualTo("{}");
 
-		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.class);
+		map = getTypeVariableMap(TypedTopLevelClass.class);
 		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
 
-		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
+		map = getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
 		assertThat(map).hasSize(2);
 		Type t = null;
 		Type x = null;
@@ -142,19 +147,19 @@ class GenericTypeResolverTests {
 
 	@Test
 	void resolveTypeArgumentsOfAbstractType() {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(MyConcreteType.class, MyAbstractType.class);
+		Class<?>[] resolved = resolveTypeArguments(MyConcreteType.class, MyAbstractType.class);
 		assertThat(resolved).containsExactly(Character.class);
 	}
 
 	@Test  // SPR-11030
 	void getGenericsCannotBeResolved() {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
+		Class<?>[] resolved = resolveTypeArguments(List.class, Iterable.class);
 		assertThat(resolved).isNull();
 	}
 
 	@Test  // SPR-11052
 	void getRawMapTypeCannotBeResolved() {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
+		Class<?>[] resolved = resolveTypeArguments(Map.class, Map.class);
 		assertThat(resolved).isNull();
 	}
 
@@ -163,24 +168,36 @@ class GenericTypeResolverTests {
 	void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
 		MethodParameter methodParameter = MethodParameter.forExecutable(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
-		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
+		Class<?> resolved = resolveParameterType(methodParameter, WithArray.class);
 		assertThat(resolved).isEqualTo(Object[].class);
 	}
 
 	@Test  // SPR-11044
 	void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
-		Class<?> resolved = GenericTypeResolver.resolveReturnType(
+		Class<?> resolved = resolveReturnType(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
 		assertThat(resolved).isEqualTo(Object[].class);
 	}
 
 	@Test  // SPR-11763
 	void resolveIncompleteTypeVariables() {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
+		Class<?>[] resolved = resolveTypeArguments(IdFixingRepository.class, Repository.class);
 		assertThat(resolved).isNotNull();
 		assertThat(resolved).hasSize(2);
 		assertThat(resolved[0]).isEqualTo(Object.class);
 		assertThat(resolved[1]).isEqualTo(Long.class);
+	}
+
+	@Test  // gh-34386
+	void resolveVariableNameChange() {
+		Type resolved = resolveType(Repository.class.getTypeParameters()[0], ConcreteRepository.class);
+		assertThat(resolved).isEqualTo(String.class);
+		Method method = method(Repository.class,"store", Supplier.class);
+		resolved = resolveType(method.getGenericParameterTypes()[0], ConcreteRepository.class);
+		assertThat(resolved).isInstanceOf(ParameterizedType.class);
+		ParameterizedType pt = (ParameterizedType) resolved;
+		assertThat(pt.getRawType()).isEqualTo(Supplier.class);
+		assertThat(pt.getActualTypeArguments()[0]).isEqualTo(String.class);
 	}
 
 	@Test
@@ -398,9 +415,15 @@ class GenericTypeResolverTests {
 	}
 
 	interface Repository<T, ID extends Serializable> {
+
+		default void store(Supplier<T> t) {
+		}
 	}
 
-	interface IdFixingRepository<T> extends Repository<T, Long> {
+	interface IdFixingRepository<V> extends Repository<V, Long> {
+	}
+
+	static class ConcreteRepository implements IdFixingRepository<String> {
 	}
 
 	static class WithMethodParameter {
