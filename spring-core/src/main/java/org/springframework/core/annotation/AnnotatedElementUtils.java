@@ -478,7 +478,7 @@ public abstract class AnnotatedElementUtils {
 	 * attributes from all annotations found, or {@code null} if not found
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
-	public static MultiValueMap<String, @Nullable Object> getAllAnnotationAttributes(
+	public static @Nullable MultiValueMap<String, @Nullable Object> getAllAnnotationAttributes(
 			AnnotatedElement element, String annotationName) {
 
 		return getAllAnnotationAttributes(element, annotationName, false, false);
@@ -502,7 +502,7 @@ public abstract class AnnotatedElementUtils {
 	 * @return a {@link MultiValueMap} keyed by attribute name, containing the annotation
 	 * attributes from all annotations found, or {@code null} if not found
 	 */
-	public static MultiValueMap<String, @Nullable Object> getAllAnnotationAttributes(AnnotatedElement element,
+	public static @Nullable MultiValueMap<String, @Nullable Object> getAllAnnotationAttributes(AnnotatedElement element,
 			String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, nestedAnnotationsAsMap);
