@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,11 +280,10 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 			return this.messagingTemplate;
 		}
 
-		public void send(UserDestinationResult destinationResult, Message<?> message) throws MessagingException {
-			Iterator<String> itr = destinationResult.getSessionIds().iterator();
-
-			for (String target : destinationResult.getTargetDestinations()) {
-				String sessionId = (itr != null && itr.hasNext() ? itr.next() : null);
+		public void send(UserDestinationResult result, Message<?> message) throws MessagingException {
+			Iterator<String> itr = result.getSessionIds().iterator();
+			for (String target : result.getTargetDestinations()) {
+				String sessionId = (itr.hasNext() ? itr.next() : null);
 				getTemplateToUse(sessionId).send(target, message);
 			}
 		}
