@@ -60,6 +60,7 @@ import org.springframework.util.Assert;
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 6.2
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
@@ -169,8 +170,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			}
 			else if (requireExistingBean) {
 				Field field = handler.getField();
-				throw new IllegalStateException(
-						"Unable to replace bean: there is no bean with name '%s' and type %s%s."
+				throw new IllegalStateException("""
+						Unable to replace bean: there is no bean with name '%s' and type %s%s. \
+						If the bean is defined in a @Bean method, make sure the return type is the \
+						most specific type possible (for example, the concrete implementation type)."""
 							.formatted(beanName, handler.getBeanType(), requiredByField(field)));
 			}
 			// 4) We are creating a bean by-name with the provided beanName.
@@ -258,7 +261,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				String message = "Unable to select a bean to wrap: ";
 				int candidateCount = candidateNames.size();
 				if (candidateCount == 0) {
-					message += "there are no beans of type %s%s.".formatted(beanType, requiredByField(field));
+					message += """
+							there are no beans of type %s%s. \
+							If the bean is defined in a @Bean method, make sure the return type is the \
+							most specific type possible (for example, the concrete implementation type)."""
+								.formatted(beanType, requiredByField(field));
 				}
 				else {
 					message += "found %d beans of type %s%s: %s"
@@ -272,8 +279,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			// We are wrapping an existing bean by-name.
 			Set<String> candidates = getExistingBeanNamesByType(beanFactory, handler, false);
 			if (!candidates.contains(beanName)) {
-				throw new IllegalStateException(
-						"Unable to wrap bean: there is no bean with name '%s' and type %s%s."
+				throw new IllegalStateException("""
+						Unable to wrap bean: there is no bean with name '%s' and type %s%s. \
+						If the bean is defined in a @Bean method, make sure the return type is the \
+						most specific type possible (for example, the concrete implementation type)."""
 							.formatted(beanName, beanType, requiredByField(field)));
 			}
 		}
@@ -297,8 +306,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		int candidateCount = candidateNames.size();
 		if (candidateCount == 0) {
 			if (requireExistingBean) {
-				throw new IllegalStateException(
-						"Unable to override bean: there are no beans of type %s%s."
+				throw new IllegalStateException("""
+						Unable to override bean: there are no beans of type %s%s. \
+						If the bean is defined in a @Bean method, make sure the return type is the \
+						most specific type possible (for example, the concrete implementation type)."""
 							.formatted(beanType, requiredByField(field)));
 			}
 			return null;
