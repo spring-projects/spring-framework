@@ -189,6 +189,17 @@ class DataBinderConstructTests {
 	}
 
 	@Test
+	void simpleListBindingEmptyBrackets() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).containsExactly(1);
+	}
+
+	@Test
 	void simpleMapBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerMap[a]", "1", "integerMap[b]", "2"));
 
