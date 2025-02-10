@@ -22,13 +22,13 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -49,17 +49,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private HttpMethod httpMethod;
 
-	@Nullable
-	private String uriPath;
+	private @Nullable String uriPath;
 
-	@Nullable
-	private String contextPath;
+	private @Nullable String contextPath;
 
-	@Nullable
-	private SslInfo sslInfo;
+	private @Nullable SslInfo sslInfo;
 
-	@Nullable
-	private InetSocketAddress remoteAddress;
+	private @Nullable InetSocketAddress remoteAddress;
 
 	private final Flux<DataBuffer> body;
 
@@ -182,11 +178,9 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private static class MutatedServerHttpRequest extends AbstractServerHttpRequest {
 
-		@Nullable
-		private final SslInfo sslInfo;
+		private final @Nullable SslInfo sslInfo;
 
-		@Nullable
-		private final InetSocketAddress remoteAddress;
+		private final @Nullable InetSocketAddress remoteAddress;
 
 		private final Flux<DataBuffer> body;
 
@@ -209,20 +203,17 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		}
 
 		@Override
-		@Nullable
-		public InetSocketAddress getLocalAddress() {
+		public @Nullable InetSocketAddress getLocalAddress() {
 			return this.originalRequest.getLocalAddress();
 		}
 
 		@Override
-		@Nullable
-		public InetSocketAddress getRemoteAddress() {
+		public @Nullable InetSocketAddress getRemoteAddress() {
 			return this.remoteAddress;
 		}
 
 		@Override
-		@Nullable
-		protected SslInfo initSslInfo() {
+		protected @Nullable SslInfo initSslInfo() {
 			return this.sslInfo;
 		}
 

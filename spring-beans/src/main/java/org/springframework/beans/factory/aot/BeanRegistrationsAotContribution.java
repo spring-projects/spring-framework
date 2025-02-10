@@ -26,9 +26,9 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeHint;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
@@ -100,8 +100,8 @@ class BeanRegistrationsAotContribution
 		registrations.forEach(registration -> {
 			ReflectionHints hints = runtimeHints.reflection();
 			Class<?> beanClass = registration.registeredBean.getBeanClass();
-			hints.registerType(beanClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			hints.registerForInterfaces(beanClass, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			hints.registerType(beanClass);
+			hints.registerForInterfaces(beanClass, TypeHint.Builder::withMembers);
 		});
 	}
 

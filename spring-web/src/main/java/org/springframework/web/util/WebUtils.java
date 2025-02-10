@@ -34,11 +34,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -278,8 +278,7 @@ public abstract class WebUtils {
 	 * @return whether default HTML escaping is enabled for the given application
 	 * ({@code null} = no explicit default)
 	 */
-	@Nullable
-	public static Boolean getDefaultHtmlEscape(@Nullable ServletContext servletContext) {
+	public static @Nullable Boolean getDefaultHtmlEscape(@Nullable ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
@@ -301,8 +300,7 @@ public abstract class WebUtils {
 	 * ({@code null} = no explicit default)
 	 * @since 4.1.2
 	 */
-	@Nullable
-	public static Boolean getResponseEncodedHtmlEscape(@Nullable ServletContext servletContext) {
+	public static @Nullable Boolean getResponseEncodedHtmlEscape(@Nullable ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
@@ -354,8 +352,7 @@ public abstract class WebUtils {
 	 * @param request current HTTP request
 	 * @return the session id, or {@code null} if none
 	 */
-	@Nullable
-	public static String getSessionId(HttpServletRequest request) {
+	public static @Nullable String getSessionId(HttpServletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
 		return (session != null ? session.getId() : null);
@@ -369,8 +366,7 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 * @return the value of the session attribute, or {@code null} if not found
 	 */
-	@Nullable
-	public static Object getSessionAttribute(HttpServletRequest request, String name) {
+	public static @Nullable Object getSessionAttribute(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
 		return (session != null ? session.getAttribute(name) : null);
@@ -455,8 +451,7 @@ public abstract class WebUtils {
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <T> T getNativeRequest(ServletRequest request, @Nullable Class<T> requiredType) {
+	public static <T> @Nullable T getNativeRequest(ServletRequest request, @Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(request)) {
 				return (T) request;
@@ -477,8 +472,7 @@ public abstract class WebUtils {
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <T> T getNativeResponse(ServletResponse response, @Nullable Class<T> requiredType) {
+	public static <T> @Nullable T getNativeResponse(ServletResponse response, @Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(response)) {
 				return (T) response;
@@ -573,8 +567,7 @@ public abstract class WebUtils {
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or {@code null} if none is found
 	 */
-	@Nullable
-	public static Cookie getCookie(HttpServletRequest request, String name) {
+	public static @Nullable Cookie getCookie(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
@@ -618,8 +611,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
-	@Nullable
-	public static String findParameterValue(ServletRequest request, String name) {
+	public static @Nullable String findParameterValue(ServletRequest request, String name) {
 		return findParameterValue(request.getParameterMap(), name);
 	}
 
@@ -646,8 +638,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
-	@Nullable
-	public static String findParameterValue(Map<String, ?> parameters, String name) {
+	public static @Nullable String findParameterValue(Map<String, ?> parameters, String name) {
 		// First try to get it as a normal name=value parameter
 		Object value = parameters.get(name);
 		if (value instanceof String[] values) {

@@ -20,13 +20,12 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Objects;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -82,8 +81,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 	@Nested
 	class WhenThereIsOneInterceptorTests {
 
-		@Nullable
-		private Throwable throwableSeenByInterceptor;
+		private @Nullable Throwable throwableSeenByInterceptor;
 
 		@BeforeEach
 		void beforeEach() {

@@ -16,7 +16,8 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
@@ -44,12 +45,10 @@ abstract class PathElement {
 	protected final char separator;
 
 	// The next path element in the chain
-	@Nullable
-	protected PathElement next;
+	protected @Nullable PathElement next;
 
 	// The previous path element in the chain
-	@Nullable
-	protected PathElement prev;
+	protected @Nullable PathElement prev;
 
 
 	/**

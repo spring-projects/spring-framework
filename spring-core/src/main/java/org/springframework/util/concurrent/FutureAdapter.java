@@ -21,7 +21,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -40,8 +41,7 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 
 	private final Future<S> adaptee;
 
-	@Nullable
-	private Object result;
+	private @Nullable Object result;
 
 	private State state = State.NEW;
 
@@ -81,20 +81,17 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	}
 
 	@Override
-	@Nullable
-	public T get() throws InterruptedException, ExecutionException {
+	public @Nullable T get() throws InterruptedException, ExecutionException {
 		return adaptInternal(this.adaptee.get());
 	}
 
 	@Override
-	@Nullable
-	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+	public @Nullable T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		return adaptInternal(this.adaptee.get(timeout, unit));
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	final T adaptInternal(S adapteeResult) throws ExecutionException {
+	final @Nullable T adaptInternal(S adapteeResult) throws ExecutionException {
 		synchronized (this.mutex) {
 			return switch (this.state) {
 				case SUCCESS -> (T) this.result;
@@ -129,8 +126,7 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	 * Adapts the given adaptee's result into T.
 	 * @return the adapted result
 	 */
-	@Nullable
-	protected abstract T adapt(S adapteeResult) throws ExecutionException;
+	protected abstract @Nullable T adapt(S adapteeResult) throws ExecutionException;
 
 
 	private enum State {NEW, SUCCESS, FAILURE}

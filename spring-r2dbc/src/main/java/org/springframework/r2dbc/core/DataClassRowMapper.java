@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.ReadableMetadata;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
@@ -66,7 +67,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 
 	private final Constructor<T> mappedConstructor;
 
-	private final String[] constructorParameterNames;
+	private final @Nullable String[] constructorParameterNames;
 
 	private final TypeDescriptor[] constructorParameterTypes;
 
@@ -98,7 +99,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 
 	@Override
 	protected T constructMappedInstance(Readable readable, List<? extends ReadableMetadata> itemMetadatas, TypeConverter tc) {
-		Object[] args = new Object[this.constructorParameterNames.length];
+		@Nullable Object[] args = new Object[this.constructorParameterNames.length];
 		for (int i = 0; i < args.length; i++) {
 			String name = this.constructorParameterNames[i];
 			int index = findIndex(itemMetadatas, lowerCaseName(name));

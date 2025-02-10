@@ -9,7 +9,7 @@ plugins {
 	id 'io.github.goooler.shadow' version '8.1.8' apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id 'me.champeau.mrjar' version '0.1.1'
-	id "net.ltgt.errorprone" version "3.1.0" apply false
+	id "net.ltgt.errorprone" version "4.1.0" apply false
 }
 
 ext {
@@ -80,18 +80,13 @@ configure([rootProject] + javaProjects) { project ->
 		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 		testRuntimeOnly("org.junit.platform:junit-platform-suite-engine")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
-		testRuntimeOnly("org.apache.logging.log4j:log4j-jul")
-		testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl")
-		// JSR-305 only used for non-required meta-annotations
-		compileOnly("com.google.code.findbugs:jsr305")
-		testCompileOnly("com.google.code.findbugs:jsr305")
 	}
 
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
-			"https://jakarta.ee/specifications/platform/9/apidocs/",
+			"https://jakarta.ee/specifications/platform/11/apidocs/",
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
-			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
+			"https://eclipse.dev/aspectj/doc/latest/runtime-api/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://fasterxml.github.io/jackson-core/javadoc/2.14/",
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.14/",
@@ -109,7 +104,8 @@ configure([rootProject] + javaProjects) { project ->
 			// Previously there could be a split-package issue between JSR250 and JSR305 javax.annotation packages,
 			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
 			// JakartaEE equivalents in the jakarta.annotation package.
-			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
+			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
+			"https://jspecify.dev/docs/api/"
 	] as String[]
 }
 

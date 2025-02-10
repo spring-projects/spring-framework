@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.log.LogDelegateFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @since 5.0
  * @param <T> the type of element signaled to the {@link Subscriber}
  */
-@SuppressWarnings("NullAway")
+@SuppressWarnings("NullAway") // Dataflow analysis limitation
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
 	/**
@@ -58,11 +58,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
-	@Nullable
-	private Subscription subscription;
+	private @Nullable Subscription subscription;
 
-	@Nullable
-	private volatile T currentData;
+	private volatile @Nullable T currentData;
 
 	/* Indicates "onComplete" was received during the (last) write. */
 	private volatile boolean sourceCompleted;
@@ -251,18 +249,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	protected abstract boolean write(T data) throws IOException;
 
 	/**
-	 * Invoked after the current data has been written and before requesting
-	 * the next item from the upstream, write Publisher.
-	 * <p>The default implementation is a no-op.
-	 * @deprecated originally introduced for Undertow to stop write notifications
-	 * when no data is available, but deprecated as of 5.0.6 since constant
-	 * switching on every requested item causes a significant slowdown.
-	 */
-	@Deprecated
-	protected void writingPaused() {
-	}
-
-	/**
 	 * Invoked after onComplete or onError notification.
 	 * <p>The default implementation is a no-op.
 	 */
@@ -411,7 +397,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 									processor.changeStateToReceived(REQUESTED);
 								}
 								else {
-									processor.writingPaused();
 									Assert.state(processor.subscription != null, "No subscription");
 									processor.subscription.request(1);
 								}

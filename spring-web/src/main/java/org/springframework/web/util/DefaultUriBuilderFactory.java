@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -42,16 +43,13 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
-	@Nullable
-	private final UriComponentsBuilder baseUri;
+	private final @Nullable UriComponentsBuilder baseUri;
 
-	@Nullable
-	private UriComponentsBuilder.ParserType parserType;
+	private UriComponentsBuilder.@Nullable ParserType parserType;
 
 	private EncodingMode encodingMode = EncodingMode.TEMPLATE_AND_VALUES;
 
-	@Nullable
-	private Map<String, Object> defaultUriVariables;
+	private @Nullable Map<String, @Nullable Object> defaultUriVariables;
 
 	private boolean parsePath = true;
 
@@ -112,8 +110,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * Return the configured parser type.
 	 * @since 6.2
 	 */
-	@Nullable
-	public UriComponentsBuilder.ParserType getParserType() {
+	public UriComponentsBuilder.@Nullable ParserType getParserType() {
 		return this.parserType;
 	}
 
@@ -143,7 +140,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 * with a Map of variables.
 	 * @param defaultUriVariables default URI variable values
 	 */
-	public void setDefaultUriVariables(@Nullable Map<String, ?> defaultUriVariables) {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	public void setDefaultUriVariables(@Nullable Map<String, ? extends @Nullable Object> defaultUriVariables) {
 		if (defaultUriVariables != null) {
 			if (this.defaultUriVariables == null) {
 				this.defaultUriVariables = new HashMap<>(defaultUriVariables);
@@ -195,12 +193,12 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	// UriTemplateHandler
 
 	@Override
-	public URI expand(String uriTemplate, Map<String, ?> uriVars) {
+	public URI expand(String uriTemplate, Map<String, ? extends @Nullable Object> uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
 	@Override
-	public URI expand(String uriTemplate, Object... uriVars) {
+	public URI expand(String uriTemplate, @Nullable Object... uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
@@ -434,6 +432,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 		public URI build(Map<String, ?> uriVars) {
 			if (!CollectionUtils.isEmpty(defaultUriVariables)) {
 				Map<String, Object> map = new HashMap<>(defaultUriVariables.size() + uriVars.size());
@@ -449,7 +448,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public URI build(Object... uriVars) {
+		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+		public URI build(@Nullable Object... uriVars) {
 			if (ObjectUtils.isEmpty(uriVars) && !CollectionUtils.isEmpty(defaultUriVariables)) {
 				return build(Collections.emptyMap());
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -28,7 +29,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Assists with the creation of a {@link MappedInterceptor}.
@@ -41,14 +44,11 @@ public class InterceptorRegistration {
 
 	private final HandlerInterceptor interceptor;
 
-	@Nullable
-	private List<String> includePatterns;
+	private @Nullable List<String> includePatterns;
 
-	@Nullable
-	private List<String> excludePatterns;
+	private @Nullable List<String> excludePatterns;
 
-	@Nullable
-	private PathMatcher pathMatcher;
+	private @Nullable PathMatcher pathMatcher;
 
 	private int order = 0;
 
@@ -116,7 +116,11 @@ public class InterceptorRegistration {
 	 * String pattern matching even when a
 	 * {@link ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
 	 * is available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public InterceptorRegistration pathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		return this;
@@ -142,6 +146,7 @@ public class InterceptorRegistration {
 	 * Build the underlying interceptor. If URL patterns are provided, the returned
 	 * type is {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
+	@SuppressWarnings("removal")
 	protected Object getInterceptor() {
 
 		if (this.includePatterns == null && this.excludePatterns == null) {

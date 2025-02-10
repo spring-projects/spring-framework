@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -37,7 +39,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -77,15 +78,13 @@ public abstract class BeanOverrideHandler {
 			Comparator.<MergedAnnotation<? extends Annotation>> comparingInt(MergedAnnotation::getDistance).reversed();
 
 
-	@Nullable
-	private final Field field;
+	private final @Nullable Field field;
 
 	private final Set<Annotation> qualifierAnnotations;
 
 	private final ResolvableType beanType;
 
-	@Nullable
-	private final String beanName;
+	private final @Nullable String beanName;
 
 	private final BeanOverrideStrategy strategy;
 
@@ -132,7 +131,7 @@ public abstract class BeanOverrideHandler {
 
 	private static List<BeanOverrideHandler> findHandlers(Class<?> testClass, boolean localFieldsOnly) {
 		List<BeanOverrideHandler> handlers = new ArrayList<>();
-		findHandlers(testClass, testClass, handlers, localFieldsOnly);
+		findHandlers(testClass, testClass, handlers, localFieldsOnly, new HashSet<>());
 		return handlers;
 	}
 
@@ -146,26 +145,30 @@ public abstract class BeanOverrideHandler {
 	 * @param testClass the original test class
 	 * @param handlers the list of handlers found
 	 * @param localFieldsOnly whether to search only on local fields within the type hierarchy
+	 * @param visitedEnclosingClasses the set of enclosing classes already visited
 	 * @since 6.2.2
 	 */
 	private static void findHandlers(Class<?> clazz, Class<?> testClass, List<BeanOverrideHandler> handlers,
-			boolean localFieldsOnly) {
+			boolean localFieldsOnly, Set<Class<?>> visitedEnclosingClasses) {
 
 		// 1) Search enclosing class hierarchy.
 		if (!localFieldsOnly && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			findHandlers(clazz.getEnclosingClass(), testClass, handlers, localFieldsOnly);
+			Class<?> enclosingClass = clazz.getEnclosingClass();
+			if (visitedEnclosingClasses.add(enclosingClass)) {
+				findHandlers(enclosingClass, testClass, handlers, localFieldsOnly, visitedEnclosingClasses);
+			}
 		}
 
 		// 2) Search class hierarchy.
 		Class<?> superclass = clazz.getSuperclass();
 		if (superclass != null && superclass != Object.class) {
-			findHandlers(superclass, testClass, handlers, localFieldsOnly);
+			findHandlers(superclass, testClass, handlers, localFieldsOnly, visitedEnclosingClasses);
 		}
 
 		if (!localFieldsOnly) {
 			// 3) Search interfaces.
 			for (Class<?> ifc : clazz.getInterfaces()) {
-				findHandlers(ifc, testClass, handlers, localFieldsOnly);
+				findHandlers(ifc, testClass, handlers, localFieldsOnly, visitedEnclosingClasses);
 			}
 
 			// 4) Process current class.
@@ -213,8 +216,7 @@ public abstract class BeanOverrideHandler {
 	/**
 	 * Get the annotated {@link Field}.
 	 */
-	@Nullable
-	public final Field getField() {
+	public final @Nullable Field getField() {
 		return this.field;
 	}
 
@@ -229,8 +231,7 @@ public abstract class BeanOverrideHandler {
 	 * Get the bean name to override, or {@code null} to look for a single
 	 * matching bean of type {@link #getBeanType()}.
 	 */
-	@Nullable
-	public final String getBeanName() {
+	public final @Nullable String getBeanName() {
 		return this.beanName;
 	}
 

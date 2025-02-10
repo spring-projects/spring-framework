@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
@@ -35,14 +36,12 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		implements MessageReceivingOperations<D> {
 
 	@Override
-	@Nullable
-	public Message<?> receive() {
+	public @Nullable Message<?> receive() {
 		return doReceive(getRequiredDefaultDestination());
 	}
 
 	@Override
-	@Nullable
-	public Message<?> receive(D destination) {
+	public @Nullable Message<?> receive(D destination) {
 		return doReceive(destination);
 	}
 
@@ -52,19 +51,16 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */
-	@Nullable
-	protected abstract Message<?> doReceive(D destination);
+	protected abstract @Nullable Message<?> doReceive(D destination);
 
 
 	@Override
-	@Nullable
-	public <T> T receiveAndConvert(Class<T> targetClass) {
+	public <T> @Nullable T receiveAndConvert(Class<T> targetClass) {
 		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
 	@Override
-	@Nullable
-	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
+	public <T> @Nullable T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = doReceive(destination);
 		if (message != null) {
 			return doConvert(message, targetClass);
@@ -81,8 +77,7 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 	 * @return the converted payload of the reply message (never {@code null})
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	protected <T> T doConvert(Message<?> message, Class<T> targetClass) {
+	protected <T> @Nullable T doConvert(Message<?> message, Class<T> targetClass) {
 		MessageConverter messageConverter = getMessageConverter();
 		T value = (T) messageConverter.fromMessage(message, targetClass);
 		if (value == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.management.MBeanServer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,7 +31,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.jmx.export.annotation.AnnotationMBeanExporter;
 import org.springframework.jmx.support.RegistrationPolicy;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -50,19 +51,16 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 	private static final String MBEAN_EXPORTER_BEAN_NAME = "mbeanExporter";
 
-	@Nullable
-	private AnnotationAttributes enableMBeanExport;
+	private @Nullable AnnotationAttributes enableMBeanExport;
 
-	@Nullable
-	private Environment environment;
+	private @Nullable Environment environment;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		Map<String, Object> map = importMetadata.getAnnotationAttributes(EnableMBeanExport.class.getName());
+		Map<String, @Nullable Object> map = importMetadata.getAnnotationAttributes(EnableMBeanExport.class.getName());
 		this.enableMBeanExport = AnnotationAttributes.fromMap(map);
 		if (this.enableMBeanExport == null) {
 			throw new IllegalArgumentException(

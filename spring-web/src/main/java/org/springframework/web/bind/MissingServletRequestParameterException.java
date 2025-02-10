@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.web.bind;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link ServletRequestBindingException} subclass that indicates a missing parameter.
@@ -32,8 +33,7 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 
 	private final String parameterType;
 
-	@Nullable
-	private final MethodParameter parameter;
+	private final @Nullable MethodParameter parameter;
 
 
 	/**
@@ -63,25 +63,6 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 		this.parameterName = parameterName;
 		this.parameterType = parameter.getNestedParameterType().getSimpleName();
 		this.parameter = parameter;
-		getBody().setDetail(initBodyDetail(this.parameterName));
-	}
-
-	/**
-	 * Constructor for use when a value was present but converted to {@code null}.
-	 * @param parameterName the name of the missing parameter
-	 * @param parameterType the expected type of the missing parameter
-	 * @param missingAfterConversion whether the value became null after conversion
-	 * @since 5.3.6
-	 * @deprecated in favor of {@link #MissingServletRequestParameterException(String, MethodParameter, boolean)}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public MissingServletRequestParameterException(
-			String parameterName, String parameterType, boolean missingAfterConversion) {
-
-		super("", missingAfterConversion, null, new Object[] {parameterName});
-		this.parameterName = parameterName;
-		this.parameterType = parameterType;
-		this.parameter = null;
 		getBody().setDetail(initBodyDetail(this.parameterName));
 	}
 
@@ -116,8 +97,7 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 	 * a controller method argument.
 	 * @since 6.1
 	 */
-	@Nullable
-	public MethodParameter getMethodParameter() {
+	public @Nullable MethodParameter getMethodParameter() {
 		return this.parameter;
 	}
 

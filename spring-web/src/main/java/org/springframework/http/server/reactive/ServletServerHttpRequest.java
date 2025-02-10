@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
-import java.util.Locale;
 import java.util.Map;
 
 import jakarta.servlet.AsyncContext;
@@ -34,19 +34,18 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -58,6 +57,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.0
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
@@ -75,7 +75,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final DataBufferFactory bufferFactory;
 
-	private final byte[] buffer;
+	private final int bufferSize;
 
 	private final AsyncListener asyncListener;
 
@@ -87,7 +87,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this(createDefaultHttpHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
 	}
 
-	public ServletServerHttpRequest(MultiValueMap<String, String> headers, HttpServletRequest request,
+	public ServletServerHttpRequest(HttpHeaders headers, HttpServletRequest request,
 			AsyncContext asyncContext, String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
 
@@ -99,7 +99,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 		this.request = request;
 		this.bufferFactory = bufferFactory;
-		this.buffer = new byte[bufferSize];
+		this.bufferSize = bufferSize;
 
 		this.asyncListener = new RequestAsyncListener();
 
@@ -110,9 +110,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	private static MultiValueMap<String, String> createDefaultHttpHeaders(HttpServletRequest request) {
-		MultiValueMap<String, String> headers =
-				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
+	private static HttpHeaders createDefaultHttpHeaders(HttpServletRequest request) {
+		HttpHeaders headers = new HttpHeaders();
 		for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
 			for (Enumeration<?> values = request.getHeaders(name); values.hasMoreElements(); ) {
@@ -160,9 +159,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
-	@SuppressWarnings("NullAway")
-	private static MultiValueMap<String, String> initHeaders(
-			MultiValueMap<String, String> headerValues, HttpServletRequest request) {
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	private static HttpHeaders initHeaders(HttpHeaders headerValues, HttpServletRequest request) {
 
 		HttpHeaders headers = null;
 		MediaType contentType = null;
@@ -211,31 +209,26 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@NonNull
 	public InetSocketAddress getLocalAddress() {
 		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
 	}
 
 	@Override
-	@NonNull
 	public InetSocketAddress getRemoteAddress() {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
 	@Override
-	@Nullable
-	protected SslInfo initSslInfo() {
+	protected @Nullable SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
 		return (certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null);
 	}
 
-	@Nullable
-	private String getSslSessionId() {
+	private @Nullable String getSslSessionId() {
 		return (String) this.request.getAttribute("jakarta.servlet.request.ssl_session_id");
 	}
 
-	@Nullable
-	private X509Certificate[] getX509Certificates() {
+	private X509Certificate @Nullable [] getX509Certificates() {
 		return (X509Certificate[]) this.request.getAttribute("jakarta.servlet.request.X509Certificate");
 	}
 
@@ -275,20 +268,31 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * or {@link #EOF_BUFFER} if the input stream returned -1.
 	 */
 	DataBuffer readFromInputStream() throws IOException {
-		int read = this.inputStream.read(this.buffer);
-		logBytesRead(read);
-
-		if (read > 0) {
-			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
-			dataBuffer.write(this.buffer, 0, read);
-			return dataBuffer;
+		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(this.bufferSize);
+		int read = -1;
+		try {
+			try (DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers()) {
+				Assert.state(iterator.hasNext(), "No ByteBuffer available");
+				ByteBuffer byteBuffer = iterator.next();
+				read = this.inputStream.read(byteBuffer);
+			}
+			logBytesRead(read);
+			if (read > 0) {
+				dataBuffer.writePosition(read);
+				return dataBuffer;
+			}
+			else if (read == -1) {
+				return EOF_BUFFER;
+			}
+			else {
+				return AbstractListenerReadPublisher.EMPTY_BUFFER;
+			}
 		}
-
-		if (read == -1) {
-			return EOF_BUFFER;
+		finally {
+			if (read <= 0) {
+				DataBufferUtils.release(dataBuffer);
+			}
 		}
-
-		return AbstractListenerReadPublisher.EMPTY_BUFFER;
 	}
 
 	protected final void logBytesRead(int read) {
@@ -345,8 +349,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		@Nullable
-		protected DataBuffer read() throws IOException {
+		protected @Nullable DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
 				DataBuffer dataBuffer = readFromInputStream();
 				if (dataBuffer == EOF_BUFFER) {

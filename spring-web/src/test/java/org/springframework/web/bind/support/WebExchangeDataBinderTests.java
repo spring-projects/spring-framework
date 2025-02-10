@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -35,7 +36,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
@@ -330,12 +330,11 @@ class WebExchangeDataBinderTests {
 	}
 
 
-	private static class MultipartDataClass {
+	static class MultipartDataClass {
 
 		private final FilePart part;
 
-		@Nullable
-		private final FilePart nullablePart;
+		private final @Nullable FilePart nullablePart;
 
 		MultipartDataClass(FilePart part, @Nullable FilePart nullablePart) {
 			this.part = part;
@@ -346,9 +345,9 @@ class WebExchangeDataBinderTests {
 			return part;
 		}
 
-		@Nullable
-		public FilePart getNullablePart() {
+		public @Nullable FilePart getNullablePart() {
 			return nullablePart;
 		}
 	}
+
 }

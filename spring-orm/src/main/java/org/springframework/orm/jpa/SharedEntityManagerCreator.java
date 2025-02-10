@@ -35,8 +35,8 @@ import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -190,13 +190,11 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManagerFactory targetFactory;
 
-		@Nullable
-		private final Map<?, ?> properties;
+		private final @Nullable Map<?, ?> properties;
 
 		private final boolean synchronizedWithTransaction;
 
-		@Nullable
-		private transient volatile ClassLoader proxyClassLoader;
+		private transient volatile @Nullable ClassLoader proxyClassLoader;
 
 		public SharedEntityManagerInvocationHandler(
 				EntityManagerFactory target, @Nullable Map<?, ?> properties, boolean synchronizedWithTransaction) {
@@ -217,8 +215,7 @@ public abstract class SharedEntityManagerCreator {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
 			switch (method.getName()) {
@@ -362,11 +359,9 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Query target;
 
-		@Nullable
-		private EntityManager entityManager;
+		private @Nullable EntityManager entityManager;
 
-		@Nullable
-		private Map<Object, Object> outputParameters;
+		private @Nullable Map<Object, Object> outputParameters;
 
 		public DeferredQueryInvocationHandler(Query target, EntityManager entityManager) {
 			this.target = target;

@@ -69,6 +69,7 @@ class WebMvcStompEndpointRegistryTests {
 		assertThat(protocolHandlers.get("v12.stomp")).isNotNull();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void handlerMapping() {
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();

@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import jakarta.servlet.jsp.JspException;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -190,14 +190,12 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * The {@link TagWriter} instance being used.
 	 * <p>Stored so we can close the tag on {@link #doEndTag()}.
 	 */
-	@Nullable
-	private TagWriter tagWriter;
+	private @Nullable TagWriter tagWriter;
 
 	/**
 	 * The value of the '{@code for}' attribute.
 	 */
-	@Nullable
-	private String forId;
+	private @Nullable String forId;
 
 
 	/**
@@ -212,8 +210,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * Get the value of the '{@code id}' attribute.
 	 * <p>May be a runtime expression.
 	 */
-	@Nullable
-	protected String getFor() {
+	protected @Nullable String getFor() {
 		return this.forId;
 	}
 
@@ -240,8 +237,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * @return the value for the HTML '{@code name}' attribute
 	 */
 	@Override
-	@Nullable
-	protected String getName() throws JspException {
+	protected @Nullable String getName() throws JspException {
 		// This also suppresses the 'id' attribute (which is okay for a <label/>)
 		return null;
 	}

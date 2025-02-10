@@ -18,11 +18,12 @@ package org.springframework.aop.config;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,14 +34,11 @@ import org.springframework.util.StringUtils;
  */
 public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFactoryAware {
 
-	@Nullable
-	private String targetBeanName;
+	private @Nullable String targetBeanName;
 
-	@Nullable
-	private String methodName;
+	private @Nullable String methodName;
 
-	@Nullable
-	private Method method;
+	private @Nullable Method method;
 
 
 	/**
@@ -84,8 +82,7 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 
 
 	@Override
-	@Nullable
-	public Method getObject() throws Exception {
+	public @Nullable Method getObject() throws Exception {
 		return this.method;
 	}
 

@@ -16,8 +16,9 @@
 
 package org.springframework.web.reactive.function.client;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for exception published by {@link WebClient} in case of errors.

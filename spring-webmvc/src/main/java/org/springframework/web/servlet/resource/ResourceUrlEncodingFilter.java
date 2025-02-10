@@ -28,8 +28,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
@@ -69,11 +69,9 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 
 	private static class ResourceUrlEncodingRequestWrapper extends HttpServletRequestWrapper {
 
-		@Nullable
-		private ResourceUrlProvider resourceUrlProvider;
+		private @Nullable ResourceUrlProvider resourceUrlProvider;
 
-		@Nullable
-		private Integer indexLookupPath;
+		private @Nullable Integer indexLookupPath;
 
 		private String prefixLookupPath = "";
 
@@ -91,6 +89,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			}
 		}
 
+		@SuppressWarnings("removal")
 		private void initLookupPath(ResourceUrlProvider urlProvider) {
 			this.resourceUrlProvider = urlProvider;
 			if (this.indexLookupPath == null) {
@@ -112,8 +111,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			}
 		}
 
-		@Nullable
-		public String resolveUrlPath(String url) {
+		public @Nullable String resolveUrlPath(String url) {
 			if (this.resourceUrlProvider == null) {
 				logger.trace("ResourceUrlProvider not available via request attribute " +
 						ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);

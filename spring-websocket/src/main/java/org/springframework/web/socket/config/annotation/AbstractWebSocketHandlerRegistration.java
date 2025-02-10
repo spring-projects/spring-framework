@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,8 +48,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	private final MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<>();
 
-	@Nullable
-	private HandshakeHandler handshakeHandler;
+	private @Nullable HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
@@ -56,8 +56,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	private final List<String> allowedOriginPatterns = new ArrayList<>();
 
-	@Nullable
-	private SockJsServiceRegistration sockJsServiceRegistration;
+	private @Nullable SockJsServiceRegistration sockJsServiceRegistration;
 
 
 	@Override
@@ -74,8 +73,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		return this;
 	}
 
-	@Nullable
-	protected HandshakeHandler getHandshakeHandler() {
+	protected @Nullable HandshakeHandler getHandshakeHandler() {
 		return this.handshakeHandler;
 	}
 
@@ -143,8 +141,7 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	 * if the application did not provide one. This should be done prior to
 	 * calling {@link #getMappings()}.
 	 */
-	@Nullable
-	protected SockJsServiceRegistration getSockJsServiceRegistration() {
+	protected @Nullable SockJsServiceRegistration getSockJsServiceRegistration() {
 		return this.sockJsServiceRegistration;
 	}
 

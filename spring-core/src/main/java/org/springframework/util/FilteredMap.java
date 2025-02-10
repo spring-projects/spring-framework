@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Map that filters out values that do not match a predicate.
@@ -76,8 +76,7 @@ final class FilteredMap<K, V> extends AbstractMap<K, V> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public V get(Object key) {
+	public @Nullable V get(Object key) {
 		V value = this.delegate.get(key);
 		if (value != null && this.filter.test((K) key)) {
 			return value;
@@ -88,8 +87,7 @@ final class FilteredMap<K, V> extends AbstractMap<K, V> {
 	}
 
 	@Override
-	@Nullable
-	public V put(K key, V value) {
+	public @Nullable V put(K key, V value) {
 		V oldValue = this.delegate.put(key, value);
 		if (oldValue != null && this.filter.test(key)) {
 			return oldValue;
@@ -101,8 +99,7 @@ final class FilteredMap<K, V> extends AbstractMap<K, V> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public V remove(Object key) {
+	public @Nullable V remove(Object key) {
 		V oldValue = this.delegate.remove(key);
 		if (oldValue != null && this.filter.test((K) key)) {
 			return oldValue;

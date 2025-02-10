@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package org.springframework.web.jsf.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
-
 import jakarta.el.ELContext;
 import jakarta.el.ELException;
 import jakarta.el.ELResolver;
 import jakarta.faces.context.FacesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -67,8 +64,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 
 
 	@Override
-	@Nullable
-	public Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext wac) {
 				String beanName = property.toString();
@@ -104,8 +100,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base != null) {
 			if (base instanceof WebApplicationContext wac) {
 				String beanName = property.toString();
@@ -154,12 +149,6 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	}
 
 	@Override
-	@Nullable
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, Object base) {
-		return null;
-	}
-
-	@Override
 	public Class<?> getCommonPropertyType(ELContext elContext, Object base) {
 		return Object.class;
 	}
@@ -173,8 +162,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	 * @return the Spring web application context
 	 * @see org.springframework.web.jsf.FacesContextUtils#getWebApplicationContext
 	 */
-	@Nullable
-	protected WebApplicationContext getWebApplicationContext(ELContext elContext) {
+	protected @Nullable WebApplicationContext getWebApplicationContext(ELContext elContext) {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		return FacesContextUtils.getRequiredWebApplicationContext(facesContext);
 	}

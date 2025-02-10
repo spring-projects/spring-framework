@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
+import org.springframework.http.server.RequestPath;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
@@ -35,9 +35,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -57,7 +57,7 @@ public class InterceptorRegistryTests {
 
 	private final HandlerInterceptor interceptor1 = new LocaleChangeInterceptor();
 
-	private final HandlerInterceptor interceptor2 = new ThemeChangeInterceptor();
+	private final HandlerInterceptor interceptor2 = new LocaleChangeInterceptor();
 
 	private TestWebRequestInterceptor webInterceptor1;
 
@@ -120,6 +120,7 @@ public class InterceptorRegistryTests {
 		verifyWebInterceptor(interceptors.get(1), this.webInterceptor2);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void addInterceptorsWithCustomPathMatcher() {
 		PathMatcher pathMatcher = mock();
@@ -178,12 +179,13 @@ public class InterceptorRegistryTests {
 	}
 
 
-	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
-		PathMatcher pathMatcher = new AntPathMatcher();
+	private List<HandlerInterceptor> getInterceptorsForPath(@Nullable String lookupPath) {
+		lookupPath = (lookupPath != null ? lookupPath : "");
+		this.request.setAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE, RequestPath.parse(lookupPath, null));
 		List<HandlerInterceptor> result = new ArrayList<>();
 		for (Object interceptor : this.registry.getInterceptors()) {
 			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
-				if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
+				if (mappedInterceptor.matches(this.request)) {
 					result.add(mappedInterceptor.getInterceptor());
 				}
 			}

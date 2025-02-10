@@ -5,9 +5,7 @@
  * handling.
  */
 
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.test.web.servlet.client;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -38,12 +39,10 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.SslInfo;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -57,14 +56,11 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
-	@Nullable
-	private final InetSocketAddress localAddress;
+	private final @Nullable InetSocketAddress localAddress;
 
-	@Nullable
-	private final InetSocketAddress remoteAddress;
+	private final @Nullable InetSocketAddress remoteAddress;
 
-	@Nullable
-	private final SslInfo sslInfo;
+	private final @Nullable SslInfo sslInfo;
 
 	private final Flux<DataBuffer> body;
 
@@ -83,20 +79,17 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
 	@Override
-	@Nullable
-	protected SslInfo initSslInfo() {
+	protected @Nullable SslInfo initSslInfo() {
 		return this.sslInfo;
 	}
 
@@ -126,7 +119,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BaseBuilder<?> get(String urlTemplate, Object... uriVars) {
+	public static BaseBuilder<?> get(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.GET, urlTemplate, uriVars);
 	}
 
@@ -136,7 +129,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BaseBuilder<?> head(String urlTemplate, Object... uriVars) {
+	public static BaseBuilder<?> head(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.HEAD, urlTemplate, uriVars);
 	}
 
@@ -146,7 +139,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BodyBuilder post(String urlTemplate, Object... uriVars) {
+	public static BodyBuilder post(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.POST, urlTemplate, uriVars);
 	}
 
@@ -157,7 +150,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BodyBuilder put(String urlTemplate, Object... uriVars) {
+	public static BodyBuilder put(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.PUT, urlTemplate, uriVars);
 	}
 
@@ -167,7 +160,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BodyBuilder patch(String urlTemplate, Object... uriVars) {
+	public static BodyBuilder patch(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.PATCH, urlTemplate, uriVars);
 	}
 
@@ -177,7 +170,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BaseBuilder<?> delete(String urlTemplate, Object... uriVars) {
+	public static BaseBuilder<?> delete(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.DELETE, urlTemplate, uriVars);
 	}
 
@@ -187,7 +180,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param uriVars zero or more URI variables
 	 * @return the created builder
 	 */
-	public static BaseBuilder<?> options(String urlTemplate, Object... uriVars) {
+	public static BaseBuilder<?> options(String urlTemplate, @Nullable Object... uriVars) {
 		return method(HttpMethod.OPTIONS, urlTemplate, uriVars);
 	}
 
@@ -212,27 +205,11 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @param vars variables to expand into the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder method(HttpMethod method, String uri, Object... vars) {
+	public static BodyBuilder method(HttpMethod method, String uri, @Nullable Object... vars) {
 		return method(method, toUri(uri, vars));
 	}
 
-	/**
-	 * Create a builder with a raw HTTP method value that is outside the
-	 * range of {@link HttpMethod} enum values.
-	 * @param httpMethod the HTTP methodValue value
-	 * @param uri the URI template for target the URL
-	 * @param vars variables to expand into the template
-	 * @return the created builder
-	 * @since 5.2.7
-	 * @deprecated in favor of {@link #method(HttpMethod, String, Object...)}
-	 */
-	@Deprecated
-	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
-		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
-		return new DefaultBodyBuilder(HttpMethod.valueOf(httpMethod), toUri(uri, vars));
-	}
-
-	private static URI toUri(String uri, Object[] vars) {
+	private static URI toUri(String uri, @Nullable Object[] vars) {
 		return UriComponentsBuilder.fromUriString(uri).buildAndExpand(vars).encode().toUri();
 	}
 
@@ -305,8 +282,17 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add the given header values.
 		 * @param headers the header values
+		 * @deprecated in favor of {@link #headers(HttpHeaders)}
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		B headers(MultiValueMap<String, String> headers);
+
+		/**
+		 * Add the given header values.
+		 * @param headers the header values
+		 * @since 7.0
+		 */
+		B headers(HttpHeaders headers);
 
 		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
@@ -422,8 +408,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final URI url;
 
-		@Nullable
-		private String contextPath;
+		private @Nullable String contextPath;
 
 		private final UriComponentsBuilder queryParamsBuilder = UriComponentsBuilder.newInstance();
 
@@ -431,14 +416,11 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
-		@Nullable
-		private InetSocketAddress remoteAddress;
+		private @Nullable InetSocketAddress remoteAddress;
 
-		@Nullable
-		private InetSocketAddress localAddress;
+		private @Nullable InetSocketAddress localAddress;
 
-		@Nullable
-		private SslInfo sslInfo;
+		private @Nullable SslInfo sslInfo;
 
 		DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -501,7 +483,14 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		@Deprecated(since = "7.0", forRemoval = true)
 		public BodyBuilder headers(MultiValueMap<String, String> headers) {
+			this.headers.putAll(headers);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(HttpHeaders headers) {
 			this.headers.putAll(headers);
 			return this;
 		}

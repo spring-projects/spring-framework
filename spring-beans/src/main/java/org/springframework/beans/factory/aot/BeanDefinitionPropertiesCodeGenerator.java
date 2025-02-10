@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
@@ -55,7 +57,6 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -110,7 +111,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		this.valueCodeGenerator = ValueCodeGenerator.with(allDelegates).scoped(generatedMethods);
 	}
 
-
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	CodeBlock generateCode(RootBeanDefinition beanDefinition) {
 		CodeBlock.Builder code = CodeBlock.builder();
 		addStatementForValue(code, beanDefinition, BeanDefinition::getScope,
@@ -149,7 +150,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addInitDestroyMethods(Builder code, AbstractBeanDefinition beanDefinition,
-			@Nullable String[] methodNames, String format) {
+			String @Nullable [] methodNames, String format) {
 
 		// For Publisher-based destroy methods
 		this.hints.reflection().registerType(TypeReference.of("org.reactivestreams.Publisher"));
@@ -252,10 +253,10 @@ class BeanDefinitionPropertiesCodeGenerator {
 		// ReflectionUtils#findField searches recursively in the type hierarchy
 		Class<?> searchType = beanDefinition.getTargetType();
 		while (searchType != null && searchType != writeMethod.getDeclaringClass()) {
-			this.hints.reflection().registerType(searchType, MemberCategory.DECLARED_FIELDS);
+			this.hints.reflection().registerType(searchType, MemberCategory.ACCESS_DECLARED_FIELDS);
 			searchType = searchType.getSuperclass();
 		}
-		this.hints.reflection().registerType(writeMethod.getDeclaringClass(), MemberCategory.DECLARED_FIELDS);
+		this.hints.reflection().registerType(writeMethod.getDeclaringClass(), MemberCategory.ACCESS_DECLARED_FIELDS);
 	}
 
 	private void addQualifiers(CodeBlock.Builder code, RootBeanDefinition beanDefinition) {
@@ -343,7 +344,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private <B extends BeanDefinition, T> void addStatementForValue(
-			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, T> getter, String format) {
+			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, @Nullable T> getter, String format) {
 
 		addStatementForValue(code, beanDefinition, getter,
 				(defaultValue, actualValue) -> !Objects.equals(defaultValue, actualValue), format);
@@ -351,14 +352,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private <B extends BeanDefinition, T> void addStatementForValue(
 			CodeBlock.Builder code, BeanDefinition beanDefinition,
-			Function<B, T> getter, BiPredicate<T, T> filter, String format) {
+			Function<B, @Nullable T> getter, BiPredicate<T, T> filter, String format) {
 
 		addStatementForValue(code, beanDefinition, getter, filter, format, actualValue -> actualValue);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "NullAway"})
 	private <B extends BeanDefinition, T> void addStatementForValue(
-			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, T> getter,
+			CodeBlock.Builder code, BeanDefinition beanDefinition, Function<B, @Nullable T> getter,
 			BiPredicate<T, T> filter, String format, Function<T, Object> formatter) {
 
 		T defaultValue = getter.apply((B) DEFAULT_BEAN_DEFINITION);
@@ -395,8 +396,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 			threadLocal.get().pop();
 		}
 
-		@Nullable
-		static String peek() {
+		static @Nullable String peek() {
 			String value = threadLocal.get().peek();
 			return ("".equals(value) ? null : value);
 		}

@@ -18,7 +18,8 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.io.Serializable;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -33,8 +34,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 	private final MetadataAwareAspectInstanceFactory maaif;
 
-	@Nullable
-	private volatile Object materialized;
+	private volatile @Nullable Object materialized;
 
 
 	/**
@@ -74,8 +74,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getAspectClassLoader() {
+	public @Nullable ClassLoader getAspectClassLoader() {
 		return this.maaif.getAspectClassLoader();
 	}
 
@@ -85,8 +84,7 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	@Override
-	@Nullable
-	public Object getAspectCreationMutex() {
+	public @Nullable Object getAspectCreationMutex() {
 		return this.maaif.getAspectCreationMutex();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  */
 class MethodParameterTests {
 
@@ -49,6 +50,14 @@ class MethodParameterTests {
 
 	private MethodParameter intReturnType;
 
+	private MethodParameter jspecifyNullableParameter;
+
+	private MethodParameter jspecifyNonNullParameter;
+
+	private MethodParameter springNullableParameter;
+
+	private MethodParameter springNonNullParameter;
+
 
 	@BeforeEach
 	void setup() throws NoSuchMethodException {
@@ -56,6 +65,12 @@ class MethodParameterTests {
 		stringParameter = new MethodParameter(method, 0);
 		longParameter = new MethodParameter(method, 1);
 		intReturnType = new MethodParameter(method, -1);
+		Method jspecifyNullableMethod = getClass().getMethod("jspecifyNullableMethod", String.class, String.class);
+		jspecifyNullableParameter = new MethodParameter(jspecifyNullableMethod, 0);
+		jspecifyNonNullParameter = new MethodParameter(jspecifyNullableMethod, 1);
+		Method springNullableMethod = getClass().getMethod("springNullableMethod", String.class, String.class);
+		springNullableParameter = new MethodParameter(springNullableMethod, 0);
+		springNonNullParameter = new MethodParameter(springNullableMethod, 1);
 	}
 
 
@@ -237,8 +252,38 @@ class MethodParameterTests {
 		assertThat(m3.getTypeIndexForCurrentLevel()).isEqualTo(3);
 	}
 
+	@Test
+	void jspecifyNullableParameter() {
+		assertThat(jspecifyNullableParameter.isOptional()).isTrue();
+	}
+
+	@Test
+	void jspecifyNonNullParameter() {
+		assertThat(jspecifyNonNullParameter.isOptional()).isFalse();
+	}
+
+	@Test
+	void springNullableParameter() {
+		assertThat(springNullableParameter.isOptional()).isTrue();
+	}
+
+	@Test
+	void springNonNullParameter() {
+		assertThat(springNonNullParameter.isOptional()).isFalse();
+	}
+
 	public int method(String p1, long p2) {
 		return 42;
+	}
+
+	public @org.jspecify.annotations.Nullable String jspecifyNullableMethod(@org.jspecify.annotations.Nullable String nullableParameter, String nonNullParameter) {
+		return nullableParameter;
+	}
+
+	@SuppressWarnings("deprecation")
+	@org.springframework.lang.Nullable
+	public String springNullableMethod(@org.springframework.lang.Nullable String nullableParameter, String nonNullParameter) {
+		return nullableParameter;
 	}
 
 	@SuppressWarnings("unused")

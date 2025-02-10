@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.xnio.channels.StreamSinkChannel;
@@ -38,7 +39,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,8 +56,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	private final UndertowServerHttpRequest request;
 
-	@Nullable
-	private StreamSinkChannel responseChannel;
+	private @Nullable StreamSinkChannel responseChannel;
 
 
 	UndertowServerHttpResponse(
@@ -85,14 +84,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	public HttpStatusCode getStatusCode() {
 		HttpStatusCode status = super.getStatusCode();
 		return (status != null ? status : HttpStatusCode.valueOf(this.exchange.getStatusCode()));
-	}
-
-	@Override
-	@Deprecated
-	@SuppressWarnings("removal")
-	public Integer getRawStatusCode() {
-		Integer status = super.getRawStatusCode();
-		return (status != null ? status : this.exchange.getStatusCode());
 	}
 
 	@Override
@@ -165,8 +156,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 		private final StreamSinkChannel channel;
 
-		@Nullable
-		private volatile ByteBuffer byteBuffer;
+		private volatile @Nullable ByteBuffer byteBuffer;
 
 		/** Keep track of write listener calls, for {@link #writePossible}. */
 		private volatile boolean writePossible;

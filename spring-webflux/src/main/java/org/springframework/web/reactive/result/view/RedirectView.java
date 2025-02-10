@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -63,8 +63,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	private boolean propagateQuery = false;
 
-	@Nullable
-	private String[] hosts;
+	private String @Nullable [] hosts;
 
 
 	/**
@@ -148,15 +147,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * <p>If not set (the default) all redirect URLs are encoded.
 	 * @param hosts one or more application hosts
 	 */
-	public void setHosts(@Nullable String... hosts) {
+	public void setHosts(String @Nullable ... hosts) {
 		this.hosts = hosts;
 	}
 
 	/**
 	 * Return the configured application hosts.
 	 */
-	@Nullable
-	public String[] getHosts() {
+	public String @Nullable [] getHosts() {
 		return this.hosts;
 	}
 

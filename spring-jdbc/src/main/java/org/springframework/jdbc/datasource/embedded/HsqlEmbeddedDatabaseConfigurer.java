@@ -18,7 +18,8 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Driver;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -32,8 +33,7 @@ import org.springframework.util.ClassUtils;
  */
 final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
-	@Nullable
-	private static HsqlEmbeddedDatabaseConfigurer instance;
+	private static @Nullable HsqlEmbeddedDatabaseConfigurer instance;
 
 	private final Class<? extends Driver> driverClass;
 

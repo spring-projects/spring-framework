@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +39,7 @@ public class Compiled {
 
 	private final ResourceFiles resourceFiles;
 
-	@Nullable
-	private List<Class<?>> compiledClasses;
+	private @Nullable List<Class<?>> compiledClasses;
 
 
 	Compiled(ClassLoader classLoader, SourceFiles sourceFiles, ResourceFiles resourceFiles) {

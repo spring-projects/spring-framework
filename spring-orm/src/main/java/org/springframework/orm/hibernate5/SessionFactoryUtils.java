@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.orm.hibernate5;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -52,6 +51,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
 import org.hibernate.service.UnknownServiceException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -63,9 +63,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.
@@ -149,16 +146,12 @@ public abstract class SessionFactoryUtils {
 	 * @return the DataSource, or {@code null} if none found
 	 * @see ConnectionProvider
 	 */
-	@Nullable
-	public static DataSource getDataSource(SessionFactory sessionFactory) {
-		Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
-		if (getProperties != null) {
-			Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
-			if (props != null) {
-				Object dataSourceValue = props.get(Environment.DATASOURCE);
-				if (dataSourceValue instanceof DataSource dataSource) {
-					return dataSource;
-				}
+	public static @Nullable DataSource getDataSource(SessionFactory sessionFactory) {
+		Map<String, Object> props = sessionFactory.getProperties();
+		if (props != null) {
+			Object dataSourceValue = props.get(Environment.JAKARTA_NON_JTA_DATASOURCE);
+			if (dataSourceValue instanceof DataSource dataSource) {
+				return dataSource;
 			}
 		}
 		if (sessionFactory instanceof SessionFactoryImplementor sfi) {

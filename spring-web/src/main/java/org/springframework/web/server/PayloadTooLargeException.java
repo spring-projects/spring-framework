@@ -17,8 +17,9 @@
 package org.springframework.web.server;
 
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception for errors that fit response status 413 (payload too large) for use in

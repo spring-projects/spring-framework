@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -60,19 +60,17 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	protected final transient Log logger = LogFactory.getLog(getClass());
 
 	/** Name of the target bean we will create on each invocation. */
-	@Nullable
-	private String targetBeanName;
+	private @Nullable String targetBeanName;
 
 	/** Class of the target. */
-	@Nullable
-	private volatile Class<?> targetClass;
+	private volatile @Nullable Class<?> targetClass;
 
 	/**
 	 * BeanFactory that owns this TargetSource. We need to hold onto this
 	 * reference so that we can create new prototype instances as necessary.
 	 */
-	@Nullable
-	private BeanFactory beanFactory;
+	@SuppressWarnings("serial")
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**
@@ -128,8 +126,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 
 
 	@Override
-	@Nullable
-	public Class<?> getTargetClass() {
+	public @Nullable Class<?> getTargetClass() {
 		Class<?> targetClass = this.targetClass;
 		if (targetClass != null) {
 			return targetClass;

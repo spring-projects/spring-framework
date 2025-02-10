@@ -19,8 +19,9 @@ package org.springframework.core.convert.support;
 import java.util.Locale;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.Nullable;
 
 /**
  * Converts a String to a Boolean.
@@ -38,8 +39,7 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 
 
 	@Override
-	@Nullable
-	public Boolean convert(String source) {
+	public @Nullable Boolean convert(String source) {
 		String value = source.trim();
 		if (value.isEmpty()) {
 			return null;

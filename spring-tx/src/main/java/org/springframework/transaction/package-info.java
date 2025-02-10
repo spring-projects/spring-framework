@@ -3,9 +3,7 @@
  * management system); an exception hierarchy for Spring's transaction infrastructure;
  * and transaction manager, definition, and status interfaces.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.transaction;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

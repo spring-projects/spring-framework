@@ -20,9 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +39,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 
 	private final List<RequestMatcher> requestMatchers = new ArrayList<>(1);
 
-	@Nullable
-	private ResponseCreator responseCreator;
+	private @Nullable ResponseCreator responseCreator;
 
 
 	/**
@@ -63,8 +63,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		return this.requestMatchers;
 	}
 
-	@Nullable
-	protected ResponseCreator getResponseCreator() {
+	protected @Nullable ResponseCreator getResponseCreator() {
 		return this.responseCreator;
 	}
 

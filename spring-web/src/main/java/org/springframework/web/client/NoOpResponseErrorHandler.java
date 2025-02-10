@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
 
 /**
  * A basic, no operation {@link ResponseErrorHandler} implementation suitable
- * for ignoring any error using the {@link RestTemplate}.
+ * for ignoring any error using the {@link RestTemplate} or {@link RestClient}.
  * <p>This implementation is not suitable with the {@link RestClient} as it uses
  * a list of candidates where the first matching is invoked. If you want to
  * disable default status handlers with the {@code RestClient}, consider

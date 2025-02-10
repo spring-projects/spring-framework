@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -62,9 +62,6 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	private PathMatcher pathMatcher = defaultPathMatcher;
 
-	@Nullable
-	private String lookupPathAttributeName;
-
 	private boolean allowInitLookupPath = true;
 
 	private final Map<PathPattern, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
@@ -96,7 +93,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@link #setUrlPathHelper(UrlPathHelper)}, if at all. For further details,
 	 * please see {@link #setAllowInitLookupPath(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		initUrlPathHelper();
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
@@ -110,7 +107,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@link #setUrlPathHelper(UrlPathHelper)}, if at all. For further details,
 	 * please see {@link #setAllowInitLookupPath(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public void setUrlDecode(boolean urlDecode) {
 		initUrlPathHelper();
 		this.urlPathHelper.setUrlDecode(urlDecode);
@@ -124,7 +121,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * {@link #setUrlPathHelper(UrlPathHelper)}, if at all. For further details,
 	 * please see {@link #setAllowInitLookupPath(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		initUrlPathHelper();
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
@@ -142,7 +139,11 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * parsed {@code PathPatterns} are used instead.
 	 * For further details on that, see {@link #setAllowInitLookupPath(boolean)}.
 	 * <p>By default this is {@link UrlPathHelper#defaultInstance}.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
@@ -168,22 +169,13 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * @param allowInitLookupPath whether to disable lazy initialization
 	 * and fail if not already resolved
 	 * @since 5.3
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setAllowInitLookupPath(boolean allowInitLookupPath) {
 		this.allowInitLookupPath = allowInitLookupPath;
-	}
-
-	/**
-	 * Configure the name of the attribute that holds the lookupPath extracted
-	 * via {@link UrlPathHelper#getLookupPathForRequest(HttpServletRequest)}.
-	 * <p>By default this is {@link UrlPathHelper#PATH_ATTRIBUTE}.
-	 * @param name the request attribute to check
-	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of {@link UrlPathHelper#PATH_ATTRIBUTE}.
-	 */
-	@Deprecated
-	public void setLookupPathAttributeName(String name) {
-		this.lookupPathAttributeName = name;
 	}
 
 	/**
@@ -195,7 +187,11 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * String pattern matching even when a
 	 * {@link ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
 	 * is available.
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 	}
@@ -239,8 +235,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 
 	@Override
-	@Nullable
-	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+	public @Nullable CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		Object path = resolvePath(request);
 		boolean isPathContainer = (path instanceof PathContainer);
 		for (Map.Entry<PathPattern, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
@@ -252,12 +247,9 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	private Object resolvePath(HttpServletRequest request) {
 		if (this.allowInitLookupPath && !ServletRequestPathUtils.hasCachedPath(request)) {
-			return (this.lookupPathAttributeName != null ?
-					this.urlPathHelper.getLookupPathForRequest(request, this.lookupPathAttributeName) :
-					this.urlPathHelper.getLookupPathForRequest(request));
+			return this.urlPathHelper.getLookupPathForRequest(request);
 		}
 		Object lookupPath = ServletRequestPathUtils.getCachedPath(request);
 		if (this.pathMatcher != defaultPathMatcher) {

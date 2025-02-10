@@ -21,20 +21,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.FailureCallback;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SuccessCallback;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A pass-through {@code Future} handle that can be used for method signatures
  * which are declared with a {@code Future} return type for asynchronous execution.
- *
- * <p>As of Spring 4.1, this class implements {@code ListenableFuture}, not just
- * plain {@link java.util.concurrent.Future}, along with the corresponding support
- * in {@code @Async} processing. As of 7.0, this will be turned back to a plain
- * {@code Future} in order to focus on compatibility with existing common usage.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -46,14 +37,11 @@ import org.springframework.util.concurrent.SuccessCallback;
  * @deprecated as of 6.0, in favor of {@link CompletableFuture}
  */
 @Deprecated(since = "6.0")
-@SuppressWarnings("removal")
-public class AsyncResult<V> implements ListenableFuture<V> {
+public class AsyncResult<V> implements Future<V> {
 
-	@Nullable
-	private final V value;
+	private final @Nullable V value;
 
-	@Nullable
-	private final Throwable executionException;
+	private final @Nullable Throwable executionException;
 
 
 	/**
@@ -90,8 +78,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	}
 
 	@Override
-	@Nullable
-	public V get() throws ExecutionException {
+	public @Nullable V get() throws ExecutionException {
 		if (this.executionException != null) {
 			throw (this.executionException instanceof ExecutionException execEx ? execEx :
 					new ExecutionException(this.executionException));
@@ -100,41 +87,8 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	}
 
 	@Override
-	@Nullable
-	public V get(long timeout, TimeUnit unit) throws ExecutionException {
+	public @Nullable V get(long timeout, TimeUnit unit) throws ExecutionException {
 		return get();
-	}
-
-	@Override
-	public void addCallback(ListenableFutureCallback<? super V> callback) {
-		addCallback(callback, callback);
-	}
-
-	@Override
-	public void addCallback(SuccessCallback<? super V> successCallback, FailureCallback failureCallback) {
-		try {
-			if (this.executionException != null) {
-				failureCallback.onFailure(exposedException(this.executionException));
-			}
-			else {
-				successCallback.onSuccess(this.value);
-			}
-		}
-		catch (Throwable ex) {
-			// Ignore
-		}
-	}
-
-	@Override
-	public CompletableFuture<V> completable() {
-		if (this.executionException != null) {
-			CompletableFuture<V> completable = new CompletableFuture<>();
-			completable.completeExceptionally(exposedException(this.executionException));
-			return completable;
-		}
-		else {
-			return CompletableFuture.completedFuture(this.value);
-		}
 	}
 
 
@@ -144,7 +98,7 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * @since 4.2
 	 * @see Future#get()
 	 */
-	public static <V> org.springframework.util.concurrent.ListenableFuture<V> forValue(V value) {
+	public static <V> Future<V> forValue(V value) {
 		return new AsyncResult<>(value, null);
 	}
 
@@ -156,24 +110,8 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	 * @since 4.2
 	 * @see ExecutionException
 	 */
-	public static <V> org.springframework.util.concurrent.ListenableFuture<V> forExecutionException(Throwable ex) {
+	public static <V> Future<V> forExecutionException(Throwable ex) {
 		return new AsyncResult<>(null, ex);
-	}
-
-	/**
-	 * Determine the exposed exception: either the cause of a given
-	 * {@link ExecutionException}, or the original exception as-is.
-	 * @param original the original as given to {@link #forExecutionException}
-	 * @return the exposed exception
-	 */
-	private static Throwable exposedException(Throwable original) {
-		if (original instanceof ExecutionException) {
-			Throwable cause = original.getCause();
-			if (cause != null) {
-				return cause;
-			}
-		}
-		return original;
 	}
 
 }

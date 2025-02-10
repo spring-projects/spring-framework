@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -28,7 +30,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -82,8 +83,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody()) {
 				@Override
-				@Nullable
-				public String getFilename() {
+				public @Nullable String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
 				@Override
@@ -97,8 +97,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
 			return new ByteArrayResource(body) {
 				@Override
-				@Nullable
-				public String getFilename() {
+				public @Nullable String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
 			};
@@ -131,8 +130,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	@Override
-	@Nullable
-	protected Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
+	protected @Nullable Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
 		if (InputStreamResource.class == resource.getClass()) {

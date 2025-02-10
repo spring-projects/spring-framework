@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Object to represent an SQL parameter value, including parameter meta-data
@@ -38,8 +38,7 @@ import org.springframework.lang.Nullable;
  */
 public class SqlParameterValue extends SqlParameter {
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
 
 	/**
@@ -89,8 +88,7 @@ public class SqlParameterValue extends SqlParameter {
 	/**
 	 * Return the value object that this parameter value holds.
 	 */
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 

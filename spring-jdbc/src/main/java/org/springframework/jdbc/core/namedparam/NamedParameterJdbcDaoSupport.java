@@ -16,9 +16,10 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
-import org.springframework.lang.Nullable;
 
 /**
  * Extension of JdbcDaoSupport that exposes a NamedParameterJdbcTemplate as well.
@@ -30,8 +31,7 @@ import org.springframework.lang.Nullable;
  */
 public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 
-	@Nullable
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	private @Nullable NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 
 	/**
@@ -48,8 +48,7 @@ public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 	/**
 	 * Return a NamedParameterJdbcTemplate wrapping the configured JdbcTemplate.
 	 */
-	@Nullable
-	public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+	public @Nullable NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
 		return this.namedParameterJdbcTemplate;
 	}
 

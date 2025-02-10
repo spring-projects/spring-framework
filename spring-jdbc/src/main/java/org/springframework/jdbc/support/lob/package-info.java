@@ -2,9 +2,7 @@
  * Provides a strategy interface for Large OBject handling,
  * as well as a customizable default implementation.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.jdbc.support.lob;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

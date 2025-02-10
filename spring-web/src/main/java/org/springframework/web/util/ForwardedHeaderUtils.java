@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -145,8 +146,7 @@ public abstract class ForwardedHeaderUtils {
 	 * {@code null} if the headers are not present
 	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.2">RFC 7239, Section 5.2</a>
 	 */
-	@Nullable
-	public static InetSocketAddress parseForwardedFor(
+	public static @Nullable InetSocketAddress parseForwardedFor(
 			URI uri, HttpHeaders headers, @Nullable InetSocketAddress remoteAddress) {
 
 		int port = (remoteAddress != null ?
@@ -181,6 +181,8 @@ public abstract class ForwardedHeaderUtils {
 		String forHeader = headers.getFirst("X-Forwarded-For");
 		if (StringUtils.hasText(forHeader)) {
 			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
+			boolean ipv6 = (host.indexOf(':') != -1);
+			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
 			return InetSocketAddress.createUnresolved(host, port);
 		}
 

@@ -16,9 +16,10 @@
 
 package org.springframework.web.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * A TypeMismatchException raised while resolving a controller method argument.

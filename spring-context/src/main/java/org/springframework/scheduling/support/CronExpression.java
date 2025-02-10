@@ -20,7 +20,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -236,14 +237,12 @@ public final class CronExpression {
 	 * @return the next temporal that matches this expression, or {@code null}
 	 * if no such temporal can be found
 	 */
-	@Nullable
-	public <T extends Temporal & Comparable<? super T>> T next(T temporal) {
+	public <T extends Temporal & Comparable<? super T>> @Nullable T next(T temporal) {
 		return nextOrSame(ChronoUnit.NANOS.addTo(temporal, 1));
 	}
 
 
-	@Nullable
-	private <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
+	private <T extends Temporal & Comparable<? super T>> @Nullable T nextOrSame(T temporal) {
 		for (int i = 0; i < MAX_ATTEMPTS; i++) {
 			T result = nextOrSameInternal(temporal);
 			if (result == null || result.equals(temporal)) {
@@ -254,8 +253,7 @@ public final class CronExpression {
 		return null;
 	}
 
-	@Nullable
-	private <T extends Temporal & Comparable<? super T>> T nextOrSameInternal(T temporal) {
+	private <T extends Temporal & Comparable<? super T>> @Nullable T nextOrSameInternal(T temporal) {
 		for (CronField field : this.fields) {
 			temporal = field.nextOrSame(temporal);
 			if (temporal == null) {

@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface used by a {@link ConfigurableBeanFactory},
@@ -89,8 +90,7 @@ public interface Scope {
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 * @see #registerDestructionCallback
 	 */
-	@Nullable
-	Object remove(String name);
+	@Nullable Object remove(String name);
 
 	/**
 	 * Register a callback to be executed on destruction of the specified
@@ -130,8 +130,7 @@ public interface Scope {
 	 * @return the corresponding object, or {@code null} if none found
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable
-	Object resolveContextualObject(String key);
+	@Nullable Object resolveContextualObject(String key);
 
 	/**
 	 * Return the <em>conversation ID</em> for the current underlying scope, if any.
@@ -148,7 +147,6 @@ public interface Scope {
 	 * conversation ID for the current scope
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable
-	String getConversationId();
+	@Nullable String getConversationId();
 
 }

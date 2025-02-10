@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -61,7 +61,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 	@Override
 	public CompletableFuture<WebSocketSession> execute(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVars) {
+			String uriTemplate, @Nullable Object... uriVars) {
 
 		Assert.notNull(uriTemplate, "'uriTemplate' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
@@ -103,28 +103,6 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		if (!"ws".equals(scheme) && !"wss".equals(scheme)) {
 			throw new IllegalArgumentException("Invalid scheme: " + scheme);
 		}
-	}
-
-	/**
-	 * Perform the actual handshake to establish a connection to the server.
-	 * @param webSocketHandler the client-side handler for WebSocket messages
-	 * @param headers the HTTP headers to use for the handshake, with unwanted (forbidden)
-	 * headers filtered out (never {@code null})
-	 * @param uri the target URI for the handshake (never {@code null})
-	 * @param subProtocols requested sub-protocols, or an empty list
-	 * @param extensions requested WebSocket extensions, or an empty list
-	 * @param attributes the attributes to associate with the WebSocketSession, i.e. via
-	 * {@link WebSocketSession#getAttributes()}; currently always an empty map.
-	 * @return the established WebSocket session wrapped in a {@code ListenableFuture}.
-	 * @deprecated as of 6.0, in favor of {@link #executeInternal(WebSocketHandler, HttpHeaders, URI, List, List, Map)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	protected org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshakeInternal(
-			WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri, List<String> subProtocols,
-			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
-
-		throw new UnsupportedOperationException("doHandshakeInternal is deprecated in favor of executeInternal");
 	}
 
 	/**

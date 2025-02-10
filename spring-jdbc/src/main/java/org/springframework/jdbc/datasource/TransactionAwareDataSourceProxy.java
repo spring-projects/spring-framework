@@ -26,7 +26,8 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -180,8 +181,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 		private final DataSource targetDataSource;
 
-		@Nullable
-		private Connection target;
+		private @Nullable Connection target;
 
 		private boolean closed = false;
 
@@ -190,8 +190,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
 			switch (method.getName()) {

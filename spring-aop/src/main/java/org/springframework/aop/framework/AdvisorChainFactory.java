@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Factory interface for advisor chains.

@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -32,8 +33,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class UnsatisfiedDependencyException extends BeanCreationException {
 
-	@Nullable
-	private final InjectionPoint injectionPoint;
+	private final @Nullable InjectionPoint injectionPoint;
 
 
 	/**
@@ -103,8 +103,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * Return the injection point (field or method/constructor parameter), if known.
 	 * @since 4.3
 	 */
-	@Nullable
-	public InjectionPoint getInjectionPoint() {
+	public @Nullable InjectionPoint getInjectionPoint() {
 		return this.injectionPoint;
 	}
 

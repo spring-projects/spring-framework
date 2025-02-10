@@ -47,18 +47,6 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	HttpStatusCode getStatusCode();
 
 	/**
-	 * Return the HTTP status code as an integer.
-	 * @return the HTTP status as an integer value
-	 * @since 5.0.6
-	 * @see #getStatusCode()
-	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	default int getRawStatusCode() {
-		return getStatusCode().value();
-	}
-
-	/**
 	 * Return a read-only map of response cookies received from the server.
 	 */
 	MultiValueMap<String, ResponseCookie> getCookies();

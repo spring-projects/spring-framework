@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,15 +112,6 @@ class StatusResultMatchersDsl internal constructor (private val actions: ResultA
 	 */
 	fun isProcessing() {
 		actions.andExpect(matchers.isProcessing())
-	}
-
-	/**
-	 * @see isEarlyHints
-	 */
-	@Deprecated("use isEarlyHints() instead", replaceWith= ReplaceWith("isEarlyHints()"))
-	fun isCheckpoint() {
-		@Suppress("DEPRECATION")
-		actions.andExpect(matchers.isCheckpoint())
 	}
 
 	/**

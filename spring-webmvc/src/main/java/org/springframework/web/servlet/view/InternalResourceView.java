@@ -22,8 +22,8 @@ import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
@@ -224,8 +224,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @param path the target URL (as returned from {@link #prepareForRendering})
 	 * @return a corresponding RequestDispatcher
 	 */
-	@Nullable
-	protected RequestDispatcher getRequestDispatcher(HttpServletRequest request, String path) {
+	protected @Nullable RequestDispatcher getRequestDispatcher(HttpServletRequest request, String path) {
 		return request.getRequestDispatcher(path);
 	}
 

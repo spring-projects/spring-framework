@@ -3,9 +3,7 @@
  * Provides an abstraction over various serialization techniques.
  * Includes exceptions for serialization and deserialization failures.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.core.serializer;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

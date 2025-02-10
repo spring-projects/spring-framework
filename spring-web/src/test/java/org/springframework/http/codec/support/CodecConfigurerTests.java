@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.codec.support;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -411,19 +410,6 @@ class CodecConfigurerTests {
 
 		assertThat(decoders).doesNotContain(jacksonDecoder, jaxb2Decoder, protoDecoder);
 		assertThat(encoders).doesNotContain(jacksonEncoder, jaxb2Encoder, protoEncoder);
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	void withDefaultCodecConfig() {
-		AtomicBoolean callbackCalled = new AtomicBoolean();
-		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
-		this.configurer.customCodecs().withDefaultCodecConfig(config -> {
-			assertThat(config.isEnableLoggingRequestDetails()).isTrue();
-			callbackCalled.compareAndSet(false, true);
-		});
-		this.configurer.getReaders();
-		assertThat(callbackCalled).isTrue();
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {

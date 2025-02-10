@@ -23,8 +23,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.InputStreamSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.ThrowingConsumer;
 
@@ -64,8 +65,7 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 	 * @return the file content or {@code null} if no file could be found
 	 * @throws IOException on read error
 	 */
-	@Nullable
-	public String getGeneratedFileContent(Kind kind, String path) throws IOException {
+	public @Nullable String getGeneratedFileContent(Kind kind, String path) throws IOException {
 		InputStreamSource source = getGeneratedFile(kind, path);
 		if (source != null) {
 			return new String(source.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
@@ -79,8 +79,7 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 	 * @param path the path of the file
 	 * @return the file source or {@code null} if no file could be found
 	 */
-	@Nullable
-	public InputStreamSource getGeneratedFile(Kind kind, String path) {
+	public @Nullable InputStreamSource getGeneratedFile(Kind kind, String path) {
 		Assert.notNull(kind, "'kind' must not be null");
 		Assert.hasLength(path, "'path' must not be empty");
 		Map<String, InputStreamSource> paths = this.files.get(kind);

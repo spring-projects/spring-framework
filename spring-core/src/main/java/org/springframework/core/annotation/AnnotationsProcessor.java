@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Callback interface used to process annotations.
@@ -40,8 +40,7 @@ interface AnnotationsProcessor<C, R> {
 	 * @param aggregateIndex the aggregate index about to be processed
 	 * @return a {@code non-null} result if no further processing is required
 	 */
-	@Nullable
-	default R doWithAggregate(C context, int aggregateIndex) {
+	default @Nullable R doWithAggregate(C context, int aggregateIndex) {
 		return null;
 	}
 
@@ -55,8 +54,7 @@ interface AnnotationsProcessor<C, R> {
 	 * {@code null} elements)
 	 * @return a {@code non-null} result if no further processing is required
 	 */
-	@Nullable
-	R doWithAnnotations(C context, int aggregateIndex, @Nullable Object source, Annotation[] annotations);
+	@Nullable R doWithAnnotations(C context, int aggregateIndex, @Nullable Object source, @Nullable Annotation[] annotations);
 
 	/**
 	 * Get the final result to be returned. By default this method returns
@@ -64,8 +62,7 @@ interface AnnotationsProcessor<C, R> {
 	 * @param result the last early exit result, or {@code null} if none
 	 * @return the final result to be returned to the caller
 	 */
-	@Nullable
-	default R finish(@Nullable R result) {
+	default @Nullable R finish(@Nullable R result) {
 		return result;
 	}
 

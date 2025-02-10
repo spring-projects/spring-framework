@@ -26,10 +26,10 @@ import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.JmxUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Internal helper class for managing a JMX connector.
@@ -41,8 +41,7 @@ class ConnectorDelegate {
 
 	private static final Log logger = LogFactory.getLog(ConnectorDelegate.class);
 
-	@Nullable
-	private JMXConnector connector;
+	private @Nullable JMXConnector connector;
 
 
 	/**

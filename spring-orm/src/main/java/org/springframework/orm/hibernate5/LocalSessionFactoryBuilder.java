@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
@@ -65,7 +66,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -120,7 +120,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
-	@Nullable
 	private TypeFilter[] entityTypeFilters = DEFAULT_ENTITY_TYPE_FILTERS;
 
 
@@ -169,7 +168,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 		getProperties().put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		if (dataSource != null) {
-			getProperties().put(AvailableSettings.DATASOURCE, dataSource);
+			getProperties().put(AvailableSettings.JAKARTA_NON_JTA_DATASOURCE, dataSource);
 		}
 		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
 				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
@@ -256,7 +255,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @since 4.3
 	 * @see AvailableSettings#MULTI_TENANT_CONNECTION_PROVIDER
 	 */
-	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(MultiTenantConnectionProvider multiTenantConnectionProvider) {
+	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(MultiTenantConnectionProvider<?> multiTenantConnectionProvider) {
 		getProperties().put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
 		return this;
 	}
@@ -267,9 +266,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @see AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER
 	 */
 	@Override
-	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
+	public LocalSessionFactoryBuilder setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver) {
 		getProperties().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
 		super.setCurrentTenantIdentifierResolver(currentTenantIdentifierResolver);
+		return this;
 	}
 
 	/**
@@ -281,18 +281,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 */
 	public LocalSessionFactoryBuilder setEntityTypeFilters(TypeFilter... entityTypeFilters) {
 		this.entityTypeFilters = entityTypeFilters;
-		return this;
-	}
-
-	/**
-	 * Add the given annotated classes in a batch.
-	 * @see #addAnnotatedClass
-	 * @see #scanPackages
-	 */
-	public LocalSessionFactoryBuilder addAnnotatedClasses(Class<?>... annotatedClasses) {
-		for (Class<?> annotatedClass : annotatedClasses) {
-			addAnnotatedClass(annotatedClass);
-		}
 		return this;
 	}
 

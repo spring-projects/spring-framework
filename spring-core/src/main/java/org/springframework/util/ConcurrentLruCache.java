@@ -28,7 +28,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Simple LRU (Least Recently Used) cache, bounded by a specified cache capacity.
@@ -223,7 +223,6 @@ public final class ConcurrentLruCache<K, V> {
 	 * @return {@code true} if the key was present before,
 	 * {@code false} if there was no matching key
 	 */
-	@Nullable
 	public boolean remove(K key) {
 		final Node<K, V> node = this.cache.remove(key);
 		if (node == null) {
@@ -486,19 +485,16 @@ public final class ConcurrentLruCache<K, V> {
 	private static final class Node<K, V> extends AtomicReference<CacheEntry<V>> {
 		final K key;
 
-		@Nullable
-		Node<K, V> prev;
+		@Nullable Node<K, V> prev;
 
-		@Nullable
-		Node<K, V> next;
+		@Nullable Node<K, V> next;
 
 		Node(K key, CacheEntry<V> cacheEntry) {
 			super(cacheEntry);
 			this.key = key;
 		}
 
-		@Nullable
-		public Node<K, V> getPrevious() {
+		public @Nullable Node<K, V> getPrevious() {
 			return this.prev;
 		}
 
@@ -506,8 +502,7 @@ public final class ConcurrentLruCache<K, V> {
 			this.prev = prev;
 		}
 
-		@Nullable
-		public Node<K, V> getNext() {
+		public @Nullable Node<K, V> getNext() {
 			return this.next;
 		}
 
@@ -523,15 +518,12 @@ public final class ConcurrentLruCache<K, V> {
 
 	private static final class EvictionQueue<K, V> {
 
-		@Nullable
-		Node<K, V> first;
+		@Nullable Node<K, V> first;
 
-		@Nullable
-		Node<K, V> last;
+		@Nullable Node<K, V> last;
 
 
-		@Nullable
-		Node<K, V> poll() {
+		@Nullable Node<K, V> poll() {
 			if (this.first == null) {
 				return null;
 			}

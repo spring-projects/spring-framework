@@ -36,7 +36,7 @@ class RestClientResponseExceptionTests {
 
 		HttpHeaders responseHeaders = ex.getResponseHeaders();
 		assertThat(responseHeaders).isNotNull();
-		assertThat(responseHeaders).hasSize(1);
+		assertThat(responseHeaders.size()).isOne();
 		assertThat(responseHeaders.getFirst("FOO")).isEqualTo("bar");
 	}
 

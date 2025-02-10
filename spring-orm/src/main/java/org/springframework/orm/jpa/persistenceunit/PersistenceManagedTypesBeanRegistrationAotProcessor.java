@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import jakarta.persistence.EntityListeners;
@@ -32,6 +33,7 @@ import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
@@ -49,7 +51,6 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -70,9 +71,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 	private static final boolean jpaPresent = ClassUtils.isPresent("jakarta.persistence.Entity",
 			PersistenceManagedTypesBeanRegistrationAotProcessor.class.getClassLoader());
 
-	@Nullable
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		if (jpaPresent) {
 			if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
 				return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
@@ -173,7 +173,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 			ReflectionUtils.doWithFields(managedClass, field -> {
 				Convert convertFieldAnnotation = AnnotationUtils.findAnnotation(field, Convert.class);
-				if (convertFieldAnnotation != null && convertFieldAnnotation.converter() != void.class) {
+				if (convertFieldAnnotation != null && convertFieldAnnotation.converter() != AttributeConverter.class) {
 					reflectionHints.registerType(convertFieldAnnotation.converter(), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 				}
 			});
@@ -229,8 +229,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
-		@Nullable
-		private static Class<? extends Annotation> loadClass(String className, @Nullable ClassLoader classLoader) {
+		private static @Nullable Class<? extends Annotation> loadClass(String className, @Nullable ClassLoader classLoader) {
 			try {
 				return (Class<? extends Annotation>) ClassUtils.forName(className, classLoader);
 			}
@@ -239,13 +238,13 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
-		@SuppressWarnings("NullAway")
+		@SuppressWarnings("NullAway") // Not null assertion performed in ReflectionHints.registerType
 		private void registerForReflection(ReflectionHints reflection, @Nullable Annotation annotation, String attribute) {
 			if (annotation == null) {
 				return;
 			}
-			Class<?> embeddableInstantiatorClass = (Class<?>) AnnotationUtils.getAnnotationAttributes(annotation).get(attribute);
-			reflection.registerType(embeddableInstantiatorClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			Class<?> type = (Class<?>) AnnotationUtils.getAnnotationAttributes(annotation).get(attribute);
+			reflection.registerType(type, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		}
 	}
 }

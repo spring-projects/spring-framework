@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.AccessControl.Visibility;
@@ -54,7 +55,6 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.ThrowingSupplier;
 
@@ -160,7 +160,7 @@ public class InstanceSupplierCodeGenerator {
 				registeredBean.getBeanName(), constructor, registeredBean.getBeanClass());
 
 		Class<?> publicType = descriptor.publicType();
-		if (KotlinDetector.isKotlinReflectPresent() && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
+		if (KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
@@ -174,8 +174,7 @@ public class InstanceSupplierCodeGenerator {
 
 	private CodeBlock generateCodeForAccessibleConstructor(ConstructorDescriptor descriptor) {
 		Constructor<?> constructor = descriptor.constructor();
-		this.generationContext.getRuntimeHints().reflection().registerConstructor(
-				constructor, ExecutableMode.INTROSPECT);
+		this.generationContext.getRuntimeHints().reflection().registerType(constructor.getDeclaringClass());
 
 		if (constructor.getParameterCount() == 0) {
 			if (!this.allowDirectSupplierShortcut) {
@@ -270,7 +269,7 @@ public class InstanceSupplierCodeGenerator {
 	private CodeBlock generateCodeForAccessibleFactoryMethod(String beanName,
 			Method factoryMethod, Class<?> targetClass, @Nullable String factoryBeanName) {
 
-		this.generationContext.getRuntimeHints().reflection().registerMethod(factoryMethod, ExecutableMode.INTROSPECT);
+		this.generationContext.getRuntimeHints().reflection().registerType(factoryMethod.getDeclaringClass());
 
 		if (factoryBeanName == null && factoryMethod.getParameterCount() == 0) {
 			Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
@@ -409,13 +408,11 @@ public class InstanceSupplierCodeGenerator {
 	private static class KotlinDelegate {
 
 		public static boolean hasConstructorWithOptionalParameter(Class<?> beanClass) {
-			if (KotlinDetector.isKotlinType(beanClass)) {
-				KClass<?> kClass = JvmClassMappingKt.getKotlinClass(beanClass);
-				for (KFunction<?> constructor : kClass.getConstructors()) {
-					for (KParameter parameter : constructor.getParameters()) {
-						if (parameter.isOptional()) {
-							return true;
-						}
+			KClass<?> kClass = JvmClassMappingKt.getKotlinClass(beanClass);
+			for (KFunction<?> constructor : kClass.getConstructors()) {
+				for (KParameter parameter : constructor.getParameters()) {
+					if (parameter.isOptional()) {
+						return true;
 					}
 				}
 			}

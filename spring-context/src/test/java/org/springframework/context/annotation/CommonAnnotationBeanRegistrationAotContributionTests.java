@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateFieldResourceSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PrivateFieldResourceSample.class, "one"))
+				.onType(PrivateFieldResourceSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PrivateFieldResourceSample instance = new PrivateFieldResourceSample();
@@ -98,7 +98,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateFieldResourceSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PackagePrivateFieldResourceSample.class, "one"))
+				.onType(PackagePrivateFieldResourceSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateFieldResourceSample instance = new PackagePrivateFieldResourceSample();
@@ -117,7 +117,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateFieldResourceFromParentSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PackagePrivateFieldResourceSample.class, "one"))
+				.onType(PackagePrivateFieldResourceSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateFieldResourceFromParentSample instance = new PackagePrivateFieldResourceFromParentSample();
@@ -135,7 +135,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateMethodResourceSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PrivateMethodResourceSample.class, "setOne").invoke())
+				.onMethodInvocation(PrivateMethodResourceSample.class, "setOne"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PrivateMethodResourceSample instance = new PrivateMethodResourceSample();
@@ -153,7 +153,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateMethodResourceWithCustomNameSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PrivateMethodResourceWithCustomNameSample.class, "setText").invoke())
+				.onMethodInvocation(PrivateMethodResourceWithCustomNameSample.class, "setText"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PrivateMethodResourceWithCustomNameSample instance = new PrivateMethodResourceWithCustomNameSample();
@@ -172,7 +172,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateMethodResourceSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PackagePrivateMethodResourceSample.class, "setOne").introspect())
+				.onType(PackagePrivateMethodResourceSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateMethodResourceSample instance = new PackagePrivateMethodResourceSample();
@@ -191,7 +191,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateMethodResourceFromParentSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PackagePrivateMethodResourceSample.class, "setOne"))
+				.onMethodInvocation(PackagePrivateMethodResourceSample.class, "setOne"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateMethodResourceFromParentSample instance = new PackagePrivateMethodResourceFromParentSample();

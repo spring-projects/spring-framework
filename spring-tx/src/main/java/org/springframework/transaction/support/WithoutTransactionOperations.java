@@ -18,7 +18,8 @@ package org.springframework.transaction.support;
 
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
@@ -40,8 +41,7 @@ final class WithoutTransactionOperations implements TransactionOperations {
 
 
 	@Override
-	@Nullable
-	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
+	public <T> @Nullable T execute(TransactionCallback<T> action) throws TransactionException {
 		return action.doInTransaction(new SimpleTransactionStatus(false));
 	}
 

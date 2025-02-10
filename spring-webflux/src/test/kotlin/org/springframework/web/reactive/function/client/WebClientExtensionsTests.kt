@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,16 +96,6 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	@Suppress("DEPRECATION")
-	fun awaitExchange() {
-		val response = mockk<ClientResponse>()
-		every { requestBodySpec.exchange() } returns Mono.just(response)
-		runBlocking {
-			assertThat(requestBodySpec.awaitExchange()).isEqualTo(response)
-		}
-	}
-
-	@Test
 	fun `awaitExchange with function parameter`() {
 		val foo = mockk<Foo>()
 		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
@@ -129,7 +119,7 @@ class WebClientExtensionsTests {
 	@Test
 	fun `awaitExchangeOrNull returning null`() {
 		val foo = mockk<Foo>()
-		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo?>>>()) } returns Mono.empty()
+		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.empty()
 		runBlocking {
 			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(null)
 		}

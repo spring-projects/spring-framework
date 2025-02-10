@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.ResolvableType;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.BindParam;
 import org.springframework.web.bind.support.BindParamNameResolver;
@@ -36,7 +37,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test fixture for {@link ExtendedServletRequestDataBinder}.
+ * Tests for {@link ExtendedServletRequestDataBinder}.
  *
  * @author Rossen Stoyanchev
  */
@@ -120,6 +121,36 @@ class ExtendedServletRequestDataBinderTests {
 	}
 
 	@Test
+	void headerPredicateWithConstructorArgs() {
+		ExtendedServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(null);
+		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Some-Int-Array"));
+		binder.setTargetType(ResolvableType.forClass(DataBean.class));
+		binder.setNameResolver(new BindParamNameResolver());
+
+		request.addHeader("Some-Int-Array", "1");
+		request.addHeader("Some-Int-Array", "2");
+
+		binder.construct(request);
+
+		DataBean bean = (DataBean) binder.getTarget();
+
+		assertThat(bean.someIntArray()).isNull();
+	}
+
+	@Test
+	void filteredPriorityHeaderForConstructorBinding() {
+		TestBinder binder = new TestBinder();
+		binder.setTargetType(ResolvableType.forClass(TestTarget.class));
+		request.addHeader("Priority", "u1");
+
+		binder.construct(request);
+		BindingResult result = binder.getBindingResult();
+		TestTarget target = (TestTarget) result.getTarget();
+
+		assertThat(target.priority).isNull();
+	}
+
+	@Test
 	void headerPredicate() {
 		TestBinder binder = new TestBinder();
 		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));
@@ -160,6 +191,16 @@ class ExtendedServletRequestDataBinderTests {
 		public void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
 			super.addBindValues(mpvs, request);
 		}
+	}
+
+	static class TestTarget {
+
+		final String priority;
+
+		public TestTarget(String priority) {
+			this.priority = priority;
+		}
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -52,8 +52,7 @@ public class AnnotatedMethod {
 
 	private final MethodParameter[] parameters;
 
-	@Nullable
-	private volatile List<Annotation[][]> inheritedParameterAnnotations;
+	private volatile @Nullable List<Annotation[][]> inheritedParameterAnnotations;
 
 
 	/**
@@ -148,8 +147,7 @@ public class AnnotatedMethod {
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
-	@Nullable
-	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
+	public <A extends Annotation> @Nullable A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
 
@@ -214,8 +212,8 @@ public class AnnotatedMethod {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other != null && getClass() == other.getClass() &&
-				this.method.equals(((AnnotatedMethod) other).method)));
+		return (this == other || (other instanceof AnnotatedMethod otherHandlerMethod &&
+				this.method.equals(otherHandlerMethod.method)));
 	}
 
 	@Override
@@ -231,8 +229,7 @@ public class AnnotatedMethod {
 
 	// Support methods for use in subclass variants
 
-	@Nullable
-	protected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
+	protected static @Nullable Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
 		if (!ObjectUtils.isEmpty(providedArgs)) {
 			for (Object providedArg : providedArgs) {
 				if (parameter.getParameterType().isInstance(providedArg)) {
@@ -254,8 +251,7 @@ public class AnnotatedMethod {
 	 */
 	protected class AnnotatedMethodParameter extends SynthesizingMethodParameter {
 
-		@Nullable
-		private volatile Annotation[] combinedAnnotations;
+		private volatile Annotation @Nullable [] combinedAnnotations;
 
 		public AnnotatedMethodParameter(int index) {
 			super(AnnotatedMethod.this.getBridgedMethod(), index);
@@ -267,7 +263,6 @@ public class AnnotatedMethod {
 		}
 
 		@Override
-		@NonNull
 		public Method getMethod() {
 			return AnnotatedMethod.this.getBridgedMethod();
 		}
@@ -278,8 +273,7 @@ public class AnnotatedMethod {
 		}
 
 		@Override
-		@Nullable
-		public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
+		public <T extends Annotation> @Nullable T getMethodAnnotation(Class<T> annotationType) {
 			return AnnotatedMethod.this.getMethodAnnotation(annotationType);
 		}
 
@@ -335,8 +329,7 @@ public class AnnotatedMethod {
 	 */
 	private class ReturnValueMethodParameter extends AnnotatedMethodParameter {
 
-		@Nullable
-		private final Class<?> returnValueType;
+		private final @Nullable Class<?> returnValueType;
 
 		public ReturnValueMethodParameter(@Nullable Object returnValue) {
 			super(-1);

@@ -7,8 +7,6 @@
 
 	<import resource="resources/messageSource.xml"/>
 
-	<import resource="/resources/../resources/themeSource.xml"/>
-
 	<bean id="lifecyclePostProcessor" class="org.springframework.beans.testfixture.beans.LifecycleBean$PostProcessor"/>
 
 	<!--

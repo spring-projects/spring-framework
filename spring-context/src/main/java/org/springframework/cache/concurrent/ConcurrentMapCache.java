@@ -23,9 +23,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.serializer.support.SerializationDelegate;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -57,8 +58,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 
 	private final ConcurrentMap<Object, Object> store;
 
-	@Nullable
-	private final SerializationDelegate serialization;
+	private final @Nullable SerializationDelegate serialization;
 
 
 	/**
@@ -137,15 +137,13 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	protected Object lookup(Object key) {
+	protected @Nullable Object lookup(Object key) {
 		return this.store.get(key);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	public <T> @Nullable T get(Object key, Callable<T> valueLoader) {
 		return (T) fromStoreValue(this.store.computeIfAbsent(key, k -> {
 			try {
 				return toStoreValue(valueLoader.call());
@@ -157,8 +155,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	public CompletableFuture<?> retrieve(Object key) {
+	public @Nullable CompletableFuture<?> retrieve(Object key) {
 		Object value = lookup(key);
 		return (value != null ? CompletableFuture.completedFuture(
 				isAllowNullValues() ? toValueWrapper(value) : fromStoreValue(value)) : null);
@@ -177,8 +174,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
+	public @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Object existing = this.store.putIfAbsent(key, toStoreValue(value));
 		return toValueWrapper(existing);
 	}
@@ -223,8 +219,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	protected Object fromStoreValue(@Nullable Object storeValue) {
+	protected @Nullable Object fromStoreValue(@Nullable Object storeValue) {
 		if (storeValue != null && this.serialization != null) {
 			try {
 				return super.fromStoreValue(this.serialization.deserializeFromByteArray((byte[]) storeValue));

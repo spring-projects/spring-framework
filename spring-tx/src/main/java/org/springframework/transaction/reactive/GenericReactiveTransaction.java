@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.transaction.reactive;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.util.Assert;
 
@@ -40,11 +41,9 @@ import org.springframework.util.Assert;
  */
 public class GenericReactiveTransaction implements ReactiveTransaction {
 
-	@Nullable
-	private final String transactionName;
+	private final @Nullable String transactionName;
 
-	@Nullable
-	private final Object transaction;
+	private final @Nullable Object transaction;
 
 	private final boolean newTransaction;
 
@@ -56,8 +55,7 @@ public class GenericReactiveTransaction implements ReactiveTransaction {
 
 	private final boolean debug;
 
-	@Nullable
-	private final Object suspendedResources;
+	private final @Nullable Object suspendedResources;
 
 	private boolean rollbackOnly = false;
 
@@ -94,13 +92,6 @@ public class GenericReactiveTransaction implements ReactiveTransaction {
 		this.readOnly = readOnly;
 		this.debug = debug;
 		this.suspendedResources = suspendedResources;
-	}
-
-	@Deprecated(since = "6.1", forRemoval = true)
-	public GenericReactiveTransaction(@Nullable Object transaction, boolean newTransaction,
-			boolean newSynchronization, boolean readOnly, boolean debug, @Nullable Object suspendedResources) {
-
-		this(null, transaction, newTransaction, newSynchronization, false, readOnly, debug, suspendedResources);
 	}
 
 
@@ -158,8 +149,7 @@ public class GenericReactiveTransaction implements ReactiveTransaction {
 	 * Return the holder for resources that have been suspended for this transaction,
 	 * if any.
 	 */
-	@Nullable
-	public Object getSuspendedResources() {
+	public @Nullable Object getSuspendedResources() {
 		return this.suspendedResources;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +50,8 @@ public class IndexedTestBean {
 
 	private SortedMap sortedMap;
 
+	private IterableMap iterableMap;
+
 	private MyTestBeans myTestBeans;
 
 
@@ -73,6 +76,9 @@ public class IndexedTestBean {
 		TestBean tb6 = new TestBean("name6", 0);
 		TestBean tb7 = new TestBean("name7", 0);
 		TestBean tb8 = new TestBean("name8", 0);
+		TestBean tbA = new TestBean("nameA", 0);
+		TestBean tbB = new TestBean("nameB", 0);
+		TestBean tbC = new TestBean("nameC", 0);
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
 		TestBean tbZ = new TestBean("nameZ", 0);
@@ -88,6 +94,12 @@ public class IndexedTestBean {
 		this.map.put("key2", tb5);
 		this.map.put("key.3", tb5);
 		List list = new ArrayList();
+		list.add(tbA);
+		list.add(tbB);
+		this.iterableMap = new IterableMap<>();
+		this.iterableMap.put("key1", tbC);
+		this.iterableMap.put("key2", list);
+		list = new ArrayList();
 		list.add(tbX);
 		list.add(tbY);
 		this.map.put("key4", list);
@@ -152,6 +164,14 @@ public class IndexedTestBean {
 		this.sortedMap = sortedMap;
 	}
 
+	public IterableMap getIterableMap() {
+		return this.iterableMap;
+	}
+
+	public void setIterableMap(IterableMap iterableMap) {
+		this.iterableMap = iterableMap;
+	}
+
 	public MyTestBeans getMyTestBeans() {
 		return myTestBeans;
 	}
@@ -160,6 +180,15 @@ public class IndexedTestBean {
 		this.myTestBeans = myTestBeans;
 	}
 
+
+	@SuppressWarnings("serial")
+	public static class IterableMap<K,V> extends LinkedHashMap<K,V> implements Iterable<V> {
+
+		@Override
+		public Iterator<V> iterator() {
+			return values().iterator();
+		}
+	}
 
 	public static class MyTestBeans implements Iterable<TestBean> {
 

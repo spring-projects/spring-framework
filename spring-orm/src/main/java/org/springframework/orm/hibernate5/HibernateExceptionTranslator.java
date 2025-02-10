@@ -19,11 +19,11 @@ package org.springframework.orm.hibernate5;
 import jakarta.persistence.PersistenceException;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 /**
@@ -45,8 +45,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
  */
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
-	@Nullable
-	private SQLExceptionTranslator jdbcExceptionTranslator;
+	private @Nullable SQLExceptionTranslator jdbcExceptionTranslator;
 
 
 	/**
@@ -66,8 +65,7 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 
 
 	@Override
-	@Nullable
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+	public @Nullable DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException hibernateEx) {
 			return convertHibernateAccessException(hibernateEx);
 		}

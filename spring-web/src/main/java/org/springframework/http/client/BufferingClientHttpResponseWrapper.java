@@ -20,9 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -36,8 +37,7 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 	private final ClientHttpResponse response;
 
-	@Nullable
-	private byte[] body;
+	private byte @Nullable [] body;
 
 
 	BufferingClientHttpResponseWrapper(ClientHttpResponse response) {

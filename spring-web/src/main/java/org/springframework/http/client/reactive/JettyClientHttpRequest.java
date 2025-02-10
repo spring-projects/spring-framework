@@ -143,7 +143,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 		HttpHeaders headers = getHeaders();
 		this.jettyRequest.headers(fields -> {
 			headers.forEach((key, value) -> value.forEach(v -> fields.add(key, v)));
-			if (!headers.containsKey(HttpHeaders.ACCEPT)) {
+			if (!headers.containsHeader(HttpHeaders.ACCEPT)) {
 				fields.add(HttpHeaders.ACCEPT, "*/*");
 			}
 		});

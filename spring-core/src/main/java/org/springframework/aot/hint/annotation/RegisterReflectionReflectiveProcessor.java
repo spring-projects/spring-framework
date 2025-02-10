@@ -24,11 +24,11 @@ import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -80,8 +80,7 @@ public class RegisterReflectionReflectiveProcessor implements ReflectiveProcesso
 		hints.registerType(target, type -> type.withMembers(memberCategories));
 	}
 
-	@Nullable
-	private Class<?> loadClass(String className) {
+	private @Nullable Class<?> loadClass(String className) {
 		try {
 			return ClassUtils.forName(className, getClass().getClassLoader());
 		}

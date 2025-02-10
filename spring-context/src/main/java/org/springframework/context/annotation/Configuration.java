@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -471,7 +471,10 @@ public @interface Configuration {
 	 * Switch this flag to {@code false} in order to allow for method overloading
 	 * according to those semantics, accepting the risk for accidental overlaps.
 	 * @since 6.0
+	 * @deprecated as of 7.0, always relying on {@code @Bean} unique methods,
+	 * just possibly with {@code Optional}/{@code ObjectProvider} arguments
 	 */
+	@Deprecated(since = "7.0")
 	boolean enforceUniqueMethods() default true;
 
 }

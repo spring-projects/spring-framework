@@ -31,8 +31,9 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -76,11 +77,9 @@ import org.springframework.util.ClassUtils;
  */
 public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements BeanClassLoaderAware {
 
-	@Nullable
-	private ClassLoader bundleClassLoader;
+	private @Nullable ClassLoader bundleClassLoader;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
 	 * Cache to hold loaded ResourceBundles.
@@ -103,8 +102,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
 			new ConcurrentHashMap<>();
 
-	@Nullable
-	private volatile MessageSourceControl control = new MessageSourceControl();
+	private volatile @Nullable MessageSourceControl control = new MessageSourceControl();
 
 
 	public ResourceBundleMessageSource() {
@@ -129,8 +127,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * <p>Default is the containing BeanFactory's bean ClassLoader.
 	 * @see #setBundleClassLoader
 	 */
-	@Nullable
-	protected ClassLoader getBundleClassLoader() {
+	protected @Nullable ClassLoader getBundleClassLoader() {
 		return (this.bundleClassLoader != null ? this.bundleClassLoader : this.beanClassLoader);
 	}
 
@@ -145,8 +142,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * returning the value found in the bundle as-is (without MessageFormat parsing).
 	 */
 	@Override
-	@Nullable
-	protected String resolveCodeWithoutArguments(String code, Locale locale) {
+	protected @Nullable String resolveCodeWithoutArguments(String code, Locale locale) {
 		Set<String> basenames = getBasenameSet();
 		for (String basename : basenames) {
 			ResourceBundle bundle = getResourceBundle(basename, locale);
@@ -165,8 +161,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * using a cached MessageFormat instance per message code.
 	 */
 	@Override
-	@Nullable
-	protected MessageFormat resolveCode(String code, Locale locale) {
+	protected @Nullable MessageFormat resolveCode(String code, Locale locale) {
 		Set<String> basenames = getBasenameSet();
 		for (String basename : basenames) {
 			ResourceBundle bundle = getResourceBundle(basename, locale);
@@ -189,8 +184,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @return the resulting ResourceBundle, or {@code null} if none
 	 * found for the given basename and Locale
 	 */
-	@Nullable
-	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
+	protected @Nullable ResourceBundle getResourceBundle(String basename, Locale locale) {
 		if (getCacheMillis() >= 0) {
 			// Fresh ResourceBundle.getBundle call in order to let ResourceBundle
 			// do its native caching, at the expense of more extensive lookup steps.
@@ -311,8 +305,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * defined for the given code
 	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
-	@Nullable
-	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
+	protected @Nullable MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
 
 		Map<String, Map<Locale, MessageFormat>> codeMap = this.cachedBundleMessageFormats.get(bundle);
@@ -357,8 +350,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * @see ResourceBundle#getString(String)
 	 * @see ResourceBundle#containsKey(String)
 	 */
-	@Nullable
-	protected String getStringOrNull(ResourceBundle bundle, String key) {
+	protected @Nullable String getStringOrNull(ResourceBundle bundle, String key) {
 		if (bundle.containsKey(key)) {
 			try {
 				return bundle.getString(key);
@@ -388,8 +380,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	private class MessageSourceControl extends ResourceBundle.Control {
 
 		@Override
-		@Nullable
-		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+		public @Nullable ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IllegalAccessException, InstantiationException, IOException {
 
 			// Special handling of default encoding
@@ -436,8 +427,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		}
 
 		@Override
-		@Nullable
-		public Locale getFallbackLocale(String baseName, Locale locale) {
+		public @Nullable Locale getFallbackLocale(String baseName, Locale locale) {
 			Locale defaultLocale = getDefaultLocale();
 			return (defaultLocale != null && !defaultLocale.equals(locale) ? defaultLocale : null);
 		}

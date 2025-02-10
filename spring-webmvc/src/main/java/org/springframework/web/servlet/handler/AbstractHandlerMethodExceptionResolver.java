@@ -18,8 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -65,8 +65,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	}
 
 	@Override
-	@Nullable
-	protected final ModelAndView doResolveException(
+	protected final @Nullable ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		HandlerMethod handlerMethod = (handler instanceof HandlerMethod hm ? hm : null);
@@ -87,8 +86,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to, or {@code null} for default processing
 	 */
-	@Nullable
-	protected abstract ModelAndView doResolveHandlerMethodException(
+	protected abstract @Nullable ModelAndView doResolveHandlerMethodException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception ex);
 
 }

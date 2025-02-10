@@ -33,11 +33,11 @@ import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
 import kotlinx.serialization.descriptors.PolymorphicKind;
 import kotlinx.serialization.descriptors.SerialDescriptor;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MimeType;
@@ -126,31 +126,31 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 	 * @param resolvableType the type to find a serializer for
 	 * @return a resolved serializer for the given type, or {@code null}
 	 */
-	@Nullable
-	protected final KSerializer<Object> serializer(ResolvableType resolvableType) {
+	protected final @Nullable KSerializer<Object> serializer(ResolvableType resolvableType) {
 		if (resolvableType.getSource() instanceof MethodParameter parameter) {
 			Method method = parameter.getMethod();
 			Assert.notNull(method, "Method must not be null");
 			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-				Assert.notNull(function, "Kotlin function must not be null");
-				KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
-						KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
-				KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
-				if (serializer == null) {
-					try {
-						serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
-					}
-					catch (IllegalArgumentException ignored) {
-					}
-					if (serializer != null) {
-						if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-							return null;
+				if (function != null) {
+					KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
+							KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
+					KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
+					if (serializer == null) {
+						try {
+							serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
 						}
-						this.kTypeSerializerCache.put(type, serializer);
+						catch (IllegalArgumentException ignored) {
+						}
+						if (serializer != null) {
+							if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
+								return null;
+							}
+							this.kTypeSerializerCache.put(type, serializer);
+						}
 					}
+					return serializer;
 				}
-				return serializer;
 			}
 		}
 		Type type = resolvableType.getType();

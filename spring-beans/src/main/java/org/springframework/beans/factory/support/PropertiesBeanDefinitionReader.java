@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
@@ -35,7 +37,6 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
@@ -145,8 +146,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String CONSTRUCTOR_ARG_PREFIX = "$";
 
 
-	@Nullable
-	private String defaultParentBean;
+	private @Nullable String defaultParentBean;
 
 	private PropertiesPersister propertiesPersister = DefaultPropertiesPersister.INSTANCE;
 
@@ -180,8 +180,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Return the default parent bean for this bean factory.
 	 */
-	@Nullable
-	public String getDefaultParentBean() {
+	public @Nullable String getDefaultParentBean() {
 		return this.defaultParentBean;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
@@ -35,7 +37,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -60,8 +61,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
-	@Nullable
-	private List<HttpMessageConverter<?>> messageConverters;
+	private @Nullable List<HttpMessageConverter<?>> messageConverters;
 
 
 	/**
@@ -98,25 +98,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * Template method called from {@link #hasError(ClientHttpResponse)}.
-	 * <p>The default implementation checks if the given status code is
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
-	 * Can be overridden in subclasses.
-	 * @param statusCode the HTTP status code as raw value
-	 * @return {@code true} if the response indicates an error; {@code false} otherwise
-	 * @since 4.3.21
-	 * @see org.springframework.http.HttpStatus.Series#CLIENT_ERROR
-	 * @see org.springframework.http.HttpStatus.Series#SERVER_ERROR
-	 * @deprecated in favor of {@link #hasError(HttpStatusCode)}
-	 */
-	@Deprecated
-	protected boolean hasError(int statusCode) {
-		HttpStatus.Series series = HttpStatus.Series.resolve(statusCode);
-		return (series == HttpStatus.Series.CLIENT_ERROR || series == HttpStatus.Series.SERVER_ERROR);
-	}
-
-	/**
 	 * Handle the error in the given response with the given resolved status code
 	 * and extra information providing access to the request URL and HTTP method.
 	 * <p>The default implementation throws:
@@ -136,29 +117,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@Override
 	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
-
-		// For backwards compatibility try handle(response) first
-		HandleErrorResponseDecorator decorator = new HandleErrorResponseDecorator(response);
-		handleError(decorator);
-		if (decorator.isHandled()) {
-			return;
-		}
-
 		handleError(response, response.getStatusCode(), url, method);
-	}
-
-	@SuppressWarnings("removal")
-	@Override
-	public void handleError(ClientHttpResponse response) throws IOException {
-
-		// Called via handleError(url, method, response)
-		if (response instanceof HandleErrorResponseDecorator decorator) {
-			decorator.setNotHandled();
-			return;
-		}
-
-		// Called directly, so do handle
-		handleError(response, response.getStatusCode(), null, null);
 	}
 
 	/**
@@ -216,8 +175,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @return the associated charset, or {@code null} if none
 	 * @since 4.3.8
 	 */
-	@Nullable
-	protected Charset getCharset(ClientHttpResponse response) {
+	protected @Nullable Charset getCharset(ClientHttpResponse response) {
 		MediaType contentType = response.getHeaders().getContentType();
 		return (contentType != null ? contentType.getCharset() : null);
 	}
@@ -229,7 +187,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * </pre>
 	 */
 	private String getErrorMessage(
-			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset,
+			int rawStatusCode, String statusText, byte @Nullable [] responseBody, @Nullable Charset charset,
 			@Nullable URI url, @Nullable HttpMethod method) {
 
 		StringBuilder msg = new StringBuilder(rawStatusCode + " " + statusText);
@@ -266,7 +224,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link RestClientResponseException#setBodyConvertFunction(Function)}.
 	 * @since 6.0
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	protected Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body) {
 		Assert.state(!CollectionUtils.isEmpty(this.messageConverters), "Expected message converters");
 		return resolvableType -> {
@@ -286,24 +244,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 						"Error while extracting response for type [" + resolvableType + "]", ex);
 			}
 		};
-	}
-
-
-	private static class HandleErrorResponseDecorator extends ClientHttpResponseDecorator {
-
-		private boolean handled = true;
-
-		public HandleErrorResponseDecorator(ClientHttpResponse delegate) {
-			super(delegate);
-		}
-
-		public void setNotHandled() {
-			this.handled = false;
-		}
-
-		public boolean isHandled() {
-			return this.handled;
-		}
 	}
 
 }

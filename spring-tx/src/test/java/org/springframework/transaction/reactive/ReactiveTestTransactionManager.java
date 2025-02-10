@@ -18,9 +18,9 @@ package org.springframework.transaction.reactive;
 
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -40,11 +40,9 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 	private final boolean canCreateTransaction;
 
-	@Nullable
-	private Function<String, RuntimeException> forceFailOnCommit;
+	private @Nullable Function<String, RuntimeException> forceFailOnCommit;
 
-	@Nullable
-	private Function<String, RuntimeException> forceFailOnRollback;
+	private @Nullable Function<String, RuntimeException> forceFailOnRollback;
 
 	protected boolean begin = false;
 

@@ -17,8 +17,7 @@
 package org.springframework.web.servlet;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy interface for translating an incoming
@@ -38,7 +37,6 @@ public interface RequestToViewNameTranslator {
 	 * @return the view name, or {@code null} if no default found
 	 * @throws Exception if view name translation fails
 	 */
-	@Nullable
-	String getViewName(HttpServletRequest request) throws Exception;
+	@Nullable String getViewName(HttpServletRequest request) throws Exception;
 
 }

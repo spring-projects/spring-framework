@@ -35,12 +35,12 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for factories that can create Spring AOP Advisors
@@ -112,8 +112,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * (there <i>should</i> only be one anyway...).
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
+	protected static @Nullable AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
 		for (Class<?> annotationType : ASPECTJ_ANNOTATION_CLASSES) {
 			AspectJAnnotation annotation = findAnnotation(method, (Class<Annotation>) annotationType);
 			if (annotation != null) {
@@ -123,8 +122,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		return null;
 	}
 
-	@Nullable
-	private static AspectJAnnotation findAnnotation(Method method, Class<? extends Annotation> annotationType) {
+	private static @Nullable AspectJAnnotation findAnnotation(Method method, Class<? extends Annotation> annotationType) {
 		Annotation annotation = AnnotationUtils.findAnnotation(method, annotationType);
 		if (annotation != null) {
 			return new AspectJAnnotation(annotation);
@@ -242,8 +240,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		private static final String[] EMPTY_ARRAY = new String[0];
 
 		@Override
-		@Nullable
-		public String[] getParameterNames(Method method) {
+		public String @Nullable [] getParameterNames(Method method) {
 			if (method.getParameterCount() == 0) {
 				return EMPTY_ARRAY;
 			}
@@ -266,8 +263,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		@Override
-		@Nullable
-		public String[] getParameterNames(Constructor<?> ctor) {
+		public @Nullable String @Nullable [] getParameterNames(Constructor<?> ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}
 	}

@@ -24,13 +24,13 @@ import io.undertow.websockets.core.CloseMessage;
 import io.undertow.websockets.core.WebSocketCallback;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -52,7 +52,7 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 	}
 
 	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info,
-			DataBufferFactory factory, @Nullable Sinks.Empty<Void> completionSink) {
+			DataBufferFactory factory, Sinks.@Nullable Empty<Void> completionSink) {
 
 		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionSink);
 		suspendReceiving();

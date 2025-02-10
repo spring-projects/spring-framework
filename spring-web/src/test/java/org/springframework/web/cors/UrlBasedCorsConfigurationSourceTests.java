@@ -71,6 +71,7 @@ class UrlBasedCorsConfigurationSourceTests {
 				.isThrownBy(() -> source.getCorsConfigurations().put("/**", new CorsConfiguration()));
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void allowInitLookupPath() {
 		CorsConfiguration config = new CorsConfiguration();

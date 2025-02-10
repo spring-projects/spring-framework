@@ -26,7 +26,8 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -193,8 +194,7 @@ public interface Resource extends InputStreamSource {
 	 * have a filename.
 	 * <p>Implementations are encouraged to return the filename unencoded.
 	 */
-	@Nullable
-	String getFilename();
+	@Nullable String getFilename();
 
 	/**
 	 * Return a description for this resource,

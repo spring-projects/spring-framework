@@ -16,10 +16,11 @@
 
 package org.springframework.aot.hint.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} to register hints for {@link org.springframework.core.KotlinDetector}.

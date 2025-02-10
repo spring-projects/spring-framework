@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -342,8 +342,7 @@ public class JsonPathExpectationsHelper {
 	 * @return the result of the evaluation
 	 * @throws AssertionError if the evaluation fails
 	 */
-	@Nullable
-	public Object evaluateJsonPath(String content) {
+	public @Nullable Object evaluateJsonPath(String content) {
 		try {
 			return this.jsonPath.read(content, this.configuration);
 		}
@@ -383,8 +382,7 @@ public class JsonPathExpectationsHelper {
 				context.read(this.expression, new TypeRefAdapter<>(targetType)));
 	}
 
-	@Nullable
-	private Object assertExistsAndReturn(String content) {
+	private @Nullable Object assertExistsAndReturn(String content) {
 		Object value = evaluateJsonPath(content);
 		String reason = "No value at JSON path \"" + this.expression + "\"";
 		AssertionErrors.assertTrue(reason, value != null);

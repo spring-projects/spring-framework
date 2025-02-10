@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
@@ -39,7 +41,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -101,38 +102,20 @@ public class Indexer extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
-	@Nullable
-	private IndexedType indexedType;
+	private @Nullable IndexedType indexedType;
 
-	@Nullable
-	private volatile String originalPrimitiveExitTypeDescriptor;
+	private volatile @Nullable String originalPrimitiveExitTypeDescriptor;
 
-	@Nullable
-	private volatile String arrayTypeDescriptor;
+	private volatile @Nullable String arrayTypeDescriptor;
 
-	@Nullable
-	private volatile CachedPropertyState cachedPropertyReadState;
+	private volatile @Nullable CachedPropertyState cachedPropertyReadState;
 
-	@Nullable
-	private volatile CachedPropertyState cachedPropertyWriteState;
+	private volatile @Nullable CachedPropertyState cachedPropertyWriteState;
 
-	@Nullable
-	private volatile CachedIndexState cachedIndexReadState;
+	private volatile @Nullable CachedIndexState cachedIndexReadState;
 
-	@Nullable
-	private volatile CachedIndexState cachedIndexWriteState;
+	private volatile @Nullable CachedIndexState cachedIndexWriteState;
 
-
-	/**
-	 * Create an {@code Indexer} with the given start position, end position, and
-	 * index expression.
-	 * @see #Indexer(boolean, int, int, SpelNodeImpl)
-	 * @deprecated as of 6.2, in favor of {@link #Indexer(boolean, int, int, SpelNodeImpl)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public Indexer(int startPos, int endPos, SpelNodeImpl indexExpression) {
-		this(false, startPos, endPos, indexExpression);
-	}
 
 	/**
 	 * Create an {@code Indexer} with the given null-safe flag, start position,
@@ -680,8 +663,7 @@ public class Indexer extends SpelNodeImpl {
 
 		private final Map map;
 
-		@Nullable
-		private final Object key;
+		private final @Nullable Object key;
 
 		private final TypeDescriptor mapEntryDescriptor;
 
@@ -916,8 +898,7 @@ public class Indexer extends SpelNodeImpl {
 			return (this.collection instanceof List);
 		}
 
-		@Nullable
-		private static Constructor<?> getDefaultConstructor(Class<?> type) {
+		private static @Nullable Constructor<?> getDefaultConstructor(Class<?> type) {
 			try {
 				return ReflectionUtils.accessibleConstructor(type);
 			}

@@ -24,10 +24,11 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
@@ -201,8 +202,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
 
-		@Nullable
-		private StringBuilder sb;
+		private @Nullable StringBuilder sb;
 
 		private boolean hasName;
 

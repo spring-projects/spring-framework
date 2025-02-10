@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.web.socket.client.standard;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,11 +35,11 @@ import jakarta.websocket.Endpoint;
 import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.WebSocketContainer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FutureUtils;
 import org.springframework.web.socket.WebSocketExtension;
@@ -65,11 +63,9 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final Map<String,Object> userProperties = new HashMap<>();
 
-	@Nullable
-	private SSLContext sslContext;
+	private @Nullable SSLContext sslContext;
 
-	@Nullable
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private @Nullable AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 
 	/**
@@ -124,8 +120,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	 * Return the {@link SSLContext} to use.
 	 * @since 6.1.3
 	 */
-	@Nullable
-	public SSLContext getSslContext() {
+	public @Nullable SSLContext getSslContext() {
 		return this.sslContext;
 	}
 
@@ -142,8 +137,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	/**
 	 * Return the configured {@link AsyncTaskExecutor}.
 	 */
-	@Nullable
-	public AsyncTaskExecutor getTaskExecutor() {
+	public @Nullable AsyncTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
 	}
 
@@ -153,12 +147,10 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 			HttpHeaders headers, final URI uri, List<String> protocols,
 			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
 
-		int port = getPort(uri);
-		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
-		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), port);
+		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), getPort(uri));
 
-		StandardWebSocketSession session = new StandardWebSocketSession(headers,
-				attributes, localAddress, remoteAddress);
+		StandardWebSocketSession session =
+				new StandardWebSocketSession(headers, attributes, null, remoteAddress);
 
 		ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
 				.configurator(new StandardWebSocketClientConfigurator(headers))
@@ -192,15 +184,6 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		return result;
 	}
 
-	private static InetAddress getLocalHost() {
-		try {
-			return InetAddress.getLocalHost();
-		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
-		}
-	}
-
 	private static int getPort(URI uri) {
 		if (uri.getPort() == -1) {
 			String scheme = uri.getScheme().toLowerCase(Locale.ROOT);
@@ -220,7 +203,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> requestHeaders) {
-			requestHeaders.putAll(this.headers);
+			this.headers.forEach(requestHeaders::put);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Handshake request headers: " + requestHeaders);
 			}

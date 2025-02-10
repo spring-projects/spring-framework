@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +34,6 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -98,7 +99,8 @@ final class StatusHandler {
 				});
 	}
 
-	private static Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
+	@SuppressWarnings("NullAway")
+	private static Function<ResolvableType, ? extends @Nullable Object> initBodyConvertFunction(ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 		Assert.state(!CollectionUtils.isEmpty(messageConverters), "Expected message converters");
 		return resolvableType -> {
 			try {
@@ -119,7 +121,7 @@ final class StatusHandler {
 	}
 
 
-	private static String getErrorMessage(int rawStatusCode, String statusText, @Nullable byte[] responseBody,
+	private static String getErrorMessage(int rawStatusCode, String statusText, byte @Nullable [] responseBody,
 			@Nullable Charset charset) {
 
 		String preface = rawStatusCode + " " + statusText + ": ";

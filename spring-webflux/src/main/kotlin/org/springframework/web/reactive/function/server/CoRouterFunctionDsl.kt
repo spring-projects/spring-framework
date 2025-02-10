@@ -507,6 +507,11 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 * Route to the given handler function if the given pathExtension predicate applies.
 	 * @see RouterFunctions.route
 	 */
+	@Deprecated("without replacement to discourage use of path extensions for request mapping and for" +
+			"content negotiation (with similar deprecations and removals already applied to" +
+			"annotated controllers). For further context, please read issue " +
+			"https://github.com/spring-projects/spring-framework/issues/24179", replaceWith = ReplaceWith("None"))
+	@Suppress("removal", "DEPRECATION")
 	fun pathExtension(extension: String, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(extension), asHandlerFunction(f)))
 	}
@@ -516,12 +521,22 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	 * @param extension the path extension to match against, ignoring case
 	 * @return a predicate that matches if the request's path has the given file extension
 	 */
+	@Suppress("removal", "DEPRECATION")
+	@Deprecated("without replacement to discourage use of path extensions for request mapping and for" +
+			"content negotiation (with similar deprecations and removals already applied to" +
+			"annotated controllers). For further context, please read issue " +
+			"https://github.com/spring-projects/spring-framework/issues/24179", replaceWith = ReplaceWith("None"))
 	fun pathExtension(extension: String): RequestPredicate = RequestPredicates.pathExtension(extension)
 
 	/**
 	 * Route to the given handler function if the given pathExtension predicate applies.
 	 * @see RouterFunctions.route
 	 */
+	@Suppress("removal", "DEPRECATION")
+	@Deprecated("without replacement to discourage use of path extensions for request mapping and for" +
+			"content negotiation (with similar deprecations and removals already applied to" +
+			"annotated controllers). For further context, please read issue " +
+			"https://github.com/spring-projects/spring-framework/issues/24179", replaceWith = ReplaceWith("None"))
 	fun pathExtension(predicate: (String?) -> Boolean, f: suspend (ServerRequest) -> ServerResponse) {
 		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), asHandlerFunction(f)))
 	}
@@ -529,8 +544,12 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	/**
 	 * Return a [RequestPredicate] that matches if the request's path matches the given
 	 * predicate.
-	 * @see RequestPredicates.pathExtension
 	 */
+	@Suppress("removal", "DEPRECATION")
+	@Deprecated("without replacement to discourage use of path extensions for request mapping and for" +
+			"content negotiation (with similar deprecations and removals already applied to" +
+			"annotated controllers). For further context, please read issue " +
+			"https://github.com/spring-projects/spring-framework/issues/24179", replaceWith = ReplaceWith("None"))
 	fun pathExtension(predicate: (String?) -> Boolean): RequestPredicate =
 			RequestPredicates.pathExtension(predicate)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import example.scannable.DefaultNamedComponent;
-import example.scannable.JakartaManagedBeanComponent;
 import example.scannable.JakartaNamedComponent;
-import example.scannable.JavaxManagedBeanComponent;
-import example.scannable.JavaxNamedComponent;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -109,21 +106,6 @@ class AnnotationBeanNameGeneratorTests {
 	}
 
 	@Test
-	void generateBeanNameWithJavaxNamedComponent() {
-		assertGeneratedName(JavaxNamedComponent.class, "myJavaxNamedComponent");
-	}
-
-	@Test
-	void generateBeanNameWithJakartaManagedBeanComponent() {
-		assertGeneratedName(JakartaManagedBeanComponent.class, "myJakartaManagedBeanComponent");
-	}
-
-	@Test
-	void generateBeanNameWithJavaxManagedBeanComponent() {
-		assertGeneratedName(JavaxManagedBeanComponent.class, "myJavaxManagedBeanComponent");
-	}
-
-	@Test
 	void generateBeanNameWithCustomStereotypeComponent() {
 		assertGeneratedName(DefaultNamedComponent.class, "thoreau");
 	}
@@ -168,6 +150,21 @@ class AnnotationBeanNameGeneratorTests {
 		assertGeneratedName(RestControllerAdviceClass.class, "myRestControllerAdvice");
 	}
 
+	@Test  // gh-34317, gh-34346
+	void generateBeanNameFromStereotypeAnnotationWithStringValueAsExplicitAliasForMetaAnnotationOtherThanComponent() {
+		assertGeneratedName(StereotypeWithoutExplicitName.class, "annotationBeanNameGeneratorTests.StereotypeWithoutExplicitName");
+	}
+
+	@Test  // gh-34317, gh-34346
+	void generateBeanNameFromStereotypeAnnotationWithStringValueAndExplicitAliasForComponentNameWithBlankName() {
+		assertGeneratedName(StereotypeWithGeneratedName.class, "annotationBeanNameGeneratorTests.StereotypeWithGeneratedName");
+	}
+
+	@Test  // gh-34317
+	void generateBeanNameFromStereotypeAnnotationWithStringValueAndExplicitAliasForComponentName() {
+		assertGeneratedName(StereotypeWithExplicitName.class, "explicitName");
+	}
+
 
 	private void assertGeneratedName(Class<?> clazz, String expectedName) {
 		BeanDefinition bd = annotatedBeanDef(clazz);
@@ -210,7 +207,7 @@ class AnnotationBeanNameGeneratorTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Component
 	@interface ConventionBasedComponent1 {
-		// This intentionally convention-based. Please do not add @AliasFor.
+		// This is intentionally convention-based. Please do not add @AliasFor.
 		// See gh-31093.
 		String value() default "";
 	}
@@ -218,7 +215,7 @@ class AnnotationBeanNameGeneratorTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Component
 	@interface ConventionBasedComponent2 {
-		// This intentionally convention-based. Please do not add @AliasFor.
+		// This is intentionally convention-based. Please do not add @AliasFor.
 		// See gh-31093.
 		String value() default "";
 	}
@@ -260,7 +257,7 @@ class AnnotationBeanNameGeneratorTests {
 	@Target(ElementType.TYPE)
 	@Controller
 	@interface TestRestController {
-		// This intentionally convention-based. Please do not add @AliasFor.
+		// This is intentionally convention-based. Please do not add @AliasFor.
 		// See gh-31093.
 		String value() default "";
 	}
@@ -319,13 +316,64 @@ class AnnotationBeanNameGeneratorTests {
 		String[] basePackages() default {};
 	}
 
-
 	@TestControllerAdvice(basePackages = "com.example", name = "myControllerAdvice")
 	static class ControllerAdviceClass {
 	}
 
 	@TestRestControllerAdvice(basePackages = "com.example", name = "myRestControllerAdvice")
 	static class RestControllerAdviceClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.ANNOTATION_TYPE)
+	@interface MetaAnnotationWithStringAttribute {
+
+		String attribute() default "";
+	}
+
+	/**
+	 * Custom stereotype annotation which has a {@code String value} attribute that
+	 * is explicitly declared as an alias for an attribute in a meta-annotation
+	 * other than {@link Component @Component}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Component
+	@MetaAnnotationWithStringAttribute
+	@interface MyStereotype {
+
+		@AliasFor(annotation = MetaAnnotationWithStringAttribute.class, attribute = "attribute")
+		String value() default "";
+	}
+
+	@MyStereotype("enigma")
+	static class StereotypeWithoutExplicitName {
+	}
+
+	/**
+	 * Custom stereotype annotation which is identical to {@link MyStereotype @MyStereotype}
+	 * except that it has a {@link #name} attribute that is an explicit alias for
+	 * {@link Component#value}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Component
+	@MetaAnnotationWithStringAttribute
+	@interface MyNamedStereotype {
+
+		@AliasFor(annotation = MetaAnnotationWithStringAttribute.class, attribute = "attribute")
+		String value() default "";
+
+		@AliasFor(annotation = Component.class, attribute = "value")
+		String name() default "";
+	}
+
+	@MyNamedStereotype(value = "enigma", name ="explicitName")
+	static class StereotypeWithExplicitName {
+	}
+
+	@MyNamedStereotype(value = "enigma")
+	static class StereotypeWithGeneratedName {
 	}
 
 }

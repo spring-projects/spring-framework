@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.ObjectArrayAssert;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
@@ -35,7 +36,6 @@ import org.springframework.context.testfixture.context.aot.scan.reflective.Refle
 import org.springframework.context.testfixture.context.aot.scan.reflective2.Reflective2OnType;
 import org.springframework.context.testfixture.context.aot.scan.reflective2.reflective21.Reflective21OnType;
 import org.springframework.context.testfixture.context.aot.scan.reflective2.reflective22.Reflective22OnType;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

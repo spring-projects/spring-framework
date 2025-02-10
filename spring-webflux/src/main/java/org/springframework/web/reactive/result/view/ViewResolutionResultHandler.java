@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,7 +50,6 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -220,7 +220,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 				}
 
 				valueMono = (result.getReturnValue() != null ?
-						Mono.just(FragmentsRendering.withPublisher(adapter.toPublisher(result.getReturnValue())).build()) :
+						Mono.just(FragmentsRendering.fragmentsPublisher(adapter.toPublisher(result.getReturnValue())).build()) :
 						Mono.empty());
 
 				valueType = ResolvableType.forClass(FragmentsRendering.class);
@@ -252,7 +252,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					}
 
 					if (Collection.class.isAssignableFrom(clazz)) {
-						returnValue = FragmentsRendering.withCollection((Collection<Fragment>) returnValue).build();
+						returnValue = FragmentsRendering.fragments((Collection<Fragment>) returnValue).build();
 						clazz = FragmentsRendering.class;
 					}
 
@@ -463,11 +463,9 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	 */
 	private static class BodySavingResponse extends ServerHttpResponseDecorator {
 
-		@Nullable
-		private Flux<DataBuffer> bodyFlux;
+		private @Nullable Flux<DataBuffer> bodyFlux;
 
-		@Nullable
-		private HttpHeaders headers;
+		private @Nullable HttpHeaders headers;
 
 		BodySavingResponse(ServerHttpResponse delegate) {
 			super(delegate);
@@ -475,7 +473,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		@Override
 		public HttpHeaders getHeaders() {
-			if (!super.getHeaders().containsKey(HttpHeaders.CONTENT_TYPE)) {
+			if (!super.getHeaders().containsHeader(HttpHeaders.CONTENT_TYPE)) {
 				return super.getHeaders();
 			}
 			// Content-type is set, ignore further updates
@@ -553,8 +551,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			exchange.getResponse().getHeaders().setContentType(mediaType);
 		}
 
-		@Nullable
-		private Charset getCharset(ServerHttpRequest request) {
+		private @Nullable Charset getCharset(ServerHttpRequest request) {
 			for (MediaType mediaType : request.getHeaders().getAccept()) {
 				if (mediaType.isCompatibleWith(MediaType.TEXT_EVENT_STREAM)) {
 					if (mediaType.getCharset() != null) {

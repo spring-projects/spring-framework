@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+
 plugins {
 	id 'kotlin'
 	id 'io.spring.antora.generate-antora-yml' version '0.0.1'
@@ -41,6 +43,11 @@ repositories {
 	}
 }
 
+// To avoid a redeclaration error with Kotlin compiler
+tasks.named('compileKotlin', KotlinCompilationTask.class) {
+    javaSources.from = []
+}
+
 dependencies {
 	api(project(":spring-aspects"))
 	api(project(":spring-context"))
@@ -62,6 +69,7 @@ dependencies {
 	api("jakarta.servlet:jakarta.servlet-api")
 	api("jakarta.resource:jakarta.resource-api")
 	api("jakarta.validation:jakarta.validation-api")
+	api("jakarta.websocket:jakarta.websocket-client-api")
 	api("javax.cache:cache-api")
 	api("org.apache.activemq:activemq-ra:6.1.2")
 	api("org.apache.commons:commons-dbcp2:2.11.0")

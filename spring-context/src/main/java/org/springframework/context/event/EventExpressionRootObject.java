@@ -16,6 +16,8 @@
 
 package org.springframework.context.event;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -28,5 +30,5 @@ import org.springframework.context.ApplicationEvent;
  * @param args the arguments supplied to the listener method
  * @see EventListener#condition()
  */
-record EventExpressionRootObject(ApplicationEvent event, Object[] args) {
+record EventExpressionRootObject(ApplicationEvent event, @Nullable Object[] args) {
 }

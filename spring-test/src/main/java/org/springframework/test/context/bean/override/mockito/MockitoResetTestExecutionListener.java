@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -32,7 +33,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.ClassUtils;
@@ -69,8 +69,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	 * @see #mockitoPresent
 	 * @see #isEnabled()
 	 */
-	@Nullable
-	private static volatile Boolean mockitoInitialized;
+	private static volatile @Nullable Boolean mockitoInitialized;
 
 
 	/**
@@ -126,8 +125,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 		}
 	}
 
-	@Nullable
-	private static Object getBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
+	private static @Nullable Object getBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		try {
 			if (isStandardBeanOrSingletonFactoryBean(beanFactory, beanName)) {
 				return beanFactory.getBean(beanName);

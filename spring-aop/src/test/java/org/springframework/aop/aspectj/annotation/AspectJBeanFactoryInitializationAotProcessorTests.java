@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GenerationContext;
@@ -28,7 +29,6 @@ import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -50,7 +50,7 @@ class AspectJBeanFactoryInitializationAotProcessorTests {
 	@Test
 	void shouldProcessAspect() {
 		process(TestAspect.class);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(TestAspect.class, "alterReturnValue").invoke())
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(TestAspect.class, "alterReturnValue"))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 
@@ -61,8 +61,7 @@ class AspectJBeanFactoryInitializationAotProcessorTests {
 		}
 	}
 
-	@Nullable
-	private static BeanFactoryInitializationAotContribution createContribution(Class<?> beanClass) {
+	private static @Nullable BeanFactoryInitializationAotContribution createContribution(Class<?> beanClass) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition(beanClass.getName(), new RootBeanDefinition(beanClass));
 		return new AspectJBeanFactoryInitializationAotProcessor().processAheadOfTime(beanFactory);

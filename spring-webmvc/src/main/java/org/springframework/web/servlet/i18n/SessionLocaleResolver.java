@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.util.function.Function;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
@@ -93,7 +93,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 		return (defaultLocale != null ? defaultLocale : request.getLocale());
 	};
 
-	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
+	private Function<HttpServletRequest, @Nullable TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
 
 	/**
 	 * Specify the name of the corresponding attribute in the {@code HttpSession},
@@ -141,7 +141,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	 * @since 6.0
 	 * @see #setDefaultTimeZone
 	 */
-	public void setDefaultTimeZoneFunction(Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction) {
+	public void setDefaultTimeZoneFunction(Function<HttpServletRequest, @Nullable TimeZone> defaultTimeZoneFunction) {
 		Assert.notNull(defaultTimeZoneFunction, "defaultTimeZoneFunction must not be null");
 		this.defaultTimeZoneFunction = defaultTimeZoneFunction;
 	}
@@ -167,8 +167,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 				return locale;
 			}
 			@Override
-			@Nullable
-			public TimeZone getTimeZone() {
+			public @Nullable TimeZone getTimeZone() {
 				TimeZone timeZone = (TimeZone) WebUtils.getSessionAttribute(request, timeZoneAttributeName);
 				if (timeZone == null) {
 					timeZone = defaultTimeZoneFunction.apply(request);
@@ -192,41 +191,6 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 		}
 		WebUtils.setSessionAttribute(request, this.localeAttributeName, locale);
 		WebUtils.setSessionAttribute(request, this.timeZoneAttributeName, timeZone);
-	}
-
-
-	/**
-	 * Determine the default locale for the given request, called if no
-	 * {@link Locale} session attribute has been found.
-	 * <p>The default implementation returns the configured
-	 * {@linkplain #setDefaultLocale(Locale) default locale}, if any, and otherwise
-	 * falls back to the request's {@code Accept-Language} header locale or the
-	 * default locale for the server.
-	 * @param request the request to resolve the locale for
-	 * @return the default locale (never {@code null})
-	 * @see #setDefaultLocale
-	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
-	 * @deprecated as of 6.0, in favor of {@link #setDefaultLocaleFunction(Function)}
-	 */
-	@Deprecated(since = "6.0")
-	protected Locale determineDefaultLocale(HttpServletRequest request) {
-		return this.defaultLocaleFunction.apply(request);
-	}
-
-	/**
-	 * Determine the default time zone for the given request, called if no
-	 * {@link TimeZone} session attribute has been found.
-	 * <p>The default implementation returns the configured default time zone,
-	 * if any, or {@code null} otherwise.
-	 * @param request the request to resolve the time zone for
-	 * @return the default time zone (or {@code null} if none defined)
-	 * @see #setDefaultTimeZone
-	 * @deprecated as of 6.0, in favor of {@link #setDefaultTimeZoneFunction(Function)}
-	 */
-	@Deprecated(since = "6.0")
-	@Nullable
-	protected TimeZone determineDefaultTimeZone(HttpServletRequest request) {
-		return this.defaultTimeZoneFunction.apply(request);
 	}
 
 }

@@ -16,9 +16,9 @@
 
 package org.springframework.web.service.invoker;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.service.annotation.GetExchange;
 

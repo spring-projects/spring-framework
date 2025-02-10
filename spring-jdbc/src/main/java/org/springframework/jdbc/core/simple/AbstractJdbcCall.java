@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.CallableStatementCreator;
@@ -37,7 +38,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.metadata.CallMetaDataContext;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -78,15 +78,13 @@ public abstract class AbstractJdbcCall {
 	private volatile boolean compiled;
 
 	/** The generated string used for call statement. */
-	@Nullable
-	private String callString;
+	private @Nullable String callString;
 
 	/**
 	 * A delegate enabling us to create CallableStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
-	@Nullable
-	private CallableStatementCreatorFactory callableStatementFactory;
+	private @Nullable CallableStatementCreatorFactory callableStatementFactory;
 
 
 	/**
@@ -124,8 +122,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Get the name of the stored procedure.
 	 */
-	@Nullable
-	public String getProcedureName() {
+	public @Nullable String getProcedureName() {
 		return this.callMetaDataContext.getProcedureName();
 	}
 
@@ -153,8 +150,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Get the catalog name used.
 	 */
-	@Nullable
-	public String getCatalogName() {
+	public @Nullable String getCatalogName() {
 		return this.callMetaDataContext.getCatalogName();
 	}
 
@@ -168,8 +164,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Get the schema name used.
 	 */
-	@Nullable
-	public String getSchemaName() {
+	public @Nullable String getSchemaName() {
 		return this.callMetaDataContext.getSchemaName();
 	}
 
@@ -231,8 +226,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Get the call string that should be used based on parameters and meta-data.
 	 */
-	@Nullable
-	public String getCallString() {
+	public @Nullable String getCallString() {
 		return this.callString;
 	}
 
@@ -254,6 +248,10 @@ public abstract class AbstractJdbcCall {
 	 * @param parameter the {@link SqlParameter} to add
 	 */
 	public void addDeclaredParameter(SqlParameter parameter) {
+		if (isCompiled()) {
+			throw new IllegalStateException("SqlCall for " + (isFunction() ? "function" : "procedure") +
+					" is already compiled");
+		}
 		Assert.notNull(parameter, "The supplied parameter must not be null");
 		if (!StringUtils.hasText(parameter.getName())) {
 			throw new InvalidDataAccessApiUsageException(
@@ -271,6 +269,10 @@ public abstract class AbstractJdbcCall {
 	 * @param rowMapper the RowMapper implementation to use
 	 */
 	public void addDeclaredRowMapper(String parameterName, RowMapper<?> rowMapper) {
+		if (isCompiled()) {
+			throw new IllegalStateException("SqlCall for " + (isFunction() ? "function" : "procedure") +
+					" is already compiled");
+		}
 		this.declaredRowMappers.put(parameterName, rowMapper);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
@@ -428,8 +430,7 @@ public abstract class AbstractJdbcCall {
 	 * Get the name of a single out parameter or return value.
 	 * Used for functions or procedures with one out parameter.
 	 */
-	@Nullable
-	protected String getScalarOutParameterName() {
+	protected @Nullable String getScalarOutParameterName() {
 		return this.callMetaDataContext.getScalarOutParameterName();
 	}
 

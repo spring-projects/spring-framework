@@ -29,8 +29,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -104,14 +104,11 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 	private static final Log logger = LogFactory.getLog(LazyConnectionDataSourceProxy.class);
 
-	@Nullable
-	private DataSource readOnlyDataSource;
+	private @Nullable DataSource readOnlyDataSource;
 
-	@Nullable
-	private volatile Boolean defaultAutoCommit;
+	private volatile @Nullable Boolean defaultAutoCommit;
 
-	@Nullable
-	private volatile Integer defaultTransactionIsolation;
+	private volatile @Nullable Integer defaultTransactionIsolation;
 
 
 	/**
@@ -238,16 +235,14 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Expose the default auto-commit value.
 	 */
-	@Nullable
-	protected Boolean defaultAutoCommit() {
+	protected @Nullable Boolean defaultAutoCommit() {
 		return this.defaultAutoCommit;
 	}
 
 	/**
 	 * Expose the default transaction isolation value.
 	 */
-	@Nullable
-	protected Integer defaultTransactionIsolation() {
+	protected @Nullable Integer defaultTransactionIsolation() {
 		return this.defaultTransactionIsolation;
 	}
 
@@ -295,17 +290,13 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 */
 	private class LazyConnectionInvocationHandler implements InvocationHandler {
 
-		@Nullable
-		private String username;
+		private @Nullable String username;
 
-		@Nullable
-		private String password;
+		private @Nullable String password;
 
-		@Nullable
-		private Boolean autoCommit;
+		private @Nullable Boolean autoCommit;
 
-		@Nullable
-		private Integer transactionIsolation;
+		private @Nullable Integer transactionIsolation;
 
 		private boolean readOnly = false;
 
@@ -313,8 +304,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 		private boolean closed = false;
 
-		@Nullable
-		private Connection target;
+		private @Nullable Connection target;
 
 		public LazyConnectionInvocationHandler() {
 			this.autoCommit = defaultAutoCommit();
@@ -328,8 +318,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
 			switch (method.getName()) {

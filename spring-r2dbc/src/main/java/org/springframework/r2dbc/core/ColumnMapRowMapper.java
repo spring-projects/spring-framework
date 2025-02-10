@@ -23,8 +23,8 @@ import java.util.function.BiFunction;
 import io.r2dbc.spi.ColumnMetadata;
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -95,8 +95,7 @@ public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<Stri
 	 * @param index is the column index
 	 * @return the Object returned
 	 */
-	@Nullable
-	protected Object getColumnValue(Row row, int index) {
+	protected @Nullable Object getColumnValue(Row row, int index) {
 		return row.get(index);
 	}
 

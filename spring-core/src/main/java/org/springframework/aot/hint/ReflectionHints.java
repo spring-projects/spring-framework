@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.TypeHint.Builder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -59,8 +60,7 @@ public class ReflectionHints {
 	 * @param type the type to inspect
 	 * @return the reflection hints for this type, or {@code null}
 	 */
-	@Nullable
-	public TypeHint getTypeHint(TypeReference type) {
+	public @Nullable TypeHint getTypeHint(TypeReference type) {
 		Builder typeHintBuilder = this.types.get(type);
 		return (typeHintBuilder != null ? typeHintBuilder.build() : null);
 	}
@@ -70,8 +70,7 @@ public class ReflectionHints {
 	 * @param type the type to inspect
 	 * @return the reflection hints for this type, or {@code null}
 	 */
-	@Nullable
-	public TypeHint getTypeHint(Class<?> type) {
+	public @Nullable TypeHint getTypeHint(Class<?> type) {
 		return getTypeHint(TypeReference.of(type));
 	}
 
@@ -199,8 +198,8 @@ public class ReflectionHints {
 	}
 
 	/**
-	 * Register the need for reflection on the specified {@link Field}.
-	 * @param field the field that requires reflection
+	 * Register the need for reflective field access on the specified {@link Field}.
+	 * @param field the field that requires reflective access
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerField(Field field) {

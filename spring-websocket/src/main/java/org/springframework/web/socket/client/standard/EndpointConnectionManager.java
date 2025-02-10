@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import jakarta.websocket.Endpoint;
 import jakarta.websocket.Extension;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
@@ -49,11 +49,9 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  */
 public class EndpointConnectionManager extends ConnectionManagerSupport implements BeanFactoryAware {
 
-	@Nullable
-	private final Endpoint endpoint;
+	private final @Nullable Endpoint endpoint;
 
-	@Nullable
-	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
+	private final @Nullable BeanCreatingHandlerProvider<Endpoint> endpointProvider;
 
 	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
 
@@ -61,18 +59,17 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
 
-	@Nullable
-	private volatile Session session;
+	private volatile @Nullable Session session;
 
 
-	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
+	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, @Nullable Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		Assert.notNull(endpoint, "endpoint must not be null");
 		this.endpoint = endpoint;
 		this.endpointProvider = null;
 	}
 
-	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
+	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, @Nullable Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass must not be null");
 		this.endpoint = null;

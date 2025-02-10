@@ -22,7 +22,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -196,8 +197,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * there is no appropriate text representation.
 	 */
 	@Override
-	@Nullable
-	public String getAsText() {
+	public @Nullable String getAsText() {
 		return null;
 	}
 

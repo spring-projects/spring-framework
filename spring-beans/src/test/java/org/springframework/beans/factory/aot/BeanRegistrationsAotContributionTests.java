@@ -31,7 +31,6 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGenerationException;
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Registration;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -149,14 +148,11 @@ class BeanRegistrationsAotContributionTests {
 				registeredBean, null, List.of());
 		BeanRegistrationsAotContribution contribution = createContribution(registeredBean, generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
-		assertThat(reflection().onType(Employee.class)
-				.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS))
+		assertThat(reflection().onType(Employee.class))
 				.accepts(this.generationContext.getRuntimeHints());
-		assertThat(reflection().onType(ITestBean.class)
-				.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+		assertThat(reflection().onType(ITestBean.class))
 				.accepts(this.generationContext.getRuntimeHints());
-		assertThat(reflection().onType(AgeHolder.class)
-				.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+		assertThat(reflection().onType(AgeHolder.class))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 

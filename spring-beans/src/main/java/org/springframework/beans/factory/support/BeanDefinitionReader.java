@@ -16,10 +16,11 @@
 
 package org.springframework.beans.factory.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 /**
  * Simple interface for bean definition readers that specifies load methods with
@@ -63,8 +64,7 @@ public interface BeanDefinitionReader {
 	 * @see #loadBeanDefinitions(String)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
-	@Nullable
-	ResourceLoader getResourceLoader();
+	@Nullable ResourceLoader getResourceLoader();
 
 	/**
 	 * Return the class loader to use for bean classes.
@@ -72,8 +72,7 @@ public interface BeanDefinitionReader {
 	 * but rather to just register bean definitions with class names,
 	 * with the corresponding classes to be resolved later (or never).
 	 */
-	@Nullable
-	ClassLoader getBeanClassLoader();
+	@Nullable ClassLoader getBeanClassLoader();
 
 	/**
 	 * Return the {@link BeanNameGenerator} to use for anonymous beans

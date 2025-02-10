@@ -19,12 +19,13 @@ package org.springframework.test.web.client.response;
 import java.io.IOException;
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
 
 /**

@@ -21,7 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -87,8 +88,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * Subclasses can use this method to access the "native" headers sub-map.
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	protected Map<String, List<String>> getNativeHeaders() {
+	protected @Nullable Map<String, List<String>> getNativeHeaders() {
 		return (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
 	}
 
@@ -158,8 +158,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * @param headerName the name of the header
 	 * @return the associated values, or {@code null} if none
 	 */
-	@Nullable
-	public List<String> getNativeHeader(String headerName) {
+	public @Nullable List<String> getNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		return (map != null ? map.get(headerName) : null);
 	}
@@ -169,8 +168,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * @param headerName the name of the header
 	 * @return the associated value, or {@code null} if none
 	 */
-	@Nullable
-	public String getFirstNativeHeader(String headerName) {
+	public @Nullable String getFirstNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		if (map != null) {
 			List<String> values = map.get(headerName);
@@ -272,8 +270,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * @param headerName the name of the header
 	 * @return the associated values, or {@code null} if the header was not present
 	 */
-	@Nullable
-	public List<String> removeNativeHeader(String headerName) {
+	public @Nullable List<String> removeNativeHeader(String headerName) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
 		if (CollectionUtils.isEmpty(nativeHeaders)) {
@@ -291,8 +288,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * @return the associated value, or {@code null} if none
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
+	public static @Nullable String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
 		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
 		if (map != null) {
 			List<String> values = map.get(headerName);

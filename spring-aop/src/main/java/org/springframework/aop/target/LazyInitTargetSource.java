@@ -16,8 +16,9 @@
 
 package org.springframework.aop.target;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.aop.TargetSource} that lazily accesses a
@@ -60,8 +61,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
-	@Nullable
-	private Object target;
+	private @Nullable Object target;
 
 
 	@Override

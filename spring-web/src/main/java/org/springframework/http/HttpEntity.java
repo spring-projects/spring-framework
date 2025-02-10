@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.http;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -65,15 +66,14 @@ public class HttpEntity<T> {
 
 	private final HttpHeaders headers;
 
-	@Nullable
-	private final T body;
+	private final @Nullable T body;
 
 
 	/**
 	 * Create a new, empty {@code HttpEntity}.
 	 */
 	protected HttpEntity() {
-		this(null, null);
+		this(null, (HttpHeaders) null);
 	}
 
 	/**
@@ -81,13 +81,35 @@ public class HttpEntity<T> {
 	 * @param body the entity body
 	 */
 	public HttpEntity(T body) {
-		this(body, null);
+		this(body, (HttpHeaders) null);
 	}
 
 	/**
 	 * Create a new {@code HttpEntity} with the given headers and no body.
 	 * @param headers the entity headers
+	 * @since 7.0
 	 */
+	public HttpEntity(HttpHeaders headers) {
+		this(null, headers);
+	}
+
+	/**
+	 * Create a new {@code HttpEntity} with the given body and headers.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @since 7.0
+	 */
+	public HttpEntity(@Nullable T body, @Nullable HttpHeaders headers) {
+		this.body = body;
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? headers : new HttpHeaders());
+	}
+
+	/**
+	 * Create a new {@code HttpEntity} with the given headers and no body.
+	 * @param headers the entity headers
+	 * @deprecated in favor of {@link #HttpEntity(HttpHeaders)}
+	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(MultiValueMap<String, String> headers) {
 		this(null, headers);
 	}
@@ -96,10 +118,12 @@ public class HttpEntity<T> {
 	 * Create a new {@code HttpEntity} with the given body and headers.
 	 * @param body the entity body
 	 * @param headers the entity headers
+	 * @deprecated in favor of {@link #HttpEntity(Object, HttpHeaders)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
 		this.body = body;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? headers : new HttpHeaders());
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? new HttpHeaders(headers) : new HttpHeaders());
 	}
 
 
@@ -113,8 +137,7 @@ public class HttpEntity<T> {
 	/**
 	 * Returns the body of this entity.
 	 */
-	@Nullable
-	public T getBody() {
+	public @Nullable T getBody() {
 		return this.body;
 	}
 

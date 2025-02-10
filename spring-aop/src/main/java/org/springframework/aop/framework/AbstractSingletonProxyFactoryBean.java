@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
@@ -24,7 +26,6 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -42,26 +43,20 @@ import org.springframework.util.ClassUtils;
 public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
 
-	@Nullable
-	private Object target;
+	private @Nullable Object target;
 
-	@Nullable
-	private Class<?>[] proxyInterfaces;
+	private Class<?> @Nullable [] proxyInterfaces;
 
-	@Nullable
-	private Object[] preInterceptors;
+	private Object @Nullable [] preInterceptors;
 
-	@Nullable
-	private Object[] postInterceptors;
+	private Object @Nullable [] postInterceptors;
 
 	/** Default is global AdvisorAdapterRegistry. */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-	@Nullable
-	private transient ClassLoader proxyClassLoader;
+	private transient @Nullable ClassLoader proxyClassLoader;
 
-	@Nullable
-	private Object proxy;
+	private @Nullable Object proxy;
 
 
 	/**
@@ -221,8 +216,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();
 		}

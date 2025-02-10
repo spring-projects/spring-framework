@@ -2,9 +2,7 @@
  * Auxiliary interfaces and implementation classes for
  * {@link org.springframework.web.server.WebSession} support.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.server.session;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

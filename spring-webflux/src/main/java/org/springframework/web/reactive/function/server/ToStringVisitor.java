@@ -102,6 +102,8 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 		this.builder.append(pattern);
 	}
 
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	@Override
 	public void pathExtension(String extension) {
 		this.builder.append(String.format("*.%s", extension));

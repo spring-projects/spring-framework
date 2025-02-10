@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -60,14 +60,13 @@ public class JCacheInterceptor extends JCacheAspectSupport implements MethodInte
 	 * applying the default error handler if the supplier is not resolvable
 	 * @since 5.1
 	 */
-	public JCacheInterceptor(@Nullable Supplier<CacheErrorHandler> errorHandler) {
+	public JCacheInterceptor(@Nullable Supplier<? extends @Nullable CacheErrorHandler> errorHandler) {
 		this.errorHandler = new SingletonSupplier<>(errorHandler, SimpleCacheErrorHandler::new);
 	}
 
 
 	@Override
-	@Nullable
-	public Object invoke(final MethodInvocation invocation) throws Throwable {
+	public @Nullable Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 
 		CacheOperationInvoker aopAllianceInvoker = () -> {

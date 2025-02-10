@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -39,7 +40,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.WebApplicationContext;
@@ -64,6 +64,7 @@ import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -74,29 +75,19 @@ import org.springframework.web.util.WebUtils;
 public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void refresh() throws BeansException {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
-		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME,
-				org.springframework.web.servlet.theme.SessionThemeResolver.class);
 
 		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
 		LocaleChangeInterceptor interceptor2 = new LocaleChangeInterceptor();
 		interceptor2.setParamName("locale2");
-		org.springframework.web.servlet.theme.ThemeChangeInterceptor interceptor3 =
-				new org.springframework.web.servlet.theme.ThemeChangeInterceptor();
-		org.springframework.web.servlet.theme.ThemeChangeInterceptor interceptor4 =
-				new org.springframework.web.servlet.theme.ThemeChangeInterceptor();
-		interceptor4.setParamName("theme2");
-		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
-		interceptor5.setAuthorizedRoles("role1", "role2");
+		UserRoleAuthorizationInterceptor interceptor3 = new UserRoleAuthorizationInterceptor();
+		interceptor3.setAuthorizedRoles("role1", "role2");
 
 		List<Object> interceptors = new ArrayList<>();
-		interceptors.add(interceptor5);
+		interceptors.add(interceptor3);
 		interceptors.add(interceptor1);
 		interceptors.add(interceptor2);
-		interceptors.add(interceptor3);
-		interceptors.add(interceptor4);
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
 		interceptors.add(new MyWebRequestInterceptor());
@@ -128,10 +119,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("noviewController", NoViewController.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.add("order", 0);
-		pvs.add("basename", "org.springframework.web.servlet.complexviews");
-		registerSingleton("viewResolver",
-				org.springframework.web.servlet.view.ResourceBundleViewResolver.class, pvs);
+		registerSingleton("viewResolver", TestViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
 		pvs.add("suffix", ".jsp");
@@ -273,12 +261,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			((MyHandler) delegate).doSomething(request);
 			return null;
 		}
-
-		@Deprecated
-		@Override
-		public long getLastModified(HttpServletRequest request, Object delegate) {
-			return ((MyHandler) delegate).lastModified();
-		}
 	}
 
 
@@ -293,12 +275,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
 			throws IOException, ServletException {
 			throw new ServletException("dummy");
-		}
-
-		@Deprecated
-		@Override
-		public long getLastModified(HttpServletRequest request, Object delegate) {
-			return -1;
 		}
 	}
 
@@ -457,16 +433,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (!TimeZone.getDefault().equals(LocaleContextHolder.getTimeZone())) {
 				throw new ServletException("Incorrect TimeZone");
 			}
-			if (!(RequestContextUtils.getThemeResolver(request)
-					instanceof org.springframework.web.servlet.theme.SessionThemeResolver)) {
-				throw new ServletException("Incorrect ThemeResolver");
-			}
-			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
-				throw new ServletException("Incorrect theme name");
-			}
 			RequestContext rc = new RequestContext(request);
 			rc.changeLocale(Locale.US, TimeZone.getTimeZone("GMT+1"));
-			rc.changeTheme("theme2");
 			if (!Locale.US.equals(RequestContextUtils.getLocale(request))) {
 				throw new ServletException("Incorrect Locale");
 			}
@@ -478,9 +446,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 			if (!TimeZone.getTimeZone("GMT+1").equals(LocaleContextHolder.getTimeZone())) {
 				throw new ServletException("Incorrect TimeZone");
-			}
-			if (!"theme2".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
-				throw new ServletException("Incorrect theme name");
 			}
 		}
 
@@ -528,6 +493,25 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new IllegalStateException("Already cleaned up");
 			}
 			request.setAttribute("cleanedUp", Boolean.TRUE);
+		}
+	}
+
+
+	private static class TestViewResolver implements ViewResolver, Ordered {
+
+		@Override
+		public int getOrder() {
+			return 0;
+		}
+
+		@Override
+		public @Nullable View resolveViewName(String viewName, Locale locale) throws Exception {
+			if (viewName.equalsIgnoreCase("form")) {
+				InternalResourceView view = new InternalResourceView("myform.jsp");
+				view.setRequestContextAttribute("rc");
+				return view;
+			}
+			return null;
 		}
 	}
 

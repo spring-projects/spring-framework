@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -23,7 +25,6 @@ import org.springframework.http.converter.json.AbstractJackson2HttpMessageConver
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * A convenient base class for {@code ResponseBodyAdvice} implementations
@@ -42,8 +43,7 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice implements Respon
 	}
 
 	@Override
-	@Nullable
-	public final Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType,
+	public final @Nullable Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType,
 			MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
 

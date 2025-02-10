@@ -360,7 +360,7 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 			// SPRING PATCH BEGIN
 			if (inNativeImage) {
 				throw new UnsupportedOperationException("CGLIB runtime enhancement not supported on native image. " +
-						"Make sure to include a pre-generated class on the classpath instead: " + getClassName());
+						"Make sure to enable Spring AOT processing to pre-generate '" + getClassName() + "' at build time.");
 			}
 			// SPRING PATCH END
 			byte[] b = strategy.generate(this);

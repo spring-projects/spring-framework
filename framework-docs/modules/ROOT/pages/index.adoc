@@ -7,7 +7,7 @@ xref:overview.adoc[Overview] :: History, Design Philosophy, Feedback,
 Getting Started.
 xref:core.adoc[Core] :: IoC Container, Events, Resources, i18n,
 Validation, Data Binding, Type Conversion, SpEL, AOP, AOT.
-<<testing.adoc#testing, Testing>> :: Mock Objects, TestContext Framework,
+xref:testing.adoc[Testing] :: Mock Objects, TestContext Framework,
 Spring MVC Test, WebTestClient.
 xref:data-access.adoc[Data Access] :: Transactions, DAO Support,
 JDBC, R2DBC, O/R Mapping, XML Marshalling.

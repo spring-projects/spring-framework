@@ -27,7 +27,6 @@ dependencies {
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
-	optional("javax.inject:javax.inject")
 	optional("junit:junit")
 	optional("org.apache.groovy:groovy")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
@@ -78,8 +77,8 @@ dependencies {
 	}
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("org.easymock:easymock")
-	testImplementation("org.hibernate:hibernate-core-jakarta")
-	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hibernate.orm:hibernate-core")
+	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.junit.platform:junit-platform-testkit")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")

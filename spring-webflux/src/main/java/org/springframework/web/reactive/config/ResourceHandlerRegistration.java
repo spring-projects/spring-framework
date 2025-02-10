@@ -23,13 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.server.ServerWebExchange;
@@ -48,21 +49,17 @@ public class ResourceHandlerRegistration {
 
 	private final List<String> locationValues = new ArrayList<>();
 
-	@Nullable
-	private CacheControl cacheControl;
+	private @Nullable CacheControl cacheControl;
 
-	@Nullable
-	private ResourceChainRegistration resourceChainRegistration;
+	private @Nullable ResourceChainRegistration resourceChainRegistration;
 
 	private boolean useLastModified = true;
 
-	@Nullable
-	private Function<Resource, String> etagGenerator;
+	private @Nullable Function<Resource, String> etagGenerator;
 
 	private boolean optimizeLocations = false;
 
-	@Nullable
-	private Map<String, MediaType> mediaTypes;
+	private @Nullable Map<String, MediaType> mediaTypes;
 
 
 

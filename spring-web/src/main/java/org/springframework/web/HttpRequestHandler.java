@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,21 +49,12 @@ import jakarta.servlet.http.HttpServletResponse;
  * return value gives a clearer signature to callers other than the
  * DispatcherServlet, indicating that there will never be a view to render.
  *
- * <p>Note that HttpRequestHandlers may optionally implement the
- * {@link org.springframework.web.servlet.mvc.LastModified} interface,
- * just like Controllers can, <i>provided that they run within Spring's
- * DispatcherServlet</i>. However, this is usually not necessary, since
- * HttpRequestHandlers typically only support POST requests to begin with.
- * Alternatively, a handler may implement the "If-Modified-Since" HTTP
- * header processing manually within its {@code handle} method.
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.context.support.HttpRequestHandlerServlet
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.ModelAndView
  * @see org.springframework.web.servlet.mvc.Controller
- * @see org.springframework.web.servlet.mvc.LastModified
  * @see org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter
  */
 @FunctionalInterface

@@ -22,13 +22,12 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogFormatUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -54,11 +53,12 @@ public abstract class ResourceHandlerUtils {
 	/**
 	 * Assert the given location is not null, and its path ends on slash.
 	 */
+	@SuppressWarnings("removal")
 	public static void assertResourceLocation(@Nullable Resource location) {
 		Assert.notNull(location, "Resource location must not be null");
 		try {
 			String path;
-			if (location instanceof PathResource) {
+			if (location instanceof org.springframework.core.io.PathResource) {
 				return;
 			}
 			else if (location instanceof UrlResource) {

@@ -16,7 +16,7 @@
 
 package org.springframework.core.convert;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception to be thrown when a suitable converter could not be found
@@ -29,8 +29,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ConverterNotFoundException extends ConversionException {
 
-	@Nullable
-	private final TypeDescriptor sourceType;
+	private final @Nullable TypeDescriptor sourceType;
 
 	private final TypeDescriptor targetType;
 
@@ -50,8 +49,7 @@ public class ConverterNotFoundException extends ConversionException {
 	/**
 	 * Return the source type that was requested to convert from.
 	 */
-	@Nullable
-	public TypeDescriptor getSourceType() {
+	public @Nullable TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
 

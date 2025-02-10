@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -51,7 +52,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.StandardMethodMetadata;
-import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -292,6 +292,7 @@ class ConfigurationClassBeanDefinitionReader {
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 
+	@SuppressWarnings("NullAway") // Reflection
 	protected boolean isOverriddenByExistingDefinition(BeanMethod beanMethod, String beanName) {
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return false;
@@ -302,21 +303,23 @@ class ConfigurationClassBeanDefinitionReader {
 		// If the bean method is an overloaded case on the same configuration class,
 		// preserve the existing bean definition and mark it as overloaded.
 		if (existingBeanDef instanceof ConfigurationClassBeanDefinition ccbd) {
-			if (ccbd.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
-				if (ccbd.getFactoryMethodMetadata().getMethodName().equals(beanMethod.getMetadata().getMethodName())) {
-					ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
-				}
-				else if (!this.registry.isBeanDefinitionOverridable(beanName)) {
-					throw new BeanDefinitionOverrideException(beanName,
-							new ConfigurationClassBeanDefinition(configClass, beanMethod.getMetadata(), beanName),
-							existingBeanDef,
-							"@Bean method override with same bean name but different method name: " + existingBeanDef);
-				}
-				return true;
-			}
-			else {
+			if (!ccbd.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
 				return false;
 			}
+			if (ccbd.getFactoryMethodMetadata().getMethodName().equals(beanMethod.getMetadata().getMethodName())) {
+				ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
+				return true;
+			}
+			Map<String, @Nullable Object> attributes =
+					configClass.getMetadata().getAnnotationAttributes(Configuration.class.getName());
+			if ((attributes != null && (Boolean) attributes.get("enforceUniqueMethods")) ||
+					!this.registry.isBeanDefinitionOverridable(beanName)) {
+				throw new BeanDefinitionOverrideException(beanName,
+						new ConfigurationClassBeanDefinition(configClass, beanMethod.getMetadata(), beanName),
+						existingBeanDef,
+						"@Bean method override with same bean name but different method name: " + existingBeanDef);
+			}
+			return true;
 		}
 
 		// A bean definition resulting from a component scan can be silently overridden
@@ -445,7 +448,6 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		@Override
-		@NonNull
 		public MethodMetadata getFactoryMethodMetadata() {
 			return this.factoryMethodMetadata;
 		}

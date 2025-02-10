@@ -20,11 +20,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.util.ReflectionUtils;
 
@@ -89,10 +89,9 @@ class MockitoBeanOverrideProcessorTests {
 
 		static class TestCase {
 
-			@Nullable
 			@MockitoBean
 			@MockitoSpyBean
-			Integer number;
+			public @Nullable Integer number;
 
 			@MockitoBean(types = Integer.class)
 			String typesNotSupported;

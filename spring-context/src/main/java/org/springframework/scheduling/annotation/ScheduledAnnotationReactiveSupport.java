@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -37,7 +38,6 @@ import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.support.DefaultScheduledTaskObservationConvention;
 import org.springframework.scheduling.support.ScheduledTaskObservationContext;
@@ -81,7 +81,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * Kotlin coroutines bridge are not present at runtime
 	 */
 	public static boolean isReactive(Method method) {
-		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+		if (KotlinDetector.isSuspendingFunction(method)) {
 			// Note that suspending functions declared without args have a single Continuation
 			// parameter in reflective inspection
 			Assert.isTrue(method.getParameterCount() == 1,
@@ -138,7 +138,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * to a {@code Flux} with a checkpoint String, allowing for better debugging.
 	 */
 	static Publisher<?> getPublisherFor(Method method, Object bean) {
-		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+		if (KotlinDetector.isSuspendingFunction(method)) {
 			return CoroutinesUtils.invokeSuspendingFunction(method, bean, (Object[]) method.getParameters());
 		}
 
@@ -195,8 +195,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		final String displayName;
 
-		@Nullable
-		private final String qualifier;
+		private final @Nullable String qualifier;
 
 		private final List<Runnable> subscriptionTrackerRegistry;
 
@@ -219,8 +218,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 		}
 
 		@Override
-		@Nullable
-		public String getQualifier() {
+		public @Nullable String getQualifier() {
 			return this.qualifier;
 		}
 
@@ -276,15 +274,13 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		private final Observation observation;
 
-		@Nullable
-		private final CountDownLatch blockingLatch;
+		private final @Nullable CountDownLatch blockingLatch;
 
 		// Implementation note: since this is created last-minute when subscribing,
 		// there shouldn't be a way to cancel the tracker externally from the
 		// ScheduledAnnotationBeanProcessor before the #setSubscription(Subscription)
 		// method is called.
-		@Nullable
-		private Subscription subscription;
+		private @Nullable Subscription subscription;
 
 		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry, Observation observation) {
 			this(subscriptionTrackerRegistry, observation, null);

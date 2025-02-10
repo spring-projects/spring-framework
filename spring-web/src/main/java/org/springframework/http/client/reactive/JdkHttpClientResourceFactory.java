@@ -22,9 +22,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.util.Assert;
 
@@ -41,8 +42,7 @@ import org.springframework.util.Assert;
  */
 public class JdkHttpClientResourceFactory implements InitializingBean, DisposableBean {
 
-	@Nullable
-	private Executor executor;
+	private @Nullable Executor executor;
 
 	private String threadPrefix = "jdk-http";
 
@@ -62,8 +62,7 @@ public class JdkHttpClientResourceFactory implements InitializingBean, Disposabl
 	/**
 	 * Return the configured {@link Executor}.
 	 */
-	@Nullable
-	public Executor getExecutor() {
+	public @Nullable Executor getExecutor() {
 		return this.executor;
 	}
 

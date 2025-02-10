@@ -24,8 +24,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.Assert;
@@ -118,8 +118,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 	}
 
 	@Override
-	@Nullable
-	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+	protected @Nullable HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		HandlerExecutionChain chain = super.getHandler(request);
 		if (chain != null) {
 			DefaultMvcResult mvcResult = getMvcResult(request);
@@ -139,8 +138,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 	}
 
 	@Override
-	@Nullable
-	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
+	protected @Nullable ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) throws Exception {
 
 		ModelAndView mav = super.processHandlerException(request, response, handler, ex);

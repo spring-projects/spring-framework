@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -70,6 +71,30 @@ class HandlerMethodTests {
 		Object target = new MyValidatedClass();
 		testValidateArgs(target, List.of("addPerson"), false);
 		testValidateReturnValue(target, List.of("getPerson"), false);
+	}
+
+	@Test // gh-34277
+	void createWithResolvedBeanSameInstance() {
+		MyClass target = new MyClass();
+		HandlerMethod handlerMethod = getHandlerMethod(target, "addPerson");
+		assertThat(handlerMethod.createWithResolvedBean()).isSameAs(handlerMethod);
+	}
+
+	@Test
+	void resolvedFromHandlerMethod() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerSingleton("myClass", MyClass.class);
+
+		MyClass target = new MyClass();
+		Method method = ClassUtils.getMethod(target.getClass(), "addPerson", (Class<?>[]) null);
+
+		HandlerMethod hm1 = new HandlerMethod("myClass", context.getBeanFactory(), method);
+		HandlerMethod hm2 = hm1.createWithValidateFlags();
+		HandlerMethod hm3 = hm2.createWithResolvedBean();
+
+		assertThat(hm1.getResolvedFromHandlerMethod()).isNull();
+		assertThat(hm2.getResolvedFromHandlerMethod()).isSameAs(hm1);
+		assertThat(hm3.getResolvedFromHandlerMethod()).isSameAs(hm1);
 	}
 
 	private static void testValidateArgs(Object target, List<String> methodNames, boolean expected) {

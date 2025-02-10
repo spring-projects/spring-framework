@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME;
 import static org.springframework.web.servlet.DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME;
 import static org.springframework.web.servlet.DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME;
-import static org.springframework.web.servlet.DispatcherServlet.THEME_RESOLVER_BEAN_NAME;
 
 /**
  * Integration tests for {@link WebMvcConfigurationSupport} (imported via
@@ -330,17 +329,6 @@ class WebMvcConfigurationSupportTests {
 
 		assertThat(localeResolver).isNotNull();
 		assertThat(localeResolver).isInstanceOf(AcceptHeaderLocaleResolver.class);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void defaultThemeResolverConfiguration() {
-		ApplicationContext context = initContext(WebConfig.class);
-		org.springframework.web.servlet.ThemeResolver themeResolver =
-				context.getBean(THEME_RESOLVER_BEAN_NAME, org.springframework.web.servlet.ThemeResolver.class);
-
-		assertThat(themeResolver).isNotNull();
-		assertThat(themeResolver).isInstanceOf(org.springframework.web.servlet.theme.FixedThemeResolver.class);
 	}
 
 	@Test

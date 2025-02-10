@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,15 @@ class SimpleCommandLinePropertySourceTests {
 		assertThat(ps.getProperty("o1")).isEqualTo("v1");
 		assertThat(ps.getProperty("o2")).isEmpty();
 		assertThat(ps.getProperty("o3")).isNull();
+	}
+
+	@Test  // gh-34282
+	void withRepeatedOptionArgs() {
+		CommandLinePropertySource<?> ps = new SimpleCommandLinePropertySource("--o1=v1", "--o1=v2", "--o1=v3");
+		assertThat(ps.containsProperty("o1")).isTrue();
+		assertThat(ps.containsProperty("o2")).isFalse();
+		assertThat(ps.getProperty("o1")).isEqualTo("v1,v2,v3");
+		assertThat(ps.getProperty("o2")).isNull();
 	}
 
 	@Test // gh-24464

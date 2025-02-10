@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.xml.sax.InputSource;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -94,8 +94,7 @@ class ResourceEntityResolverTests {
 
 		private final boolean shouldThrow;
 
-		@Nullable
-		private final InputSource returnValue;
+		private final @Nullable InputSource returnValue;
 
 		boolean fallbackInvoked = false;
 
@@ -112,8 +111,7 @@ class ResourceEntityResolverTests {
 		}
 
 		@Override
-		@Nullable
-		protected InputSource resolveSchemaEntity(String publicId, String systemId) {
+		protected @Nullable InputSource resolveSchemaEntity(String publicId, String systemId) {
 			this.fallbackInvoked = true;
 			if (this.shouldThrow) {
 				throw new ResolutionRejectedException();

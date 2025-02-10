@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.wiring;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy interface to be implemented by objects than can resolve bean name
@@ -41,7 +41,6 @@ public interface BeanWiringInfoResolver {
 	 * @param beanInstance the bean instance to resolve info for
 	 * @return the BeanWiringInfo, or {@code null} if not found
 	 */
-	@Nullable
-	BeanWiringInfo resolveWiringInfo(Object beanInstance);
+	@Nullable BeanWiringInfo resolveWiringInfo(Object beanInstance);
 
 }

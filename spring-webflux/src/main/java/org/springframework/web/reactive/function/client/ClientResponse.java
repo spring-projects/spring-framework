@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,17 +56,6 @@ public interface ClientResponse {
 	 * @return the HTTP status as an HttpStatusCode value (never {@code null})
 	 */
 	HttpStatusCode statusCode();
-
-	/**
-	 * Return the raw status code of this response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.1
-	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	default int rawStatusCode() {
-		return statusCode().value();
-	}
 
 	/**
 	 * Return the headers of this response.
@@ -223,21 +212,6 @@ public interface ClientResponse {
 	// Static builder methods
 
 	/**
-	 * Create a builder with the status, headers, and cookies of the given response.
-	 * <p><strong>Note:</strong> Note that the body in the returned builder is
-	 * {@link Flux#empty()} by default. To carry over the one from the original
-	 * response, use {@code otherResponse.bodyToFlux(DataBuffer.class)} or
-	 * simply use the instance based {@link #mutate()} method.
-	 * @param other the response to copy the status, headers, and cookies from
-	 * @return the created builder
-	 * @deprecated as of 5.3 in favor of the instance based {@link #mutate()}.
-	 */
-	@Deprecated
-	static Builder from(ClientResponse other) {
-		return new DefaultClientResponseBuilder(other, false);
-	}
-
-	/**
 	 * Create a response builder with the given status code and using default strategies for
 	 * reading the body.
 	 * @param statusCode the status code
@@ -354,7 +328,7 @@ public interface ClientResponse {
 		 * Manipulate this response's headers with the given consumer.
 		 * <p>The headers provided to the consumer are "live", so that the consumer
 		 * can be used to {@linkplain HttpHeaders#set(String, String) overwrite}
-		 * existing header values, {@linkplain HttpHeaders#remove(Object) remove}
+		 * existing header values, {@linkplain HttpHeaders#remove(String) remove}
 		 * values, or use any of the other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder

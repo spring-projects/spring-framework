@@ -23,12 +23,12 @@ import java.nio.charset.Charset;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -113,8 +113,7 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		throw new IllegalStateException("No body available for request part '" + this.requestPartName + "'");
 	}
 
-	@Nullable
-	private Part retrieveServletPart() {
+	private @Nullable Part retrieveServletPart() {
 		try {
 			return this.multipartRequest.getPart(this.requestPartName);
 		}

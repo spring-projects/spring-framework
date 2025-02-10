@@ -22,13 +22,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -44,7 +44,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurationSupport;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
-import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,7 +144,7 @@ class WebSocketStompClientIntegrationTests {
 		@Override
 		protected void registerStompEndpoints(StompEndpointRegistry registry) {
 			// Can't rely on classpath detection
-			RequestUpgradeStrategy upgradeStrategy = new TomcatRequestUpgradeStrategy();
+			RequestUpgradeStrategy upgradeStrategy = new StandardWebSocketUpgradeStrategy();
 			registry.addEndpoint("/stomp")
 					.setHandshakeHandler(new DefaultHandshakeHandler(upgradeStrategy))
 					.setAllowedOrigins("*");

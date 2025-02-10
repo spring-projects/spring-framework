@@ -27,9 +27,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
@@ -187,15 +187,13 @@ public final class PathPatternsRequestCondition extends AbstractRequestCondition
 	 * or {@code null} if no patterns match.
 	 */
 	@Override
-	@Nullable
-	public PathPatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
+	public @Nullable PathPatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		PathContainer path = ServletRequestPathUtils.getParsedRequestPath(request).pathWithinApplication();
 		SortedSet<PathPattern> matches = getMatchingPatterns(path);
 		return (matches != null ? new PathPatternsRequestCondition(matches) : null);
 	}
 
-	@Nullable
-	private SortedSet<PathPattern> getMatchingPatterns(PathContainer path) {
+	private @Nullable SortedSet<PathPattern> getMatchingPatterns(PathContainer path) {
 		TreeSet<PathPattern> result = null;
 		for (PathPattern pattern : this.patterns) {
 			if (pattern.matches(path)) {

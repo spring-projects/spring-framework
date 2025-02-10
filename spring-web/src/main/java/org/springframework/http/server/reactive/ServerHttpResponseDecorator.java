@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +27,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -61,22 +61,13 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	}
 
 	@Override
-	@Nullable
-	public HttpStatusCode getStatusCode() {
+	public @Nullable HttpStatusCode getStatusCode() {
 		return getDelegate().getStatusCode();
 	}
 
 	@Override
 	public boolean setRawStatusCode(@Nullable Integer value) {
 		return getDelegate().setRawStatusCode(value);
-	}
-
-	@Override
-	@Nullable
-	@Deprecated
-	@SuppressWarnings("removal")
-	public Integer getRawStatusCode() {
-		return getDelegate().getRawStatusCode();
 	}
 
 	@Override

@@ -30,10 +30,10 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of the {@link SqlXmlHandler} interface.
@@ -59,50 +59,43 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	//-------------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public String getXmlAsString(ResultSet rs, String columnName) throws SQLException {
+	public @Nullable String getXmlAsString(ResultSet rs, String columnName) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		return (xmlObject != null ? xmlObject.getString() : null);
 	}
 
 	@Override
-	@Nullable
-	public String getXmlAsString(ResultSet rs, int columnIndex) throws SQLException {
+	public @Nullable String getXmlAsString(ResultSet rs, int columnIndex) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		return (xmlObject != null ? xmlObject.getString() : null);
 	}
 
 	@Override
-	@Nullable
-	public InputStream getXmlAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
+	public @Nullable InputStream getXmlAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		return (xmlObject != null ? xmlObject.getBinaryStream() : null);
 	}
 
 	@Override
-	@Nullable
-	public InputStream getXmlAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
+	public @Nullable InputStream getXmlAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		return (xmlObject != null ? xmlObject.getBinaryStream() : null);
 	}
 
 	@Override
-	@Nullable
-	public Reader getXmlAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
+	public @Nullable Reader getXmlAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnName);
 		return (xmlObject != null ? xmlObject.getCharacterStream() : null);
 	}
 
 	@Override
-	@Nullable
-	public Reader getXmlAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
+	public @Nullable Reader getXmlAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
 		return (xmlObject != null ? xmlObject.getCharacterStream() : null);
 	}
 
 	@Override
-	@Nullable
-	public Source getXmlAsSource(ResultSet rs, String columnName, @Nullable Class<? extends Source> sourceClass)
+	public @Nullable Source getXmlAsSource(ResultSet rs, String columnName, @Nullable Class<? extends Source> sourceClass)
 			throws SQLException {
 
 		SQLXML xmlObject = rs.getSQLXML(columnName);
@@ -113,8 +106,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@Override
-	@Nullable
-	public Source getXmlAsSource(ResultSet rs, int columnIndex, @Nullable Class<? extends Source> sourceClass)
+	public @Nullable Source getXmlAsSource(ResultSet rs, int columnIndex, @Nullable Class<? extends Source> sourceClass)
 			throws SQLException {
 
 		SQLXML xmlObject = rs.getSQLXML(columnIndex);
@@ -185,8 +177,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	 */
 	private abstract static class AbstractJdbc4SqlXmlValue implements SqlXmlValue {
 
-		@Nullable
-		private SQLXML xmlObject;
+		private @Nullable SQLXML xmlObject;
 
 		@Override
 		public void setValue(PreparedStatement ps, int paramIndex) throws SQLException {

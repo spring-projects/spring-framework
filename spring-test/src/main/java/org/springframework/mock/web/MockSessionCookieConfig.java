@@ -21,8 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.servlet.SessionCookieConfig;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Mock implementation of the {@link jakarta.servlet.SessionCookieConfig} interface.
@@ -33,17 +32,13 @@ import org.springframework.lang.Nullable;
  */
 public class MockSessionCookieConfig implements SessionCookieConfig {
 
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
-	@Nullable
-	private String domain;
+	private @Nullable String domain;
 
-	@Nullable
-	private String path;
+	private @Nullable String path;
 
-	@Nullable
-	private String comment;
+	private @Nullable String comment;
 
 	private boolean httpOnly;
 
@@ -60,8 +55,7 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
@@ -71,8 +65,7 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getDomain() {
+	public @Nullable String getDomain() {
 		return this.domain;
 	}
 
@@ -82,8 +75,7 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getPath() {
+	public @Nullable String getPath() {
 		return this.path;
 	}
 
@@ -95,8 +87,7 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 
 	@SuppressWarnings("removal")
 	@Override
-	@Nullable
-	public String getComment() {
+	public @Nullable String getComment() {
 		return this.comment;
 	}
 
@@ -136,8 +127,7 @@ public class MockSessionCookieConfig implements SessionCookieConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getAttribute(String name) {
+	public @Nullable String getAttribute(String name) {
 		return this.attributes.get(name);
 	}
 

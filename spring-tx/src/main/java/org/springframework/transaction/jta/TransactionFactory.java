@@ -19,8 +19,7 @@ package org.springframework.transaction.jta;
 import jakarta.transaction.NotSupportedException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy interface for creating JTA {@link jakarta.transaction.Transaction}

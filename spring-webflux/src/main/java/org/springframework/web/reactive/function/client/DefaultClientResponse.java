@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.OptionalLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -46,7 +47,6 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
@@ -232,7 +232,8 @@ class DefaultClientResponse implements ClientResponse {
 				});
 	}
 
-	private Function<ResolvableType, ?> initDecodeFunction(byte[] body, @Nullable MediaType contentType) {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	private Function<ResolvableType, ? extends @Nullable Object> initDecodeFunction(byte[] body, @Nullable MediaType contentType) {
 		return targetType -> {
 			if (ObjectUtils.isEmpty(body)) {
 				return null;

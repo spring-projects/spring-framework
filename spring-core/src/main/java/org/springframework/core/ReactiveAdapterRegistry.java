@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ package org.springframework.core;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Publisher;
 import reactor.adapter.JdkFlowAdapter;
@@ -33,7 +37,6 @@ import reactor.blockhound.integration.BlockHoundIntegration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -56,8 +59,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ReactiveAdapterRegistry {
 
-	@Nullable
-	private static volatile ReactiveAdapterRegistry sharedInstance;
+	private static volatile @Nullable ReactiveAdapterRegistry sharedInstance;
 
 	private static final boolean reactiveStreamsPresent;
 
@@ -174,8 +176,7 @@ public class ReactiveAdapterRegistry {
 	 * Get the adapter for the given reactive type.
 	 * @return the corresponding adapter, or {@code null} if none available
 	 */
-	@Nullable
-	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
+	public @Nullable ReactiveAdapter getAdapter(Class<?> reactiveType) {
 		return getAdapter(reactiveType, null);
 	}
 
@@ -188,8 +189,7 @@ public class ReactiveAdapterRegistry {
 	 * (i.e. to adapt from; may be {@code null} if the reactive type is specified)
 	 * @return the corresponding adapter, or {@code null} if none available
 	 */
-	@Nullable
-	public ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, @Nullable Object source) {
+	public @Nullable ReactiveAdapter getAdapter(@Nullable Class<?> reactiveType, @Nullable Object source) {
 		if (this.adapters.isEmpty()) {
 			return null;
 		}
@@ -383,13 +383,13 @@ public class ReactiveAdapterRegistry {
 						io.smallrye.mutiny.groups.MultiCreate.class, "publisher", Flow.Publisher.class);
 				registry.registerReactiveType(uniDesc,
 						uni -> FlowAdapters.toPublisher((Flow.Publisher<Object>)
-								ReflectionUtils.invokeMethod(uniToPublisher, ((io.smallrye.mutiny.Uni<?>) uni).convert())),
-						publisher -> ReflectionUtils.invokeMethod(uniPublisher, io.smallrye.mutiny.Uni.createFrom(),
-								FlowAdapters.toFlowPublisher(publisher)));
+								Objects.requireNonNull(ReflectionUtils.invokeMethod(uniToPublisher, ((Uni<?>) uni).convert()))),
+						publisher -> Objects.requireNonNull(ReflectionUtils.invokeMethod(uniPublisher, Uni.createFrom(),
+								FlowAdapters.toFlowPublisher(publisher))));
 				registry.registerReactiveType(multiDesc,
 						multi -> FlowAdapters.toPublisher((Flow.Publisher<Object>) multi),
-						publisher -> ReflectionUtils.invokeMethod(multiPublisher, io.smallrye.mutiny.Multi.createFrom(),
-								FlowAdapters.toFlowPublisher(publisher)));
+						publisher -> Objects.requireNonNull(ReflectionUtils.invokeMethod(multiPublisher, Multi.createFrom(),
+								FlowAdapters.toFlowPublisher(publisher))));
 			}
 			else {
 				// Mutiny 1 based on Reactive Streams

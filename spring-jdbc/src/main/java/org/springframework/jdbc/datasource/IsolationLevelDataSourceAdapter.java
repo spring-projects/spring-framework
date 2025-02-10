@@ -20,7 +20,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -69,8 +70,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 		);
 
 
-	@Nullable
-	private Integer isolationLevel;
+	private @Nullable Integer isolationLevel;
 
 
 	/**
@@ -122,8 +122,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * Return the statically specified isolation level,
 	 * or {@code null} if none.
 	 */
-	@Nullable
-	protected Integer getIsolationLevel() {
+	protected @Nullable Integer getIsolationLevel() {
 		return this.isolationLevel;
 	}
 
@@ -155,8 +154,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()
 	 * @see #setIsolationLevel
 	 */
-	@Nullable
-	protected Integer getCurrentIsolationLevel() {
+	protected @Nullable Integer getCurrentIsolationLevel() {
 		Integer isolationLevelToUse = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
 		if (isolationLevelToUse == null) {
 			isolationLevelToUse = getIsolationLevel();
@@ -170,8 +168,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 * @return whether there is a read-only hint for the current scope
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
-	@Nullable
-	protected Boolean getCurrentReadOnlyFlag() {
+	protected @Nullable Boolean getCurrentReadOnlyFlag() {
 		boolean txReadOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 		return (txReadOnly ? Boolean.TRUE : null);
 	}

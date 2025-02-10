@@ -24,9 +24,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -67,11 +68,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ResponseBodyEmitter {
 
-	@Nullable
-	private final Long timeout;
+	private final @Nullable Long timeout;
 
-	@Nullable
-	private Handler handler;
+	private @Nullable Handler handler;
 
 	/** Store send data before handler is initialized. */
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
@@ -80,8 +79,7 @@ public class ResponseBodyEmitter {
 	private final AtomicBoolean complete = new AtomicBoolean();
 
 	/** Store an error before the handler is initialized. */
-	@Nullable
-	private Throwable failure;
+	private @Nullable Throwable failure;
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
 
@@ -112,8 +110,7 @@ public class ResponseBodyEmitter {
 	/**
 	 * Return the configured timeout value, if any.
 	 */
-	@Nullable
-	public Long getTimeout() {
+	public @Nullable Long getTimeout() {
 		return this.timeout;
 	}
 
@@ -350,8 +347,7 @@ public class ResponseBodyEmitter {
 
 		private final Object data;
 
-		@Nullable
-		private final MediaType mediaType;
+		private final @Nullable MediaType mediaType;
 
 		public DataWithMediaType(Object data, @Nullable MediaType mediaType) {
 			this.data = data;
@@ -362,8 +358,7 @@ public class ResponseBodyEmitter {
 			return this.data;
 		}
 
-		@Nullable
-		public MediaType getMediaType() {
+		public @Nullable MediaType getMediaType() {
 			return this.mediaType;
 		}
 	}

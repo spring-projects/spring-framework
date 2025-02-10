@@ -2,9 +2,7 @@
  * Support classes for Spring's serializer abstraction.
  * Includes adapters to the Converter SPI.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.core.serializer.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

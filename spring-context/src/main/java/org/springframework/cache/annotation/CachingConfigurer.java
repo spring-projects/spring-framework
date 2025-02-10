@@ -16,11 +16,12 @@
 
 package org.springframework.cache.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
@@ -66,8 +67,7 @@ public interface CachingConfigurer {
 	 * </pre>
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
-	@Nullable
-	default CacheManager cacheManager() {
+	default @Nullable CacheManager cacheManager() {
 		return null;
 	}
 
@@ -94,8 +94,7 @@ public interface CachingConfigurer {
 	 * </pre>
 	 * See {@link EnableCaching} for more complete examples.
 	 */
-	@Nullable
-	default CacheResolver cacheResolver() {
+	default @Nullable CacheResolver cacheResolver() {
 		return null;
 	}
 
@@ -105,8 +104,7 @@ public interface CachingConfigurer {
 	 * is used.
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
-	@Nullable
-	default KeyGenerator keyGenerator() {
+	default @Nullable KeyGenerator keyGenerator() {
 		return null;
 	}
 
@@ -116,8 +114,7 @@ public interface CachingConfigurer {
 	 * is used, which throws the exception back at the client.
 	 * See @{@link EnableCaching} for more complete examples.
 	 */
-	@Nullable
-	default CacheErrorHandler errorHandler() {
+	default @Nullable CacheErrorHandler errorHandler() {
 		return null;
 	}
 

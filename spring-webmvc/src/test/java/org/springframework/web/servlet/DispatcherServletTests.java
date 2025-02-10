@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.RequestPath;
 import org.springframework.web.HttpRequestHandler;
@@ -72,6 +73,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -196,7 +198,6 @@ class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
 		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("Wed, 01 Apr 2015 00:00:00 GMT");
 	}
 
 	@Test
@@ -226,7 +227,6 @@ class DispatcherServletTests {
 		assertThat(request.getAttribute("test3")).isNotNull();
 		assertThat(request.getAttribute("test3x")).isNotNull();
 		assertThat(request.getAttribute("test3y")).isNotNull();
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("Wed, 01 Apr 2015 00:00:01 GMT");
 	}
 
 	@Test
@@ -391,31 +391,6 @@ class DispatcherServletTests {
 		request.addUserRole("role2");
 		request.addParameter("locale", "en");
 		request.addParameter("locale2", "en_CA");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
-	}
-
-	@Test
-	void themeChangeInterceptor1() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
-		request.addPreferredLocale(Locale.CANADA);
-		request.addUserRole("role1");
-		request.addParameter("theme", "mytheme");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexDispatcherServlet.service(request, response);
-		assertThat(response.getStatus()).isEqualTo(200);
-		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed0.jsp");
-		assertThat(request.getAttribute("exception").getClass().equals(ServletException.class)).as("Exception exposed").isTrue();
-	}
-
-	@Test
-	void themeChangeInterceptor2() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
-		request.addPreferredLocale(Locale.CANADA);
-		request.addUserRole("role1");
-		request.addParameter("theme", "mytheme");
-		request.addParameter("theme2", "theme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
@@ -814,8 +789,7 @@ class DispatcherServletTests {
 		ConfigurableEnvironment env1 = new StandardServletEnvironment();
 		servlet.setEnvironment(env1); // should succeed
 		assertThat(servlet.getEnvironment()).isSameAs(env1);
-		assertThatIllegalArgumentException().as("non-configurable Environment").isThrownBy(() ->
-				servlet.setEnvironment(new DummyEnvironment()));
+		assertThatIllegalArgumentException().isThrownBy(() -> servlet.setEnvironment(mock(Environment.class)));
 		class CustomServletEnvironment extends StandardServletEnvironment { }
 		DispatcherServlet custom = new DispatcherServlet() {
 			@Override

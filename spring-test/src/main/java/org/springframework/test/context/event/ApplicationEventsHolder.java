@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.event;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -57,8 +58,7 @@ public abstract class ApplicationEventsHolder {
 	 * Get the {@link ApplicationEvents} for the current thread.
 	 * @return the current {@code ApplicationEvents}, or {@code null} if not registered
 	 */
-	@Nullable
-	public static ApplicationEvents getApplicationEvents() {
+	public static @Nullable ApplicationEvents getApplicationEvents() {
 		return applicationEvents.get();
 	}
 

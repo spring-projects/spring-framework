@@ -17,8 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import jakarta.servlet.jsp.JspException;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML form input element.
@@ -65,17 +64,13 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	public static final String READONLY_ATTRIBUTE = "readonly";
 
 
-	@Nullable
-	private String onfocus;
+	private @Nullable String onfocus;
 
-	@Nullable
-	private String onblur;
+	private @Nullable String onblur;
 
-	@Nullable
-	private String onchange;
+	private @Nullable String onchange;
 
-	@Nullable
-	private String accesskey;
+	private @Nullable String accesskey;
 
 	private boolean disabled;
 
@@ -93,8 +88,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code onfocus}' attribute.
 	 */
-	@Nullable
-	protected String getOnfocus() {
+	protected @Nullable String getOnfocus() {
 		return this.onfocus;
 	}
 
@@ -109,8 +103,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code onblur}' attribute.
 	 */
-	@Nullable
-	protected String getOnblur() {
+	protected @Nullable String getOnblur() {
 		return this.onblur;
 	}
 
@@ -125,8 +118,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code onchange}' attribute.
 	 */
-	@Nullable
-	protected String getOnchange() {
+	protected @Nullable String getOnchange() {
 		return this.onchange;
 	}
 
@@ -141,8 +133,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Get the value of the '{@code accesskey}' attribute.
 	 */
-	@Nullable
-	protected String getAccesskey() {
+	protected @Nullable String getAccesskey() {
 		return this.accesskey;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,13 @@ package org.springframework.web.context.support;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.lang.Nullable;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
@@ -53,12 +50,6 @@ import org.springframework.web.context.ServletContextAware;
  * can be accessed via "file:" URLs, as implemented by
  * {@link org.springframework.core.io.DefaultResourceLoader}.
  *
- * <p>In addition to the special beans detected by
- * {@link org.springframework.context.support.AbstractApplicationContext},
- * this class detects a bean of type {@link org.springframework.ui.context.ThemeSource}
- * in the context, under the special bean name "themeSource".
- * Theme support is deprecated as of 6.0 with no direct replacement.
- *
  * <p><b>This is the web context to be subclassed for a different bean definition format.</b>
  * Such a context implementation can be specified as "contextClass" context-param
  * for {@link org.springframework.web.context.ContextLoader} or as "contextClass"
@@ -80,23 +71,16 @@ import org.springframework.web.context.ServletContextAware;
  */
 @SuppressWarnings("deprecation")
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableConfigApplicationContext
-		implements ConfigurableWebApplicationContext, ThemeSource {
+		implements ConfigurableWebApplicationContext {
 
 	/** Servlet context that this context runs in. */
-	@Nullable
-	private ServletContext servletContext;
+	private @Nullable ServletContext servletContext;
 
 	/** Servlet config that this context runs in, if any. */
-	@Nullable
-	private ServletConfig servletConfig;
+	private @Nullable ServletConfig servletConfig;
 
 	/** Namespace of this context, or {@code null} if root. */
-	@Nullable
-	private String namespace;
-
-	/** the ThemeSource for this ApplicationContext. */
-	@Nullable
-	private ThemeSource themeSource;
+	private @Nullable String namespace;
 
 
 	public AbstractRefreshableWebApplicationContext() {
@@ -110,8 +94,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	@Override
-	@Nullable
-	public ServletContext getServletContext() {
+	public @Nullable ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
@@ -124,8 +107,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	@Override
-	@Nullable
-	public ServletConfig getServletConfig() {
+	public @Nullable ServletConfig getServletConfig() {
 		return this.servletConfig;
 	}
 
@@ -138,14 +120,12 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	@Override
-	@Nullable
-	public String getNamespace() {
+	public @Nullable String getNamespace() {
 		return this.namespace;
 	}
 
 	@Override
-	@Nullable
-	public String[] getConfigLocations() {
+	public String @Nullable [] getConfigLocations() {
 		return super.getConfigLocations();
 	}
 
@@ -196,14 +176,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	/**
-	 * Initialize the theme capability.
-	 */
-	@Override
-	protected void onRefresh() {
-		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 * <p>Replace {@code Servlet}-related property sources.
 	 */
@@ -213,14 +185,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		if (env instanceof ConfigurableWebEnvironment configurableWebEnv) {
 			configurableWebEnv.initPropertySources(this.servletContext, this.servletConfig);
 		}
-	}
-
-	@Override
-	@Nullable
-	@Deprecated
-	public Theme getTheme(String themeName) {
-		Assert.state(this.themeSource != null, "No ThemeSource available");
-		return this.themeSource.getTheme(themeName);
 	}
 
 }

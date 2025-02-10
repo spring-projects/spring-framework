@@ -20,7 +20,8 @@ import java.io.IOException;
 
 import javax.xml.transform.Source;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
 

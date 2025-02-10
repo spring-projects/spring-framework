@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.server.ServerContainer;
 import jakarta.websocket.server.ServerEndpointConfig;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -32,7 +33,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -60,20 +60,15 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 	private static final String SERVER_CONTAINER_ATTR = "jakarta.websocket.server.ServerContainer";
 
 
-	@Nullable
-	private Long asyncSendTimeout;
+	private @Nullable Long asyncSendTimeout;
 
-	@Nullable
-	private Long maxSessionIdleTimeout;
+	private @Nullable Long maxSessionIdleTimeout;
 
-	@Nullable
-	private Integer maxTextMessageBufferSize;
+	private @Nullable Integer maxTextMessageBufferSize;
 
-	@Nullable
-	private Integer maxBinaryMessageBufferSize;
+	private @Nullable Integer maxBinaryMessageBufferSize;
 
-	@Nullable
-	private ServerContainer serverContainer;
+	private @Nullable ServerContainer serverContainer;
 
 
 	/**
@@ -84,8 +79,7 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 		this.asyncSendTimeout = timeoutInMillis;
 	}
 
-	@Nullable
-	public Long getAsyncSendTimeout() {
+	public @Nullable Long getAsyncSendTimeout() {
 		return this.asyncSendTimeout;
 	}
 
@@ -97,8 +91,7 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 		this.maxSessionIdleTimeout = timeoutInMillis;
 	}
 
-	@Nullable
-	public Long getMaxSessionIdleTimeout() {
+	public @Nullable Long getMaxSessionIdleTimeout() {
 		return this.maxSessionIdleTimeout;
 	}
 
@@ -110,8 +103,7 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 		this.maxTextMessageBufferSize = bufferSize;
 	}
 
-	@Nullable
-	public Integer getMaxTextMessageBufferSize() {
+	public @Nullable Integer getMaxTextMessageBufferSize() {
 		return this.maxTextMessageBufferSize;
 	}
 
@@ -123,8 +115,7 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 		this.maxBinaryMessageBufferSize = bufferSize;
 	}
 
-	@Nullable
-	public Integer getMaxBinaryMessageBufferSize() {
+	public @Nullable Integer getMaxBinaryMessageBufferSize() {
 		return this.maxBinaryMessageBufferSize;
 	}
 

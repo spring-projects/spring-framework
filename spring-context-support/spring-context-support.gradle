@@ -23,7 +23,7 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("org.hsqldb:hsqldb")
-	testRuntimeOnly("com.sun.mail:jakarta.mail")
+	testRuntimeOnly("org.eclipse.angus:angus-mail")
 	testRuntimeOnly("org.ehcache:ehcache")
 	testRuntimeOnly("org.ehcache:jcache")
 	testRuntimeOnly("org.glassfish:jakarta.el")

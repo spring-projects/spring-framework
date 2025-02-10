@@ -62,7 +62,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.function.ThrowingBiFunction;
 import org.springframework.util.function.ThrowingFunction;
-import org.springframework.util.function.ThrowingSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -181,16 +180,6 @@ class BeanInstanceSupplierTests {
 	}
 
 	@Test
-	@Deprecated
-	@SuppressWarnings("removal")
-	void withGeneratorWhenSupplierIsNullThrowsException() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor();
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> resolver.withGenerator((ThrowingSupplier<Object>) null))
-				.withMessage("'generator' must not be null");
-	}
-
-	@Test
 	void getWithConstructorDoesNotSetResolvedFactoryMethod() {
 		BeanInstanceSupplier<SingleArgConstructor> resolver = BeanInstanceSupplier.forConstructor(String.class);
 		this.beanFactory.registerSingleton("one", "1");
@@ -233,18 +222,6 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
 		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.<String>forConstructor(String.class)
 				.withGenerator(registeredBean -> "1");
-		assertThat(resolver.get(registerBean)).isInstanceOf(String.class).isEqualTo("1");
-	}
-
-	@Test
-	@Deprecated
-	@SuppressWarnings("removal")
-	void getWithGeneratorCallsSupplier() {
-		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
-		this.beanFactory.registerSingleton("one", "1");
-		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
-		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.<String>forConstructor(String.class)
-				.withGenerator(() -> "1");
 		assertThat(resolver.get(registerBean)).isInstanceOf(String.class).isEqualTo("1");
 	}
 

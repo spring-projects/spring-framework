@@ -16,7 +16,7 @@
 
 package org.aopalliance.intercept;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This interface represents an invocation in the program.
@@ -34,7 +34,6 @@ public interface Invocation extends Joinpoint {
 	 * array to change the arguments.
 	 * @return the argument of the invocation
 	 */
-	@Nonnull
-	Object[] getArguments();
+	@Nullable Object[] getArguments();
 
 }

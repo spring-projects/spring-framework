@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Simple adapter for {@link PreparedStatementSetter} that applies a given array
@@ -30,15 +30,14 @@ import org.springframework.lang.Nullable;
  */
 public class ArgumentPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
-	@Nullable
-	private final Object[] args;
+	private final @Nullable Object @Nullable [] args;
 
 
 	/**
 	 * Create a new {@code ArgumentPreparedStatementSetter} for the given arguments.
 	 * @param args the arguments to set
 	 */
-	public ArgumentPreparedStatementSetter(@Nullable Object[] args) {
+	public ArgumentPreparedStatementSetter(@Nullable Object @Nullable [] args) {
 		this.args = args;
 	}
 

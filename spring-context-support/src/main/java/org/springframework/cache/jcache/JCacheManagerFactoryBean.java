@@ -22,11 +22,12 @@ import java.util.Properties;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} for a JCache {@link CacheManager javax.cache.CacheManager},
@@ -43,17 +44,13 @@ import org.springframework.lang.Nullable;
 public class JCacheManagerFactoryBean
 		implements FactoryBean<CacheManager>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
-	@Nullable
-	private URI cacheManagerUri;
+	private @Nullable URI cacheManagerUri;
 
-	@Nullable
-	private Properties cacheManagerProperties;
+	private @Nullable Properties cacheManagerProperties;
 
-	@Nullable
-	private ClassLoader beanClassLoader;
+	private @Nullable ClassLoader beanClassLoader;
 
-	@Nullable
-	private CacheManager cacheManager;
+	private @Nullable CacheManager cacheManager;
 
 
 	/**
@@ -86,8 +83,7 @@ public class JCacheManagerFactoryBean
 
 
 	@Override
-	@Nullable
-	public CacheManager getObject() {
+	public @Nullable CacheManager getObject() {
 		return this.cacheManager;
 	}
 

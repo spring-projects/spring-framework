@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,14 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -57,8 +58,7 @@ public abstract class ReflectionHelper {
 	 * @return an {@code ArgumentsMatchInfo} object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
-	@Nullable
-	static ArgumentsMatchKind compareArguments(
+	static @Nullable ArgumentsMatchKind compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),
@@ -146,8 +146,7 @@ public abstract class ReflectionHelper {
 	 * @return an {@code ArgumentsMatchKind} object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
-	@Nullable
-	static ArgumentsMatchKind compareArgumentsVarargs(
+	static @Nullable ArgumentsMatchKind compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),
@@ -251,7 +250,7 @@ public abstract class ReflectionHelper {
 	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws SpelEvaluationException if a problem occurs during conversion
 	 */
-	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
+	public static boolean convertAllArguments(TypeConverter converter, @Nullable Object[] arguments, Method method)
 			throws SpelEvaluationException {
 
 		Integer varargsPosition = (method.isVarArgs() ? method.getParameterCount() - 1 : null);
@@ -270,7 +269,8 @@ public abstract class ReflectionHelper {
 	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
-	static boolean convertArguments(TypeConverter converter, Object[] arguments, Executable executable,
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	static boolean convertArguments(TypeConverter converter, @Nullable Object[] arguments, Executable executable,
 			@Nullable Integer varargsPosition) throws EvaluationException {
 
 		boolean conversionOccurred = false;
@@ -360,7 +360,8 @@ public abstract class ReflectionHelper {
 	 * @throws EvaluationException if a problem occurs during conversion
 	 * @since 6.1
 	 */
-	public static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	public static boolean convertAllMethodHandleArguments(TypeConverter converter, @Nullable Object[] arguments,
 			MethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {
 
 		boolean conversionOccurred = false;
@@ -454,7 +455,7 @@ public abstract class ReflectionHelper {
 	 * @param possibleArray an array object that may have the supplied value as the first element
 	 * @return true if the supplied value is the first entry in the array
 	 */
-	private static boolean isFirstEntryInArray(Object value, @Nullable Object possibleArray) {
+	private static boolean isFirstEntryInArray(@Nullable Object value, @Nullable Object possibleArray) {
 		if (possibleArray == null) {
 			return false;
 		}
@@ -478,7 +479,7 @@ public abstract class ReflectionHelper {
 	 * @param args the arguments to be set up for the invocation
 	 * @return a repackaged array of arguments where any varargs setup has been performed
 	 */
-	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
+	public static @Nullable Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, @Nullable Object... args) {
 		Assert.notEmpty(requiredParameterTypes, "Required parameter types array must not be empty");
 
 		int parameterCount = requiredParameterTypes.length;
@@ -492,7 +493,7 @@ public abstract class ReflectionHelper {
 		// Check if repackaging is needed...
 		if (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {
 			// Create an array for the leading arguments plus the varargs array argument.
-			Object[] newArgs = new Object[parameterCount];
+			@Nullable Object[] newArgs = new Object[parameterCount];
 			// Copy all leading arguments to the new array, omitting the varargs array argument.
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);
 

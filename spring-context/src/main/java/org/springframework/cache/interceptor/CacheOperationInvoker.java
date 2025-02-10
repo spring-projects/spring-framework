@@ -16,7 +16,7 @@
 
 package org.springframework.cache.interceptor;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract the invocation of a cache operation.
@@ -38,8 +38,7 @@ public interface CacheOperationInvoker {
 	 * @return the result of the operation
 	 * @throws ThrowableWrapper if an error occurred while invoking the operation
 	 */
-	@Nullable
-	Object invoke() throws ThrowableWrapper;
+	@Nullable Object invoke() throws ThrowableWrapper;
 
 
 	/**

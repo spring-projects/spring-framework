@@ -18,9 +18,10 @@ package org.springframework.beans.factory.support;
 
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
-import org.springframework.lang.Nullable;
 
 /**
  * Tag class which represents a Spring-managed {@link Properties} instance
@@ -33,8 +34,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ManagedProperties extends Properties implements Mergeable, BeanMetadataElement {
 
-	@Nullable
-	private Object source;
+	private @Nullable Object source;
 
 	private boolean mergeEnabled;
 
@@ -48,8 +48,7 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.source;
 	}
 

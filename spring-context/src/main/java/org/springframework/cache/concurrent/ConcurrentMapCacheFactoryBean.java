@@ -18,10 +18,11 @@ package org.springframework.cache.concurrent;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,13 +43,11 @@ public class ConcurrentMapCacheFactoryBean
 
 	private String name = "";
 
-	@Nullable
-	private ConcurrentMap<Object, Object> store;
+	private @Nullable ConcurrentMap<Object, Object> store;
 
 	private boolean allowNullValues = true;
 
-	@Nullable
-	private ConcurrentMapCache cache;
+	private @Nullable ConcurrentMapCache cache;
 
 
 	/**
@@ -92,8 +91,7 @@ public class ConcurrentMapCacheFactoryBean
 
 
 	@Override
-	@Nullable
-	public ConcurrentMapCache getObject() {
+	public @Nullable ConcurrentMapCache getObject() {
 		return this.cache;
 	}
 

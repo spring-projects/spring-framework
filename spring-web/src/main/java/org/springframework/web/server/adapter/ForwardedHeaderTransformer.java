@@ -24,10 +24,11 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ForwardedHeaderUtils;
@@ -143,7 +144,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	protected boolean hasForwardedHeaders(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		for (String headerName : FORWARDED_HEADER_NAMES) {
-			if (headers.containsKey(headerName)) {
+			if (headers.containsHeader(headerName)) {
 				return true;
 			}
 		}
@@ -155,8 +156,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	}
 
 
-	@Nullable
-	private static String getForwardedPrefix(ServerHttpRequest request) {
+	private static @Nullable String getForwardedPrefix(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		String header = headers.getFirst("X-Forwarded-Prefix");
 		if (header == null) {

@@ -23,7 +23,8 @@ import java.util.List;
 
 import javax.net.ssl.SSLSession;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -34,11 +35,9 @@ import org.springframework.util.Assert;
  */
 final class DefaultSslInfo implements SslInfo {
 
-	@Nullable
-	private final String sessionId;
+	private final @Nullable String sessionId;
 
-	@Nullable
-	private final X509Certificate[] peerCertificates;
+	private final X509Certificate @Nullable [] peerCertificates;
 
 
 	DefaultSslInfo(@Nullable String sessionId, X509Certificate[] peerCertificates) {
@@ -55,20 +54,17 @@ final class DefaultSslInfo implements SslInfo {
 
 
 	@Override
-	@Nullable
-	public String getSessionId() {
+	public @Nullable String getSessionId() {
 		return this.sessionId;
 	}
 
 	@Override
-	@Nullable
-	public X509Certificate[] getPeerCertificates() {
+	public X509Certificate @Nullable [] getPeerCertificates() {
 		return this.peerCertificates;
 	}
 
 
-	@Nullable
-	private static String initSessionId(SSLSession session) {
+	private static @Nullable String initSessionId(SSLSession session) {
 		byte [] bytes = session.getId();
 		if (bytes == null) {
 			return null;
@@ -88,8 +84,7 @@ final class DefaultSslInfo implements SslInfo {
 		return sb.toString();
 	}
 
-	@Nullable
-	private static X509Certificate[] initCertificates(SSLSession session) {
+	private static X509Certificate @Nullable [] initCertificates(SSLSession session) {
 		Certificate[] certificates;
 		try {
 			certificates = session.getPeerCertificates();

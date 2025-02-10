@@ -16,7 +16,7 @@
 
 package org.springframework.beans;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception thrown when referring to an invalid bean property.

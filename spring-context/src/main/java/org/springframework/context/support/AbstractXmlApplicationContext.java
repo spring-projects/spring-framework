@@ -18,6 +18,8 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.BeanDefinitionDocumentReader;
@@ -25,7 +27,6 @@ import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 
 /**
  * Convenient base class for {@link org.springframework.context.ApplicationContext}
@@ -139,8 +140,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * @return an array of Resource objects, or {@code null} if none
 	 * @see #getConfigLocations()
 	 */
-	@Nullable
-	protected Resource[] getConfigResources() {
+	protected Resource @Nullable [] getConfigResources() {
 		return null;
 	}
 

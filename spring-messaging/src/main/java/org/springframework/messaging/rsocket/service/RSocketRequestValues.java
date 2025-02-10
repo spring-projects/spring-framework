@@ -22,10 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
@@ -41,21 +41,17 @@ import org.springframework.util.StringUtils;
  */
 public final class RSocketRequestValues {
 
-	@Nullable
-	private final String route;
+	private final @Nullable String route;
 
 	private final Object[] routeVariables;
 
 	private final Map<Object, MimeType> metadata;
 
-	@Nullable
-	private final Object payloadValue;
+	private final @Nullable Object payloadValue;
 
-	@Nullable
-	private final Publisher<?> payload;
+	private final @Nullable Publisher<?> payload;
 
-	@Nullable
-	private final ParameterizedTypeReference<?> payloadElementType;
+	private final @Nullable ParameterizedTypeReference<?> payloadElementType;
 
 
 	public RSocketRequestValues(
@@ -76,8 +72,7 @@ public final class RSocketRequestValues {
 	 * Return the route value for
 	 * {@link org.springframework.messaging.rsocket.RSocketRequester#route(String, Object...) route}.
 	 */
-	@Nullable
-	public String getRoute() {
+	public @Nullable String getRoute() {
 		return this.route;
 	}
 
@@ -102,8 +97,7 @@ public final class RSocketRequestValues {
 	 * <p>This is mutually exclusive with {@link #getPayload()}.
 	 * Only one of the two or neither is set.
 	 */
-	@Nullable
-	public Object getPayloadValue() {
+	public @Nullable Object getPayloadValue() {
 		return this.payloadValue;
 	}
 
@@ -112,16 +106,14 @@ public final class RSocketRequestValues {
 	 * <p>This is mutually exclusive with {@link #getPayloadValue()}.
 	 * Only one of the two or neither is set.
 	 */
-	@Nullable
-	public Publisher<?> getPayload() {
+	public @Nullable Publisher<?> getPayload() {
 		return this.payload;
 	}
 
 	/**
 	 * Return the element type for a {@linkplain #getPayload() Publisher payload}.
 	 */
-	@Nullable
-	public ParameterizedTypeReference<?> getPayloadElementType() {
+	public @Nullable ParameterizedTypeReference<?> getPayloadElementType() {
 		return this.payloadElementType;
 	}
 
@@ -136,23 +128,17 @@ public final class RSocketRequestValues {
 	 */
 	public static final class Builder {
 
-		@Nullable
-		private String route;
+		private @Nullable String route;
 
-		@Nullable
-		private List<Object> routeVariables;
+		private @Nullable List<Object> routeVariables;
 
-		@Nullable
-		private MetadataHelper metadataHelper;
+		private @Nullable MetadataHelper metadataHelper;
 
-		@Nullable
-		private Object payloadValue;
+		private @Nullable Object payloadValue;
 
-		@Nullable
-		private Publisher<?> payload;
+		private @Nullable Publisher<?> payload;
 
-		@Nullable
-		private ParameterizedTypeReference<?> payloadElementType;
+		private @Nullable ParameterizedTypeReference<?> payloadElementType;
 
 		Builder(@Nullable String route) {
 			this.route = (StringUtils.hasText(route) ? route : null);

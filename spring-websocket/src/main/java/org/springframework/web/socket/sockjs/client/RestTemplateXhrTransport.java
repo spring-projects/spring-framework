@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +34,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.HttpServerErrorException;
@@ -167,8 +168,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		private final HttpHeaders headers;
 
-		@Nullable
-		private final String body;
+		private final @Nullable String body;
 
 		public XhrRequestCallback(HttpHeaders headers) {
 			this(headers, null);
@@ -207,8 +207,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 		}
 
 		@Override
-		@Nullable
-		public Object extractData(ClientHttpResponse response) throws IOException {
+		public @Nullable Object extractData(ClientHttpResponse response) throws IOException {
 			HttpStatusCode httpStatus = response.getStatusCode();
 			if (httpStatus != HttpStatus.OK) {
 				throw new HttpServerErrorException(

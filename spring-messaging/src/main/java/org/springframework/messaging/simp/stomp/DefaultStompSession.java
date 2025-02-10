@@ -30,9 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -87,19 +87,16 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private MessageConverter converter = new SimpleMessageConverter();
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
 	private long receiptTimeLimit = TimeUnit.SECONDS.toMillis(15);
 
 	private volatile boolean autoReceiptEnabled;
 
 
-	@Nullable
-	private volatile TcpConnection<byte[]> connection;
+	private volatile @Nullable TcpConnection<byte[]> connection;
 
-	@Nullable
-	private volatile String version;
+	private volatile @Nullable String version;
 
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
 
@@ -179,8 +176,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	/**
 	 * Return the configured TaskScheduler to use for receipt tracking.
 	 */
-	@Nullable
-	public TaskScheduler getTaskScheduler() {
+	public @Nullable TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
 
@@ -240,8 +236,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		return receiptable;
 	}
 
-	@Nullable
-	private String checkOrAddReceipt(StompHeaders headers) {
+	private @Nullable String checkOrAddReceipt(StompHeaders headers) {
 		String receiptId = headers.getReceipt();
 		if (isAutoReceiptEnabled() && receiptId == null) {
 			receiptId = String.valueOf(DefaultStompSession.this.receiptIndex.getAndIncrement());
@@ -540,21 +535,17 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private class ReceiptHandler implements Receiptable {
 
-		@Nullable
-		private final String receiptId;
+		private final @Nullable String receiptId;
 
 		private final List<Consumer<StompHeaders>> receiptCallbacks = new ArrayList<>(2);
 
 		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
-		@Nullable
-		private ScheduledFuture<?> future;
+		private @Nullable ScheduledFuture<?> future;
 
-		@Nullable
-		private Boolean result;
+		private @Nullable Boolean result;
 
-		@Nullable
-		private StompHeaders receiptHeaders;
+		private @Nullable StompHeaders receiptHeaders;
 
 		public ReceiptHandler(@Nullable String receiptId) {
 			this.receiptId = receiptId;
@@ -571,8 +562,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		@Override
-		@Nullable
-		public String getReceiptId() {
+		public @Nullable String getReceiptId() {
 			return this.receiptId;
 		}
 
@@ -671,8 +661,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		@Override
-		@Nullable
-		public String getSubscriptionId() {
+		public @Nullable String getSubscriptionId() {
 			return this.headers.getId();
 		}
 

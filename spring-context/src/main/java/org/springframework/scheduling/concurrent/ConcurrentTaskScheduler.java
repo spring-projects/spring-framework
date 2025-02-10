@@ -31,9 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import jakarta.enterprise.concurrent.LastExecution;
 import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.task.TaskRejectedException;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
@@ -75,8 +75,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	private static final TimeUnit NANO = TimeUnit.NANOSECONDS;
 
 
-	@Nullable
-	private static Class<?> managedScheduledExecutorServiceClass;
+	private static @Nullable Class<?> managedScheduledExecutorServiceClass;
 
 	static {
 		try {
@@ -91,13 +90,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 
-	@Nullable
-	private ScheduledExecutorService scheduledExecutor;
+	private @Nullable ScheduledExecutorService scheduledExecutor;
 
 	private boolean enterpriseConcurrentScheduler = false;
 
-	@Nullable
-	private ErrorHandler errorHandler;
+	private @Nullable ErrorHandler errorHandler;
 
 	private Clock clock = Clock.systemDefaultZone();
 
@@ -218,21 +215,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		return super.submit(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
 	}
 
-	@SuppressWarnings({"deprecation", "removal"})
 	@Override
-	public org.springframework.util.concurrent.ListenableFuture<?> submitListenable(Runnable task) {
-		return super.submitListenable(TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, false));
-	}
-
-	@SuppressWarnings({"deprecation", "removal"})
-	@Override
-	public <T> org.springframework.util.concurrent.ListenableFuture<T> submitListenable(Callable<T> task) {
-		return super.submitListenable(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
-	}
-
-	@Override
-	@Nullable
-	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+	public @Nullable ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService scheduleExecutorToUse = getScheduledExecutor();
 		try {
 			if (this.enterpriseConcurrentScheduler) {
@@ -344,8 +328,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 			}
 
 			@Override
-			@Nullable
-			public Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {
+			public @Nullable Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {
 				Instant instant = this.adaptee.nextExecution(new LastExecutionAdapter(le));
 				return (instant != null ? Date.from(instant) : null);
 			}
@@ -358,33 +341,28 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 			private static class LastExecutionAdapter implements TriggerContext {
 
-				@Nullable
-				private final LastExecution le;
+				private final @Nullable LastExecution le;
 
 				public LastExecutionAdapter(@Nullable LastExecution le) {
 					this.le = le;
 				}
 
 				@Override
-				@Nullable
-				public Instant lastScheduledExecution() {
+				public @Nullable Instant lastScheduledExecution() {
 					return (this.le != null ? toInstant(this.le.getScheduledStart()) : null);
 				}
 
 				@Override
-				@Nullable
-				public Instant lastActualExecution() {
+				public @Nullable Instant lastActualExecution() {
 					return (this.le != null ? toInstant(this.le.getRunStart()) : null);
 				}
 
 				@Override
-				@Nullable
-				public Instant lastCompletion() {
+				public @Nullable Instant lastCompletion() {
 					return (this.le != null ? toInstant(this.le.getRunEnd()) : null);
 				}
 
-				@Nullable
-				private static Instant toInstant(@Nullable Date date) {
+				private static @Nullable Instant toInstant(@Nullable Date date) {
 					return (date != null ? date.toInstant() : null);
 				}
 			}

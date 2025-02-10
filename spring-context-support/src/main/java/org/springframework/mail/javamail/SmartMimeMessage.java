@@ -19,8 +19,7 @@ package org.springframework.mail.javamail;
 import jakarta.activation.FileTypeMap;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Special subclass of the standard JavaMail {@link MimeMessage}, carrying a
@@ -39,11 +38,9 @@ import org.springframework.lang.Nullable;
  */
 class SmartMimeMessage extends MimeMessage {
 
-	@Nullable
-	private final String defaultEncoding;
+	private final @Nullable String defaultEncoding;
 
-	@Nullable
-	private final FileTypeMap defaultFileTypeMap;
+	private final @Nullable FileTypeMap defaultFileTypeMap;
 
 
 	/**
@@ -64,16 +61,14 @@ class SmartMimeMessage extends MimeMessage {
 	/**
 	 * Return the default encoding of this message, or {@code null} if none.
 	 */
-	@Nullable
-	public final String getDefaultEncoding() {
+	public final @Nullable String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
 
 	/**
 	 * Return the default FileTypeMap of this message, or {@code null} if none.
 	 */
-	@Nullable
-	public final FileTypeMap getDefaultFileTypeMap() {
+	public final @Nullable FileTypeMap getDefaultFileTypeMap() {
 		return this.defaultFileTypeMap;
 	}
 

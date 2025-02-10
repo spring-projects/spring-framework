@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
@@ -39,7 +40,6 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
@@ -403,7 +403,7 @@ public interface WebTestClient {
 		 * Manipulate the default headers with the given consumer. The
 		 * headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
@@ -491,16 +491,6 @@ public interface WebTestClient {
 		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
-		 * Customize the strategies configured via
-		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
-		 * designed for use in scenarios where multiple parties wish to update
-		 * the {@code ExchangeStrategies}.
-		 * @deprecated as of 5.1.13 in favor of {@link #codecs(Consumer)}
-		 */
-		@Deprecated
-		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
-
-		/**
 		 * Max amount of time to wait for responses.
 		 * <p>By default 5 seconds.
 		 * @param timeout the response timeout value
@@ -557,7 +547,7 @@ public interface WebTestClient {
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
-		S uri(String uri, Object... uriVariables);
+		S uri(String uri, @Nullable Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
@@ -565,7 +555,7 @@ public interface WebTestClient {
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
-		S uri(String uri, Map<String, ?> uriVariables);
+		S uri(String uri, Map<String, ? extends @Nullable Object> uriVariables);
 
 		/**
 		 * Build the URI for the request with a {@link UriBuilder} obtained
@@ -646,7 +636,7 @@ public interface WebTestClient {
 		 * Manipulate the request's headers with the given consumer. The
 		 * headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
@@ -771,15 +761,6 @@ public interface WebTestClient {
 		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
 		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
-
-		/**
-		 * Shortcut for {@link #body(BodyInserter)} with a
-		 * {@linkplain BodyInserters#fromValue value inserter}.
-		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
-		 */
-		@Deprecated
-		RequestHeadersSpec<?> syncBody(Object body);
 	}
 
 
@@ -918,26 +899,26 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body is equal to the given value.
 		 */
-		<T extends S> T isEqualTo(B expected);
+		<T extends S> T isEqualTo(@Nullable B expected);
 
 		/**
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Matcher<? super B> matcher);
+		<T extends S> T value(Matcher<? super @Nullable B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher);
+		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Consumer<B> consumer);
+		<T extends S> T value(Consumer<@Nullable B> consumer);
 
 		/**
 		 * Assert the exchange result with the given {@link Consumer}.
@@ -957,7 +938,7 @@ public interface WebTestClient {
 	 *
 	 * @param <E> the body list element type
 	 */
-	interface ListBodySpec<E> extends BodySpec<List<E>, ListBodySpec<E>> {
+	interface ListBodySpec<E> extends BodySpec<List<@Nullable E>, ListBodySpec<E>> {
 
 		/**
 		 * Assert the extracted list of values is of the given size.
@@ -970,14 +951,14 @@ public interface WebTestClient {
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> contains(E... elements);
+		ListBodySpec<E> contains(@Nullable E... elements);
 
 		/**
 		 * Assert the extracted list of values doesn't contain the given elements.
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> doesNotContain(E... elements);
+		ListBodySpec<E> doesNotContain(@Nullable E... elements);
 	}
 
 
@@ -1074,19 +1055,6 @@ public interface WebTestClient {
 		 * @since 6.2
 		 */
 		JsonPathAssertions jsonPath(String expression);
-
-		/**
-		 * Access to response body assertions using a
-		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
-		 * to inspect a specific subset of the body.
-		 * <p>The JSON path expression can be a parameterized string using
-		 * formatting specifiers as defined in {@link String#format}.
-		 * @param expression the JsonPath expression
-		 * @param args arguments to parameterize the expression
-		 * @deprecated in favor of calling {@link String#formatted(Object...)} upfront
-		 */
-		@Deprecated(since = "6.2", forRemoval = true)
-		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**
 		 * Access to response body assertions using an XPath expression to

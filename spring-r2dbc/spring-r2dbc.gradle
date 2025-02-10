@@ -8,6 +8,7 @@ dependencies {
 	api(project(":spring-tx"))
 	api("io.projectreactor:reactor-core")
 	api("io.r2dbc:r2dbc-spi")
+	compileOnly("com.google.code.findbugs:jsr305") // for r2dbc-spi
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")

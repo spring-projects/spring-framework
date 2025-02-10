@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -25,7 +26,6 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,8 +58,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 
 
 	@Override
-	@Nullable
-	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
+	public final @Nullable BeanDefinition parse(Element element, ParserContext parserContext) {
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {
 			try {
@@ -150,8 +150,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * @see #parse(org.w3c.dom.Element, ParserContext)
 	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.parsing.BeanComponentDefinition)
 	 */
-	@Nullable
-	protected abstract AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
+	protected abstract @Nullable AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
 
 	/**
 	 * Should an ID be generated instead of read from the passed in {@link Element}?

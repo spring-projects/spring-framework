@@ -20,15 +20,14 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Container for a model and a view for use with {@link FragmentsRendering} and
- * multi-view rendering. For full page rendering with a single model and view,
- * use {@link Rendering}.
+ * Container for a model and a view pair. For use with {@link FragmentsRendering}.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -36,14 +35,11 @@ import org.springframework.util.CollectionUtils;
  */
 public final class Fragment {
 
-	@Nullable
-	private final String viewName;
+	private final @Nullable String viewName;
 
-	@Nullable
-	private final View view;
+	private final @Nullable View view;
 
-	@Nullable
-	private Map<String, Object> model;
+	private @Nullable Map<String, Object> model;
 
 
 	private Fragment(@Nullable String viewName, @Nullable View view, @Nullable Map<String, Object> model) {
@@ -63,8 +59,7 @@ public final class Fragment {
 	/**
 	 * Return the view name of the Fragment, or {@code null} if not set.
 	 */
-	@Nullable
-	public String viewName() {
+	public @Nullable String viewName() {
 		return this.viewName;
 	}
 

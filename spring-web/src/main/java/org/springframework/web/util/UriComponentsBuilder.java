@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.HttpRequest;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -77,27 +77,21 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Object[] EMPTY_VALUES = new Object[0];
 
-	@Nullable
-	private String scheme;
+	private @Nullable String scheme;
 
-	@Nullable
-	private String ssp;
+	private @Nullable String ssp;
 
-	@Nullable
-	private String userInfo;
+	private @Nullable String userInfo;
 
-	@Nullable
-	private String host;
+	private @Nullable String host;
 
-	@Nullable
-	private String port;
+	private @Nullable String port;
 
 	private CompositePathComponentBuilder pathBuilder;
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
-	@Nullable
-	private String fragment;
+	private @Nullable String fragment;
 
 	private final Map<String, Object> uriVariables = new HashMap<>(4);
 
@@ -222,55 +216,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		};
 	}
 
-	/**
-	 * Create a URI components builder from the given HTTP URL String.
-	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
-	 * correct parsing of the URI string. For example if a query parameter
-	 * contains {@code '='} or {@code '&'} characters, the query string cannot
-	 * be parsed unambiguously. Such values should be substituted for URI
-	 * variables to enable correct parsing:
-	 * <pre class="code">
-	 * String urlString = &quot;https://example.com/hotels/42?filter={value}&quot;;
-	 * UriComponentsBuilder.fromHttpUrl(urlString).buildAndExpand(&quot;hot&amp;cold&quot;);
-	 * </pre>
-	 * @param httpUrl the source URI
-	 * @return the URI components of the URI
-	 * @deprecated as of 6.2, in favor of {@link #fromUriString(String)};
-	 * scheduled for removal in 7.0.
-	 */
-	@Deprecated(since = "6.2")
-	public static UriComponentsBuilder fromHttpUrl(String httpUrl) throws InvalidUrlException {
-		return fromUriString(httpUrl);
-	}
-
-	/**
-	 * Create a new {@code UriComponents} object from the URI associated with
-	 * the given HttpRequest while also overlaying with values from the headers
-	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
-	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
-	 * "Forwarded" is not found.
-	 * @param request the source request
-	 * @return the URI components of the URI
-	 * @since 4.1.5
-	 * @deprecated in favor of {@link ForwardedHeaderUtils#adaptFromForwardedHeaders};
-	 * to be removed in 7.0
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
-		return ForwardedHeaderUtils.adaptFromForwardedHeaders(request.getURI(), request.getHeaders());
-	}
-
-	/**
-	 * Create an instance by parsing the "Origin" header of an HTTP request.
-	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454</a>
-	 * @deprecated in favor of {@link UriComponentsBuilder#fromUriString(String)};
-	 * to be removed in 7.0
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		return fromUriString(origin);
-	}
-
 
 	// Encode methods
 
@@ -371,17 +316,17 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param uriVariableValues the URI variable values
 	 * @return the URI components with expanded values
 	 */
-	public UriComponents buildAndExpand(Object... uriVariableValues) {
+	public UriComponents buildAndExpand(@Nullable Object... uriVariableValues) {
 		return build().expand(uriVariableValues);
 	}
 
 	@Override
-	public URI build(Object... uriVariables) {
+	public URI build(@Nullable Object... uriVariables) {
 		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
 	@Override
-	public URI build(Map<String, ?> uriVariables) {
+	public URI build(Map<String, ? extends @Nullable Object> uriVariables) {
 		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
@@ -639,8 +584,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	@Nullable
-	private String getQueryParamValue(@Nullable Object value) {
+	private @Nullable String getQueryParamValue(@Nullable Object value) {
 		if (value != null) {
 			return (value instanceof Optional<?> optional ?
 					optional.map(Object::toString).orElse(null) :
@@ -806,8 +750,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private interface PathComponentBuilder {
 
-		@Nullable
-		PathComponent build();
+		@Nullable PathComponent build();
 
 		PathComponentBuilder cloneBuilder();
 	}
@@ -848,8 +791,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@SuppressWarnings("unchecked")
-		@Nullable
-		private <T> T getLastBuilder(Class<T> builderClass) {
+		private <T> @Nullable T getLastBuilder(Class<T> builderClass) {
 			if (!this.builders.isEmpty()) {
 				PathComponentBuilder last = this.builders.getLast();
 				if (builderClass.isInstance(last)) {
@@ -898,8 +840,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		@Nullable
-		public PathComponent build() {
+		public @Nullable PathComponent build() {
 			if (this.path.isEmpty()) {
 				return null;
 			}
@@ -949,8 +890,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
-		@Nullable
-		public PathComponent build() {
+		public @Nullable PathComponent build() {
 			return (this.pathSegments.isEmpty() ? null :
 					new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments));
 		}

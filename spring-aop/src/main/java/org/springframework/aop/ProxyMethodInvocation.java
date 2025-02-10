@@ -17,8 +17,7 @@
 package org.springframework.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Extension of the AOP Alliance {@link org.aopalliance.intercept.MethodInvocation}
@@ -59,14 +58,14 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	 * @return an invocable clone of this invocation.
 	 * {@code proceed()} can be called once per clone.
 	 */
-	MethodInvocation invocableClone(Object... arguments);
+	MethodInvocation invocableClone(@Nullable Object... arguments);
 
 	/**
 	 * Set the arguments to be used on subsequent invocations in the any advice
 	 * in this chain.
 	 * @param arguments the argument array
 	 */
-	void setArguments(Object... arguments);
+	void setArguments(@Nullable Object... arguments);
 
 	/**
 	 * Add the specified user attribute with the given value to this invocation.
@@ -83,7 +82,6 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	 * @return the value of the attribute, or {@code null} if not set
 	 * @see #setUserAttribute
 	 */
-	@Nullable
-	Object getUserAttribute(String key);
+	@Nullable Object getUserAttribute(String key);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.http;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Enumeration of HTTP status codes.
@@ -56,14 +56,6 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @since 6.0.5
 	 */
 	EARLY_HINTS(103, Series.INFORMATIONAL, "Early Hints"),
-	/**
-	 * {@code 103 Checkpoint}.
-	 * @see <a href="https://code.google.com/p/gears/wiki/ResumableHttpRequestsProposal">A proposal for supporting
-	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
-	 * @deprecated in favor of {@link #EARLY_HINTS} which will be returned from {@code HttpStatus.valueOf(103)}
-	 */
-	@Deprecated(since = "6.0.5")
-	CHECKPOINT(103, Series.INFORMATIONAL, "Checkpoint"),
 
 	// 2xx Success
 
@@ -136,13 +128,6 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	FOUND(302, Series.REDIRECTION, "Found"),
 	/**
-	 * {@code 302 Moved Temporarily}.
-	 * @see <a href="https://tools.ietf.org/html/rfc1945#section-9.3">HTTP/1.0, section 9.3</a>
-	 * @deprecated in favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
-	 */
-	@Deprecated
-	MOVED_TEMPORARILY(302, Series.REDIRECTION, "Moved Temporarily"),
-	/**
 	 * {@code 303 See Other}.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.4.4">HTTP/1.1: Semantics and Content, section 6.4.4</a>
 	 */
@@ -152,13 +137,6 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-4.1">HTTP/1.1: Conditional Requests, section 4.1</a>
 	 */
 	NOT_MODIFIED(304, Series.REDIRECTION, "Not Modified"),
-	/**
-	 * {@code 305 Use Proxy}.
-	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.4.5">HTTP/1.1: Semantics and Content, section 6.4.5</a>
-	 * @deprecated due to security concerns regarding in-band configuration of a proxy
-	 */
-	@Deprecated
-	USE_PROXY(305, Series.REDIRECTION, "Use Proxy"),
 	/**
 	 * {@code 307 Temporary Redirect}.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.4.7">HTTP/1.1: Semantics and Content, section 6.4.7</a>
@@ -248,27 +226,12 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	PAYLOAD_TOO_LARGE(413, Series.CLIENT_ERROR, "Payload Too Large"),
 	/**
-	 * {@code 413 Request Entity Too Large}.
-	 * @see <a href="https://tools.ietf.org/html/rfc2616#section-10.4.14">HTTP/1.1, section 10.4.14</a>
-	 * @deprecated in favor of {@link #PAYLOAD_TOO_LARGE} which will be
-	 * returned from {@code HttpStatus.valueOf(413)}
-	 */
-	@Deprecated
-	REQUEST_ENTITY_TOO_LARGE(413, Series.CLIENT_ERROR, "Request Entity Too Large"),
-	/**
 	 * {@code 414 URI Too Long}.
 	 * @since 4.1
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.5.12">
 	 *     HTTP/1.1: Semantics and Content, section 6.5.12</a>
 	 */
 	URI_TOO_LONG(414, Series.CLIENT_ERROR, "URI Too Long"),
-	/**
-	 * {@code 414 Request-URI Too Long}.
-	 * @see <a href="https://tools.ietf.org/html/rfc2616#section-10.4.15">HTTP/1.1, section 10.4.15</a>
-	 * @deprecated in favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
-	 */
-	@Deprecated
-	REQUEST_URI_TOO_LONG(414, Series.CLIENT_ERROR, "Request-URI Too Long"),
 	/**
 	 * {@code 415 Unsupported Media Type}.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.5.13">
@@ -291,27 +254,6 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @see <a href="https://tools.ietf.org/html/rfc2324#section-2.3.2">HTCPCP/1.0</a>
 	 */
 	I_AM_A_TEAPOT(418, Series.CLIENT_ERROR, "I'm a teapot"),
-	/**
-	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
-	 *     WebDAV Draft Changes</a>
-	 */
-	@Deprecated
-	INSUFFICIENT_SPACE_ON_RESOURCE(419, Series.CLIENT_ERROR, "Insufficient Space On Resource"),
-	/**
-	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
-	 *     WebDAV Draft Changes</a>
-	 */
-	@Deprecated
-	METHOD_FAILURE(420, Series.CLIENT_ERROR, "Method Failure"),
-	/**
-	 * @deprecated
-	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
-	 *     WebDAV Draft Changes</a>
-	 */
-	@Deprecated
-	DESTINATION_LOCKED(421, Series.CLIENT_ERROR, "Destination Locked"),
 	/**
 	 * {@code 422 Unprocessable Entity}.
 	 * @see <a href="https://tools.ietf.org/html/rfc4918#section-11.2">WebDAV</a>
@@ -523,8 +465,7 @@ public enum HttpStatus implements HttpStatusCode {
 	 * @return the corresponding {@code HttpStatus}, or {@code null} if not found
 	 * @since 5.0
 	 */
-	@Nullable
-	public static HttpStatus resolve(int statusCode) {
+	public static @Nullable HttpStatus resolve(int statusCode) {
 		// Use cached VALUES instead of values() to prevent array allocation.
 		for (HttpStatus status : VALUES) {
 			if (status.value == statusCode) {
@@ -561,17 +502,6 @@ public enum HttpStatus implements HttpStatusCode {
 		}
 
 		/**
-		 * Return the {@code Series} enum constant for the supplied {@code HttpStatus}.
-		 * @param status a standard HTTP status enum constant
-		 * @return the {@code Series} enum constant for the supplied {@code HttpStatus}
-		 * @deprecated as of 5.3, in favor of invoking {@link HttpStatus#series()} directly
-		 */
-		@Deprecated
-		public static Series valueOf(HttpStatus status) {
-			return status.series;
-		}
-
-		/**
 		 * Return the {@code Series} enum constant for the supplied status code.
 		 * @param statusCode the HTTP status code (potentially non-standard)
 		 * @return the {@code Series} enum constant for the supplied status code
@@ -591,8 +521,7 @@ public enum HttpStatus implements HttpStatusCode {
 		 * @return the corresponding {@code Series}, or {@code null} if not found
 		 * @since 5.1.3
 		 */
-		@Nullable
-		public static Series resolve(int statusCode) {
+		public static @Nullable Series resolve(int statusCode) {
 			int seriesCode = statusCode / 100;
 			for (Series series : values()) {
 				if (series.value == seriesCode) {

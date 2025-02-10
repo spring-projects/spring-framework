@@ -18,7 +18,7 @@ package org.springframework.http.server;
 
 import java.net.URI;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Specialization of {@link PathContainer} that subdivides the path into a

@@ -16,9 +16,10 @@
 
 package org.springframework.web.service.invoker;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
@@ -49,8 +50,7 @@ public class PathVariableArgumentResolver extends AbstractNamedValueArgumentReso
 
 
 	@Override
-	@Nullable
-	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+	protected @Nullable NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		PathVariable annot = parameter.getParameterAnnotation(PathVariable.class);
 		return (annot == null ? null :
 				new NamedValueInfo(annot.name(), annot.required(), null, "path variable", false));

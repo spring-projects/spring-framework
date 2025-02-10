@@ -33,6 +33,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -47,7 +48,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -131,8 +131,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the name of the table for this insert.
 	 */
-	@Nullable
-	public String getTableName() {
+	public @Nullable String getTableName() {
 		return this.tableMetaDataContext.getTableName();
 	}
 
@@ -147,8 +146,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the name of the schema for this insert.
 	 */
-	@Nullable
-	public String getSchemaName() {
+	public @Nullable String getSchemaName() {
 		return this.tableMetaDataContext.getSchemaName();
 	}
 
@@ -163,8 +161,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Get the name of the catalog for this insert.
 	 */
-	@Nullable
-	public String getCatalogName() {
+	public @Nullable String getCatalogName() {
 		return this.tableMetaDataContext.getCatalogName();
 	}
 
@@ -616,7 +613,7 @@ public abstract class AbstractJdbcInsert {
 	 * @param preparedStatement the PreparedStatement
 	 * @param values the values to be set
 	 */
-	private void setParameterValues(PreparedStatement preparedStatement, List<?> values, @Nullable int... columnTypes)
+	private void setParameterValues(PreparedStatement preparedStatement, List<?> values, int @Nullable ... columnTypes)
 			throws SQLException {
 
 		int colIndex = 0;

@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import reactor.netty.http.HttpResources;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -55,18 +55,15 @@ public class ReactorResourceFactory
 
 	private boolean useGlobalResources = true;
 
-	@Nullable
-	private Consumer<HttpResources> globalResourcesConsumer;
+	private @Nullable Consumer<HttpResources> globalResourcesConsumer;
 
 	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.create("webflux", 500);
 
-	@Nullable
-	private volatile ConnectionProvider connectionProvider;
+	private volatile @Nullable ConnectionProvider connectionProvider;
 
 	private Supplier<LoopResources> loopResourcesSupplier = () -> LoopResources.create("webflux-http");
 
-	@Nullable
-	private volatile LoopResources loopResources;
+	private volatile @Nullable LoopResources loopResources;
 
 	private boolean manageConnectionProvider = false;
 
@@ -76,8 +73,7 @@ public class ReactorResourceFactory
 
 	private Duration shutdownTimeout = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_TIMEOUT);
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 	private volatile boolean running;
 

@@ -50,6 +50,7 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  */
+@SuppressWarnings("removal")
 class PathResourceTests {
 
 	private static final String TEST_DIR =

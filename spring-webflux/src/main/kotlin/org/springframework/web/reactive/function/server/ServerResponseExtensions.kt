@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,18 +84,6 @@ suspend inline fun <reified T: Any> ServerResponse.BodyBuilder.bodyValueWithType
  */
 suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyAndAwait(flow: Flow<T>): ServerResponse =
 		body(flow, object : ParameterizedTypeReference<T>() {}).awaitSingle()
-
-/**
- * Extension for [ServerResponse.BodyBuilder.body] providing a
- * `bodyToServerSentEvents(Publisher<T>)` variant. This extension is not subject to type
- * erasure and retains actual generic type arguments.
- *
- * @author Sebastien Deleuze
- * @since 5.0
- */
-@Deprecated("Use 'sse().body(publisher)' instead.", replaceWith = ReplaceWith("sse().body(publisher)"))
-inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyToServerSentEvents(publisher: Publisher<T>): Mono<ServerResponse> =
-		contentType(MediaType.TEXT_EVENT_STREAM).body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Shortcut for setting [MediaType.APPLICATION_JSON] `Content-Type` header.

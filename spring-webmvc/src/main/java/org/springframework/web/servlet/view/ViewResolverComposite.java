@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Locale;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.View;
@@ -103,8 +103,7 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 	}
 
 	@Override
-	@Nullable
-	public View resolveViewName(String viewName, Locale locale) throws Exception {
+	public @Nullable View resolveViewName(String viewName, Locale locale) throws Exception {
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
 			if (view != null) {

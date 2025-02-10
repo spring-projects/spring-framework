@@ -19,7 +19,8 @@ package org.springframework.web.bind;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -95,7 +96,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	public void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+	public void reject(String errorCode, Object @Nullable [] errorArgs, @Nullable String defaultMessage) {
 		this.source.reject(errorCode, errorArgs, defaultMessage);
 	}
 
@@ -111,7 +112,7 @@ public class EscapedErrors implements Errors {
 
 	@Override
 	public void rejectValue(@Nullable String field, String errorCode,
-			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
+			Object @Nullable [] errorArgs, @Nullable String defaultMessage) {
 
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
@@ -153,8 +154,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	@Nullable
-	public ObjectError getGlobalError() {
+	public @Nullable ObjectError getGlobalError() {
 		return escapeObjectError(this.source.getGlobalError());
 	}
 
@@ -174,8 +174,7 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	@Nullable
-	public FieldError getFieldError() {
+	public @Nullable FieldError getFieldError() {
 		return this.source.getFieldError();
 	}
 
@@ -195,27 +194,23 @@ public class EscapedErrors implements Errors {
 	}
 
 	@Override
-	@Nullable
-	public FieldError getFieldError(String field) {
+	public @Nullable FieldError getFieldError(String field) {
 		return escapeObjectError(this.source.getFieldError(field));
 	}
 
 	@Override
-	@Nullable
-	public Object getFieldValue(String field) {
+	public @Nullable Object getFieldValue(String field) {
 		Object value = this.source.getFieldValue(field);
 		return (value instanceof String text ? HtmlUtils.htmlEscape(text) : value);
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getFieldType(String field) {
+	public @Nullable Class<?> getFieldType(String field) {
 		return this.source.getFieldType(field);
 	}
 
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private <T extends ObjectError> T escapeObjectError(@Nullable T source) {
+	private <T extends ObjectError> @Nullable T escapeObjectError(@Nullable T source) {
 		if (source == null) {
 			return null;
 		}

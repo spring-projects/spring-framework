@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,32 +32,65 @@ import java.lang.reflect.Method;
 public enum MemberCategory {
 
 	/**
-	 * A category that represents public {@linkplain Field fields}.
-	 * @see Class#getFields()
+	 * A category that represents reflective field access on public {@linkplain Field fields}.
+	 * @deprecated in favor of {@link #ACCESS_PUBLIC_FIELDS} with similar semantics.
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	PUBLIC_FIELDS,
 
 	/**
-	 * A category that represents {@linkplain Class#getDeclaredFields() declared
-	 * fields}: all fields defined by the class but not inherited fields.
+	 * A category that represents reflective field access on
+	 * {@linkplain Class#getDeclaredFields() declared fields}: all fields defined by the
+	 * class but not inherited fields.
+	 * @deprecated in favor of {@link #ACCESS_DECLARED_FIELDS} with similar semantics.
 	 * @see Class#getDeclaredFields()
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	DECLARED_FIELDS,
+
+	/**
+	 * A category that represents reflective field access on public {@linkplain Field fields}..
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
+	 * @since 7.0
+	 */
+	ACCESS_PUBLIC_FIELDS,
+
+	/**
+	 * A category that represents reflective field access on
+	 * {@linkplain Class#getDeclaredFields() declared fields}: all fields defined by the
+	 * class but not inherited fields.
+	 * @see Class#getDeclaredFields()
+	 * @see Field#get(Object)
+	 * @see Field#set(Object, Object)
+	 * @since 7.0
+	 */
+	ACCESS_DECLARED_FIELDS,
 
 	/**
 	 * A category that defines public {@linkplain Constructor constructors} can
 	 * be introspected but not invoked.
+	 * @deprecated with no replacement since introspection is included
+	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 * @see Class#getConstructors()
 	 * @see ExecutableMode#INTROSPECT
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	INTROSPECT_PUBLIC_CONSTRUCTORS,
 
 	/**
 	 * A category that defines {@linkplain Class#getDeclaredConstructors() all
 	 * constructors} can be introspected but not invoked.
+	 * @deprecated with no replacement since introspection is included
+	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 * @see Class#getDeclaredConstructors()
 	 * @see ExecutableMode#INTROSPECT
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	INTROSPECT_DECLARED_CONSTRUCTORS,
 
 	/**
@@ -79,17 +112,23 @@ public enum MemberCategory {
 	/**
 	 * A category that defines public {@linkplain Method methods}, including
 	 * inherited ones, can be introspected but not invoked.
+	 * @deprecated with no replacement since introspection is added by default
+	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 * @see Class#getMethods()
 	 * @see ExecutableMode#INTROSPECT
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	INTROSPECT_PUBLIC_METHODS,
 
 	/**
 	 * A category that defines {@linkplain Class#getDeclaredMethods() all
 	 * methods}, excluding inherited ones, can be introspected but not invoked.
+	 * @deprecated with no replacement since introspection is added by default
+	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 * @see Class#getDeclaredMethods()
 	 * @see ExecutableMode#INTROSPECT
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	INTROSPECT_DECLARED_METHODS,
 
 	/**
@@ -114,7 +153,10 @@ public enum MemberCategory {
 	 * <p>Contrary to other categories, this does not register any particular
 	 * reflection for inner classes but rather makes sure they are available
 	 * via a call to {@link Class#getClasses}.
+	 * @deprecated with no replacement since introspection is included
+	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	PUBLIC_CLASSES,
 
 	/**
@@ -123,7 +165,10 @@ public enum MemberCategory {
 	 * <p>Contrary to other categories, this does not register any particular
 	 * reflection for inner classes but rather makes sure they are available
 	 * via a call to {@link Class#getDeclaredClasses}.
+	 * @deprecated with no replacement since introspection is included
+	 * when {@link ReflectionHints#registerType(Class, MemberCategory...) adding a reflection hint for a type}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	DECLARED_CLASSES,
 
 	/**

@@ -16,8 +16,6 @@
 
 package org.aopalliance.intercept;
 
-import javax.annotation.Nonnull;
-
 /**
  * Intercepts the construction of a new object.
  *
@@ -56,7 +54,6 @@ public interface ConstructorInterceptor extends Interceptor {
 	 * @throws Throwable if the interceptors or the target object
 	 * throws an exception
 	 */
-	@Nonnull
 	Object construct(ConstructorInvocation invocation) throws Throwable;
 
 }

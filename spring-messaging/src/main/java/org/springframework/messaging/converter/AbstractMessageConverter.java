@@ -25,10 +25,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -53,8 +53,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 	private final List<MimeType> supportedMimeTypes = new ArrayList<>(4);
 
-	@Nullable
-	private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
+	private @Nullable ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
 
 	private boolean strictContentTypeMatch = false;
 
@@ -116,8 +115,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * Return the {@link #setContentTypeResolver(ContentTypeResolver) configured}
 	 * {@code ContentTypeResolver}.
 	 */
-	@Nullable
-	public ContentTypeResolver getContentTypeResolver() {
+	public @Nullable ContentTypeResolver getContentTypeResolver() {
 		return this.contentTypeResolver;
 	}
 
@@ -169,14 +167,12 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 
 	@Override
-	@Nullable
-	public final Object fromMessage(Message<?> message, Class<?> targetClass) {
+	public final @Nullable Object fromMessage(Message<?> message, Class<?> targetClass) {
 		return fromMessage(message, targetClass, null);
 	}
 
 	@Override
-	@Nullable
-	public final Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	public final @Nullable Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		if (!canConvertFrom(message, targetClass)) {
 			return null;
 		}
@@ -184,14 +180,12 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	}
 
 	@Override
-	@Nullable
-	public final Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
+	public final @Nullable Message<?> toMessage(Object payload, @Nullable MessageHeaders headers) {
 		return toMessage(payload, headers, null);
 	}
 
 	@Override
-	@Nullable
-	public final Message<?> toMessage(
+	public final @Nullable Message<?> toMessage(
 			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
 		if (!canConvertTo(payload, headers)) {
@@ -249,8 +243,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 		return false;
 	}
 
-	@Nullable
-	protected MimeType getMimeType(@Nullable MessageHeaders headers) {
+	protected @Nullable MimeType getMimeType(@Nullable MessageHeaders headers) {
 		return (this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
 	}
 
@@ -264,8 +257,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * @param payload the payload being converted to a message
 	 * @return the content type, or {@code null} if not known
 	 */
-	@Nullable
-	protected MimeType getDefaultContentType(Object payload) {
+	protected @Nullable MimeType getDefaultContentType(Object payload) {
 		List<MimeType> mimeTypes = getSupportedMimeTypes();
 		return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
 	}
@@ -288,8 +280,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * perform the conversion
 	 * @since 4.2
 	 */
-	@Nullable
-	protected Object convertFromInternal(
+	protected @Nullable Object convertFromInternal(
 			Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 
 		return null;
@@ -305,8 +296,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * cannot perform the conversion
 	 * @since 4.2
 	 */
-	@Nullable
-	protected Object convertToInternal(
+	protected @Nullable Object convertToInternal(
 			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
 		return null;

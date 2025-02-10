@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -30,8 +31,7 @@ import org.springframework.util.Assert;
 public class ManagedArray extends ManagedList<Object> {
 
 	/** Resolved element type for runtime creation of the target array. */
-	@Nullable
-	volatile Class<?> resolvedElementType;
+	volatile @Nullable Class<?> resolvedElementType;
 
 
 	/**

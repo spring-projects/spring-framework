@@ -33,7 +33,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -55,7 +56,9 @@ import org.springframework.util.Assert;
  * @see java.nio.file.Path
  * @see java.nio.file.Files
  * @see FileSystemResource
+ * @deprecated since 7.0 in favor of {@link FileSystemResource}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class PathResource extends AbstractResource implements WritableResource {
 
 	private final Path path;

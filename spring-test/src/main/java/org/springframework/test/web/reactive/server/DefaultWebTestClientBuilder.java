@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
@@ -31,7 +33,6 @@ import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -76,37 +77,27 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 
-	@Nullable
-	private final WebHttpHandlerBuilder httpHandlerBuilder;
+	private final @Nullable WebHttpHandlerBuilder httpHandlerBuilder;
 
-	@Nullable
-	private ClientHttpConnector connector;
+	private @Nullable ClientHttpConnector connector;
 
-	@Nullable
-	private String baseUrl;
+	private @Nullable String baseUrl;
 
-	@Nullable
-	private UriBuilderFactory uriBuilderFactory;
+	private @Nullable UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private HttpHeaders defaultHeaders;
+	private @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private MultiValueMap<String, String> defaultCookies;
+	private @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private List<ExchangeFilterFunction> filters;
+	private @Nullable List<ExchangeFilterFunction> filters;
 
 	private Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
 
-	@Nullable
-	private ExchangeStrategies strategies;
+	private @Nullable ExchangeStrategies strategies;
 
-	@Nullable
-	private List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
+	private @Nullable List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
 
-	@Nullable
-	private Duration responseTimeout;
+	private @Nullable Duration responseTimeout;
 
 
 	/** Determine connector via classpath detection. */
@@ -252,16 +243,6 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	@Override
 	public WebTestClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
 		this.strategies = strategies;
-		return this;
-	}
-
-	@Override
-	@Deprecated
-	public WebTestClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
-		if (this.strategiesConfigurers == null) {
-			this.strategiesConfigurers = new ArrayList<>(4);
-		}
-		this.strategiesConfigurers.add(configurer);
 		return this;
 	}
 

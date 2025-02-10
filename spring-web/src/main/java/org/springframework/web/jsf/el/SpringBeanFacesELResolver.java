@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 package org.springframework.web.jsf.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
-
 import jakarta.el.ELContext;
 import jakarta.el.ELException;
 import jakarta.el.ELResolver;
 import jakarta.el.PropertyNotWritableException;
 import jakarta.faces.context.FacesContext;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -72,8 +69,7 @@ import org.springframework.web.jsf.FacesContextUtils;
 public class SpringBeanFacesELResolver extends ELResolver {
 
 	@Override
-	@Nullable
-	public Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Object getValue(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
 			WebApplicationContext wac = getWebApplicationContext(elContext);
@@ -86,8 +82,7 @@ public class SpringBeanFacesELResolver extends ELResolver {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
+	public @Nullable Class<?> getType(ELContext elContext, @Nullable Object base, Object property) throws ELException {
 		if (base == null) {
 			String beanName = property.toString();
 			WebApplicationContext wac = getWebApplicationContext(elContext);
@@ -127,12 +122,6 @@ public class SpringBeanFacesELResolver extends ELResolver {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	@Nullable
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, @Nullable Object base) {
-		return null;
 	}
 
 	@Override

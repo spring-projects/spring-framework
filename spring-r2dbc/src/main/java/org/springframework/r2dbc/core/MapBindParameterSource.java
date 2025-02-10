@@ -75,7 +75,7 @@ class MapBindParameterSource implements BindParameterSource {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public Parameter getValue(String paramName) throws IllegalArgumentException {
 		if (!hasValue(paramName)) {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.web;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -34,9 +31,11 @@ class ErrorResponseTests {
 
 	@Test
 	void createWithHttpHeader() {
-		ErrorResponse response = ErrorResponse.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
-				.header("header", "value").build();
-		assertThat(response.getHeaders()).containsOnly(entry("header", List.of("value")));
+		ErrorResponse response = ErrorResponse
+				.builder(new IllegalStateException(), HttpStatus.BAD_REQUEST, "test")
+				.header("header", "value")
+				.build();
+		assertThat(response.getHeaders().containsHeaderValue("header", "value")).isTrue();
 	}
 
 	@Test
@@ -47,8 +46,8 @@ class ErrorResponseTests {
 					headers.add("header", "value2");
 					headers.add("another", "value3");
 				}).build();
-		assertThat(response.getHeaders()).containsOnly(entry("header", List.of("value", "value2")),
-				entry("another", List.of("value3")));
+		assertThat(response.getHeaders().get("header")).containsExactly("value", "value2");
+		assertThat(response.getHeaders().get("another")).containsExactly("value3");
 	}
 
 }

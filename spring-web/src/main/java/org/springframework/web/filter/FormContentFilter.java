@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -94,8 +94,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 		}
 	}
 
-	@Nullable
-	private MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
+	private @Nullable MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
 		if (!shouldParse(request)) {
 			return null;
 		}
@@ -134,8 +133,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		@Nullable
-		public String getParameter(String name) {
+		public @Nullable String getParameter(String name) {
 			String queryStringValue = super.getParameter(name);
 			String formValue = this.formParams.getFirst(name);
 			return (queryStringValue != null ? queryStringValue : formValue);
@@ -161,7 +159,6 @@ public class FormContentFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		@Nullable
 		public String[] getParameterValues(String name) {
 			String[] parameterValues = super.getParameterValues(name);
 			List<String> formParam = this.formParams.get(name);

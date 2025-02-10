@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import java.math.BigDecimal;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationException;
@@ -27,7 +28,6 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeComparator;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

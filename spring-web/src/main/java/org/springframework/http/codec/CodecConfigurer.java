@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.http.codec;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.lang.Nullable;
 
 /**
  * Defines a common interface for configuring either client or server HTTP
@@ -325,60 +326,6 @@ public interface CodecConfigurer {
 		 * @since 5.1.13
 		 */
 		void registerWithDefaultConfig(Object codec, Consumer<DefaultCodecConfig> configConsumer);
-
-		/**
-		 * Add a custom {@code Decoder} internally wrapped with
-		 * {@link DecoderHttpMessageReader}).
-		 * @param decoder the decoder to add
-		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
-		 * {@link #registerWithDefaultConfig(Object)} instead.
-		 */
-		@Deprecated
-		void decoder(Decoder<?> decoder);
-
-		/**
-		 * Add a custom {@code Encoder}, internally wrapped with
-		 * {@link EncoderHttpMessageWriter}.
-		 * @param encoder the encoder to add
-		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
-		 * {@link #registerWithDefaultConfig(Object)} instead.
-		 */
-		@Deprecated
-		void encoder(Encoder<?> encoder);
-
-		/**
-		 * Add a custom {@link HttpMessageReader}. For readers of type
-		 * {@link DecoderHttpMessageReader} consider using the shortcut
-		 * {@link #decoder(Decoder)} instead.
-		 * @param reader the reader to add
-		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
-		 * {@link #registerWithDefaultConfig(Object)} instead.
-		 */
-		@Deprecated
-		void reader(HttpMessageReader<?> reader);
-
-		/**
-		 * Add a custom {@link HttpMessageWriter}. For writers of type
-		 * {@link EncoderHttpMessageWriter} consider using the shortcut
-		 * {@link #encoder(Encoder)} instead.
-		 * @param writer the writer to add
-		 * @deprecated as of 5.1.13, use {@link #register(Object)} or
-		 * {@link #registerWithDefaultConfig(Object)} instead.
-		 */
-		@Deprecated
-		void writer(HttpMessageWriter<?> writer);
-
-		/**
-		 * Register a callback for the {@link DefaultCodecConfig configuration}
-		 * applied to default codecs. This allows custom codecs to follow general
-		 * guidelines applied to default ones, such as logging details and limiting
-		 * the amount of buffered data.
-		 * @param codecsConfigConsumer the default codecs configuration callback
-		 * @deprecated as of 5.1.13, use {@link #registerWithDefaultConfig(Object)}
-		 * or {@link #registerWithDefaultConfig(Object, Consumer)} instead.
-		 */
-		@Deprecated
-		void withDefaultCodecConfig(Consumer<DefaultCodecConfig> codecsConfigConsumer);
 	}
 
 
@@ -396,15 +343,13 @@ public interface CodecConfigurer {
 		 * Get the configured limit on the number of bytes that can be buffered whenever
 		 * the input stream needs to be aggregated.
 		 */
-		@Nullable
-		Integer maxInMemorySize();
+		@Nullable Integer maxInMemorySize();
 
 		/**
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
 		 */
-		@Nullable
-		Boolean isEnableLoggingRequestDetails();
+		@Nullable Boolean isEnableLoggingRequestDetails();
 	}
 
 

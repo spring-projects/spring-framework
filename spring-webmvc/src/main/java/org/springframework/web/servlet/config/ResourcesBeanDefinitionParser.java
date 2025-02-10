@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -46,6 +46,7 @@ import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.ContentVersionStrategy;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
 import org.springframework.web.servlet.resource.FixedVersionStrategy;
+import org.springframework.web.servlet.resource.LiteWebJarsResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
@@ -53,7 +54,6 @@ import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
-import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
@@ -82,12 +82,11 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String RESOURCE_URL_PROVIDER = "mvcResourceUrlProvider";
 
 	private static final boolean webJarsPresent = ClassUtils.isPresent(
-			"org.webjars.WebJarAssetLocator", ResourcesBeanDefinitionParser.class.getClassLoader());
+			"org.webjars.WebJarVersionLocator", ResourcesBeanDefinitionParser.class.getClassLoader());
 
 
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext context) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 
 		registerUrlProvider(context, source);
@@ -154,8 +153,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	@Nullable
-	private String registerResourceHandler(ParserContext context, Element element,
+	private @Nullable String registerResourceHandler(ParserContext context, Element element,
 			RuntimeBeanReference pathHelperRef, @Nullable Object source) {
 
 		String locationAttr = element.getAttribute("location");
@@ -186,11 +184,6 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, context, resourceChainElement, source);
-		}
-
-		Object manager = MvcNamespaceUtils.getContentNegotiationManager(context);
-		if (manager != null) {
-			values.add("contentNegotiationManager", manager);
 		}
 
 		String beanName = context.getReaderContext().generateBeanName(resourceHandlerDef);
@@ -333,7 +326,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		if (isAutoRegistration) {
 			if (webJarsPresent) {
-				RootBeanDefinition webJarsResolverDef = new RootBeanDefinition(WebJarsResourceResolver.class);
+				RootBeanDefinition webJarsResolverDef = new RootBeanDefinition(LiteWebJarsResourceResolver.class);
 				webJarsResolverDef.setSource(source);
 				webJarsResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				resourceResolvers.add(webJarsResolverDef);

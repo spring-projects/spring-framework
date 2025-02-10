@@ -18,11 +18,12 @@ package org.springframework.web.server;
 
 import java.util.Locale;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponseException;
 
 /**
@@ -37,8 +38,7 @@ import org.springframework.web.ErrorResponseException;
 @SuppressWarnings("serial")
 public class ResponseStatusException extends ErrorResponseException {
 
-	@Nullable
-	private final String reason;
+	private final @Nullable String reason;
 
 
 	/**
@@ -92,7 +92,7 @@ public class ResponseStatusException extends ErrorResponseException {
 	 */
 	protected ResponseStatusException(
 			HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause,
-			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+			@Nullable String messageDetailCode, Object @Nullable [] messageDetailArguments) {
 
 		super(status, ProblemDetail.forStatus(status), cause, messageDetailCode, messageDetailArguments);
 		this.reason = reason;
@@ -103,30 +103,15 @@ public class ResponseStatusException extends ErrorResponseException {
 	/**
 	 * The reason explaining the exception (potentially {@code null} or empty).
 	 */
-	@Nullable
-	public String getReason() {
+	public @Nullable String getReason() {
 		return this.reason;
 	}
 
 	/**
 	 * Return headers to add to the error response, for example, "Allow", "Accept", etc.
-	 * <p>By default, delegates to {@link #getResponseHeaders()} for backwards
-	 * compatibility.
 	 */
 	@Override
 	public HttpHeaders getHeaders() {
-		return getResponseHeaders();
-	}
-
-	/**
-	 * Return headers associated with the exception that should be added to the
-	 * error response, for example, "Allow", "Accept", etc.
-	 * <p>The default implementation in this class returns empty headers.
-	 * @since 5.1.13
-	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
-	 */
-	@Deprecated(since = "6.0")
-	public HttpHeaders getResponseHeaders() {
 		return HttpHeaders.EMPTY;
 	}
 

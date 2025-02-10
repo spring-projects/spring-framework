@@ -16,7 +16,7 @@
 
 package org.springframework.context;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Sub-interface of MessageSource to be implemented by objects that
@@ -39,7 +39,6 @@ public interface HierarchicalMessageSource extends MessageSource {
 	/**
 	 * Return the parent of this MessageSource, or {@code null} if none.
 	 */
-	@Nullable
-	MessageSource getParentMessageSource();
+	@Nullable MessageSource getParentMessageSource();
 
 }

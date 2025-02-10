@@ -21,6 +21,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -28,7 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.util.Assert;
@@ -46,8 +47,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 
 	private byte[] content = new byte[0];
 
-	@Nullable
-	private Resource contentResource;
+	private @Nullable Resource contentResource;
 
 	private final HttpHeaders headers = new HttpHeaders();
 

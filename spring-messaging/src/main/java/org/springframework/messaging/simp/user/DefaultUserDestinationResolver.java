@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpLogging;
@@ -124,8 +124,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 
 	@Override
-	@Nullable
-	public UserDestinationResult resolveDestination(Message<?> message) {
+	public @Nullable UserDestinationResult resolveDestination(Message<?> message) {
 		ParseResult parseResult = parse(message);
 		if (parseResult == null) {
 			return null;
@@ -145,8 +144,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return new UserDestinationResult(sourceDest, targetSet, subscribeDest, user, sessionIds);
 	}
 
-	@Nullable
-	private ParseResult parse(Message<?> message) {
+	private @Nullable ParseResult parse(Message<?> message) {
 		MessageHeaders headers = message.getHeaders();
 		String sourceDestination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (sourceDestination == null || !checkDestination(sourceDestination, this.prefix)) {
@@ -163,8 +161,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		return null;
 	}
 
-	@Nullable
-	private ParseResult parseSubscriptionMessage(Message<?> message, String sourceDestination) {
+	private @Nullable ParseResult parseSubscriptionMessage(Message<?> message, String sourceDestination) {
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
@@ -243,8 +240,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @return a target destination, or {@code null} if none
 	 */
 	@SuppressWarnings("unused")
-	@Nullable
-	protected String getTargetDestination(String sourceDestination, String actualDestination,
+	protected @Nullable String getTargetDestination(String sourceDestination, String actualDestination,
 			String sessionId, @Nullable String user) {
 
 		return actualDestination + "-user" + sessionId;
@@ -269,8 +265,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 		private final Set<String> sessionIds;
 
-		@Nullable
-		private final String user;
+		private final @Nullable String user;
 
 		public ParseResult(String sourceDest, String actualDest, String subscribeDest,
 				Set<String> sessionIds, @Nullable String user) {
@@ -313,8 +308,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		/**
 		 * The name of the user associated with the session.
 		 */
-		@Nullable
-		public String getUser() {
+		public @Nullable String getUser() {
 			return this.user;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -42,7 +44,6 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentLruCache;
 
@@ -149,46 +150,40 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	@Override
-	@Nullable
-	public <T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
+	public <T> @Nullable T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return getJdbcOperations().execute(getPreparedStatementCreator(sql, paramSource), action);
 	}
 
 	@Override
-	@Nullable
-	public <T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
+	public <T> @Nullable T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return execute(sql, new MapSqlParameterSource(paramMap), action);
 	}
 
 	@Override
-	@Nullable
-	public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
+	public <T> @Nullable T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(sql, EmptySqlParameterSource.INSTANCE, action);
 	}
 
 	@Override
-	@Nullable
-	public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
+	public <T> @Nullable T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rse);
 	}
 
 	@Override
-	@Nullable
-	public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
+	public <T> @Nullable T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rse);
 	}
 
 	@Override
-	@Nullable
-	public <T> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, EmptySqlParameterSource.INSTANCE, rse);
 	}
 
@@ -245,8 +240,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Nullable
-	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	public <T> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		List<T> results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
@@ -254,24 +248,21 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Nullable
-	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
+	public <T> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
 		return queryForObject(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
 	@Override
-	@Nullable
-	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
+	public <T> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramSource, new SingleColumnRowMapper<>(requiredType));
 	}
 
 	@Override
-	@Nullable
-	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
+	public <T> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramMap, new SingleColumnRowMapper<>(requiredType));
@@ -351,7 +342,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int update(
-			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, @Nullable String[] keyColumnNames)
+			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String @Nullable [] keyColumnNames)
 			throws DataAccessException {
 
 		PreparedStatementCreator psc = getPreparedStatementCreator(sql, paramSource, pscf -> {
@@ -379,7 +370,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
+						@Nullable Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
 						pscf.newPreparedStatementSetter(values).setValues(ps);
 					}
 					@Override
@@ -401,7 +392,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs, KeyHolder generatedKeyHolder,
-			@Nullable String[] keyColumnNames) {
+			String @Nullable [] keyColumnNames) {
 
 		if (batchArgs.length == 0) {
 			return new int[0];
@@ -416,12 +407,12 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		else {
 			pscf.setReturnGeneratedKeys(true);
 		}
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
 		PreparedStatementCreator psc = pscf.newPreparedStatementCreator(params);
 		return getJdbcOperations().batchUpdate(psc, new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
+				@Nullable Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
 				pscf.newPreparedStatementSetter(values).setValues(ps);
 			}
 
@@ -469,7 +460,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		if (customizer != null) {
 			customizer.accept(pscf);
 		}
-		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
 		return pscf.newPreparedStatementCreator(params);
 	}
 

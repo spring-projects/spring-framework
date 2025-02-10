@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -45,7 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -82,39 +82,29 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 	private final HttpMethod method;
 
-	@Nullable
-	private String uriTemplate;
+	private @Nullable String uriTemplate;
 
-	@Nullable
-	private URI uri;
+	private @Nullable URI uri;
 
 	private String contextPath = "";
 
 	private String servletPath = "";
 
-	@Nullable
-	private String pathInfo = "";
+	private @Nullable String pathInfo = "";
 
-	@Nullable
-	private Boolean secure;
+	private @Nullable Boolean secure;
 
-	@Nullable
-	private Principal principal;
+	private @Nullable Principal principal;
 
-	@Nullable
-	private MockHttpSession session;
+	private @Nullable MockHttpSession session;
 
-	@Nullable
-	private String remoteAddress;
+	private @Nullable String remoteAddress;
 
-	@Nullable
-	private String characterEncoding;
+	private @Nullable String characterEncoding;
 
-	@Nullable
-	private byte[] content;
+	private byte @Nullable [] content;
 
-	@Nullable
-	private String contentType;
+	private @Nullable String contentType;
 
 	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
 
@@ -161,7 +151,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	/**
 	 * Specify the URI for the request using a URI template and URI variables.
 	 */
-	public B uri(String uriTemplate, Object... uriVariables) {
+	public B uri(String uriTemplate, @Nullable Object... uriVariables) {
 		return updateUri(initUri(uriTemplate, uriVariables), uriTemplate);
 	}
 
@@ -171,7 +161,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		return self();
 	}
 
-	private static URI initUri(String uri, Object[] vars) {
+	private static URI initUri(String uri, @Nullable Object[] vars) {
 		Assert.notNull(uri, "'uri' must not be null");
 		Assert.isTrue(uri.isEmpty() || uri.startsWith("/") || uri.startsWith("http://") || uri.startsWith("https://"),
 				() -> "'uri' should start with a path or be a complete HTTP URI: " + uri);

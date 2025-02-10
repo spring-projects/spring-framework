@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateFieldInjectionSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PrivateFieldInjectionSample.class, "environment"))
+				.onType(PrivateFieldInjectionSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PrivateFieldInjectionSample instance = new PrivateFieldInjectionSample();
@@ -113,7 +113,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateFieldInjectionSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PackagePrivateFieldInjectionSample.class, "environment"))
+				.onType(PackagePrivateFieldInjectionSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateFieldInjectionSample instance = new PackagePrivateFieldInjectionSample();
@@ -132,7 +132,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateFieldInjectionFromParentSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PackagePrivateFieldInjectionSample.class, "environment"))
+				.onType(PackagePrivateFieldInjectionSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateFieldInjectionFromParentSample instance = new PackagePrivateFieldInjectionFromParentSample();
@@ -150,7 +150,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateMethodInjectionSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PrivateMethodInjectionSample.class, "setTestBean").invoke())
+				.onMethodInvocation(PrivateMethodInjectionSample.class, "setTestBean"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PrivateMethodInjectionSample instance = new PrivateMethodInjectionSample();
@@ -169,7 +169,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateMethodInjectionSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PackagePrivateMethodInjectionSample.class, "setTestBean").introspect())
+				.onType(PackagePrivateMethodInjectionSample.class))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateMethodInjectionSample instance = new PackagePrivateMethodInjectionSample();
@@ -188,7 +188,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateMethodInjectionFromParentSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(PackagePrivateMethodInjectionSample.class, "setTestBean"))
+				.onMethodInvocation(PackagePrivateMethodInjectionSample.class, "setTestBean"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateMethodInjectionFromParentSample instance = new PackagePrivateMethodInjectionFromParentSample();

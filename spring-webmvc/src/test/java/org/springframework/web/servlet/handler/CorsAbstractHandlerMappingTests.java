@@ -21,13 +21,13 @@ import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Named;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
@@ -207,8 +207,7 @@ class CorsAbstractHandlerMappingTests {
 
 	private static class TestHandlerMapping extends AbstractHandlerMapping {
 
-		@Nullable
-		private CorsConfiguration savedCorsConfig;
+		private @Nullable CorsConfiguration savedCorsConfig;
 
 
 		TestHandlerMapping() {

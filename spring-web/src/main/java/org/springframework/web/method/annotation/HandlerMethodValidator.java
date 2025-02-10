@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
 import jakarta.validation.Validator;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.SmartValidator;
@@ -77,8 +77,8 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 	@Override
 	public void applyArgumentValidation(
-			Object target, Method method, @Nullable MethodParameter[] parameters,
-			Object[] arguments, Class<?>[] groups) {
+			Object target, Method method, MethodParameter @Nullable [] parameters,
+			@Nullable Object[] arguments, Class<?>[] groups) {
 
 		MethodValidationResult result = validateArguments(target, method, parameters, arguments, groups);
 		if (!result.hasErrors()) {
@@ -109,8 +109,8 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 	@Override
 	public MethodValidationResult validateArguments(
-			Object target, Method method, @Nullable MethodParameter[] parameters,
-			Object[] arguments, Class<?>[] groups) {
+			Object target, Method method, MethodParameter @Nullable [] parameters,
+			@Nullable Object[] arguments, Class<?>[] groups) {
 
 		return this.validationAdapter.validateArguments(target, method, parameters, arguments, groups);
 	}
@@ -139,8 +139,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 	 * Validation is enabled for use via {@link ConfigurableWebBindingInitializer},
 	 * for example in Spring MVC or WebFlux config.
 	 */
-	@Nullable
-	public static MethodValidator from(
+	public static @Nullable MethodValidator from(
 			@Nullable WebBindingInitializer initializer, @Nullable ParameterNameDiscoverer paramNameDiscoverer,
 			Predicate<MethodParameter> modelAttributePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
@@ -162,8 +161,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 		return null;
 	}
 
-	@Nullable
-	private static Validator getValidator(ConfigurableWebBindingInitializer initializer) {
+	private static @Nullable Validator getValidator(ConfigurableWebBindingInitializer initializer) {
 		if (initializer.getValidator() instanceof Validator validator) {
 			return validator;
 		}

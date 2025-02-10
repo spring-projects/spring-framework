@@ -16,13 +16,12 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
-import org.springframework.http.server.reactive.JettyHttpHandlerAdapter;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 
 /**
@@ -41,7 +40,7 @@ public class JettyHttpServer extends AbstractHttpServer {
 
 		this.jettyServer = new Server();
 
-		ServletHttpHandlerAdapter servlet = createServletAdapter();
+		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(resolveHttpHandler());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		servletHolder.setAsyncSupported(true);
 
@@ -54,10 +53,6 @@ public class JettyHttpServer extends AbstractHttpServer {
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
 		this.jettyServer.setHandler(this.contextHandler);
-	}
-
-	private ServletHttpHandlerAdapter createServletAdapter() {
-		return new JettyHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 	@Override

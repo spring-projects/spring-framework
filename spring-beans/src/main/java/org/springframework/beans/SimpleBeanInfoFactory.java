@@ -24,7 +24,6 @@ import java.beans.SimpleBeanInfo;
 import java.util.Collection;
 
 import org.springframework.core.Ordered;
-import org.springframework.lang.NonNull;
 
 /**
  * {@link BeanInfoFactory} implementation that bypasses the standard {@link java.beans.Introspector}
@@ -47,7 +46,6 @@ import org.springframework.lang.NonNull;
 class SimpleBeanInfoFactory implements BeanInfoFactory, Ordered {
 
 	@Override
-	@NonNull
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		Collection<? extends PropertyDescriptor> pds =
 				PropertyDescriptorUtils.determineBasicProperties(beanClass);

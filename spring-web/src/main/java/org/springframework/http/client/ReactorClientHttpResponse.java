@@ -18,18 +18,16 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
 
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import reactor.netty.Connection;
-import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.support.Netty4HeadersAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -47,8 +45,7 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpHeaders headers;
 
-	@Nullable
-	private volatile InputStream body;
+	private volatile @Nullable InputStream body;
 
 
 	/**
@@ -62,21 +59,6 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.connection = connection;
 		this.headers = HttpHeaders.readOnlyHttpHeaders(
 				new Netty4HeadersAdapter(response.responseHeaders()));
-	}
-
-	/**
-	 * Original constructor.
-	 * @deprecated without a replacement; readTimeout is now applied to the
-	 * underlying client via {@link HttpClient#responseTimeout(Duration)}, and the
-	 * value passed here is not used.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public ReactorClientHttpResponse(
-			HttpClientResponse response, Connection connection, @Nullable Duration readTimeout) {
-
-		this.response = response;
-		this.connection = connection;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(new Netty4HeadersAdapter(response.responseHeaders()));
 	}
 
 

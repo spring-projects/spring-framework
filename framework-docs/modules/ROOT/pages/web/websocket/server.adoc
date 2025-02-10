@@ -85,10 +85,7 @@ for all HTTP processing -- including WebSocket handshake and all other HTTP
 requests -- such as Spring MVC's `DispatcherServlet`.
 
 This is a significant limitation of JSR-356 that Spring's WebSocket support addresses with
-server-specific `RequestUpgradeStrategy` implementations even when running in a JSR-356 runtime.
-Such strategies currently exist for Tomcat, Jetty, GlassFish, WebLogic, WebSphere, and Undertow
-(and WildFly). As of Jakarta WebSocket 2.1, a standard request upgrade strategy is available
-which Spring chooses on Jakarta EE 10 based web containers such as Tomcat 10.1 and Jetty 12.
+a standard `RequestUpgradeStrategy` implementation when running in a WebSocket API 2.1+ runtime.
 
 A secondary consideration is that Servlet containers with JSR-356 support are expected
 to perform a `ServletContainerInitializer` (SCI) scan that can slow down application

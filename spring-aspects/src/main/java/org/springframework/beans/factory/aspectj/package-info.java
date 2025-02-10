@@ -1,9 +1,7 @@
 /**
  * AspectJ-based dependency injection support.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.beans.factory.aspectj;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

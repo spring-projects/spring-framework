@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Simple strategy interface for resolving a String value.
@@ -38,7 +38,6 @@ public interface StringValueResolver {
 	 * to resolve or when ignoring unresolvable placeholders)
 	 * @throws IllegalArgumentException in case of an unresolvable String value
 	 */
-	@Nullable
-	String resolveStringValue(String strVal);
+	@Nullable String resolveStringValue(String strVal);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,20 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.util.StreamUtils;
 
 /**
  * Wrapper for a {@link ClientHttpRequest} that has support for {@link ClientHttpRequestInterceptor
  * ClientHttpRequestInterceptors}.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 3.1
  */
 class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
@@ -45,14 +43,18 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final URI uri;
 
+	private final BiPredicate<URI, HttpMethod> bufferingPredicate;
+
 
 	protected InterceptingClientHttpRequest(ClientHttpRequestFactory requestFactory,
-			List<ClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod method) {
+			List<ClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod method,
+			BiPredicate<URI, HttpMethod> bufferingPredicate) {
 
 		this.requestFactory = requestFactory;
 		this.interceptors = interceptors;
 		this.method = method;
 		this.uri = uri;
+		this.bufferingPredicate = bufferingPredicate;
 	}
 
 
@@ -68,54 +70,36 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	@Override
 	protected final ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
-		InterceptingRequestExecution requestExecution = new InterceptingRequestExecution();
-		return requestExecution.execute(this, bufferedOutput);
+		return getExecution().execute(this, bufferedOutput);
+	}
+
+	private ClientHttpRequestExecution getExecution() {
+		ClientHttpRequestExecution execution = new EndOfChainRequestExecution(this.requestFactory);
+		return this.interceptors.stream()
+				.reduce(ClientHttpRequestInterceptor::andThen)
+				.map(interceptor -> interceptor.apply(execution))
+				.orElse(execution);
+	}
+
+	private boolean shouldBufferResponse(HttpRequest request) {
+		return this.bufferingPredicate.test(request.getURI(), request.getMethod());
 	}
 
 
-	private class InterceptingRequestExecution implements ClientHttpRequestExecution {
+	private class EndOfChainRequestExecution implements ClientHttpRequestExecution {
 
-		private final Iterator<ClientHttpRequestInterceptor> iterator;
+		private final ClientHttpRequestFactory requestFactory;
 
-		public InterceptingRequestExecution() {
-			this.iterator = interceptors.iterator();
+		public EndOfChainRequestExecution(ClientHttpRequestFactory requestFactory) {
+			this.requestFactory = requestFactory;
 		}
 
 		@Override
 		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
-			if (this.iterator.hasNext()) {
-				ClientHttpRequestInterceptor nextInterceptor = this.iterator.next();
-				return nextInterceptor.intercept(request, body, this);
-			}
-			else {
-				HttpMethod method = request.getMethod();
-				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
-				request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
-				request.getAttributes().forEach((key, value) -> delegate.getAttributes().put(key, value));
-				if (body.length > 0) {
-					long contentLength = delegate.getHeaders().getContentLength();
-					if (contentLength > -1 && contentLength != body.length) {
-						delegate.getHeaders().setContentLength(body.length);
-					}
-					if (delegate instanceof StreamingHttpOutputMessage streamingOutputMessage) {
-						streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-							@Override
-							public void writeTo(OutputStream outputStream) throws IOException {
-								StreamUtils.copy(body, outputStream);
-							}
-
-							@Override
-							public boolean repeatable() {
-								return true;
-							}
-						});
-					}
-					else {
-						StreamUtils.copy(body, delegate.getBody());
-					}
-				}
-				return delegate.execute();
-			}
+			ClientHttpRequest delegate = this.requestFactory.createRequest(request.getURI(), request.getMethod());
+			request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
+			request.getAttributes().forEach((key, value) -> delegate.getAttributes().put(key, value));
+			return executeWithRequest(delegate, body, shouldBufferResponse(request));
 		}
 	}
 

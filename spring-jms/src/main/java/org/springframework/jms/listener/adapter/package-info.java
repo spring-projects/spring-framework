@@ -3,9 +3,7 @@
  * methods, converting messages to appropriate message content types
  * (such as String or byte array) that get passed into listener methods.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.jms.listener.adapter;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

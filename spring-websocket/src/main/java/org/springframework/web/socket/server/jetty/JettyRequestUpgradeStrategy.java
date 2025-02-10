@@ -26,15 +26,15 @@ import java.util.function.Consumer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketCreator;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer;
 import org.eclipse.jetty.websocket.api.Configurable;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketExtension;
@@ -45,7 +45,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A {@link RequestUpgradeStrategy} for Jetty 12 EE10.
+ * A {@link RequestUpgradeStrategy} for Jetty 12 EE11.
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4
@@ -55,8 +55,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 	private static final String[] SUPPORTED_VERSIONS = new String[] {"13"};
 
 
-	@Nullable
-	private Consumer<Configurable> webSocketConfigurer;
+	private @Nullable Consumer<Configurable> webSocketConfigurer;
 
 
 	@Override

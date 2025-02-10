@@ -20,8 +20,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
-import org.springframework.lang.Nullable;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -72,8 +73,7 @@ public abstract class AbstractCacheInvoker {
 	 * miss in case of error.
 	 * @see Cache#get(Object)
 	 */
-	@Nullable
-	protected Cache.ValueWrapper doGet(Cache cache, Object key) {
+	protected Cache.@Nullable ValueWrapper doGet(Cache cache, Object key) {
 		try {
 			return cache.get(key);
 		}
@@ -91,8 +91,7 @@ public abstract class AbstractCacheInvoker {
 	 * @since 6.2
 	 * @see Cache#get(Object, Callable)
 	 */
-	@Nullable
-	protected <T> T doGet(Cache cache, Object key, Callable<T> valueLoader) {
+	protected <T> @Nullable T doGet(Cache cache, Object key, Callable<T> valueLoader) {
 		try {
 			return cache.get(key, valueLoader);
 		}
@@ -119,8 +118,7 @@ public abstract class AbstractCacheInvoker {
 	 * @since 6.2
 	 * @see Cache#retrieve(Object)
 	 */
-	@Nullable
-	protected CompletableFuture<?> doRetrieve(Cache cache, Object key) {
+	protected @Nullable CompletableFuture<?> doRetrieve(Cache cache, Object key) {
 		try {
 			return cache.retrieve(key);
 		}

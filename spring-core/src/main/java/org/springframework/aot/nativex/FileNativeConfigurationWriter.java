@@ -23,7 +23,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link NativeConfigurationWriter} implementation that writes the
@@ -38,11 +38,9 @@ public class FileNativeConfigurationWriter extends NativeConfigurationWriter {
 
 	private final Path basePath;
 
-	@Nullable
-	private final String groupId;
+	private final @Nullable String groupId;
 
-	@Nullable
-	private final String artifactId;
+	private final @Nullable String artifactId;
 
 	public FileNativeConfigurationWriter(Path basePath) {
 		this(basePath, null, null);

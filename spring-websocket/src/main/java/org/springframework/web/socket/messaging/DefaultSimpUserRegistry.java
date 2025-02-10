@@ -22,10 +22,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -152,8 +153,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	// SimpUserRegistry methods
 
 	@Override
-	@Nullable
-	public SimpUser getUser(String userName) {
+	public @Nullable SimpUser getUser(String userName) {
 		return this.users.get(userName);
 	}
 
@@ -206,9 +206,8 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			return this.name;
 		}
 
-		@Nullable
 		@Override
-		public Principal getPrincipal() {
+		public @Nullable Principal getPrincipal() {
 			return this.user;
 		}
 
@@ -218,8 +217,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		@Nullable
-		public SimpSession getSession(@Nullable String sessionId) {
+		public @Nullable SimpSession getSession(@Nullable String sessionId) {
 			return (sessionId != null ? this.userSessions.get(sessionId) : null);
 		}
 

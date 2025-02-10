@@ -20,7 +20,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -140,8 +141,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @param obj the object to check
 	 * @return the order value, or {@code null} if none found
 	 */
-	@Nullable
-	protected Integer findOrder(Object obj) {
+	protected @Nullable Integer findOrder(Object obj) {
 		return (obj instanceof Ordered ordered ? ordered.getOrder() : null);
 	}
 
@@ -156,8 +156,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @return the priority value, or {@code null} if none
 	 * @since 4.1
 	 */
-	@Nullable
-	public Integer getPriority(Object obj) {
+	public @Nullable Integer getPriority(Object obj) {
 		return null;
 	}
 
@@ -222,8 +221,7 @@ public class OrderComparator implements Comparator<Object> {
 		 * @param obj the object to find an order source for
 		 * @return the order source for that object, or {@code null} if none found
 		 */
-		@Nullable
-		Object getOrderSource(Object obj);
+		@Nullable Object getOrderSource(Object obj);
 	}
 
 }

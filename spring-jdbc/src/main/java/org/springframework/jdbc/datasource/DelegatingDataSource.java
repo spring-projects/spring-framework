@@ -25,8 +25,9 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,8 +44,7 @@ import org.springframework.util.Assert;
  */
 public class DelegatingDataSource implements DataSource, InitializingBean {
 
-	@Nullable
-	private DataSource targetDataSource;
+	private @Nullable DataSource targetDataSource;
 
 
 	/**
@@ -73,8 +73,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	/**
 	 * Return the target DataSource that this DataSource should delegate to.
 	 */
-	@Nullable
-	public DataSource getTargetDataSource() {
+	public @Nullable DataSource getTargetDataSource() {
 		return this.targetDataSource;
 	}
 

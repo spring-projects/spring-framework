@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -36,11 +36,9 @@ import org.springframework.web.server.ServerWebExchange;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	@Nullable
-	private final ResourceResolver resolver;
+	private final @Nullable ResourceResolver resolver;
 
-	@Nullable
-	private final ResourceResolverChain nextChain;
+	private final @Nullable ResourceResolverChain nextChain;
 
 
 	public DefaultResourceResolverChain(@Nullable List<? extends ResourceResolver> resolvers) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,6 +277,26 @@ class PlaceholderParserTests {
 	class EscapedTests {
 
 		private final PlaceholderParser parser = new PlaceholderParser("${", "}", ":", '\\', true);
+
+		@ParameterizedTest(name = "{0} -> {1}")
+		@MethodSource("escapedInNestedPlaceholders")
+		void escapedSeparatorInNestedPlaceholder(String text, String expected) {
+			Properties properties = new Properties();
+			properties.setProperty("app.environment", "qa");
+			properties.setProperty("app.service", "protocol");
+			properties.setProperty("protocol://host/qa/name", "protocol://example.com/qa/name");
+			properties.setProperty("service/host/qa/name", "https://example.com/qa/name");
+			properties.setProperty("service/host/qa/name:value", "https://example.com/qa/name-value");
+			assertThat(this.parser.replacePlaceholders(text, properties::getProperty)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> escapedInNestedPlaceholders() {
+			return Stream.of(
+					Arguments.of("${protocol\\://host/${app.environment}/name}", "protocol://example.com/qa/name"),
+					Arguments.of("${${app.service}\\://host/${app.environment}/name}", "protocol://example.com/qa/name"),
+					Arguments.of("${service/host/${app.environment}/name:\\value}", "https://example.com/qa/name"),
+					Arguments.of("${service/host/${name\\:value}/}", "${service/host/${name:value}/}"));
+		}
 
 		@ParameterizedTest(name = "{0} -> {1}")
 		@MethodSource("escapedPlaceholders")

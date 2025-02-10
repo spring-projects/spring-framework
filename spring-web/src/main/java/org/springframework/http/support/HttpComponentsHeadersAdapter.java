@@ -29,9 +29,9 @@ import java.util.Set;
 
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpMessage;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -66,8 +66,7 @@ public final class HttpComponentsHeadersAdapter implements MultiValueMap<String,
 
 
 	@Override
-	@Nullable
-	public String getFirst(String key) {
+	public @Nullable String getFirst(String key) {
 		Header header = this.message.getFirstHeader(key);
 		return (header != null ? header.getValue() : null);
 	}
@@ -127,9 +126,8 @@ public final class HttpComponentsHeadersAdapter implements MultiValueMap<String,
 				Arrays.stream(this.message.getHeaders()).anyMatch(h -> h.getValue().equals(value)));
 	}
 
-	@Nullable
 	@Override
-	public List<String> get(Object key) {
+	public @Nullable List<String> get(Object key) {
 		List<String> values = null;
 		if (containsKey(key)) {
 			Header[] headers = this.message.getHeaders((String) key);
@@ -141,17 +139,15 @@ public final class HttpComponentsHeadersAdapter implements MultiValueMap<String,
 		return values;
 	}
 
-	@Nullable
 	@Override
-	public List<String> put(String key, List<String> values) {
+	public @Nullable List<String> put(String key, List<String> values) {
 		List<String> oldValues = remove(key);
 		values.forEach(value -> add(key, value));
 		return oldValues;
 	}
 
-	@Nullable
 	@Override
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(Object key) {
 		if (key instanceof String headerName) {
 			List<String> oldValues = get(key);
 			this.headerNames.remove(headerName);
@@ -267,8 +263,7 @@ public final class HttpComponentsHeadersAdapter implements MultiValueMap<String,
 
 		private final Iterator<String> iterator;
 
-		@Nullable
-		private String currentName;
+		private @Nullable String currentName;
 
 		private HeaderNamesIterator(Iterator<String> iterator) {
 			this.iterator = iterator;

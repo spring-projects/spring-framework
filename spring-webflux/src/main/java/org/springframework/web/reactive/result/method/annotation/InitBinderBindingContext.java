@@ -18,8 +18,9 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -47,8 +48,7 @@ class InitBinderBindingContext extends BindingContext {
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
-	@Nullable
-	private Runnable saveModelOperation;
+	private @Nullable Runnable saveModelOperation;
 
 
 	InitBinderBindingContext(

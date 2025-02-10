@@ -27,7 +27,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +43,7 @@ public final class TypeHint implements ConditionalHint {
 
 	private final TypeReference type;
 
-	@Nullable
-	private final TypeReference reachableType;
+	private final @Nullable TypeReference reachableType;
 
 	private final Set<FieldHint> fields;
 
@@ -83,9 +83,8 @@ public final class TypeHint implements ConditionalHint {
 		return this.type;
 	}
 
-	@Nullable
 	@Override
-	public TypeReference getReachableType() {
+	public @Nullable TypeReference getReachableType() {
 		return this.reachableType;
 	}
 
@@ -144,8 +143,7 @@ public final class TypeHint implements ConditionalHint {
 
 		private final TypeReference type;
 
-		@Nullable
-		private TypeReference reachableType;
+		private @Nullable TypeReference reachableType;
 
 		private final Set<String> fields = new HashSet<>();
 
@@ -182,9 +180,11 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
-		 * Register the need for reflection on the field with the specified name.
+		 * Register the need for reflective access on the field with the specified name.
 		 * @param name the name of the field
 		 * @return {@code this}, to facilitate method chaining
+		 * @see java.lang.reflect.Field#get(Object)
+		 * @see java.lang.reflect.Field#set(Object, Object)
 		 */
 		public Builder withField(String name) {
 			this.fields.add(name);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.springframework.context.expression;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -45,14 +46,14 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 
 	private final Method method;
 
-	private final Object[] arguments;
+	private final @Nullable Object[] arguments;
 
 	private final ParameterNameDiscoverer parameterNameDiscoverer;
 
 	private boolean argumentsLoaded = false;
 
 
-	public MethodBasedEvaluationContext(Object rootObject, Method method, Object[] arguments,
+	public MethodBasedEvaluationContext(Object rootObject, Method method, @Nullable Object[] arguments,
 			ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(rootObject);
@@ -64,8 +65,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 
 
 	@Override
-	@Nullable
-	public Object lookupVariable(String name) {
+	public @Nullable Object lookupVariable(String name) {
 		Object variable = super.lookupVariable(name);
 		if (variable != null) {
 			return variable;
@@ -88,7 +88,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 		}
 
 		// Expose indexed variables as well as parameter names (if discoverable)
-		String[] paramNames = this.parameterNameDiscoverer.getParameterNames(this.method);
+		@Nullable String[] paramNames = this.parameterNameDiscoverer.getParameterNames(this.method);
 		int paramCount = (paramNames != null ? paramNames.length : this.method.getParameterCount());
 		int argsCount = this.arguments.length;
 

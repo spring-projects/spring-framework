@@ -18,8 +18,7 @@ package org.springframework.web.servlet;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by objects that define a mapping between
@@ -167,7 +166,6 @@ public interface HandlerMapping {
 	 * any interceptors, or {@code null} if no mapping found
 	 * @throws Exception if there is an internal error
 	 */
-	@Nullable
-	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
+	@Nullable HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
 
 }

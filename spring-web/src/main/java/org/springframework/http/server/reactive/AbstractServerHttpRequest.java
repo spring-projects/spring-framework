@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,12 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.RequestPath;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -50,33 +51,25 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private final URI uri;
 
-	@Nullable
-	private final String contextPath;
+	private final @Nullable String contextPath;
 
-	@Nullable
-	private RequestPath path;
+	private @Nullable RequestPath path;
 
 	private final HttpHeaders headers;
 
 	private final HttpMethod method;
 
-	@Nullable
-	private MultiValueMap<String, String> queryParams;
+	private @Nullable MultiValueMap<String, String> queryParams;
 
-	@Nullable
-	private MultiValueMap<String, HttpCookie> cookies;
+	private @Nullable MultiValueMap<String, HttpCookie> cookies;
 
-	@Nullable
-	private SslInfo sslInfo;
+	private @Nullable SslInfo sslInfo;
 
-	@Nullable
-	private String id;
+	private @Nullable String id;
 
-	@Nullable
-	private String logPrefix;
+	private @Nullable String logPrefix;
 
-	@Nullable
-	private Supplier<Map<String, Object>> attributesSupplier;
+	private @Nullable Supplier<Map<String, Object>> attributesSupplier;
 
 
 	/**
@@ -85,10 +78,10 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * @param uri the URI for the request
 	 * @param contextPath the context path for the request
 	 * @param headers the headers for the request (as {@link MultiValueMap})
-	 * @since 6.0.8
+	 * @since 7.0
 	 */
 	public AbstractServerHttpRequest(HttpMethod method, URI uri, @Nullable String contextPath,
-			MultiValueMap<String, String> headers) {
+			HttpHeaders headers) {
 
 		Assert.notNull(method, "Method must not be null");
 		Assert.notNull(uri, "Uri must not be null");
@@ -117,8 +110,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * identity of this request instance is used.
 	 * @since 5.1
 	 */
-	@Nullable
-	protected String initId() {
+	protected @Nullable String initId() {
 		return null;
 	}
 
@@ -209,9 +201,8 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
 
-	@Nullable
 	@Override
-	public SslInfo getSslInfo() {
+	public @Nullable SslInfo getSslInfo() {
 		if (this.sslInfo == null) {
 			this.sslInfo = initSslInfo();
 		}
@@ -223,8 +214,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * @return the session information, or {@code null} if none available
 	 * @since 5.0.2
 	 */
-	@Nullable
-	protected abstract SslInfo initSslInfo();
+	protected abstract @Nullable SslInfo initSslInfo();
 
 	/**
 	 * Return the underlying server response.

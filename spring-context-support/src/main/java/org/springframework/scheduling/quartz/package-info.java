@@ -5,9 +5,7 @@
  * Triggers as beans in a Spring context. Also provides
  * convenience classes for implementing Quartz Jobs.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.scheduling.quartz;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

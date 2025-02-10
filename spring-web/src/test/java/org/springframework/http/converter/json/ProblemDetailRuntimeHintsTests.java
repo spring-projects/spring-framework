@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class ProblemDetailRuntimeHintsTests {
 	void getterMethodsShouldHaveReflectionHints() {
 		for (String methodName : METHOD_NAMES) {
 			assertThat(RuntimeHintsPredicates.reflection()
-					.onMethod(ProblemDetail.class, methodName)).accepts(this.hints);
+					.onMethodInvocation(ProblemDetail.class, methodName)).accepts(this.hints);
 		}
 	}
 
@@ -61,7 +61,7 @@ class ProblemDetailRuntimeHintsTests {
 	void mixinShouldHaveReflectionHints() {
 		for (String methodName : METHOD_NAMES) {
 			assertThat(RuntimeHintsPredicates.reflection()
-					.onMethod(ProblemDetailJacksonXmlMixin.class, methodName)).accepts(this.hints);
+					.onMethodInvocation(ProblemDetailJacksonXmlMixin.class, methodName)).accepts(this.hints);
 		}
 	}
 

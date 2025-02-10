@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cache.jcache.interceptor;
 import java.util.Collection;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -32,7 +34,6 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.util.function.SupplierUtils;
@@ -49,22 +50,18 @@ import org.springframework.util.function.SupplierUtils;
 public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSource
 		implements BeanFactoryAware, SmartInitializingSingleton {
 
-	@Nullable
-	private SingletonSupplier<CacheManager> cacheManager;
+	private @Nullable SingletonSupplier<CacheManager> cacheManager;
 
-	@Nullable
-	private SingletonSupplier<CacheResolver> cacheResolver;
+	private @Nullable SingletonSupplier<CacheResolver> cacheResolver;
 
-	@Nullable
-	private SingletonSupplier<CacheResolver> exceptionCacheResolver;
+	private @Nullable SingletonSupplier<CacheResolver> exceptionCacheResolver;
 
 	private SingletonSupplier<KeyGenerator> keyGenerator;
 
 	private final SingletonSupplier<KeyGenerator> adaptedKeyGenerator =
 			SingletonSupplier.of(() -> new KeyGeneratorAdapter(this, getKeyGenerator()));
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
 
 	/**
@@ -82,8 +79,8 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * @since 5.1
 	 */
 	public DefaultJCacheOperationSource(
-			@Nullable Supplier<CacheManager> cacheManager, @Nullable Supplier<CacheResolver> cacheResolver,
-			@Nullable Supplier<CacheResolver> exceptionCacheResolver, @Nullable Supplier<KeyGenerator> keyGenerator) {
+			@Nullable Supplier<? extends @Nullable CacheManager> cacheManager, @Nullable Supplier<? extends @Nullable CacheResolver> cacheResolver,
+			@Nullable Supplier<? extends @Nullable CacheResolver> exceptionCacheResolver, @Nullable Supplier<? extends @Nullable KeyGenerator> keyGenerator) {
 
 		this.cacheManager = SingletonSupplier.ofNullable(cacheManager);
 		this.cacheResolver = SingletonSupplier.ofNullable(cacheResolver);
@@ -103,8 +100,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified cache manager to use, if any.
 	 */
-	@Nullable
-	public CacheManager getCacheManager() {
+	public @Nullable CacheManager getCacheManager() {
 		return SupplierUtils.resolve(this.cacheManager);
 	}
 
@@ -119,8 +115,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified cache resolver to use, if any.
 	 */
-	@Nullable
-	public CacheResolver getCacheResolver() {
+	public @Nullable CacheResolver getCacheResolver() {
 		return SupplierUtils.resolve(this.cacheResolver);
 	}
 
@@ -135,8 +130,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	/**
 	 * Return the specified exception cache resolver to use, if any.
 	 */
-	@Nullable
-	public CacheResolver getExceptionCacheResolver() {
+	public @Nullable CacheResolver getExceptionCacheResolver() {
 		return SupplierUtils.resolve(this.exceptionCacheResolver);
 	}
 
@@ -188,7 +182,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 		}
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected CacheManager getDefaultCacheManager() {
 		if (getCacheManager() == null) {
 			Assert.state(this.beanFactory != null, "BeanFactory required for default CacheManager resolution");
@@ -208,7 +202,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected CacheResolver getDefaultCacheResolver() {
 		if (getCacheResolver() == null) {
 			this.cacheResolver = SingletonSupplier.of(new SimpleCacheResolver(getDefaultCacheManager()));
@@ -217,7 +211,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	protected CacheResolver getDefaultExceptionCacheResolver() {
 		if (getExceptionCacheResolver() == null) {
 			this.exceptionCacheResolver = SingletonSupplier.of(new LazyCacheResolver());

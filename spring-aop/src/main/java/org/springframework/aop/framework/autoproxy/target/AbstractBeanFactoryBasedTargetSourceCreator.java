@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
@@ -33,7 +34,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -59,8 +59,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private ConfigurableBeanFactory beanFactory;
+	private @Nullable ConfigurableBeanFactory beanFactory;
 
 	/** Internally used DefaultListableBeanFactory instances, keyed by bean name. */
 	private final Map<String, DefaultListableBeanFactory> internalBeanFactories = new HashMap<>();
@@ -78,8 +77,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	/**
 	 * Return the BeanFactory that this TargetSourceCreators runs in.
 	 */
-	@Nullable
-	protected final BeanFactory getBeanFactory() {
+	protected final @Nullable BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
 
@@ -94,8 +92,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	//---------------------------------------------------------------------
 
 	@Override
-	@Nullable
-	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
+	public final @Nullable TargetSource getTargetSource(Class<?> beanClass, String beanName) {
 		AbstractBeanFactoryBasedTargetSource targetSource =
 				createBeanFactoryBasedTargetSource(beanClass, beanName);
 		if (targetSource == null) {
@@ -195,8 +192,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * @param beanName the name of the bean
 	 * @return the AbstractPrototypeBasedTargetSource, or {@code null} if we don't match this
 	 */
-	@Nullable
-	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
+	protected abstract @Nullable AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName);
 
 }

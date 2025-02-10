@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +47,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.CheckReturnValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
@@ -385,6 +386,15 @@ public interface RestClient {
 		Builder requestInterceptors(Consumer<List<ClientHttpRequestInterceptor>> interceptorsConsumer);
 
 		/**
+		 * Enable buffering of request and response, aggregating all content before
+		 * it is sent, and making it possible to read the response body repeatedly.
+		 * @param predicate to determine whether to buffer for the given request
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder bufferContent(BiPredicate<URI, HttpMethod> predicate);
+
+		/**
 		 * Add the given request initializer to the end of the initializer chain.
 		 * @param initializer the initializer to be added to the chain
 		 * @return this builder
@@ -493,14 +503,14 @@ public interface RestClient {
 		 * <p>If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 */
-		S uri(String uri, Object... uriVariables);
+		S uri(String uri, @Nullable Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
 		 * <p>If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 */
-		S uri(String uri, Map<String, ?> uriVariables);
+		S uri(String uri, Map<String, ? extends @Nullable Object> uriVariables);
 
 		/**
 		 * Specify the URI starting with a URI template and finishing off with a
@@ -672,8 +682,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
-		@Nullable
-		default <T> T exchange(ExchangeFunction<T> exchangeFunction) {
+		default <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
 
@@ -704,8 +713,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
-		@Nullable
-		<T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
+		<T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
 
 
 		/**
@@ -722,8 +730,7 @@ public interface RestClient {
 			 * @return the exchanged type
 			 * @throws IOException in case of I/O errors
 			 */
-			@Nullable
-			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+			@Nullable T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
 
@@ -738,8 +745,7 @@ public interface RestClient {
 			 * @param <T> the body type
 			 * @return the body, or {@code null} if no response body was available
 			 */
-			@Nullable
-			<T> T bodyTo(Class<T> bodyType);
+			<T> @Nullable T bodyTo(Class<T> bodyType);
 
 			/**
 			 * Extract the response body as an object of the given type.
@@ -747,8 +753,7 @@ public interface RestClient {
 			 * @param <T> the body type
 			 * @return the body, or {@code null} if no response body was available
 			 */
-			@Nullable
-			<T> T bodyTo(ParameterizedTypeReference<T> bodyType);
+			<T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType);
 
 		}
 	}
@@ -860,8 +865,7 @@ public interface RestClient {
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
 		 */
-		@Nullable
-		<T> T body(Class<T> bodyType);
+		<T> @Nullable T body(Class<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
@@ -873,8 +877,7 @@ public interface RestClient {
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
 		 */
-		@Nullable
-		<T> T body(ParameterizedTypeReference<T> bodyType);
+		<T> @Nullable T body(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of

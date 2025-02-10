@@ -19,10 +19,10 @@ package org.springframework.web.reactive.function.server;
 import java.time.Duration;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
@@ -164,14 +164,11 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 	@SuppressWarnings("unused")
 	private static final class PropertyInjection {
 
-		@Nullable
-		private String foo;
+		private @Nullable String foo;
 
-		@Nullable
-		private String bar;
+		private @Nullable String bar;
 
-		@Nullable
-		public String getFoo() {
+		public @Nullable String getFoo() {
 			return this.foo;
 		}
 
@@ -179,8 +176,7 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 			this.foo = foo;
 		}
 
-		@Nullable
-		public String getBar() {
+		public @Nullable String getBar() {
 			return this.bar;
 		}
 
@@ -199,8 +195,7 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 
 		private final String foo;
 
-		@Nullable
-		private String bar;
+		private @Nullable String bar;
 
 		public MixedInjection(String foo) {
 			this.foo = foo;
@@ -210,8 +205,7 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 			return this.foo;
 		}
 
-		@Nullable
-		public String getBar() {
+		public @Nullable String getBar() {
 			return this.bar;
 		}
 

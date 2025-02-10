@@ -22,13 +22,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -46,8 +47,7 @@ public final class ParameterResolutionDelegate {
 
 	private static final AnnotatedElement EMPTY_ANNOTATED_ELEMENT = new AnnotatedElement() {
 		@Override
-		@Nullable
-		public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		public <T extends Annotation> @Nullable T getAnnotation(Class<T> annotationClass) {
 			return null;
 		}
 		@Override
@@ -116,8 +116,7 @@ public final class ParameterResolutionDelegate {
 	 * @see SynthesizingMethodParameter#forExecutable(Executable, int)
 	 * @see AutowireCapableBeanFactory#resolveDependency(DependencyDescriptor, String)
 	 */
-	@Nullable
-	public static Object resolveDependency(
+	public static @Nullable Object resolveDependency(
 			Parameter parameter, int parameterIndex, Class<?> containingClass, AutowireCapableBeanFactory beanFactory)
 			throws BeansException {
 

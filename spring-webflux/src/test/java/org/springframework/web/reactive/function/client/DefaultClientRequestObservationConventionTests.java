@@ -55,18 +55,6 @@ class DefaultClientRequestObservationConventionTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
-	void shouldAddKeyValuesForNullExchange() {
-		ClientRequestObservationContext context = new ClientRequestObservationContext();
-		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(6)
-				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
-						KeyValue.of("client.name", "none"),
-						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1)
-				.contains(KeyValue.of("http.url", "none"));
-	}
-
-	@Test
 	void shouldAddKeyValuesForExchangeWithException() {
 		ClientRequest.Builder request = ClientRequest.create(HttpMethod.GET, URI.create("/test"));
 		ClientRequestObservationContext context = new ClientRequestObservationContext(request);

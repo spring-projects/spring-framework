@@ -26,9 +26,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import io.r2dbc.spi.Parameter;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.core.binding.BindMarker;
 import org.springframework.r2dbc.core.binding.BindMarkers;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
@@ -460,8 +460,7 @@ abstract class NamedParameterUtils {
 			return param;
 		}
 
-		@Nullable
-		List<NamedParameter> getMarker(String name) {
+		@Nullable List<NamedParameter> getMarker(String name) {
 			return this.references.get(name);
 		}
 
@@ -566,8 +565,7 @@ abstract class NamedParameterUtils {
 			}
 		}
 
-		@Nullable
-		List<BindMarker> getBindMarkers(String identifier) {
+		@Nullable List<BindMarker> getBindMarkers(String identifier) {
 			List<NamedParameters.NamedParameter> parameters = this.parameters.getMarker(identifier);
 			if (parameters == null) {
 				return null;

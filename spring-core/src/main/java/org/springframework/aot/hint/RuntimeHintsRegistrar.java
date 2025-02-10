@@ -16,7 +16,7 @@
 
 package org.springframework.aot.hint;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Contract for registering {@link RuntimeHints} based on the {@link ClassLoader}

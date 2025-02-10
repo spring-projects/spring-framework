@@ -16,12 +16,13 @@
 
 package org.springframework.transaction.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers runtime hints
@@ -37,7 +38,7 @@ class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection().registerTypes(
 				TypeReference.listOf(Isolation.class, Propagation.class),
-				TypeHint.builtWith(MemberCategory.DECLARED_FIELDS));
+				TypeHint.builtWith(MemberCategory.ACCESS_DECLARED_FIELDS));
 	}
 
 }

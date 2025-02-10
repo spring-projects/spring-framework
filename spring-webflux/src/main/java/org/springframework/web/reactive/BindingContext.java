@@ -20,11 +20,12 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -52,8 +53,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class BindingContext {
 
-	@Nullable
-	private final WebBindingInitializer initializer;
+	private final @Nullable WebBindingInitializer initializer;
 
 	private final Model model = new BindingAwareConcurrentModel();
 

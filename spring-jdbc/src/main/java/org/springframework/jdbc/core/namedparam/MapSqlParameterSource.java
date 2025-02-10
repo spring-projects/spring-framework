@@ -20,9 +20,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.core.SqlParameterValue;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -165,8 +165,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
-	@Nullable
-	public Object getValue(String paramName) {
+	public @Nullable Object getValue(String paramName) {
 		if (!hasValue(paramName)) {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
 		}
@@ -174,7 +173,6 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	@Override
-	@NonNull
 	public String[] getParameterNames() {
 		return StringUtils.toStringArray(this.values.keySet());
 	}

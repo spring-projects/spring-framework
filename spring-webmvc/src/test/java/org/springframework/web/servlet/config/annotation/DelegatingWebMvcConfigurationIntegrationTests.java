@@ -70,6 +70,7 @@ class DelegatingWebMvcConfigurationIntegrationTests {
 				"mvcContentNegotiationManager", "testContentNegotiationManager");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void viewControllerHandlerMappingUsesMvcInfrastructureByDefault() {
 		load(context -> context.registerBean(ViewControllerConfiguration.class));
@@ -78,6 +79,7 @@ class DelegatingWebMvcConfigurationIntegrationTests {
 		assertThat(handlerMapping.getUrlPathHelper()).isSameAs(this.context.getBean("mvcUrlPathHelper"));
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void viewControllerHandlerMappingWithPrimaryUsesQualifiedPathMatcher() {
 		load(registerPrimaryBean("testPathMatcher", PathMatcher.class)
@@ -88,6 +90,7 @@ class DelegatingWebMvcConfigurationIntegrationTests {
 				"mvcPathMatcher", "testPathMatcher");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void viewControllerHandlerMappingWithPrimaryUsesQualifiedUrlPathHelper() {
 		load(registerPrimaryBean("testUrlPathHelper", UrlPathHelper.class)
@@ -98,6 +101,7 @@ class DelegatingWebMvcConfigurationIntegrationTests {
 				"mvcUrlPathHelper", "testUrlPathHelper");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void resourceHandlerMappingUsesMvcInfrastructureByDefault() {
 		load(context -> context.registerBean(ResourceHandlerConfiguration.class));
@@ -106,6 +110,7 @@ class DelegatingWebMvcConfigurationIntegrationTests {
 		assertThat(handlerMapping.getUrlPathHelper()).isSameAs(this.context.getBean("mvcUrlPathHelper"));
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void resourceHandlerMappingWithPrimaryUsesQualifiedPathMatcher() {
 		load(registerPrimaryBean("testPathMatcher", PathMatcher.class)
@@ -116,6 +121,7 @@ class DelegatingWebMvcConfigurationIntegrationTests {
 				"mvcPathMatcher", "testPathMatcher");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void resourceHandlerMappingWithPrimaryUsesQualifiedUrlPathHelper() {
 		load(registerPrimaryBean("testUrlPathHelper", UrlPathHelper.class)

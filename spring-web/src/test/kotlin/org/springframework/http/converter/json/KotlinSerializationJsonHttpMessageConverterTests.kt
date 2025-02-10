@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,11 @@
 
 package org.springframework.http.converter.json
 
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.nio.charset.StandardCharsets
-
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
-import kotlin.reflect.javaType
-import kotlin.reflect.typeOf
-
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
@@ -35,8 +28,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.http.customJson
 import org.springframework.web.testfixture.http.MockHttpInputMessage
 import org.springframework.web.testfixture.http.MockHttpOutputMessage
+import java.lang.reflect.ParameterizedType
 import java.math.BigDecimal
+import java.nio.charset.StandardCharsets
+import kotlin.reflect.javaType
 import kotlin.reflect.jvm.javaMethod
+import kotlin.reflect.typeOf
 
 /**
  * Tests for the JSON conversion using kotlinx.serialization.
@@ -258,7 +255,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result)
 				.contains("\"bytes\":[1,2]")
 				.contains("\"array\":[\"Foo\",\"Bar\"]")
@@ -277,7 +274,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result)
 				.contains("\"bytes\":[1,2]")
 				.contains("\"array\":[\"Foo\",\"Bar\"]")
@@ -299,7 +296,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo(expectedJson)
 	}
 
@@ -317,7 +314,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo(expectedJson)
 	}
 
@@ -331,7 +328,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf(contentType.toString()))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", contentType.toString())).isTrue()
 		assertThat(result).isEqualTo("\"H\u00e9llo W\u00f6rld\"")
 	}
 
@@ -367,7 +364,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo("1.0")
 	}
 
@@ -384,8 +381,21 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
 		assertThat(result).isEqualTo(expectedJson)
+	}
+
+	@Test
+	fun writeProperty() {
+		val outputMessage = MockHttpOutputMessage()
+		val method = this::class.java.getDeclaredMethod("getValue")
+		val methodParameter = MethodParameter.forExecutable(method, -1)
+
+		this.converter.write(value, ResolvableType.forMethodParameter(methodParameter), null, outputMessage, null)
+		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
+
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/json")).isTrue()
+		assertThat(result).isEqualTo("42")
 	}
 
 
@@ -412,5 +422,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 	}
 
 	fun handleMapWithNullable(map: Map<String, String?>) = map
+
+	val value: Int
+		get() = 42
 
 }

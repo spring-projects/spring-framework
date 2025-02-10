@@ -32,6 +32,7 @@ import jakarta.validation.Payload;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.internal.constraintvalidators.bv.PatternValidator;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -45,7 +46,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.OverridingClassLoader;
-import org.springframework.lang.Nullable;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -79,7 +79,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(MethodParameterLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(MethodParameterLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(ExistsValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -89,7 +89,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(ConstructorParameterLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(ConstructorParameterLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(ExistsValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -99,7 +99,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(PropertyLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(PropertyLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(ExistsValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -109,7 +109,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(GenericTypeLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(2);
 		assertThat(RuntimeHintsPredicates.reflection().onType(GenericTypeLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -119,9 +119,9 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(TransitiveGenericTypeLevelConstraint.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(3);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TransitiveGenericTypeLevelConstraint.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(Exclude.class)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
@@ -132,7 +132,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		process(beanClass);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).hasSize(1);
 		assertThat(RuntimeHintsPredicates.reflection().onType(beanClass)
-				.withMemberCategory(MemberCategory.DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test  // gh-33940
@@ -150,8 +150,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		}
 	}
 
-	@Nullable
-	private BeanRegistrationAotContribution createContribution(Class<?> beanClass) {
+	private @Nullable BeanRegistrationAotContribution createContribution(Class<?> beanClass) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition(beanClass.getName(), new RootBeanDefinition(beanClass));
 		return this.processor.processAheadOfTime(RegisteredBean.of(beanFactory, beanClass.getName()));

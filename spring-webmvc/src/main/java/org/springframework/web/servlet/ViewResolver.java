@@ -18,7 +18,7 @@ package org.springframework.web.servlet;
 
 import java.util.Locale;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by objects that can resolve views by name.
@@ -52,7 +52,6 @@ public interface ViewResolver {
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)
 	 */
-	@Nullable
-	View resolveViewName(String viewName, Locale locale) throws Exception;
+	@Nullable View resolveViewName(String viewName, Locale locale) throws Exception;
 
 }

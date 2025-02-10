@@ -16,11 +16,12 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
@@ -35,8 +36,7 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public class WebSocketConfigurationSupport {
 
-	@Nullable
-	private ServletWebSocketHandlerRegistry handlerRegistry;
+	private @Nullable ServletWebSocketHandlerRegistry handlerRegistry;
 
 
 	@Bean
@@ -100,15 +100,13 @@ public class WebSocketConfigurationSupport {
 
 	static class DefaultSockJsSchedulerContainer implements InitializingBean, DisposableBean {
 
-		@Nullable
-		private final ThreadPoolTaskScheduler scheduler;
+		private final @Nullable ThreadPoolTaskScheduler scheduler;
 
 		DefaultSockJsSchedulerContainer(@Nullable ThreadPoolTaskScheduler scheduler) {
 			this.scheduler = scheduler;
 		}
 
-		@Nullable
-		public ThreadPoolTaskScheduler getScheduler() {
+		public @Nullable ThreadPoolTaskScheduler getScheduler() {
 			return this.scheduler;
 		}
 

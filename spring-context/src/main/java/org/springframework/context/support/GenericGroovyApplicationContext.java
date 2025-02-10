@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import groovy.lang.GroovyObject;
 import groovy.lang.GroovySystem;
 import groovy.lang.MetaClass;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 
 /**
  * An {@link org.springframework.context.ApplicationContext} implementation that extends
@@ -251,8 +251,7 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 	}
 
 	@Override
-	@Nullable
-	public Object getProperty(String property) {
+	public @Nullable Object getProperty(String property) {
 		if (containsBean(property)) {
 			return getBean(property);
 		}

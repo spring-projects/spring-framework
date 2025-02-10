@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.xmlunit.assertj.XmlAssert;
@@ -53,7 +54,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -970,8 +970,7 @@ class RequestResponseBodyMethodProcessorTests {
 			this.withView1 = withView1;
 		}
 
-		@Nullable
-		public String getWithView2() {
+		public @Nullable String getWithView2() {
 			return withView2;
 		}
 
@@ -979,8 +978,7 @@ class RequestResponseBodyMethodProcessorTests {
 			this.withView2 = withView2;
 		}
 
-		@Nullable
-		public String getWithoutView() {
+		public @Nullable String getWithoutView() {
 			return withoutView;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.ConstraintDescriptor;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
@@ -50,7 +51,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -235,8 +235,8 @@ public class MethodValidationAdapter implements MethodValidator {
 
 	@Override
 	public final MethodValidationResult validateArguments(
-			Object target, Method method, @Nullable MethodParameter[] parameters,
-			Object[] arguments, Class<?>[] groups) {
+			Object target, Method method, MethodParameter @Nullable [] parameters,
+			@Nullable Object[] arguments, Class<?>[] groups) {
 
 		Set<ConstraintViolation<Object>> violations =
 				invokeValidatorForArguments(target, method, arguments, groups);
@@ -254,7 +254,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * Invoke the validator, and return the resulting violations.
 	 */
 	public final Set<ConstraintViolation<Object>> invokeValidatorForArguments(
-			Object target, Method method, Object[] arguments, Class<?>[] groups) {
+			Object target, Method method, @Nullable Object[] arguments, Class<?>[] groups) {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		try {
@@ -298,7 +298,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	private MethodValidationResult adaptViolations(
 			Object target, Method method, Set<ConstraintViolation<Object>> violations,
 			Function<Integer, MethodParameter> parameterFunction,
-			Function<Integer, Object> argumentFunction) {
+			Function<Integer, @Nullable Object> argumentFunction) {
 
 		Map<Path.Node, ParamValidationResultBuilder> paramViolations = new LinkedHashMap<>();
 		Map<Path.Node, ParamErrorsBuilder> nestedViolations = new LinkedHashMap<>();
@@ -461,17 +461,13 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		private final MethodParameter parameter;
 
-		@Nullable
-		private final Object value;
+		private final @Nullable Object value;
 
-		@Nullable
-		private final Object container;
+		private final @Nullable Object container;
 
-		@Nullable
-		private final Integer containerIndex;
+		private final @Nullable Integer containerIndex;
 
-		@Nullable
-		private final Object containerKey;
+		private final @Nullable Object containerKey;
 
 		private final List<MessageSourceResolvable> resolvableErrors = new ArrayList<>();
 
@@ -511,17 +507,13 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		private final MethodParameter parameter;
 
-		@Nullable
-		private final Object bean;
+		private final @Nullable Object bean;
 
-		@Nullable
-		private final Object container;
+		private final @Nullable Object container;
 
-		@Nullable
-		private final Integer containerIndex;
+		private final @Nullable Integer containerIndex;
 
-		@Nullable
-		private final Object containerKey;
+		private final @Nullable Object containerKey;
 
 		private final Errors errors;
 

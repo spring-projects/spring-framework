@@ -18,10 +18,11 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.reflect.Field;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 
@@ -39,7 +40,7 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 
 
 	protected AbstractMockitoBeanOverrideHandler(@Nullable Field field, ResolvableType beanType,
-			@Nullable String beanName, BeanOverrideStrategy strategy, @Nullable MockReset reset) {
+			@Nullable String beanName, BeanOverrideStrategy strategy, MockReset reset) {
 
 		super(field, beanType, beanName, strategy);
 		this.reset = (reset != null ? reset : MockReset.AFTER);

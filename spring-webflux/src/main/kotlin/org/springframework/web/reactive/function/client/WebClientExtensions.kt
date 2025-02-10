@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@ package org.springframework.web.reactive.function.client
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -81,19 +80,6 @@ inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeaders
  */
 inline fun <reified T : Any> RequestBodySpec.bodyValueWithType(body: T): RequestHeadersSpec<*> =
 	bodyValue(body, object : ParameterizedTypeReference<T>() {})
-
-/**
- * Coroutines variant of [WebClient.RequestHeadersSpec.exchange].
- *
- * @author Sebastien Deleuze
- * @since 5.2
- */
-@Suppress("DEPRECATION")
-@Deprecated("Deprecated since 5.3 due to the possibility to leak memory and/or connections; please," +
-		"use awaitExchange { } or exchangeToFlow { } instead; consider also using retrieve()" +
-		"which provides access to the response status and headers via ResponseEntity along with error status handling.")
-suspend fun RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(): ClientResponse =
-		exchange().awaitSingle()
 
 /**
  * Coroutines variant of [WebClient.RequestHeadersSpec.exchangeToMono].

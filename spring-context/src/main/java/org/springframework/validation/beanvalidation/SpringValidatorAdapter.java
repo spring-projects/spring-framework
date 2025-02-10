@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import jakarta.validation.ValidationException;
 import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.BeanDescriptor;
 import jakarta.validation.metadata.ConstraintDescriptor;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -69,8 +69,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	private static final Set<String> internalAnnotationAttributes = Set.of("message", "groups", "payload");
 
 
-	@Nullable
-	private jakarta.validation.Validator targetValidator;
+	private jakarta.validation.@Nullable Validator targetValidator;
 
 
 	/**
@@ -117,7 +116,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public void validateValue(
-			Class<?> targetType, String fieldName, @Nullable Object value, Errors errors, Object... validationHints) {
+			Class<?> targetType, @Nullable String fieldName, @Nullable Object value, Errors errors, Object... validationHints) {
 
 		if (this.targetValidator != null) {
 			processConstraintViolations(this.targetValidator.validateValue(
@@ -305,8 +304,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	 * @see jakarta.validation.ConstraintViolation#getInvalidValue()
 	 * @see org.springframework.validation.FieldError#getRejectedValue()
 	 */
-	@Nullable
-	protected Object getRejectedValue(String field, ConstraintViolation<Object> violation, BindingResult bindingResult) {
+	protected @Nullable Object getRejectedValue(String field, ConstraintViolation<Object> violation, BindingResult bindingResult) {
 		Object invalidValue = violation.getInvalidValue();
 		if (!field.isEmpty() && !field.contains("[]") &&
 				(invalidValue == violation.getLeafBean() || field.contains("[") || field.contains("."))) {
@@ -423,8 +421,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 		}
 
 		@Override
-		@Nullable
-		public Object[] getArguments() {
+		public Object @Nullable [] getArguments() {
 			return null;
 		}
 
@@ -446,11 +443,9 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	@SuppressWarnings("serial")
 	private static class ViolationObjectError extends ObjectError implements Serializable {
 
-		@Nullable
-		private transient SpringValidatorAdapter adapter;
+		private @Nullable transient SpringValidatorAdapter adapter;
 
-		@Nullable
-		private transient ConstraintViolation<?> violation;
+		private @Nullable transient ConstraintViolation<?> violation;
 
 		public ViolationObjectError(String objectName, String[] codes, Object[] arguments,
 				ConstraintViolation<?> violation, SpringValidatorAdapter adapter) {
@@ -476,11 +471,9 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	@SuppressWarnings("serial")
 	private static class ViolationFieldError extends FieldError implements Serializable {
 
-		@Nullable
-		private transient SpringValidatorAdapter adapter;
+		private @Nullable transient SpringValidatorAdapter adapter;
 
-		@Nullable
-		private transient ConstraintViolation<?> violation;
+		private @Nullable transient ConstraintViolation<?> violation;
 
 		public ViolationFieldError(String objectName, String field, @Nullable Object rejectedValue, String[] codes,
 				Object[] arguments, ConstraintViolation<?> violation, SpringValidatorAdapter adapter) {

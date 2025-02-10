@@ -23,11 +23,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodClassKey;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringValueResolver;
@@ -70,8 +70,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private transient StringValueResolver embeddedValueResolver;
+	private transient @Nullable StringValueResolver embeddedValueResolver;
 
 	/**
 	 * Cache of TransactionAttributes, keyed by method on a specific target class.
@@ -93,8 +92,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	}
 
 	@Override
-	@Nullable
-	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+	public @Nullable TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		return getTransactionAttribute(method, targetClass, true);
 	}
 
@@ -107,8 +105,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 * @return a TransactionAttribute for this method, or {@code null} if the method
 	 * is not transactional
 	 */
-	@Nullable
-	private TransactionAttribute getTransactionAttribute(
+	private @Nullable TransactionAttribute getTransactionAttribute(
 			Method method, @Nullable Class<?> targetClass, boolean cacheNull) {
 
 		if (ReflectionUtils.isObjectMethod(method)) {
@@ -160,8 +157,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 * @since 4.1.8
 	 * @see #getTransactionAttribute
 	 */
-	@Nullable
-	protected TransactionAttribute computeTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+	protected @Nullable TransactionAttribute computeTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow non-public methods, as configured.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -206,8 +202,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 * @param clazz the class to retrieve the attribute for
 	 * @return all transaction attribute associated with this class, or {@code null} if none
 	 */
-	@Nullable
-	protected abstract TransactionAttribute findTransactionAttribute(Class<?> clazz);
+	protected abstract @Nullable TransactionAttribute findTransactionAttribute(Class<?> clazz);
 
 	/**
 	 * Subclasses need to implement this to return the transaction attribute for the
@@ -215,8 +210,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 * @param method the method to retrieve the attribute for
 	 * @return all transaction attribute associated with this method, or {@code null} if none
 	 */
-	@Nullable
-	protected abstract TransactionAttribute findTransactionAttribute(Method method);
+	protected abstract @Nullable TransactionAttribute findTransactionAttribute(Method method);
 
 	/**
 	 * Should only public methods be allowed to have transactional semantics?

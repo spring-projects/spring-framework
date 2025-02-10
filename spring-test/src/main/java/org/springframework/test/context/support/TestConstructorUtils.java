@@ -23,11 +23,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -62,15 +62,6 @@ public abstract class TestConstructorUtils {
 		}
 		catch (ClassNotFoundException ex) {
 			// jakarta.inject API not available - simply skip.
-		}
-
-		try {
-			autowiredAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("javax.inject.Inject", classLoader));
-			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
-		}
-		catch (ClassNotFoundException ex) {
-			// javax.inject API not available - simply skip.
 		}
 	}
 
@@ -135,9 +126,8 @@ public abstract class TestConstructorUtils {
 	 * conditions is {@code true}.
 	 *
 	 * <ol>
-	 * <li>The constructor is annotated with {@link Autowired @Autowired},
-	 * {@link jakarta.inject.Inject @jakarta.inject.Inject}, or
-	 * {@link javax.inject.Inject @javax.inject.Inject}.</li>
+	 * <li>The constructor is annotated with {@link Autowired @Autowired} or
+	 * {@link jakarta.inject.Inject @jakarta.inject.Inject}.</li>
 	 * <li>{@link TestConstructor @TestConstructor} is <em>present</em> or
 	 * <em>meta-present</em> on the test class with
 	 * {@link TestConstructor#autowireMode() autowireMode} set to

@@ -19,7 +19,7 @@ package org.springframework.aot.hint;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Type abstraction that can be used to refer to types that are not available as
@@ -62,8 +62,7 @@ public interface TypeReference extends Comparable<TypeReference> {
 	 * does not have an enclosing type.
 	 * @return the enclosing type, if any
 	 */
-	@Nullable
-	TypeReference getEnclosingType();
+	@Nullable TypeReference getEnclosingType();
 
 	/**
 	 * Create an instance based on the specified type.

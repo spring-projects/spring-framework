@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ class MockitoSpyBeanConfigurationErrorTests {
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to wrap bean: there is no bean with name 'beanToSpy' and \
-						type java.lang.String (as required by field 'ByNameSingleLookup.example').""");
+						type java.lang.String (as required by field 'ByNameSingleLookup.example'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 		}
 
 	@Test
@@ -52,7 +54,9 @@ class MockitoSpyBeanConfigurationErrorTests {
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean to wrap: there are no beans of type java.lang.String \
-						(as required by field 'ByTypeSingleLookup.example').""");
+						(as required by field 'ByTypeSingleLookup.example'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 	}
 
 	@Test

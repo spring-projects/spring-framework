@@ -23,14 +23,13 @@ import java.nio.charset.Charset;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently
@@ -102,13 +101,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private final String subtype;
 
+	@SuppressWarnings("serial")
 	private final Map<String, String> parameters;
 
-	@Nullable
-	private transient Charset resolvedCharset;
+	private transient @Nullable Charset resolvedCharset;
 
-	@Nullable
-	private volatile String toStringValue;
+	private volatile @Nullable String toStringValue;
 
 
 	/**
@@ -296,8 +294,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Return the subtype suffix as defined in RFC 6839.
 	 * @since 5.3
 	 */
-	@Nullable
-	public String getSubtypeSuffix() {
+	public @Nullable String getSubtypeSuffix() {
 		int suffixIndex = this.subtype.lastIndexOf('+');
 		if (suffixIndex != -1 && this.subtype.length() > suffixIndex) {
 			return this.subtype.substring(suffixIndex + 1);
@@ -310,8 +307,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return the character set, or {@code null} if not available
 	 * @since 4.3
 	 */
-	@Nullable
-	public Charset getCharset() {
+	public @Nullable Charset getCharset() {
 		return this.resolvedCharset;
 	}
 
@@ -320,8 +316,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param name the parameter name
 	 * @return the parameter value, or {@code null} if not present
 	 */
-	@Nullable
-	public String getParameter(String name) {
+	public @Nullable String getParameter(String name) {
 		return this.parameters.get(name);
 	}
 
@@ -693,50 +688,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		Map<String, String> map = new LinkedHashMap<>(parameters);
 		map.put(PARAM_CHARSET, charset.name());
 		return map;
-	}
-
-
-	/**
-	 * Comparator to sort {@link MimeType MimeTypes} in order of specificity.
-	 *
-	 * @param <T> the type of mime types that may be compared by this comparator
-	 * @deprecated As of 6.0, with no direct replacement
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public static class SpecificityComparator<T extends MimeType> implements Comparator<T> {
-
-		@Override
-		public int compare(T mimeType1, T mimeType2) {
-			if (mimeType1.isWildcardType() && !mimeType2.isWildcardType()) {  // */* < audio/*
-				return 1;
-			}
-			else if (mimeType2.isWildcardType() && !mimeType1.isWildcardType()) {  // audio/* > */*
-				return -1;
-			}
-			else if (!mimeType1.getType().equals(mimeType2.getType())) {  // audio/basic == text/html
-				return 0;
-			}
-			else {  // mediaType1.getType().equals(mediaType2.getType())
-				if (mimeType1.isWildcardSubtype() && !mimeType2.isWildcardSubtype()) {  // audio/* < audio/basic
-					return 1;
-				}
-				else if (mimeType2.isWildcardSubtype() && !mimeType1.isWildcardSubtype()) {  // audio/basic > audio/*
-					return -1;
-				}
-				else if (!mimeType1.getSubtype().equals(mimeType2.getSubtype())) {  // audio/basic == audio/wave
-					return 0;
-				}
-				else {  // mediaType2.getSubtype().equals(mediaType2.getSubtype())
-					return compareParameters(mimeType1, mimeType2);
-				}
-			}
-		}
-
-		protected int compareParameters(T mimeType1, T mimeType2) {
-			int paramsSize1 = mimeType1.getParameters().size();
-			int paramsSize2 = mimeType2.getParameters().size();
-			return Integer.compare(paramsSize2, paramsSize1);  // audio/basic;level=1 < audio/basic
-		}
 	}
 
 }

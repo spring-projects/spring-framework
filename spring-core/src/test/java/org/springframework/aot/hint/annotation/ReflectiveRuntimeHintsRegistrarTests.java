@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	void shouldInvokeCustomProcessor() {
 		process(SampleCustomProcessor.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(SampleCustomProcessor.class, "managed")).accepts(this.runtimeHints);
+				.onMethodInvocation(SampleCustomProcessor.class, "managed")).accepts(this.runtimeHints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(String.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.runtimeHints);
 

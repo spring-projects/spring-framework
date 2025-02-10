@@ -20,9 +20,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -43,8 +44,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private final WebSocketHandler webSocketHandler;
 
-	@Nullable
-	private WebSocketSession webSocketSession;
+	private @Nullable WebSocketSession webSocketSession;
 
 	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
@@ -53,7 +53,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	 * Constructor with the client to use and a handler to handle messages with.
 	 */
 	public WebSocketConnectionManager(WebSocketClient client,
-			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
+			WebSocketHandler webSocketHandler, String uriTemplate, @Nullable Object... uriVariables) {
 
 		super(uriTemplate, uriVariables);
 		this.client = client;
@@ -99,8 +99,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	/**
 	 * Return the configured origin.
 	 */
-	@Nullable
-	public String getOrigin() {
+	public @Nullable String getOrigin() {
 		return this.headers.getOrigin();
 	}
 

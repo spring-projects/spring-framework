@@ -28,10 +28,10 @@ import org.aspectj.weaver.patterns.IScope;
 import org.aspectj.weaver.patterns.PatternParser;
 import org.aspectj.weaver.patterns.SimpleScope;
 import org.aspectj.weaver.patterns.TypePattern;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * Type filter that uses AspectJ type pattern for matching.

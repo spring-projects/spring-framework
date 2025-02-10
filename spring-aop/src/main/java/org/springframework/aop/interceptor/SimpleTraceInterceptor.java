@@ -18,6 +18,7 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 
@@ -55,7 +56,7 @@ public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 
 
 	@Override
-	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
+	protected @Nullable Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String invocationDescription = getInvocationDescription(invocation);
 		writeToLog(logger, "Entering " + invocationDescription);
 		try {

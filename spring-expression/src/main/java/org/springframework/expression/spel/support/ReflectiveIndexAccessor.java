@@ -19,6 +19,8 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.IndexAccessor;
@@ -26,7 +28,6 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.CompilableIndexAccessor;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -114,8 +115,7 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 
 	private final Method readMethodToInvoke;
 
-	@Nullable
-	private final Method writeMethodToInvoke;
+	private final @Nullable Method writeMethodToInvoke;
 
 
 	/**

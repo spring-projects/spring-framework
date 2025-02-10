@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledForJreRange;
-import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
@@ -43,7 +41,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -90,7 +87,6 @@ public class FreeMarkerMacroTests {
 
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 	}
 
 
@@ -148,12 +144,6 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	@DisabledForJreRange(min = JRE.JAVA_21)
-	public void testAge() throws Exception {
-		assertThat(getMacroOutput("AGE")).isEqualTo("99");
-	}
-
-	@Test
 	void testMessage() throws Exception {
 		assertThat(getMacroOutput("MESSAGE")).isEqualTo("Howdy Mundo");
 	}
@@ -171,26 +161,6 @@ public class FreeMarkerMacroTests {
 	@Test
 	void testMessageArgsWithDefaultMessage() throws Exception {
 		assertThat(getMacroOutput("MESSAGEARGSWITHDEFAULTMESSAGE")).isEqualTo("Hi");
-	}
-
-	@Test
-	void testTheme() throws Exception {
-		assertThat(getMacroOutput("THEME")).isEqualTo("Howdy! Mundo!");
-	}
-
-	@Test
-	void testDefaultTheme() throws Exception {
-		assertThat(getMacroOutput("DEFAULTTHEME")).isEqualTo("hi! planet!");
-	}
-
-	@Test
-	void testThemeArgs() throws Exception {
-		assertThat(getMacroOutput("THEMEARGS")).isEqualTo("Howdy![World]");
-	}
-
-	@Test
-	void testThemeArgsWithDefaultMessage() throws Exception {
-		assertThat(getMacroOutput("THEMEARGSWITHDEFAULTMESSAGE")).isEqualTo("Hi!");
 	}
 
 	@Test
@@ -293,10 +263,6 @@ public class FreeMarkerMacroTests {
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
 		rc.setMessageMap(msgMap);
-		Map<String, String> themeMsgMap = new HashMap<>();
-		themeMsgMap.put("hello", "Howdy!");
-		themeMsgMap.put("world", "Mundo!");
-		rc.setThemeMessageMap(themeMsgMap);
 		rc.setContextPath("/springtest");
 
 		TestBean darren = new TestBean("Darren", 99);

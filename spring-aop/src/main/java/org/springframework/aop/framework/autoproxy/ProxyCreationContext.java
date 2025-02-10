@@ -16,8 +16,9 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.Nullable;
 
 /**
  * Holder for the current proxy creation context, as exposed by auto-proxy creators
@@ -42,8 +43,7 @@ public final class ProxyCreationContext {
 	 * Return the name of the currently proxied bean instance.
 	 * @return the name of the bean, or {@code null} if none available
 	 */
-	@Nullable
-	public static String getCurrentProxiedBeanName() {
+	public static @Nullable String getCurrentProxiedBeanName() {
 		return currentProxiedBeanName.get();
 	}
 

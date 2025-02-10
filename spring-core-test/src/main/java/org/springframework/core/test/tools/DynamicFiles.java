@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Internal class used by {@link SourceFiles} and {@link ResourceFiles} to
@@ -83,8 +83,7 @@ final class DynamicFiles<F extends DynamicFile> implements Iterable<F> {
 		return this.files.isEmpty();
 	}
 
-	@Nullable
-	F get(String path) {
+	@Nullable F get(String path) {
 		return this.files.get(path);
 	}
 

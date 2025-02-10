@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,6 @@ class ContentNegotiationManagerFactoryBeanTests {
 		this.webRequest = new ServletWebRequest(this.servletRequest);
 
 		this.factoryBean = new ContentNegotiationManagerFactoryBean();
-		this.factoryBean.setServletContext(this.servletRequest.getServletContext());
 	}
 
 
@@ -116,42 +115,6 @@ class ContentNegotiationManagerFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void favorPath() throws Exception {
-		this.factoryBean.setFavorPathExtension(true);
-		this.factoryBean.addMediaType("bar", new MediaType("application", "bar"));
-		this.factoryBean.afterPropertiesSet();
-		ContentNegotiationManager manager = this.factoryBean.getObject();
-
-		this.servletRequest.setRequestURI("/flower.foo");
-		assertThat(manager.resolveMediaTypes(this.webRequest))
-				.isEqualTo(Collections.singletonList(new MediaType("application", "foo")));
-
-		this.servletRequest.setRequestURI("/flower.bar");
-		assertThat(manager.resolveMediaTypes(this.webRequest))
-				.isEqualTo(Collections.singletonList(new MediaType("application", "bar")));
-
-		this.servletRequest.setRequestURI("/flower.gif");
-		assertThat(manager.resolveMediaTypes(this.webRequest))
-				.isEqualTo(Collections.singletonList(MediaType.IMAGE_GIF));
-	}
-
-	@Test // SPR-10170
-	@SuppressWarnings("deprecation")
-	void favorPathWithIgnoreUnknownPathExtensionTurnedOff() {
-		this.factoryBean.setFavorPathExtension(true);
-		this.factoryBean.setIgnoreUnknownPathExtensions(false);
-		this.factoryBean.afterPropertiesSet();
-		ContentNegotiationManager manager = this.factoryBean.getObject();
-
-		this.servletRequest.setRequestURI("/flower.foobarbaz");
-		this.servletRequest.addParameter("format", "json");
-
-		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
-				manager.resolveMediaTypes(this.webRequest));
-	}
-
-	@Test
 	void favorParameter() throws Exception {
 		this.factoryBean.setFavorParameter(true);
 		this.factoryBean.addMediaType("json", MediaType.APPLICATION_JSON);
@@ -180,9 +143,7 @@ class ContentNegotiationManagerFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void mediaTypeMappingsWithoutPathAndParameterStrategies() {
-		this.factoryBean.setFavorPathExtension(false);
 		this.factoryBean.setFavorParameter(false);
 
 		Properties properties = new Properties();
@@ -201,9 +162,7 @@ class ContentNegotiationManagerFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void fileExtensions() {
-		this.factoryBean.setFavorPathExtension(false);
 		this.factoryBean.setFavorParameter(false);
 
 		Properties properties = new Properties();

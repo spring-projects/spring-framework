@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,15 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -52,7 +55,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -117,43 +119,33 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
 	}
 
-	@Nullable
-	private String baseUrl;
+	private @Nullable String baseUrl;
 
-	@Nullable
-	private Map<String, ?> defaultUriVariables;
+	private @Nullable Map<String, ?> defaultUriVariables;
 
-	@Nullable
-	private UriBuilderFactory uriBuilderFactory;
+	private @Nullable UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private HttpHeaders defaultHeaders;
+	private @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private MultiValueMap<String, String> defaultCookies;
+	private @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest;
+	private @Nullable Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest;
 
-	@Nullable
-	private List<StatusHandler> statusHandlers;
+	private @Nullable List<StatusHandler> statusHandlers;
 
-	@Nullable
-	private ClientHttpRequestFactory requestFactory;
+	private @Nullable List<ClientHttpRequestInterceptor> interceptors;
 
-	@Nullable
-	private List<HttpMessageConverter<?>> messageConverters;
+	private @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
 
-	@Nullable
-	private List<ClientHttpRequestInterceptor> interceptors;
+	private @Nullable List<ClientHttpRequestInitializer> initializers;
 
-	@Nullable
-	private List<ClientHttpRequestInitializer> initializers;
+	private @Nullable ClientHttpRequestFactory requestFactory;
+
+	private @Nullable List<HttpMessageConverter<?>> messageConverters;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	@Nullable
-	private ClientRequestObservationConvention observationConvention;
+	private @Nullable ClientRequestObservationConvention observationConvention;
 
 
 	public DefaultRestClientBuilder() {
@@ -163,10 +155,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		Assert.notNull(other, "Other must not be null");
 
 		this.baseUrl = other.baseUrl;
-		this.defaultUriVariables = (other.defaultUriVariables != null ?
-				new LinkedHashMap<>(other.defaultUriVariables) : null);
+		this.defaultUriVariables = (other.defaultUriVariables != null ? new LinkedHashMap<>(other.defaultUriVariables) : null);
 		this.uriBuilderFactory = other.uriBuilderFactory;
-
 		if (other.defaultHeaders != null) {
 			this.defaultHeaders = new HttpHeaders();
 			this.defaultHeaders.putAll(other.defaultHeaders);
@@ -174,17 +164,14 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		else {
 			this.defaultHeaders = null;
 		}
-		this.defaultCookies = (other.defaultCookies != null ?
-				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new ArrayList<>(other.statusHandlers) : null);
-
-		this.requestFactory = other.requestFactory;
-		this.messageConverters = (other.messageConverters != null ?
-				new ArrayList<>(other.messageConverters) : null);
-
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
+		this.bufferingPredicate = other.bufferingPredicate;
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
+		this.requestFactory = other.requestFactory;
+		this.messageConverters = (other.messageConverters != null ? new ArrayList<>(other.messageConverters) : null);
 		this.observationRegistry = other.observationRegistry;
 		this.observationConvention = other.observationConvention;
 	}
@@ -195,22 +182,20 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.uriBuilderFactory = getUriBuilderFactory(restTemplate);
 		this.statusHandlers = new ArrayList<>();
 		this.statusHandlers.add(StatusHandler.fromErrorHandler(restTemplate.getErrorHandler()));
-
-		this.requestFactory = getRequestFactory(restTemplate);
-		this.messageConverters = new ArrayList<>(restTemplate.getMessageConverters());
-
 		if (!CollectionUtils.isEmpty(restTemplate.getInterceptors())) {
 			this.interceptors = new ArrayList<>(restTemplate.getInterceptors());
 		}
+		this.bufferingPredicate = restTemplate.getBufferingPredicate();
 		if (!CollectionUtils.isEmpty(restTemplate.getClientHttpRequestInitializers())) {
 			this.initializers = new ArrayList<>(restTemplate.getClientHttpRequestInitializers());
 		}
+		this.requestFactory = getRequestFactory(restTemplate);
+		this.messageConverters = new ArrayList<>(restTemplate.getMessageConverters());
 		this.observationRegistry = restTemplate.getObservationRegistry();
 		this.observationConvention = restTemplate.getObservationConvention();
 	}
 
-	@Nullable
-	private static UriBuilderFactory getUriBuilderFactory(RestTemplate restTemplate) {
+	private static @Nullable UriBuilderFactory getUriBuilderFactory(RestTemplate restTemplate) {
 		UriTemplateHandler uriTemplateHandler = restTemplate.getUriTemplateHandler();
 		if (uriTemplateHandler instanceof DefaultUriBuilderFactory builderFactory) {
 			// only reuse the DefaultUriBuilderFactory if it has been customized
@@ -361,6 +346,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
+	public RestClient.Builder bufferContent(BiPredicate<URI, HttpMethod> predicate) {
+		this.bufferingPredicate = predicate;
+		return this;
+	}
+
+	@Override
 	public RestClient.Builder requestInitializer(ClientHttpRequestInitializer initializer) {
 		Assert.notNull(initializer, "Initializer must not be null");
 		initInitializers().add(initializer);
@@ -476,7 +467,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				(this.messageConverters != null ? this.messageConverters : initMessageConverters());
 
 		return new DefaultRestClient(
-				requestFactory, this.interceptors, this.initializers,
+				requestFactory, this.interceptors, this.bufferingPredicate, this.initializers,
 				uriBuilderFactory, defaultHeaders, defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
@@ -517,8 +508,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return factory;
 	}
 
-	@Nullable
-	private HttpHeaders copyDefaultHeaders() {
+	private @Nullable HttpHeaders copyDefaultHeaders() {
 		if (this.defaultHeaders == null) {
 			return null;
 		}
@@ -527,8 +517,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return HttpHeaders.readOnlyHttpHeaders(copy);
 	}
 
-	@Nullable
-	private MultiValueMap<String, String> copyDefaultCookies() {
+	private @Nullable MultiValueMap<String, String> copyDefaultCookies() {
 		if (this.defaultCookies == null) {
 			return null;
 		}

@@ -16,8 +16,9 @@
 
 package org.springframework.web.multipart;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when multipart resolution fails.

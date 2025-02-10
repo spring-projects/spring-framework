@@ -16,8 +16,9 @@
 
 package org.springframework.web.bind.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.BindParam;
@@ -33,8 +34,7 @@ import org.springframework.web.bind.annotation.BindParam;
 public final class BindParamNameResolver implements DataBinder.NameResolver {
 
 	@Override
-	@Nullable
-	public String resolveName(MethodParameter parameter) {
+	public @Nullable String resolveName(MethodParameter parameter) {
 		BindParam bindParam = parameter.getParameterAnnotation(BindParam.class);
 		if (bindParam != null) {
 			if (StringUtils.hasText(bindParam.value())) {

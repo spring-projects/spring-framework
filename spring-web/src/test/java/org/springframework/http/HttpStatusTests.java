@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,12 @@
 package org.springframework.http;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * @author Arjen Poutsma
@@ -62,7 +55,6 @@ class HttpStatusTests {
 		statusCodes.put(302, "FOUND");
 		statusCodes.put(303, "SEE_OTHER");
 		statusCodes.put(304, "NOT_MODIFIED");
-		statusCodes.put(305, "USE_PROXY");
 		statusCodes.put(307, "TEMPORARY_REDIRECT");
 		statusCodes.put(308, "PERMANENT_REDIRECT");
 
@@ -85,9 +77,6 @@ class HttpStatusTests {
 		statusCodes.put(416, "REQUESTED_RANGE_NOT_SATISFIABLE");
 		statusCodes.put(417, "EXPECTATION_FAILED");
 		statusCodes.put(418, "I_AM_A_TEAPOT");
-		statusCodes.put(419, "INSUFFICIENT_SPACE_ON_RESOURCE");
-		statusCodes.put(420, "METHOD_FAILURE");
-		statusCodes.put(421, "DESTINATION_LOCKED");
 		statusCodes.put(422, "UNPROCESSABLE_ENTITY");
 		statusCodes.put(423, "LOCKED");
 		statusCodes.put(424, "FAILED_DEPENDENCY");
@@ -127,9 +116,6 @@ class HttpStatusTests {
 	void fromEnumToMap() {
 		for (HttpStatus status : HttpStatus.values()) {
 			int code = status.value();
-			if (DEPRECATED_CODES.contains(status)) {
-				continue;
-			}
 			assertThat(statusCodes).as("Map has no value for [" + code + "]").containsKey(code);
 			assertThat(status.name()).as("Invalid name for [" + code + "]").isEqualTo(statusCodes.get(code));
 		}
@@ -142,37 +128,6 @@ class HttpStatusTests {
 			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(status.value());
 			assertThat(status.series()).isEqualTo(expectedSeries);
 		}
-	}
-
-	@ParameterizedTest(name = "[{index}] code {0}")
-	@MethodSource("codesWithAliases")
-	void codeWithDeprecatedAlias(int code, HttpStatus expected, HttpStatus outdated) {
-		HttpStatus resolved = HttpStatus.valueOf(code);
-		assertThat(resolved)
-				.as("HttpStatus.valueOf(" + code + ")")
-				.isSameAs(expected)
-				.isNotEqualTo(outdated);
-		assertThat(outdated.isSameCodeAs(resolved))
-				.as("outdated isSameCodeAs(resolved)")
-				.isTrue();
-		assertThat(outdated.value())
-				.as("outdated value()")
-				.isEqualTo(resolved.value());
-	}
-
-	private static final Set<HttpStatus> DEPRECATED_CODES = codesWithAliases()
-				.stream()
-				.map(args -> (HttpStatus) args.get()[2])
-				.collect(Collectors.toUnmodifiableSet());
-
-	@SuppressWarnings("deprecation")
-	static List<Arguments> codesWithAliases() {
-		return List.of(
-				arguments(103, HttpStatus.EARLY_HINTS, HttpStatus.CHECKPOINT),
-				arguments(302, HttpStatus.FOUND, HttpStatus.MOVED_TEMPORARILY),
-				arguments(413, HttpStatus.PAYLOAD_TOO_LARGE, HttpStatus.REQUEST_ENTITY_TOO_LARGE),
-				arguments(414, HttpStatus.URI_TOO_LONG, HttpStatus.REQUEST_URI_TOO_LONG)
-		);
 	}
 
 }

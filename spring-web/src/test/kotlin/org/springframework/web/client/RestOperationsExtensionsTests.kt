@@ -20,6 +20,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
@@ -269,6 +270,7 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
+	@Disabled("May require Kotlin 2") // TODO Enable after Kotlin 2 upgrade
 	fun `RestOperations are available`() {
 		val extensions = Class.forName("org.springframework.web.client.RestOperationsExtensionsKt")
 		ReflectionUtils.doWithMethods(RestOperations::class.java) { method ->
@@ -277,7 +279,9 @@ class RestOperationsExtensionsTests {
 					val parameters = mutableListOf<Class<*>>(RestOperations::class.java).apply { addAll(method.parameterTypes.filter { it !=  kClass.java }) }
 					val f = extensions.getDeclaredMethod(method.name, *parameters.toTypedArray()).kotlinFunction!!
 					assertThat(f.typeParameters.size).isEqualTo(1)
-					assertThat(f.typeParameters[0].upperBounds).isEqualTo(listOf(Any::class.createType(nullable = true)))
+					val type = f.typeParameters[0].upperBounds.first()
+					assertThat(type.classifier).isEqualTo(Any::class)
+					assertThat(type.isMarkedNullable).isTrue()
 				}
 			}
 		}

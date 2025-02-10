@@ -21,7 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -80,8 +81,7 @@ public class CompositeMessageCondition implements MessageCondition<CompositeMess
 	}
 
 	@Override
-	@Nullable
-	public CompositeMessageCondition getMatchingCondition(Message<?> message) {
+	public @Nullable CompositeMessageCondition getMatchingCondition(Message<?> message) {
 		List<MessageCondition<?>> result = new ArrayList<>(this.messageConditions.size());
 		for (MessageCondition<?> condition : this.messageConditions) {
 			MessageCondition<?> matchingCondition = (MessageCondition<?>) condition.getMatchingCondition(message);

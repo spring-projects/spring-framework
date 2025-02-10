@@ -1,9 +1,7 @@
 /**
  * Annotations for declaring HTTP service request methods.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.service.annotation;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

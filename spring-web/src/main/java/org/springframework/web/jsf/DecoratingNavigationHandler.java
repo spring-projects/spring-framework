@@ -18,8 +18,7 @@ package org.springframework.web.jsf;
 
 import jakarta.faces.application.NavigationHandler;
 import jakarta.faces.context.FacesContext;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for JSF NavigationHandler implementations that want
@@ -39,8 +38,7 @@ import org.springframework.lang.Nullable;
  */
 public abstract class DecoratingNavigationHandler extends NavigationHandler {
 
-	@Nullable
-	private NavigationHandler decoratedNavigationHandler;
+	private @Nullable NavigationHandler decoratedNavigationHandler;
 
 
 	/**
@@ -61,8 +59,7 @@ public abstract class DecoratingNavigationHandler extends NavigationHandler {
 	 * Return the fixed original NavigationHandler decorated by this handler, if any
 	 * (that is, if passed in through the constructor).
 	 */
-	@Nullable
-	public final NavigationHandler getDecoratedNavigationHandler() {
+	public final @Nullable NavigationHandler getDecoratedNavigationHandler() {
 		return this.decoratedNavigationHandler;
 	}
 

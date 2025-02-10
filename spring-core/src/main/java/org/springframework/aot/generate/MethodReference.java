@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package org.springframework.aot.generate;
 
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.TypeName;
-import org.springframework.lang.Nullable;
 
 /**
  * A reference to a method with convenient code generation for
@@ -74,8 +75,7 @@ public interface MethodReference {
 		 * @param argumentType the argument type
 		 * @return the code for this argument, or {@code null}
 		 */
-		@Nullable
-		CodeBlock generateCode(TypeName argumentType);
+		@Nullable CodeBlock generateCode(TypeName argumentType);
 
 		/**
 		 * Factory method that returns an {@link ArgumentCodeGenerator} that
@@ -106,7 +106,7 @@ public interface MethodReference {
 		 * @param function the resolver function
 		 * @return a new {@link ArgumentCodeGenerator} instance backed by the function
 		 */
-		static ArgumentCodeGenerator from(Function<TypeName, CodeBlock> function) {
+		static ArgumentCodeGenerator from(Function<TypeName, @Nullable CodeBlock> function) {
 			return function::apply;
 		}
 

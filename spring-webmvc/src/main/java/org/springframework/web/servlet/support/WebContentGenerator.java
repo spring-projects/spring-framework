@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import java.util.concurrent.TimeUnit;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -73,21 +73,17 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/** Set of supported HTTP methods. */
-	@Nullable
-	private Set<String> supportedMethods;
+	private @Nullable Set<String> supportedMethods;
 
-	@Nullable
-	private String allowHeader;
+	private @Nullable String allowHeader;
 
 	private boolean requireSession = false;
 
-	@Nullable
-	private CacheControl cacheControl;
+	private @Nullable CacheControl cacheControl;
 
 	private int cacheSeconds = -1;
 
-	@Nullable
-	private String[] varyByRequestHeaders;
+	private String @Nullable [] varyByRequestHeaders;
 
 
 	/**
@@ -128,7 +124,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * <p>Default is GET, HEAD and POST for simple form controller types;
 	 * unrestricted for general controllers and interceptors.
 	 */
-	public final void setSupportedMethods(@Nullable String... methods) {
+	public final void setSupportedMethods(String @Nullable ... methods) {
 		if (!ObjectUtils.isEmpty(methods)) {
 			this.supportedMethods = new LinkedHashSet<>(Arrays.asList(methods));
 		}
@@ -141,8 +137,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Return the HTTP methods that this content generator supports.
 	 */
-	@Nullable
-	public final String[] getSupportedMethods() {
+	public final String @Nullable [] getSupportedMethods() {
 		return (this.supportedMethods != null ? StringUtils.toStringArray(this.supportedMethods) : null);
 	}
 
@@ -176,8 +171,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * call to {@link #checkRequest(HttpServletRequest)}.
 	 * @since 4.3
 	 */
-	@Nullable
-	protected String getAllowHeader() {
+	protected @Nullable String getAllowHeader() {
 		return this.allowHeader;
 	}
 
@@ -209,8 +203,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * that builds the Cache-Control HTTP response header.
 	 * @since 4.2
 	 */
-	@Nullable
-	public final CacheControl getCacheControl() {
+	public final @Nullable CacheControl getCacheControl() {
 		return this.cacheControl;
 	}
 
@@ -246,7 +239,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
 	 */
-	public final void setVaryByRequestHeaders(@Nullable String... varyByRequestHeaders) {
+	public final void setVaryByRequestHeaders(String @Nullable ... varyByRequestHeaders) {
 		this.varyByRequestHeaders = varyByRequestHeaders;
 	}
 
@@ -254,8 +247,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Return the configured request header names for the "Vary" response header.
 	 * @since 4.3
 	 */
-	@Nullable
-	public final String[] getVaryByRequestHeaders() {
+	public final String @Nullable [] getVaryByRequestHeaders() {
 		return this.varyByRequestHeaders;
 	}
 
@@ -340,24 +332,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			cControl = CacheControl.empty();
 		}
 		applyCacheControl(response, cControl);
-	}
-
-
-	/**
-	 * Check and prepare the given request and response according to the settings
-	 * of this generator.
-	 * @see #checkRequest(HttpServletRequest)
-	 * @see #applyCacheSeconds(HttpServletResponse, int)
-	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
-	 * with a must-revalidate header only generated if explicitly configured
-	 */
-	@Deprecated
-	protected final void checkAndPrepare(
-			HttpServletRequest request, HttpServletResponse response, int cacheSeconds, boolean lastModified)
-			throws ServletException {
-
-		checkRequest(request);
-		applyCacheSeconds(response, cacheSeconds);
 	}
 
 	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response, String[] varyByRequestHeaders) {

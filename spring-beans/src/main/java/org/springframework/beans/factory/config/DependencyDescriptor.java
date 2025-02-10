@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -36,7 +37,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -52,16 +52,13 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	private final Class<?> declaringClass;
 
-	@Nullable
-	private String methodName;
+	private @Nullable String methodName;
 
-	@Nullable
-	private Class<?>[] parameterTypes;
+	private Class<?> @Nullable [] parameterTypes;
 
 	private int parameterIndex;
 
-	@Nullable
-	private String fieldName;
+	private @Nullable String fieldName;
 
 	private final boolean required;
 
@@ -69,14 +66,11 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	private int nestingLevel = 1;
 
-	@Nullable
-	private Class<?> containingClass;
+	private @Nullable Class<?> containingClass;
 
-	@Nullable
-	private transient volatile ResolvableType resolvableType;
+	private transient volatile @Nullable ResolvableType resolvableType;
 
-	@Nullable
-	private transient volatile TypeDescriptor typeDescriptor;
+	private transient volatile @Nullable TypeDescriptor typeDescriptor;
 
 
 	/**
@@ -169,9 +163,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 		if (this.field != null) {
 			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
-					(KotlinDetector.isKotlinReflectPresent() &&
-							KotlinDetector.isKotlinType(this.field.getDeclaringClass()) &&
-							KotlinDelegate.isNullable(this.field)));
+					(KotlinDetector.isKotlinType(this.field.getDeclaringClass()) && KotlinDelegate.isNullable(this.field)));
 		}
 		else {
 			return !obtainMethodParameter().isOptional();
@@ -213,8 +205,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @throws BeansException in case of the not-unique scenario being fatal
 	 * @since 5.1
 	 */
-	@Nullable
-	public Object resolveNotUnique(ResolvableType type, Map<String, Object> matchingBeans) throws BeansException {
+	public @Nullable Object resolveNotUnique(ResolvableType type, Map<String, Object> matchingBeans) throws BeansException {
 		throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 	}
 
@@ -230,8 +221,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @throws BeansException if the shortcut could not be obtained
 	 * @since 4.3.1
 	 */
-	@Nullable
-	public Object resolveShortcut(BeanFactory beanFactory) throws BeansException {
+	public @Nullable Object resolveShortcut(BeanFactory beanFactory) throws BeansException {
 		return null;
 	}
 
@@ -355,8 +345,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * Determine the name of the wrapped parameter/field.
 	 * @return the declared name (may be {@code null} if unresolvable)
 	 */
-	@Nullable
-	public String getDependencyName() {
+	public @Nullable String getDependencyName() {
 		return (this.field != null ? this.field.getName() : obtainMethodParameter().getParameterName());
 	}
 

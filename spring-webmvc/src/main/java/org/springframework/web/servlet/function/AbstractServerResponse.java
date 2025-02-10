@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -66,13 +66,6 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	}
 
 	@Override
-	@Deprecated
-	@SuppressWarnings("removal")
-	public int rawStatusCode() {
-		return this.statusCode.value();
-	}
-
-	@Override
 	public final HttpHeaders headers() {
 		return this.headers;
 	}
@@ -83,8 +76,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	}
 
 	@Override
-	@Nullable
-	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response,
+	public @Nullable ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response,
 			Context context) throws ServletException, IOException {
 
 		try {
@@ -135,8 +127,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 				.forEach(servletResponse::addCookie);
 	}
 
-	@Nullable
-	protected abstract ModelAndView writeToInternal(
+	protected abstract @Nullable ModelAndView writeToInternal(
 			HttpServletRequest request, HttpServletResponse response, Context context)
 			throws Exception;
 

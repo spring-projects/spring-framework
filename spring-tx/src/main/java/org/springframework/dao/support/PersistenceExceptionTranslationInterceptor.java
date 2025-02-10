@@ -18,6 +18,7 @@ package org.springframework.dao.support;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationNotAllowedException;
@@ -25,7 +26,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -46,13 +46,11 @@ import org.springframework.util.ReflectionUtils;
 public class PersistenceExceptionTranslationInterceptor
 		implements MethodInterceptor, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private volatile PersistenceExceptionTranslator persistenceExceptionTranslator;
+	private volatile @Nullable PersistenceExceptionTranslator persistenceExceptionTranslator;
 
 	private boolean alwaysTranslate = false;
 
-	@Nullable
-	private ListableBeanFactory beanFactory;
+	private @Nullable ListableBeanFactory beanFactory;
 
 
 	/**
@@ -132,8 +130,7 @@ public class PersistenceExceptionTranslationInterceptor
 
 
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation mi) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();
 		}

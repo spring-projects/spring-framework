@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.web.reactive.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.reactive.resource.CachingResourceResolver;
@@ -32,7 +33,6 @@ import org.springframework.web.reactive.resource.PathResourceResolver;
 import org.springframework.web.reactive.resource.ResourceResolver;
 import org.springframework.web.reactive.resource.ResourceTransformer;
 import org.springframework.web.reactive.resource.VersionResourceResolver;
-import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 
 /**
  * Assists with the registration of resource resolvers and transformers.
@@ -44,10 +44,7 @@ public class ResourceChainRegistration {
 
 	private static final String DEFAULT_CACHE_NAME = "spring-resource-chain-cache";
 
-	private static final boolean isWebJarAssetLocatorPresent = ClassUtils.isPresent(
-			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
-
-	private static final boolean isWebJarVersionLocatorPresent = ClassUtils.isPresent(
+	private static final boolean webJarsPresent = ClassUtils.isPresent(
 			"org.webjars.WebJarVersionLocator", ResourceChainRegistration.class.getClassLoader());
 
 
@@ -68,7 +65,7 @@ public class ResourceChainRegistration {
 		this(cacheResources, cacheResources ? new ConcurrentMapCache(DEFAULT_CACHE_NAME) : null);
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public ResourceChainRegistration(boolean cacheResources, @Nullable Cache cache) {
 		Assert.isTrue(!cacheResources || cache != null, "'cache' is required when cacheResources=true");
 		if (cacheResources) {
@@ -93,7 +90,7 @@ public class ResourceChainRegistration {
 		else if (resolver instanceof PathResourceResolver) {
 			this.hasPathResolver = true;
 		}
-		else if (resolver instanceof WebJarsResourceResolver || resolver instanceof LiteWebJarsResourceResolver) {
+		else if (resolver instanceof LiteWebJarsResourceResolver) {
 			this.hasWebjarsResolver = true;
 		}
 		return this;
@@ -113,15 +110,11 @@ public class ResourceChainRegistration {
 		return this;
 	}
 
-	@SuppressWarnings("removal")
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
 			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
-			if (isWebJarVersionLocatorPresent && !this.hasWebjarsResolver) {
+			if (webJarsPresent && !this.hasWebjarsResolver) {
 				result.add(new LiteWebJarsResourceResolver());
-			}
-			else if (isWebJarAssetLocatorPresent && !this.hasWebjarsResolver) {
-				result.add(new WebJarsResourceResolver());
 			}
 			result.add(new PathResourceResolver());
 			return result;

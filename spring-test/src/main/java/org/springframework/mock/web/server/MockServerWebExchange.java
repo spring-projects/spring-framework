@@ -16,10 +16,10 @@
 
 package org.springframework.mock.web.server;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.server.WebSession;
@@ -98,8 +98,7 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private final MockServerHttpRequest request;
 
-		@Nullable
-		private WebSessionManager sessionManager;
+		private @Nullable WebSessionManager sessionManager;
 
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;

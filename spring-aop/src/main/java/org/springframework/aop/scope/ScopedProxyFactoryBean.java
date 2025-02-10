@@ -18,6 +18,8 @@ package org.springframework.aop.scope;
 
 import java.lang.reflect.Modifier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -59,12 +60,10 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 	private final SimpleBeanTargetSource scopedTargetSource = new SimpleBeanTargetSource();
 
 	/** The name of the target bean. */
-	@Nullable
-	private String targetBeanName;
+	private @Nullable String targetBeanName;
 
 	/** The cached singleton proxy. */
-	@Nullable
-	private Object proxy;
+	private @Nullable Object proxy;
 
 
 	/**
@@ -117,8 +116,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 
 
 	@Override
-	@Nullable
-	public Object getObject() {
+	public @Nullable Object getObject() {
 		if (this.proxy == null) {
 			throw new FactoryBeanNotInitializedException();
 		}
@@ -126,8 +124,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getObjectType() {
+	public @Nullable Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();
 		}

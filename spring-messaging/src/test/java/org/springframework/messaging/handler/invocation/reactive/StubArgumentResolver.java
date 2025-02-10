@@ -19,10 +19,10 @@ package org.springframework.messaging.handler.invocation.reactive;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
@@ -34,8 +34,7 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final Class<?> valueType;
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
 	private List<MethodParameter> resolvedParameters = new ArrayList<>();
 

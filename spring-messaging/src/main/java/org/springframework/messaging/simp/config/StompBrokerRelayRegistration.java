@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.simp.config;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
@@ -44,28 +45,21 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	private String systemPasscode = "guest";
 
-	@Nullable
-	private Long systemHeartbeatSendInterval;
+	private @Nullable Long systemHeartbeatSendInterval;
 
-	@Nullable
-	private Long systemHeartbeatReceiveInterval;
+	private @Nullable Long systemHeartbeatReceiveInterval;
 
-	@Nullable
-	private String virtualHost;
+	private @Nullable String virtualHost;
 
-	@Nullable
-	private TcpOperations<byte[]> tcpClient;
+	private @Nullable TcpOperations<byte[]> tcpClient;
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
 	private boolean autoStartup = true;
 
-	@Nullable
-	private String userDestinationBroadcast;
+	private @Nullable String userDestinationBroadcast;
 
-	@Nullable
-	private String userRegistryBroadcast;
+	private @Nullable String userRegistryBroadcast;
 
 
 	/**
@@ -235,8 +229,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		return this;
 	}
 
-	@Nullable
-	protected String getUserDestinationBroadcast() {
+	protected @Nullable String getUserDestinationBroadcast() {
 		return this.userDestinationBroadcast;
 	}
 
@@ -254,8 +247,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		return this;
 	}
 
-	@Nullable
-	protected String getUserRegistryBroadcast() {
+	protected @Nullable String getUserRegistryBroadcast() {
 		return this.userRegistryBroadcast;
 	}
 

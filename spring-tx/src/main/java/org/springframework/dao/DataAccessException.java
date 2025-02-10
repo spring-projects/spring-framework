@@ -16,8 +16,9 @@
 
 package org.springframework.dao;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.lang.Nullable;
 
 /**
  * Root of the hierarchy of data access exceptions discussed in

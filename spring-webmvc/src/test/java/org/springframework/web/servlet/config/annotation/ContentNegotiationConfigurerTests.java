@@ -49,7 +49,7 @@ class ContentNegotiationConfigurerTests {
 	void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
-		this.configurer = new ContentNegotiationConfigurer(this.servletRequest.getServletContext());
+		this.configurer = new ContentNegotiationConfigurer();
 	}
 
 

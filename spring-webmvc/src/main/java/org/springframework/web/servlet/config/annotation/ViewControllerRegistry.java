@@ -21,9 +21,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
@@ -38,8 +39,7 @@ import org.springframework.web.util.pattern.PathPattern;
  */
 public class ViewControllerRegistry {
 
-	@Nullable
-	private final ApplicationContext applicationContext;
+	private final @Nullable ApplicationContext applicationContext;
 
 	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
@@ -128,8 +128,7 @@ public class ViewControllerRegistry {
 	 * controller mappings, or {@code null} for no registrations.
 	 * @since 4.3.12
 	 */
-	@Nullable
-	protected SimpleUrlHandlerMapping buildHandlerMapping() {
+	protected @Nullable SimpleUrlHandlerMapping buildHandlerMapping() {
 		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}

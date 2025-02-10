@@ -20,11 +20,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.servlet.ServletContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -75,8 +75,7 @@ public class ServletContextScope implements Scope, DisposableBean {
 	}
 
 	@Override
-	@Nullable
-	public Object remove(String name) {
+	public @Nullable Object remove(String name) {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject != null) {
 			synchronized (this.destructionCallbacks) {
@@ -98,14 +97,12 @@ public class ServletContextScope implements Scope, DisposableBean {
 	}
 
 	@Override
-	@Nullable
-	public Object resolveContextualObject(String key) {
+	public @Nullable Object resolveContextualObject(String key) {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public String getConversationId() {
+	public @Nullable String getConversationId() {
 		return null;
 	}
 

@@ -35,7 +35,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
@@ -136,10 +135,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertThat(defaultThread.get()).isNotEqualTo(Thread.currentThread());
 		assertThat(defaultThread.get().getName()).doesNotStartWith("e1-");
 
-		ListenableFuture<Thread> e1Thread = obj.e1Work();
-		assertThat(e1Thread.get().getName()).startsWith("e1-");
-
-		CompletableFuture<Thread> e1OtherThread = obj.e1OtherWork();
+		CompletableFuture<Thread> e1OtherThread = obj.e1Work();
 		assertThat(e1OtherThread.get().getName()).startsWith("e1-");
 	}
 
@@ -269,12 +265,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		}
 
 		@Async("e1")
-		public ListenableFuture<Thread> e1Work() {
-			return new AsyncResult<>(Thread.currentThread());
-		}
-
-		@Async("e1")
-		public CompletableFuture<Thread> e1OtherWork() {
+		public CompletableFuture<Thread> e1Work() {
 			return CompletableFuture.completedFuture(Thread.currentThread());
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import javax.annotation.meta.TypeQualifierNickname;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
+ * @deprecated since 7.0; use {@link org.jspecify.annotations.NonNull} instead
  * @see NonNullApi
  * @see NonNullFields
  * @see Nullable
@@ -51,5 +52,6 @@ import javax.annotation.meta.TypeQualifierNickname;
 @Documented
 @Nonnull
 @TypeQualifierNickname
+@Deprecated
 public @interface NonNull {
 }

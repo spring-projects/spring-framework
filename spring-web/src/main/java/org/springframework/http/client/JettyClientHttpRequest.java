@@ -29,10 +29,10 @@ import org.eclipse.jetty.client.InputStreamResponseListener;
 import org.eclipse.jetty.client.OutputStreamRequestContent;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.client.Response;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -69,7 +69,6 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		if (!headers.isEmpty()) {
 			this.request.headers(httpFields -> {
@@ -118,7 +117,8 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 				throw ioEx;
 			}
 			else {
-				throw new IOException(cause.getMessage(), cause);
+				String message = (cause == null ? null : cause.getMessage());
+				throw (message == null ? new IOException(cause) : new IOException(message, cause));
 			}
 		}
 		catch (TimeoutException ex) {

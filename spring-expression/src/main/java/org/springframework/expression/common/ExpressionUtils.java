@@ -16,12 +16,13 @@
 
 package org.springframework.expression.common;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -45,8 +46,7 @@ public abstract class ExpressionUtils {
 	 * of the value to the specified type is not supported
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public static <T> T convertTypedValue(
+	public static <T> @Nullable T convertTypedValue(
 			@Nullable EvaluationContext context, TypedValue typedValue, @Nullable Class<T> targetType) {
 
 		Object value = typedValue.getValue();

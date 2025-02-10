@@ -16,7 +16,8 @@
 
 package org.springframework.beans;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -32,11 +33,9 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 
 	private final String name;
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
-	@Nullable
-	private Object source;
+	private @Nullable Object source;
 
 
 	/**
@@ -61,8 +60,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	/**
 	 * Return the value of the attribute.
 	 */
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 
@@ -75,8 +73,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.source;
 	}
 

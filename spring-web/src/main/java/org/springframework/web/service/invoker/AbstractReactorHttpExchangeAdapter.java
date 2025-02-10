@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package org.springframework.web.service.invoker;
 
 import java.time.Duration;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,14 +33,11 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 6.1
  */
-@SuppressWarnings("removal")
-public abstract class AbstractReactorHttpExchangeAdapter
-		implements ReactorHttpExchangeAdapter, org.springframework.web.service.invoker.HttpClientAdapter {
+public abstract class AbstractReactorHttpExchangeAdapter implements ReactorHttpExchangeAdapter {
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
-	@Nullable
-	private Duration blockTimeout;
+	private @Nullable Duration blockTimeout;
 
 
 	/**
@@ -74,8 +69,7 @@ public abstract class AbstractReactorHttpExchangeAdapter
 	}
 
 	@Override
-	@Nullable
-	public Duration getBlockTimeout() {
+	public @Nullable Duration getBlockTimeout() {
 		return this.blockTimeout;
 	}
 
@@ -124,48 +118,6 @@ public abstract class AbstractReactorHttpExchangeAdapter
 				exchangeForEntityMono(requestValues, bodyType).block());
 		Assert.state(entity != null, "Expected ResponseEntity");
 		return entity;
-	}
-
-
-	// HttpClientAdapter implementation
-
-	@Override
-	public Mono<Void> requestToVoid(HttpRequestValues requestValues) {
-		return exchangeForMono(requestValues);
-	}
-
-	@Override
-	public Mono<HttpHeaders> requestToHeaders(HttpRequestValues requestValues) {
-		return exchangeForHeadersMono(requestValues);
-	}
-
-	@Override
-	public <T> Mono<T> requestToBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return exchangeForBodyMono(requestValues, bodyType);
-	}
-
-	@Override
-	public <T> Flux<T> requestToBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return exchangeForBodyFlux(requestValues, bodyType);
-	}
-
-	@Override
-	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestValues requestValues) {
-		return exchangeForBodilessEntityMono(requestValues);
-	}
-
-	@Override
-	public <T> Mono<ResponseEntity<T>> requestToEntity(
-			HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-
-		return exchangeForEntityMono(requestValues, bodyType);
-	}
-
-	@Override
-	public <T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(
-			HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-
-		return exchangeForEntityFlux(requestValues, bodyType);
 	}
 
 }

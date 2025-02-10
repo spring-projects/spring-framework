@@ -23,6 +23,8 @@ import java.util.List;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 
@@ -74,7 +76,7 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 	 * @return the {@link CacheInvocationParameter} instances for the parameters to be
 	 * used to compute the key
 	 */
-	public CacheInvocationParameter[] getKeyParameters(Object... values) {
+	public CacheInvocationParameter[] getKeyParameters(@Nullable Object... values) {
 		List<CacheInvocationParameter> result = new ArrayList<>();
 		for (CacheParameterDetail keyParameterDetail : this.keyParameterDetails) {
 			int parameterPosition = keyParameterDetail.getParameterPosition();

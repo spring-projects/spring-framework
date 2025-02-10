@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cglib.core.internal.Function;
-import org.springframework.lang.Nullable;
 import org.springframework.test.util.MethodAssert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;

@@ -19,7 +19,7 @@ package org.springframework.util;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Contract for matching routes to patterns.
@@ -74,8 +74,7 @@ public interface RouteMatcher {
 	 * @param route the route to extract template variables from
 	 * @return a map with template variables and values
 	 */
-	@Nullable
-	Map<String, String> matchAndExtract(String pattern, Route route);
+	@Nullable Map<String, String> matchAndExtract(String pattern, Route route);
 
 	/**
 	 * Given a route, return a {@link Comparator} suitable for sorting patterns

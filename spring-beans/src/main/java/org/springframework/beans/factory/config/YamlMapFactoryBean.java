@@ -19,9 +19,10 @@ package org.springframework.beans.factory.config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 
 /**
  * Factory for a {@code Map} that reads from a YAML source, preserving the
@@ -74,8 +75,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	private boolean singleton = true;
 
-	@Nullable
-	private Map<String, Object> map;
+	private @Nullable Map<String, Object> map;
 
 
 	/**
@@ -99,8 +99,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	}
 
 	@Override
-	@Nullable
-	public Map<String, Object> getObject() {
+	public @Nullable Map<String, Object> getObject() {
 		return (this.map != null ? this.map : createMap());
 	}
 

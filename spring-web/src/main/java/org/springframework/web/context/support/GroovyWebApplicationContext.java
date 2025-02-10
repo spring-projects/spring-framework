@@ -21,6 +21,7 @@ import java.io.IOException;
 import groovy.lang.GroovyObject;
 import groovy.lang.GroovySystem;
 import groovy.lang.MetaClass;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -28,7 +29,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation which takes
@@ -175,8 +175,7 @@ public class GroovyWebApplicationContext extends AbstractRefreshableWebApplicati
 	}
 
 	@Override
-	@Nullable
-	public Object getProperty(String property) {
+	public @Nullable Object getProperty(String property) {
 		if (containsBean(property)) {
 			return getBean(property);
 		}

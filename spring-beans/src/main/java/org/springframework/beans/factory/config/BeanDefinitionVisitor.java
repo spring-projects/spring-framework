@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringValueResolver;
@@ -47,8 +48,7 @@ import org.springframework.util.StringValueResolver;
  */
 public class BeanDefinitionVisitor {
 
-	@Nullable
-	private StringValueResolver valueResolver;
+	private @Nullable StringValueResolver valueResolver;
 
 
 	/**
@@ -170,8 +170,7 @@ public class BeanDefinitionVisitor {
 	}
 
 	@SuppressWarnings("rawtypes")
-	@Nullable
-	protected Object resolveValue(@Nullable Object value) {
+	protected @Nullable Object resolveValue(@Nullable Object value) {
 		if (value instanceof BeanDefinition beanDef) {
 			visitBeanDefinition(beanDef);
 		}
@@ -221,7 +220,7 @@ public class BeanDefinitionVisitor {
 		return value;
 	}
 
-	protected void visitArray(Object[] arrayVal) {
+	protected void visitArray(@Nullable Object[] arrayVal) {
 		for (int i = 0; i < arrayVal.length; i++) {
 			Object elem = arrayVal[i];
 			Object newVal = resolveValue(elem);
@@ -284,8 +283,7 @@ public class BeanDefinitionVisitor {
 	 * @param strVal the original String value
 	 * @return the resolved String value
 	 */
-	@Nullable
-	protected String resolveStringValue(String strVal) {
+	protected @Nullable String resolveStringValue(String strVal) {
 		if (this.valueResolver == null) {
 			throw new IllegalStateException("No StringValueResolver specified - pass a resolver " +
 					"object into the constructor or override the 'resolveStringValue' method");

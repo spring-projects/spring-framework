@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 import javax.lang.model.element.Modifier;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -58,7 +59,6 @@ import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -568,13 +568,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
 		assertThat(methodNames).allMatch(methodName -> RuntimeHintsPredicates.reflection()
-				.onMethod(beanType, methodName).invoke()
+				.onMethodInvocation(beanType, methodName)
 				.test(this.generationContext.getRuntimeHints()));
 	}
 
 	private void assertHasDeclaredFieldsHint(Class<?> beanType) {
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onType(beanType).withMemberCategory(MemberCategory.DECLARED_FIELDS))
+				.onType(beanType).withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 
@@ -706,15 +706,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			this.name = name;
 		}
 
-		@Nullable
 		@Override
-		public String getObject() {
+		public @Nullable String getObject() {
 			return getPrefix() + " " + getName();
 		}
 
-		@Nullable
 		@Override
-		public Class<?> getObjectType() {
+		public @Nullable Class<?> getObjectType() {
 			return String.class;
 		}
 

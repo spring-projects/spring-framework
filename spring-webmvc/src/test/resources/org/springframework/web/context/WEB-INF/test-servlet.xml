@@ -7,10 +7,6 @@
 		<property name="basename"><value>org/springframework/web/context/WEB-INF/test-messages</value></property>
 	</bean>
 
-	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
-		<property name="basenamePrefix"><value>org/springframework/web/context/WEB-INF/test-</value></property>
-	</bean>
-
 	<bean id="aca" class="org.springframework.context.testfixture.beans.ACATester"/>
 
 	<bean id="aca-prototype" class="org.springframework.context.testfixture.beans.ACATester" scope="prototype"/>

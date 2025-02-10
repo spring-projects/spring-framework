@@ -41,7 +41,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.BeanDescriptor;
-import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorFactoryImpl;
+import org.hibernate.validator.constraintvalidation.spi.DefaultConstraintValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -557,7 +557,7 @@ class MethodValidationTests {
 
 		private final Map<Class<?>, ConstraintValidator<?, ?>> validators;
 
-		private final ConstraintValidatorFactory delegate = new ConstraintValidatorFactoryImpl();
+		private final ConstraintValidatorFactory delegate = new DefaultConstraintValidatorFactory();
 
 		private TestConstraintValidatorFactory(ConstraintValidator<?, ?>... validators) {
 			this.validators = new LinkedHashMap<>(validators.length);

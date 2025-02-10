@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An implementation of the Spring WebFlux {@link ScriptTemplateConfig} for
@@ -51,32 +51,23 @@ import org.springframework.lang.Nullable;
  */
 public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
-	@Nullable
-	private ScriptEngine engine;
+	private @Nullable ScriptEngine engine;
 
-	@Nullable
-	private Supplier<ScriptEngine> engineSupplier;
+	private @Nullable Supplier<ScriptEngine> engineSupplier;
 
-	@Nullable
-	private String engineName;
+	private @Nullable String engineName;
 
-	@Nullable
-	private Boolean sharedEngine;
+	private @Nullable Boolean sharedEngine;
 
-	@Nullable
-	private String[] scripts;
+	private String @Nullable [] scripts;
 
-	@Nullable
-	private String renderObject;
+	private @Nullable String renderObject;
 
-	@Nullable
-	private String renderFunction;
+	private @Nullable String renderFunction;
 
-	@Nullable
-	private Charset charset;
+	private @Nullable Charset charset;
 
-	@Nullable
-	private String resourceLoaderPath;
+	private @Nullable String resourceLoaderPath;
 
 
 	/**
@@ -109,8 +100,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public ScriptEngine getEngine() {
+	public @Nullable ScriptEngine getEngine() {
 		return this.engine;
 	}
 
@@ -128,8 +118,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public Supplier<ScriptEngine> getEngineSupplier() {
+	public @Nullable Supplier<ScriptEngine> getEngineSupplier() {
 		return this.engineSupplier;
 	}
 
@@ -145,8 +134,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getEngineName() {
+	public @Nullable String getEngineName() {
 		return this.engineName;
 	}
 
@@ -167,8 +155,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public Boolean isSharedEngine() {
+	public @Nullable Boolean isSharedEngine() {
 		return this.sharedEngine;
 	}
 
@@ -183,13 +170,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * @see #setResourceLoaderPath
 	 * @see <a href="https://www.webjars.org">WebJars</a>
 	 */
-	public void setScripts(@Nullable String... scriptNames) {
+	public void setScripts(String @Nullable ... scriptNames) {
 		this.scripts = scriptNames;
 	}
 
 	@Override
-	@Nullable
-	public String[] getScripts() {
+	public String @Nullable [] getScripts() {
 		return this.scripts;
 	}
 
@@ -203,8 +189,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getRenderObject() {
+	public @Nullable String getRenderObject() {
 		return this.renderObject;
 	}
 
@@ -224,8 +209,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getRenderFunction() {
+	public @Nullable String getRenderFunction() {
 		return this.renderFunction;
 	}
 
@@ -238,8 +222,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public Charset getCharset() {
+	public @Nullable Charset getCharset() {
 		return this.charset;
 	}
 
@@ -256,8 +239,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	}
 
 	@Override
-	@Nullable
-	public String getResourceLoaderPath() {
+	public @Nullable String getResourceLoaderPath() {
 		return this.resourceLoaderPath;
 	}
 

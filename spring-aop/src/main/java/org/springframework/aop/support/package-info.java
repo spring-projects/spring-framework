@@ -1,9 +1,7 @@
 /**
  * Convenience classes for using Spring's AOP API.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.aop.support;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

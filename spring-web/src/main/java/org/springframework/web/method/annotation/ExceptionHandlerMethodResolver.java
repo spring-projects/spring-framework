@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.MimeType;
@@ -160,8 +162,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
-	@Nullable
-	public Method resolveMethod(Exception exception) {
+	public @Nullable Method resolveMethod(Exception exception) {
 		ExceptionHandlerMappingInfo mappingInfo = resolveExceptionMapping(exception, MediaType.ALL);
 		return (mappingInfo != null) ? mappingInfo.getHandlerMethod() : null;
 	}
@@ -173,8 +174,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 5.0
 	 */
-	@Nullable
-	public Method resolveMethodByThrowable(Throwable exception) {
+	public @Nullable Method resolveMethodByThrowable(Throwable exception) {
 		ExceptionHandlerMappingInfo mappingInfo = resolveExceptionMapping(exception, MediaType.ALL);
 		return (mappingInfo != null) ? mappingInfo.getHandlerMethod() : null;
 	}
@@ -188,8 +188,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 6.2
 	 */
-	@Nullable
-	public ExceptionHandlerMappingInfo resolveExceptionMapping(Throwable exception, MediaType mediaType) {
+	public @Nullable ExceptionHandlerMappingInfo resolveExceptionMapping(Throwable exception, MediaType mediaType) {
 		ExceptionHandlerMappingInfo mappingInfo = resolveExceptionMappingByExceptionType(exception.getClass(), mediaType);
 		if (mappingInfo == null) {
 			Throwable cause = exception.getCause();
@@ -207,8 +206,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
-	@Nullable
-	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
+	public @Nullable Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		ExceptionHandlerMappingInfo mappingInfo = resolveExceptionMappingByExceptionType(exceptionType, MediaType.ALL);
 		return (mappingInfo != null) ? mappingInfo.getHandlerMethod() : null;
 	}
@@ -220,8 +218,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param mediaType the media type requested by the HTTP client
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
-	@Nullable
-	public ExceptionHandlerMappingInfo resolveExceptionMappingByExceptionType(Class<? extends Throwable> exceptionType, MediaType mediaType) {
+	public @Nullable ExceptionHandlerMappingInfo resolveExceptionMappingByExceptionType(Class<? extends Throwable> exceptionType, MediaType mediaType) {
 		ExceptionHandlerMappingInfo mappingInfo = this.lookupCache.get(new ExceptionMapping(exceptionType, mediaType));
 		return (mappingInfo != NO_MATCHING_EXCEPTION_HANDLER ? mappingInfo : null);
 	}
@@ -230,7 +227,6 @@ public class ExceptionHandlerMethodResolver {
 	 * Return the {@link Method} mapped to the given exception type, or
 	 * {@link #NO_MATCHING_EXCEPTION_HANDLER} if none.
 	 */
-	@Nullable
 	private ExceptionHandlerMappingInfo getMappedMethod(Class<? extends Throwable> exceptionType, MediaType mediaType) {
 		List<ExceptionMapping> matches = new ArrayList<>();
 		for (ExceptionMapping mappingInfo : this.mappedMethods.keySet()) {
@@ -242,7 +238,7 @@ public class ExceptionHandlerMethodResolver {
 			if (matches.size() > 1) {
 				matches.sort(new ExceptionMapingComparator(exceptionType, mediaType));
 			}
-			return this.mappedMethods.get(matches.get(0));
+			return Objects.requireNonNull(this.mappedMethods.get(matches.get(0)));
 		}
 		else {
 			return NO_MATCHING_EXCEPTION_HANDLER;

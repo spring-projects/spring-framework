@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Task scheduler interface that abstracts the scheduling of
@@ -75,8 +75,7 @@ public interface TaskScheduler {
 	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @see org.springframework.scheduling.support.CronTrigger
 	 */
-	@Nullable
-	ScheduledFuture<?> schedule(Runnable task, Trigger trigger);
+	@Nullable ScheduledFuture<?> schedule(Runnable task, Trigger trigger);
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time.

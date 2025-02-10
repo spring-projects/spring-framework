@@ -19,9 +19,9 @@ package org.springframework.scripting.bsh;
 import java.io.IOException;
 
 import bsh.EvalError;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -47,14 +47,11 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 
-	@Nullable
-	private final Class<?>[] scriptInterfaces;
+	private final Class<?> @Nullable [] scriptInterfaces;
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private Class<?> scriptClass;
+	private @Nullable Class<?> scriptClass;
 
 	private final Object scriptClassMonitor = new Object();
 
@@ -85,7 +82,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement (may be {@code null})
 	 */
-	public BshScriptFactory(String scriptSourceLocator, @Nullable Class<?>... scriptInterfaces) {
+	public BshScriptFactory(String scriptSourceLocator, Class<?> @Nullable ... scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;
@@ -104,8 +101,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 	@Override
-	@Nullable
-	public Class<?>[] getScriptInterfaces() {
+	public Class<?> @Nullable [] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
 
@@ -122,8 +118,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
 	@Override
-	@Nullable
-	public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
+	public @Nullable Object getScriptedObject(ScriptSource scriptSource, Class<?> @Nullable ... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		Class<?> clazz;
@@ -181,8 +176,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 	@Override
-	@Nullable
-	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
+	public @Nullable Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
 		synchronized (this.scriptClassMonitor) {

@@ -16,12 +16,13 @@
 
 package org.springframework.beans;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.core.io.ResourceEditor;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} to register hints for popular conventions in

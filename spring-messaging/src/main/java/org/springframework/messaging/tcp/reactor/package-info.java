@@ -1,9 +1,7 @@
 /**
  * Contains support for TCP messaging based on Reactor.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.messaging.tcp.reactor;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

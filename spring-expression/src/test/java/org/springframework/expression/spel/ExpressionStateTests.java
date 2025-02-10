@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -56,21 +54,6 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
-	void localVariables() {
-		Object value = state.lookupLocalVariable("foo");
-		assertThat(value).isNull();
-
-		state.setLocalVariable("foo",34);
-		value = state.lookupLocalVariable("foo");
-		assertThat(value).isEqualTo(34);
-
-		state.setLocalVariable("foo", null);
-		value = state.lookupLocalVariable("foo");
-		assertThat(value).isNull();
-	}
-
-	@Test
 	void globalVariables() {
 		TypedValue typedValue = state.lookupVariable("foo");
 		assertThat(typedValue).isEqualTo(TypedValue.NULL);
@@ -84,41 +67,6 @@ class ExpressionStateTests extends AbstractExpressionTests {
 		typedValue = state.lookupVariable("foo");
 		assertThat(typedValue.getValue()).isEqualTo("abc");
 		assertThat(typedValue.getTypeDescriptor().getType()).isEqualTo(String.class);
-	}
-
-	@Test
-	@SuppressWarnings("removal")
-	void noVariableInterference() {
-		TypedValue typedValue = state.lookupVariable("foo");
-		assertThat(typedValue).isEqualTo(TypedValue.NULL);
-
-		state.setLocalVariable("foo",34);
-		typedValue = state.lookupVariable("foo");
-		assertThat(typedValue).isEqualTo(TypedValue.NULL);
-
-		state.setVariable("goo", "hello");
-		assertThat(state.lookupLocalVariable("goo")).isNull();
-	}
-
-	@Test
-	@SuppressWarnings("removal")
-	void localVariableNestedScopes() {
-		assertThat(state.lookupLocalVariable("foo")).isNull();
-
-		state.setLocalVariable("foo",12);
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
-
-		state.enterScope(null);
-		// found in upper scope
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
-
-		state.setLocalVariable("foo","abc");
-		// found in nested scope
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo("abc");
-
-		state.exitScope();
-		// found in nested scope
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
 	}
 
 	@Test
@@ -160,25 +108,6 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
-	void populatedNestedScopes() {
-		assertThat(state.lookupLocalVariable("foo")).isNull();
-
-		state.enterScope("foo",34);
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(34);
-
-		state.enterScope(null);
-		state.setLocalVariable("foo", 12);
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
-
-		state.exitScope();
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(34);
-
-		state.exitScope();
-		assertThat(state.lookupLocalVariable("goo")).isNull();
-	}
-
-	@Test
 	void rootObjectConstructor() {
 		EvaluationContext ctx = TestScenarioCreator.getTestEvaluationContext();
 		// TypedValue root = ctx.getRootObject();
@@ -187,27 +116,6 @@ class ExpressionStateTests extends AbstractExpressionTests {
 		TypedValue stateRoot = state.getRootContextObject();
 		assertThat(stateRoot.getTypeDescriptor().getType()).isEqualTo(String.class);
 		assertThat(stateRoot.getValue()).isEqualTo("i am a string");
-	}
-
-	@Test
-	@SuppressWarnings("removal")
-	void populatedNestedScopesMap() {
-		assertThat(state.lookupLocalVariable("foo")).isNull();
-		assertThat(state.lookupLocalVariable("goo")).isNull();
-
-		state.enterScope(Map.of("foo", 34, "goo", "abc"));
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(34);
-		assertThat(state.lookupLocalVariable("goo")).isEqualTo("abc");
-
-		state.enterScope(null);
-		state.setLocalVariable("foo",12);
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
-		assertThat(state.lookupLocalVariable("goo")).isEqualTo("abc");
-
-		state.exitScope();
-		state.exitScope();
-		assertThat(state.lookupLocalVariable("foo")).isNull();
-		assertThat(state.lookupLocalVariable("goo")).isNull();
 	}
 
 	@Test

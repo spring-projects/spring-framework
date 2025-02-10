@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -29,8 +31,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
- * @see HandlerMappingIntrospector
+ * @deprecated together with {@link HandlerMappingIntrospector} without a replacement.
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public interface MatchableHandlerMapping extends HandlerMapping {
 
 	/**
@@ -38,8 +41,7 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * case pre-parsed patterns are used.
 	 * @since 5.3
 	 */
-	@Nullable
-	default PathPatternParser getPatternParser() {
+	default @Nullable PathPatternParser getPatternParser() {
 		return null;
 	}
 
@@ -50,8 +52,12 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * @param request the current request
 	 * @param pattern the pattern to match
 	 * @return the result from request matching, or {@code null} if none
+	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
+	 * for use at runtime in web modules in favor of parsed patterns with
+	 * {@link PathPatternParser}.
 	 */
-	@Nullable
-	RequestMatchResult match(HttpServletRequest request, String pattern);
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
+	@Nullable RequestMatchResult match(HttpServletRequest request, String pattern);
 
 }

@@ -39,10 +39,10 @@ import org.htmlunit.WebClient;
 import org.htmlunit.WebRequest;
 import org.htmlunit.util.KeyDataPair;
 import org.htmlunit.util.NameValuePair;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockPart;
@@ -79,17 +79,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private final WebRequest webRequest;
 
-	@Nullable
-	private String contextPath;
+	private @Nullable String contextPath;
 
-	@Nullable
-	private RequestBuilder parentBuilder;
+	private @Nullable RequestBuilder parentBuilder;
 
-	@Nullable
-	private SmartRequestBuilder parentPostProcessor;
+	private @Nullable SmartRequestBuilder parentPostProcessor;
 
-	@Nullable
-	private RequestPostProcessor forwardPostProcessor;
+	private @Nullable RequestPostProcessor forwardPostProcessor;
 
 
 	/**
@@ -234,8 +230,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
-	@Nullable
-	private String getHeader(String headerName) {
+	private @Nullable String getHeader(String headerName) {
 		return this.webRequest.getAdditionalHeaders().get(headerName);
 	}
 
@@ -451,8 +446,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 
 		@Override
-		@Nullable
-		public HttpSession getSession(boolean create) {
+		public @Nullable HttpSession getSession(boolean create) {
 			HttpSession session = super.getSession(false);
 			if (session == null && create) {
 				HtmlUnitMockHttpSession newSession = new HtmlUnitMockHttpSession(this);

@@ -22,10 +22,10 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.hibernate5.SessionFactoryUtils;
 import org.springframework.orm.hibernate5.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -80,8 +80,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@Nullable
-	private SessionFactory sessionFactory;
+	private @Nullable SessionFactory sessionFactory;
 
 
 	/**
@@ -94,8 +93,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	/**
 	 * Return the Hibernate SessionFactory that should be used to create Hibernate Sessions.
 	 */
-	@Nullable
-	public SessionFactory getSessionFactory() {
+	public @Nullable SessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
 

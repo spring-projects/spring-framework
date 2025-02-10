@@ -18,7 +18,7 @@ package org.springframework.core;
 
 import java.security.ProtectionDomain;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface to be implemented by a reloading-aware ClassLoader

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import example.gh24375.AnnotatedComponent;
-import example.indexed.IndexedJakartaManagedBeanComponent;
 import example.indexed.IndexedJakartaNamedComponent;
-import example.indexed.IndexedJavaxManagedBeanComponent;
-import example.indexed.IndexedJavaxNamedComponent;
 import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
 import example.profilescan.ProfileMetaAnnotatedComponent;
@@ -40,10 +37,7 @@ import example.scannable.DefaultNamedComponent;
 import example.scannable.FooDao;
 import example.scannable.FooService;
 import example.scannable.FooServiceImpl;
-import example.scannable.JakartaManagedBeanComponent;
 import example.scannable.JakartaNamedComponent;
-import example.scannable.JavaxManagedBeanComponent;
-import example.scannable.JavaxNamedComponent;
 import example.scannable.MessageBean;
 import example.scannable.NamedComponent;
 import example.scannable.NamedStubDao;
@@ -99,51 +93,31 @@ class ClassPathScanningCandidateComponentProviderTests {
 			BarComponent.class
 	);
 
-	private static final Set<Class<?>> scannedJakartaComponents = Set.of(
-			JakartaNamedComponent.class,
-			JakartaManagedBeanComponent.class
-	);
-
-	private static final Set<Class<?>> scannedJavaxComponents = Set.of(
-			JavaxNamedComponent.class,
-			JavaxManagedBeanComponent.class
-	);
-
-	private static final Set<Class<?>> indexedComponents = Set.of(
-			IndexedJakartaNamedComponent.class,
-			IndexedJakartaManagedBeanComponent.class,
-			IndexedJavaxNamedComponent.class,
-			IndexedJavaxManagedBeanComponent.class
-	);
-
 
 	@Test
 	void defaultsWithScan() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		provider.setResourceLoader(new DefaultResourceLoader(
 				CandidateComponentsTestClassLoader.disableIndex(getClass().getClassLoader())));
-		testDefault(provider, TEST_BASE_PACKAGE, true, true, false);
+		testDefault(provider, TEST_BASE_PACKAGE, true, false);
 	}
 
 	@Test
 	void defaultsWithIndex() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		provider.setResourceLoader(new DefaultResourceLoader(TEST_BASE_CLASSLOADER));
-		testDefault(provider, "example", true, true, true);
+		testDefault(provider, "example", true, true);
 	}
 
 	private void testDefault(ClassPathScanningCandidateComponentProvider provider, String basePackage,
-			boolean includeScannedJakartaComponents, boolean includeScannedJavaxComponents, boolean includeIndexedComponents) {
+			boolean includeScannedJakartaComponents, boolean includeIndexedComponents) {
 
 		Set<Class<?>> expectedTypes = new HashSet<>(springComponents);
 		if (includeScannedJakartaComponents) {
-			expectedTypes.addAll(scannedJakartaComponents);
-		}
-		if (includeScannedJavaxComponents) {
-			expectedTypes.addAll(scannedJavaxComponents);
+			expectedTypes.add(JakartaNamedComponent.class);
 		}
 		if (includeIndexedComponents) {
-			expectedTypes.addAll(indexedComponents);
+			expectedTypes.add(IndexedJakartaNamedComponent.class);
 		}
 
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(basePackage);
@@ -216,7 +190,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 
 	private void testCustomAnnotationTypeIncludeFilter(ClassPathScanningCandidateComponentProvider provider) {
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
-		testDefault(provider, TEST_BASE_PACKAGE, false, false, false);
+		testDefault(provider, TEST_BASE_PACKAGE, false, false);
 	}
 
 	@Test
@@ -309,7 +283,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertScannedBeanDefinitions(candidates);
 		assertBeanTypes(candidates, FooServiceImpl.class, StubFooDao.class, ServiceInvocationCounter.class,
-				BarComponent.class, JakartaManagedBeanComponent.class, JavaxManagedBeanComponent.class);
+				BarComponent.class);
 	}
 
 	@Test

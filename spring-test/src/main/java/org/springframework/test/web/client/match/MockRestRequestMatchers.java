@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -97,7 +99,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param uriVars zero or more URI variables to populate the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestToUriTemplate(String expectedUri, Object... uriVars) {
+	public static RequestMatcher requestToUriTemplate(String expectedUri, @Nullable Object... uriVars) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(expectedUri).buildAndExpand(uriVars).encode().toUri();
 		return requestTo(uri);
@@ -158,11 +160,11 @@ public abstract class MockRestRequestMatchers {
 	 * @see #queryParam(String, String...)
 	 */
 	@SafeVarargs
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static RequestMatcher queryParam(String name, Matcher<? super String>... matchers) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
-			assertValueCount("query param", name, params, matchers.length);
+			assertValueCount(name, params, matchers.length);
 			for (int i = 0 ; i < matchers.length; i++) {
 				assertThat("Query param", params.get(name).get(i), matchers[i]);
 			}
@@ -186,11 +188,11 @@ public abstract class MockRestRequestMatchers {
 	 * @see #queryParamList(String, Matcher)
 	 * @see #queryParam(String, Matcher...)
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static RequestMatcher queryParam(String name, String... expectedValues) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
-			assertValueCount("query param", name, params, expectedValues.length);
+			assertValueCount(name, params, expectedValues.length);
 			for (int i = 0 ; i < expectedValues.length; i++) {
 				assertEquals("Query param [" + name + "]", expectedValues[i], params.get(name).get(i));
 			}
@@ -246,7 +248,7 @@ public abstract class MockRestRequestMatchers {
 	@SafeVarargs
 	public static RequestMatcher header(String name, Matcher<? super String>... matchers) {
 		return request -> {
-			assertValueCount("header", name, request.getHeaders(), matchers.length);
+			assertValueCount(name, request.getHeaders(), matchers.length);
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < matchers.length; i++) {
@@ -273,7 +275,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher header(String name, String... expectedValues) {
 		return request -> {
-			assertValueCount("header", name, request.getHeaders(), expectedValues.length);
+			assertValueCount(name, request.getHeaders(), expectedValues.length);
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < expectedValues.length; i++) {
@@ -356,11 +358,22 @@ public abstract class MockRestRequestMatchers {
 	}
 
 
-	private static void assertValueCount(
-			String valueType, String name, MultiValueMap<String, String> map, int count) {
+	private static void assertValueCount(String name, MultiValueMap<String, String> map, int count) {
 
 		List<String> values = map.get(name);
-		String message = "Expected " + valueType + " <" + name + ">";
+		String message = "Expected query param <" + name + ">";
+		if (values == null) {
+			fail(message + " to exist but was null");
+		}
+		else if (count > values.size()) {
+			fail(message + " to have at least <" + count + "> values but found " + values);
+		}
+	}
+
+	private static void assertValueCount(String name, HttpHeaders headers, int count) {
+
+		List<String> values = headers.get(name);
+		String message = "Expected header <" + name + ">";
 		if (values == null) {
 			fail(message + " to exist but was null");
 		}

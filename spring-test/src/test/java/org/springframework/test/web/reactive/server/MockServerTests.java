@@ -100,15 +100,15 @@ public class MockServerTests {
 		WebTestClient clientFromMutatedBuilder = mutatedBuilder.build();
 
 		client1.mutate().filters(filters -> assertThat(filters).hasSize(1));
-		client1.mutate().defaultHeaders(headers -> assertThat(headers).hasSize(1));
+		client1.mutate().defaultHeaders(headers -> assertThat(headers.size()).isOne());
 		client1.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(1));
 
 		client2.mutate().filters(filters -> assertThat(filters).hasSize(2));
-		client2.mutate().defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		client2.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
 		client2.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 
 		clientFromMutatedBuilder.mutate().filters(filters -> assertThat(filters).hasSize(2));
-		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
 		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 	}
 

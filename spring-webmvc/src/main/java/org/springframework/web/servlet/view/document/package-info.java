@@ -2,9 +2,7 @@
  * Support classes for document generation,
  * providing View implementations for PDF and Excel.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.web.servlet.view.document;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

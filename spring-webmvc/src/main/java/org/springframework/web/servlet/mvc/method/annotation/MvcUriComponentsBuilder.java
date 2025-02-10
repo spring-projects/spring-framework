@@ -28,6 +28,7 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -43,7 +44,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotatedMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
@@ -678,8 +678,7 @@ public class MvcUriComponentsBuilder {
 		return value;
 	}
 
-	@Nullable
-	private static WebApplicationContext getWebApplicationContext() {
+	private static @Nullable WebApplicationContext getWebApplicationContext() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		if (requestAttributes == null) {
 			return null;
@@ -722,19 +721,16 @@ public class MvcUriComponentsBuilder {
 
 		private final Class<?> controllerType;
 
-		@Nullable
-		private Method controllerMethod;
+		private @Nullable Method controllerMethod;
 
-		@Nullable
-		private Object[] argumentValues;
+		private Object @Nullable [] argumentValues;
 
 		ControllerMethodInvocationInterceptor(Class<?> controllerType) {
 			this.controllerType = controllerType;
 		}
 
 		@Override
-		@Nullable
-		public Object intercept(@Nullable Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
+		public @Nullable Object intercept(@Nullable Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
 			switch (method.getName()) {
 				case "getControllerType" -> {
 					return this.controllerType;
@@ -766,8 +762,7 @@ public class MvcUriComponentsBuilder {
 		}
 
 		@Override
-		@Nullable
-		public Object invoke(Object proxy, Method method, @Nullable Object[] args) {
+		public @Nullable Object invoke(Object proxy, Method method, Object @Nullable [] args) {
 			return intercept(proxy, method, (args != null ? args : new Object[0]), null);
 		}
 

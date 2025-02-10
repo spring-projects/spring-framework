@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
@@ -37,7 +39,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -56,14 +57,11 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	private final String name;
 
-	@Nullable
-	private String originalPrimitiveExitTypeDescriptor;
+	private @Nullable String originalPrimitiveExitTypeDescriptor;
 
-	@Nullable
-	private volatile PropertyAccessor cachedReadAccessor;
+	private volatile @Nullable PropertyAccessor cachedReadAccessor;
 
-	@Nullable
-	private volatile PropertyAccessor cachedWriteAccessor;
+	private volatile @Nullable PropertyAccessor cachedWriteAccessor;
 
 
 	public PropertyOrFieldReference(boolean nullSafe, String propertyOrFieldName, int startPos, int endPos) {

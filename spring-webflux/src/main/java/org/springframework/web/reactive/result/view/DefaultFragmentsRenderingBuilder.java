@@ -22,12 +22,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link FragmentsRendering.Builder}.
@@ -37,20 +37,16 @@ import org.springframework.lang.Nullable;
  */
 class DefaultFragmentsRenderingBuilder implements FragmentsRendering.Builder {
 
-	@Nullable
-	private Collection<Fragment> fragmentsCollection;
+	private @Nullable Collection<Fragment> fragmentsCollection;
 
-	@Nullable
-	private final Flux<Fragment> fragmentsFlux;
+	private final @Nullable Flux<Fragment> fragmentsFlux;
 
-	@Nullable
-	private HttpStatusCode status;
+	private @Nullable HttpStatusCode status;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
-	DefaultFragmentsRenderingBuilder(Collection<Fragment> fragments) {
-		this.fragmentsCollection = new ArrayList<>(fragments);
+	DefaultFragmentsRenderingBuilder() {
+		this.fragmentsCollection = null;
 		this.fragmentsFlux = null;
 	}
 
@@ -85,18 +81,24 @@ class DefaultFragmentsRenderingBuilder implements FragmentsRendering.Builder {
 	}
 
 	@Override
-	public FragmentsRendering.Builder fragment(String viewName, Map<String, Object> model) {
-		return fragment(Fragment.create(viewName, model));
-	}
-
-	@Override
 	public FragmentsRendering.Builder fragment(String viewName) {
 		return fragment(Fragment.create(viewName));
 	}
 
 	@Override
+	public FragmentsRendering.Builder fragment(String viewName, Map<String, Object> model) {
+		return fragment(Fragment.create(viewName, model));
+	}
+
+	@Override
 	public FragmentsRendering.Builder fragment(Fragment fragment) {
 		initFragmentsCollection().add(fragment);
+		return this;
+	}
+
+	@Override
+	public FragmentsRendering.Builder fragments(Collection<Fragment> fragments) {
+		initFragmentsCollection().addAll(fragments);
 		return this;
 	}
 

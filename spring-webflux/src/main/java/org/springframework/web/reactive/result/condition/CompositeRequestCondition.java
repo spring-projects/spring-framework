@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -78,12 +79,12 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	/**
 	 * Return the underlying conditions, possibly empty but never {@code null}.
 	 */
-	public List<RequestCondition<?>> getConditions() {
+	public List<@Nullable RequestCondition<?>> getConditions() {
 		return unwrap();
 	}
 
-	private List<RequestCondition<?>> unwrap() {
-		List<RequestCondition<?>> result = new ArrayList<>();
+	private List<@Nullable RequestCondition<?>> unwrap() {
+		List<@Nullable RequestCondition<?>> result = new ArrayList<>();
 		for (RequestConditionHolder holder : this.requestConditions) {
 			result.add(holder.getCondition());
 		}
@@ -91,7 +92,8 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	}
 
 	@Override
-	protected Collection<?> getContent() {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	protected Collection<? extends @Nullable Object> getContent() {
 		return (!isEmpty() ? getConditions() : Collections.emptyList());
 	}
 
@@ -143,17 +145,17 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * <p>An empty {@code CompositeRequestCondition} matches to all requests.
 	 */
 	@Override
-	@Nullable
-	public CompositeRequestCondition getMatchingCondition(ServerWebExchange exchange) {
+	public @Nullable CompositeRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (isEmpty()) {
 			return this;
 		}
 		RequestConditionHolder[] matchingConditions = new RequestConditionHolder[getLength()];
 		for (int i = 0; i < getLength(); i++) {
-			matchingConditions[i] = this.requestConditions[i].getMatchingCondition(exchange);
-			if (matchingConditions[i] == null) {
+			RequestConditionHolder matchingCondition = this.requestConditions[i].getMatchingCondition(exchange);
+			if (matchingCondition == null) {
 				return null;
 			}
+			matchingConditions[i] = matchingCondition;
 		}
 		return new CompositeRequestCondition(matchingConditions);
 	}

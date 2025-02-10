@@ -27,10 +27,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -330,7 +330,7 @@ public abstract class ScriptUtils {
 		}
 	}
 
-	private static String readScript(LineNumberReader lineNumberReader, @Nullable String[] commentPrefixes,
+	private static String readScript(LineNumberReader lineNumberReader, String @Nullable [] commentPrefixes,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
 		String currentStatement = lineNumberReader.readLine();

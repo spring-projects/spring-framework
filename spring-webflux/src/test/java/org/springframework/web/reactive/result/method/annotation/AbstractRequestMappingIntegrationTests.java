@@ -123,7 +123,7 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 	}
 
 	private void addHeaders(RequestEntity.HeadersBuilder<?> builder, HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+		for (Map.Entry<String, List<String>> entry : headers.headerSet()) {
 			for (String value : entry.getValue()) {
 				builder.header(entry.getKey(), value);
 			}

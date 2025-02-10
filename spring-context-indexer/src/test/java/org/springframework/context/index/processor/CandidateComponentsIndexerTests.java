@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import jakarta.annotation.ManagedBean;
 import jakarta.inject.Named;
 import jakarta.persistence.Converter;
 import jakarta.persistence.Embeddable;
@@ -43,7 +42,6 @@ import org.springframework.context.index.sample.SampleNonStaticEmbedded;
 import org.springframework.context.index.sample.SampleNone;
 import org.springframework.context.index.sample.SampleRepository;
 import org.springframework.context.index.sample.SampleService;
-import org.springframework.context.index.sample.cdi.SampleManagedBean;
 import org.springframework.context.index.sample.cdi.SampleNamed;
 import org.springframework.context.index.sample.cdi.SampleTransactional;
 import org.springframework.context.index.sample.jpa.SampleConverter;
@@ -124,11 +122,6 @@ class CandidateComponentsIndexerTests {
 	@Test
 	void stereotypeOnAbstractClass() {
 		testComponent(AbstractController.class);
-	}
-
-	@Test
-	void cdiManagedBean() {
-		testSingleComponent(SampleManagedBean.class, ManagedBean.class);
 	}
 
 	@Test

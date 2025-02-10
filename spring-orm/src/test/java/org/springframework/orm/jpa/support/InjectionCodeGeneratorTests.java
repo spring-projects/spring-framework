@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ class InjectionCodeGeneratorTests {
 		Field field = ReflectionUtils.findField(bean.getClass(), "age");
 		createGenerator(TEST_TARGET).generateInjectionCode(
 				field, INSTANCE_VARIABLE, CodeBlock.of("$L", 123));
-		assertThat(RuntimeHintsPredicates.reflection().onField(TestBean.class, "age"))
+		assertThat(RuntimeHintsPredicates.reflection().onType(TestBean.class))
 				.accepts(this.hints);
 	}
 
@@ -197,7 +197,7 @@ class InjectionCodeGeneratorTests {
 		createGenerator(TEST_TARGET).generateInjectionCode(
 				method, INSTANCE_VARIABLE, CodeBlock.of("$L", 123));
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onMethod(TestBeanWithPrivateMethod.class, "setAge").invoke()).accepts(this.hints);
+				.onMethodInvocation(TestBeanWithPrivateMethod.class, "setAge")).accepts(this.hints);
 	}
 
 	private InjectionCodeGenerator createGenerator(ClassName target) {

@@ -19,8 +19,9 @@ package org.springframework.messaging.simp.config;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.event.SmartApplicationListener;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -41,28 +42,21 @@ public class MessageBrokerRegistry {
 
 	private final MessageChannel clientOutboundChannel;
 
-	@Nullable
-	private SimpleBrokerRegistration simpleBrokerRegistration;
+	private @Nullable SimpleBrokerRegistration simpleBrokerRegistration;
 
-	@Nullable
-	private StompBrokerRelayRegistration brokerRelayRegistration;
+	private @Nullable StompBrokerRelayRegistration brokerRelayRegistration;
 
 	private final ChannelRegistration brokerChannelRegistration = new ChannelRegistration();
 
-	@Nullable
-	private String[] applicationDestinationPrefixes;
+	private String @Nullable [] applicationDestinationPrefixes;
 
-	@Nullable
-	private String userDestinationPrefix;
+	private @Nullable String userDestinationPrefix;
 
-	@Nullable
-	private Integer userRegistryOrder;
+	private @Nullable Integer userRegistryOrder;
 
-	@Nullable
-	private PathMatcher pathMatcher;
+	private @Nullable PathMatcher pathMatcher;
 
-	@Nullable
-	private Integer cacheLimit;
+	private @Nullable Integer cacheLimit;
 
 	private boolean preservePublishOrder;
 
@@ -111,14 +105,12 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
-	@Nullable
-	protected String getUserDestinationBroadcast() {
+	protected @Nullable String getUserDestinationBroadcast() {
 		return (this.brokerRelayRegistration != null ?
 				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
 	}
 
-	@Nullable
-	protected String getUserRegistryBroadcast() {
+	protected @Nullable String getUserRegistryBroadcast() {
 		return (this.brokerRelayRegistration != null ?
 				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
 	}
@@ -138,8 +130,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
-	@Nullable
-	protected Collection<String> getApplicationDestinationPrefixes() {
+	protected @Nullable Collection<String> getApplicationDestinationPrefixes() {
 		return (this.applicationDestinationPrefixes != null ?
 				Arrays.asList(this.applicationDestinationPrefixes) : null);
 	}
@@ -161,8 +152,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
-	@Nullable
-	protected String getUserDestinationPrefix() {
+	protected @Nullable String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
 	}
 
@@ -177,8 +167,7 @@ public class MessageBrokerRegistry {
 		this.userRegistryOrder = order;
 	}
 
-	@Nullable
-	protected Integer getUserRegistryOrder() {
+	protected @Nullable Integer getUserRegistryOrder() {
 		return this.userRegistryOrder;
 	}
 
@@ -204,8 +193,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
-	@Nullable
-	protected PathMatcher getPathMatcher() {
+	protected @Nullable PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}
 
@@ -236,8 +224,7 @@ public class MessageBrokerRegistry {
 		return this;
 	}
 
-	@Nullable
-	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
+	protected @Nullable SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
 			enableSimpleBroker();
 		}
@@ -251,8 +238,7 @@ public class MessageBrokerRegistry {
 		return null;
 	}
 
-	@Nullable
-	protected StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
+	protected @Nullable StompBrokerRelayMessageHandler getStompBrokerRelay(SubscribableChannel brokerChannel) {
 		if (this.brokerRelayRegistration != null) {
 			StompBrokerRelayMessageHandler relay = this.brokerRelayRegistration.getMessageHandler(brokerChannel);
 			relay.setPreservePublishOrder(this.preservePublishOrder);

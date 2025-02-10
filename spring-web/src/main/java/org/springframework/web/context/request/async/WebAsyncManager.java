@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -74,18 +75,15 @@ public final class WebAsyncManager {
 			new TimeoutDeferredResultProcessingInterceptor();
 
 
-	@Nullable
-	private AsyncWebRequest asyncWebRequest;
+	private @Nullable AsyncWebRequest asyncWebRequest;
 
 	private AsyncTaskExecutor taskExecutor = DEFAULT_TASK_EXECUTOR;
 
 	private boolean isMultipartRequestParsed;
 
-	@Nullable
-	private volatile Object concurrentResult = RESULT_NONE;
+	private volatile @Nullable Object concurrentResult = RESULT_NONE;
 
-	@Nullable
-	private volatile Object[] concurrentResultContext;
+	private volatile Object @Nullable [] concurrentResultContext;
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.NOT_STARTED);
 
@@ -123,8 +121,7 @@ public final class WebAsyncManager {
 	 * Return the current {@link AsyncWebRequest}.
 	 * @since 5.3.33
 	 */
-	@Nullable
-	public AsyncWebRequest getAsyncWebRequest() {
+	public @Nullable AsyncWebRequest getAsyncWebRequest() {
 		return this.asyncWebRequest;
 	}
 
@@ -162,8 +159,7 @@ public final class WebAsyncManager {
 	 * concurrent handling raised one
 	 * @see #clearConcurrentResult()
 	 */
-	@Nullable
-	public Object getConcurrentResult() {
+	public @Nullable Object getConcurrentResult() {
 		return this.concurrentResult;
 	}
 
@@ -171,8 +167,7 @@ public final class WebAsyncManager {
 	 * Get the additional processing context saved at the start of concurrent handling.
 	 * @see #clearConcurrentResult()
 	 */
-	@Nullable
-	public Object[] getConcurrentResultContext() {
+	public Object @Nullable [] getConcurrentResultContext() {
 		return this.concurrentResultContext;
 	}
 
@@ -181,8 +176,7 @@ public final class WebAsyncManager {
 	 * @param key the key
 	 * @return the interceptor registered under that key, or {@code null} if none
 	 */
-	@Nullable
-	public CallableProcessingInterceptor getCallableInterceptor(Object key) {
+	public @Nullable CallableProcessingInterceptor getCallableInterceptor(Object key) {
 		return this.callableInterceptors.get(key);
 	}
 
@@ -191,8 +185,7 @@ public final class WebAsyncManager {
 	 * @param key the key
 	 * @return the interceptor registered under that key, or {@code null} if none
 	 */
-	@Nullable
-	public DeferredResultProcessingInterceptor getDeferredResultInterceptor(Object key) {
+	public @Nullable DeferredResultProcessingInterceptor getDeferredResultInterceptor(Object key) {
 		return this.deferredResultInterceptors.get(key);
 	}
 
@@ -306,7 +299,7 @@ public final class WebAsyncManager {
 	 * via {@link #getConcurrentResultContext()}
 	 * @throws Exception if concurrent processing failed to start
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void startCallableProcessing(final WebAsyncTask<?> webAsyncTask, Object... processingContext)
 			throws Exception {
 
@@ -349,6 +342,10 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.addErrorHandler(ex -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest) + ": " + ex);
+			}
+			if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+				ex = new AsyncRequestNotUsableException(
+						"Servlet container error notification for disconnected client", ex);
 			}
 			Object result = interceptorChain.triggerAfterError(this.asyncWebRequest, callable, ex);
 			result = (result != CallableProcessingInterceptor.RESULT_NONE ? result : ex);
@@ -397,7 +394,7 @@ public final class WebAsyncManager {
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings("NullAway") // Lambda
 	public void startDeferredResultProcessing(
 			final DeferredResult<?> deferredResult, Object... processingContext) throws Exception {
 
@@ -441,6 +438,10 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.addErrorHandler(ex -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest));
+			}
+			if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+				ex = new AsyncRequestNotUsableException(
+						"Servlet container error notification for disconnected client", ex);
 			}
 			try {
 				interceptorChain.triggerAfterError(this.asyncWebRequest, deferredResult, ex);

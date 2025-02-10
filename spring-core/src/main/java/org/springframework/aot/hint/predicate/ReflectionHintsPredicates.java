@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
@@ -34,7 +36,6 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -80,10 +81,24 @@ public class ReflectionHintsPredicates {
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param constructor the constructor
 	 * @return the {@link RuntimeHints} predicate
+	 * @deprecated since 7.0 in favor of {@link #onConstructorInvocation(Constructor)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public ConstructorHintPredicate onConstructor(Constructor<?> constructor) {
 		Assert.notNull(constructor, "'constructor' must not be null");
 		return new ConstructorHintPredicate(constructor);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the given constructor.
+	 * @param constructor the constructor
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onConstructorInvocation(Constructor<?> constructor) {
+		Assert.notNull(constructor, "'constructor' must not be null");
+		return new ConstructorHintPredicate(constructor).invoke();
 	}
 
 	/**
@@ -92,10 +107,24 @@ public class ReflectionHintsPredicates {
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param method the method
 	 * @return the {@link RuntimeHints} predicate
+	 * @deprecated since 7.0 in favor of {@link #onMethodInvocation(Method)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MethodHintPredicate onMethod(Method method) {
 		Assert.notNull(method, "'method' must not be null");
 		return new MethodHintPredicate(method);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the given method.
+	 * @param method the method
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onMethodInvocation(Method method) {
+		Assert.notNull(method, "'method' must not be null");
+		return new MethodHintPredicate(method).invoke();
 	}
 
 	/**
@@ -107,11 +136,29 @@ public class ReflectionHintsPredicates {
 	 * @param methodName the method name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @deprecated since 7.0 in favor of {@link #onMethodInvocation(Class, String)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MethodHintPredicate onMethod(Class<?> type, String methodName) {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.hasText(methodName, "'methodName' must not be empty");
 		return new MethodHintPredicate(getMethod(type, methodName));
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the method that matches the given selector.
+	 * This looks up a method on the given type with the expected name, if unique.
+	 * @param type the type holding the method
+	 * @param methodName the method name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onMethodInvocation(Class<?> type, String methodName) {
+		Assert.notNull(type, "'type' must not be null");
+		Assert.hasText(methodName, "'methodName' must not be empty");
+		return new MethodHintPredicate(getMethod(type, methodName)).invoke();
 	}
 
 	/**
@@ -124,11 +171,30 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws ClassNotFoundException if the class cannot be resolved.
 	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @deprecated since 7.0 in favor of {@link #onMethodInvocation(String, String)}
+	 * or {@link #onType(Class)}.
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public MethodHintPredicate onMethod(String className, String methodName) throws ClassNotFoundException {
 		Assert.hasText(className, "'className' must not be empty");
 		Assert.hasText(methodName, "'methodName' must not be empty");
 		return onMethod(Class.forName(className), methodName);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the method that matches the given selector.
+	 * This looks up a method on the given type with the expected name, if unique.
+	 * @param className the name of the class holding the method
+	 * @param methodName the method name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onMethodInvocation(String className, String methodName) throws ClassNotFoundException {
+		Assert.hasText(className, "'className' must not be empty");
+		Assert.hasText(methodName, "'methodName' must not be empty");
+		return onMethod(Class.forName(className), methodName).invoke();
 	}
 
 	private Method getMethod(Class<?> type, String methodName) {
@@ -146,16 +212,29 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
 	 * This looks up a field on the given type with the expected name, if present.
-	 * By default, unsafe or write access is not considered.
-	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param type the type holding the field
 	 * @param fieldName the field name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @deprecated since 7.0 in favor of {@link #onFieldAccess(Class, String)} with similar semantics.
 	 */
-	public FieldHintPredicate onField(Class<?> type, String fieldName) {
+	@Deprecated(since = "7.0", forRemoval = true)
+	public Predicate<RuntimeHints> onField(Class<?> type, String fieldName) {
+		return onFieldAccess(type, fieldName);
+	}
+
+	/**
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * @param type the type holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldAccess(Class<?> type, String fieldName) {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		Field field = ReflectionUtils.findField(type, fieldName);
@@ -166,30 +245,54 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
 	 * This looks up a field on the given type with the expected name, if present.
-	 * By default, unsafe or write access is not considered.
-	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param className the name of the class holding the field
 	 * @param fieldName the field name
 	 * @return the {@link RuntimeHints} predicate
 	 * @throws ClassNotFoundException if the class cannot be resolved.
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @deprecated since 7.0 in favor of {@link #onFieldAccess(String, String)} with similar semantics.
 	 */
-	public FieldHintPredicate onField(String className, String fieldName) throws ClassNotFoundException {
-		Assert.hasText(className, "'className' must not be empty");
-		Assert.hasText(fieldName, "'fieldName' must not be empty");
-		return onField(Class.forName(className), fieldName);
+	@Deprecated(since = "7.0", forRemoval = true)
+	public Predicate<RuntimeHints> onField(String className, String fieldName) throws ClassNotFoundException {
+		return onFieldAccess(className, fieldName);
 	}
 
 	/**
-	 * Return a predicate that checks whether a reflection hint is registered for the given field.
-	 * By default, unsafe or write access is not considered.
-	 * <p>The returned type exposes additional methods that refine the predicate behavior.
+	 * Return a predicate that checks whether an invocation hint is registered for the field.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * @param className the name of the class holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldAccess(String className, String fieldName) throws ClassNotFoundException {
+		Assert.hasText(className, "'className' must not be empty");
+		Assert.hasText(fieldName, "'fieldName' must not be empty");
+		return onFieldAccess(Class.forName(className), fieldName);
+	}
+
+	/**
+	 * Return a predicate that checks whether a reflective field access hint is registered for the given field.
 	 * @param field the field
 	 * @return the {@link RuntimeHints} predicate
+	 * @deprecated since 7.0 in favor of {@link #onFieldAccess(Field)} with similar semantics.
 	 */
-	public FieldHintPredicate onField(Field field) {
+	@Deprecated(since = "7.0", forRemoval = true)
+	public Predicate<RuntimeHints> onField(Field field) {
+		return onFieldAccess(field);
+	}
+
+	/**
+	 * Return a predicate that checks whether an invocation hint is registered for the given field.
+	 * @param field the field
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0
+	 */
+	public Predicate<RuntimeHints> onFieldAccess(Field field) {
 		Assert.notNull(field, "'field' must not be null");
 		return new FieldHintPredicate(field);
 	}
@@ -203,8 +306,7 @@ public class ReflectionHintsPredicates {
 			this.type = type;
 		}
 
-		@Nullable
-		private TypeHint getTypeHint(RuntimeHints hints) {
+		private @Nullable TypeHint getTypeHint(RuntimeHints hints) {
 			return hints.reflection().getTypeHint(this.type);
 		}
 
@@ -254,7 +356,8 @@ public class ReflectionHintsPredicates {
 		}
 	}
 
-
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public abstract static class ExecutableHintPredicate<T extends Executable> implements Predicate<RuntimeHints> {
 
 		protected final T executable;
@@ -299,6 +402,8 @@ public class ReflectionHintsPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static class ConstructorHintPredicate extends ExecutableHintPredicate<Constructor<?>> {
 
 		ConstructorHintPredicate(Constructor<?> constructor) {
@@ -308,26 +413,15 @@ public class ReflectionHintsPredicates {
 		@Override
 		public boolean test(RuntimeHints runtimeHints) {
 			return (new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
-					.withAnyMemberCategory(getPublicMemberCategories())
-					.and(hints -> Modifier.isPublic(this.executable.getModifiers())))
-					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass())).withAnyMemberCategory(getDeclaredMemberCategories()))
+					.and(hints -> this.executableMode == ExecutableMode.INTROSPECT))
+					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+							.withMemberCategory(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS)
+							.and(hints -> Modifier.isPublic(this.executable.getModifiers()))
+							.and(hints -> this.executableMode == ExecutableMode.INVOKE))
+					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+							.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
+							.and(hints -> this.executableMode == ExecutableMode.INVOKE))
 					.or(exactMatch()).test(runtimeHints);
-		}
-
-		MemberCategory[] getPublicMemberCategories() {
-			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] { MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
-						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS };
-			}
-			return new MemberCategory[] { MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS };
-		}
-
-		MemberCategory[] getDeclaredMemberCategories() {
-			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] { MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS };
-			}
-			return new MemberCategory[] { MemberCategory.INVOKE_DECLARED_CONSTRUCTORS };
 		}
 
 		@Override
@@ -343,6 +437,8 @@ public class ReflectionHintsPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static class MethodHintPredicate extends ExecutableHintPredicate<Method> {
 
 		MethodHintPredicate(Method method) {
@@ -352,29 +448,16 @@ public class ReflectionHintsPredicates {
 		@Override
 		public boolean test(RuntimeHints runtimeHints) {
 			return (new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
-					.withAnyMemberCategory(getPublicMemberCategories())
-					.and(hints -> Modifier.isPublic(this.executable.getModifiers())))
-					.or(new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
-							.withAnyMemberCategory(getDeclaredMemberCategories())
-							.and(hints -> !Modifier.isPublic(this.executable.getModifiers())))
+					.and(hints -> this.executableMode == ExecutableMode.INTROSPECT))
+					.or((new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+							.withMemberCategory(MemberCategory.INVOKE_PUBLIC_METHODS)
+							.and(hints -> Modifier.isPublic(this.executable.getModifiers()))
+							.and(hints -> this.executableMode == ExecutableMode.INVOKE)))
+					.or((new TypeHintPredicate(TypeReference.of(this.executable.getDeclaringClass()))
+							.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)
+							.and(hints -> !Modifier.isPublic(this.executable.getModifiers()))
+							.and(hints -> this.executableMode == ExecutableMode.INVOKE)))
 					.or(exactMatch()).test(runtimeHints);
-		}
-
-		MemberCategory[] getPublicMemberCategories() {
-			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] { MemberCategory.INTROSPECT_PUBLIC_METHODS,
-						MemberCategory.INVOKE_PUBLIC_METHODS };
-			}
-			return new MemberCategory[] { MemberCategory.INVOKE_PUBLIC_METHODS };
-		}
-
-		MemberCategory[] getDeclaredMemberCategories() {
-
-			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] { MemberCategory.INTROSPECT_DECLARED_METHODS,
-						MemberCategory.INVOKE_DECLARED_METHODS };
-			}
-			return new MemberCategory[] { MemberCategory.INVOKE_DECLARED_METHODS };
 		}
 
 		@Override
@@ -390,6 +473,7 @@ public class ReflectionHintsPredicates {
 	}
 
 
+	@Deprecated(since = "7.0", forRemoval = true)
 	public static class FieldHintPredicate implements Predicate<RuntimeHints> {
 
 		private final Field field;
@@ -407,12 +491,15 @@ public class ReflectionHintsPredicates {
 			return memberCategoryMatch(typeHint) || exactMatch(typeHint);
 		}
 
+		@SuppressWarnings("removal")
 		private boolean memberCategoryMatch(TypeHint typeHint) {
 			if (Modifier.isPublic(this.field.getModifiers())) {
-				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_PUBLIC_FIELDS)
+						|| typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS);
 			}
 			else {
-				return typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_DECLARED_FIELDS)
+						|| typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
 			}
 		}
 

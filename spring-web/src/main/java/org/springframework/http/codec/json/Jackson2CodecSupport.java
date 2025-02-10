@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -41,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
@@ -85,8 +85,7 @@ public abstract class Jackson2CodecSupport {
 
 	private ObjectMapper defaultObjectMapper;
 
-	@Nullable
-	private Map<Class<?>, Map<MimeType, ObjectMapper>> objectMapperRegistrations;
+	private @Nullable Map<Class<?>, Map<MimeType, ObjectMapper>> objectMapperRegistrations;
 
 	private final List<MimeType> mimeTypes;
 
@@ -150,8 +149,7 @@ public abstract class Jackson2CodecSupport {
 	 * or empty if in case of no registrations for the given class.
 	 * @since 5.3.4
 	 */
-	@Nullable
-	public Map<MimeType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
+	public @Nullable Map<MimeType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
 		for (Map.Entry<Class<?>, Map<MimeType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
 			if (entry.getKey().isAssignableFrom(clazz)) {
 				return entry.getValue();
@@ -252,13 +250,11 @@ public abstract class Jackson2CodecSupport {
 		return Hints.none();
 	}
 
-	@Nullable
-	protected MethodParameter getParameter(ResolvableType type) {
+	protected @Nullable MethodParameter getParameter(ResolvableType type) {
 		return (type.getSource() instanceof MethodParameter methodParameter ? methodParameter : null);
 	}
 
-	@Nullable
-	protected abstract <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType);
+	protected abstract <A extends Annotation> @Nullable A getAnnotation(MethodParameter parameter, Class<A> annotType);
 
 	/**
 	 * Select an ObjectMapper to use, either the main ObjectMapper or another
@@ -266,8 +262,7 @@ public abstract class Jackson2CodecSupport {
 	 * {@link #registerObjectMappersForType(Class, Consumer)}.
 	 * @since 5.3.4
 	 */
-	@Nullable
-	protected ObjectMapper selectObjectMapper(ResolvableType targetType, @Nullable MimeType targetMimeType) {
+	protected @Nullable ObjectMapper selectObjectMapper(ResolvableType targetType, @Nullable MimeType targetMimeType) {
 		if (targetMimeType == null || CollectionUtils.isEmpty(this.objectMapperRegistrations)) {
 			return this.defaultObjectMapper;
 		}

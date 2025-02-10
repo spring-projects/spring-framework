@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 
 /**
@@ -31,17 +32,13 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
  */
 public class WebSocketTransportRegistration {
 
-	@Nullable
-	private Integer messageSizeLimit;
+	private @Nullable Integer messageSizeLimit;
 
-	@Nullable
-	private Integer sendTimeLimit;
+	private @Nullable Integer sendTimeLimit;
 
-	@Nullable
-	private Integer sendBufferSizeLimit;
+	private @Nullable Integer sendBufferSizeLimit;
 
-	@Nullable
-	private Integer timeToFirstMessage;
+	private @Nullable Integer timeToFirstMessage;
 
 	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories = new ArrayList<>(2);
 
@@ -62,8 +59,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
-	@Nullable
-	protected Integer getMessageSizeLimit() {
+	protected @Nullable Integer getMessageSizeLimit() {
 		return this.messageSizeLimit;
 	}
 
@@ -104,8 +100,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
-	@Nullable
-	protected Integer getSendTimeLimit() {
+	protected @Nullable Integer getSendTimeLimit() {
 		return this.sendTimeLimit;
 	}
 
@@ -141,8 +136,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
-	@Nullable
-	protected Integer getSendBufferSizeLimit() {
+	protected @Nullable Integer getSendBufferSizeLimit() {
 		return this.sendBufferSizeLimit;
 	}
 
@@ -165,8 +159,7 @@ public class WebSocketTransportRegistration {
 	/**
 	 * Protected accessor for internal use.
 	 */
-	@Nullable
-	protected Integer getTimeToFirstMessage() {
+	protected @Nullable Integer getTimeToFirstMessage() {
 		return this.timeToFirstMessage;
 	}
 

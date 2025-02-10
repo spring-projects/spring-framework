@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,13 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -763,6 +766,46 @@ class RestTemplateTests {
 		assertThat(requestHeaders.get("MyHeader")).contains("MyEntityValue", "MyInterceptorValue");
 
 		verify(response).close();
+	}
+
+	@Test
+	void requestInterceptorWithBuffering() throws Exception {
+		try (MockWebServer server = new MockWebServer()) {
+			server.enqueue(new MockResponse().setResponseCode(200).setBody("Hello Spring!"));
+			server.start();
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.setInterceptors(List.of((request, body, execution) -> {
+				ClientHttpResponse response = execution.execute(request, body);
+				byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
+				assertThat(result).isEqualTo("Hello Spring!".getBytes(UTF_8));
+				return response;
+			}));
+			template.setBufferingPredicate((uri, httpMethod) -> true);
+			template.setMessageConverters(List.of(new StringHttpMessageConverter()));
+			String result = template.getForObject(server.url("/").uri(), String.class);
+			assertThat(server.getRequestCount()).isEqualTo(1);
+			assertThat(result).isEqualTo("Hello Spring!");
+		}
+	}
+
+	@Test
+	void buffering() throws Exception {
+		try (MockWebServer server = new MockWebServer()) {
+			server.enqueue(new MockResponse().setResponseCode(200).setBody("Hello Spring!"));
+			server.start();
+			template.setRequestFactory(new SimpleClientHttpRequestFactory());
+			template.setBufferingPredicate((uri, httpMethod) -> true);
+			template.setMessageConverters(List.of(new StringHttpMessageConverter()));
+			String result = template.execute(server.url("/").uri(), HttpMethod.GET, req -> {}, response -> {
+				byte[] bytes = FileCopyUtils.copyToByteArray(response.getBody());
+				assertThat(bytes).isEqualTo("Hello Spring!".getBytes(UTF_8));
+				bytes = FileCopyUtils.copyToByteArray(response.getBody());
+				assertThat(bytes).isEqualTo("Hello Spring!".getBytes(UTF_8));
+				return new String(bytes, UTF_8);
+			});
+			assertThat(server.getRequestCount()).isEqualTo(1);
+			assertThat(result).isEqualTo("Hello Spring!");
+		}
 	}
 
 	@Test

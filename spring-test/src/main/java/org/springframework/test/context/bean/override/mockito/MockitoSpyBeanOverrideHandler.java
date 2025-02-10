@@ -19,6 +19,7 @@ package org.springframework.test.context.bean.override.mockito;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 
+import org.jspecify.annotations.Nullable;
 import org.mockito.AdditionalAnswers;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
@@ -27,7 +28,6 @@ import org.mockito.listeners.VerificationStartedListener;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.util.Assert;

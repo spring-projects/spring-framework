@@ -16,7 +16,8 @@
 
 package org.springframework.core.convert;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -29,13 +30,11 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class ConversionFailedException extends ConversionException {
 
-	@Nullable
-	private final TypeDescriptor sourceType;
+	private final @Nullable TypeDescriptor sourceType;
 
 	private final TypeDescriptor targetType;
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
 
 	/**
@@ -59,8 +58,7 @@ public class ConversionFailedException extends ConversionException {
 	/**
 	 * Return the source type we tried to convert the value from.
 	 */
-	@Nullable
-	public TypeDescriptor getSourceType() {
+	public @Nullable TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
 
@@ -74,8 +72,7 @@ public class ConversionFailedException extends ConversionException {
 	/**
 	 * Return the offending value.
 	 */
-	@Nullable
-	public Object getValue() {
+	public @Nullable Object getValue() {
 		return this.value;
 	}
 

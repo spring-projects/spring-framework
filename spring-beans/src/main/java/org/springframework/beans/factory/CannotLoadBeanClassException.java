@@ -16,8 +16,9 @@
 
 package org.springframework.beans.factory;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.FatalBeanException;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when the BeanFactory cannot load the specified class
@@ -29,13 +30,11 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class CannotLoadBeanClassException extends FatalBeanException {
 
-	@Nullable
-	private final String resourceDescription;
+	private final @Nullable String resourceDescription;
 
 	private final String beanName;
 
-	@Nullable
-	private final String beanClassName;
+	private final @Nullable String beanClassName;
 
 
 	/**
@@ -80,8 +79,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * Return the description of the resource that the bean
 	 * definition came from.
 	 */
-	@Nullable
-	public String getResourceDescription() {
+	public @Nullable String getResourceDescription() {
 		return this.resourceDescription;
 	}
 
@@ -95,8 +93,7 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	/**
 	 * Return the name of the class we were trying to load.
 	 */
-	@Nullable
-	public String getBeanClassName() {
+	public @Nullable String getBeanClassName() {
 		return this.beanClassName;
 	}
 

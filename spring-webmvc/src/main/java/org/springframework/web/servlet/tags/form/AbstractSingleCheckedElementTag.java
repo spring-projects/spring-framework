@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import jakarta.servlet.jsp.JspException;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -35,14 +35,12 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * The value of the '{@code value}' attribute.
 	 */
-	@Nullable
-	private Object value;
+	private @Nullable Object value;
 
 	/**
 	 * The value of the '{@code label}' attribute.
 	 */
-	@Nullable
-	private Object label;
+	private @Nullable Object label;
 
 
 	/**
@@ -56,8 +54,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * Get the value of the '{@code value}' attribute.
 	 */
-	@Nullable
-	protected Object getValue() {
+	protected @Nullable Object getValue() {
 		return this.value;
 	}
 
@@ -72,8 +69,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	/**
 	 * Get the value of the '{@code label}' attribute.
 	 */
-	@Nullable
-	protected Object getLabel() {
+	protected @Nullable Object getLabel() {
 		return this.label;
 	}
 

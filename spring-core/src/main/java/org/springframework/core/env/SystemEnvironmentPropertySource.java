@@ -19,7 +19,8 @@ package org.springframework.core.env;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -89,8 +90,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
-	@Nullable
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
 			logger.debug("PropertySource '" + getName() + "' does not contain property '" + name +
@@ -120,8 +120,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		return name;
 	}
 
-	@Nullable
-	private String checkPropertyName(String name) {
+	private @Nullable String checkPropertyName(String name) {
 		// Check name as-is
 		if (this.source.containsKey(name)) {
 			return name;

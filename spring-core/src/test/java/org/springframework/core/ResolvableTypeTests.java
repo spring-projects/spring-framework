@@ -1230,6 +1230,8 @@ class ResolvableTypeTests {
 		ResolvableType consumerUnresolved = ResolvableType.forClass(Consumer.class);
 		ResolvableType consumerObject = ResolvableType.forClassWithGenerics(Consumer.class, Object.class);
 		ResolvableType consumerNestedUnresolved = ResolvableType.forClassWithGenerics(Consumer.class, ResolvableType.forClass(Consumer.class));
+		ResolvableType consumerNumber = ResolvableType.forClassWithGenerics(Consumer.class, Number.class);
+		ResolvableType consumerExtendsNumber = ResolvableType.forClass(SubConsumer.class);
 
 		assertThat(consumerUnresolved.isAssignableFrom(consumerObject)).isTrue();
 		assertThat(consumerUnresolved.isAssignableFromResolvedPart(consumerObject)).isTrue();
@@ -1239,6 +1241,10 @@ class ResolvableTypeTests {
 		assertThat(consumerUnresolved.isAssignableFromResolvedPart(consumerNestedUnresolved)).isTrue();
 		assertThat(consumerObject.isAssignableFrom(consumerNestedUnresolved)).isFalse();
 		assertThat(consumerObject.isAssignableFromResolvedPart(consumerNestedUnresolved)).isFalse();
+		assertThat(consumerObject.isAssignableFrom(consumerNumber)).isFalse();
+		assertThat(consumerObject.isAssignableFromResolvedPart(consumerNumber)).isFalse();
+		assertThat(consumerObject.isAssignableFrom(consumerExtendsNumber)).isFalse();
+		assertThat(consumerObject.isAssignableFromResolvedPart(consumerExtendsNumber)).isTrue();
 	}
 
 	@Test
@@ -1786,6 +1792,9 @@ class ResolvableTypeTests {
 
 
 	public interface Consumer<T> {
+	}
+
+	private static class SubConsumer<N extends Number> implements Consumer<N> {
 	}
 
 	public class Wildcard<T extends CharSequence> {

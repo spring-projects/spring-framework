@@ -1,9 +1,7 @@
 /**
  * Provides an HttpMessageConverter for the CBOR data format.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.http.converter.cbor;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

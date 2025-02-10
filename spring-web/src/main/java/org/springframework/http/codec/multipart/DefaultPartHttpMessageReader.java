@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -37,7 +38,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.LoggingCodecSupport;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -66,8 +66,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private int maxParts = -1;
 
-	@Nullable
-	private Scheduler blockingOperationScheduler;
+	private @Nullable Scheduler blockingOperationScheduler;
 
 	private FileStorage fileStorage = FileStorage.tempDirectory(this::getBlockingOperationScheduler);
 

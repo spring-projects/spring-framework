@@ -16,10 +16,10 @@
 
 package org.springframework.web.testfixture.server;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
@@ -99,8 +99,7 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private final MockServerHttpRequest request;
 
-		@Nullable
-		private WebSessionManager sessionManager;
+		private @Nullable WebSessionManager sessionManager;
 
 
 		public Builder(MockServerHttpRequest request) {

@@ -18,9 +18,10 @@ package org.springframework.scripting.groovy;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
-import org.springframework.lang.Nullable;
 
 public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 

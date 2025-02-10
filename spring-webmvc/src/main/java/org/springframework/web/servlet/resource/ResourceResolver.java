@@ -19,9 +19,9 @@ package org.springframework.web.servlet.resource;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 
 /**
  * A strategy for resolving a request to a server-side resource.
@@ -47,8 +47,7 @@ public interface ResourceResolver {
 	 * @param chain the chain of remaining resolvers to delegate to
 	 * @return the resolved resource, or {@code null} if unresolved
 	 */
-	@Nullable
-	Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
+	@Nullable Resource resolveResource(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 
 	/**
@@ -61,7 +60,6 @@ public interface ResourceResolver {
 	 * @param chain the chain of resolvers to delegate to
 	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
-	@Nullable
-	String resolveUrlPath(String resourcePath, List<? extends Resource> locations, ResourceResolverChain chain);
+	@Nullable String resolveUrlPath(String resourcePath, List<? extends Resource> locations, ResourceResolverChain chain);
 
 }

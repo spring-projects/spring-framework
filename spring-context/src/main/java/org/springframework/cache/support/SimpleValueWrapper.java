@@ -18,8 +18,9 @@ package org.springframework.cache.support;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache.ValueWrapper;
-import org.springframework.lang.Nullable;
 
 /**
  * Straightforward implementation of {@link org.springframework.cache.Cache.ValueWrapper},
@@ -30,8 +31,7 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleValueWrapper implements ValueWrapper {
 
-	@Nullable
-	private final Object value;
+	private final @Nullable Object value;
 
 
 	/**
@@ -47,8 +47,7 @@ public class SimpleValueWrapper implements ValueWrapper {
 	 * Simply returns the value as given at construction time.
 	 */
 	@Override
-	@Nullable
-	public Object get() {
+	public @Nullable Object get() {
 		return this.value;
 	}
 

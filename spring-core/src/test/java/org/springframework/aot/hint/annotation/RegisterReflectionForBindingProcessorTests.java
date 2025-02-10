@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class RegisterReflectionForBindingProcessorTests {
 		processor.registerReflectionHints(hints.reflection(), ClassLevelAnnotatedBean.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(SampleClassWithGetter.class)).accepts(hints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(String.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithGetter.class, "getName")).accepts(hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleClassWithGetter.class, "getName")).accepts(hints);
 	}
 
 	@Test
@@ -49,7 +49,7 @@ class RegisterReflectionForBindingProcessorTests {
 		processor.registerReflectionHints(hints.reflection(), MethodLevelAnnotatedBean.class.getMethod("method"));
 		assertThat(RuntimeHintsPredicates.reflection().onType(SampleClassWithGetter.class)).accepts(hints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(String.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithGetter.class, "getName")).accepts(hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleClassWithGetter.class, "getName")).accepts(hints);
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class RegisterReflectionForBindingProcessorTests {
 		processor.registerReflectionHints(hints.reflection(), SampleClassWithoutAnnotationAttribute.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(SampleClassWithoutAnnotationAttribute.class)).accepts(hints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(String.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithoutAnnotationAttribute.class, "getName")).accepts(hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleClassWithoutAnnotationAttribute.class, "getName")).accepts(hints);
 	}
 
 	@Test

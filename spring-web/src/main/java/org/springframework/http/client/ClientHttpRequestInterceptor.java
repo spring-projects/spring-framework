@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.util.Assert;
 
 /**
  * Contract to intercept client-side HTTP requests. Implementations can be
@@ -59,5 +60,33 @@ public interface ClientHttpRequestInterceptor {
 	 */
 	ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 			throws IOException;
+
+	/**
+	 * Return a new interceptor that invokes {@code this} interceptor first, and
+	 * then the one that's passed in.
+	 * @param interceptor the next interceptor
+	 * @return a new interceptor that chains the two
+	 * @since 7.0
+	 */
+	default ClientHttpRequestInterceptor andThen(ClientHttpRequestInterceptor interceptor) {
+		Assert.notNull(interceptor, "ClientHttpRequestInterceptor must not be null");
+		return (request, body, execution) -> {
+			ClientHttpRequestExecution nextExecution =
+					(nextRequest, nextBody) -> interceptor.intercept(nextRequest, nextBody, execution);
+			return intercept(request, body, nextExecution);
+		};
+	}
+
+	/**
+	 * Return a new execution that invokes {@code this} interceptor, and then
+	 * delegates to the given execution.
+	 * @param execution the execution to delegate to
+	 * @return a new execution instance
+	 * @since 7.0
+	 */
+	default ClientHttpRequestExecution apply(ClientHttpRequestExecution execution) {
+		Assert.notNull(execution, "ClientHttpRequestExecution must not be null");
+		return (request, body) -> intercept(request, body, execution);
+	}
 
 }

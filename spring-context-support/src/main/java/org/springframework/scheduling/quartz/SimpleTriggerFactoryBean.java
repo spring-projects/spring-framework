@@ -19,6 +19,7 @@ package org.springframework.scheduling.quartz;
 import java.util.Date;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -28,7 +29,6 @@ import org.quartz.impl.triggers.SimpleTriggerImpl;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -77,19 +77,15 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 				SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT
 		);
 
-	@Nullable
-	private String name;
+	private @Nullable String name;
 
-	@Nullable
-	private String group;
+	private @Nullable String group;
 
-	@Nullable
-	private JobDetail jobDetail;
+	private @Nullable JobDetail jobDetail;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
-	@Nullable
-	private Date startTime;
+	private @Nullable Date startTime;
 
 	private long startDelay;
 
@@ -101,14 +97,11 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 	private int misfireInstruction = SimpleTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
-	@Nullable
-	private String description;
+	private @Nullable String description;
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private SimpleTrigger simpleTrigger;
+	private @Nullable SimpleTrigger simpleTrigger;
 
 
 	/**
@@ -275,8 +268,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 
 	@Override
-	@Nullable
-	public SimpleTrigger getObject() {
+	public @Nullable SimpleTrigger getObject() {
 		return this.simpleTrigger;
 	}
 

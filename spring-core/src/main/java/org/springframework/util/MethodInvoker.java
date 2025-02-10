@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Helper class that allows for specifying a method to invoke in a declarative
@@ -41,24 +41,18 @@ public class MethodInvoker {
 	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
 
 
-	@Nullable
-	protected Class<?> targetClass;
+	protected @Nullable Class<?> targetClass;
 
-	@Nullable
-	private Object targetObject;
+	private @Nullable Object targetObject;
 
-	@Nullable
-	private String targetMethod;
+	private @Nullable String targetMethod;
 
-	@Nullable
-	private String staticMethod;
+	private @Nullable String staticMethod;
 
-	@Nullable
-	private Object[] arguments;
+	private @Nullable Object @Nullable [] arguments;
 
 	/** The method we will call. */
-	@Nullable
-	private Method methodObject;
+	private @Nullable Method methodObject;
 
 
 	/**
@@ -75,8 +69,7 @@ public class MethodInvoker {
 	/**
 	 * Return the target class on which to call the target method.
 	 */
-	@Nullable
-	public Class<?> getTargetClass() {
+	public @Nullable Class<?> getTargetClass() {
 		return this.targetClass;
 	}
 
@@ -97,8 +90,7 @@ public class MethodInvoker {
 	/**
 	 * Return the target object on which to call the target method.
 	 */
-	@Nullable
-	public Object getTargetObject() {
+	public @Nullable Object getTargetObject() {
 		return this.targetObject;
 	}
 
@@ -116,8 +108,7 @@ public class MethodInvoker {
 	/**
 	 * Return the name of the method to be invoked.
 	 */
-	@Nullable
-	public String getTargetMethod() {
+	public @Nullable String getTargetMethod() {
 		return this.targetMethod;
 	}
 
@@ -143,7 +134,7 @@ public class MethodInvoker {
 	/**
 	 * Return the arguments for the method invocation.
 	 */
-	public Object[] getArguments() {
+	public @Nullable Object[] getArguments() {
 		return (this.arguments != null ? this.arguments : EMPTY_ARGUMENTS);
 	}
 
@@ -175,7 +166,7 @@ public class MethodInvoker {
 		Assert.notNull(targetClass, "Either 'targetClass' or 'targetObject' is required");
 		Assert.notNull(targetMethod, "Property 'targetMethod' is required");
 
-		Object[] arguments = getArguments();
+		@Nullable Object[] arguments = getArguments();
 		Class<?>[] argTypes = new Class<?>[arguments.length];
 		for (int i = 0; i < arguments.length; ++i) {
 			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
@@ -213,10 +204,9 @@ public class MethodInvoker {
 	 * @see #getTargetMethod()
 	 * @see #getArguments()
 	 */
-	@Nullable
-	protected Method findMatchingMethod() {
+	protected @Nullable Method findMatchingMethod() {
 		String targetMethod = getTargetMethod();
-		Object[] arguments = getArguments();
+		@Nullable Object[] arguments = getArguments();
 		int argCount = arguments.length;
 
 		Class<?> targetClass = getTargetClass();
@@ -271,8 +261,7 @@ public class MethodInvoker {
 	 * @throws IllegalAccessException if the target method couldn't be accessed
 	 * @see #prepare
 	 */
-	@Nullable
-	public Object invoke() throws InvocationTargetException, IllegalAccessException {
+	public @Nullable Object invoke() throws InvocationTargetException, IllegalAccessException {
 		// In the static case, target will simply be {@code null}.
 		Object targetObject = getTargetObject();
 		Method preparedMethod = getPreparedMethod();
@@ -304,7 +293,7 @@ public class MethodInvoker {
 	 * @param args the arguments to match
 	 * @return the accumulated weight for all arguments
 	 */
-	public static int getTypeDifferenceWeight(Class<?>[] paramTypes, Object[] args) {
+	public static int getTypeDifferenceWeight(Class<?>[] paramTypes, @Nullable Object[] args) {
 		int result = 0;
 		for (int i = 0; i < paramTypes.length; i++) {
 			if (!ClassUtils.isAssignableValue(paramTypes[i], args[i])) {

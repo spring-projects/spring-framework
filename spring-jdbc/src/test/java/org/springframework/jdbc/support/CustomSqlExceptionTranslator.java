@@ -18,9 +18,10 @@ package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
-import org.springframework.lang.Nullable;
 
 /**
  * Custom SQLException translation for testing.

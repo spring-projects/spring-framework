@@ -19,7 +19,8 @@ package org.springframework.web.multipart.support;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -33,8 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class StringMultipartFileEditor extends PropertyEditorSupport {
 
-	@Nullable
-	private final String charsetName;
+	private final @Nullable String charsetName;
 
 
 	/**

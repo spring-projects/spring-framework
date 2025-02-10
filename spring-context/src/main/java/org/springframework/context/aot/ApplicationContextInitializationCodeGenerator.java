@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.function.Function;
 
 import javax.lang.model.element.Modifier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
@@ -44,7 +46,6 @@ import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeName;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.lang.Nullable;
 
 /**
  * Internal code generator to create the {@link ApplicationContextInitializer}.
@@ -139,16 +140,14 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 		this.initializers.add(methodReference);
 	}
 
-	private static class InitializerMethodArgumentCodeGenerator implements Function<TypeName, CodeBlock> {
+	private static class InitializerMethodArgumentCodeGenerator implements Function<TypeName, @Nullable CodeBlock> {
 
 		@Override
-		@Nullable
-		public CodeBlock apply(TypeName typeName) {
+		public @Nullable CodeBlock apply(TypeName typeName) {
 			return (typeName instanceof ClassName className ? apply(className) : null);
 		}
 
-		@Nullable
-		private CodeBlock apply(ClassName className) {
+		private @Nullable CodeBlock apply(ClassName className) {
 			String name = className.canonicalName();
 			if (name.equals(DefaultListableBeanFactory.class.getName())
 					|| name.equals(ConfigurableListableBeanFactory.class.getName())) {

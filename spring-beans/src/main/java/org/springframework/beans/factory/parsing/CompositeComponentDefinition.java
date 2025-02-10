@@ -19,7 +19,8 @@ package org.springframework.beans.factory.parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -35,8 +36,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 
 	private final String name;
 
-	@Nullable
-	private final Object source;
+	private final @Nullable Object source;
 
 	private final List<ComponentDefinition> nestedComponents = new ArrayList<>();
 
@@ -59,8 +59,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
+	public @Nullable Object getSource() {
 		return this.source;
 	}
 

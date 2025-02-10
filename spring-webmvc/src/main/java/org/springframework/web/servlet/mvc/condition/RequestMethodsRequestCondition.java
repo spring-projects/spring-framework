@@ -25,10 +25,10 @@ import java.util.Set;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -123,8 +123,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * request method is OPTIONS.
 	 */
 	@Override
-	@Nullable
-	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
+	public @Nullable RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return matchPreFlight(request);
 		}
@@ -146,8 +145,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Hence empty conditions is a match, otherwise try to match to the HTTP
 	 * method in the "Access-Control-Request-Method" header.
 	 */
-	@Nullable
-	private RequestMethodsRequestCondition matchPreFlight(HttpServletRequest request) {
+	private @Nullable RequestMethodsRequestCondition matchPreFlight(HttpServletRequest request) {
 		if (getMethods().isEmpty()) {
 			return this;
 		}
@@ -155,8 +153,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return matchRequestMethod(expectedMethod);
 	}
 
-	@Nullable
-	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
+	private @Nullable RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
 		RequestMethod requestMethod = RequestMethod.resolve(httpMethodValue);
 		if (requestMethod != null) {
 			if (getMethods().contains(requestMethod)) {

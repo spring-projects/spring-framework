@@ -25,9 +25,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -75,14 +75,11 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	public static final String DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
 
 
-	@Nullable
-	private String entityManagerFactoryBeanName;
+	private @Nullable String entityManagerFactoryBeanName;
 
-	@Nullable
-	private String persistenceUnitName;
+	private @Nullable String persistenceUnitName;
 
-	@Nullable
-	private volatile EntityManagerFactory entityManagerFactory;
+	private volatile @Nullable EntityManagerFactory entityManagerFactory;
 
 
 	/**
@@ -101,8 +98,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * Return the bean name of the EntityManagerFactory to fetch from Spring's
 	 * root application context.
 	 */
-	@Nullable
-	protected String getEntityManagerFactoryBeanName() {
+	protected @Nullable String getEntityManagerFactoryBeanName() {
 		return this.entityManagerFactoryBeanName;
 	}
 
@@ -123,8 +119,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Return the name of the persistence unit to access the EntityManagerFactory for, if any.
 	 */
-	@Nullable
-	protected String getPersistenceUnitName() {
+	protected @Nullable String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
 

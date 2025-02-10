@@ -13,8 +13,8 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
-	errorprone 'com.uber.nullaway:nullaway:0.10.26'
-	errorprone 'com.google.errorprone:error_prone_core:2.9.0'
+	errorprone 'com.uber.nullaway:nullaway:0.12.3'
+	errorprone 'com.google.errorprone:error_prone_core:2.36.0'
 }
 
 pluginManager.withPlugin("kotlin") {
@@ -76,9 +76,9 @@ javadoc {
 	options.header = project.name
 	options.use = true
 	options.links(project.ext.javadocLinks)
-	// Check for syntax during linting. 'none' doesn't seem to work in suppressing
-	// all linting warnings all the time (see/link references most notably).
-	options.addStringOption("Xdoclint:syntax", "-quiet")
+	options.setOutputLevel(JavadocOutputLevel.QUIET)
+	// Check for syntax during linting.
+	options.addBooleanOption("Xdoclint:syntax", true)
 
 	// Suppress warnings due to cross-module @see and @link references.
 	// Note that global 'api' task does display all warnings, and
@@ -116,11 +116,9 @@ components.java.withVariantsFromConfiguration(configurations.testFixturesRuntime
 tasks.withType(JavaCompile).configureEach {
     options.errorprone {
     	disableAllChecks = true
-        option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
-        option("NullAway:AnnotatedPackages", "org.springframework")
-        option("NullAway:UnannotatedSubPackages", "org.springframework.instrument,org.springframework.context.index," +
-				"org.springframework.asm,org.springframework.cglib,org.springframework.objenesis," +
-				"org.springframework.javapoet,org.springframework.aot.nativex.substitution,org.springframework.aot.nativex.feature")
+		option("NullAway:OnlyNullMarked", "true")
+		option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
+		option("NullAway:JSpecifyMode", "true")
     }
 }
 tasks.compileJava {

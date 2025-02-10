@@ -18,7 +18,8 @@ package org.springframework.scheduling.config;
 
 import java.time.Instant;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.util.Assert;
 
@@ -99,9 +100,8 @@ public class Task {
 			return SchedulingAwareRunnable.super.isLongLived();
 		}
 
-		@Nullable
 		@Override
-		public String getQualifier() {
+		public @Nullable String getQualifier() {
 			if (this.runnable instanceof SchedulingAwareRunnable sar) {
 				return sar.getQualifier();
 			}

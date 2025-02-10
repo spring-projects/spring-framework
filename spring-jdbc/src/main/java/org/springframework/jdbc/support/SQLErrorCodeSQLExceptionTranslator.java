@@ -23,6 +23,8 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -33,7 +35,6 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.util.function.SupplierUtils;
 
@@ -84,8 +85,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 			new ClassPathResource(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH,
 					SQLErrorCodesFactory.class.getClassLoader()).exists();
 
-	@Nullable
-	private SingletonSupplier<SQLErrorCodes> sqlErrorCodes;
+	private @Nullable SingletonSupplier<SQLErrorCodes> sqlErrorCodes;
 
 
 	/**
@@ -173,16 +173,14 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Usually determined via a DataSource.
 	 * @see #setDataSource
 	 */
-	@Nullable
-	public SQLErrorCodes getSqlErrorCodes() {
+	public @Nullable SQLErrorCodes getSqlErrorCodes() {
 		return SupplierUtils.resolve(this.sqlErrorCodes);
 	}
 
 
 	@SuppressWarnings("deprecation")
 	@Override
-	@Nullable
-	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
+	protected @Nullable DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		SQLException sqlEx = ex;
 		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
 			SQLException nestedSqlEx = sqlEx.getNextException();
@@ -312,8 +310,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * @deprecated as of 6.1, in favor of {@link #setCustomTranslator}
 	 */
 	@Deprecated(since = "6.1")
-	@Nullable
-	protected DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
+	protected @Nullable DataAccessException customTranslate(String task, @Nullable String sql, SQLException sqlEx) {
 		return null;
 	}
 
@@ -330,8 +327,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * {@code sqlEx} parameter as a nested root cause.
 	 * @see CustomSQLErrorCodesTranslation#setExceptionClass
 	 */
-	@Nullable
-	protected DataAccessException createCustomException(
+	protected @Nullable DataAccessException createCustomException(
 			String task, @Nullable String sql, SQLException sqlEx, Class<?> exceptionClass) {
 
 		// Find appropriate constructor for the given exception class

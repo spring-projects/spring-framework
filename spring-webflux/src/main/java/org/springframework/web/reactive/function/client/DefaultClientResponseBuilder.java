@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -35,7 +36,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -79,16 +79,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private HttpStatusCode statusCode = HttpStatus.OK;
 
-	@Nullable
-	private HttpHeaders headers;
+	private @Nullable HttpHeaders headers;
 
-	@Nullable
-	private MultiValueMap<String, ResponseCookie> cookies;
+	private @Nullable MultiValueMap<String, ResponseCookie> cookies;
 
 	private Flux<DataBuffer> body = Flux.empty();
 
-	@Nullable
-	private ClientResponse originalResponse;
+	private @Nullable ClientResponse originalResponse;
 
 	private HttpRequest request;
 
@@ -228,16 +225,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		private final HttpStatusCode statusCode;
 
-		@Nullable
-		private final HttpHeaders headers;
+		private final @Nullable HttpHeaders headers;
 
-		@Nullable
-		private final MultiValueMap<String, ResponseCookie> cookies;
+		private final @Nullable MultiValueMap<String, ResponseCookie> cookies;
 
 		private final Flux<DataBuffer> body;
 
-		@Nullable
-		private final ClientResponse originalResponse;
+		private final @Nullable ClientResponse originalResponse;
 
 
 		BuiltClientHttpResponse(HttpStatusCode statusCode, @Nullable HttpHeaders headers,

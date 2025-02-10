@@ -21,12 +21,12 @@ import javax.management.MBeanServerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that obtains a {@link javax.management.MBeanServer} reference
@@ -59,16 +59,13 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 
 	private boolean locateExistingServerIfPossible = false;
 
-	@Nullable
-	private String agentId;
+	private @Nullable String agentId;
 
-	@Nullable
-	private String defaultDomain;
+	private @Nullable String defaultDomain;
 
 	private boolean registerWithFactory = true;
 
-	@Nullable
-	private MBeanServer server;
+	private @Nullable MBeanServer server;
 
 	private boolean newlyRegistered = false;
 
@@ -187,8 +184,7 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 
 
 	@Override
-	@Nullable
-	public MBeanServer getObject() {
+	public @Nullable MBeanServer getObject() {
 		return this.server;
 	}
 

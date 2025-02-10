@@ -22,10 +22,10 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.lang.Nullable;
 import org.springframework.orm.hibernate5.SessionFactoryUtils;
 import org.springframework.orm.hibernate5.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -50,8 +50,7 @@ import org.springframework.util.Assert;
  */
 public class OpenSessionInterceptor implements MethodInterceptor, InitializingBean {
 
-	@Nullable
-	private SessionFactory sessionFactory;
+	private @Nullable SessionFactory sessionFactory;
 
 
 	/**
@@ -64,8 +63,7 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 	/**
 	 * Return the Hibernate SessionFactory that should be used to create Hibernate Sessions.
 	 */
-	@Nullable
-	public SessionFactory getSessionFactory() {
+	public @Nullable SessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
 
@@ -78,8 +76,7 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 
 
 	@Override
-	@Nullable
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 		SessionFactory sf = getSessionFactory();
 		Assert.state(sf != null, "No SessionFactory set");
 

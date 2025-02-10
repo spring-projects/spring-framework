@@ -32,11 +32,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -130,8 +130,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	@Nullable
-	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
+	protected @Nullable Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		Resource resource = chain.resolveResource(request, requestPath, locations);
@@ -164,8 +163,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		return resource;
 	}
 
-	@Nullable
-	private String getAcceptEncoding(HttpServletRequest request) {
+	private @Nullable String getAcceptEncoding(HttpServletRequest request) {
 		String header = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
 		return (header != null ? header.toLowerCase(Locale.ROOT) : null);
 	}
@@ -179,8 +177,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	@Nullable
-	protected String resolveUrlPathInternal(String resourceUrlPath,
+	protected @Nullable String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveUrlPath(resourceUrlPath, locations);
@@ -275,8 +272,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
+		public @Nullable String getFilename() {
 			return this.original.getFilename();
 		}
 

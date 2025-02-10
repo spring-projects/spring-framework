@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,38 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 
 	/**
 	 * Configure HTTP message writers to serialize the request body with.
-	 * <p>By default this is set to {@link ServerCodecConfigurer}'s default writers.
+	 * <p>By default, this is set to {@link ServerCodecConfigurer}'s default writers.
 	 */
 	public void setMessageWriters(List<HttpMessageWriter<?>> configurer) {
 		this.messageWriters = configurer;
 	}
 
+	/**
+	 * Return the configured {@link HttpMessageWriter}'s.
+	 * @since 6.2.3
+	 */
+	public List<HttpMessageWriter<?>> getMessageWriters() {
+		return this.messageWriters;
+	}
+
+	/**
+	 * Set the current view resolvers.
+	 */
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
 		this.viewResolvers = viewResolvers;
 	}
 
 	/**
+	 * Return the configured {@link ViewResolver}'s.
+	 * @since 6.2.3
+	 */
+	public List<ViewResolver> getViewResolvers() {
+		return this.viewResolvers;
+	}
+
+	/**
 	 * Set the order for this result handler relative to others.
-	 * <p>By default set to 0. It is generally safe to place it early in the
+	 * <p>By default, set to 0. It is generally safe to place it early in the
 	 * order as it looks for a concrete return type.
 	 */
 	public void setOrder(int order) {

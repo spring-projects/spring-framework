@@ -34,7 +34,8 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -63,8 +64,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 
 	private final String path;
 
-	@Nullable
-	private final File file;
+	private final @Nullable File file;
 
 	private final Path filePath;
 

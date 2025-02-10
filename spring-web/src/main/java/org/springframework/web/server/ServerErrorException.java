@@ -18,9 +18,10 @@ package org.springframework.web.server;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 
 /**
  * Exception for an {@link HttpStatus#INTERNAL_SERVER_ERROR} that exposes extra
@@ -33,11 +34,9 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class ServerErrorException extends ResponseStatusException {
 
-	@Nullable
-	private final Method handlerMethod;
+	private final @Nullable Method handlerMethod;
 
-	@Nullable
-	private final MethodParameter parameter;
+	private final @Nullable MethodParameter parameter;
 
 
 	/**
@@ -74,16 +73,14 @@ public class ServerErrorException extends ResponseStatusException {
 	 * Return the handler method associated with the error, if any.
 	 * @since 5.0.5
 	 */
-	@Nullable
-	public Method getHandlerMethod() {
+	public @Nullable Method getHandlerMethod() {
 		return this.handlerMethod;
 	}
 
 	/**
 	 * Return the specific method parameter associated with the error, if any.
 	 */
-	@Nullable
-	public MethodParameter getMethodParameter() {
+	public @Nullable MethodParameter getMethodParameter() {
 		return this.parameter;
 	}
 

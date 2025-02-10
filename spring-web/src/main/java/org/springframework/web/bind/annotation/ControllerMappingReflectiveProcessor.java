@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
@@ -29,7 +31,6 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
 
@@ -111,8 +112,7 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 		}
 	}
 
-	@Nullable
-	private Type getHttpEntityType(MethodParameter parameter) {
+	private @Nullable Type getHttpEntityType(MethodParameter parameter) {
 		MethodParameter nestedParameter = parameter.nested();
 		return (nestedParameter.getNestedParameterType() == nestedParameter.getParameterType() ?
 				null : nestedParameter.getNestedParameterType());

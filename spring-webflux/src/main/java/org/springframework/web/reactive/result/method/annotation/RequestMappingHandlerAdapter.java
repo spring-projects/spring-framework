@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -36,7 +37,6 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -79,31 +79,23 @@ public class RequestMappingHandlerAdapter
 
 	private List<HttpMessageReader<?>> messageReaders = Collections.emptyList();
 
-	@Nullable
-	private WebBindingInitializer webBindingInitializer;
+	private @Nullable WebBindingInitializer webBindingInitializer;
 
-	@Nullable
-	private ArgumentResolverConfigurer argumentResolverConfigurer;
+	private @Nullable ArgumentResolverConfigurer argumentResolverConfigurer;
 
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
 
-	@Nullable
-	private Scheduler scheduler;
+	private @Nullable Scheduler scheduler;
 
-	@Nullable
-	private Predicate<HandlerMethod> blockingMethodPredicate;
+	private @Nullable Predicate<HandlerMethod> blockingMethodPredicate;
 
-	@Nullable
-	private ReactiveAdapterRegistry reactiveAdapterRegistry;
+	private @Nullable ReactiveAdapterRegistry reactiveAdapterRegistry;
 
-	@Nullable
-	private ConfigurableApplicationContext applicationContext;
+	private @Nullable ConfigurableApplicationContext applicationContext;
 
-	@Nullable
-	private ControllerMethodResolver methodResolver;
+	private @Nullable ControllerMethodResolver methodResolver;
 
-	@Nullable
-	private ModelInitializer modelInitializer;
+	private @Nullable ModelInitializer modelInitializer;
 
 
 	/**
@@ -133,8 +125,7 @@ public class RequestMappingHandlerAdapter
 	/**
 	 * Return the configured WebBindingInitializer, or {@code null} if none.
 	 */
-	@Nullable
-	public WebBindingInitializer getWebBindingInitializer() {
+	public @Nullable WebBindingInitializer getWebBindingInitializer() {
 		return this.webBindingInitializer;
 	}
 
@@ -148,8 +139,7 @@ public class RequestMappingHandlerAdapter
 	/**
 	 * Return the configured resolvers for controller method arguments.
 	 */
-	@Nullable
-	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
+	public @Nullable ArgumentResolverConfigurer getArgumentResolverConfigurer() {
 		return this.argumentResolverConfigurer;
 	}
 
@@ -207,8 +197,7 @@ public class RequestMappingHandlerAdapter
 	/**
 	 * Return the configured registry for adapting reactive types.
 	 */
-	@Nullable
-	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+	public @Nullable ReactiveAdapterRegistry getReactiveAdapterRegistry() {
 		return this.reactiveAdapterRegistry;
 	}
 
@@ -325,7 +314,7 @@ public class RequestMappingHandlerAdapter
 					Throwable cause = exToExpose.getCause();
 					exToExpose = (cause != exToExpose ? cause : null);
 				}
-				Object[] arguments = new Object[exceptions.size() + 1];
+				@Nullable Object[] arguments = new Object[exceptions.size() + 1];
 				exceptions.toArray(arguments);  // efficient arraycopy call in ArrayList
 				arguments[arguments.length - 1] = handlerMethod;
 

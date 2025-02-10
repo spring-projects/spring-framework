@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -58,8 +58,7 @@ class DeferredResultInterceptorChain {
 		}
 	}
 
-	@Nullable
-	public Object applyPostProcess(NativeWebRequest request, DeferredResult<?> deferredResult,
+	public @Nullable Object applyPostProcess(NativeWebRequest request, DeferredResult<?> deferredResult,
 			@Nullable Object concurrentResult) {
 
 		try {

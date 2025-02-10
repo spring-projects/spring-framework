@@ -19,10 +19,11 @@ package org.springframework.core.convert.support;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.lang.Nullable;
 
 /**
  * Converts a {@link ByteBuffer} directly to and from {@code byte[] ByteBuffer} directly to and from {@code byte[]s} and indirectly
@@ -77,8 +78,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	}
 
 	@Override
-	@Nullable
-	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	public @Nullable Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		boolean byteBufferTarget = targetType.isAssignableTo(BYTE_BUFFER_TYPE);
 		if (source instanceof ByteBuffer buffer) {
 			return (byteBufferTarget ? buffer.duplicate() : convertFromByteBuffer(buffer, targetType));
@@ -90,8 +90,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		throw new IllegalStateException("Unexpected source/target types");
 	}
 
-	@Nullable
-	private Object convertFromByteBuffer(ByteBuffer source, TypeDescriptor targetType) {
+	private @Nullable Object convertFromByteBuffer(ByteBuffer source, TypeDescriptor targetType) {
 		byte[] bytes = new byte[source.remaining()];
 		source.get(bytes);
 

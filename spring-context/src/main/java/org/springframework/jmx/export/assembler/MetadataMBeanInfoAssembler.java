@@ -18,10 +18,13 @@ package org.springframework.jmx.export.assembler;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import javax.management.Descriptor;
 import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
@@ -35,7 +38,6 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -59,8 +61,7 @@ import org.springframework.util.StringUtils;
 public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler
 		implements AutodetectCapableMBeanInfoAssembler, InitializingBean {
 
-	@Nullable
-	private JmxAttributeSource attributeSource;
+	private @Nullable JmxAttributeSource attributeSource;
 
 
 	/**
@@ -259,7 +260,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 */
 	@Override
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
-		ManagedOperationParameter[] params = obtainAttributeSource().getManagedOperationParameters(method);
+		@Nullable ManagedOperationParameter[] params = obtainAttributeSource().getManagedOperationParameters(method);
 		if (ObjectUtils.isEmpty(params)) {
 			return super.getOperationParameters(method, beanKey);
 		}
@@ -267,7 +268,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[params.length];
 		Class<?>[] methodParameters = method.getParameterTypes();
 		for (int i = 0; i < params.length; i++) {
-			ManagedOperationParameter param = params[i];
+			ManagedOperationParameter param = Objects.requireNonNull(params[i]);
 			parameterInfo[i] =
 					new MBeanParameterInfo(param.getName(), methodParameters[i].getName(), param.getDescription());
 		}
@@ -280,14 +281,14 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 */
 	@Override
 	protected ModelMBeanNotificationInfo[] getNotificationInfo(Object managedBean, String beanKey) {
-		ManagedNotification[] notificationAttributes =
+		@Nullable ManagedNotification[] notificationAttributes =
 				obtainAttributeSource().getManagedNotifications(getClassToExpose(managedBean));
 		ModelMBeanNotificationInfo[] notificationInfos =
 				new ModelMBeanNotificationInfo[notificationAttributes.length];
 
 		for (int i = 0; i < notificationAttributes.length; i++) {
 			ManagedNotification attribute = notificationAttributes[i];
-			notificationInfos[i] = JmxMetadataUtils.convertToModelMBeanNotificationInfo(attribute);
+			notificationInfos[i] = JmxMetadataUtils.convertToModelMBeanNotificationInfo(Objects.requireNonNull(attribute));
 		}
 
 		return notificationInfos;
@@ -428,8 +429,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the Object value associated with the set method
 	 * @return the appropriate Object to use as the value for the descriptor
 	 */
-	@Nullable
-	private Object resolveObjectDescriptor(@Nullable Object getter, @Nullable Object setter) {
+	private @Nullable Object resolveObjectDescriptor(@Nullable Object getter, @Nullable Object setter) {
 		return (getter != null ? getter : setter);
 	}
 
@@ -443,8 +443,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param setter the String value associated with the set method
 	 * @return the appropriate String to use as the value for the descriptor
 	 */
-	@Nullable
-	private String resolveStringDescriptor(@Nullable String getter, @Nullable String setter) {
+	private @Nullable String resolveStringDescriptor(@Nullable String getter, @Nullable String setter) {
 		return (StringUtils.hasLength(getter) ? getter : setter);
 	}
 

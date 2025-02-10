@@ -28,10 +28,10 @@ import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpointConfig;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
 
@@ -59,11 +59,9 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	private final String path;
 
-	@Nullable
-	private final Endpoint endpoint;
+	private final @Nullable Endpoint endpoint;
 
-	@Nullable
-	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
+	private final @Nullable BeanCreatingHandlerProvider<Endpoint> endpointProvider;
 
 	private List<String> subprotocols = new ArrayList<>(0);
 

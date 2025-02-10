@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
@@ -537,6 +538,17 @@ class ForwardedHeaderUtilsTests {
 		assertThat(result.getPath()).isEqualTo("/rest/mobile/users/1");
 		assertThat(result.getPort()).isEqualTo(9090);
 		assertThat(result.toUriString()).isEqualTo("https://192.0.2.3:9090/rest/mobile/users/1");
+	}
+
+	@Test  // gh-34253
+	void fromHttpRequestXForwardedHeaderForIpv6Formatting() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-For", "fd00:fefe:1::4, 192.168.0.1");
+
+		InetSocketAddress address =
+				ForwardedHeaderUtils.parseForwardedFor(URI.create("https://example.com"), headers, null);
+
+		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.util;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Exception thrown from {@link MimeTypeUtils#parseMimeType(String)} in case of
  * encountering an invalid content type specification String.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 @SuppressWarnings("serial")
@@ -35,8 +38,10 @@ public class InvalidMimeTypeException extends IllegalArgumentException {
 	 * @param mimeType the offending media type
 	 * @param message a detail message indicating the invalid part
 	 */
-	public InvalidMimeTypeException(String mimeType, String message) {
-		super("Invalid mime type \"" + mimeType + "\": " + message);
+	public InvalidMimeTypeException(String mimeType, @Nullable String message) {
+		super(message == null ?
+				"Invalid mime type \"" + mimeType + "\"" :
+				"Invalid mime type \"" + mimeType + "\": " + message);
 		this.mimeType = mimeType;
 	}
 

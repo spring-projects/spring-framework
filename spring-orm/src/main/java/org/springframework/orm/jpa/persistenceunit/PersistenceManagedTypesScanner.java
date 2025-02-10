@@ -29,6 +29,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PersistenceException;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.index.CandidateComponentsIndex;
 import org.springframework.context.index.CandidateComponentsIndexLoader;
@@ -43,7 +44,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
@@ -77,8 +77,7 @@ public final class PersistenceManagedTypesScanner {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
-	@Nullable
-	private final CandidateComponentsIndex componentsIndex;
+	private final @Nullable CandidateComponentsIndex componentsIndex;
 
 	private final ManagedClassNameFilter managedClassNameFilter;
 
@@ -192,8 +191,7 @@ public final class PersistenceManagedTypesScanner {
 
 		private final List<String> managedPackages = new ArrayList<>();
 
-		@Nullable
-		private URL persistenceUnitRootUrl;
+		private @Nullable URL persistenceUnitRootUrl;
 
 		PersistenceManagedTypes toJpaManagedTypes() {
 			return new SimplePersistenceManagedTypes(this.managedClassNames,

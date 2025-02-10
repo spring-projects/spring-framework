@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.springframework.util.StreamUtils;
+
 /**
  * Represents an HTTP output message that allows for setting a streaming body.
  * Note that such messages typically do not support {@link #getBody()} access.
@@ -34,6 +36,27 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 	 * @param body the streaming body callback
 	 */
 	void setBody(Body body);
+
+	/**
+	 * Variant of {@link #setBody(Body)} for a non-streaming write.
+	 * @param body the content to write
+	 * @throws IOException if an I/O exception occurs
+	 * @since 7.0
+	 */
+	default void setBody(byte[] body) throws IOException {
+		setBody(new Body() {
+			@Override
+			public void writeTo(OutputStream outputStream) throws IOException {
+				StreamUtils.copy(body, outputStream);
+			}
+
+			@Override
+			public boolean repeatable() {
+				return true;
+			}
+		});
+	}
+
 
 
 	/**

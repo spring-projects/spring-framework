@@ -192,6 +192,7 @@ class RouterFunctionDslTests {
 				null
 			}
 		}
+		@Suppress("DEPRECATION")
 		GET(pathExtension { it == "properties" }) {
 			ok().body("foo=bar")
 		}

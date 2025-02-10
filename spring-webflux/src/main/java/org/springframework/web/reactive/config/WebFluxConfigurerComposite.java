@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -62,14 +63,14 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	@Nullable
-	public Validator getValidator() {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
+	public @Nullable Validator getValidator() {
 		return createSingleBean(WebFluxConfigurer::getValidator, Validator.class);
 	}
 
 	@Override
-	@Nullable
-	public MessageCodesResolver getMessageCodesResolver() {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
+	public @Nullable MessageCodesResolver getMessageCodesResolver() {
 		return createSingleBean(WebFluxConfigurer::getMessageCodesResolver, MessageCodesResolver.class);
 	}
 
@@ -115,14 +116,13 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
 	}
 
-	@Nullable
 	@Override
-	public WebSocketService getWebSocketService() {
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
+	public @Nullable WebSocketService getWebSocketService() {
 		return createSingleBean(WebFluxConfigurer::getWebSocketService, WebSocketService.class);
 	}
 
-	@Nullable
-	private <T> T createSingleBean(Function<WebFluxConfigurer, T> factory, Class<T> beanType) {
+	private <T> @Nullable T createSingleBean(Function<WebFluxConfigurer, @Nullable T> factory, Class<T> beanType) {
 		List<T> result = this.delegates.stream().map(factory).filter(Objects::nonNull).toList();
 		if (result.isEmpty()) {
 			return null;

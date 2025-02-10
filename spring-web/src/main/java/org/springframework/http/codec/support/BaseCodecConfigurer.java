@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,36 +164,6 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 		public void registerWithDefaultConfig(Object codec, Consumer<DefaultCodecConfig> configConsumer) {
 			addCodec(codec, false);
 			this.defaultConfigConsumers.add(configConsumer);
-		}
-
-		@SuppressWarnings("deprecation")
-		@Override
-		public void decoder(Decoder<?> decoder) {
-			addCodec(decoder, false);
-		}
-
-		@SuppressWarnings("deprecation")
-		@Override
-		public void encoder(Encoder<?> encoder) {
-			addCodec(encoder, false);
-		}
-
-		@SuppressWarnings("deprecation")
-		@Override
-		public void reader(HttpMessageReader<?> reader) {
-			addCodec(reader, false);
-		}
-
-		@SuppressWarnings("deprecation")
-		@Override
-		public void writer(HttpMessageWriter<?> writer) {
-			addCodec(writer, false);
-		}
-
-		@SuppressWarnings("deprecation")
-		@Override
-		public void withDefaultCodecConfig(Consumer<DefaultCodecConfig> codecsConfigConsumer) {
-			this.defaultConfigConsumers.add(codecsConfigConsumer);
 		}
 
 		private void addCodec(Object codec, boolean applyDefaultConfig) {

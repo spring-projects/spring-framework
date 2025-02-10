@@ -24,8 +24,8 @@ import java.util.function.IntPredicate;
 import io.netty5.buffer.Buffer;
 import io.netty5.buffer.BufferComponent;
 import io.netty5.buffer.ComponentIterator;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -359,8 +359,7 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 
 		private final boolean readable;
 
-		@Nullable
-		private T next;
+		private @Nullable T next;
 
 		public BufferComponentIterator(ComponentIterator<T> delegate, boolean readable) {
 			Assert.notNull(delegate, "Delegate must not be null");

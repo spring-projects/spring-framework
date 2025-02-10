@@ -16,8 +16,9 @@
 
 package org.springframework.messaging.rsocket.service;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 
 /**
  * Resolve an argument from an {@link RSocketExchange @RSocketExchange}-annotated

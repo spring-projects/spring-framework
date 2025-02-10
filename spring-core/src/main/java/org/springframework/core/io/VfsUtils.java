@@ -25,7 +25,8 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -184,13 +185,11 @@ public abstract class VfsUtils {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
 	}
 
-	@Nullable
-	protected static Object doGetVisitorAttributes() {
+	protected static @Nullable Object doGetVisitorAttributes() {
 		return ReflectionUtils.getField(VISITOR_ATTRIBUTES_FIELD_RECURSE, null);
 	}
 
-	@Nullable
-	protected static String doGetPath(Object resource) {
+	protected static @Nullable String doGetPath(Object resource) {
 		return (String) ReflectionUtils.invokeMethod(VIRTUAL_FILE_METHOD_GET_PATH_NAME, resource);
 	}
 

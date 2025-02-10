@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(serializableBean, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/x-protobuf")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -196,8 +196,7 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 		val serializableBean = SerializableBean(byteArrayOf(0x1, 0x2), arrayOf("Foo", "Bar"), 42, null, true, 42.0f)
 
 		this.converter.write(serializableBean, null, outputMessage)
-
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/x-protobuf")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -207,7 +206,7 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(serializableBeanArray, null, outputMessage)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/x-protobuf")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 
@@ -218,7 +217,7 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 
 		this.converter.write(listOf(serializableBean), ResolvableType.forType(typeOf<List<SerializableBean>>().javaType), null, outputMessage, null)
 
-		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/x-protobuf"))
+		assertThat(outputMessage.headers.containsHeaderValue("Content-Type", "application/x-protobuf")).isTrue()
 		assertThat(outputMessage.bodyAsBytes.isNotEmpty()).isTrue()
 	}
 

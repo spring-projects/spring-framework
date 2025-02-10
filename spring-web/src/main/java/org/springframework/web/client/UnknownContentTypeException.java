@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.springframework.web.client;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 /**
  * Raised when no suitable
@@ -112,15 +113,6 @@ public class UnknownContentTypeException extends RestClientException {
 	}
 
 	/**
-	 * Return the raw HTTP status code value.
-	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0")
-	public int getRawStatusCode() {
-		return this.statusCode.value();
-	}
-
-	/**
 	 * Return the HTTP status text.
 	 */
 	public String getStatusText() {
@@ -130,8 +122,7 @@ public class UnknownContentTypeException extends RestClientException {
 	/**
 	 * Return the HTTP response headers.
 	 */
-	@Nullable
-	public HttpHeaders getResponseHeaders() {
+	public @Nullable HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
 	}
 

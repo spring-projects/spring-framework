@@ -22,6 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -34,7 +36,6 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -146,8 +147,7 @@ public abstract class BeanFactoryAnnotationUtils {
 	 * @return the associated qualifier value, or {@code null} if none
 	 * @since 6.2
 	 */
-	@Nullable
-	public static String getQualifierValue(AnnotatedElement annotatedElement) {
+	public static @Nullable String getQualifierValue(AnnotatedElement annotatedElement) {
 		Qualifier qualifier = AnnotationUtils.getAnnotation(annotatedElement, Qualifier.class);
 		return (qualifier != null ? qualifier.value() : null);
 	}

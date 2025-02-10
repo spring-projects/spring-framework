@@ -22,9 +22,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -57,27 +58,6 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	/**
 	 * Create a new {@code XhrClientSockJsSession}.
-	 * @deprecated as of 6.0, in favor of
-	 * {@link #XhrClientSockJsSession(TransportRequest, WebSocketHandler, XhrTransport, CompletableFuture)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
-	public XhrClientSockJsSession(
-			TransportRequest request, WebSocketHandler handler, XhrTransport transport,
-			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
-
-		super(request, handler, connectFuture);
-		Assert.notNull(transport, "XhrTransport is required");
-		this.transport = transport;
-		this.headers = request.getHttpRequestHeaders();
-		this.sendHeaders = new HttpHeaders();
-		this.sendHeaders.putAll(this.headers);
-		this.sendHeaders.setContentType(MediaType.APPLICATION_JSON);
-		this.sendUrl = request.getSockJsUrlInfo().getTransportUrl(TransportType.XHR_SEND);
-	}
-
-	/**
-	 * Create a new {@code XhrClientSockJsSession}.
 	 * @since 6.0
 	 */
 	public XhrClientSockJsSession(TransportRequest request, WebSocketHandler handler,
@@ -99,21 +79,18 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getLocalAddress() {
+	public @Nullable InetSocketAddress getLocalAddress() {
 		return null;
 	}
 
 	@Override
-	@Nullable
-	public InetSocketAddress getRemoteAddress() {
+	public @Nullable InetSocketAddress getRemoteAddress() {
 		URI uri = getUri();
 		return (uri != null ? new InetSocketAddress(uri.getHost(), uri.getPort()) : null);
 	}
 
 	@Override
-	@Nullable
-	public String getAcceptedProtocol() {
+	public @Nullable String getAcceptedProtocol() {
 		return null;
 	}
 

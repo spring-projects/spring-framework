@@ -18,7 +18,7 @@ package org.springframework.jmx.access;
 
 import javax.management.JMRuntimeException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Thrown when trying to invoke an operation on a proxy that is not exposed

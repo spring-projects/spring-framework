@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -34,7 +35,6 @@ import reactor.netty.http.client.HttpClientRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -53,8 +53,7 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 
 	private final URI uri;
 
-	@Nullable
-	private final Duration exchangeTimeout;
+	private final @Nullable Duration exchangeTimeout;
 
 
 	/**
@@ -75,24 +74,6 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 	 * Package private constructor for use until exchangeTimeout is removed.
 	 */
 	ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Duration exchangeTimeout) {
-		this.httpClient = httpClient;
-		this.method = method;
-		this.uri = uri;
-		this.exchangeTimeout = exchangeTimeout;
-	}
-
-	/**
-	 * Original constructor with timeout values.
-	 * @deprecated without a replacement; readTimeout is now applied to the
-	 * underlying client via {@link HttpClient#responseTimeout(Duration)}, and the
-	 * value passed here is not used; exchangeTimeout is deprecated and superseded
-	 * by Reactor Netty timeout configuration, but applied if set.
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public ReactorClientHttpRequest(
-			HttpClient httpClient, URI uri, HttpMethod method,
-			@Nullable Duration exchangeTimeout, @Nullable Duration readTimeout) {
-
 		this.httpClient = httpClient;
 		this.method = method;
 		this.uri = uri;

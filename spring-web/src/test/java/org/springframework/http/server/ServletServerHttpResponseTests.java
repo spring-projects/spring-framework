@@ -99,7 +99,7 @@ class ServletServerHttpResponseTests {
 
 		assertThat(this.response.getHeaders().getFirst(headerName)).isEqualTo(headerValue);
 		assertThat(this.response.getHeaders().get(headerName)).containsExactly(headerValue);
-		assertThat(this.response.getHeaders()).containsKey(headerName);
+		assertThat(this.response.getHeaders().containsHeader(headerName)).isTrue();
 		assertThat(this.response.getHeaders().getAccessControlAllowOrigin()).isEqualTo(headerValue);
 	}
 

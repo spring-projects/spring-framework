@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -141,8 +142,7 @@ abstract class PropertyDescriptorUtils {
 	/**
 	 * See {@link java.beans.PropertyDescriptor#findPropertyType}.
 	 */
-	@Nullable
-	public static Class<?> findPropertyType(@Nullable Method readMethod, @Nullable Method writeMethod)
+	public static @Nullable Class<?> findPropertyType(@Nullable Method readMethod, @Nullable Method writeMethod)
 			throws IntrospectionException {
 
 		Class<?> propertyType = null;
@@ -186,8 +186,7 @@ abstract class PropertyDescriptorUtils {
 	/**
 	 * See {@link java.beans.IndexedPropertyDescriptor#findIndexedPropertyType}.
 	 */
-	@Nullable
-	public static Class<?> findIndexedPropertyType(String name, @Nullable Class<?> propertyType,
+	public static @Nullable Class<?> findIndexedPropertyType(String name, @Nullable Class<?> propertyType,
 			@Nullable Method indexedReadMethod, @Nullable Method indexedWriteMethod) throws IntrospectionException {
 
 		Class<?> indexedPropertyType = null;
@@ -264,11 +263,9 @@ abstract class PropertyDescriptorUtils {
 	 */
 	private static class BasicPropertyDescriptor extends PropertyDescriptor {
 
-		@Nullable
-		private Method readMethod;
+		private @Nullable Method readMethod;
 
-		@Nullable
-		private Method writeMethod;
+		private @Nullable Method writeMethod;
 
 		private final List<Method> alternativeWriteMethods = new ArrayList<>();
 
@@ -284,8 +281,7 @@ abstract class PropertyDescriptorUtils {
 		}
 
 		@Override
-		@Nullable
-		public Method getReadMethod() {
+		public @Nullable Method getReadMethod() {
 			return this.readMethod;
 		}
 
@@ -303,8 +299,7 @@ abstract class PropertyDescriptorUtils {
 		}
 
 		@Override
-		@Nullable
-		public Method getWriteMethod() {
+		public @Nullable Method getWriteMethod() {
 			if (this.writeMethod == null && !this.alternativeWriteMethods.isEmpty()) {
 				if (this.readMethod == null) {
 					return this.alternativeWriteMethods.get(0);

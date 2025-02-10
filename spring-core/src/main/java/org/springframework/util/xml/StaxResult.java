@@ -20,10 +20,9 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.sax.SAXResult;
 
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ext.LexicalHandler;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Implementation of the {@code Result} tagging interface for StAX writers. Can be constructed with
@@ -48,11 +47,9 @@ import org.springframework.lang.Nullable;
  */
 class StaxResult extends SAXResult {
 
-	@Nullable
-	private XMLEventWriter eventWriter;
+	private @Nullable XMLEventWriter eventWriter;
 
-	@Nullable
-	private XMLStreamWriter streamWriter;
+	private @Nullable XMLStreamWriter streamWriter;
 
 
 	/**
@@ -85,8 +82,7 @@ class StaxResult extends SAXResult {
 	 * @return the StAX event writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLEventWriter)
 	 */
-	@Nullable
-	public XMLEventWriter getXMLEventWriter() {
+	public @Nullable XMLEventWriter getXMLEventWriter() {
 		return this.eventWriter;
 	}
 
@@ -97,8 +93,7 @@ class StaxResult extends SAXResult {
 	 * @return the StAX stream writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLStreamWriter)
 	 */
-	@Nullable
-	public XMLStreamWriter getXMLStreamWriter() {
+	public @Nullable XMLStreamWriter getXMLStreamWriter() {
 		return this.streamWriter;
 	}
 

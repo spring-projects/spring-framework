@@ -18,15 +18,13 @@ package org.springframework.web.socket;
 
 import java.util.List;
 
-import org.glassfish.tyrus.core.TyrusExtension;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.web.socket.adapter.standard.StandardToWebSocketExtensionAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test fixture for {@link WebSocketExtension}
+ * Test fixture for {@link WebSocketExtension}.
+ *
  * @author Brian Clozel
  */
 class WebSocketExtensionTests {
@@ -54,11 +52,4 @@ class WebSocketExtensionTests {
 				.containsExactly("x-foo-extension", "x-bar-extension");
 	}
 
-	@Test // gh-26449
-	public void equality() {
-		WebSocketExtension ext1 = new WebSocketExtension("myExtension");
-		WebSocketExtension ext2 = new StandardToWebSocketExtensionAdapter(new TyrusExtension("myExtension"));
-
-		assertThat(ext1).isEqualTo(ext2);
-	}
 }

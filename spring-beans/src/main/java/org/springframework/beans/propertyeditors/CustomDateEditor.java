@@ -21,7 +21,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.StringUtils;
 
 /**

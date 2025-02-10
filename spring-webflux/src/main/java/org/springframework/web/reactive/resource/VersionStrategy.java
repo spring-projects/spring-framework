@@ -16,10 +16,10 @@
 
 package org.springframework.web.reactive.resource;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 
 /**
  * A strategy to determine the version of a static resource and to apply and/or
@@ -37,8 +37,7 @@ public interface VersionStrategy {
 	 * @param requestPath the request path to check
 	 * @return the version string or {@code null} if none was found
 	 */
-	@Nullable
-	String extractVersion(String requestPath);
+	@Nullable String extractVersion(String requestPath);
 
 	/**
 	 * Remove the version from the request path. It is assumed that the given

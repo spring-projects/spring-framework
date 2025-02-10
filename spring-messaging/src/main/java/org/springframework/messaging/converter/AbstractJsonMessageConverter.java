@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.converter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -27,7 +28,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.ClassUtils;
@@ -61,8 +63,7 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 	}
 
 	@Override
-	@Nullable
-	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+	protected @Nullable Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		try {
 			Type resolvedType = getResolvedType(targetClass, conversionHint);
 			Object payload = message.getPayload();
@@ -83,15 +84,13 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 	}
 
 	@Override
-	@Nullable
-	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
+	protected @Nullable Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 		try {
 			Type resolvedType = getResolvedType(payload.getClass(), conversionHint);
 			if (byte[].class == getSerializedPayloadClass()) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				Writer writer = getWriter(out, headers);
 				toJson(payload, resolvedType, writer);
-				writer.flush();
 				return out.toByteArray();
 			}
 			else {
@@ -120,11 +119,11 @@ public abstract class AbstractJsonMessageConverter extends AbstractMessageConver
 	}
 
 
-	protected abstract Object fromJson(Reader reader, Type resolvedType);
+	protected abstract Object fromJson(Reader reader, Type resolvedType) throws IOException;
 
 	protected abstract Object fromJson(String payload, Type resolvedType);
 
-	protected abstract void toJson(Object payload, Type resolvedType, Writer writer);
+	protected abstract void toJson(Object payload, Type resolvedType, Writer writer) throws IOException;
 
 	protected abstract String toJson(Object payload, Type resolvedType);
 

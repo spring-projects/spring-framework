@@ -31,10 +31,11 @@ import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,8 +59,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	}
 
 	@Override
-	@Nullable
-	protected JCacheOperation<?> findCacheOperation(Method method, @Nullable Class<?> targetType) {
+	protected @Nullable JCacheOperation<?> findCacheOperation(Method method, @Nullable Class<?> targetType) {
 		CacheResult cacheResult = method.getAnnotation(CacheResult.class);
 		CachePut cachePut = method.getAnnotation(CachePut.class);
 		CacheRemove cacheRemove = method.getAnnotation(CacheRemove.class);
@@ -88,8 +88,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	@Nullable
-	protected CacheDefaults getCacheDefaults(Method method, @Nullable Class<?> targetType) {
+	protected @Nullable CacheDefaults getCacheDefaults(Method method, @Nullable Class<?> targetType) {
 		CacheDefaults annotation = method.getDeclaringClass().getAnnotation(CacheDefaults.class);
 		if (annotation != null) {
 			return annotation;
@@ -175,8 +174,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	@Nullable
-	protected CacheResolverFactory determineCacheResolverFactory(
+	protected @Nullable CacheResolverFactory determineCacheResolverFactory(
 			@Nullable CacheDefaults defaults, Class<? extends CacheResolverFactory> candidate) {
 
 		if (candidate != CacheResolverFactory.class) {

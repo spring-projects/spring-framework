@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -45,14 +46,11 @@ import org.springframework.util.function.SingletonSupplier;
 @Configuration(proxyBeanMethods = false)
 public abstract class AbstractAsyncConfiguration implements ImportAware {
 
-	@Nullable
-	protected AnnotationAttributes enableAsync;
+	protected @Nullable AnnotationAttributes enableAsync;
 
-	@Nullable
-	protected Supplier<Executor> executor;
+	protected @Nullable Supplier<? extends @Nullable Executor> executor;
 
-	@Nullable
-	protected Supplier<AsyncUncaughtExceptionHandler> exceptionHandler;
+	protected @Nullable Supplier<? extends @Nullable AsyncUncaughtExceptionHandler> exceptionHandler;
 
 
 	@Override
@@ -69,8 +67,9 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
 	@Autowired
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
-		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
+		SingletonSupplier<AsyncConfigurer> configurer = SingletonSupplier.ofNullable(() -> {
 			List<AsyncConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
@@ -84,7 +83,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 		this.exceptionHandler = adapt(configurer, AsyncConfigurer::getAsyncUncaughtExceptionHandler);
 	}
 
-	private <T> Supplier<T> adapt(Supplier<AsyncConfigurer> supplier, Function<AsyncConfigurer, T> provider) {
+	private <T> Supplier<@Nullable T> adapt(SingletonSupplier<AsyncConfigurer> supplier, Function<AsyncConfigurer, @Nullable T> provider) {
 		return () -> {
 			AsyncConfigurer configurer = supplier.get();
 			return (configurer != null ? provider.apply(configurer) : null);

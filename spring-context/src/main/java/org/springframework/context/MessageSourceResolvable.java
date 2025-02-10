@@ -16,7 +16,7 @@
 
 package org.springframework.context;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface for objects that are suitable for message resolution in a
@@ -37,8 +37,7 @@ public interface MessageSourceResolvable {
 	 * they should get tried. The last code will therefore be the default one.
 	 * @return a String array of codes which are associated with this message
 	 */
-	@Nullable
-	String[] getCodes();
+	String @Nullable [] getCodes();
 
 	/**
 	 * Return the array of arguments to be used to resolve this message.
@@ -47,8 +46,7 @@ public interface MessageSourceResolvable {
 	 * placeholders within the message text
 	 * @see java.text.MessageFormat
 	 */
-	@Nullable
-	default Object[] getArguments() {
+	default Object @Nullable [] getArguments() {
 		return null;
 	}
 
@@ -61,8 +59,7 @@ public interface MessageSourceResolvable {
 	 * for this particular message.
 	 * @return the default message, or {@code null} if no default
 	 */
-	@Nullable
-	default String getDefaultMessage() {
+	default @Nullable String getDefaultMessage() {
 		return null;
 	}
 

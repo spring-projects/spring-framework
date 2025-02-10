@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package org.springframework.http.client.support;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -46,8 +47,7 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 
 	private final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 
-	@Nullable
-	private volatile ClientHttpRequestFactory interceptingRequestFactory;
+	private volatile @Nullable ClientHttpRequestFactory interceptingRequestFactory;
 
 
 	/**
@@ -99,7 +99,8 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 		if (!CollectionUtils.isEmpty(interceptors)) {
 			ClientHttpRequestFactory factory = this.interceptingRequestFactory;
 			if (factory == null) {
-				factory = new InterceptingClientHttpRequestFactory(super.getRequestFactory(), interceptors);
+				factory = new InterceptingClientHttpRequestFactory(
+						super.getRequestFactory(), interceptors, getBufferingPredicate());
 				this.interceptingRequestFactory = factory;
 			}
 			return factory;

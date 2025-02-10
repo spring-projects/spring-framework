@@ -22,9 +22,9 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.PropertyAccessor;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
@@ -56,20 +56,17 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	/**
 	 * The property path from the {@link FormTag#setModelAttribute form object}.
 	 */
-	@Nullable
-	private String path;
+	private @Nullable String path;
 
 	/**
 	 * The value of the '{@code id}' attribute.
 	 */
-	@Nullable
-	private String id;
+	private @Nullable String id;
 
 	/**
 	 * The {@link BindStatus} of this tag.
 	 */
-	@Nullable
-	private BindStatus bindStatus;
+	private @Nullable BindStatus bindStatus;
 
 
 	/**
@@ -103,8 +100,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Get the value of the '{@code id}' attribute.
 	 */
 	@Override
-	@Nullable
-	public String getId() {
+	public @Nullable String getId() {
 		return this.id;
 	}
 
@@ -129,8 +125,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * @see #getId()
 	 * @see #autogenerateId()
 	 */
-	@Nullable
-	protected String resolveId() throws JspException {
+	protected @Nullable String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
 		if (id != null) {
 			String idString = id.toString();
@@ -144,8 +139,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * <p>The default implementation simply delegates to {@link #getName()},
 	 * deleting invalid characters (such as "[" or "]").
 	 */
-	@Nullable
-	protected String autogenerateId() throws JspException {
+	protected @Nullable String autogenerateId() throws JspException {
 		String name = getName();
 		return (name != null ? StringUtils.deleteAny(name, "[]") : null);
 	}
@@ -159,8 +153,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * the value of the '{@code name}' attribute without changing the bind path.
 	 * @return the value for the HTML '{@code name}' attribute
 	 */
-	@Nullable
-	protected String getName() throws JspException {
+	protected @Nullable String getName() throws JspException {
 		return getPropertyPath();
 	}
 
@@ -184,8 +177,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Get the value of the nested path that may have been exposed by the
 	 * {@link NestedPathTag}.
 	 */
-	@Nullable
-	protected String getNestedPath() {
+	protected @Nullable String getNestedPath() {
 		return (String) this.pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
@@ -204,16 +196,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Get the bound value.
 	 * @see #getBindStatus()
 	 */
-	@Nullable
-	protected final Object getBoundValue() throws JspException {
+	protected final @Nullable Object getBoundValue() throws JspException {
 		return getBindStatus().getValue();
 	}
 
 	/**
 	 * Get the {@link PropertyEditor}, if any, in use for value bound to this tag.
 	 */
-	@Nullable
-	protected PropertyEditor getPropertyEditor() throws JspException {
+	protected @Nullable PropertyEditor getPropertyEditor() throws JspException {
 		return getBindStatus().getEditor();
 	}
 
@@ -222,8 +212,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * <p>Use {@link #getPropertyEditor()} for internal rendering purposes.
 	 */
 	@Override
-	@Nullable
-	public final PropertyEditor getEditor() throws JspException {
+	public final @Nullable PropertyEditor getEditor() throws JspException {
 		return getPropertyEditor();
 	}
 

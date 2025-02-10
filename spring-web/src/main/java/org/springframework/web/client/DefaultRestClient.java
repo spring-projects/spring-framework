@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -37,6 +38,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -47,6 +49,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -61,7 +64,6 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.SmartHttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -75,6 +77,7 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 6.1
  * @see RestClient#create()
  * @see RestClient#create(String)
@@ -91,25 +94,21 @@ final class DefaultRestClient implements RestClient {
 
 	private final ClientHttpRequestFactory clientRequestFactory;
 
-	@Nullable
-	private volatile ClientHttpRequestFactory interceptingRequestFactory;
+	private volatile @Nullable ClientHttpRequestFactory interceptingRequestFactory;
 
-	@Nullable
-	private final List<ClientHttpRequestInitializer> initializers;
+	private final @Nullable List<ClientHttpRequestInitializer> initializers;
 
-	@Nullable
-	private final List<ClientHttpRequestInterceptor> interceptors;
+	private final @Nullable List<ClientHttpRequestInterceptor> interceptors;
+
+	private final @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
 
 	private final UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private final HttpHeaders defaultHeaders;
+	private final @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private final MultiValueMap<String, String> defaultCookies;
+	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
+	private final @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest;
 
 	private final List<StatusHandler> defaultStatusHandlers;
 
@@ -119,12 +118,12 @@ final class DefaultRestClient implements RestClient {
 
 	private final ObservationRegistry observationRegistry;
 
-	@Nullable
-	private final ClientRequestObservationConvention observationConvention;
+	private final @Nullable ClientRequestObservationConvention observationConvention;
 
 
 	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory,
 			@Nullable List<ClientHttpRequestInterceptor> interceptors,
+			@Nullable BiPredicate<URI, HttpMethod> bufferingPredicate,
 			@Nullable List<ClientHttpRequestInitializer> initializers,
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
@@ -139,6 +138,7 @@ final class DefaultRestClient implements RestClient {
 		this.clientRequestFactory = clientRequestFactory;
 		this.initializers = initializers;
 		this.interceptors = interceptors;
+		this.bufferingPredicate = bufferingPredicate;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
@@ -204,9 +204,8 @@ final class DefaultRestClient implements RestClient {
 		return new DefaultRestClientBuilder(this.builder);
 	}
 
-	@Nullable
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private <T> T readWithMessageConverters(
+	private <T> @Nullable T readWithMessageConverters(
 			ClientHttpResponse clientResponse, Runnable callback, Type bodyType, Class<T> bodyClass) {
 
 		MediaType contentType = getContentType(clientResponse);
@@ -289,30 +288,24 @@ final class DefaultRestClient implements RestClient {
 
 		private final HttpMethod httpMethod;
 
-		@Nullable
-		private URI uri;
+		private @Nullable URI uri;
 
-		@Nullable
-		private HttpHeaders headers;
+		private @Nullable HttpHeaders headers;
 
-		@Nullable
-		private MultiValueMap<String, String> cookies;
+		private @Nullable MultiValueMap<String, String> cookies;
 
-		@Nullable
-		private InternalBody body;
+		private @Nullable InternalBody body;
 
-		@Nullable
-		private Map<String, Object> attributes;
+		private @Nullable Map<String, Object> attributes;
 
-		@Nullable
-		private Consumer<ClientHttpRequest> httpRequestConsumer;
+		private @Nullable Consumer<ClientHttpRequest> httpRequestConsumer;
 
 		public DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
 
 		@Override
-		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
+		public RequestBodySpec uri(String uriTemplate, @Nullable Object... uriVariables) {
 			UriBuilder uriBuilder = uriBuilderFactory.uriString(uriTemplate);
 			attribute(URI_TEMPLATE_ATTRIBUTE, uriBuilder.toUriString());
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
@@ -530,13 +523,11 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		@Nullable
-		public <T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {
+		public <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {
 			return exchangeInternal(exchangeFunction, close);
 		}
 
-		@Nullable
-		private <T> T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
+		private <T> @Nullable T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
 			Assert.notNull(exchangeFunction, "ExchangeFunction must not be null");
 
 			ClientHttpResponse clientResponse = null;
@@ -603,8 +594,7 @@ final class DefaultRestClient implements RestClient {
 			return (this.uri != null ? this.uri : DefaultRestClient.this.uriBuilderFactory.expand(""));
 		}
 
-		@Nullable
-		private String serializeCookies() {
+		private @Nullable String serializeCookies() {
 			MultiValueMap<String, String> map;
 			MultiValueMap<String, String> defaultCookies = DefaultRestClient.this.defaultCookies;
 			if (CollectionUtils.isEmpty(this.cookies)) {
@@ -638,13 +628,12 @@ final class DefaultRestClient implements RestClient {
 			return sb.toString();
 		}
 
-		@Nullable
-		private HttpHeaders initHeaders() {
+		private @Nullable HttpHeaders initHeaders() {
 			HttpHeaders defaultHeaders = DefaultRestClient.this.defaultHeaders;
-			if (CollectionUtils.isEmpty(this.headers)) {
+			if (this.headers == null || this.headers.isEmpty()) {
 				return defaultHeaders;
 			}
-			else if (CollectionUtils.isEmpty(defaultHeaders)) {
+			else if (defaultHeaders == null || defaultHeaders.isEmpty()) {
 				return this.headers;
 			}
 			else {
@@ -661,9 +650,14 @@ final class DefaultRestClient implements RestClient {
 				factory = DefaultRestClient.this.interceptingRequestFactory;
 				if (factory == null) {
 					factory = new InterceptingClientHttpRequestFactory(
-							DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.interceptors);
+							DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.interceptors,
+							DefaultRestClient.this.bufferingPredicate);
 					DefaultRestClient.this.interceptingRequestFactory = factory;
 				}
+			}
+			else if (DefaultRestClient.this.bufferingPredicate != null) {
+				factory = new BufferingClientHttpRequestFactory(
+						DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.bufferingPredicate);
 			}
 			else {
 				factory = DefaultRestClient.this.clientRequestFactory;
@@ -740,14 +734,12 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		@Nullable
-		public <T> T body(Class<T> bodyType) {
+		public <T> @Nullable T body(Class<T> bodyType) {
 			return executeAndExtract((request, response) -> readBody(request, response, bodyType, bodyType));
 		}
 
 		@Override
-		@Nullable
-		public <T> T body(ParameterizedTypeReference<T> bodyType) {
+		public <T> @Nullable T body(ParameterizedTypeReference<T> bodyType) {
 			Type type = bodyType.getType();
 			Class<T> bodyClass = bodyClass(type);
 			return executeAndExtract((request, response) -> readBody(request, response, type, bodyClass));
@@ -804,13 +796,11 @@ final class DefaultRestClient implements RestClient {
 			return entity;
 		}
 
-		@Nullable
-		public <T> T executeAndExtract(RequestHeadersSpec.ExchangeFunction<T> exchangeFunction) {
+		public <T> @Nullable T executeAndExtract(RequestHeadersSpec.ExchangeFunction<T> exchangeFunction) {
 			return this.requestHeadersSpec.exchange(exchangeFunction);
 		}
 
-		@Nullable
-		private <T> T readBody(HttpRequest request, ClientHttpResponse response, Type bodyType, Class<T> bodyClass) {
+		private <T> @Nullable T readBody(HttpRequest request, ClientHttpResponse response, Type bodyType, Class<T> bodyClass) {
 			return DefaultRestClient.this.readWithMessageConverters(
 					response, () -> applyStatusHandlers(request, response), bodyType, bodyClass);
 
@@ -844,15 +834,13 @@ final class DefaultRestClient implements RestClient {
 			this.delegate = delegate;
 		}
 
-		@Nullable
 		@Override
-		public <T> T bodyTo(Class<T> bodyType) {
+		public <T> @Nullable T bodyTo(Class<T> bodyType) {
 			return readWithMessageConverters(this.delegate, () -> {} , bodyType, bodyType);
 		}
 
-		@Nullable
 		@Override
-		public <T> T bodyTo(ParameterizedTypeReference<T> bodyType) {
+		public <T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType) {
 			Type type = bodyType.getType();
 			Class<T> bodyClass = bodyClass(type);
 			return readWithMessageConverters(this.delegate, () -> {}, type, bodyClass);

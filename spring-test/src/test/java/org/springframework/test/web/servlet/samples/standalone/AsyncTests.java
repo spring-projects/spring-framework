@@ -144,18 +144,6 @@ class AsyncTests {
 					.andExpect(content().string("Delayed Error"));
 		}
 
-		@Test
-		void listenableFuture() throws Exception {
-			MvcResult mvcResult = this.mockMvc.perform(get("/1").param("listenableFuture", "true"))
-					.andExpect(request().asyncStarted())
-					.andReturn();
-
-			this.mockMvc.perform(asyncDispatch(mvcResult))
-					.andExpect(status().isOk())
-					.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-					.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
-		}
-
 		@Test  // SPR-12597
 		void completableFutureWithImmediateValue() throws Exception {
 			MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFutureWithImmediateValue", "true"))
@@ -245,13 +233,6 @@ class AsyncTests {
 					.hasStatus5xxServerError().hasBodyTextEqualTo("Delayed Error");
 		}
 
-		@Test
-		void listenableFuture() {
-			assertThat(this.mockMvc.get().uri("/1").param("listenableFuture", "true"))
-					.hasStatusOk().hasContentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-					.hasBodyTextEqualTo("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}");
-		}
-
 		@Test  // SPR-12597
 		void completableFutureWithImmediateValue() {
 			assertThat(this.mockMvc.get().uri("/1").param("completableFutureWithImmediateValue", "true"))
@@ -331,15 +312,6 @@ class AsyncTests {
 			DeferredResult<Person> result = new DeferredResult<>();
 			delay(100, () -> result.setErrorResult(new RuntimeException("Delayed Error")));
 			return result;
-		}
-
-		@RequestMapping(params = "listenableFuture")
-		@SuppressWarnings({"deprecation", "removal"})
-		org.springframework.util.concurrent.ListenableFuture<Person> getListenableFuture() {
-			org.springframework.util.concurrent.ListenableFutureTask<Person> futureTask =
-					new org.springframework.util.concurrent.ListenableFutureTask<>(() -> new Person("Joe"));
-			delay(100, futureTask);
-			return futureTask;
 		}
 
 		@RequestMapping(params = "completableFutureWithImmediateValue")

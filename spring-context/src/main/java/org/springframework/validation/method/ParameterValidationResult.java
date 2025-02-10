@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -49,19 +50,15 @@ public class ParameterValidationResult {
 
 	private final MethodParameter methodParameter;
 
-	@Nullable
-	private final Object argument;
+	private final @Nullable Object argument;
 
 	private final List<MessageSourceResolvable> resolvableErrors;
 
-	@Nullable
-	private final Object container;
+	private final @Nullable Object container;
 
-	@Nullable
-	private final Integer containerIndex;
+	private final @Nullable Integer containerIndex;
 
-	@Nullable
-	private final Object containerKey;
+	private final @Nullable Object containerKey;
 
 	private final BiFunction<MessageSourceResolvable, Class<?>, Object> sourceLookup;
 
@@ -85,35 +82,6 @@ public class ParameterValidationResult {
 		this.sourceLookup = sourceLookup;
 	}
 
-	/**
-	 * Create a {@code ParameterValidationResult}.
-	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, BiFunction)}
-	 */
-	@Deprecated(since = "6.2", forRemoval = true)
-	public ParameterValidationResult(
-			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors,
-			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
-
-		this(param, arg, errors, container, index, key, (error, sourceType) -> {
-			throw new IllegalArgumentException("No source object of the given type");
-		});
-	}
-
-	/**
-	 * Create a {@code ParameterValidationResult}.
-	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, BiFunction)}
-	 */
-	@Deprecated(since = "6.1.3", forRemoval = true)
-	public ParameterValidationResult(
-			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors) {
-
-		this(param, arg, errors, null, null, null, (error, sourceType) -> {
-			throw new IllegalArgumentException("No source object of the given type");
-		});
-	}
-
 
 	/**
 	 * The method parameter the validation results are for.
@@ -125,8 +93,7 @@ public class ParameterValidationResult {
 	/**
 	 * The method argument value that was validated.
 	 */
-	@Nullable
-	public Object getArgument() {
+	public @Nullable Object getArgument() {
 		return this.argument;
 	}
 
@@ -161,8 +128,7 @@ public class ParameterValidationResult {
 	 * {@link #getContainerIndex()} and {@link #getContainerKey()} provide
 	 * information about the index or key if applicable.
 	 */
-	@Nullable
-	public Object getContainer() {
+	public @Nullable Object getContainer() {
 		return this.container;
 	}
 
@@ -171,8 +137,7 @@ public class ParameterValidationResult {
 	 * {@link List} or array, this method returns the index of the validated
 	 * {@link #getArgument() argument}.
 	 */
-	@Nullable
-	public Integer getContainerIndex() {
+	public @Nullable Integer getContainerIndex() {
 		return this.containerIndex;
 	}
 
@@ -181,8 +146,7 @@ public class ParameterValidationResult {
 	 * key such as {@link java.util.Map}, this method returns the key of the
 	 * validated {@link #getArgument() argument}.
 	 */
-	@Nullable
-	public Object getContainerKey() {
+	public @Nullable Object getContainerKey() {
 		return this.containerKey;
 	}
 

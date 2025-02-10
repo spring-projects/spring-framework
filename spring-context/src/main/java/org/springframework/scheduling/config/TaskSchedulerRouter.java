@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.beans.factory.config.NamedBeanHolder;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -69,19 +69,15 @@ public class TaskSchedulerRouter implements TaskScheduler, BeanNameAware, BeanFa
 
 	protected static final Log logger = LogFactory.getLog(TaskSchedulerRouter.class);
 
-	@Nullable
-	private String beanName;
+	private @Nullable String beanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 	private final Supplier<TaskScheduler> defaultScheduler = SingletonSupplier.of(this::determineDefaultScheduler);
 
-	@Nullable
-	private volatile ScheduledExecutorService localExecutor;
+	private volatile @Nullable ScheduledExecutorService localExecutor;
 
 
 	/**
@@ -106,8 +102,7 @@ public class TaskSchedulerRouter implements TaskScheduler, BeanNameAware, BeanFa
 
 
 	@Override
-	@Nullable
-	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+	public @Nullable ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		return determineTargetScheduler(task).schedule(task, trigger);
 	}
 
@@ -150,8 +145,7 @@ public class TaskSchedulerRouter implements TaskScheduler, BeanNameAware, BeanFa
 		}
 	}
 
-	@Nullable
-	protected String determineQualifier(Runnable task) {
+	protected @Nullable String determineQualifier(Runnable task) {
 		return (task instanceof SchedulingAwareRunnable sar ? sar.getQualifier() : null);
 	}
 

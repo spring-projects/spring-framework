@@ -18,10 +18,11 @@ package org.springframework.beans.factory.annotation;
 
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} for Jakarta annotations and their pre-Jakarta equivalents.
@@ -33,14 +34,10 @@ class JakartaAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		// javax.inject.Provider is omitted from the list, since we do not currently load
-		// it via reflection.
 		Stream.of(
 				"jakarta.inject.Inject",
 				"jakarta.inject.Provider",
-				"jakarta.inject.Qualifier",
-				"javax.inject.Inject",
-				"javax.inject.Qualifier"
+				"jakarta.inject.Qualifier"
 			).forEach(typeName -> hints.reflection().registerType(TypeReference.of(typeName)));
 	}
 

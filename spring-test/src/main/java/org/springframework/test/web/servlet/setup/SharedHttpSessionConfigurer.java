@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.setup;
 
 import jakarta.servlet.http.HttpSession;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -44,8 +44,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class SharedHttpSessionConfigurer implements MockMvcConfigurer {
 
-	@Nullable
-	private HttpSession session;
+	private @Nullable HttpSession session;
 
 
 	@Override

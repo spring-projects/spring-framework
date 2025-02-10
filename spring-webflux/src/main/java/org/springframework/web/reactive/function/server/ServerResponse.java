@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -65,15 +66,6 @@ public interface ServerResponse {
 	 * @return the status as an HttpStatusCode value
 	 */
 	HttpStatusCode statusCode();
-
-	/**
-	 * Return the status code of this response as integer.
-	 * @return the status as an integer
-	 * @since 5.2
-	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.
@@ -243,13 +235,13 @@ public interface ServerResponse {
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B header(String headerName, String... headerValues);
+		B header(String headerName, @Nullable String... headerValues);
 
 		/**
 		 * Manipulate this response's headers with the given consumer. The
 		 * headers provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
@@ -487,14 +479,6 @@ public interface ServerResponse {
 		 * @return the built response
 		 */
 		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
-
-		/**
-		 * Set the response body to the given {@code Object} and return it.
-		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
-		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
-		 */
-		@Deprecated
-		Mono<ServerResponse> syncBody(Object body);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

@@ -16,9 +16,10 @@
 
 package org.springframework.validation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * Special implementation of the Errors and BindingResult interfaces,
@@ -36,13 +37,11 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
-	@Nullable
-	private final Object target;
+	private final @Nullable Object target;
 
 	private final boolean autoGrowNestedPaths;
 
-	@Nullable
-	private transient ConfigurablePropertyAccessor directFieldAccessor;
+	private transient @Nullable ConfigurablePropertyAccessor directFieldAccessor;
 
 
 	/**
@@ -68,8 +67,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 
 	@Override
-	@Nullable
-	public final Object getTarget() {
+	public final @Nullable Object getTarget() {
 		return this.target;
 	}
 

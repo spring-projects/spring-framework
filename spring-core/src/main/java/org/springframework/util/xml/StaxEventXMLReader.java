@@ -37,13 +37,13 @@ import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -67,8 +67,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
-	@Nullable
-	private String encoding;
+	private @Nullable String encoding;
 
 
 	/**
@@ -164,13 +163,11 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					return (location != null ? location.getLineNumber() : -1);
 				}
 				@Override
-				@Nullable
-				public String getPublicId() {
+				public @Nullable String getPublicId() {
 					return (location != null ? location.getPublicId() : null);
 				}
 				@Override
-				@Nullable
-				public String getSystemId() {
+				public @Nullable String getSystemId() {
 					return (location != null ? location.getSystemId() : null);
 				}
 				@Override
@@ -178,8 +175,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					return xmlVersion;
 				}
 				@Override
-				@Nullable
-				public String getEncoding() {
+				public @Nullable String getEncoding() {
 					return encoding;
 				}
 			});

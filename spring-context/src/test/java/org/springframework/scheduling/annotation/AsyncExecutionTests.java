@@ -42,7 +42,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -51,7 +50,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-@SuppressWarnings({"resource", "deprecation", "removal"})
 class AsyncExecutionTests {
 
 	private static String originalThreadName;
@@ -81,30 +79,20 @@ class AsyncExecutionTests {
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
 		assertThat(future.get()).isEqualTo("20");
-		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
-		assertThat(listenableFuture.get()).isEqualTo("20");
 		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
 		assertThat(completableFuture.get()).isEqualTo("20");
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomething(0).get())
-			.withCauseInstanceOf(IllegalArgumentException.class);
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(() -> asyncTest.returnSomething(0).get())
+				.withCauseInstanceOf(IllegalArgumentException.class);
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomething(-1).get())
-			.withCauseInstanceOf(IOException.class);
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(() -> asyncTest.returnSomething(-1).get())
+				.withCauseInstanceOf(IOException.class);
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomethingListenable(0).get())
-			.withCauseInstanceOf(IllegalArgumentException.class);
-
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomethingListenable(-1).get())
-			.withCauseInstanceOf(IOException.class);
-
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomethingCompletable(0).get())
-			.withCauseInstanceOf(IllegalArgumentException.class);
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(() -> asyncTest.returnSomethingCompletable(0).get())
+				.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -174,22 +162,16 @@ class AsyncExecutionTests {
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
 		assertThat(future.get()).isEqualTo("20");
-		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
-		assertThat(listenableFuture.get()).isEqualTo("20");
 		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
 		assertThat(completableFuture.get()).isEqualTo("20");
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomething(0).get())
-			.withCauseInstanceOf(IllegalArgumentException.class);
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(() -> asyncTest.returnSomething(0).get())
+				.withCauseInstanceOf(IllegalArgumentException.class);
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomethingListenable(0).get())
-			.withCauseInstanceOf(IllegalArgumentException.class);
-
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
-				asyncTest.returnSomethingCompletable(0).get())
-			.withCauseInstanceOf(IllegalArgumentException.class);
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(() -> asyncTest.returnSomethingCompletable(0).get())
+				.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -408,6 +390,7 @@ class AsyncExecutionTests {
 		}
 
 		@Async
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
@@ -417,18 +400,6 @@ class AsyncExecutionTests {
 				return AsyncResult.forExecutionException(new IOException());
 			}
 			return AsyncResult.forValue(Integer.toString(i));
-		}
-
-		@Async
-		public ListenableFuture<String> returnSomethingListenable(int i) {
-			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
-			if (i == 0) {
-				throw new IllegalArgumentException();
-			}
-			else if (i < 0) {
-				return AsyncResult.forExecutionException(new IOException());
-			}
-			return new AsyncResult<>(Integer.toString(i));
 		}
 
 		@Async
@@ -465,12 +436,14 @@ class AsyncExecutionTests {
 		}
 
 		@MyAsync
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			assertThat(Thread.currentThread().getName()).startsWith("e2-");
 			return new AsyncResult<>(Integer.toString(i));
 		}
 
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething2(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			assertThat(Thread.currentThread().getName()).startsWith("e0-");
@@ -497,15 +470,8 @@ class AsyncExecutionTests {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething(int i) {
-			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
-			if (i == 0) {
-				throw new IllegalArgumentException();
-			}
-			return new AsyncResult<>(Integer.toString(i));
-		}
-
-		public ListenableFuture<String> returnSomethingListenable(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
@@ -545,6 +511,7 @@ class AsyncExecutionTests {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			return new AsyncResult<>(Integer.toString(i));
@@ -569,6 +536,7 @@ class AsyncExecutionTests {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			return new AsyncResult<>(Integer.toString(i));
@@ -580,6 +548,7 @@ class AsyncExecutionTests {
 
 		private final AsyncInterface proxy;
 
+		@SuppressWarnings("deprecation")
 		public DynamicAsyncInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
@@ -636,6 +605,7 @@ class AsyncExecutionTests {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Future<String> returnSomething(int i) {
 			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			return new AsyncResult<>(Integer.toString(i));
@@ -647,6 +617,7 @@ class AsyncExecutionTests {
 
 		private final AsyncMethodsInterface proxy;
 
+		@SuppressWarnings("deprecation")
 		public DynamicAsyncMethodsInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {

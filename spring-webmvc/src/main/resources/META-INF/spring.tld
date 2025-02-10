@@ -129,84 +129,8 @@
 	</tag>
 
 	<tag>
-		<description>Retrieves the theme message with the given code, or text if code isn't
-		resolvable. The HTML escaping flag participates in a page-wide or application-wide setting
-		(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).</description>
-		<name>theme</name>
-		<tag-class>org.springframework.web.servlet.tags.ThemeTag</tag-class>
-		<body-content>JSP</body-content>
-		<attribute>
-			<description>A MessageSourceResolvable argument (direct or through JSP EL).</description>
-			<name>message</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>The code (key) to use when looking up the message.
-			If code is not provided, the text attribute will be used.</description>
-			<name>code</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>Set optional message arguments for this tag, as a (comma-)
-			delimited String (each String argument can contain JSP EL), an Object array
-			(used as argument array), or a single Object (used as single argument).
-			You can additionally use nested spring:argument tags.</description>
-			<name>arguments</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>The separator character to be used for splitting the
-			arguments string value; defaults to a 'comma' (',').</description>
-			<name>argumentSeparator</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>Default text to output when a message for the given code
-			could not be found. If both text and code are not set, the tag will
-			output null.</description>
-			<name>text</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>The string to use when binding the result to the page,
-			request, session or application scope. If not specified, the result
-			gets outputted to the writer (i.e. typically directly to the JSP).</description>
-			<name>var</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>The scope to use when exporting the result to a variable.
-			This attribute is only used when var is also set. Possible values are
-			page, request, session and application.</description>
-			<name>scope</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>Set HTML escaping for this tag, as boolean value.
-			Overrides the default HTML escaping setting for the current page.</description>
-			<name>htmlEscape</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>Set JavaScript escaping for this tag, as boolean value.
-			Default is 'false'.</description>
-			<name>javaScriptEscape</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-	</tag>
-
-	<tag>
 		<description>Argument tag based on the JSTL fmt:param tag. The purpose is to
-		support arguments inside the spring:message and spring:theme tags.</description>
+		support arguments inside the spring:message tags.</description>
 		<name>argument</name>
 		<tag-class>org.springframework.web.servlet.tags.ArgumentTag</tag-class>
 		<body-content>JSP</body-content>

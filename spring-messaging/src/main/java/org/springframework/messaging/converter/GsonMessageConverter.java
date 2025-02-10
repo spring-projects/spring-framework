@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
@@ -88,13 +89,14 @@ public class GsonMessageConverter extends AbstractJsonMessageConverter {
 	}
 
 	@Override
-	protected void toJson(Object payload, Type resolvedType, Writer writer) {
+	protected void toJson(Object payload, Type resolvedType, Writer writer) throws IOException {
 		if (resolvedType instanceof ParameterizedType) {
 			getGson().toJson(payload, resolvedType, writer);
 		}
 		else {
 			getGson().toJson(payload, writer);
 		}
+		writer.flush();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -38,7 +39,6 @@ import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -78,11 +78,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	private SingletonSupplier<AsyncUncaughtExceptionHandler> exceptionHandler;
 
-	@Nullable
-	private BeanFactory beanFactory;
+	private @Nullable BeanFactory beanFactory;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<>(16);
 
@@ -118,8 +116,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * applying the corresponding default if a supplier is not resolvable.
 	 * @since 5.1
 	 */
-	public void configure(@Nullable Supplier<Executor> defaultExecutor,
-			@Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler) {
+	public void configure(@Nullable Supplier<? extends @Nullable Executor> defaultExecutor,
+			@Nullable Supplier<? extends @Nullable AsyncUncaughtExceptionHandler> exceptionHandler) {
 
 		this.defaultExecutor = new SingletonSupplier<>(defaultExecutor, () -> getDefaultExecutor(this.beanFactory));
 		this.exceptionHandler = new SingletonSupplier<>(exceptionHandler, SimpleAsyncUncaughtExceptionHandler::new);
@@ -167,8 +165,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * Determine the specific executor to use when executing the given method.
 	 * @return the executor to use (or {@code null}, but just if no default executor is available)
 	 */
-	@Nullable
-	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
+	protected @Nullable AsyncTaskExecutor determineAsyncExecutor(Method method) {
 		AsyncTaskExecutor executor = this.executors.get(method);
 		if (executor == null) {
 			Executor targetExecutor;
@@ -203,8 +200,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #determineAsyncExecutor(Method)
 	 * @see #findQualifiedExecutor(BeanFactory, String)
 	 */
-	@Nullable
-	protected abstract String getExecutorQualifier(Method method);
+	protected abstract @Nullable String getExecutorQualifier(Method method);
 
 	/**
 	 * Retrieve a target executor for the given qualifier.
@@ -213,8 +209,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @since 4.2.6
 	 * @see #getExecutorQualifier(Method)
 	 */
-	@Nullable
-	protected Executor findQualifiedExecutor(@Nullable BeanFactory beanFactory, String qualifier) {
+	protected @Nullable Executor findQualifiedExecutor(@Nullable BeanFactory beanFactory, String qualifier) {
 		if (beanFactory == null) {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
 					" to access qualified executor '" + qualifier + "'");
@@ -234,8 +229,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #findQualifiedExecutor(BeanFactory, String)
 	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
 	 */
-	@Nullable
-	protected Executor getDefaultExecutor(@Nullable BeanFactory beanFactory) {
+	protected @Nullable Executor getDefaultExecutor(@Nullable BeanFactory beanFactory) {
 		if (beanFactory != null) {
 			try {
 				// Search for TaskExecutor bean... not plain Executor since that would
@@ -281,14 +275,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param returnType the declared return type (potentially a {@link Future} variant)
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
-	@SuppressWarnings("removal")
-	@Nullable
-	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
+	protected @Nullable Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
 			return executor.submitCompletable(task);
-		}
-		else if (org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((org.springframework.core.task.AsyncListenableTaskExecutor) executor).submitListenable(task);
 		}
 		else if (Future.class.isAssignableFrom(returnType)) {
 			return executor.submit(task);
@@ -315,7 +304,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param method the method that was invoked
 	 * @param params the parameters used to invoke the method
 	 */
-	protected void handleError(Throwable ex, Method method, Object... params) throws Exception {
+	protected void handleError(Throwable ex, Method method, @Nullable Object... params) throws Exception {
 		if (Future.class.isAssignableFrom(method.getReturnType())) {
 			ReflectionUtils.rethrowException(ex);
 		}

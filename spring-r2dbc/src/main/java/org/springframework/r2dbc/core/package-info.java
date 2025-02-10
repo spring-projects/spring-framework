@@ -1,9 +1,7 @@
 /**
  * Core domain types around DatabaseClient.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package org.springframework.r2dbc.core;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

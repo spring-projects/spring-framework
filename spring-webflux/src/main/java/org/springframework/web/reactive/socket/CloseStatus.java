@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package org.springframework.web.reactive.socket;
 
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -138,8 +139,7 @@ public final class CloseStatus {
 
 	private final int code;
 
-	@Nullable
-	private final String reason;
+	private final @Nullable String reason;
 
 
 	/**
@@ -172,8 +172,7 @@ public final class CloseStatus {
 	/**
 	 * Return the reason, or {@code null} if none.
 	 */
-	@Nullable
-	public String getReason() {
+	public @Nullable String getReason() {
 		return this.reason;
 	}
 
@@ -185,14 +184,6 @@ public final class CloseStatus {
 	public CloseStatus withReason(String reason) {
 		Assert.hasText(reason, "Reason must not be empty");
 		return new CloseStatus(this.code, reason);
-	}
-
-	/**
-	 * @deprecated as of 5.3 in favor of comparing codes directly
-	 */
-	@Deprecated
-	public boolean equalsCode(CloseStatus other) {
-		return (this.code == other.code);
 	}
 
 

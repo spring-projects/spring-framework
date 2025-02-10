@@ -19,8 +19,9 @@ package org.springframework.cache.interceptor;
 import java.util.Collection;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.Nullable;
 
 /**
  * A {@link CacheResolver} that forces the resolution to a configurable
@@ -31,8 +32,7 @@ import org.springframework.lang.Nullable;
  */
 public class NamedCacheResolver extends AbstractCacheResolver {
 
-	@Nullable
-	private Collection<String> cacheNames;
+	private @Nullable Collection<String> cacheNames;
 
 
 	public NamedCacheResolver() {
@@ -52,8 +52,7 @@ public class NamedCacheResolver extends AbstractCacheResolver {
 	}
 
 	@Override
-	@Nullable
-	protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
+	protected @Nullable Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 		return this.cacheNames;
 	}
 

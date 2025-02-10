@@ -35,10 +35,10 @@ import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import jakarta.transaction.UserTransaction;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.HeuristicCompletionException;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -141,11 +141,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
-	@Nullable
-	private transient UserTransaction userTransaction;
+	private transient @Nullable UserTransaction userTransaction;
 
-	@Nullable
-	private String userTransactionName;
+	private @Nullable String userTransactionName;
 
 	private boolean autodetectUserTransaction = true;
 
@@ -153,19 +151,15 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private boolean userTransactionObtainedFromJndi = false;
 
-	@Nullable
-	private transient TransactionManager transactionManager;
+	private transient @Nullable TransactionManager transactionManager;
 
-	@Nullable
-	private String transactionManagerName;
+	private @Nullable String transactionManagerName;
 
 	private boolean autodetectTransactionManager = true;
 
-	@Nullable
-	private transient TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+	private transient @Nullable TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
-	@Nullable
-	private String transactionSynchronizationRegistryName;
+	private @Nullable String transactionSynchronizationRegistryName;
 
 	private boolean autodetectTransactionSynchronizationRegistry = true;
 
@@ -248,8 +242,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JNDI environment to use for JNDI lookups.
 	 */
-	@Nullable
-	public Properties getJndiEnvironment() {
+	public @Nullable Properties getJndiEnvironment() {
 		return this.jndiTemplate.getEnvironment();
 	}
 
@@ -268,8 +261,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JTA UserTransaction that this transaction manager uses.
 	 */
-	@Nullable
-	public UserTransaction getUserTransaction() {
+	public @Nullable UserTransaction getUserTransaction() {
 		return this.userTransaction;
 	}
 
@@ -332,8 +324,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JTA TransactionManager that this transaction manager uses, if any.
 	 */
-	@Nullable
-	public TransactionManager getTransactionManager() {
+	public @Nullable TransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
 
@@ -385,8 +376,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Return the JTA 1.1 TransactionSynchronizationRegistry that this transaction manager uses, if any.
 	 */
-	@Nullable
-	public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
+	public @Nullable TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
 		return this.transactionSynchronizationRegistry;
 	}
 
@@ -635,8 +625,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setUserTransaction
 	 * @see #setUserTransactionName
 	 */
-	@Nullable
-	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
+	protected @Nullable UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		return null;
 	}
 
@@ -649,8 +638,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionManager
 	 * @see #setTransactionManagerName
 	 */
-	@Nullable
-	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
+	protected @Nullable TransactionManager retrieveTransactionManager() throws TransactionSystemException {
 		return null;
 	}
 
@@ -662,8 +650,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * or {@code null} if none found
 	 * @throws TransactionSystemException in case of errors
 	 */
-	@Nullable
-	protected TransactionSynchronizationRegistry retrieveTransactionSynchronizationRegistry() throws TransactionSystemException {
+	protected @Nullable TransactionSynchronizationRegistry retrieveTransactionSynchronizationRegistry() throws TransactionSystemException {
 		return null;
 	}
 
@@ -673,8 +660,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return the JTA UserTransaction reference, or {@code null} if not found
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
 	 */
-	@Nullable
-	protected UserTransaction findUserTransaction() {
+	protected @Nullable UserTransaction findUserTransaction() {
 		String jndiName = DEFAULT_USER_TRANSACTION_NAME;
 		try {
 			UserTransaction ut = getJndiTemplate().lookup(jndiName, UserTransaction.class);
@@ -700,8 +686,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return the JTA TransactionManager reference, or {@code null} if not found
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
 	 */
-	@Nullable
-	protected TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
+	protected @Nullable TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
 		if (ut instanceof TransactionManager tm) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");
@@ -740,8 +725,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * or {@code null} if none found
 	 * @throws TransactionSystemException in case of errors
 	 */
-	@Nullable
-	protected TransactionSynchronizationRegistry findTransactionSynchronizationRegistry(
+	protected @Nullable TransactionSynchronizationRegistry findTransactionSynchronizationRegistry(
 			@Nullable UserTransaction ut, @Nullable TransactionManager tm) throws TransactionSystemException {
 
 		if (this.userTransactionObtainedFromJndi) {

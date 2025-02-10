@@ -44,6 +44,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
@@ -53,7 +54,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
-import org.springframework.lang.Nullable;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.UnmarshallingFailureException;
@@ -82,11 +82,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 	private boolean processExternalEntities = false;
 
-	@Nullable
-	private volatile DocumentBuilderFactory documentBuilderFactory;
+	private volatile @Nullable DocumentBuilderFactory documentBuilderFactory;
 
-	@Nullable
-	private volatile SAXParserFactory saxParserFactory;
+	private volatile @Nullable SAXParserFactory saxParserFactory;
 
 
 	/**
@@ -220,8 +218,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * a byte stream, or {@code null} if none.
 	 * <p>The default implementation returns {@code null}.
 	 */
-	@Nullable
-	protected String getDefaultEncoding() {
+	protected @Nullable String getDefaultEncoding() {
 		return null;
 	}
 

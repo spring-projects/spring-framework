@@ -206,18 +206,17 @@ another file or files. The following example shows how to do so:
 	<beans>
 		<import resource="services.xml"/>
 		<import resource="resources/messageSource.xml"/>
-		<import resource="/resources/themeSource.xml"/>
 
 		<bean id="bean1" class="..."/>
 		<bean id="bean2" class="..."/>
 	</beans>
 ----
 
-In the preceding example, external bean definitions are loaded from three files:
-`services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are
+In the preceding example, external bean definitions are loaded from the files
+`services.xml` and `messageSource.xml`. All location paths are
 relative to the definition file doing the importing, so `services.xml` must be in the
 same directory or classpath location as the file doing the importing, while
-`messageSource.xml` and `themeSource.xml` must be in a `resources` location below the
+`messageSource.xml` must be in a `resources` location below the
 location of the importing file. As you can see, a leading slash is ignored. However, given
 that these paths are relative, it is better form not to use the slash at all. The
 contents of the files being imported, including the top level `<beans/>` element, must

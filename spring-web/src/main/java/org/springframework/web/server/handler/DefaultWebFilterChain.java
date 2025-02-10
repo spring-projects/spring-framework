@@ -20,9 +20,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -48,11 +48,9 @@ public class DefaultWebFilterChain implements WebFilterChain {
 
 	private final WebHandler handler;
 
-	@Nullable
-	private final WebFilter currentFilter;
+	private final @Nullable WebFilter currentFilter;
 
-	@Nullable
-	private final DefaultWebFilterChain chain;
+	private final @Nullable DefaultWebFilterChain chain;
 
 
 	/**

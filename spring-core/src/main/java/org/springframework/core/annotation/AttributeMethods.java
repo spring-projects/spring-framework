@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -49,8 +50,7 @@ final class AttributeMethods {
 	};
 
 
-	@Nullable
-	private final Class<? extends Annotation> annotationType;
+	private final @Nullable Class<? extends Annotation> annotationType;
 
 	private final Method[] attributeMethods;
 
@@ -155,8 +155,7 @@ final class AttributeMethods {
 	 * @param name the attribute name to find
 	 * @return the attribute method or {@code null}
 	 */
-	@Nullable
-	Method get(String name) {
+	@Nullable Method get(String name) {
 		int index = indexOf(name);
 		return (index != -1 ? this.attributeMethods[index] : null);
 	}
@@ -251,11 +250,13 @@ final class AttributeMethods {
 		return cache.computeIfAbsent(annotationType, AttributeMethods::compute);
 	}
 
+	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private static AttributeMethods compute(Class<? extends Annotation> annotationType) {
 		Method[] methods = annotationType.getDeclaredMethods();
 		int size = methods.length;
 		for (int i = 0; i < methods.length; i++) {
 			if (!isAttributeMethod(methods[i])) {
+				//noinspection DataFlowIssue
 				methods[i] = null;
 				size--;
 			}

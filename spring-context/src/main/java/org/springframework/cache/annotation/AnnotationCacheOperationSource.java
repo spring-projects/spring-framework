@@ -23,9 +23,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.interceptor.AbstractFallbackCacheOperationSource;
 import org.springframework.cache.interceptor.CacheOperation;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -120,14 +121,12 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	}
 
 	@Override
-	@Nullable
-	protected Collection<CacheOperation> findCacheOperations(Class<?> clazz) {
+	protected @Nullable Collection<CacheOperation> findCacheOperations(Class<?> clazz) {
 		return determineCacheOperations(parser -> parser.parseCacheAnnotations(clazz));
 	}
 
 	@Override
-	@Nullable
-	protected Collection<CacheOperation> findCacheOperations(Method method) {
+	protected @Nullable Collection<CacheOperation> findCacheOperations(Method method) {
 		return determineCacheOperations(parser -> parser.parseCacheAnnotations(method));
 	}
 
@@ -140,8 +139,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	 * @param provider the cache operation provider to use
 	 * @return the configured caching operations, or {@code null} if none found
 	 */
-	@Nullable
-	protected Collection<CacheOperation> determineCacheOperations(CacheOperationProvider provider) {
+	protected @Nullable Collection<CacheOperation> determineCacheOperations(CacheOperationProvider provider) {
 		Collection<CacheOperation> ops = null;
 		for (CacheAnnotationParser parser : this.annotationParsers) {
 			Collection<CacheOperation> annOps = provider.getCacheOperations(parser);
@@ -195,8 +193,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		 * @param parser the parser to use
 		 * @return the cache operations, or {@code null} if none found
 		 */
-		@Nullable
-		Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser);
+		@Nullable Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser);
 	}
 
 }

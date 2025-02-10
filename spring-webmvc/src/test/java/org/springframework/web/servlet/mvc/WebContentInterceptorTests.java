@@ -103,6 +103,7 @@ class WebContentInterceptorTests {
 		assertThat(cacheControlHeaders).isEmpty();
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void throwsExceptionWithNullPathMatcher() {
 		assertThatIllegalArgumentException()

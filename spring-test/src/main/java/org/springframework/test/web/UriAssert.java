@@ -20,8 +20,8 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -56,7 +56,7 @@ public class UriAssert extends AbstractStringAssert<UriAssert> {
 	 * @param uriVars the values to replace the URI template variables
 	 * @see UriComponentsBuilder#buildAndExpand(Object...)
 	 */
-	public UriAssert isEqualToTemplate(String uriTemplate, Object... uriVars) {
+	public UriAssert isEqualToTemplate(String uriTemplate, @Nullable Object... uriVars) {
 		String uri = buildUri(uriTemplate, uriVars);
 		return isEqualTo(uri);
 	}
@@ -80,22 +80,32 @@ public class UriAssert extends AbstractStringAssert<UriAssert> {
 		return this;
 	}
 
-	@SuppressWarnings("NullAway")
-	private String buildUri(String uriTemplate, Object... uriVars) {
+
+	private String buildUri(String uriTemplate, @Nullable Object... uriVars) {
 		try {
 			return UriComponentsBuilder.fromUriString(uriTemplate)
 					.buildAndExpand(uriVars).encode().toUriString();
 		}
 		catch (Exception ex) {
+			String message = ex.getMessage();
 			throw Failures.instance().failure(this.info,
-					new ShouldBeValidUriTemplate(uriTemplate, ex.getMessage()));
+					message == null ?
+							new ShouldBeValidUriTemplate(uriTemplate) :
+							new ShouldBeValidUriTemplateWithMessage(uriTemplate, message));
 		}
 	}
 
 
 	private static final class ShouldBeValidUriTemplate extends BasicErrorMessageFactory {
 
-		private ShouldBeValidUriTemplate(String uriTemplate, String errorMessage) {
+		private ShouldBeValidUriTemplate(String uriTemplate) {
+			super("%nExpecting:%n  %s%nTo be a valid URI template%n", uriTemplate);
+		}
+	}
+
+	private static final class ShouldBeValidUriTemplateWithMessage extends BasicErrorMessageFactory {
+
+		private ShouldBeValidUriTemplateWithMessage(String uriTemplate, String errorMessage) {
 			super("%nExpecting:%n  %s%nTo be a valid URI template but got:%n  %s%n", uriTemplate, errorMessage);
 		}
 	}

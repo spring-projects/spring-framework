@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ import javax.lang.model.element.Modifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -103,7 +103,6 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -153,13 +152,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
-	@Nullable
-	private Environment environment;
+	private @Nullable Environment environment;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private @Nullable ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
@@ -169,8 +166,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private final Set<Integer> factoriesPostProcessed = new HashSet<>();
 
-	@Nullable
-	private ConfigurationClassBeanDefinitionReader reader;
+	private @Nullable ConfigurationClassBeanDefinitionReader reader;
 
 	private boolean localBeanNameGeneratorSet = false;
 
@@ -182,7 +178,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
-	@Nullable
+	@SuppressWarnings("NullAway.Init")
 	private List<PropertySourceDescriptor> propertySourceDescriptors;
 
 
@@ -312,9 +308,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
-	@Nullable
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Object configClassAttr = registeredBean.getMergedBeanDefinition()
 				.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
 		if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
@@ -325,9 +320,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
-	@Nullable
-	@SuppressWarnings("NullAway")
-	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+	public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
 		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
 		if (hasPropertySourceDescriptors || hasImportRegistry) {
@@ -344,8 +337,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		return null;
 	}
 
-	@Nullable
-	private Resource resolvePropertySourceLocation(String location) {
+	private @Nullable Resource resolvePropertySourceLocation(String location) {
 		try {
 			String resolvedLocation = (this.environment != null ?
 					this.environment.resolveRequiredPlaceholders(location) : location);
@@ -558,8 +550,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		@Nullable
-		public PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
+		public @Nullable PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
 			// postProcessProperties method attempts to autowire other configuration beans.
 			if (bean instanceof EnhancedConfiguration enhancedConfiguration) {
@@ -667,9 +658,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private final List<PropertySourceDescriptor> descriptors;
 
-		private final Function<String, Resource> resourceResolver;
+		private final Function<String, @Nullable Resource> resourceResolver;
 
-		PropertySourcesAotContribution(List<PropertySourceDescriptor> descriptors, Function<String, Resource> resourceResolver) {
+		PropertySourcesAotContribution(List<PropertySourceDescriptor> descriptors, Function<String, @Nullable Resource> resourceResolver) {
 			this.descriptors = descriptors;
 			this.resourceResolver = resourceResolver;
 		}
@@ -812,7 +803,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			Executable userExecutable = instantiationDescriptor.executable();
 			if (userExecutable instanceof Constructor<?> userConstructor) {
 				try {
-					runtimeHints.reflection().registerConstructor(userConstructor, ExecutableMode.INTROSPECT);
+					runtimeHints.reflection().registerType(userConstructor.getDeclaringClass());
 					Constructor<?> constructor = this.proxyClass.getConstructor(userExecutable.getParameterTypes());
 					return new InstantiationDescriptor(constructor);
 				}

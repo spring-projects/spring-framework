@@ -26,7 +26,8 @@ import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -42,17 +43,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class NotificationListenerHolder {
 
-	@Nullable
-	private NotificationListener notificationListener;
+	private @Nullable NotificationListener notificationListener;
 
-	@Nullable
-	private NotificationFilter notificationFilter;
+	private @Nullable NotificationFilter notificationFilter;
 
-	@Nullable
-	private Object handback;
+	private @Nullable Object handback;
 
-	@Nullable
-	protected Set<Object> mappedObjectNames;
+	protected @Nullable Set<Object> mappedObjectNames;
 
 
 	/**
@@ -65,8 +62,7 @@ public class NotificationListenerHolder {
 	/**
 	 * Get the {@link javax.management.NotificationListener}.
 	 */
-	@Nullable
-	public NotificationListener getNotificationListener() {
+	public @Nullable NotificationListener getNotificationListener() {
 		return this.notificationListener;
 	}
 
@@ -84,8 +80,7 @@ public class NotificationListenerHolder {
 	 * with the encapsulated {@link #getNotificationListener() NotificationListener}.
 	 * <p>May be {@code null}.
 	 */
-	@Nullable
-	public NotificationFilter getNotificationFilter() {
+	public @Nullable NotificationFilter getNotificationFilter() {
 		return this.notificationFilter;
 	}
 
@@ -107,8 +102,7 @@ public class NotificationListenerHolder {
 	 * @return the handback object (may be {@code null})
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
-	@Nullable
-	public Object getHandback() {
+	public @Nullable Object getHandback() {
 		return this.handback;
 	}
 
@@ -141,8 +135,7 @@ public class NotificationListenerHolder {
 	 * be registered as a listener for {@link javax.management.Notification Notifications}.
 	 * @throws MalformedObjectNameException if an {@code ObjectName} is malformed
 	 */
-	@Nullable
-	public ObjectName[] getResolvedObjectNames() throws MalformedObjectNameException {
+	public ObjectName @Nullable [] getResolvedObjectNames() throws MalformedObjectNameException {
 		if (this.mappedObjectNames == null) {
 			return null;
 		}

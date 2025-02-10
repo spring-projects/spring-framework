@@ -36,6 +36,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.meta.When;
 
 import jakarta.annotation.Resource;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,8 +47,6 @@ import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.testfixture.stereotype.Indexed;
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.asList;
@@ -237,10 +236,11 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void isAnnotatedForPlainTypes() {
 		assertThat(isAnnotated(Order.class, Documented.class)).isTrue();
-		assertThat(isAnnotated(NonNullApi.class, Documented.class)).isTrue();
-		assertThat(isAnnotated(NonNullApi.class, Nonnull.class)).isTrue();
+		assertThat(isAnnotated(org.springframework.lang.NonNullApi.class, Documented.class)).isTrue();
+		assertThat(isAnnotated(org.springframework.lang.NonNullApi.class, Nonnull.class)).isTrue();
 		assertThat(isAnnotated(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
 	}
 
@@ -277,10 +277,11 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void hasAnnotationForPlainTypes() {
 		assertThat(hasAnnotation(Order.class, Documented.class)).isTrue();
-		assertThat(hasAnnotation(NonNullApi.class, Documented.class)).isTrue();
-		assertThat(hasAnnotation(NonNullApi.class, Nonnull.class)).isTrue();
+		assertThat(hasAnnotation(org.springframework.lang.NonNullApi.class, Documented.class)).isTrue();
+		assertThat(hasAnnotation(org.springframework.lang.NonNullApi.class, Nonnull.class)).isTrue();
 		assertThat(hasAnnotation(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
 	}
 
@@ -344,9 +345,10 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void getAllAnnotationAttributesOnLangType() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
-				NonNullApi.class, Nonnull.class.getName());
+				org.springframework.lang.NonNullApi.class, Nonnull.class.getName());
 		assertThat(attributes).as("Annotation attributes map for @Nonnull on NonNullApi").isNotNull();
 		assertThat(attributes.get("when")).as("value for NonNullApi").isEqualTo(List.of(When.ALWAYS));
 	}
@@ -1548,15 +1550,13 @@ class AnnotatedElementUtilsTests {
 	interface TransactionalService {
 
 		@Transactional
-		@Nullable
-		Object doIt();
+		@Nullable Object doIt();
 	}
 
 	class TransactionalServiceImpl implements TransactionalService {
 
 		@Override
-		@Nullable
-		public Object doIt() {
+		public @Nullable Object doIt() {
 			return null;
 		}
 	}

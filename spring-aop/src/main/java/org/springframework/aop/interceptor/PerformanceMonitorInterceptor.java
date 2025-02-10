@@ -18,6 +18,7 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.StopWatch;
 
@@ -53,7 +54,7 @@ public class PerformanceMonitorInterceptor extends AbstractMonitoringInterceptor
 
 
 	@Override
-	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
+	protected @Nullable Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);
 		StopWatch stopWatch = new StopWatch(name);
 		stopWatch.start(name);

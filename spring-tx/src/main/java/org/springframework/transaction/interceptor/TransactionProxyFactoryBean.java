@@ -18,6 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
 import org.springframework.aop.framework.ProxyFactory;
@@ -26,7 +28,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -117,8 +118,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 
 	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 
-	@Nullable
-	private Pointcut pointcut;
+	private @Nullable Pointcut pointcut;
 
 
 	/**

@@ -24,8 +24,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.time.Duration;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,8 +43,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
 
-	@Nullable
-	private Proxy proxy;
+	private @Nullable Proxy proxy;
 
 	private int chunkSize = DEFAULT_CHUNK_SIZE;
 
@@ -57,17 +57,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 */
 	public void setProxy(Proxy proxy) {
 		this.proxy = proxy;
-	}
-
-	/**
-	 * Indicate whether this request factory should buffer the
-	 * {@linkplain ClientHttpRequest#getBody() request body} internally.
-	 * @see #setChunkSize(int)
-	 * @deprecated since 6.1 requests are never buffered,
-	 * as if this property is {@code false}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public void setBufferRequestBody(boolean bufferRequestBody) {
 	}
 
 	/**
@@ -120,20 +109,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "ReadTimeout must not be null");
 		this.readTimeout = (int) readTimeout.toMillis();
-	}
-
-	/**
-	 * Set if the underlying URLConnection can be set to 'output streaming' mode.
-	 * Default is {@code true}.
-	 * <p>When output streaming is enabled, authentication and redirection cannot be handled automatically.
-	 * If output streaming is disabled, the {@link HttpURLConnection#setFixedLengthStreamingMode} and
-	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
-	 * be called.
-	 * @param outputStreaming if output streaming is enabled
-	 * @deprecated as of 6.1 requests are always streamed, as if this property is {@code true}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public void setOutputStreaming(boolean outputStreaming) {
 	}
 
 

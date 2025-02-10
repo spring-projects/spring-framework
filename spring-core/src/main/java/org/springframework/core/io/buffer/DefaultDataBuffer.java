@@ -22,7 +22,8 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.function.IntPredicate;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 

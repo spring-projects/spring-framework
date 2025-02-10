@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.ModelMap;

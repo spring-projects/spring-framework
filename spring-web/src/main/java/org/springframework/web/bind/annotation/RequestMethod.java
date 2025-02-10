@@ -16,8 +16,9 @@
 
 package org.springframework.web.bind.annotation;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -48,8 +49,7 @@ public enum RequestMethod {
 	 * @return the corresponding {@code RequestMethod}, or {@code null} if not found
 	 * @since 6.0.6
 	 */
-	@Nullable
-	public static RequestMethod resolve(String method) {
+	public static @Nullable RequestMethod resolve(String method) {
 		Assert.notNull(method, "Method must not be null");
 		return switch (method) {
 			case "GET" -> GET;
@@ -71,8 +71,7 @@ public enum RequestMethod {
 	 * @return the corresponding {@code RequestMethod}, or {@code null} if not found
 	 * @since 6.0.6
 	 */
-	@Nullable
-	public static RequestMethod resolve(HttpMethod httpMethod) {
+	public static @Nullable RequestMethod resolve(HttpMethod httpMethod) {
 		Assert.notNull(httpMethod, "HttpMethod must not be null");
 		return resolve(httpMethod.name());
 	}

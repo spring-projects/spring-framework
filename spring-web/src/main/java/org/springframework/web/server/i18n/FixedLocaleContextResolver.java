@@ -19,9 +19,10 @@ package org.springframework.web.server.i18n;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -39,8 +40,7 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 
 	private final Locale locale;
 
-	@Nullable
-	private final TimeZone timeZone;
+	private final @Nullable TimeZone timeZone;
 
 
 	/**
@@ -79,8 +79,7 @@ public class FixedLocaleContextResolver implements LocaleContextResolver {
 				return locale;
 			}
 			@Override
-			@Nullable
-			public TimeZone getTimeZone() {
+			public @Nullable TimeZone getTimeZone() {
 				return timeZone;
 			}
 		};

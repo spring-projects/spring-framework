@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.core.CollectionFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -85,11 +86,9 @@ public class WebDataBinder extends DataBinder {
 	 */
 	public static final String DEFAULT_FIELD_DEFAULT_PREFIX = "!";
 
-	@Nullable
-	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
+	private @Nullable String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
 
-	@Nullable
-	private String fieldDefaultPrefix = DEFAULT_FIELD_DEFAULT_PREFIX;
+	private @Nullable String fieldDefaultPrefix = DEFAULT_FIELD_DEFAULT_PREFIX;
 
 	private boolean bindEmptyMultipartFiles = true;
 
@@ -143,8 +142,7 @@ public class WebDataBinder extends DataBinder {
 	/**
 	 * Return the prefix for parameters that mark potentially empty fields.
 	 */
-	@Nullable
-	public String getFieldMarkerPrefix() {
+	public @Nullable String getFieldMarkerPrefix() {
 		return this.fieldMarkerPrefix;
 	}
 
@@ -169,8 +167,7 @@ public class WebDataBinder extends DataBinder {
 	/**
 	 * Return the prefix for parameters that mark default fields.
 	 */
-	@Nullable
-	public String getFieldDefaultPrefix() {
+	public @Nullable String getFieldDefaultPrefix() {
 		return this.fieldDefaultPrefix;
 	}
 
@@ -203,8 +200,7 @@ public class WebDataBinder extends DataBinder {
 	 * @return the resolved value, or {@code null}
 	 * @since 6.1
 	 */
-	@Nullable
-	protected Object resolvePrefixValue(String name, Class<?> type, BiFunction<String, Class<?>, Object> resolver) {
+	protected @Nullable Object resolvePrefixValue(String name, Class<?> type, BiFunction<String, Class<?>, Object> resolver) {
 		Object value = resolver.apply(name, type);
 		if (value == null) {
 			String prefix = getFieldDefaultPrefix();
@@ -316,8 +312,7 @@ public class WebDataBinder extends DataBinder {
 	 * @param fieldType the type of the field
 	 * @return the empty value (for most fields: {@code null})
 	 */
-	@Nullable
-	protected Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
+	protected @Nullable Object getEmptyValue(String field, @Nullable Class<?> fieldType) {
 		return (fieldType != null ? getEmptyValue(fieldType) : null);
 	}
 
@@ -335,8 +330,7 @@ public class WebDataBinder extends DataBinder {
 	 * @return the empty value (for most fields: {@code null})
 	 * @since 5.0
 	 */
-	@Nullable
-	public Object getEmptyValue(Class<?> fieldType) {
+	public @Nullable Object getEmptyValue(Class<?> fieldType) {
 		try {
 			if (boolean.class == fieldType || Boolean.class == fieldType) {
 				// Special handling of boolean property.
