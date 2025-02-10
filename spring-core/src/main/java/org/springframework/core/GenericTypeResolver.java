@@ -166,8 +166,8 @@ public final class GenericTypeResolver {
 			else if (genericType instanceof ParameterizedType parameterizedType) {
 				ResolvableType resolvedType = ResolvableType.forType(genericType);
 				if (resolvedType.hasUnresolvableGenerics()) {
-					ResolvableType[] generics = new ResolvableType[parameterizedType.getActualTypeArguments().length];
 					Type[] typeArguments = parameterizedType.getActualTypeArguments();
+					ResolvableType[] generics = new ResolvableType[typeArguments.length];
 					ResolvableType contextType = ResolvableType.forClass(contextClass);
 					for (int i = 0; i < typeArguments.length; i++) {
 						Type typeArgument = typeArguments[i];
@@ -206,6 +206,9 @@ public final class GenericTypeResolver {
 			}
 			resolvedType = variableResolver.resolveVariable(typeVariable);
 			if (resolvedType != null) {
+				while (resolvedType.getType() instanceof TypeVariable<?>) {
+					resolvedType = resolvedType.resolveType();
+				}
 				return resolvedType;
 			}
 		}
