@@ -228,8 +228,17 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 					handleInvalidUpgradeHeader(request, response);
 					return false;
 				}
-				if (!headers.getConnection().contains("Upgrade") && !headers.getConnection().contains("upgrade")) {
+				List<String> connectionValue = headers.getConnection();
+				if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
 					handleInvalidConnectHeader(request, response);
+					return false;
+				}
+				String key = headers.getSecWebSocketKey();
+				if (key == null) {
+					if (logger.isErrorEnabled()) {
+						logger.error("Missing \"Sec-WebSocket-Key\" header");
+					}
+					response.setStatusCode(HttpStatus.BAD_REQUEST);
 					return false;
 				}
 			}
@@ -240,16 +249,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			if (!isValidOrigin(request)) {
 				response.setStatusCode(HttpStatus.FORBIDDEN);
 				return false;
-			}
-			if (HttpMethod.GET == httpMethod) {
-				String wsKey = headers.getSecWebSocketKey();
-				if (wsKey == null) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Missing \"Sec-WebSocket-Key\" header");
-					}
-					response.setStatusCode(HttpStatus.BAD_REQUEST);
-					return false;
-				}
 			}
 		}
 		catch (IOException ex) {
