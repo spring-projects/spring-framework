@@ -147,25 +147,16 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 						key -> getMetaAnnotationTypes(mergedAnnotation));
 				if (isStereotypeWithNameValue(annotationType, metaAnnotationTypes, attributes)) {
 					Object value = attributes.get(MergedAnnotation.VALUE);
-					if (value instanceof String currentName && !currentName.isBlank()) {
+					if (value instanceof String currentName && !currentName.isBlank() &&
+							!hasExplicitlyAliasedValueAttribute(mergedAnnotation.getType())) {
 						if (conventionBasedStereotypeCheckCache.add(annotationType) &&
 								metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) && logger.isWarnEnabled()) {
-							if (hasExplicitlyAliasedValueAttribute(mergedAnnotation.getType())) {
-								logger.warn("""
-										Although the 'value' attribute in @%s declares @AliasFor for an attribute \
-										other than @Component's 'value' attribute, the value is still used as the \
-										@Component name based on convention. As of Spring Framework 7.0, such a \
-										'value' attribute will no longer be used as the @Component name."""
-											.formatted(annotationType));
-							}
-							else {
-								logger.warn("""
-										Support for convention-based @Component names is deprecated and will \
-										be removed in a future version of the framework. Please annotate the \
-										'value' attribute in @%s with @AliasFor(annotation=Component.class) \
-										to declare an explicit alias for @Component's 'value' attribute."""
-											.formatted(annotationType));
-							}
+							logger.warn("""
+									Support for convention-based @Component names is deprecated and will \
+									be removed in a future version of the framework. Please annotate the \
+									'value' attribute in @%s with @AliasFor(annotation=Component.class) \
+									to declare an explicit alias for @Component's 'value' attribute."""
+										.formatted(annotationType));
 						}
 						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +

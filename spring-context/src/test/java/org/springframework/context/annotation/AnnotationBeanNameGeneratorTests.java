@@ -150,18 +150,14 @@ class AnnotationBeanNameGeneratorTests {
 		assertGeneratedName(RestControllerAdviceClass.class, "myRestControllerAdvice");
 	}
 
-	@Test  // gh-34317
+	@Test  // gh-34317, gh-34346
 	void generateBeanNameFromStereotypeAnnotationWithStringValueAsExplicitAliasForMetaAnnotationOtherThanComponent() {
-		// As of Spring Framework 6.2, "enigma" is incorrectly used as the @Component name.
-		// As of Spring Framework 7.0, the generated name will be "annotationBeanNameGeneratorTests.StereotypeWithoutExplicitName".
-		assertGeneratedName(StereotypeWithoutExplicitName.class, "enigma");
+		assertGeneratedName(StereotypeWithoutExplicitName.class, "annotationBeanNameGeneratorTests.StereotypeWithoutExplicitName");
 	}
 
-	@Test  // gh-34317
+	@Test  // gh-34317, gh-34346
 	void generateBeanNameFromStereotypeAnnotationWithStringValueAndExplicitAliasForComponentNameWithBlankName() {
-		// As of Spring Framework 6.2, "enigma" is incorrectly used as the @Component name.
-		// As of Spring Framework 7.0, the generated name will be "annotationBeanNameGeneratorTests.StereotypeWithGeneratedName".
-		assertGeneratedName(StereotypeWithGeneratedName.class, "enigma");
+		assertGeneratedName(StereotypeWithGeneratedName.class, "annotationBeanNameGeneratorTests.StereotypeWithGeneratedName");
 	}
 
 	@Test  // gh-34317
