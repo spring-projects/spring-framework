@@ -40,9 +40,11 @@ public class TestBeanTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessageStartingWith("""
+				.withMessage("""
 						Unable to replace bean: there is no bean with name 'beanToOverride' \
-						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
+						and type java.lang.String (as required by field 'FailureByNameLookup.example'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 	}
 
 	@Test
@@ -52,9 +54,11 @@ public class TestBeanTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessageStartingWith("""
+				.withMessage("""
 						Unable to replace bean: there is no bean with name 'beanToOverride' \
-						and type java.lang.String (as required by field 'FailureByNameLookup.example').""");
+						and type java.lang.String (as required by field 'FailureByNameLookup.example'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 	}
 
 	@Test
@@ -63,9 +67,10 @@ public class TestBeanTests {
 		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByTypeLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessageStartingWith("""
-						Unable to override bean: there are no beans of \
-						type %s (as required by field '%s.example').""",
+				.withMessage("""
+						Unable to override bean: there are no beans of type %s (as required by field '%s.example'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""",
 						String.class.getName(), FailureByTypeLookup.class.getSimpleName());
 	}
 

@@ -68,9 +68,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	private static final BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
 
-	private static final String unableToOverrideByTypeDiagnosticsMessage = " If the bean is defined from a @Bean method,"
-			+ " please make sure the return type is the most specific type (recommended) or type can be assigned to %s";
-
 	private final Set<BeanOverrideHandler> beanOverrideHandlers;
 
 	private final BeanOverrideRegistry beanOverrideRegistry;
@@ -172,9 +169,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			}
 			else if (requireExistingBean) {
 				Field field = handler.getField();
-				throw new IllegalStateException(
-						"Unable to replace bean: there is no bean with name '%s' and type %s%s."
-							.formatted(beanName, handler.getBeanType(), requiredByField(field, handler.getBeanType())));
+				throw new IllegalStateException("""
+						Unable to replace bean: there is no bean with name '%s' and type %s%s. \
+						If the bean is defined in a @Bean method, make sure the return type is the \
+						most specific type possible (for example, the concrete implementation type)."""
+							.formatted(beanName, handler.getBeanType(), requiredByField(field)));
 			}
 			// 4) We are creating a bean by-name with the provided beanName.
 		}
@@ -261,7 +260,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				String message = "Unable to select a bean to wrap: ";
 				int candidateCount = candidateNames.size();
 				if (candidateCount == 0) {
-					message += "there are no beans of type %s%s.".formatted(beanType, requiredByField(field, beanType));
+					message += """
+							there are no beans of type %s%s. \
+							If the bean is defined in a @Bean method, make sure the return type is the \
+							most specific type possible (for example, the concrete implementation type)."""
+								.formatted(beanType, requiredByField(field));
 				}
 				else {
 					message += "found %d beans of type %s%s: %s"
@@ -275,8 +278,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			// We are wrapping an existing bean by-name.
 			Set<String> candidates = getExistingBeanNamesByType(beanFactory, handler, false);
 			if (!candidates.contains(beanName)) {
-				throw new IllegalStateException(
-						"Unable to wrap bean: there is no bean with name '%s' and type %s%s."
+				throw new IllegalStateException("""
+						Unable to wrap bean: there is no bean with name '%s' and type %s%s. \
+						If the bean is defined in a @Bean method, make sure the return type is the \
+						most specific type possible (for example, the concrete implementation type)."""
 							.formatted(beanName, beanType, requiredByField(field)));
 			}
 		}
@@ -301,9 +306,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		int candidateCount = candidateNames.size();
 		if (candidateCount == 0) {
 			if (requireExistingBean) {
-				throw new IllegalStateException(
-						"Unable to override bean: there are no beans of type %s%s."
-							.formatted(beanType, requiredByField(field, beanType)));
+				throw new IllegalStateException("""
+						Unable to override bean: there are no beans of type %s%s. \
+						If the bean is defined in a @Bean method, make sure the return type is the \
+						most specific type possible (for example, the concrete implementation type)."""
+							.formatted(beanType, requiredByField(field)));
 			}
 			return null;
 		}
@@ -485,10 +492,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 		return " (as required by field '%s.%s')".formatted(
 				field.getDeclaringClass().getSimpleName(), field.getName());
-	}
-
-	private static String requiredByField(@Nullable Field field, ResolvableType requiredBeanType) {
-		return requiredByField(field) + '.' + unableToOverrideByTypeDiagnosticsMessage.formatted(requiredBeanType);
 	}
 
 }

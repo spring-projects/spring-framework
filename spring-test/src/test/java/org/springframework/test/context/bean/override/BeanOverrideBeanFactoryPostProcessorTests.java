@@ -85,9 +85,11 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessageStartingWith("""
+				.withMessage("""
 						Unable to replace bean: there is no bean with name 'descriptionBean' \
-						and type java.lang.String (as required by field 'ByNameTestCase.description').""");
+						and type java.lang.String (as required by field 'ByNameTestCase.description'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 	}
 
 	@Test
@@ -97,9 +99,11 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessageStartingWith("""
+				.withMessage("""
 						Unable to replace bean: there is no bean with name 'descriptionBean' \
-						and type java.lang.String (as required by field 'ByNameTestCase.description').""");
+						and type java.lang.String (as required by field 'ByNameTestCase.description'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 	}
 
 	@Test
@@ -144,9 +148,11 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessageStartingWith("""
+				.withMessage("""
 						Unable to override bean: there are no beans of type java.lang.Integer \
-						(as required by field 'ByTypeTestCase.counter').""");
+						(as required by field 'ByTypeTestCase.counter'). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""");
 	}
 
 	@Test
