@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,11 +98,22 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 public class EventPublishingTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 10000}.
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 10_000;
+
+	/**
+	 * Returns {@value #ORDER}, which ensures that the {@code EventPublishingTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+	 * SqlScriptsTestExecutionListener} and before the
+	 * {@link org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener
+	 * MockitoResetTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 10_000;
+		return ORDER;
 	}
 
 	/**

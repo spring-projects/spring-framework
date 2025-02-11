@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,12 @@ import org.springframework.util.StringUtils;
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
 
+	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 4000;
+
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
 	// Do not require @Transactional test methods to be public.
@@ -175,11 +181,16 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 
 	/**
-	 * Returns {@code 4000}.
+	 * Returns {@value #ORDER}, which ensures that the {@code TransactionalTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.CommonCachesTestExecutionListener
+	 * CommonCachesTestExecutionListener} and before the
+	 * {@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+	 * SqlScriptsTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 4000;
+		return ORDER;
 	}
 
 	/**

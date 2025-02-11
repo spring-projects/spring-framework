@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,12 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  */
 public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListener implements AotTestExecutionListener {
 
+	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 5000;
+
 	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(SqlScriptsTestExecutionListener.class);
@@ -126,11 +132,16 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 
 	/**
-	 * Returns {@code 5000}.
+	 * Returns {@value #ORDER}, which ensures that the {@code SqlScriptsTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+	 * TransactionalTestExecutionListener} and before the
+	 * {@link org.springframework.test.context.event.EventPublishingTestExecutionListener
+	 * EventPublishingTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 5000;
+		return ORDER;
 	}
 
 	/**

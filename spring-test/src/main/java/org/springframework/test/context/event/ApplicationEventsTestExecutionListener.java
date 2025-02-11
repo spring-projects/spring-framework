@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,12 @@ import org.springframework.util.Assert;
 public class ApplicationEventsTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 1800;
+
+	/**
 	 * Attribute name for a {@link TestContext} attribute which indicates
 	 * whether the test class for the given test context is annotated with
 	 * {@link RecordApplicationEvents @RecordApplicationEvents}.
@@ -61,11 +67,18 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 
 
 	/**
-	 * Returns {@code 1800}.
+	 * Returns {@value #ORDER}, which ensures that the {@code ApplicationEventsTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * DirtiesContextBeforeModesTestExecutionListener} and before the
+	 * {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
+	 * BeanOverrideTestExecutionListener} and the
+	 * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+	 * DependencyInjectionTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 1800;
+		return ORDER;
 	}
 
 	@Override
