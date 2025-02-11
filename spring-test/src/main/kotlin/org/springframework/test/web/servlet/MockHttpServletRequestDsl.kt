@@ -130,6 +130,18 @@ open class MockHttpServletRequestDsl(private val builder: AbstractMockHttpServle
 	var queryParams: MultiValueMap<String, String>? = null
 
 	/**
+	 * @see [MockHttpServletRequestBuilder.formField]
+	 */
+	fun formField(name: String, vararg values: String) {
+		builder.formField(name, *values)
+	}
+
+	/**
+	 * @see [MockHttpServletRequestBuilder.formFields]
+	 */
+	var formFields: MultiValueMap<String, String>? = null
+
+	/**
 	 * @see [MockHttpServletRequestBuilder.cookie]
 	 */
 	fun cookie(vararg cookies: Cookie) {
@@ -215,6 +227,7 @@ open class MockHttpServletRequestDsl(private val builder: AbstractMockHttpServle
 		contentType?.also { builder.contentType(it) }
 		params?.also { builder.params(it) }
 		queryParams?.also { builder.queryParams(it) }
+		formFields?.also { builder.formFields(it) }
 		sessionAttrs?.also { builder.sessionAttrs(it) }
 		flashAttrs?.also { builder.flashAttrs(it) }
 		session?.also { builder.session(it) }

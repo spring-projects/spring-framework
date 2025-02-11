@@ -23,6 +23,7 @@ import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
 import org.springframework.http.MediaType.APPLICATION_ATOM_XML
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_XML
@@ -230,6 +231,15 @@ class MockMvcExtensionsTests {
 		assertThat(result.request.queryString).isEqualTo("foo=bar&foo=baz")
 	}
 
+	@Test
+	fun formField() {
+		val result = mockMvc.post("/person") {
+			formField("name", "foo")
+			formField("someDouble", "1.23")
+		}.andReturn()
+		assertThat(result.request.contentType).startsWith(APPLICATION_FORM_URLENCODED_VALUE)
+		assertThat(result.request.contentAsString).isEqualTo("name=foo&someDouble=1.23")
+	}
 
 	@RestController
 	private class PersonController {
