@@ -12,7 +12,7 @@ dependencies {
 	api(platform("io.netty:netty-bom:4.1.115.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
 	api(platform("io.projectreactor:reactor-bom:2023.0.13"))
-	api(platform("io.rsocket:rsocket-bom:1.1.4"))
+	api(platform("io.rsocket:rsocket-bom:1.1.5"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.24"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.21.1"))
 	api(platform("org.assertj:assertj-bom:3.26.3"))
