@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -50,7 +51,9 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.web.ErrorResponse
  * @see org.springframework.web.ErrorResponseException
  */
-public class ProblemDetail {
+public class ProblemDetail implements Serializable {
+
+	private static final long serialVersionUID = 3307761915842206538L;
 
 	private static final URI BLANK_TYPE = URI.create("about:blank");
 
