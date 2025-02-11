@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito.mockbeans;
+package org.springframework.test.context.bean.override.mockito.typelevel;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -27,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
 
 /**
  * Integration tests for {@link MockitoBeans @MockitoBeans} and
@@ -42,7 +43,7 @@ import static org.mockito.BDDMockito.given;
 @MockitoBean(types = {Service04.class, Service05.class})
 @SharedMocks // Intentionally declared between local @MockitoBean declarations
 @MockitoBean(types = Service06.class)
-class MockitoBeansByTypeIntegrationTests implements TestInterface01 {
+class MockitoBeansByTypeIntegrationTests implements MockTestInterface01 {
 
 	@Autowired
 	Service01 service01;
@@ -79,6 +80,14 @@ class MockitoBeansByTypeIntegrationTests implements TestInterface01 {
 
 	@Test
 	void checkMocks() {
+		assertIsMock(service01, "service01");
+		assertIsMock(service02, "service02");
+		assertIsMock(service03, "service03");
+		assertIsMock(service04, "service04");
+		assertIsMock(service05, "service05");
+		assertIsMock(service06, "service06");
+		assertIsMock(service07, "service07");
+
 		assertThat(service01.greeting()).isEqualTo("mock 01");
 		assertThat(service02.greeting()).isEqualTo("mock 02");
 		assertThat(service03.greeting()).isEqualTo("mock 03");
@@ -90,7 +99,7 @@ class MockitoBeansByTypeIntegrationTests implements TestInterface01 {
 
 
 	@MockitoBean(types = Service09.class)
-	class BaseTestCase implements TestInterface08 {
+	class BaseTestCase implements MockTestInterface08 {
 
 		@Autowired
 		Service08 service08;
@@ -104,7 +113,7 @@ class MockitoBeansByTypeIntegrationTests implements TestInterface01 {
 
 	@Nested
 	@MockitoBean(types = Service12.class)
-	class NestedTests extends BaseTestCase implements TestInterface11 {
+	class NestedTests extends BaseTestCase implements MockTestInterface11 {
 
 		@Autowired
 		Service11 service11;
@@ -128,6 +137,20 @@ class MockitoBeansByTypeIntegrationTests implements TestInterface01 {
 
 		@Test
 		void checkMocks() {
+			assertIsMock(service01, "service01");
+			assertIsMock(service02, "service02");
+			assertIsMock(service03, "service03");
+			assertIsMock(service04, "service04");
+			assertIsMock(service05, "service05");
+			assertIsMock(service06, "service06");
+			assertIsMock(service07, "service07");
+			assertIsMock(service08, "service08");
+			assertIsMock(service09, "service09");
+			assertIsMock(service10, "service10");
+			assertIsMock(service11, "service11");
+			assertIsMock(service12, "service12");
+			assertIsMock(service13, "service13");
+
 			assertThat(service01.greeting()).isEqualTo("mock 01");
 			assertThat(service02.greeting()).isEqualTo("mock 02");
 			assertThat(service03.greeting()).isEqualTo("mock 03");

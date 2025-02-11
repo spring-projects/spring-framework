@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito.mockbeans;
+package org.springframework.test.context.bean.override.mockito.typelevel;
 
-interface Service04 extends Service {
+interface Service08 extends Service {
 }

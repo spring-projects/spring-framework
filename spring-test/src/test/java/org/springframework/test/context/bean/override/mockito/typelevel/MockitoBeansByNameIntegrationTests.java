@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito.mockbeans;
+package org.springframework.test.context.bean.override.mockito.typelevel;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +30,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
+import static org.springframework.test.mockito.MockitoAssertions.assertIsNotMock;
 
 /**
  * Integration tests for {@link MockitoBeans @MockitoBeans} and
@@ -69,11 +71,17 @@ class MockitoBeansByNameIntegrationTests {
 
 	@Test
 	void checkMocksAndStandardBean() {
+		assertIsMock(s1, "s1");
+		assertIsMock(s2, "s2");
+		assertIsMock(service3, "service3");
+		assertIsNotMock(service4, "service4");
+
 		assertThat(s1.greeting()).isEqualTo("mock 1");
 		assertThat(s2.greeting()).isEqualTo("mock 2");
 		assertThat(service3.greeting()).isEqualTo("mock 3");
 		assertThat(service4.greeting()).isEqualTo("prod 4");
 	}
+
 
 	@Configuration
 	static class Config {

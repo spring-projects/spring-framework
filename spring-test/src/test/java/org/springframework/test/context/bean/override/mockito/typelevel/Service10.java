@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito.mockbeans;
+package org.springframework.test.context.bean.override.mockito.typelevel;
 
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-@MockitoBean(types = Service11.class)
-interface TestInterface11 {
+interface Service10 extends Service {
 }

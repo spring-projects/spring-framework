@@ -31,9 +31,9 @@ import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
  * {@code @MockitoBean} is an annotation that can be used in test classes to
- * override beans in a test's
+ * override a bean in the test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * using Mockito mocks.
+ * with a Mockito mock.
  *
  * <p>{@code @MockitoBean} can be applied in the following ways.
  * <ul>
@@ -49,18 +49,19 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * </ul>
  *
  * <p>When {@code @MockitoBean} is declared on a field, the bean to mock is inferred
- * from the type of the annotated field. If multiple candidates exist, a
- * {@code @Qualifier} annotation can be declared on the field to help disambiguate.
- * In the absence of a {@code @Qualifier} annotation, the name of the annotated
- * field will be used as a fallback qualifier. Alternatively, you can explicitly
- * specify a bean name to mock by setting the {@link #value() value} or
- * {@link #name() name} attribute.
+ * from the type of the annotated field. If multiple candidates exist in the
+ * {@code ApplicationContext}, a {@code @Qualifier} annotation can be declared
+ * on the field to help disambiguate. In the absence of a {@code @Qualifier}
+ * annotation, the name of the annotated field will be used as a <em>fallback
+ * qualifier</em>. Alternatively, you can explicitly specify a bean name to mock
+ * by setting the {@link #value() value} or {@link #name() name} attribute.
  *
  * <p>When {@code @MockitoBean} is declared at the type level, the type of bean
- * to mock must be supplied via the {@link #types() types} attribute. If multiple
- * candidates exist, you can explicitly specify a bean name to mock by setting the
- * {@link #name() name} attribute. Note, however, that the {@code types} attribute
- * must contain a single type if an explicit bean {@code name} is configured.
+ * (or beans) to mock must be supplied via the {@link #types() types} attribute.
+ * If multiple candidates exist in the {@code ApplicationContext}, you can
+ * explicitly specify a bean name to mock by setting the {@link #name() name}
+ * attribute. Note, however, that the {@code types} attribute must contain a
+ * single type if an explicit bean {@code name} is configured.
  *
  * <p>A bean will be created if a corresponding bean does not exist. However, if
  * you would like for the test to fail when a corresponding bean does not exist,
@@ -111,7 +112,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
 public @interface MockitoBean {
 
 	/**
-	 * Alias for {@link #name()}.
+	 * Alias for {@link #name() name}.
 	 * <p>Intended to be used when no other attributes are needed &mdash; for
 	 * example, {@code @MockitoBean("customBeanName")}.
 	 * @see #name()
@@ -136,7 +137,7 @@ public @interface MockitoBean {
 	 * <p>Each type specified will result in a mock being created and registered
 	 * with the {@code ApplicationContext}.
 	 * <p>Types must be omitted when the annotation is used on a field.
-	 * <p>When {@code @MockitoBean} also defines a {@link #name}, this attribute
+	 * <p>When {@code @MockitoBean} also defines a {@link #name name}, this attribute
 	 * can only contain a single value.
 	 * @return the types to mock
 	 * @since 6.2.2
