@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
@@ -266,11 +267,10 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	void functionMethodMustBeStatic() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
-		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
+		context.registerFunction("nonStatic", this.getClass().getMethod("nonStatic"));
+		SpelExpression expression = parser.parseRaw("#nonStatic()");
 		assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> parser.parseRaw("#notStatic()").getValue(ctx))
+				.isThrownBy(() -> expression.getValue(context))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(FUNCTION_MUST_BE_STATIC));
 	}
 
