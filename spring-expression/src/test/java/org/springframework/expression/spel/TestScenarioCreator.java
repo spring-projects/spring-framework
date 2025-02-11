@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,11 @@ class TestScenarioCreator {
 		MethodHandle varargsFunctionHandle = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
 				"varargsFunction", MethodType.methodType(String.class, String[].class));
 		testContext.registerFunction("varargsFunctionHandle", varargsFunctionHandle);
+
+		// #varargsObjectFunctionHandle(args...)
+		MethodHandle varargsObjectFunctionHandle = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"varargsObjectFunction", MethodType.methodType(String.class, Object[].class));
+		testContext.registerFunction("varargsObjectFunctionHandle", varargsObjectFunctionHandle);
 
 		// #add(int, int)
 		MethodHandle add = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
