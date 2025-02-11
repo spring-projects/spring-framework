@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,8 @@ public class DirtiesContextTestExecutionListener extends AbstractDirtiesContextT
 	/**
 	 * Returns {@code 3000}, which ensures that the {@code DirtiesContextTestExecutionListener}
 	 * is ordered after the
-	 * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
-	 * DependencyInjectionTestExecutionListener} and just before the
-	 * {@link org.springframework.test.context.support.CommonCachesTestExecutionListener
-	 * CommonCachesTestExecutionListener}.
+	 * {@link DependencyInjectionTestExecutionListener DependencyInjectionTestExecutionListener}
+	 * and before the {@link CommonCachesTestExecutionListener CommonCachesTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {

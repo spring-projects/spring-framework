@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Returns {@code 4000}, which ensures that the {@code TransactionalTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.support.CommonCachesTestExecutionListener
-	 * CommonCachesTestExecutionListener} and just before the
+	 * CommonCachesTestExecutionListener} and before the
 	 * {@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
 	 * SqlScriptsTestExecutionListener}.
 	 */

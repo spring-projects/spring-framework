@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,10 +107,10 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 
 
 	/**
-	 * Returns {@code 2500}, which ensures that the {@code MicrometerObservationRegistryTestExecutionListener}
-	 * is ordered after the
+	 * Returns {@code 2500}, which ensures that the
+	 * {@code MicrometerObservationRegistryTestExecutionListener} is ordered after the
 	 * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
-	 * DependencyInjectionTestExecutionListener} and just before the
+	 * DependencyInjectionTestExecutionListener} and before the
 	 * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * DirtiesContextTestExecutionListener}.
 	 */

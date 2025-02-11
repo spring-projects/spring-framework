@@ -74,7 +74,9 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 
 	/**
-	 * Returns {@code Ordered.LOWEST_PRECEDENCE - 100}.
+	 * Returns {@code Ordered.LOWEST_PRECEDENCE - 100}, which ensures that the
+	 * {@code MockitoResetTestExecutionListener} is ordered after all standard
+	 * {@code TestExecutionListener} implementations.
 	 */
 	@Override
 	public int getOrder() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ public class CommonCachesTestExecutionListener extends AbstractTestExecutionList
 	/**
 	 * Returns {@code 3005}, which ensures that the {@code CommonCachesTestExecutionListener}
 	 * is ordered after the
-	 * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
-	 * DirtiesContextTestExecutionListener} and just before the
+	 * {@link DirtiesContextTestExecutionListener DirtiesContextTestExecutionListener} and before the
 	 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
 	 * TransactionalTestExecutionListener}.
 	 */

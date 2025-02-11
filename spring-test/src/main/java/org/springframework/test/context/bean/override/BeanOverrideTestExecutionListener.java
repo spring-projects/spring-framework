@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 * Returns {@code 1950}, which ensures that the {@code BeanOverrideTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
-	 * DirtiesContextBeforeModesTestExecutionListener} and just before the
+	 * DirtiesContextBeforeModesTestExecutionListener} and before the
 	 * {@link DependencyInjectionTestExecutionListener}.
 	 */
 	@Override

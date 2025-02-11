@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,9 @@ public class DirtiesContextBeforeModesTestExecutionListener extends AbstractDirt
 	 * Returns {@code 1500}, which ensures that the {@code DirtiesContextBeforeModesTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.web.ServletTestExecutionListener
-	 * ServletTestExecutionListener} and just before the
+	 * ServletTestExecutionListener} and before the
+	 * {@link org.springframework.test.context.event.ApplicationEventsTestExecutionListener
+	 * ApplicationEventsTestExecutionListener} and the
 	 * {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
 	 * BeanOverrideTestExecutionListener}.
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Returns {@code 5000}, which ensures that the {@code SqlScriptsTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
-	 * TransactionalTestExecutionListener} and just before the
+	 * TransactionalTestExecutionListener} and before the
 	 * {@link org.springframework.test.context.event.EventPublishingTestExecutionListener
 	 * EventPublishingTestExecutionListener}.
 	 */
