@@ -54,6 +54,11 @@ You can customize XML mapping as needed through the use of JAXB or Jackson's pro
 When you need further control (for cases where custom XML serializers/deserializers need to be provided for specific types), you can inject a custom `XmlMapper` through the `ObjectMapper` property.
 By default, this converter supports `application/xml`. This requires the `com.fasterxml.jackson.dataformat:jackson-dataformat-xml` dependency.
 
+| `KotlinSerializationJsonHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write JSON using `kotlinx.serialization`.
+This converter is not configured by default, as this conflicts with Jackson.
+Developers must configure it as an additional converter ahead of the Jackson one.
+
 | `MappingJackson2CborHttpMessageConverter`
 | `com.fasterxml.jackson.dataformat:jackson-dataformat-cbor`
 

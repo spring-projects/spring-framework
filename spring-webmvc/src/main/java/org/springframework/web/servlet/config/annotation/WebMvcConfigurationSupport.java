@@ -894,9 +894,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (kotlinSerializationCborPresent) {
 			messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
 		}
-		if (kotlinSerializationJsonPresent) {
-			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
-		}
 		if (kotlinSerializationProtobufPresent) {
 			messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
 		}
@@ -913,6 +910,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 		else if (jsonbPresent) {
 			messageConverters.add(new JsonbHttpMessageConverter());
+		}
+		else if (kotlinSerializationJsonPresent) {
+			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
 		if (jackson2SmilePresent) {
