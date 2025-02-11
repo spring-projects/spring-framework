@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class DelegatingWebFluxConfigurationTests {
 		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
 		assertThat(condition).isTrue();
 		assertThat(initializer.getConversionService()).isSameAs(formatterRegistry.getValue());
-		assertThat(codecsConfigurer.getValue().getReaders()).hasSize(17);
+		assertThat(codecsConfigurer.getValue().getReaders()).hasSize(16);
 	}
 
 	@Test

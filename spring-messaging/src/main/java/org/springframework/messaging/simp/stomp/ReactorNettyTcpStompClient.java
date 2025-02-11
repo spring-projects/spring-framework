@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,30 +22,16 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
- * A STOMP over TCP client, configurable with either
- * {@link ReactorNettyTcpClient} or {@link ReactorNetty2TcpClient}.
+ * A STOMP over TCP client, configurable with {@link ReactorNettyTcpClient}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class ReactorNettyTcpStompClient extends StompClientSupport {
-
-	private static final boolean reactorNettyClientPresent;
-
-	private static final boolean reactorNetty2ClientPresent;
-
-	static {
-		ClassLoader classLoader = StompBrokerRelayMessageHandler.class.getClassLoader();
-		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", classLoader);
-		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", classLoader);
-	}
-
 
 	private final TcpOperations<byte[]> tcpClient;
 
@@ -76,17 +62,9 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	}
 
 	private static TcpOperations<byte[]> initTcpClient(String host, int port) {
-		if (reactorNettyClientPresent) {
-			ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
-			client.setLogger(SimpLogging.forLog(client.getLogger()));
-			return client;
-		}
-		else if (reactorNetty2ClientPresent) {
-			ReactorNetty2TcpClient<byte[]> client = new ReactorNetty2TcpClient<>(host, port, new StompTcpMessageCodec());
-			client.setLogger(SimpLogging.forLog(client.getLogger()));
-			return client;
-		}
-		throw new IllegalStateException("No compatible version of Reactor Netty");
+		ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(host, port, new StompReactorNettyCodec());
+		client.setLogger(SimpLogging.forLog(client.getLogger()));
+		return client;
 	}
 
 

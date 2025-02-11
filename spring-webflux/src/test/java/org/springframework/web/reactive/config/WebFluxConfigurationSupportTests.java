@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertThat(readers).hasSize(17);
+		assertThat(readers).hasSize(16);
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -169,7 +169,7 @@ class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(0);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers).hasSize(17);
+		assertThat(writers).hasSize(16);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -197,7 +197,7 @@ class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(100);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers).hasSize(17);
+		assertThat(writers).hasSize(16);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);

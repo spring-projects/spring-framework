@@ -14,7 +14,6 @@ dependencies {
 	optional("com.google.code.gson:gson")
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("io.projectreactor.netty:reactor-netty-http")
-	optional("io.projectreactor.netty:reactor-netty5-http")
 	optional("io.rsocket:rsocket-core")
 	optional("io.rsocket:rsocket-transport-netty")
 	optional("jakarta.json.bind:jakarta.json.bind-api")

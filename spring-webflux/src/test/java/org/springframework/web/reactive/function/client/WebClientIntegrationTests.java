@@ -77,7 +77,6 @@ import org.springframework.http.client.reactive.HttpComponentsClientHttpConnecto
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -107,7 +106,6 @@ class WebClientIntegrationTests {
 	static Stream<Arguments> arguments() {
 		return Stream.of(
 				argumentSet("Reactor Netty", new ReactorClientHttpConnector()),
-				argumentSet("Reactor Netty 2", new ReactorNetty2ClientHttpConnector()),
 				argumentSet("JDK", new JdkClientHttpConnector()),
 				argumentSet("Jetty", new JettyClientHttpConnector()),
 				argumentSet("HttpComponents", new HttpComponentsClientHttpConnector())
@@ -204,9 +202,6 @@ class WebClientIntegrationTests {
 					if (clientHttpRequest instanceof ChannelOperations<?,?> nettyReq) {
 						nativeRequest.set(nettyReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY));
 					}
-					else if (clientHttpRequest instanceof reactor.netty5.channel.ChannelOperations<?,?> nettyReq) {
-						nativeRequest.set(nettyReq.channel().attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY));
-					}
 					else {
 						nativeRequest.set(clientHttpRequest.getNativeRequest());
 					}
@@ -219,13 +214,6 @@ class WebClientIntegrationTests {
 		if (nativeRequest.get() instanceof Attribute<?>) {
 			@SuppressWarnings("unchecked")
 			Attribute<Map<String, Object>> attributes = (Attribute<Map<String, Object>>) nativeRequest.get();
-			assertThat(attributes.get()).isNotNull();
-			assertThat(attributes.get()).containsEntry("foo", "bar");
-		}
-		else if (nativeRequest.get() instanceof io.netty5.util.Attribute<?>) {
-			@SuppressWarnings("unchecked")
-			io.netty5.util.Attribute<Map<String, Object>> attributes =
-					(io.netty5.util.Attribute<Map<String, Object>>) nativeRequest.get();
 			assertThat(attributes.get()).isNotNull();
 			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
@@ -945,11 +933,6 @@ class WebClientIntegrationTests {
 
 	@ParameterizedWebClientTest
 	void statusHandlerSuppressedErrorSignalWithFlux(ClientHttpConnector connector) {
-
-		// Temporarily disabled, leads to io.netty5.buffer.BufferClosedException
-		if (connector instanceof ReactorNetty2ClientHttpConnector) {
-			return;
-		}
 
 		startServer(connector);
 

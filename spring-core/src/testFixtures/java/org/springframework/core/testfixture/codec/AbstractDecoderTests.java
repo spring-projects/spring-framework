@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import io.netty5.buffer.Buffer;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -210,13 +209,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 
 		Flux<DataBuffer> flux = Mono.from(input).concatWith(Flux.error(new InputException()));
 		assertThatExceptionOfType(InputException.class).isThrownBy(() ->
-				this.decoder.decode(flux, outputType, mimeType, hints)
-						.doOnNext(object -> {
-							if (object instanceof Buffer buffer) {
-								buffer.close();
-							}
-						})
-						.blockLast(Duration.ofSeconds(5)));
+				this.decoder.decode(flux, outputType, mimeType, hints).blockLast(Duration.ofSeconds(5)));
 	}
 
 	/**
@@ -233,12 +226,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	protected void testDecodeCancel(Publisher<DataBuffer> input, ResolvableType outputType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints)
-				.doOnNext(object -> {
-					if (object instanceof Buffer buffer) {
-						buffer.close();
-					}
-				});
+		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints);
 		StepVerifier.create(result).expectNextCount(1).thenCancel().verify();
 	}
 

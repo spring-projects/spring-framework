@@ -77,7 +77,6 @@ dependencies {
 	compileOnly("org.graalvm.sdk:graal-sdk")
 	optional("io.micrometer:context-propagation")
 	optional("io.netty:netty-buffer")
-	optional("io.netty:netty5-buffer")
 	optional("io.projectreactor:reactor-core")
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.smallrye.reactive:mutiny")

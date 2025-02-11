@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
-import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 
@@ -57,8 +56,6 @@ class ReactorNettyTcpStompClientTests {
 	private BrokerService activeMQBroker;
 
 	private ReactorNettyTcpStompClient client;
-
-	private ReactorNettyTcpStompClient client2;
 
 
 	@BeforeEach
@@ -84,10 +81,6 @@ class ReactorNettyTcpStompClientTests {
 		this.client = new ReactorNettyTcpStompClient(host, port);
 		this.client.setMessageConverter(new StringMessageConverter());
 		this.client.setTaskScheduler(taskScheduler);
-
-		this.client2 = new ReactorNettyTcpStompClient(new ReactorNetty2TcpClient<>(host, port, new StompTcpMessageCodec()));
-		this.client2.setMessageConverter(new StringMessageConverter());
-		this.client2.setTaskScheduler(taskScheduler);
 	}
 
 	private TransportConnector createStompConnector() throws Exception {
@@ -100,7 +93,6 @@ class ReactorNettyTcpStompClientTests {
 	void shutdown() throws Exception {
 		try {
 			this.client.shutdown();
-			this.client2.shutdown();
 		}
 		catch (Throwable ex) {
 			logger.error("Failed to shut client", ex);
@@ -118,11 +110,6 @@ class ReactorNettyTcpStompClientTests {
 	@Test
 	void publishSubscribeOnReactorNetty() throws Exception {
 		testPublishSubscribe(this.client);
-	}
-
-	@Test
-	void publishSubscribeOnReactorNetty2() throws Exception {
-		testPublishSubscribe(this.client2);
 	}
 
 	private void testPublishSubscribe(ReactorNettyTcpStompClient clientToUse) throws Exception {

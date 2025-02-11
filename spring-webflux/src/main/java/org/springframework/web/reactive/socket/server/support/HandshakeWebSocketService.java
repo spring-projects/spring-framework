@@ -46,7 +46,6 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.reactive.socket.server.upgrade.JettyCoreRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.ReactorNetty2RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.StandardWebSocketUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
@@ -84,8 +83,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final boolean reactorNettyPresent;
 
-	private static final boolean reactorNetty2Present;
-
 	static {
 		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
 		jettyWsPresent = ClassUtils.isPresent(
@@ -96,8 +93,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 				"io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
 		reactorNettyPresent = ClassUtils.isPresent(
 				"reactor.netty.http.server.HttpServerResponse", classLoader);
-		reactorNetty2Present = ClassUtils.isPresent(
-				"reactor.netty5.http.server.HttpServerResponse", classLoader);
 	}
 
 
@@ -285,31 +280,11 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			return new UndertowRequestUpgradeStrategy();
 		}
 		else if (reactorNettyPresent) {
-			// As late as possible (Reactor Netty commonly used for WebClient)
-			return ReactorNettyStrategyDelegate.forReactorNetty1();
-		}
-		else if (reactorNetty2Present) {
-			// As late as possible (Reactor Netty commonly used for WebClient)
-			return ReactorNettyStrategyDelegate.forReactorNetty2();
+			return new ReactorNettyRequestUpgradeStrategy();
 		}
 		else {
 			// Let's assume Jakarta WebSocket API 2.1+
 			return new StandardWebSocketUpgradeStrategy();
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a reachable dependency on Reactor Netty API.
-	 */
-	private static class ReactorNettyStrategyDelegate {
-
-		public static RequestUpgradeStrategy forReactorNetty1() {
-			return new ReactorNettyRequestUpgradeStrategy();
-		}
-
-		public static RequestUpgradeStrategy forReactorNetty2() {
-			return new ReactorNetty2RequestUpgradeStrategy();
 		}
 	}
 

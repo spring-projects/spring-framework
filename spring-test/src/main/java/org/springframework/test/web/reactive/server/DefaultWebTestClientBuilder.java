@@ -31,7 +31,6 @@ import org.springframework.http.client.reactive.HttpComponentsClientHttpConnecto
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -56,8 +55,6 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private static final boolean reactorNettyClientPresent;
 
-	private static final boolean reactorNetty2ClientPresent;
-
 	private static final boolean jettyClientPresent;
 
 	private static final boolean httpComponentsClientPresent;
@@ -67,7 +64,6 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	static {
 		ClassLoader loader = DefaultWebTestClientBuilder.class.getClassLoader();
 		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
-		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
@@ -296,9 +292,6 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	private static ClientHttpConnector initConnector() {
 		if (reactorNettyClientPresent) {
 			return new ReactorClientHttpConnector();
-		}
-		else if (reactorNetty2ClientPresent) {
-			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpConnector();

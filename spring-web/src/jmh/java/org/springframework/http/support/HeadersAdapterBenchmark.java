@@ -40,7 +40,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * Benchmark for implementations of MultiValueMap adapters over native HTTP
  * headers implementations.
- * <p>Run JMH with {@code -p implementation=Netty,Netty5,HttpComponents,Jetty}
+ * <p>Run JMH with {@code -p implementation=Netty,HttpComponents,Jetty}
  * to cover all implementations
  * @author Simon Baslé
  */
@@ -83,7 +83,6 @@ public class HeadersAdapterBenchmark {
 			this.headers = switch (this.implementation) {
 				case "Netty" -> new Netty4HeadersAdapter(new DefaultHttpHeaders());
 				case "HttpComponents" -> new HttpComponentsHeadersAdapter(new HttpGet("https://example.com"));
-				case "Netty5" -> new Netty5HeadersAdapter(io.netty5.handler.codec.http.headers.HttpHeaders.newHeaders());
 				case "Jetty" -> new JettyHeadersAdapter(HttpFields.build());
 				// FIXME tomcat/undertow implementations (in another package)
 //				case "Tomcat" -> new TomcatHeadersAdapter(new MimeHeaders());
@@ -102,7 +101,6 @@ public class HeadersAdapterBenchmark {
 			this.headers = switch (this.implementation) {
 				case "Netty" -> new HeadersAdaptersBaseline.Netty4(new DefaultHttpHeaders());
 				case "HttpComponents" -> new HeadersAdaptersBaseline.HttpComponents(new HttpGet("https://example.com"));
-				case "Netty5" -> new HeadersAdaptersBaseline.Netty5(io.netty5.handler.codec.http.headers.HttpHeaders.newHeaders());
 				case "Jetty" -> new HeadersAdaptersBaseline.Jetty(HttpFields.build());
 				default -> throw new IllegalArgumentException("Unsupported implementation: " + this.implementation);
 			};
