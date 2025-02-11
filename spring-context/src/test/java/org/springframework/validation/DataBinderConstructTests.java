@@ -189,6 +189,17 @@ class DataBinderConstructTests {
 	}
 
 	@Test
+	void simpleListBindingEmptyBrackets() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).containsExactly(1);
+	}
+
+	@Test
 	void simpleMapBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerMap[a]", "1", "integerMap[b]", "2"));
 
@@ -208,6 +219,34 @@ class DataBinderConstructTests {
 
 		IntegerArrayRecord target = getTarget(binder);
 		assertThat(target.integerArray()).containsExactly(1, 2);
+	}
+
+	@Test
+	void nestedListWithinMap() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"integerListMap[a][0]", "1", "integerListMap[a][1]", "2",
+				"integerListMap[b][0]", "3", "integerListMap[b][1]", "4"));
+
+		DataBinder binder = initDataBinder(IntegerListMapRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListMapRecord target = getTarget(binder);
+		assertThat(target.integerListMap().get("a")).containsExactly(1, 2);
+		assertThat(target.integerListMap().get("b")).containsExactly(3, 4);
+	}
+
+	@Test
+	void nestedMapWithinList() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"integerMapList[0][a]", "1", "integerMapList[0][b]", "2",
+				"integerMapList[1][a]", "3", "integerMapList[1][b]", "4"));
+
+		DataBinder binder = initDataBinder(IntegerMapListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerMapListRecord target = getTarget(binder);
+		assertThat(target.integerMapList().get(0)).containsOnly(Map.entry("a", 1), Map.entry("b", 2));
+		assertThat(target.integerMapList().get(1)).containsOnly(Map.entry("a", 3), Map.entry("b", 4));
 	}
 
 
@@ -301,6 +340,14 @@ class DataBinderConstructTests {
 
 
 	private record IntegerArrayRecord(Integer[] integerArray) {
+	}
+
+
+	private record IntegerMapListRecord(List<Map<String, Integer>> integerMapList) {
+	}
+
+
+	private record IntegerListMapRecord(Map<String, List<Integer>> integerListMap) {
 	}
 
 
