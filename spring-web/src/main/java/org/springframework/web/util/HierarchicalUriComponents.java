@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Sam Brannen
- * @author Mengqi Xu
  * @since 3.1.3
  * @see <a href="https://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -1092,8 +1091,8 @@ final class HierarchicalUriComponents extends UriComponents {
 			if (ObjectUtils.isArray(value)) {
 				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));
 			}
-			if (value instanceof Collection<?> coll) {
-				value = StringUtils.collectionToCommaDelimitedString(coll);
+			else if (value instanceof Collection<?> collection) {
+				value = StringUtils.collectionToCommaDelimitedString(collection);
 			}
 			return value;
 		}

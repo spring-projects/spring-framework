@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -157,22 +158,22 @@ class UriComponentsTests {
 
 	@Test
 	void expandQueryParamWithArray() {
-		UriComponents uri = UriComponentsBuilder.fromPath("/hello")
+		String uri = UriComponentsBuilder.fromPath("/hello")
 				.queryParam("name", "{name}")
-				.build();
-		uri = uri.expand(Collections.singletonMap("name", new String[]{"foo", "bar"}));
+				.buildAndExpand(Map.of("name", new String[] {"foo", "bar"}))
+				.toString();
 
-		assertThat(uri.toString()).hasToString("/hello?name=foo,bar");
+		assertThat(uri).isEqualTo("/hello?name=foo,bar");
 	}
 
 	@Test
 	void expandQueryParamWithList() {
-		UriComponents uri = UriComponentsBuilder.fromPath("/hello")
+		String uri = UriComponentsBuilder.fromPath("/hello")
 				.queryParam("name", "{name}")
-				.build();
-		uri = uri.expand(Collections.singletonMap("name", List.of("foo", "bar")));
+				.buildAndExpand(Map.of("name", List.of("foo", "bar")))
+				.toString();
 
-		assertThat(uri.toString()).hasToString("/hello?name=foo,bar");
+		assertThat(uri).isEqualTo("/hello?name=foo,bar");
 	}
 
 	@ParameterizedTest // SPR-12123
