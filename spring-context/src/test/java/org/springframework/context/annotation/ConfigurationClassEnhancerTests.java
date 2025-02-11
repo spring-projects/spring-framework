@@ -23,11 +23,11 @@ import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.SmartClassLoader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
