@@ -49,6 +49,12 @@ import org.springframework.util.Assert;
 public class ApplicationEventsTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 1800;
+
+	/**
 	 * Attribute name for a {@link TestContext} attribute which indicates
 	 * whether the test class for the given test context is annotated with
 	 * {@link RecordApplicationEvents @RecordApplicationEvents}.
@@ -61,7 +67,7 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 
 
 	/**
-	 * Returns {@code 1800}, which ensures that the {@code ApplicationEventsTestExecutionListener}
+	 * Returns {@value #ORDER}, which ensures that the {@code ApplicationEventsTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
 	 * DirtiesContextBeforeModesTestExecutionListener} and before the
@@ -72,7 +78,7 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	 */
 	@Override
 	public final int getOrder() {
-		return 1800;
+		return ORDER;
 	}
 
 	@Override

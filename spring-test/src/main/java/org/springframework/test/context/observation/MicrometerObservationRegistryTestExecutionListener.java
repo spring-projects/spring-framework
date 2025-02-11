@@ -44,6 +44,12 @@ import org.springframework.util.ReflectionUtils;
  */
 class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExecutionListener {
 
+	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 2500;
+
 	private static final Log logger = LogFactory.getLog(MicrometerObservationRegistryTestExecutionListener.class);
 
 	/**
@@ -107,7 +113,7 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 
 
 	/**
-	 * Returns {@code 2500}, which ensures that the
+	 * Returns {@value #ORDER}, which ensures that the
 	 * {@code MicrometerObservationRegistryTestExecutionListener} is ordered after the
 	 * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * DependencyInjectionTestExecutionListener} and before the
@@ -116,7 +122,7 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 	 */
 	@Override
 	public final int getOrder() {
-		return 2500;
+		return ORDER;
 	}
 
 	/**

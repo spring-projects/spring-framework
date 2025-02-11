@@ -55,14 +55,20 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.AFTE
 public class DirtiesContextTestExecutionListener extends AbstractDirtiesContextTestExecutionListener {
 
 	/**
-	 * Returns {@code 3000}, which ensures that the {@code DirtiesContextTestExecutionListener}
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 3000;
+
+	/**
+	 * Returns {@value #ORDER}, which ensures that the {@code DirtiesContextTestExecutionListener}
 	 * is ordered after the
 	 * {@link DependencyInjectionTestExecutionListener DependencyInjectionTestExecutionListener}
 	 * and before the {@link CommonCachesTestExecutionListener CommonCachesTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 3000;
+		return ORDER;
 	}
 
 	/**

@@ -148,6 +148,12 @@ import org.springframework.util.StringUtils;
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
 
+	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 4000;
+
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
 	// Do not require @Transactional test methods to be public.
@@ -177,7 +183,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 
 	/**
-	 * Returns {@code 4000}, which ensures that the {@code TransactionalTestExecutionListener}
+	 * Returns {@value #ORDER}, which ensures that the {@code TransactionalTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.support.CommonCachesTestExecutionListener
 	 * CommonCachesTestExecutionListener} and before the
@@ -186,7 +192,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	@Override
 	public final int getOrder() {
-		return 4000;
+		return ORDER;
 	}
 
 	/**

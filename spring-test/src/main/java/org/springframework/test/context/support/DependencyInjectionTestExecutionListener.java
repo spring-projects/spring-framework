@@ -40,6 +40,12 @@ import org.springframework.test.context.aot.AotTestContextInitializers;
 public class DependencyInjectionTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 2000;
+
+	/**
 	 * Attribute name for a {@link TestContext} attribute which indicates
 	 * whether the dependencies of a test instance should be
 	 * <em>reinjected</em> in
@@ -63,7 +69,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 
 	/**
-	 * Returns {@code 2000}, which ensures that the {@code DependencyInjectionTestExecutionListener}
+	 * Returns {@value #ORDER}, which ensures that the {@code DependencyInjectionTestExecutionListener}
 	 * is ordered after the
 	 * {@link DirtiesContextBeforeModesTestExecutionListener DirtiesContextBeforeModesTestExecutionListener}
 	 * and the {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
@@ -74,7 +80,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 */
 	@Override
 	public final int getOrder() {
-		return 2000;
+		return ORDER;
 	}
 
 	/**

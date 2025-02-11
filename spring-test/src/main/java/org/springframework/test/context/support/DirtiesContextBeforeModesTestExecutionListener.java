@@ -55,8 +55,14 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFO
 public class DirtiesContextBeforeModesTestExecutionListener extends AbstractDirtiesContextTestExecutionListener {
 
 	/**
-	 * Returns {@code 1500}, which ensures that the {@code DirtiesContextBeforeModesTestExecutionListener}
-	 * is ordered after the
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 1500;
+
+	/**
+	 * Returns {@value #ORDER}, which ensures that the
+	 * {@code DirtiesContextBeforeModesTestExecutionListener} is ordered after the
 	 * {@link org.springframework.test.context.web.ServletTestExecutionListener
 	 * ServletTestExecutionListener} and before the
 	 * {@link org.springframework.test.context.event.ApplicationEventsTestExecutionListener
@@ -66,7 +72,7 @@ public class DirtiesContextBeforeModesTestExecutionListener extends AbstractDirt
 	 */
 	@Override
 	public final int getOrder() {
-		return 1500;
+		return ORDER;
 	}
 
 	/**

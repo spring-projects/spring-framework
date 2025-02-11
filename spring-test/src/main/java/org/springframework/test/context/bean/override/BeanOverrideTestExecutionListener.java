@@ -37,7 +37,13 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 public class BeanOverrideTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 1950}, which ensures that the {@code BeanOverrideTestExecutionListener}
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 1950;
+
+	/**
+	 * Returns {@value #ORDER}, which ensures that the {@code BeanOverrideTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
 	 * DirtiesContextBeforeModesTestExecutionListener} and before the
@@ -45,7 +51,7 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 */
 	@Override
 	public int getOrder() {
-		return 1950;
+		return ORDER;
 	}
 
 	/**
