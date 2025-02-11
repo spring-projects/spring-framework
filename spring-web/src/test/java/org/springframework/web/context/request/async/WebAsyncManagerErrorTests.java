@@ -162,11 +162,10 @@ class WebAsyncManagerErrorTests {
 		AsyncEvent event = new AsyncEvent(new MockAsyncContext(this.servletRequest, this.servletResponse), ex);
 		this.asyncWebRequest.onError(event);
 
-		MockAsyncContext asyncContext = (MockAsyncContext) this.servletRequest.getAsyncContext();
 		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
 		assertThat(this.asyncManager.getConcurrentResult())
-				.as("Disconnected client error not wrapped AsyncRequestNotUsableException")
-				.isOfAnyClassIn(AsyncRequestNotUsableException.class);
+				.as("Disconnected client error not wrapped in AsyncRequestNotUsableException")
+				.isExactlyInstanceOf(AsyncRequestNotUsableException.class);
 	}
 
 	@Test
@@ -287,8 +286,8 @@ class WebAsyncManagerErrorTests {
 
 		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
 		assertThat(deferredResult.getResult())
-				.as("Disconnected client error not wrapped AsyncRequestNotUsableException")
-				.isOfAnyClassIn(AsyncRequestNotUsableException.class);
+				.as("Disconnected client error not wrapped in AsyncRequestNotUsableException")
+				.isExactlyInstanceOf(AsyncRequestNotUsableException.class);
 	}
 
 
