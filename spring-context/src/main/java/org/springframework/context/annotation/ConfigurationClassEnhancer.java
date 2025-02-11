@@ -109,8 +109,16 @@ class ConfigurationClassEnhancer {
 			}
 			return configClass;
 		}
+
 		try {
-			Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
+			// Use original ClassLoader if config class not locally loaded in overriding class loader
+			if (classLoader instanceof SmartClassLoader smartClassLoader &&
+					classLoader != configClass.getClassLoader()) {
+				classLoader = smartClassLoader.getOriginalClassLoader();
+			}
+			Enhancer enhancer = newEnhancer(configClass, classLoader);
+			boolean classLoaderMismatch = (classLoader != null && classLoader != configClass.getClassLoader());
+			Class<?> enhancedClass = createClass(enhancer, classLoaderMismatch);
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Successfully enhanced %s; enhanced class name is: %s",
 						configClass.getName(), enhancedClass.getName()));
@@ -155,8 +163,21 @@ class ConfigurationClassEnhancer {
 	 * Uses enhancer to generate a subclass of superclass,
 	 * ensuring that callbacks are registered for the new subclass.
 	 */
-	private Class<?> createClass(Enhancer enhancer) {
-		Class<?> subclass = enhancer.createClass();
+	private Class<?> createClass(Enhancer enhancer, boolean fallback) {
+		Class<?> subclass;
+		try {
+			subclass = enhancer.createClass();
+		}
+		catch (CodeGenerationException ex) {
+			if (!fallback) {
+				throw ex;
+			}
+			// Possibly a package-visible @Bean method declaration not accessible
+			// in the given ClassLoader -> retry with original ClassLoader
+			enhancer.setClassLoader(null);
+			subclass = enhancer.createClass();
+		}
+
 		// Registering callbacks statically (as opposed to thread-local)
 		// is critical for usage in an OSGi environment (SPR-5932)...
 		Enhancer.registerStaticCallbacks(subclass, CALLBACKS);
