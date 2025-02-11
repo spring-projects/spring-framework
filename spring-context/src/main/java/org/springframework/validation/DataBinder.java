@@ -1154,23 +1154,36 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	private <V> V createIndexedValue(
-			String paramPath, Class<?> paramType, ResolvableType elementType,
+			String paramPath, Class<?> containerType, ResolvableType elementType,
 			String indexedPath, ValueResolver valueResolver) {
 
 		Object value = null;
 		Class<?> elementClass = elementType.resolve(Object.class);
-		Object rawValue = valueResolver.resolveValue(indexedPath, elementClass);
-		if (rawValue != null) {
-			try {
-				value = convertIfNecessary(rawValue, elementClass);
-			}
-			catch (TypeMismatchException ex) {
-				handleTypeMismatchException(ex, paramPath, paramType, rawValue);
-			}
+
+		if (List.class.isAssignableFrom(elementClass)) {
+			value = createList(indexedPath, elementClass, elementType, valueResolver);
+		}
+		else if (Map.class.isAssignableFrom(elementClass)) {
+			value = createMap(indexedPath, elementClass, elementType, valueResolver);
+		}
+		else if (elementClass.isArray()) {
+			value = createArray(indexedPath, elementClass, elementType, valueResolver);
 		}
 		else {
-			value = createObject(elementType, indexedPath + ".", valueResolver);
+			Object rawValue = valueResolver.resolveValue(indexedPath, elementClass);
+			if (rawValue != null) {
+				try {
+					value = convertIfNecessary(rawValue, elementClass);
+				}
+				catch (TypeMismatchException ex) {
+					handleTypeMismatchException(ex, paramPath, containerType, rawValue);
+				}
+			}
+			else {
+				value = createObject(elementType, indexedPath + ".", valueResolver);
+			}
 		}
+
 		return (V) value;
 	}
 
