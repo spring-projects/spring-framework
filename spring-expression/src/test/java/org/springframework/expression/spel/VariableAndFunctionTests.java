@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,6 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -344,15 +344,13 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 
 		static class ArrayHolderConverter implements GenericConverter {
 
-			@Nullable
 			@Override
-			public Set<ConvertiblePair> getConvertibleTypes() {
+			public @Nullable Set<ConvertiblePair> getConvertibleTypes() {
 				return Set.of(new ConvertiblePair(ArrayHolder.class, Object[].class));
 			}
 
-			@Nullable
 			@Override
-			public String[] convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			public @Nullable String[] convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 				return ((ArrayHolder) source).array();
 			}
 		}
