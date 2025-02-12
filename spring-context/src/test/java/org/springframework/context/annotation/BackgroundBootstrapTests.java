@@ -104,6 +104,8 @@ class BackgroundBootstrapTests {
 		public TestBean testBean1(ObjectProvider<TestBean> testBean3, ObjectProvider<TestBean> testBean4) {
 			new Thread(testBean3::getObject).start();
 			new Thread(testBean4::getObject).start();
+			new Thread(testBean3::getObject).start();
+			new Thread(testBean4::getObject).start();
 			try {
 				Thread.sleep(1000);
 			}
