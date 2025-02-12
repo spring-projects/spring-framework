@@ -37,6 +37,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpConnector} for the Java {@link HttpClient}.
@@ -99,7 +100,7 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Set the underlying {@code HttpClient}'s read timeout as a {@code Duration}.
+	 * Set the underlying {@code HttpClient} read timeout as a {@code Duration}.
 	 * <p>Default is the system's default timeout.
 	 * @since 6.2
 	 * @see java.net.http.HttpRequest.Builder#timeout
@@ -126,21 +127,23 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(
 			HttpMethod method, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		JdkClientHttpRequest jdkClientHttpRequest = new JdkClientHttpRequest(method, uri, this.bufferFactory,
-				this.readTimeout);
+		JdkClientHttpRequest request =
+				new JdkClientHttpRequest(method, uri, this.bufferFactory, this.readTimeout);
 
-		return requestCallback.apply(jdkClientHttpRequest).then(Mono.defer(() -> {
-			HttpRequest httpRequest = jdkClientHttpRequest.getNativeRequest();
+		return requestCallback.apply(request).then(Mono.defer(() -> {
+			HttpRequest nativeRequest = request.getNativeRequest();
 
 			CompletableFuture<HttpResponse<Flow.Publisher<List<ByteBuffer>>>> future =
-					this.httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofPublisher());
+					this.httpClient.sendAsync(nativeRequest, HttpResponse.BodyHandlers.ofPublisher());
 
-			return Mono.fromCompletionStage(future)
-					.map(response -> {
-						List<String> headers = response.headers().allValues(HttpHeaders.SET_COOKIE);
-						return new JdkClientHttpResponse(response, this.bufferFactory, this.cookieParser.parse(headers));
-					});
+			return Mono.fromCompletionStage(future).map(response ->
+					new JdkClientHttpResponse(response, this.bufferFactory, parseCookies(response)));
 		}));
+	}
+
+	private MultiValueMap<String, ResponseCookie> parseCookies(HttpResponse<?> response) {
+		List<String> headers = response.headers().allValues(HttpHeaders.SET_COOKIE);
+		return this.cookieParser.parse(headers);
 	}
 
 }

@@ -47,7 +47,8 @@ import org.springframework.util.MultiValueMap;
  */
 class JdkClientHttpResponse extends AbstractClientHttpResponse {
 
-	public JdkClientHttpResponse(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response,
+	public JdkClientHttpResponse(
+			HttpResponse<Flow.Publisher<List<ByteBuffer>>> response,
 			DataBufferFactory bufferFactory, MultiValueMap<String, ResponseCookie> cookies) {
 
 		super(HttpStatusCode.valueOf(response.statusCode()),
@@ -63,7 +64,9 @@ class JdkClientHttpResponse extends AbstractClientHttpResponse {
 		return HttpHeaders.readOnlyHttpHeaders(multiValueMap);
 	}
 
-	private static Flux<DataBuffer> adaptBody(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
+	private static Flux<DataBuffer> adaptBody(
+			HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
+
 		return JdkFlowAdapter.flowPublisherToFlux(response.body())
 				.flatMapIterable(Function.identity())
 				.map(bufferFactory::wrap)

@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.reactive.client.ReactiveResponse;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpConnector} for the Jetty Reactive Streams HttpClient.
@@ -126,11 +128,15 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	private Mono<ClientHttpResponse> execute(JettyClientHttpRequest request) {
 		return Mono.fromDirect(request.toReactiveRequest()
-				.response((reactiveResponse, chunkPublisher) -> {
+				.response((response, chunkPublisher) -> {
 					Flux<DataBuffer> content = Flux.from(chunkPublisher).map(this.bufferFactory::wrap);
-					List<String> headers = reactiveResponse.getHeaders().getValuesList(HttpHeaders.SET_COOKIE);
-					return Mono.just(new JettyClientHttpResponse(reactiveResponse, content, this.cookieParser.parse(headers)));
+					return Mono.just(new JettyClientHttpResponse(response, content, parseCookies(response)));
 				}));
+	}
+
+	private MultiValueMap<String, ResponseCookie> parseCookies(ReactiveResponse response) {
+		List<String> headers = response.getHeaders().getValuesList(HttpHeaders.SET_COOKIE);
+		return this.cookieParser.parse(headers);
 	}
 
 }
