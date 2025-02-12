@@ -31,6 +31,7 @@ import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -222,10 +223,18 @@ class MockMvcExtensionsTests {
 	}
 
 	@Test
-	fun queryParameter() {
+	fun queryParam() {
 		val result = mockMvc.get("/") {
-			queryParam("foo", "bar")
-			queryParam("foo", "baz")
+			queryParam("foo", "bar", "baz")
+		}.andReturn()
+		assertThat(result.request.parameterMap["foo"]).containsExactly("bar", "baz")
+		assertThat(result.request.queryString).isEqualTo("foo=bar&foo=baz")
+	}
+
+	@Test
+	fun queryParams() {
+		val result = mockMvc.get("/") {
+			queryParams = LinkedMultiValueMap(mapOf("foo" to listOf("bar", "baz")))
 		}.andReturn()
 		assertThat(result.request.parameterMap["foo"]).containsExactly("bar", "baz")
 		assertThat(result.request.queryString).isEqualTo("foo=bar&foo=baz")
@@ -234,11 +243,41 @@ class MockMvcExtensionsTests {
 	@Test
 	fun formField() {
 		val result = mockMvc.post("/person") {
-			formField("name", "foo")
+			formField("name", "foo", "bar")
 			formField("someDouble", "1.23")
 		}.andReturn()
 		assertThat(result.request.contentType).startsWith(APPLICATION_FORM_URLENCODED_VALUE)
-		assertThat(result.request.contentAsString).isEqualTo("name=foo&someDouble=1.23")
+		assertThat(result.request.contentAsString).isEqualTo("name=foo&name=bar&someDouble=1.23")
+	}
+
+	@Test
+	fun formFields() {
+		val result = mockMvc.post("/person") {
+			formFields = LinkedMultiValueMap(mapOf("name" to listOf("foo", "bar"), "someDouble" to listOf("1.23")))
+		}.andReturn()
+		assertThat(result.request.contentType).startsWith(APPLICATION_FORM_URLENCODED_VALUE)
+		assertThat(result.request.contentAsString).isEqualTo("name=foo&name=bar&someDouble=1.23")
+	}
+
+	@Test
+	fun sessionAttr() {
+		val result = mockMvc.post("/person") {
+			sessionAttr("name", "foo")
+			sessionAttr("someDouble", 1.23)
+		}.andReturn()
+		val session = result.request.session!!
+		assertThat(session.getAttribute("name")).isEqualTo("foo")
+		assertThat(session.getAttribute("someDouble")).isEqualTo(1.23)
+	}
+
+	@Test
+	fun sessionAttrs() {
+		val result = mockMvc.post("/person") {
+			sessionAttrs = mapOf("name" to "foo", "someDouble" to 1.23)
+		}.andReturn()
+		val session = result.request.session!!
+		assertThat(session.getAttribute("name")).isEqualTo("foo")
+		assertThat(session.getAttribute("someDouble")).isEqualTo(1.23)
 	}
 
 	@RestController
