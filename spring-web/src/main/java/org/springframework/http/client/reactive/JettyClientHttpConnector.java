@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.List;
 import java.util.function.Function;
 
 import org.eclipse.jetty.client.HttpClient;
@@ -27,9 +28,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.JettyDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.support.DefaultHttpCookieParser;
-import org.springframework.http.support.HttpCookieParser;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -45,7 +46,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	private JettyDataBufferFactory bufferFactory = new JettyDataBufferFactory();
 
-	private HttpCookieParser httpCookieParser = new DefaultHttpCookieParser();
+	private ResponseCookie.Parser cookieParser = new JdkResponseCookieParser();
 
 
 	/**
@@ -88,11 +89,17 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Set the cookie parser to use.
+	 * Customize the parsing of response cookies.
+	 * <p>By default, {@link java.net.HttpCookie#parse(String)} is used, and
+	 * additionally the sameSite attribute is parsed and set.
+	 * @param parser the parser to use
+	 * @since 7.0
 	 */
-	public void setHttpCookieParser(HttpCookieParser httpCookieParser) {
-		this.httpCookieParser = httpCookieParser;
+	public void setCookieParser(ResponseCookie.Parser parser) {
+		Assert.notNull(parser, "ResponseCookie parser is required");
+		this.cookieParser = parser;
 	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -121,7 +128,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		return Mono.fromDirect(request.toReactiveRequest()
 				.response((reactiveResponse, chunkPublisher) -> {
 					Flux<DataBuffer> content = Flux.from(chunkPublisher).map(this.bufferFactory::wrap);
-					return Mono.just(new JettyClientHttpResponse(reactiveResponse, content, this.httpCookieParser));
+					List<String> headers = reactiveResponse.getHeaders().getValuesList(HttpHeaders.SET_COOKIE);
+					return Mono.just(new JettyClientHttpResponse(reactiveResponse, content, this.cookieParser.parse(headers)));
 				}));
 	}
 

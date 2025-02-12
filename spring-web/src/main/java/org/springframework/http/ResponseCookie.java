@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.http;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -235,6 +238,22 @@ public final class ResponseCookie extends HttpCookie {
 		return new DefaultResponseCookieBuilder(name, value, true);
 	}
 
+	/**
+	 * Factory method to obtain a builder that copies from {@link java.net.HttpCookie}.
+	 * @param cookie the source cookie to copy from
+	 * @return a builder to create the cookie with
+	 * @since 7.0
+	 */
+	public static ResponseCookieBuilder from(java.net.HttpCookie cookie) {
+		return ResponseCookie.from(cookie.getName(), cookie.getValue())
+				.domain(cookie.getDomain())
+				.httpOnly(cookie.isHttpOnly())
+				.maxAge(cookie.getMaxAge())
+				.path(cookie.getPath())
+				.secure(cookie.getSecure());
+	}
+
+
 
 	/**
 	 * A builder for a server-defined HttpCookie with attributes.
@@ -304,6 +323,32 @@ public final class ResponseCookie extends HttpCookie {
 		 * Create the HttpCookie.
 		 */
 		ResponseCookie build();
+	}
+
+
+	/**
+	 * Contract to parse {@code "Set-Cookie"} headers.
+	 * @since 7.0
+	 */
+	public interface Parser {
+
+		/**
+		 * Parse the given header.
+		 */
+		List<ResponseCookie> parse(String header);
+
+		/**
+		 * Convenience method to parse a list of headers into a {@link MultiValueMap}.
+		 */
+		default MultiValueMap<String, ResponseCookie> parse(List<String> headers) {
+			MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
+			for (String header : headers) {
+				for (ResponseCookie cookie : parse(header)) {
+					result.add(cookie.getName(), cookie);
+				}
+			}
+			return result;
+		}
 	}
 
 

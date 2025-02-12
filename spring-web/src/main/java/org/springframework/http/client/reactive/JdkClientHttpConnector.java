@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.support.DefaultHttpCookieParser;
-import org.springframework.http.support.HttpCookieParser;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -52,9 +52,9 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 
 	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
-	private HttpCookieParser httpCookieParser = new DefaultHttpCookieParser();
-
 	private @Nullable Duration readTimeout;
+
+	private ResponseCookie.Parser cookieParser = new JdkResponseCookieParser();
 
 
 	/**
@@ -110,13 +110,15 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Set the {@code HttpCookieParser} to be used in response parsing.
-	 * <p>Default is {@code DefaultHttpCookieParser} based on {@code java.net.HttpCookie} capabilities</p>
-	 * @param httpCookieParser
+	 * Customize the parsing of response cookies.
+	 * <p>By default, {@link java.net.HttpCookie#parse(String)} is used, and
+	 * additionally the sameSite attribute is parsed and set.
+	 * @param parser the parser to use
+	 * @since 7.0
 	 */
-	public void setHttpCookieParser(HttpCookieParser httpCookieParser) {
-		Assert.notNull(readTimeout, "httpCookieParser is required");
-		this.httpCookieParser = httpCookieParser;
+	public void setCookieParser(ResponseCookie.Parser parser) {
+		Assert.notNull(parser, "ResponseCookie parser is required");
+		this.cookieParser = parser;
 	}
 
 
@@ -134,7 +136,10 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 					this.httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofPublisher());
 
 			return Mono.fromCompletionStage(future)
-					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory, this.httpCookieParser));
+					.map(response -> {
+						List<String> headers = response.headers().allValues(HttpHeaders.SET_COOKIE);
+						return new JdkClientHttpResponse(response, this.bufferFactory, this.cookieParser.parse(headers));
+					});
 		}));
 	}
 

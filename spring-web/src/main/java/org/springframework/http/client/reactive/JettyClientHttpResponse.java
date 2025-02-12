@@ -16,9 +16,6 @@
 
 package org.springframework.http.client.reactive;
 
-import java.util.List;
-
-import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
 import reactor.core.publisher.Flux;
 
@@ -26,10 +23,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.support.HttpCookieParser;
 import org.springframework.http.support.JettyHeadersAdapter;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -42,26 +36,16 @@ import org.springframework.util.MultiValueMap;
  */
 class JettyClientHttpResponse extends AbstractClientHttpResponse {
 
-	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Flux<DataBuffer> content, HttpCookieParser httpCookieParser) {
+	public JettyClientHttpResponse(
+			ReactiveResponse reactiveResponse, Flux<DataBuffer> content,
+			MultiValueMap<String, ResponseCookie> cookies) {
 
-		super(HttpStatusCode.valueOf(reactiveResponse.getStatus()),
-				adaptHeaders(reactiveResponse),
-				adaptCookies(reactiveResponse, httpCookieParser),
-				content);
+		super(HttpStatusCode.valueOf(reactiveResponse.getStatus()), adaptHeaders(reactiveResponse), cookies, content);
 	}
 
 	private static HttpHeaders adaptHeaders(ReactiveResponse response) {
 		MultiValueMap<String, String> headers = new JettyHeadersAdapter(response.getHeaders());
 		return HttpHeaders.readOnlyHttpHeaders(headers);
-	}
-	private static MultiValueMap<String, ResponseCookie> adaptCookies(ReactiveResponse response, HttpCookieParser httpCookieParser) {
-		List<HttpField> cookieHeaders = response.getHeaders().getFields(HttpHeaders.SET_COOKIE);
-		MultiValueMap<String, ResponseCookie> result = cookieHeaders.stream()
-				.flatMap(header -> httpCookieParser.parse(header.getValue()))
-				.collect(LinkedMultiValueMap::new,
-						(cookies, cookie) -> cookies.add(cookie.getName(), cookie),
-						LinkedMultiValueMap::addAll);
-		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
 }
