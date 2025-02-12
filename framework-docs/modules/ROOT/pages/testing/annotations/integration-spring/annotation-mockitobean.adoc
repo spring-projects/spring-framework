@@ -1,9 +1,11 @@
 [[spring-testing-annotation-beanoverriding-mockitobean]]
 = `@MockitoBean` and `@MockitoSpyBean`
 
-`@MockitoBean` and `@MockitoSpyBean` can be used in test classes to override a bean in
-the test's `ApplicationContext` with a Mockito _mock_ or _spy_, respectively. In the
-latter case, an early instance of the original bean is captured and wrapped by the spy.
+{spring-framework-api}/test/context/bean/override/mockito/MockitoBean.html[`@MockitoBean`] and
+{spring-framework-api}/test/context/bean/override/mockito/MockitoSpyBean.html[`@MockitoSpyBean`]
+can be used in test classes to override a bean in the test's `ApplicationContext` with a
+Mockito _mock_ or _spy_, respectively. In the latter case, an early instance of the
+original bean is captured and wrapped by the spy.
 
 The annotations can be applied in the following ways.
 
