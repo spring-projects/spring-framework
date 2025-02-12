@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,6 +422,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	void varargsWithEnumArray() {
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
