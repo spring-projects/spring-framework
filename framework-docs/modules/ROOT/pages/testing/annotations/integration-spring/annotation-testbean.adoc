@@ -1,8 +1,9 @@
 [[spring-testing-annotation-beanoverriding-testbean]]
 = `@TestBean`
 
-`@TestBean` is used on a non-static field in a test class to override a specific bean in
-the test's `ApplicationContext` with an instance provided by a factory method.
+{spring-framework-api}/test/context/bean/override/convention/TestBean.html[`@TestBean`]
+is used on a non-static field in a test class to override a specific bean in the test's
+`ApplicationContext` with an instance provided by a factory method.
 
 The associated factory method name is derived from the annotated field's name, or the
 bean name if specified. The factory method must be `static`, accept no arguments, and
