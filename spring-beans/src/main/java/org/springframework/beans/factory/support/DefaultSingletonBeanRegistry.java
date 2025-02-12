@@ -301,25 +301,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					beforeSingletonCreation(beanName);
 				}
 				catch (BeanCurrentlyInCreationException ex) {
-					if (locked) {
-						this.lenientCreationLock.lock();
-						try {
-							while ((singletonObject = this.singletonObjects.get(beanName)) == null) {
-								if (!this.singletonsInLenientCreation.contains(beanName)) {
-									throw ex;
-								}
-								try {
-									this.lenientCreationFinished.await();
-								}
-								catch (InterruptedException ie) {
-									Thread.currentThread().interrupt();
-								}
+					this.lenientCreationLock.lock();
+					try {
+						while ((singletonObject = this.singletonObjects.get(beanName)) == null) {
+							if (!this.singletonsInLenientCreation.contains(beanName)) {
+								break;
 							}
-							return singletonObject;
+							try {
+								this.lenientCreationFinished.await();
+							}
+							catch (InterruptedException ie) {
+								Thread.currentThread().interrupt();
+							}
 						}
-						finally {
-							this.lenientCreationLock.unlock();
-						}
+					}
+					finally {
+						this.lenientCreationLock.unlock();
+					}
+					if (singletonObject != null) {
+						return singletonObject;
+					}
+					if (locked) {
+						throw ex;
 					}
 					// Try late locking for waiting on specific bean to be finished.
 					this.singletonLock.lock();
