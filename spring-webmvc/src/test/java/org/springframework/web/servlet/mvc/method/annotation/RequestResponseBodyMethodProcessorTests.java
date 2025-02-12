@@ -841,6 +841,8 @@ class RequestResponseBodyMethodProcessorTests {
 
 	private static class MyProblemDetail extends ProblemDetail {
 
+		private static final long serialVersionUID = 848059476504348430L;
+
 		public MyProblemDetail(HttpStatus status) {
 			super(status.value());
 		}

@@ -220,6 +220,8 @@ class ResponseBodyResultHandlerTests {
 
 	private static class MyProblemDetail extends ProblemDetail {
 
+		private static final long serialVersionUID = -3036911788793188054L;
+
 		public MyProblemDetail(HttpStatus status) {
 			super(status.value());
 		}

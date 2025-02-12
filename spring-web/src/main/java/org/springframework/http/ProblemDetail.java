@@ -68,6 +68,7 @@ public class ProblemDetail implements Serializable {
 
 	private @Nullable URI instance;
 
+	@SuppressWarnings("serial")
 	private @Nullable Map<String, Object> properties;
 
 
