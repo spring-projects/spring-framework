@@ -39,6 +39,9 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
 	optional("org.reactivestreams:reactive-streams")
 	optional("org.webjars:webjars-locator-lite")
+	testCompileOnly("com.google.code.findbugs:findbugs") {  // for groovy-templates
+		exclude group: "dom4j", module: "dom4j"
+	}
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-core")))
