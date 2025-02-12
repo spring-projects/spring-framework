@@ -48,7 +48,11 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 			new SpringAopBypassingVerificationStartedListener();
 
 
-	MockitoSpyBeanOverrideHandler(Field field, ResolvableType typeToSpy, MockitoSpyBean spyBean) {
+	MockitoSpyBeanOverrideHandler(ResolvableType typeToSpy, MockitoSpyBean spyBean) {
+		this(null, typeToSpy, spyBean);
+	}
+
+	MockitoSpyBeanOverrideHandler(@Nullable Field field, ResolvableType typeToSpy, MockitoSpyBean spyBean) {
 		super(field, typeToSpy, (StringUtils.hasText(spyBean.name()) ? spyBean.name() : null),
 				BeanOverrideStrategy.WRAP, spyBean.reset());
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");

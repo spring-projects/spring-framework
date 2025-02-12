@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -26,19 +27,40 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * {@code @MockitoSpyBean} is an annotation that can be applied to a non-static
- * field in a test class to override a bean in the test's
+ * {@code @MockitoSpyBean} is an annotation that can be used in test classes to
+ * override a bean in the test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * with a Mockito spy that wraps the original bean instance.
  *
- * <p>By default, the bean to spy is inferred from the type of the annotated
- * field. If multiple candidates exist, a {@code @Qualifier} annotation can be
- * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
- * the name of the annotated field will be used as a fallback qualifier.
- * Alternatively, you can explicitly specify a bean name to spy by setting the
- * {@link #value() value} or {@link #name() name} attribute. If a bean name is
- * specified, it is required that a target bean with that name has been previously
- * registered in the application context.
+ * <p>{@code @MockitoSpyBean} can be applied in the following ways.
+ * <ul>
+ * <li>On a non-static field in a test class or any of its superclasses.</li>
+ * <li>On a non-static field in an enclosing class for a {@code @Nested} test class
+ * or in any class in the type hierarchy or enclosing class hierarchy above the
+ * {@code @Nested} test class.</li>
+ * <li>At the type level on a test class or any superclass or implemented interface
+ * in the type hierarchy above the test class.</li>
+ * <li>At the type level on an enclosing class for a {@code @Nested} test class
+ * or on any class or interface in the type hierarchy or enclosing class hierarchy
+ * above the {@code @Nested} test class.</li>
+ * </ul>
+ *
+ * <p>When {@code @MockitoSpyBean} is declared on a field, the bean to spy is
+ * inferred from the type of the annotated field. If multiple candidates exist in
+ * the {@code ApplicationContext}, a {@code @Qualifier} annotation can be declared
+ * on the field to help disambiguate. In the absence of a {@code @Qualifier}
+ * annotation, the name of the annotated field will be used as a <em>fallback
+ * qualifier</em>. Alternatively, you can explicitly specify a bean name to spy
+ * by setting the {@link #value() value} or {@link #name() name} attribute. If a
+ * bean name is specified, it is required that a target bean with that name has
+ * been previously registered in the application context.
+ *
+ * <p>When {@code @MockitoSpyBean} is declared at the type level, the type of bean
+ * (or beans) to spy must be supplied via the {@link #types() types} attribute.
+ * If multiple candidates exist in the {@code ApplicationContext}, you can
+ * explicitly specify a bean name to spy by setting the {@link #name() name}
+ * attribute. Note, however, that the {@code types} attribute must contain a
+ * single type if an explicit bean {@code name} is configured.
  *
  * <p>A spy cannot be created for components which are known to the application
  * context but are not beans &mdash; for example, components
@@ -56,9 +78,17 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * (default visibility), or {@code private} depending on the needs or coding
  * practices of the project.
  *
- * <p>{@code @MockitoSpyBean} fields will be inherited from an enclosing test class by default.
- * See {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
+ * <p>{@code @MockitoSpyBean} fields and type-level {@code @MockitoSpyBean} declarations
+ * will be inherited from an enclosing test class by default. See
+ * {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
  * for details.
+ *
+ * <p>{@code @MockitoSpyBean} may be used as a <em>meta-annotation</em> to create
+ * custom <em>composed annotations</em> &mdash; for example, to define common spy
+ * configuration in a single annotation that can be reused across a test suite.
+ * {@code @MockitoSpyBean} can also be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation at the type level &mdash; for example, to spy on several beans by
+ * {@link #name() name}.
  *
  * @author Simon Baslé
  * @author Sam Brannen
@@ -66,14 +96,15 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * @see org.springframework.test.context.bean.override.mockito.MockitoBean @MockitoBean
  * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Repeatable(MockitoSpyBeans.class)
 @BeanOverride(MockitoBeanOverrideProcessor.class)
 public @interface MockitoSpyBean {
 
 	/**
-	 * Alias for {@link #name()}.
+	 * Alias for {@link #name() name}.
 	 * <p>Intended to be used when no other attributes are needed &mdash; for
 	 * example, {@code @MockitoSpyBean("customBeanName")}.
 	 * @see #name()
@@ -84,12 +115,26 @@ public @interface MockitoSpyBean {
 	/**
 	 * Name of the bean to spy.
 	 * <p>If left unspecified, the bean to spy is selected according to the
-	 * annotated field's type, taking qualifiers into account if necessary. See
-	 * the {@linkplain MockitoSpyBean class-level documentation} for details.
+	 * configured {@link #types() types} or the annotated field's type, taking
+	 * qualifiers into account if necessary. See the {@linkplain MockitoSpyBean
+	 * class-level documentation} for details.
 	 * @see #value()
 	 */
 	@AliasFor("value")
 	String name() default "";
+
+	/**
+	 * One or more types to spy.
+	 * <p>Defaults to none.
+	 * <p>Each type specified will result in a spy being created and registered
+	 * with the {@code ApplicationContext}.
+	 * <p>Types must be omitted when the annotation is used on a field.
+	 * <p>When {@code @MockitoSpyBean} also defines a {@link #name name}, this
+	 * attribute can only contain a single value.
+	 * @return the types to spy
+	 * @since 6.2.3
+	 */
+	Class<?>[] types() default {};
 
 	/**
 	 * The reset mode to apply to the spied bean.

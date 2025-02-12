@@ -31,10 +31,12 @@ public abstract class MockitoAssertions {
 
 	public static void assertIsMock(Object obj) {
 		assertThat(isMock(obj)).as("is a Mockito mock").isTrue();
+		assertIsNotSpy(obj);
 	}
 
 	public static void assertIsMock(Object obj, String message) {
 		assertThat(isMock(obj)).as("%s is a Mockito mock", message).isTrue();
+		assertIsNotSpy(obj, message);
 	}
 
 	public static void assertIsNotMock(Object obj) {

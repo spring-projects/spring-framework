@@ -1,34 +1,60 @@
 [[spring-testing-annotation-beanoverriding-mockitobean]]
 = `@MockitoBean` and `@MockitoSpyBean`
 
-`@MockitoBean` and `@MockitoSpyBean` are used on non-static fields in test classes to
-override beans in the test's `ApplicationContext` with a Mockito _mock_ or _spy_,
-respectively. In the latter case, an early instance of the original bean is captured and
-wrapped by the spy.
+`@MockitoBean` and `@MockitoSpyBean` can be used in test classes to override a bean in
+the test's `ApplicationContext` with a Mockito _mock_ or _spy_, respectively. In the
+latter case, an early instance of the original bean is captured and wrapped by the spy.
 
-By default, the annotated field's type is used to search for candidate beans to override.
-If multiple candidates match, `@Qualifier` can be provided to narrow the candidate to
-override. Alternatively, a candidate whose bean name matches the name of the field will
-match.
+The annotations can be applied in the following ways.
+
+* On a non-static field in a test class or any of its superclasses.
+* On a non-static field in an enclosing class for a `@Nested` test class or in any class
+  in the type hierarchy or enclosing class hierarchy above the `@Nested` test class.
+* At the type level on a test class or any superclass or implemented interface in the
+  type hierarchy above the test class.
+* At the type level on an enclosing class for a `@Nested` test class or on any class or
+  interface in the type hierarchy or enclosing class hierarchy above the `@Nested` test
+  class.
+
+When `@MockitoBean` or `@MockitoSpyBean` is declared on a field, the bean to mock or spy
+is inferred from the type of the annotated field. If multiple candidates exist in the
+`ApplicationContext`, a `@Qualifier` annotation can be declared on the field to help
+disambiguate. In the absence of a `@Qualifier` annotation, the name of the annotated
+field will be used as a _fallback qualifier_. Alternatively, you can explicitly specify a
+bean name to mock or spy by setting the `value` or `name` attribute in the annotation.
+
+When `@MockitoBean` or `@MockitoSpyBean` is declared at the type level, the type of bean
+(or beans) to mock or spy must be supplied via the `types` attribute in the annotation –
+for example, `@MockitoBean(types = {OrderService.class, UserService.class})`. If multiple
+candidates exist in the `ApplicationContext`, you can explicitly specify a bean name to
+mock or spy by setting the `name` attribute. Note, however, that the `types` attribute
+must contain a single type if an explicit bean `name` is configured – for example,
+`@MockitoBean(name = "ps1", types = PrintingService.class)`.
+
+To support reuse of mock configuration, `@MockitoBean` and `@MockitoSpyBean` may be used
+as meta-annotations to create custom _composed annotations_ – for example, to define
+common mock or spy configuration in a single annotation that can be reused across a test
+suite. `@MockitoBean` and `@MockitoSpyBean` can also be used as repeatable annotations at
+the type level — for example, to mock or spy several beans by name.
 
 [WARNING]
 ====
-Qualifiers, including the name of the field, are used to determine if a separate
+Qualifiers, including the name of a field, are used to determine if a separate
 `ApplicationContext` needs to be created. If you are using this feature to mock or spy
-the same bean in several test classes, make sure to name the field consistently to avoid
+the same bean in several test classes, make sure to name the fields consistently to avoid
 creating unnecessary contexts.
 ====
 
 Each annotation also defines Mockito-specific attributes to fine-tune the mocking behavior.
 
 The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE`
-xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
-If no existing bean matches, a new bean is created on the fly. However, you can switch to
-the `REPLACE` strategy by setting the `enforceOverride` attribute to `true`. See the
-following section for an example.
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy for bean overrides].
+If a corresponding bean does not exist, a new bean will be created. However, you can
+switch to the `REPLACE` strategy by setting the `enforceOverride` attribute to `true` –
+for example, `@MockitoBean(enforceOverride = true)`.
 
 The `@MockitoSpyBean` annotation uses the `WRAP`
-xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy],
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy],
 and the original instance is wrapped in a Mockito spy. This strategy requires that
 exactly one candidate bean exists.
 
@@ -56,15 +82,8 @@ or `private` depending on the needs or coding practices of the project.
 [[spring-testing-annotation-beanoverriding-mockitobean-examples]]
 == `@MockitoBean` Examples
 
-When using `@MockitoBean`, a new bean will be created if a corresponding bean does not
-exist. However, if you would like for the test to fail when a corresponding bean does not
-exist, you can set the `enforceOverride` attribute to `true` – for example,
-`@MockitoBean(enforceOverride = true)`.
-
-To use a by-name override rather than a by-type override, specify the `name` (or `value`)
-attribute of the annotation.
-
-The following example shows how to use the default behavior of the `@MockitoBean` annotation:
+The following example shows how to use the default behavior of the `@MockitoBean`
+annotation.
 
 [tabs]
 ======
@@ -81,7 +100,7 @@ Java::
 		// tests...
 	}
 ----
-<1> Replace the bean with type `CustomService` with a Mockito `mock`.
+<1> Replace the bean with type `CustomService` with a Mockito mock.
 ======
 
 In the example above, we are creating a mock for `CustomService`. If more than one bean
@@ -90,7 +109,8 @@ will fail, and you will need to provide a qualifier of some sort to identify whi
 `CustomService` beans you want to override. If no such bean exists, a bean will be
 created with an auto-generated bean name.
 
-The following example uses a by-name lookup, rather than a by-type lookup:
+The following example uses a by-name lookup, rather than a by-type lookup. If no bean
+named `service` exists, one is created.
 
 [tabs]
 ======
@@ -108,31 +128,8 @@ Java::
 
 	}
 ----
-<1> Replace the bean named `service` with a Mockito `mock`.
+<1> Replace the bean named `service` with a Mockito mock.
 ======
-
-If no bean named `service` exists, one is created.
-
-`@MockitoBean` can also be used at the type level:
-
-- on a test class or any superclass or implemented interface in the type hierarchy above
-  the test class
-- on an enclosing class for a `@Nested` test class or on any class or interface in the
-  type hierarchy or enclosing class hierarchy above the `@Nested` test class
-
-When `@MockitoBean` is declared at the type level, the type of bean (or beans) to mock
-must be supplied via the `types` attribute – for example,
-`@MockitoBean(types = {OrderService.class, UserService.class})`. If multiple candidates
-exist in the application context, you can explicitly specify a bean name to mock by
-setting the `name` attribute. Note, however, that the `types` attribute must contain a
-single type if an explicit bean `name` is configured – for example,
-`@MockitoBean(name = "ps1", types = PrintingService.class)`.
-
-To support reuse of mock configuration, `@MockitoBean` may be used as a meta-annotation
-to create custom _composed annotations_ — for example, to define common mock
-configuration in a single annotation that can be reused across a test suite.
-`@MockitoBean` can also be used as a repeatable annotation at the type level — for
-example, to mock several beans by name.
 
 The following `@SharedMocks` annotation registers two mocks by-type and one mock by-name.
 
@@ -191,7 +188,7 @@ APIs.
 == `@MockitoSpyBean` Examples
 
 The following example shows how to use the default behavior of the `@MockitoSpyBean`
-annotation:
+annotation.
 
 [tabs]
 ======
@@ -208,7 +205,7 @@ Java::
 		// tests...
 	}
 ----
-<1> Wrap the bean with type `CustomService` with a Mockito `spy`.
+<1> Wrap the bean with type `CustomService` with a Mockito spy.
 ======
 
 In the example above, we are wrapping the bean with type `CustomService`. If more than
@@ -216,7 +213,7 @@ one bean of that type exists, the bean named `customService` is considered. Othe
 the test will fail, and you will need to provide a qualifier of some sort to identify
 which of the `CustomService` beans you want to spy.
 
-The following example uses a by-name lookup, rather than a by-type lookup:
+The following example uses a by-name lookup, rather than a by-type lookup.
 
 [tabs]
 ======
@@ -233,5 +230,58 @@ Java::
 		// tests...
 	}
 ----
-<1> Wrap the bean named `service` with a Mockito `spy`.
+<1> Wrap the bean named `service` with a Mockito spy.
 ======
+
+The following `@SharedSpies` annotation registers two spies by-type and one spy by-name.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@MockitoSpyBean(types = {OrderService.class, UserService.class}) // <1>
+	@MockitoSpyBean(name = "ps1", types = PrintingService.class) // <2>
+	public @interface SharedSpies {
+	}
+----
+<1> Register `OrderService` and `UserService` spies by-type.
+<2> Register `PrintingService` spy by-name.
+======
+
+The following demonstrates how `@SharedSpies` can be used on a test class.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	@SharedSpies // <1>
+	class BeanOverrideTests {
+
+		@Autowired OrderService orderService; // <2>
+
+		@Autowired UserService userService; // <2>
+
+		@Autowired PrintingService ps1; // <2>
+
+		// Inject other components that rely on the spies.
+
+		@Test
+		void testThatDependsOnMocks() {
+			// ...
+		}
+	}
+----
+<1> Register common spies via the custom `@SharedSpies` annotation.
+<2> Optionally inject spies to _stub_ or _verify_ them.
+======
+
+TIP: The spies can also be injected into `@Configuration` classes or other test-related
+components in the `ApplicationContext` in order to configure them with Mockito's stubbing
+APIs.

@@ -45,8 +45,10 @@ class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 					"The @MockitoBean 'types' attribute must be omitted when declared on a field");
 			return new MockitoBeanOverrideHandler(field, ResolvableType.forField(field, testClass), mockitoBean);
 		}
-		else if (overrideAnnotation instanceof MockitoSpyBean spyBean) {
-			return new MockitoSpyBeanOverrideHandler(field, ResolvableType.forField(field, testClass), spyBean);
+		else if (overrideAnnotation instanceof MockitoSpyBean mockitoSpyBean) {
+			Assert.state(mockitoSpyBean.types().length == 0,
+					"The @MockitoSpyBean 'types' attribute must be omitted when declared on a field");
+			return new MockitoSpyBeanOverrideHandler(field, ResolvableType.forField(field, testClass), mockitoSpyBean);
 		}
 		throw new IllegalStateException("""
 				Invalid annotation passed to MockitoBeanOverrideProcessor: \
@@ -56,21 +58,34 @@ class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
 	public List<BeanOverrideHandler> createHandlers(Annotation overrideAnnotation, Class<?> testClass) {
-		if (!(overrideAnnotation instanceof MockitoBean mockitoBean)) {
-			throw new IllegalStateException("""
-					Invalid annotation passed to MockitoBeanOverrideProcessor: \
-					expected @MockitoBean on test class """ + testClass.getName());
+		if (overrideAnnotation instanceof MockitoBean mockitoBean) {
+			Class<?>[] types = mockitoBean.types();
+			Assert.state(types.length > 0,
+					"The @MockitoBean 'types' attribute must not be empty when declared on a class");
+			Assert.state(mockitoBean.name().isEmpty() || types.length == 1,
+					"The @MockitoBean 'name' attribute cannot be used when mocking multiple types");
+			List<BeanOverrideHandler> handlers = new ArrayList<>();
+			for (Class<?> type : types) {
+				handlers.add(new MockitoBeanOverrideHandler(ResolvableType.forClass(type), mockitoBean));
+			}
+			return handlers;
 		}
-		Class<?>[] types = mockitoBean.types();
-		Assert.state(types.length > 0,
-				"The @MockitoBean 'types' attribute must not be empty when declared on a class");
-		Assert.state(mockitoBean.name().isEmpty() || types.length == 1,
-				"The @MockitoBean 'name' attribute cannot be used when mocking multiple types");
-		List<BeanOverrideHandler> handlers = new ArrayList<>();
-		for (Class<?> type : types) {
-			handlers.add(new MockitoBeanOverrideHandler(ResolvableType.forClass(type), mockitoBean));
+		else if (overrideAnnotation instanceof MockitoSpyBean mockitoSpyBean) {
+			Class<?>[] types = mockitoSpyBean.types();
+			Assert.state(types.length > 0,
+					"The @MockitoSpyBean 'types' attribute must not be empty when declared on a class");
+			Assert.state(mockitoSpyBean.name().isEmpty() || types.length == 1,
+					"The @MockitoSpyBean 'name' attribute cannot be used when mocking multiple types");
+			List<BeanOverrideHandler> handlers = new ArrayList<>();
+			for (Class<?> type : types) {
+				handlers.add(new MockitoSpyBeanOverrideHandler(ResolvableType.forClass(type), mockitoSpyBean));
+			}
+			return handlers;
 		}
-		return handlers;
+		throw new IllegalStateException("""
+				Invalid annotation passed to MockitoBeanOverrideProcessor: \
+				expected either @MockitoBean or @MockitoSpyBean on test class %s"""
+					.formatted(testClass.getName()));
 	}
 
 }
