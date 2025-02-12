@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -100,6 +101,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/** Names of beans currently excluded from in creation checks. */
 	private final Set<String> inCreationCheckExclusions = ConcurrentHashMap.newKeySet(16);
+
+	/** Specific lock for lenient creation tracking. */
+	private final Lock lenientCreationLock = new ReentrantLock();
+
+	/** Specific lock condition for lenient creation tracking. */
+	private final Condition lenientCreationFinished = this.lenientCreationLock.newCondition();
+
+	/** Names of beans that are currently in lenient creation. */
+	private final Set<String> singletonsInLenientCreation = new HashSet<>();
 
 	/** Flag that indicates whether we're currently within destroySingletons. */
 	private volatile boolean singletonsCurrentlyInDestruction = false;
@@ -241,6 +251,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Boolean lockFlag = isCurrentThreadAllowedToHoldSingletonLock();
 		boolean acquireLock = !Boolean.FALSE.equals(lockFlag);
 		boolean locked = (acquireLock && this.singletonLock.tryLock());
+		boolean lenient = false;
 		try {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
@@ -254,6 +265,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 							logger.info("Creating singleton bean '" + beanName + "' in thread \"" +
 									Thread.currentThread().getName() + "\" while other thread holds " +
 									"singleton lock for other beans " + this.singletonsCurrentlyInCreation);
+						}
+						lenient = true;
+						this.lenientCreationLock.lock();
+						try {
+							this.singletonsInLenientCreation.add(beanName);
+						}
+						finally {
+							this.lenientCreationLock.unlock();
 						}
 					}
 					else {
@@ -283,7 +302,24 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				}
 				catch (BeanCurrentlyInCreationException ex) {
 					if (locked) {
-						throw ex;
+						this.lenientCreationLock.lock();
+						try {
+							while ((singletonObject = this.singletonObjects.get(beanName)) == null) {
+								if (!this.singletonsInLenientCreation.contains(beanName)) {
+									throw ex;
+								}
+								try {
+									this.lenientCreationFinished.await();
+								}
+								catch (InterruptedException ie) {
+									Thread.currentThread().interrupt();
+								}
+							}
+							return singletonObject;
+						}
+						finally {
+							this.lenientCreationLock.unlock();
+						}
 					}
 					// Try late locking for waiting on specific bean to be finished.
 					this.singletonLock.lock();
@@ -336,6 +372,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		finally {
 			if (locked) {
 				this.singletonLock.unlock();
+			}
+			if (lenient) {
+				this.lenientCreationLock.lock();
+				try {
+					this.singletonsInLenientCreation.remove(beanName);
+					this.lenientCreationFinished.signalAll();
+				}
+				finally {
+					this.lenientCreationLock.unlock();
+				}
 			}
 		}
 	}
