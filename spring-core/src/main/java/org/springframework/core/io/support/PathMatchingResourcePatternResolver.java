@@ -840,8 +840,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
 				closeJarFile = !jarCon.getUseCaches();
 			}
-			catch (FileNotFoundException ex) {
-				// Happens in case of cached root directory without specific subdirectory present.
+			catch (ZipException | FileNotFoundException ex) {
+				// Happens in case of a non-jar file or in case of a cached root directory
+				// without specific subdirectory present, respectively.
 				return Collections.emptySet();
 			}
 		}
