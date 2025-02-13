@@ -142,7 +142,7 @@ dependencies {
 		api("org.seleniumhq.selenium:selenium-java:4.26.0")
 		api("org.skyscreamer:jsonassert:1.5.3")
 		api("org.slf4j:slf4j-api:2.0.16")
-		api("org.testng:testng:7.10.2")
+		api("org.testng:testng:7.11.0")
 		api("org.webjars:underscorejs:1.8.3")
 		api("org.webjars:webjars-locator-core:0.55")
 		api("org.webjars:webjars-locator-lite:1.0.0")
