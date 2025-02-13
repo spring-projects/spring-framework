@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,19 +44,20 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * {@code TestContextAnnotationUtils} is a collection of utility methods that
- * complements the standard support already available in {@link AnnotationUtils}
- * and {@link AnnotatedElementUtils}, while transparently honoring
- * {@link NestedTestConfiguration @NestedTestConfiguration} semantics.
+ * complements the standard support already available in {@link MergedAnnotations},
+ * {@link AnnotationUtils}, and {@link AnnotatedElementUtils}, while transparently
+ * honoring {@link NestedTestConfiguration @NestedTestConfiguration} semantics.
  *
  * <p>Mainly for internal use within the <em>Spring TestContext Framework</em>
  * but also supported for third-party integrations with the TestContext framework.
  *
- * <p>Whereas {@code AnnotationUtils} and {@code AnnotatedElementUtils} provide
- * utilities for <em>getting</em> or <em>finding</em> annotations,
- * {@code TestContextAnnotationUtils} goes a step further by providing support
- * for determining the <em>root class</em> on which an annotation is declared,
- * either directly or indirectly via a <em>composed annotation</em>. This
- * additional information is encapsulated in an {@link AnnotationDescriptor}.
+ * <p>Whereas {@code MergedAnnotations}, {@code AnnotationUtils} and
+ * {@code AnnotatedElementUtils} provide utilities for <em>getting</em> or
+ * <em>finding</em> annotations, {@code TestContextAnnotationUtils} goes a step
+ * further by providing support for determining the <em>root class</em> on which
+ * an annotation is declared, either directly or indirectly via a
+ * <em>composed annotation</em>. This additional information is encapsulated in
+ * an {@link AnnotationDescriptor}.
  *
  * <p>The additional information provided by an {@code AnnotationDescriptor} is
  * required by the <em>Spring TestContext Framework</em> in order to be able to
@@ -68,7 +69,11 @@ import org.springframework.util.ObjectUtils;
  * example, {@link ContextConfiguration#inheritLocations}.
  *
  * @author Sam Brannen
- * @since 5.3, though originally since 4.0 as {@code org.springframework.test.util.MetaAnnotationUtils}
+ * @since 5.3
+ * @see MergedAnnotations
+ * @see MergedAnnotations.Search
+ * @see MergedAnnotations.Search#withEnclosingClasses(Predicate)
+ * @see #searchEnclosingClass(Class)
  * @see AnnotationUtils
  * @see AnnotatedElementUtils
  * @see AnnotationDescriptor

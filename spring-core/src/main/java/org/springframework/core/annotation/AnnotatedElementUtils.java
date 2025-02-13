@@ -37,8 +37,12 @@ import org.springframework.util.MultiValueMap;
  *
  * <p>{@code AnnotatedElementUtils} defines the public API for Spring's
  * meta-annotation programming model with support for <em>annotation attribute
- * overrides</em>. If you do not need support for annotation attribute
- * overrides, consider using {@link AnnotationUtils} instead.
+ * overrides</em> and {@link AliasFor @AliasFor}. Note, however, that
+ * {@code AnnotatedElementUtils} is effectively a facade for the
+ * {@link MergedAnnotations} API. For fine-grained support consider using the
+ * {@code MergedAnnotations} API directly. If you do not need support for
+ * annotation attribute overrides, {@code @AliasFor}, or merged annotations,
+ * consider using {@link AnnotationUtils} instead.
  *
  * <p>Note that the features of this class are not provided by the JDK's
  * introspection facilities themselves.
@@ -88,6 +92,7 @@ import org.springframework.util.MultiValueMap;
  * @since 4.0
  * @see AliasFor
  * @see AnnotationAttributes
+ * @see MergedAnnotations
  * @see AnnotationUtils
  * @see BridgeMethodResolver
  */
