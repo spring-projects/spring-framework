@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  * <h3>Terminology</h3>
  * The terms <em>directly present</em>, <em>indirectly present</em>, and
  * <em>present</em> have the same meanings as defined in the class-level
- * javadoc for {@link AnnotatedElement} (in Java 8).
+ * javadoc for {@link AnnotatedElement}.
  *
  * <p>An annotation is <em>meta-present</em> on an element if the annotation
  * is declared as a meta-annotation on some other annotation which is
@@ -73,7 +73,8 @@ import org.springframework.util.StringUtils;
  * provide support for finding annotations used as meta-annotations. Consult the
  * javadoc for each method in this class for details. For fine-grained support for
  * meta-annotations with <em>attribute overrides</em> in <em>composed annotations</em>,
- * consider using {@link AnnotatedElementUtils}'s more specific methods instead.
+ * consider using the {@link MergedAnnotations} API directly or the more specific
+ * methods in {@link AnnotatedElementUtils} instead.
  *
  * <h3>Attribute Aliases</h3>
  * <p>All public methods in this class that return annotations, arrays of
@@ -97,6 +98,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  * @see AliasFor
  * @see AnnotationAttributes
+ * @see MergedAnnotations
  * @see AnnotatedElementUtils
  * @see BridgeMethodResolver
  * @see java.lang.reflect.AnnotatedElement#getAnnotations()
