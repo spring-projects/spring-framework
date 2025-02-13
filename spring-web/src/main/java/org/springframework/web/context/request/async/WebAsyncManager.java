@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request.async;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,7 +35,6 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
-import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -343,7 +343,7 @@ public final class WebAsyncManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest) + ": " + ex);
 			}
-			if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+			if (ex instanceof IOException) {
 				ex = new AsyncRequestNotUsableException(
 						"Servlet container error notification for disconnected client", ex);
 			}
@@ -439,7 +439,7 @@ public final class WebAsyncManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest));
 			}
-			if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+			if (ex instanceof IOException) {
 				ex = new AsyncRequestNotUsableException(
 						"Servlet container error notification for disconnected client", ex);
 			}
