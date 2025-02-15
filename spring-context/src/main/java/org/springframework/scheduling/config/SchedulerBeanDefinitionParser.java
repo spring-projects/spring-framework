@@ -18,6 +18,7 @@ package org.springframework.scheduling.config;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.util.StringUtils;
@@ -37,6 +38,7 @@ public class SchedulerBeanDefinitionParser extends AbstractSingleBeanDefinitionP
 
 	@Override
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
+		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		String poolSize = element.getAttribute("pool-size");
 		if (StringUtils.hasText(poolSize)) {
 			builder.addPropertyValue("poolSize", poolSize);
