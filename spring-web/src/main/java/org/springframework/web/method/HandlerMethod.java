@@ -181,6 +181,7 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * validation annotations.
 	 * <p>Subclasses can override this to ensure that a HandlerMethod is of the
 	 * same type if re-created.
+	 * @since 6.2.3
 	 */
 	protected HandlerMethod(HandlerMethod handlerMethod, @Nullable Object handler, boolean initValidateFlags) {
 		super(handlerMethod);
