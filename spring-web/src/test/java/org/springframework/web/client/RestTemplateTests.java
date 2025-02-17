@@ -108,13 +108,15 @@ class RestTemplateTests {
 		template.setErrorHandler(errorHandler);
 	}
 
-	@Test // gh-29008
-	void defaultMessageConvertersWithKotlinSerialization() {
+	@Test
+	void defaultMessageConvertersWithoutKotlinSerialization() {
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
 		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(
-			KotlinSerializationJsonHttpMessageConverter.class,
 			MappingJackson2HttpMessageConverter.class
+		);
+		assertThat(httpMessageConverters).extracting("class").doesNotContain(
+				KotlinSerializationJsonHttpMessageConverter.class
 		);
 	}
 

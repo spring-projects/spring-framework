@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 			addPartConverter(new Jaxb2RootElementHttpMessageConverter());
 		}
 
-		if (kotlinSerializationJsonPresent) {
-			addPartConverter(new KotlinSerializationJsonHttpMessageConverter());
-		}
 		if (jackson2Present) {
 			addPartConverter(new MappingJackson2HttpMessageConverter());
 		}
@@ -98,6 +95,9 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		}
 		else if (jsonbPresent) {
 			addPartConverter(new JsonbHttpMessageConverter());
+		}
+		else if (kotlinSerializationJsonPresent) {
+			addPartConverter(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
 		if (jackson2XmlPresent) {
@@ -111,13 +111,12 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		if (jackson2CborPresent) {
 			addPartConverter(new MappingJackson2CborHttpMessageConverter());
 		}
+		else if (kotlinSerializationCborPresent) {
+			addPartConverter(new KotlinSerializationCborHttpMessageConverter());
+		}
 
 		if (jackson2YamlPresent) {
 			addPartConverter(new MappingJackson2YamlHttpMessageConverter());
-		}
-
-		if (kotlinSerializationCborPresent) {
-			addPartConverter(new KotlinSerializationCborHttpMessageConverter());
 		}
 
 		if (kotlinSerializationProtobufPresent) {

@@ -411,10 +411,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(this.protobufDecoder != null ?
 					(ProtobufDecoder) this.protobufDecoder : new ProtobufDecoder()));
 		}
-		else if (kotlinSerializationProtobufPresent) {
-			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(this.kotlinSerializationProtobufDecoder != null ?
-					(KotlinSerializationProtobufDecoder) this.kotlinSerializationProtobufDecoder : new KotlinSerializationProtobufDecoder()));
-		}
 		addCodec(this.typedReaders, new FormHttpMessageReader());
 		if (this.multipartReader != null) {
 			addCodec(this.typedReaders, this.multipartReader);

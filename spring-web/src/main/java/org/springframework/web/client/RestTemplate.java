@@ -204,9 +204,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
 		}
 
-		if (kotlinSerializationJsonPresent) {
-			this.messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
-		}
 		if (jackson2Present) {
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}
@@ -215,6 +212,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		else if (jsonbPresent) {
 			this.messageConverters.add(new JsonbHttpMessageConverter());
+		}
+		else if (kotlinSerializationJsonPresent) {
+			this.messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
 		if (jackson2SmilePresent) {
