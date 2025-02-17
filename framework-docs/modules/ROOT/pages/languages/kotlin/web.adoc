@@ -79,14 +79,9 @@ mockMvc.get("/person/{name}", "Lee") {
 == Kotlin multiplatform serialization
 
 {kotlin-github-org}/kotlinx.serialization[Kotlin multiplatform serialization] is
-supported in Spring MVC, Spring WebFlux and Spring Messaging (RSocket). The builtin support currently targets CBOR, JSON, and ProtoBuf formats.
+supported in Spring MVC, Spring WebFlux and Spring Messaging (RSocket). The builtin support currently targets CBOR, JSON,
+and ProtoBuf formats.
 
-To enable it, follow {kotlin-github-org}/kotlinx.serialization#setup[those instructions] to add the related dependency and plugin.
-With Spring MVC and WebFlux, both Kotlin serialization and Jackson will be configured by default if they are in the classpath since
-Kotlin serialization is designed to serialize only Kotlin classes annotated with `@Serializable`.
-With Spring Messaging (RSocket), make sure that neither Jackson, GSON or JSONB are in the classpath if you want automatic configuration,
-if Jackson is needed configure `KotlinSerializationJsonMessageConverter` manually.
-
-
-
-
+To enable it, follow {kotlin-github-org}/kotlinx.serialization#setup[those instructions] to add the related dependencies
+and plugin. With Spring MVC and WebFlux, Kotlin serialization is configured by default if it is in the classpath and
+other variants like Jackson are not. If needed, configure the converters or codecs manually.
