@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import org.springframework.http.converter.KotlinSerializationBinaryHttpMessageCo
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
  * that can read and write Protocol Buffers using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
- *
- * <p>This converter can be used to bind {@code @Serializable} Kotlin classes,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
- * is not supported.
  * It supports {@code application/x-protobuf}, {@code application/octet-stream}, and {@code application/vnd.google.protobuf}.
+ *
+ * <p>As of Spring Framework 7.0,
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
+ * is supported.
  *
  * @author Iain Henderson
  * @since 6.0

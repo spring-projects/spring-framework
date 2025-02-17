@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@ package org.springframework.http.codec;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KType;
@@ -31,8 +29,6 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
-import kotlinx.serialization.descriptors.PolymorphicKind;
-import kotlinx.serialization.descriptors.SerialDescriptor;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.KotlinDetector;
@@ -45,6 +41,10 @@ import org.springframework.util.MimeType;
 /**
  * Base class providing support methods for encoding and decoding with Kotlin
  * serialization.
+ *
+ * <p>As of Spring Framework 7.0,
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
+ * is supported.
  *
  * @author Sebastien Deleuze
  * @author Iain Henderson
@@ -143,9 +143,6 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 						catch (IllegalArgumentException ignored) {
 						}
 						if (serializer != null) {
-							if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-								return null;
-							}
 							this.kTypeSerializerCache.put(type, serializer);
 						}
 					}
@@ -162,27 +159,9 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 			catch (IllegalArgumentException ignored) {
 			}
 			if (serializer != null) {
-				if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-					return null;
-				}
 				this.typeSerializerCache.put(type, serializer);
 			}
 		}
 		return serializer;
 	}
-
-	private static boolean hasPolymorphism(SerialDescriptor descriptor, Set<String> alreadyProcessed) {
-		alreadyProcessed.add(descriptor.getSerialName());
-		if (descriptor.getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
-			return true;
-		}
-		for (int i = 0 ; i < descriptor.getElementsCount() ; i++) {
-			SerialDescriptor elementDescriptor = descriptor.getElementDescriptor(i);
-			if (!alreadyProcessed.contains(elementDescriptor.getSerialName()) && hasPolymorphism(elementDescriptor, alreadyProcessed)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 }

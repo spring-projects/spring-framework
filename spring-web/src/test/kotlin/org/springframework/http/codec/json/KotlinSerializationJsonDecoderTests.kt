@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.http.codec.json
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
@@ -24,11 +26,11 @@ import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.core.codec.DecodingException
 import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.testfixture.codec.AbstractDecoderTests
 import org.springframework.http.MediaType
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 import reactor.test.StepVerifier.FirstStep
 import java.math.BigDecimal
 import java.nio.charset.Charset
@@ -58,11 +60,13 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 				MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue()
 
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, OrderedImpl::class.java), MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
-		assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClass(OrderedImpl::class.java), MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClass(BigDecimal::class.java), MediaType.APPLICATION_JSON)).isFalse()
 
@@ -82,6 +86,31 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 				.expectComplete()
 				.verify()
 		}, null, null)
+	}
+
+	@Test
+	@Suppress("UNCHECKED_CAST")
+	fun polymorphicDecode() {
+		val json = Json {
+			serializersModule = SerializersModule {
+				polymorphic(ISimpleSerializableBean::class, SimpleSerializableBean::class, SimpleSerializableBean.serializer())
+			}
+		}
+		val customDecoder = KotlinSerializationJsonDecoder(json)
+		val input = Flux.concat(
+			stringBuffer("{\"type\":\"org.springframework.http.codec.json.KotlinSerializationJsonDecoderTests.SimpleSerializableBean\",\"name\":\"foo\"}\n"),
+			stringBuffer("{\"type\":\"org.springframework.http.codec.json.KotlinSerializationJsonDecoderTests.SimpleSerializableBean\",\"name\":\"bar\"}\n"),
+			stringBuffer("{\"type\":\"org.springframework.http.codec.json.KotlinSerializationJsonDecoderTests.SimpleSerializableBean\",\"name\":\"baz\"}\n")
+		)
+
+		val resolvableType = ResolvableType.forClass(ISimpleSerializableBean::class.java)
+		val result: Flux<ISimpleSerializableBean> = customDecoder.decode(input, resolvableType, null, null) as Flux<ISimpleSerializableBean>
+		val step: FirstStep<ISimpleSerializableBean> = StepVerifier.create(result)
+
+		step.expectNext(SimpleSerializableBean("foo"))
+			.expectNext(SimpleSerializableBean("bar"))
+			.expectNext(SimpleSerializableBean("baz"))
+			.verifyComplete()
 	}
 
 	@Test
@@ -187,5 +216,18 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
 
 	fun handleMapWithNullable(map: Map<String, String?>) = map
+
+	interface ISimpleSerializableBean {
+		val name: String
+	}
+
+	@Serializable
+	data class SimpleSerializableBean(override val name: String): ISimpleSerializableBean
+
+	class OrderedImpl : Ordered {
+		override fun getOrder(): Int {
+			return 0
+		}
+	}
 
 }

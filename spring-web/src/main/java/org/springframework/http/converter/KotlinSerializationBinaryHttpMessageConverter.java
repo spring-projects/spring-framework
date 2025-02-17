@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,10 @@ import org.springframework.util.StreamUtils;
 /**
  * Abstract base class for {@link HttpMessageConverter} implementations that
  * defer to Kotlin {@linkplain BinaryFormat binary serializers}.
+ *
+ * <p>As of Spring Framework 7.0,
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
+ * is supported.
  *
  * @author Andreas Ahlenstorf
  * @author Sebastien Deleuze

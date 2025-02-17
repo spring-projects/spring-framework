@@ -41,7 +41,6 @@ import kotlin.reflect.typeOf
  * @author Sebastien Deleuze
  * @author Iain Henderson
  */
-@Suppress("UsePropertyAccessSyntax")
 @ExperimentalSerializationApi
 class KotlinSerializationProtobufHttpMessageConverterTests {
 
@@ -68,18 +67,20 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 			assertThat(converter.canRead(String::class.java, mimeType)).isTrue()
 			assertThat(converter.canRead(NotSerializableBean::class.java, mimeType)).isFalse()
 
-			assertThat(converter.canRead(Map::class.java, mimeType)).isFalse()
+			assertThat(converter.canRead(Map::class.java, mimeType)).isTrue()
 			assertThat(converter.canRead(resolvableTypeOf<Map<String, SerializableBean>>(), mimeType)).isTrue()
-			assertThat(converter.canRead(List::class.java, mimeType)).isFalse()
+			assertThat(converter.canRead(List::class.java, mimeType)).isTrue()
 			assertThat(converter.canRead(resolvableTypeOf<List<SerializableBean>>(), mimeType)).isTrue()
-			assertThat(converter.canRead(Set::class.java, mimeType)).isFalse()
+			assertThat(converter.canRead(Set::class.java, mimeType)).isTrue()
 			assertThat(converter.canRead(resolvableTypeOf<Set<SerializableBean>>(), mimeType)).isTrue()
 
 			assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), mimeType)).isTrue()
 			assertThat(converter.canRead(resolvableTypeOf<ArrayList<Int>>(),mimeType)).isTrue()
 
-			assertThat(converter.canRead(resolvableTypeOf<Ordered>(), mimeType)).isFalse()
-			assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), mimeType)).isFalse()
+			assertThat(converter.canRead(resolvableTypeOf<Ordered>(), mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<OrderedImpl>(), mimeType)).isFalse()
+			assertThat(converter.canRead(resolvableTypeOf<List<OrderedImpl>>(), mimeType)).isFalse()
 		}
 		assertThat(converter.canRead(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), MediaType.APPLICATION_JSON)).isFalse()
@@ -92,17 +93,18 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 			assertThat(converter.canWrite(String::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(NotSerializableBean::class.java, mimeType)).isFalse()
 
-			assertThat(converter.canWrite(Map::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(Map::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(resolvableTypeOf<Map<String, SerializableBean>>(), Map::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(List::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(List::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(resolvableTypeOf<List<SerializableBean>>(), List::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(Set::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(Set::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(resolvableTypeOf<Set<SerializableBean>>(), Set::class.java, mimeType)).isTrue()
 
 			assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, mimeType)).isTrue()
 			assertThat(converter.canWrite(resolvableTypeOf<ArrayList<Int>>(), List::class.java, mimeType)).isTrue()
 
-			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), OrderedImpl::class.java, mimeType)).isTrue()
 		}
 
 		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
@@ -241,6 +243,12 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 		val base = object : TypeBase<T>() {}
 		val superType = base::class.java.genericSuperclass!!
 		return ResolvableType.forType((superType as ParameterizedType).actualTypeArguments.first()!!)
+	}
+
+	class OrderedImpl : Ordered {
+		override fun getOrder(): Int {
+			return 0
+		}
 	}
 
 }

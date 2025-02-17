@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@
 package org.springframework.http.codec.json
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.testfixture.codec.AbstractEncoderTests
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
@@ -53,11 +56,9 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 				MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue()
 
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
-		assertThat(encoder.canEncode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
 
 		assertThat(encoder.canEncode(pojoType, MediaType.APPLICATION_NDJSON)).isTrue()
 	}
@@ -117,6 +118,28 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 	}
 
 	@Test
+	fun encodePolymorphicStream() {
+		val json = Json {
+			serializersModule = SerializersModule {
+				polymorphic(ISimpleSerializableBean::class, SimpleSerializableBean::class, SimpleSerializableBean.serializer())
+			}
+		}
+		val customEncoder = KotlinSerializationJsonEncoder(json)
+		val input = Flux<ISimpleSerializableBean>.just(
+			SimpleSerializableBean("foo"),
+			SimpleSerializableBean("bar"),
+			SimpleSerializableBean("baz")
+		)
+		val result = customEncoder.encode(input, this.bufferFactory, ResolvableType.forClass(ISimpleSerializableBean::class.java), MediaType.APPLICATION_NDJSON, null)
+		val step = StepVerifier.create<DataBuffer>(result)
+		step
+			.consumeNextWith { expectString("{\"type\":\"org.springframework.http.codec.json.KotlinSerializationJsonEncoderTests.SimpleSerializableBean\",\"name\":\"foo\"}\n").accept(it) }
+			.consumeNextWith { expectString("{\"type\":\"org.springframework.http.codec.json.KotlinSerializationJsonEncoderTests.SimpleSerializableBean\",\"name\":\"bar\"}\n").accept(it) }
+			.consumeNextWith { expectString("{\"type\":\"org.springframework.http.codec.json.KotlinSerializationJsonEncoderTests.SimpleSerializableBean\",\"name\":\"baz\"}\n").accept(it) }
+			.verifyComplete()
+	}
+
+	@Test
 	fun encodeMono() {
 		val input = Mono.just(Pojo("foo", "bar"))
 		testEncode(input, Pojo::class.java) {
@@ -141,8 +164,10 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
 		assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.forClass(BigDecimal::class.java), null)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, OrderedImpl::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -164,5 +189,18 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 
 	val value: Int
 		get() = 42
+
+	interface ISimpleSerializableBean {
+		val name: String
+	}
+
+	@Serializable
+	data class SimpleSerializableBean(override val name: String): ISimpleSerializableBean
+
+	class OrderedImpl : Ordered {
+		override fun getOrder(): Int {
+			return 0
+		}
+	}
 
 }

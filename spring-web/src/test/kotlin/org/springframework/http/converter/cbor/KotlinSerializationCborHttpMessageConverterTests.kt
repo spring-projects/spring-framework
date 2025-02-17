@@ -43,7 +43,6 @@ import org.springframework.web.testfixture.http.MockHttpOutputMessage
  * @author Sebastien Deleuze
  * @author Iain Henderson
  */
-@Suppress("UsePropertyAccessSyntax")
 @ExperimentalSerializationApi
 class KotlinSerializationCborHttpMessageConverterTests {
 
@@ -66,19 +65,21 @@ class KotlinSerializationCborHttpMessageConverterTests {
 		assertThat(converter.canRead(String::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(NotSerializableBean::class.java, MediaType.APPLICATION_CBOR)).isFalse()
 
-		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(resolvableTypeOf<Map<String, SerializableBean>>(), MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(converter.canRead(List::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canRead(List::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(resolvableTypeOf<List<SerializableBean>>(), MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(converter.canRead(Set::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canRead(Set::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(resolvableTypeOf<Set<SerializableBean>>(), MediaType.APPLICATION_CBOR)).isTrue()
 
 		assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(resolvableTypeOf<ArrayList<Int>>(), MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), MediaType.APPLICATION_JSON)).isFalse()
 
-		assertThat(converter.canRead(resolvableTypeOf<Ordered>(), MediaType.APPLICATION_CBOR)).isFalse()
-		assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canRead(resolvableTypeOf<Ordered>(), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(converter.canRead(resolvableTypeOf<OrderedImpl>(), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canRead(resolvableTypeOf<List<OrderedImpl>>(), MediaType.APPLICATION_CBOR)).isFalse()
 	}
 
 	@Test
@@ -88,18 +89,19 @@ class KotlinSerializationCborHttpMessageConverterTests {
 		assertThat(converter.canWrite(String::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(NotSerializableBean::class.java, MediaType.APPLICATION_CBOR)).isFalse()
 
-		assertThat(converter.canWrite(Map::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canWrite(Map::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(resolvableTypeOf<Map<String, SerializableBean>>(), Map::class.java, MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(converter.canWrite(List::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canWrite(List::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(resolvableTypeOf<List<SerializableBean>>(), List::class.java, MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(converter.canWrite(Set::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canWrite(Set::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(resolvableTypeOf<Set<SerializableBean>>(), Set::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 
 		assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(resolvableTypeOf<ArrayList<Int>>(), List::class.java, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
-		assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(converter.canWrite(resolvableTypeOf<OrderedImpl>(), Ordered::class.java, MediaType.APPLICATION_CBOR)).isFalse()
 	}
 
 	@Test
@@ -226,6 +228,12 @@ class KotlinSerializationCborHttpMessageConverterTests {
 		val base = object : TypeBase<T>() {}
 		val superType = base::class.java.genericSuperclass!!
 		return ResolvableType.forType((superType as ParameterizedType).actualTypeArguments.first()!!)
+	}
+
+	class OrderedImpl : Ordered {
+		override fun getOrder(): Int {
+			return 0
+		}
 	}
 
 }
