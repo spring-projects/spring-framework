@@ -112,12 +112,11 @@ class ConfigurationClassEnhancer {
 
 		try {
 			// Use original ClassLoader if config class not locally loaded in overriding class loader
-			if (classLoader instanceof SmartClassLoader smartClassLoader &&
-					classLoader != configClass.getClassLoader()) {
+			boolean classLoaderMismatch = (classLoader != null && classLoader != configClass.getClassLoader());
+			if (classLoaderMismatch && classLoader instanceof SmartClassLoader smartClassLoader) {
 				classLoader = smartClassLoader.getOriginalClassLoader();
 			}
 			Enhancer enhancer = newEnhancer(configClass, classLoader);
-			boolean classLoaderMismatch = (classLoader != null && classLoader != configClass.getClassLoader());
 			Class<?> enhancedClass = createClass(enhancer, classLoaderMismatch);
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Successfully enhanced %s; enhanced class name is: %s",
@@ -188,8 +187,7 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
 	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance}
-	 * through checking to see if candidate classes are already assignable to it, for example,
-	 * have already been enhanced.
+	 * through checking to see if candidate classes are already assignable to it.
 	 * <p>Also extends {@link BeanFactoryAware}, as all enhanced {@code @Configuration}
 	 * classes require access to the {@link BeanFactory} that created them.
 	 * <p>Note that this interface is intended for framework-internal use only, however
