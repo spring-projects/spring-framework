@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,19 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
+import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
+import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -84,19 +90,29 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	// message factories
 
+	private static final boolean romePresent;
+
+	private static final boolean jaxb2Present;
+
 	private static final boolean jackson2Present;
 
-	private static final boolean gsonPresent;
-
-	private static final boolean jsonbPresent;
-
-	private static final boolean kotlinSerializationJsonPresent;
+	private static final boolean jackson2XmlPresent;
 
 	private static final boolean jackson2SmilePresent;
 
 	private static final boolean jackson2CborPresent;
 
 	private static final boolean jackson2YamlPresent;
+
+	private static final boolean gsonPresent;
+
+	private static final boolean jsonbPresent;
+
+	private static final boolean kotlinSerializationCborPresent;
+
+	private static final boolean kotlinSerializationJsonPresent;
+
+	private static final boolean kotlinSerializationProtobufPresent;
 
 
 	static {
@@ -107,14 +123,19 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
 		jdkClientPresent = ClassUtils.isPresent("java.net.http.HttpClient", loader);
 
+		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", loader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", loader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", loader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", loader);
-		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", loader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", loader);
-		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", loader);
+		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", loader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", loader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", loader);
 		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
+		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", loader);
+		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", loader);
+		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", loader);
+		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", loader);
+		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", loader);
 	}
 
 	@Nullable
@@ -428,6 +449,22 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.messageConverters.add(new ResourceHttpMessageConverter(false));
 			this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
+			if (romePresent) {
+				this.messageConverters.add(new AtomFeedHttpMessageConverter());
+				this.messageConverters.add(new RssChannelHttpMessageConverter());
+			}
+
+			if (jackson2XmlPresent) {
+				this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+			}
+			else if (jaxb2Present) {
+				this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+			}
+
+			if (kotlinSerializationProtobufPresent) {
+				this.messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
+			}
+
 			if (kotlinSerializationJsonPresent) {
 				this.messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 			}
@@ -446,9 +483,13 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			if (jackson2CborPresent) {
 				this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
 			}
+			else if (kotlinSerializationCborPresent) {
+				this.messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
+			}
 			if (jackson2YamlPresent) {
 				this.messageConverters.add(new MappingJackson2YamlHttpMessageConverter());
 			}
+
 		}
 		return this.messageConverters;
 	}

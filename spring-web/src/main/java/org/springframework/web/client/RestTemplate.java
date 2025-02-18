@@ -148,6 +148,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	static {
 		ClassLoader classLoader = RestTemplate.class.getClassLoader();
+
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
@@ -186,7 +187,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter(false));
-
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		if (romePresent) {
@@ -208,6 +208,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		if (kotlinSerializationJsonPresent) {
 			this.messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
+
 		if (jackson2Present) {
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}
