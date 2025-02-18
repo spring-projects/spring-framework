@@ -857,7 +857,7 @@ Start by creating the interface with `@HttpExchange` methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	interface RepositoryService {
+	public interface RepositoryService {
 
 		@GetExchange("/repos/{owner}/{repo}")
 		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
@@ -908,7 +908,7 @@ For `RestTemplate`:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@HttpExchange(url = "/repos/{owner}/{repo}", accept = "application/vnd.github.v3+json")
-	interface RepositoryService {
+	public interface RepositoryService {
 
 		@GetExchange
 		Repository getRepository(@PathVariable String owner, @PathVariable String repo);

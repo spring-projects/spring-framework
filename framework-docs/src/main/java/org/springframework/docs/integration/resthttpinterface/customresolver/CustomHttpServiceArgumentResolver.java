@@ -29,7 +29,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class CustomHttpServiceArgumentResolver {
 
 	// tag::httpinterface[]
-	interface RepositoryService {
+	public interface RepositoryService {
 
 		@GetExchange("/repos/search")
 		List<Repository> searchRepository(Search search);
