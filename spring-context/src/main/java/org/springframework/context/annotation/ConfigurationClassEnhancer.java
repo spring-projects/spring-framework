@@ -168,9 +168,9 @@ class ConfigurationClassEnhancer {
 		try {
 			subclass = enhancer.createClass();
 		}
-		catch (CodeGenerationException ex) {
+		catch (Throwable ex) {
 			if (!fallback) {
-				throw ex;
+				throw (ex instanceof CodeGenerationException cgex ? cgex : new CodeGenerationException(ex));
 			}
 			// Possibly a package-visible @Bean method declaration not accessible
 			// in the given ClassLoader -> retry with original ClassLoader
