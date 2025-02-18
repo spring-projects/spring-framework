@@ -366,8 +366,18 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					}
 					afterSingletonCreation(beanName);
 				}
+
 				if (newSingleton) {
-					addSingleton(beanName, singletonObject);
+					try {
+						addSingleton(beanName, singletonObject);
+					}
+					catch (IllegalStateException ex) {
+						// Leniently accept same instance if implicitly appeared.
+						Object object = this.singletonObjects.get(beanName);
+						if (singletonObject != object) {
+							throw ex;
+						}
+					}
 				}
 			}
 			return singletonObject;

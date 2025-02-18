@@ -1479,6 +1479,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (candidateName == null) {
 				candidateName = determineHighestPriorityCandidate(candidates, requiredType.toClass());
 			}
+			if (candidateName == null) {
+				candidateName = determineDefaultCandidate(candidates);
+			}
 			if (candidateName != null) {
 				Object beanInstance = candidates.get(candidateName);
 				if (beanInstance == null) {
@@ -1939,7 +1942,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (priorityCandidate != null) {
 			return priorityCandidate;
 		}
-		// Step 4: pick directly registered dependency
+		// Step 4: pick unique default-candidate
+		String defaultCandidate = determineDefaultCandidate(candidates);
+		if (defaultCandidate != null) {
+			return defaultCandidate;
+		}
+		// Step 5: pick directly registered dependency
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateName = entry.getKey();
 			Object beanInstance = entry.getValue();
@@ -2095,6 +2103,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return orderComparator.getPriority(beanInstance);
 		}
 		return null;
+	}
+
+	/**
+	 * Return a unique "default-candidate" among remaining non-default candidates.
+	 * @param candidates a Map of candidate names and candidate instances
+	 * (or candidate classes if not created yet) that match the required type
+	 * @return the name of the default candidate, or {@code null} if none found
+	 * @since 6.2.4
+	 * @see AbstractBeanDefinition#isDefaultCandidate()
+	 */
+	@Nullable
+	private String determineDefaultCandidate(Map<String, Object> candidates) {
+		String defaultBeanName = null;
+		for (String candidateBeanName : candidates.keySet()) {
+			if (AutowireUtils.isDefaultCandidate(this, candidateBeanName)) {
+				if (defaultBeanName != null) {
+					return null;
+				}
+				defaultBeanName = candidateBeanName;
+			}
+		}
+		return defaultBeanName;
 	}
 
 	/**

@@ -1658,9 +1658,37 @@ class DefaultListableBeanFactoryTests {
 		bd2.setPrimary(true);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
+		lbf.registerSingleton("bd3", new TestBean());
 
 		TestBean bean = lbf.getBean(TestBean.class);
 		assertThat(bean.getBeanName()).isEqualTo("bd2");
+		assertThat(lbf.containsSingleton("bd1")).isFalse();
+	}
+
+	@Test
+	void getBeanByTypeWithUniqueNonDefaultDefinition() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setDefaultCandidate(false);
+		bd1.setLazyInit(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName()).isEqualTo("bd2");
+		assertThat(lbf.containsSingleton("bd1")).isFalse();
+	}
+
+	@Test
+	void getBeanByTypeWithUniqueNonDefaultSingleton() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setDefaultCandidate(false);
+		bd1.setLazyInit(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerSingleton("bd2", new TestBean());
+
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName()).isNull();
 		assertThat(lbf.containsSingleton("bd1")).isFalse();
 	}
 
