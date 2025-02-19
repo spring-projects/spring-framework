@@ -5,6 +5,7 @@
     "@antora/collector-extension": "1.0.0-alpha.3",
     "@asciidoctor/tabs": "1.0.0-beta.6",
     "@springio/antora-extensions": "1.14.2",
+    "fast-xml-parser": "4.5.2",
     "@springio/asciidoctor-extensions": "1.0.0-alpha.10"
   }
 }
