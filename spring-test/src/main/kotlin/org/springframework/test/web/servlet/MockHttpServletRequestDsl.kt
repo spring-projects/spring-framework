@@ -130,6 +130,7 @@ open class MockHttpServletRequestDsl(private val builder: AbstractMockHttpServle
 	var queryParams: MultiValueMap<String, String>? = null
 
 	/**
+	 * @since 6.2.3
 	 * @see [MockHttpServletRequestBuilder.formField]
 	 */
 	fun formField(name: String, vararg values: String) {
@@ -137,6 +138,7 @@ open class MockHttpServletRequestDsl(private val builder: AbstractMockHttpServle
 	}
 
 	/**
+	 * @since 6.2.3
 	 * @see [MockHttpServletRequestBuilder.formFields]
 	 */
 	var formFields: MultiValueMap<String, String>? = null
