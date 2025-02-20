@@ -69,6 +69,7 @@ import org.springframework.util.ObjectUtils;
  * example, {@link ContextConfiguration#inheritLocations}.
  *
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 5.3
  * @see MergedAnnotations
  * @see MergedAnnotations.Search
@@ -135,11 +136,39 @@ public abstract class TestContextAnnotationUtils {
 	private static <T extends Annotation> @Nullable T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
 			Predicate<Class<?>> searchEnclosingClass) {
 
+		return getMergedAnnotation(clazz, annotationType, searchEnclosingClass)
+				.synthesize(MergedAnnotation::isPresent).orElse(null);
+	}
+
+	/**
+	 * Get the {@link MergedAnnotation} of the specified {@code annotationType} within
+	 * the annotation hierarchy <em>above</em> the supplied class.
+	 * <p>In the context of this method, the term "above" means within the
+	 * {@linkplain Class#getSuperclass() superclass} hierarchy or within the
+	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
+	 * supplied class. The enclosing class hierarchy will only be searched
+	 * according to {@link NestedTestConfiguration @NestedTestConfiguration}
+	 * semantics.
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
+	 * are fully supported, both within a single annotation and within annotation
+	 * hierarchies.
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * @return a {@link MergedAnnotation} instance
+	 * @see #findMergedAnnotation(Class, Class)
+	 * @see #searchEnclosingClass(Class)
+	 */
+	public static <T extends Annotation> MergedAnnotation<T> getMergedAnnotation(Class<?> clazz, Class<T> annotationType) {
+		return getMergedAnnotation(clazz, annotationType, TestContextAnnotationUtils::searchEnclosingClass);
+	}
+
+	private static <T extends Annotation> MergedAnnotation<T> getMergedAnnotation(Class<?> clazz, Class<T> annotationType,
+			Predicate<Class<?>> searchEnclosingClass) {
+
 		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
 				.withEnclosingClasses(searchEnclosingClass)
 				.from(clazz)
-				.get(annotationType)
-				.synthesize(MergedAnnotation::isPresent).orElse(null);
+				.get(annotationType);
 	}
 
 	/**

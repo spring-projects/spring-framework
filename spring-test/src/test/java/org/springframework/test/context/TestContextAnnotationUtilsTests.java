@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -48,11 +49,39 @@ import static org.springframework.test.context.TestContextAnnotationUtils.search
  * Tests for {@link TestContextAnnotationUtils}.
  *
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 5.3, though originally since 4.0 for the deprecated
  * {@link org.springframework.test.util.MetaAnnotationUtils} support
  * @see OverriddenMetaAnnotationAttributesTestContextAnnotationUtilsTests
  */
 class TestContextAnnotationUtilsTests {
+
+	@Nested
+	@DisplayName("findMergedAnnotation() tests")
+	class FindMergedAnnotationTests {
+
+		@Test
+		void findMergedAnnotation() {
+			Class<?> startClass = MetaConfigWithDefaultAttributesTestCase.class;
+			Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+			ContextConfiguration annotation = TestContextAnnotationUtils.findMergedAnnotation(startClass, annotationType);
+
+			assertThat(annotation).isNotNull();
+			assertThat(annotation.classes()).containsExactlyInAnyOrder(MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class);
+		}
+
+		@Test
+		void getMergedAnnotation() {
+			Class<?> startClass = MetaConfigWithDefaultAttributesTestCase.class;
+			Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+			MergedAnnotation<ContextConfiguration> annotation = TestContextAnnotationUtils.getMergedAnnotation(startClass, annotationType);
+
+			assertThat(annotation.isPresent()).isTrue();
+			assertThat(annotation.getClassArray("classes")).containsExactlyInAnyOrder(MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class);
+		}
+	}
 
 	@Nested
 	@DisplayName("searchEnclosingClass() tests")
