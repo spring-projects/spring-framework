@@ -87,7 +87,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	 */
 	@Override
 	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE - 100;
+		return ORDER;
 	}
 
 	@Override
