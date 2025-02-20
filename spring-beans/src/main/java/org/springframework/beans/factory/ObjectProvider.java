@@ -149,8 +149,14 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
-	 * @return an instance of the bean, or {@code null} if not available or
-	 * not unique (i.e. multiple candidates found with none marked as primary)
+	 * <p>An instance is considered as unique when multiple candidates found
+	 * if it meet one of the following conditions:
+	 * <ul>
+	 * <li>It's the only one marked as primary</li>
+	 * <li>It's the only one not marked as fallback</li>
+	 * <li>It's the only one default candidate</li>
+	 * </ul>
+	 * @return an instance of the bean, or {@code null} if not available or not unique
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
@@ -167,10 +173,10 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
 	 * @param defaultSupplier a callback for supplying a default object
-	 * if no unique candidate is present in the factory
+	 * if no unique (refer to {@link #getIfUnique()} for the definition)
+	 * candidate is present in the factory
 	 * @return an instance of the bean, or the supplied default object
 	 * if no such bean is available or if it is not unique in the factory
-	 * (i.e. multiple candidates found with none marked as primary)
 	 * @throws BeansException in case of creation errors
 	 * @since 5.0
 	 * @see #getIfUnique()
@@ -182,12 +188,12 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 
 	/**
 	 * Consume an instance (possibly shared or independent) of the object
-	 * managed by this factory, if unique.
+	 * managed by this factory, if unique (refer to {@link #getIfUnique()} for the definition).
 	 * @param dependencyConsumer a callback for processing the target object
 	 * if unique (not called otherwise)
 	 * @throws BeansException in case of creation errors
 	 * @since 5.0
-	 * @see #getIfAvailable()
+	 * @see #getIfUnique()
 	 */
 	default void ifUnique(Consumer<T> dependencyConsumer) throws BeansException {
 		T dependency = getIfUnique();
