@@ -88,6 +88,18 @@ class MockHttpServletResponseTests {
 		assertThat(response.containsHeader(headerName)).isFalse();
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CONTENT_TYPE,
+			CONTENT_LANGUAGE,
+			"X-Test-Header"
+	})
+	void removeHeaderIfNullValue(String headerName) {
+		response.addHeader(headerName, "test");
+		response.setHeader(headerName, null);
+		assertThat(response.containsHeader(headerName)).isFalse();
+	}
+
 	@Test  // gh-26493
 	void setLocaleWithNullValue() {
 		assertThat(response.getLocale()).isEqualTo(Locale.getDefault());

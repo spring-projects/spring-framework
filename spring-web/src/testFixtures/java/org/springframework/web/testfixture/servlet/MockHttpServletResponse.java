@@ -681,7 +681,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setHeader(String name, @Nullable String value) {
-		setHeaderValue(name, value);
+		if (value == null) {
+			this.headers.remove(name);
+		}
+		else {
+			setHeaderValue(name, value);
+		}
 	}
 
 	@Override
