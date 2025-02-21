@@ -270,6 +270,17 @@ class ContentCachingResponseWrapperTests {
 				.withMessageContaining(overflow);
 	}
 
+	@Test
+	void setContentLengthNull() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		responseWrapper.setContentLength(1024);
+		responseWrapper.setHeader(CONTENT_LENGTH, null);
+
+		assertThat(response.getHeaderNames()).doesNotContain(CONTENT_LENGTH);
+		assertThat(responseWrapper.getHeader(CONTENT_LENGTH)).isNull();
+	}
+
 
 	private void assertHeader(HttpServletResponse response, String header, int value) {
 		assertHeader(response, header, Integer.toString(value));
