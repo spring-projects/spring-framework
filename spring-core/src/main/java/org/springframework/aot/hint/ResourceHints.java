@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ClassUtils;
 
 /**
  * Gather the need for resources available at runtime.
@@ -51,14 +52,14 @@ public class ResourceHints {
 		this.resourceBundleHints = new LinkedHashSet<>();
 	}
 
+
 	/**
 	 * Return the resources that should be made available at runtime.
 	 * @return a stream of {@link ResourcePatternHints}
 	 */
 	public Stream<ResourcePatternHints> resourcePatternHints() {
 		Stream<ResourcePatternHints> patterns = this.resourcePatternHints.stream();
-		return (this.types.isEmpty() ? patterns
-				: Stream.concat(Stream.of(typesPatternResourceHint()), patterns));
+		return (this.types.isEmpty() ? patterns : Stream.concat(Stream.of(typesPatternResourceHint()), patterns));
 	}
 
 	/**
@@ -71,18 +72,18 @@ public class ResourceHints {
 
 	/**
 	 * Register a pattern if the given {@code location} is available on the
-	 * classpath. This delegates to {@link ClassLoader#getResource(String)}
-	 * which validates directories as well. The location is not included in
-	 * the hint.
-	 * @param classLoader the classloader to use
+	 * classpath. This delegates to {@link ClassLoader#getResource(String)} which
+	 * validates directories as well. The location is not included in the hint.
+	 * @param classLoader the ClassLoader to use, or {@code null} for the default
 	 * @param location a '/'-separated path name that should exist
 	 * @param resourceHint a builder to customize the resource pattern
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location,
 			Consumer<ResourcePatternHints.Builder> resourceHint) {
-		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : getClass().getClassLoader());
-		if (classLoaderToUse.getResource(location) != null) {
+
+		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		if (classLoaderToUse != null && classLoaderToUse.getResource(location) != null) {
 			registerPattern(resourceHint);
 		}
 		return this;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -58,19 +59,21 @@ public final class FilePatternResourceHintsRegistrar {
 
 
 	private void registerHints(ResourceHints hints, @Nullable ClassLoader classLoader) {
-		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : getClass().getClassLoader());
-		List<String> includes = new ArrayList<>();
-		for (String location : this.classpathLocations) {
-			if (classLoaderToUse.getResource(location) != null) {
-				for (String filePrefix : this.filePrefixes) {
-					for (String fileExtension : this.fileExtensions) {
-						includes.add(location + filePrefix + "*" + fileExtension);
+		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		if (classLoaderToUse != null) {
+			List<String> includes = new ArrayList<>();
+			for (String location : this.classpathLocations) {
+				if (classLoaderToUse.getResource(location) != null) {
+					for (String filePrefix : this.filePrefixes) {
+						for (String fileExtension : this.fileExtensions) {
+							includes.add(location + filePrefix + "*" + fileExtension);
+						}
 					}
 				}
 			}
-		}
-		if (!includes.isEmpty()) {
-			hints.registerPattern(hint -> hint.includes(includes.toArray(String[]::new)));
+			if (!includes.isEmpty()) {
+				hints.registerPattern(hint -> hint.includes(includes.toArray(String[]::new)));
+			}
 		}
 	}
 
@@ -257,8 +260,7 @@ public final class FilePatternResourceHintsRegistrar {
 		 * classpath location that resolves against the {@code ClassLoader}, files
 		 * with the configured file prefixes and extensions are registered.
 		 * @param hints the hints contributed so far for the deployment unit
-		 * @param classLoader the classloader, or {@code null} if even the system
-		 * ClassLoader isn't accessible
+		 * @param classLoader the ClassLoader to use, or {@code null} for the default
 		 */
 		public void registerHints(ResourceHints hints, @Nullable ClassLoader classLoader) {
 			build().registerHints(hints, classLoader);
