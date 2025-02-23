@@ -813,17 +813,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// Clean root entry path to match jar entries format without "!" separators
 				rootEntryPath = rootEntryPath.replace(ResourceUtils.JAR_URL_SEPARATOR, "/");
 				// Search sorted entries from first entry with rootEntryPath prefix
+				boolean rootEntryPathFound = false;
 				for (String entryPath : entriesCache.tailSet(rootEntryPath, false)) {
 					if (!entryPath.startsWith(rootEntryPath)) {
 						// We are beyond the potential matches in the current TreeSet.
 						break;
 					}
+					rootEntryPathFound = true;
 					String relativePath = entryPath.substring(rootEntryPath.length());
 					if (getPathMatcher().match(subPattern, relativePath)) {
 						result.add(rootDirResource.createRelative(relativePath));
 					}
 				}
-				return result;
+				if (rootEntryPathFound) {
+					return result;
+				}
 			}
 		}
 
