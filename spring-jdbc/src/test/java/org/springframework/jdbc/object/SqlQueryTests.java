@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -52,6 +53,7 @@ import static org.mockito.Mockito.verify;
  * @author Trevor Cook
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class SqlQueryTests {
 
@@ -121,6 +123,72 @@ class SqlQueryTests {
 
 		assertThat(list).containsExactly(1);
 		verify(connection).prepareStatement(SELECT_ID);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+	}
+
+	@Test
+	void testStreamWithoutParams() throws SQLException {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(1);
+
+		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<>() {
+			@Override
+			protected Integer mapRow(ResultSet rs, int rownum, Object @Nullable [] params, @Nullable Map<? ,?> context)
+					throws SQLException {
+				assertThat(params).as("params were null").isNull();
+				assertThat(context).as("context was null").isNull();
+				return rs.getInt(1);
+			}
+		};
+		query.setDataSource(dataSource);
+		query.setSql(SELECT_ID);
+		query.compile();
+		try (Stream<Integer> stream = query.stream()) {
+			List<Integer> list = stream.toList();
+			assertThat(list).containsExactly(1);
+		}
+		verify(connection).prepareStatement(SELECT_ID);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+	}
+
+	@Test
+	void testStreamByNamedParam() throws SQLException {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt("id")).willReturn(1);
+		given(resultSet.getString("forename")).willReturn("rod");
+		given(connection.prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED,
+				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
+		).willReturn(preparedStatement);
+
+		SqlQuery<Customer> query = new MappingSqlQueryWithParameters<>() {
+			@Override
+			protected Customer mapRow(ResultSet rs, int rownum, Object @Nullable [] params, @Nullable Map<? ,?> context)
+					throws SQLException {
+				assertThat(params).as("params were not null").isNotNull();
+				assertThat(context).as("context was null").isNull();
+				Customer cust = new Customer();
+				cust.setId(rs.getInt(COLUMN_NAMES[0]));
+				cust.setForename(rs.getString(COLUMN_NAMES[1]));
+				return cust;
+			}
+		};
+		query.declareParameter(new SqlParameter("id", Types.NUMERIC));
+		query.declareParameter(new SqlParameter("country", Types.VARCHAR));
+		query.setDataSource(dataSource);
+		query.setSql(SELECT_ID_FORENAME_NAMED_PARAMETERS);
+		query.compile();
+		try (Stream<Customer> stream = query.streamByNamedParam(Map.of("id", 1, "country", "UK"))) {
+			List<Customer> list = stream.toList();
+			assertThat(list).hasSize(1);
+			Customer customer = list.get(0);
+			assertThat(customer.getId()).isEqualTo(1);
+			assertThat(customer.getForename()).isEqualTo("rod");
+		}
+		verify(connection).prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1, Types.NUMERIC);
+		verify(preparedStatement).setString(2, "UK");
 		verify(resultSet).close();
 		verify(preparedStatement).close();
 	}
