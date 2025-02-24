@@ -112,3 +112,15 @@ configure([rootProject] + javaProjects) { project ->
 configure(moduleProjects) { project ->
 	apply from: "${rootDir}/gradle/spring-module.gradle"
 }
+
+plugins {
+  id "org.sonarqube" version "6.0.1.5171"
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "LiuMingyue1_spring-framework"
+    property "sonar.organization", "liumingyue1"
+    property "sonar.host.url", "https://sonarcloud.io"
+  }
+}
