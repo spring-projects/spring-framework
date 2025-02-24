@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
-	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
+	private @Nullable ServletOutputStream outputStream;
 
 	private @Nullable PrintWriter writer;
 
@@ -222,7 +222,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				}
 				catch (Exception ignored) {
 					String value = this.contentType;
-					int charsetIndex = value.toLowerCase().indexOf(CHARSET_PREFIX);
+					int charsetIndex = value.toLowerCase(Locale.ROOT).indexOf(CHARSET_PREFIX);
 					if (charsetIndex != -1) {
 						value = value.substring(0, charsetIndex).trim();
 						if (value.endsWith(";")) {
@@ -242,7 +242,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private void updateContentTypePropertyAndHeader() {
 		if (this.contentType != null) {
 			String value = this.contentType;
-			if (this.characterEncodingSet && !value.toLowerCase().contains(CHARSET_PREFIX)) {
+			if (this.characterEncodingSet && !value.toLowerCase(Locale.ROOT).contains(CHARSET_PREFIX)) {
 				value += ';' + CHARSET_PREFIX + getCharacterEncoding();
 				this.contentType = value;
 			}
@@ -258,12 +258,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public ServletOutputStream getOutputStream() {
 		Assert.state(this.outputStreamAccessAllowed, "OutputStream access not allowed");
+		Assert.state(this.writer == null, "getWriter() has already been called");
+		if (this.outputStream == null) {
+			this.outputStream = new ResponseServletOutputStream(this.content);
+		}
 		return this.outputStream;
 	}
 
 	@Override
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		Assert.state(this.writerAccessAllowed, "Writer access not allowed");
+		Assert.state(this.outputStream == null, "getOutputStream() has already been called");
 		if (this.writer == null) {
 			Writer targetWriter = new OutputStreamWriter(this.content, getCharacterEncoding());
 			this.writer = new ResponsePrintWriter(targetWriter);
@@ -353,17 +358,20 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				}
 				else if (mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) ||
 						mediaType.isCompatibleWith(APPLICATION_PLUS_JSON)) {
-						this.characterEncoding = StandardCharsets.UTF_8.name();
+					this.characterEncoding = StandardCharsets.UTF_8.name();
 				}
 			}
 			catch (Exception ex) {
 				// Try to get charset value anyway
-				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+				int charsetIndex = contentType.toLowerCase(Locale.ROOT).indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
 					setExplicitCharacterEncoding(contentType.substring(charsetIndex + CHARSET_PREFIX.length()));
 				}
 			}
 			updateContentTypePropertyAndHeader();
+		}
+		else {
+			this.headers.remove(HttpHeaders.CONTENT_TYPE);
 		}
 	}
 
@@ -421,6 +429,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.headers.clear();
 		this.status = HttpServletResponse.SC_OK;
 		this.errorMessage = null;
+		this.writer = null;
+		this.outputStream = null;
 	}
 
 	@Override
@@ -632,7 +642,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		sendRedirect(url, HttpServletResponse.SC_MOVED_TEMPORARILY, true);
 	}
 
-	@Override
+	// @Override - on Servlet 6.1
 	public void sendRedirect(String url, int sc, boolean clearBuffer) throws IOException {
 		Assert.state(!isCommitted(), "Cannot send redirect - response is already committed");
 		Assert.notNull(url, "Redirect URL must not be null");
@@ -680,17 +690,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setHeader(String name, @Nullable String value) {
-		if (value == null) {
-			this.headers.remove(name);
-		}
-		else {
-			setHeaderValue(name, value);
-		}
+	public void setHeader(@Nullable String name, @Nullable String value) {
+		setHeaderValue(name, value);
 	}
 
 	@Override
-	public void addHeader(String name, @Nullable String value) {
+	public void addHeader(@Nullable String name, @Nullable String value) {
 		addHeaderValue(name, value);
 	}
 
@@ -704,8 +709,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		addHeaderValue(name, value);
 	}
 
-	private void setHeaderValue(String name, @Nullable Object value) {
-		if (value == null) {
+	private void setHeaderValue(@Nullable String name, @Nullable Object value) {
+		if (name == null) {
 			return;
 		}
 		boolean replaceHeader = true;
@@ -715,8 +720,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(name, value, replaceHeader);
 	}
 
-	private void addHeaderValue(String name, @Nullable Object value) {
-		if (value == null) {
+	private void addHeaderValue(@Nullable String name, @Nullable Object value) {
+		if (name == null) {
 			return;
 		}
 		boolean replaceHeader = false;
@@ -726,7 +731,19 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(name, value, replaceHeader);
 	}
 
-	private boolean setSpecialHeader(String name, Object value, boolean replaceHeader) {
+	private boolean setSpecialHeader(String name, @Nullable Object value, boolean replaceHeader) {
+		if (value == null) {
+			if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+				setContentType(null);
+			}
+			else if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+				this.contentLength = 0;
+			}
+			else {
+				this.headers.remove(name);
+			}
+			return true;
+		}
 		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 			setContentType(value.toString());
 			return true;
@@ -763,7 +780,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 	}
 
-	private void doAddHeaderValue(String name, Object value, boolean replace) {
+	private void doAddHeaderValue(String name, @Nullable Object value, boolean replace) {
 		Assert.notNull(value, "Header value must not be null");
 		HeaderValueHolder header = this.headers.computeIfAbsent(name, key -> new HeaderValueHolder());
 		if (replace) {
