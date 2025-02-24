@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Check Out Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build
         id: build
         uses: ./.github/actions/build
@@ -23,3 +25,28 @@ jobs:
         with:
           name: build-reports
           path: '**/build/reports/'
+          
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu'  # Alternative distribution options are available
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Build and analyze with SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonarqube --info
