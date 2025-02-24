@@ -3,14 +3,18 @@ on:
   push:
     branches:
       - main
+      - ‘**’
   pull_request:
+    branches:
+      - main
+      - ‘**’
     types: [opened, synchronize, reopened]
 permissions:
   contents: read
 jobs:
   build:
     name: Build Pull Request
-    if: ${{ github.repository == 'spring-projects/spring-framework' }}
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
