@@ -10,6 +10,7 @@ plugins {
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id 'me.champeau.mrjar' version '0.1.1'
 	id "net.ltgt.errorprone" version "4.1.0" apply false
+	id "org.sonarqube" version "6.0.1.5171"
 }
 
 ext {
@@ -111,10 +112,6 @@ configure([rootProject] + javaProjects) { project ->
 
 configure(moduleProjects) { project ->
 	apply from: "${rootDir}/gradle/spring-module.gradle"
-}
-
-plugins {
-  id "org.sonarqube" version "6.0.1.5171"
 }
 
 sonar {
