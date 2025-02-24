@@ -79,9 +79,6 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.OneStatementPerLineCheck"/>
 		<!-- Imports -->
-		<module name="AvoidStarImport"/>
-		<module name="UnusedImports"/>
-		<module name="RedundantImport"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck">
 			<property name="groups" value="java,javax,*,org.springframework"/>
 			<property name="ordered" value="true"/>
