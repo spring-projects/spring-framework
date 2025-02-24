@@ -18,6 +18,8 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -25,6 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
@@ -52,6 +55,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
+ * @author Yanming Zhou
  * @param <T> the result type
  * @see SqlUpdate
  */
@@ -95,6 +99,23 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	}
 
 	/**
+	 * Central stream method. All un-named parameter execution goes through this method.
+	 * @param params parameters, similar to JDO query parameters.
+	 * Primitive parameters must be represented by their Object wrapper type.
+	 * The ordering of parameters is significant.
+	 * @param context the contextual information passed to the {@code mapRow}
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
+	 * @return a result Stream of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 */
+	public Stream<T> stream(Object @Nullable [] params, @Nullable Map<?, ?> context) throws DataAccessException {
+		validateParameters(params);
+		RowMapper<T> rowMapper = newRowMapper(params, context);
+		return getJdbcTemplate().queryForStream(newPreparedStatementCreator(params), rowMapper);
+	}
+
+	/**
 	 * Convenient method to execute without context.
 	 * @param params parameters for the query. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
@@ -102,6 +123,16 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 */
 	public List<T> execute(Object... params) throws DataAccessException {
 		return execute(params, null);
+	}
+
+	/**
+	 * Convenient method to stream without context.
+	 * @param params parameters for the query. Primitive parameters must
+	 * be represented by their Object wrapper type. The ordering of parameters is
+	 * significant.
+	 */
+	public Stream<T> stream(Object... params) throws DataAccessException {
+		return stream(params, null);
 	}
 
 	/**
@@ -113,10 +144,25 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	}
 
 	/**
+	 * Convenient method to stream without parameters.
+	 * @param context the contextual information for object creation
+	 */
+	public Stream<T> stream(Map<?, ?> context) throws DataAccessException {
+		return stream(null, context);
+	}
+
+	/**
 	 * Convenient method to execute without parameters nor context.
 	 */
 	public List<T> execute() throws DataAccessException {
 		return execute((Object[]) null, null);
+	}
+
+	/**
+	 * Convenient method to stream without parameters nor context.
+	 */
+	public Stream<T> stream() throws DataAccessException {
+		return stream(null, null);
 	}
 
 	/**
@@ -202,13 +248,23 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * will be of the same class, although it is possible to use different types.
 	 */
 	public List<T> executeByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context) throws DataAccessException {
-		validateNamedParameters(paramMap);
-		ParsedSql parsedSql = getParsedSql();
-		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
-		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
-		RowMapper<T> rowMapper = newRowMapper(params, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
+		return queryByNamedParam(paramMap, context, getJdbcTemplate()::query);
+	}
+
+	/**
+	 * Central stream method. All named parameter execution goes through this method.
+	 * @param paramMap parameters associated with the name specified while declaring
+	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant since they are supplied in a
+	 * SqlParameterMap which is an implementation of the Map interface.
+	 * @param context the contextual information passed to the {@code mapRow}
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
+	 * @return a Stream of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 */
+	public Stream<T> streamByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context) throws DataAccessException {
+		return queryByNamedParam(paramMap, context, getJdbcTemplate()::queryForStream);
 	}
 
 	/**
@@ -221,6 +277,15 @@ public abstract class SqlQuery<T> extends SqlOperation {
 		return executeByNamedParam(paramMap, null);
 	}
 
+	/**
+	 * Convenient method to stream without context.
+	 * @param paramMap parameters associated with the name specified while declaring
+	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant.
+	 */
+	public Stream<T> streamByNamedParam(Map<String, ? extends @Nullable Object> paramMap) throws DataAccessException {
+		return streamByNamedParam(paramMap, null);
+	}
 
 	/**
 	 * Generic object finder method, used by all other {@code findObject} methods.
@@ -341,5 +406,15 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @see #execute
 	 */
 	protected abstract RowMapper<T> newRowMapper(@Nullable Object @Nullable [] parameters, @Nullable Map<?, ?> context);
+
+	private <R> R queryByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context, BiFunction<PreparedStatementCreator, RowMapper<T>, R> queryFunction) {
+		validateNamedParameters(paramMap);
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
+		RowMapper<T> rowMapper = newRowMapper(params, context);
+		return queryFunction.apply(newPreparedStatementCreator(sqlToUse, params), rowMapper);
+	}
 
 }
