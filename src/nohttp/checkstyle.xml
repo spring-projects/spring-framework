@@ -16,7 +16,7 @@
 	<module name="TreeWalker">
 		<!-- Imports -->
 		<!--		<module name="AvoidStarImport"/>-->
-		<!--		<module name="UnusedImports"/>-->
+		<module name="UnusedImports"/>
 		<!--		<module name="RedundantImport"/>-->
 		<!-- Best Practices -->
 		<!-- <module name="UnusedLocalVariable"/> fix https://docs.openrewrite.org/recipes/staticanalysis/removeunusedprivatefields#usage-->
