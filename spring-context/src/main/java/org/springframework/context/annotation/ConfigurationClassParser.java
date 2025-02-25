@@ -166,14 +166,22 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				ConfigurationClass configClass;
 				if (bd instanceof AnnotatedBeanDefinition annotatedBeanDef) {
-					parse(annotatedBeanDef, holder.getBeanName());
+					configClass = parse(annotatedBeanDef, holder.getBeanName());
 				}
 				else if (bd instanceof AbstractBeanDefinition abstractBeanDef && abstractBeanDef.hasBeanClass()) {
-					parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
+					configClass = parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
 				}
 				else {
-					parse(bd.getBeanClassName(), holder.getBeanName());
+					configClass = parse(bd.getBeanClassName(), holder.getBeanName());
+				}
+
+				// Downgrade to lite (no enhancement) in case of no instance-level @Bean methods.
+				if (!configClass.hasNonStaticBeanMethods() && ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(
+						bd.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE))) {
+					bd.setAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE,
+							ConfigurationClassUtils.CONFIGURATION_CLASS_LITE);
 				}
 			}
 			catch (BeanDefinitionStoreException ex) {
@@ -188,20 +196,25 @@ class ConfigurationClassParser {
 		this.deferredImportSelectorHandler.process();
 	}
 
-	private void parse(AnnotatedBeanDefinition beanDef, String beanName) {
-		processConfigurationClass(
-				new ConfigurationClass(beanDef.getMetadata(), beanName, (beanDef instanceof ScannedGenericBeanDefinition)),
-				DEFAULT_EXCLUSION_FILTER);
+	private ConfigurationClass parse(AnnotatedBeanDefinition beanDef, String beanName) {
+		ConfigurationClass configClass = new ConfigurationClass(
+				beanDef.getMetadata(), beanName, (beanDef instanceof ScannedGenericBeanDefinition));
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
-	private void parse(Class<?> clazz, String beanName) {
-		processConfigurationClass(new ConfigurationClass(clazz, beanName), DEFAULT_EXCLUSION_FILTER);
+	private ConfigurationClass parse(Class<?> clazz, String beanName) {
+		ConfigurationClass configClass = new ConfigurationClass(clazz, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
-	final void parse(@Nullable String className, String beanName) throws IOException {
+	final ConfigurationClass parse(@Nullable String className, String beanName) throws IOException {
 		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER);
+		ConfigurationClass configClass = new ConfigurationClass(reader, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
 	/**
