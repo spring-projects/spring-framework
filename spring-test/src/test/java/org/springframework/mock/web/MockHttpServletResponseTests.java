@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -629,6 +629,14 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentType()).isEqualTo("text/plain");
 		contentTypeHeader = response.getHeader(CONTENT_TYPE);
 		assertThat(contentTypeHeader).isEqualTo("text/plain");
+	}
+
+	@Test // gh-34488
+	void shouldAddMultipleContentLanguage() {
+		response.addHeader("Content-Language", "en");
+		response.addHeader("Content-Language", "fr");
+		assertThat(response.getHeaders("Content-Language")).contains("en", "fr");
+		assertThat(response.getLocale()).isEqualTo(Locale.ENGLISH);
 	}
 
 }
