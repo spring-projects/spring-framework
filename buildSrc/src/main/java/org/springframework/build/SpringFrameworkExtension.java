@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.api.tasks.testing.Test;
 import org.gradle.process.CommandLineArgumentProvider;
 
 public class SpringFrameworkExtension {
@@ -29,13 +31,18 @@ public class SpringFrameworkExtension {
 
 	public SpringFrameworkExtension(Project project) {
 		this.enableJavaPreviewFeatures = project.getObjects().property(Boolean.class);
+		project.getTasks().withType(JavaCompile.class).configureEach(javaCompile ->
+				javaCompile.getOptions().getCompilerArgumentProviders().add(asArgumentProvider()));
+		project.getTasks().withType(Test.class).configureEach(test ->
+				test.getJvmArgumentProviders().add(asArgumentProvider()));
+
 	}
 
 	public Property<Boolean> getEnableJavaPreviewFeatures() {
 		return this.enableJavaPreviewFeatures;
 	}
 
-	public CommandLineArgumentProvider asArgumentProvider() {
+	private CommandLineArgumentProvider asArgumentProvider() {
 		return () -> {
 			if (getEnableJavaPreviewFeatures().getOrElse(false)) {
 				return List.of("--enable-preview");

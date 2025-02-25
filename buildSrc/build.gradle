@@ -20,10 +20,13 @@ ext {
 dependencies {
 	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
 	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
-	implementation "com.tngtech.archunit:archunit:1.3.0"
-	implementation "org.gradle:test-retry-gradle-plugin:1.5.6"
+	implementation "com.tngtech.archunit:archunit:1.4.0"
+	implementation "org.gradle:test-retry-gradle-plugin:1.6.2"
 	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
 	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
+
+	testImplementation("org.assertj:assertj-core:${assertjVersion}")
+	testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
 }
 
 gradlePlugin {
@@ -40,6 +43,10 @@ gradlePlugin {
 			id = "org.springframework.build.localdev"
 			implementationClass = "org.springframework.build.dev.LocalDevelopmentPlugin"
 		}
+		multiReleasePlugin {
+			id = "org.springframework.build.multiReleaseJar"
+			implementationClass = "org.springframework.build.multirelease.MultiReleaseJarPlugin"
+		}
 		optionalDependenciesPlugin {
 			id = "org.springframework.build.optional-dependencies"
 			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
@@ -50,3 +57,9 @@ gradlePlugin {
 		}
 	}
 }
+
+test {
+	useJUnitPlatform()
+}
+
+jar.dependsOn check
