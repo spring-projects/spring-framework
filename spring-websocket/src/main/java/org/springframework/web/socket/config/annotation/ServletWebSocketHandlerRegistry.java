@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,11 +77,20 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	/**
 	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
 	 * used to map handshake requests.
+	 * @deprecated without a replacement since effectively the UrlPathHelper is
+	 * no longer used with {@code PathPatternParser} used by the default in
+	 * all extensions of {@code AbstractHandlerMapping}. To be removed in 7.0.
 	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
 	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	/**
+	 * Return the configured {@code UrlPathHelper}.
+	 * @deprecated without a replacement; see notice on {@link #setUrlPathHelper}
+	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
 	@Nullable
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
