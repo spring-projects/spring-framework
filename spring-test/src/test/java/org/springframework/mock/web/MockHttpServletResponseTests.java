@@ -641,4 +641,12 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentAsString()).isEqualTo(content);
 	}
 
+	@Test // gh-34488
+	void shouldAddMultipleContentLanguage() {
+		response.addHeader("Content-Language", "en");
+		response.addHeader("Content-Language", "fr");
+		assertThat(response.getHeaders("Content-Language")).contains("en", "fr");
+		assertThat(response.getLocale()).isEqualTo(Locale.ENGLISH);
+	}
+
 }
