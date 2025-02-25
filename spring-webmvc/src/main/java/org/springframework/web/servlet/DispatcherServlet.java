@@ -49,6 +49,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -1208,9 +1209,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Success and error responses may use different content types
 		request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		// Reset the response body buffer if the response is not committed already,
-		// leaving the response headers in place.
+		// Reset the response content-type header and body buffer if the response is not committed already,
+		// leaving the other response headers in place.
 		try {
+			response.setHeader(HttpHeaders.CONTENT_TYPE, null);
 			response.resetBuffer();
 		}
 		catch (IllegalStateException illegalStateException) {
