@@ -755,14 +755,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
 			String contentLanguages = value.toString();
-			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
-			Locale language = headers.getContentLanguage();
-			setLocale(language != null ? language : Locale.getDefault());
-			// Since setLocale() sets the Content-Language header to the given
-			// single Locale, we have to explicitly set the Content-Language header
-			// to the user-provided value.
-			doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, contentLanguages, true);
+			// only set the locale if we replace the header or if there was none before
+			if (replaceHeader || !this.headers.containsKey(HttpHeaders.CONTENT_LANGUAGE)) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.add(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
+				Locale language = headers.getContentLanguage();
+				this.locale = language != null ? language : Locale.getDefault();
+				doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, contentLanguages, replaceHeader);
+			}
+			else {
+				doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, contentLanguages, false);
+			}
 			return true;
 		}
 		else if (HttpHeaders.SET_COOKIE.equalsIgnoreCase(name)) {

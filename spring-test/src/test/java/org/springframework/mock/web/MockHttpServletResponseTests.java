@@ -290,6 +290,14 @@ class MockHttpServletResponseTests {
 			assertThat(response.getLocale()).isEqualTo(Locale.ITALIAN);
 		}
 
+		@Test // gh-34488
+		void shouldAddMultipleContentLanguage() {
+			response.addHeader(HttpHeaders.CONTENT_LANGUAGE, "en");
+			response.addHeader(HttpHeaders.CONTENT_LANGUAGE, "fr");
+			assertThat(response.getHeaders(HttpHeaders.CONTENT_LANGUAGE)).contains("en", "fr");
+			assertThat(response.getLocale()).isEqualTo(Locale.ENGLISH);
+		}
+
 		@Test
 		void contentLengthSetsHeader() {
 			response.setContentLength(66);
@@ -671,6 +679,5 @@ class MockHttpServletResponseTests {
 		}
 
 	}
-
 
 }
