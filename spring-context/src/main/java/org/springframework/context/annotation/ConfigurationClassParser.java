@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,10 +81,9 @@ import org.springframework.util.MultiValueMap;
  * any number of ConfigurationClass objects because one Configuration class may import
  * another using the {@link Import} annotation).
  *
- * <p>This class helps separate the concern of parsing the structure of a Configuration
- * class from the concern of registering BeanDefinition objects based on the content of
- * that model (with the exception of {@code @ComponentScan} annotations which need to be
- * registered immediately).
+ * <p>This class helps separate the concern of parsing the structure of a Configuration class
+ * from the concern of registering BeanDefinition objects based on the content of that model
+ * (except {@code @ComponentScan} annotations which need to be registered immediately).
  *
  * <p>This ASM-based implementation avoids reflection and eager class loading in order to
  * interoperate effectively with lazy class loading in a Spring ApplicationContext.
@@ -161,14 +160,22 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				ConfigurationClass configClass;
 				if (bd instanceof AnnotatedBeanDefinition annotatedBeanDef) {
-					parse(annotatedBeanDef.getMetadata(), holder.getBeanName());
+					configClass = parse(annotatedBeanDef.getMetadata(), holder.getBeanName());
 				}
 				else if (bd instanceof AbstractBeanDefinition abstractBeanDef && abstractBeanDef.hasBeanClass()) {
-					parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
+					configClass = parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
 				}
 				else {
-					parse(bd.getBeanClassName(), holder.getBeanName());
+					configClass = parse(bd.getBeanClassName(), holder.getBeanName());
+				}
+
+				// Downgrade to lite (no enhancement) in case of no instance-level @Bean methods.
+				if (!configClass.hasNonStaticBeanMethods() && ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(
+						bd.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE))) {
+					bd.setAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE,
+							ConfigurationClassUtils.CONFIGURATION_CLASS_LITE);
 				}
 			}
 			catch (BeanDefinitionStoreException ex) {
@@ -183,31 +190,37 @@ class ConfigurationClassParser {
 		this.deferredImportSelectorHandler.process();
 	}
 
-	protected final void parse(@Nullable String className, String beanName) throws IOException {
+	final ConfigurationClass parse(AnnotationMetadata metadata, String beanName) {
+		ConfigurationClass configClass = new ConfigurationClass(metadata, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
+	}
+
+	final ConfigurationClass parse(Class<?> clazz, String beanName) {
+		ConfigurationClass configClass = new ConfigurationClass(clazz, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
+	}
+
+	final ConfigurationClass parse(@Nullable String className, String beanName) throws IOException {
 		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER);
-	}
-
-	protected final void parse(Class<?> clazz, String beanName) throws IOException {
-		processConfigurationClass(new ConfigurationClass(clazz, beanName), DEFAULT_EXCLUSION_FILTER);
-	}
-
-	protected final void parse(AnnotationMetadata metadata, String beanName) throws IOException {
-		processConfigurationClass(new ConfigurationClass(metadata, beanName), DEFAULT_EXCLUSION_FILTER);
+		ConfigurationClass configClass = new ConfigurationClass(reader, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
 	/**
 	 * Validate each {@link ConfigurationClass} object.
 	 * @see ConfigurationClass#validate
 	 */
-	public void validate() {
+	void validate() {
 		for (ConfigurationClass configClass : this.configurationClasses.keySet()) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
-	public Set<ConfigurationClass> getConfigurationClasses() {
+	Set<ConfigurationClass> getConfigurationClasses() {
 		return this.configurationClasses.keySet();
 	}
 
@@ -216,7 +229,7 @@ class ConfigurationClassParser {
 				Collections.emptyList());
 	}
 
-	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
+	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) {
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
@@ -448,7 +461,7 @@ class ConfigurationClassParser {
 
 
 	/**
-	 * Returns {@code @Import} class, considering all meta-annotations.
+	 * Returns {@code @Import} classes, considering all meta-annotations.
 	 */
 	private Set<SourceClass> getImports(SourceClass sourceClass) throws IOException {
 		Set<SourceClass> imports = new LinkedHashSet<>();
@@ -636,7 +649,7 @@ class ConfigurationClassParser {
 
 		private final MultiValueMap<String, AnnotationMetadata> imports = new LinkedMultiValueMap<>();
 
-		public void registerImport(AnnotationMetadata importingClass, String importedClass) {
+		void registerImport(AnnotationMetadata importingClass, String importedClass) {
 			this.imports.add(importedClass, importingClass);
 		}
 
@@ -691,7 +704,7 @@ class ConfigurationClassParser {
 		 * @param configClass the source configuration class
 		 * @param importSelector the selector to handle
 		 */
-		public void handle(ConfigurationClass configClass, DeferredImportSelector importSelector) {
+		void handle(ConfigurationClass configClass, DeferredImportSelector importSelector) {
 			DeferredImportSelectorHolder holder = new DeferredImportSelectorHolder(configClass, importSelector);
 			if (this.deferredImportSelectors == null) {
 				DeferredImportSelectorGroupingHandler handler = new DeferredImportSelectorGroupingHandler();
@@ -703,7 +716,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		public void process() {
+		void process() {
 			List<DeferredImportSelectorHolder> deferredImports = this.deferredImportSelectors;
 			this.deferredImportSelectors = null;
 			try {
@@ -727,7 +740,7 @@ class ConfigurationClassParser {
 
 		private final Map<AnnotationMetadata, ConfigurationClass> configurationClasses = new HashMap<>();
 
-		public void register(DeferredImportSelectorHolder deferredImport) {
+		void register(DeferredImportSelectorHolder deferredImport) {
 			Class<? extends Group> group = deferredImport.getImportSelector().getImportGroup();
 			DeferredImportSelectorGrouping grouping = this.groupings.computeIfAbsent(
 					(group != null ? group : deferredImport),
@@ -737,7 +750,7 @@ class ConfigurationClassParser {
 					deferredImport.getConfigurationClass());
 		}
 
-		public void processGroupImports() {
+		void processGroupImports() {
 			for (DeferredImportSelectorGrouping grouping : this.groupings.values()) {
 				Predicate<String> exclusionFilter = grouping.getCandidateFilter();
 				grouping.getImports().forEach(entry -> {
@@ -775,16 +788,16 @@ class ConfigurationClassParser {
 
 		private final DeferredImportSelector importSelector;
 
-		public DeferredImportSelectorHolder(ConfigurationClass configClass, DeferredImportSelector selector) {
+		DeferredImportSelectorHolder(ConfigurationClass configClass, DeferredImportSelector selector) {
 			this.configurationClass = configClass;
 			this.importSelector = selector;
 		}
 
-		public ConfigurationClass getConfigurationClass() {
+		ConfigurationClass getConfigurationClass() {
 			return this.configurationClass;
 		}
 
-		public DeferredImportSelector getImportSelector() {
+		DeferredImportSelector getImportSelector() {
 			return this.importSelector;
 		}
 	}
@@ -800,7 +813,7 @@ class ConfigurationClassParser {
 			this.group = group;
 		}
 
-		public void add(DeferredImportSelectorHolder deferredImport) {
+		void add(DeferredImportSelectorHolder deferredImport) {
 			this.deferredImports.add(deferredImport);
 		}
 
@@ -808,7 +821,7 @@ class ConfigurationClassParser {
 		 * Return the imports defined by the group.
 		 * @return each import with its associated configuration class
 		 */
-		public Iterable<Group.Entry> getImports() {
+		Iterable<Group.Entry> getImports() {
 			for (DeferredImportSelectorHolder deferredImport : this.deferredImports) {
 				this.group.process(deferredImport.getConfigurationClass().getMetadata(),
 						deferredImport.getImportSelector());
@@ -816,7 +829,7 @@ class ConfigurationClassParser {
 			return this.group.selectImports();
 		}
 
-		public Predicate<String> getCandidateFilter() {
+		Predicate<String> getCandidateFilter() {
 			Predicate<String> mergedFilter = DEFAULT_EXCLUSION_FILTER;
 			for (DeferredImportSelectorHolder deferredImport : this.deferredImports) {
 				Predicate<String> selectorFilter = deferredImport.getImportSelector().getExclusionFilter();
