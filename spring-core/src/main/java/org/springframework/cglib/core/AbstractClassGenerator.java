@@ -123,13 +123,17 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 		}
 
 		public Object get(AbstractClassGenerator gen, boolean useCache) {
-			if (!useCache) {
-				return gen.generate(ClassLoaderData.this);
-			}
-			else {
+			// SPRING PATCH BEGIN
+			Object value = null;
+			if (useCache) {
 				Object cachedValue = generatedClasses.get(gen);
-				return gen.unwrapCachedValue(cachedValue);
+				value = gen.unwrapCachedValue(cachedValue);
 			}
+			if (value == null) {  // fallback when cached WeakReference returns null
+				value = gen.generate(ClassLoaderData.this);
+			}
+			return value;
+			// SPRING PATCH END
 		}
 	}
 
