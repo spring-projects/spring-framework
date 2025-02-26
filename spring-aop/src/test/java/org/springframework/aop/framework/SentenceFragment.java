@@ -16,29 +16,26 @@
 
 package org.springframework.aop.framework;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-
-import org.springframework.cglib.proxy.Enhancer;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Mikaël Francoeur
- * @since 6.2
- * @see JdkProxyExceptionHandlingTests
+ * {@code @SentenceFragment} is used to configure a sentence fragment for use
+ * with JUnit Jupiter's
+ * {@link org.junit.jupiter.api.DisplayNameGenerator.IndicativeSentences}
+ * {@code DisplayNameGenerator}.
+ *
+ * @author Sam Brannen
+ * @since 7.0
+ * @see SentenceFragmentDisplayNameGenerator
+ * @see org.junit.jupiter.api.DisplayName
  */
-@DisplayName("CGLIB proxy exception handling")
-class CglibProxyExceptionHandlingTests extends AbstractProxyExceptionHandlingTests {
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@interface SentenceFragment {
 
-	@BeforeEach
-	void setup() {
-		proxyFactory.setProxyTargetClass(true);
-	}
-
-	@Override
-	protected void assertProxyType(Object proxy) {
-		assertThat(Enhancer.isEnhanced(proxy.getClass())).isTrue();
-	}
+	String value();
 
 }

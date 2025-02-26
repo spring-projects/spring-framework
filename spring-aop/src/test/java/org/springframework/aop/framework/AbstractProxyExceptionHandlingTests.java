@@ -22,6 +22,7 @@ import java.util.Objects;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.IndicativeSentencesGeneration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.mock;
  * @see JdkProxyExceptionHandlingTests
  * @see CglibProxyExceptionHandlingTests
  */
+@IndicativeSentencesGeneration(generator = SentenceFragmentDisplayNameGenerator.class)
 abstract class AbstractProxyExceptionHandlingTests {
 
 	private static final RuntimeException uncheckedException = new RuntimeException();
@@ -79,6 +81,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 
 
 	@Nested
+	@SentenceFragment("when there is one interceptor")
 	class WhenThereIsOneInterceptorTests {
 
 		private @Nullable Throwable throwableSeenByInterceptor;
@@ -91,6 +94,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 		}
 
 		@Test
+		@SentenceFragment("and the target throws an undeclared checked exception")
 		void targetThrowsUndeclaredCheckedException() throws DeclaredCheckedException {
 			willAnswer(sneakyThrow(undeclaredCheckedException)).given(target).doSomething();
 			invokeProxy();
@@ -101,6 +105,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 		}
 
 		@Test
+		@SentenceFragment("and the target throws a declared checked exception")
 		void targetThrowsDeclaredCheckedException() throws DeclaredCheckedException {
 			willThrow(declaredCheckedException).given(target).doSomething();
 			invokeProxy();
@@ -109,6 +114,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 		}
 
 		@Test
+		@SentenceFragment("and the target throws an unchecked exception")
 		void targetThrowsUncheckedException() throws DeclaredCheckedException {
 			willThrow(uncheckedException).given(target).doSomething();
 			invokeProxy();
@@ -131,6 +137,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 
 
 	@Nested
+	@SentenceFragment("when there are no interceptors")
 	class WhenThereAreNoInterceptorsTests {
 
 		@BeforeEach
@@ -140,6 +147,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 		}
 
 		@Test
+		@SentenceFragment("and the target throws an undeclared checked exception")
 		void targetThrowsUndeclaredCheckedException() throws DeclaredCheckedException {
 			willAnswer(sneakyThrow(undeclaredCheckedException)).given(target).doSomething();
 			invokeProxy();
@@ -149,6 +157,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 		}
 
 		@Test
+		@SentenceFragment("and the target throws a declared checked exception")
 		void targetThrowsDeclaredCheckedException() throws DeclaredCheckedException {
 			willThrow(declaredCheckedException).given(target).doSomething();
 			invokeProxy();
@@ -156,6 +165,7 @@ abstract class AbstractProxyExceptionHandlingTests {
 		}
 
 		@Test
+		@SentenceFragment("and the target throws an unchecked exception")
 		void targetThrowsUncheckedException() throws DeclaredCheckedException {
 			willThrow(uncheckedException).given(target).doSomething();
 			invokeProxy();
