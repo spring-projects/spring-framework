@@ -159,6 +159,9 @@ public final class GenericTypeResolver {
 			if (genericType instanceof TypeVariable<?> typeVariable) {
 				ResolvableType resolvedTypeVariable = resolveVariable(
 						typeVariable, ResolvableType.forClass(contextClass));
+				if (resolvedTypeVariable == ResolvableType.NONE) {
+					resolvedTypeVariable = ResolvableType.forVariableBounds(typeVariable);
+				}
 				if (resolvedTypeVariable != ResolvableType.NONE) {
 					Class<?> resolved = resolvedTypeVariable.resolve();
 					if (resolved != null) {
@@ -176,6 +179,9 @@ public final class GenericTypeResolver {
 						Type typeArgument = typeArguments[i];
 						if (typeArgument instanceof TypeVariable<?> typeVariable) {
 							ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
+							if (resolvedTypeArgument == ResolvableType.NONE) {
+								resolvedTypeArgument = ResolvableType.forVariableBounds(typeVariable);
+							}
 							if (resolvedTypeArgument != ResolvableType.NONE) {
 								generics[i] = resolvedTypeArgument;
 							}
@@ -229,7 +235,7 @@ public final class GenericTypeResolver {
 				return resolvedType;
 			}
 		}
-		return ResolvableType.forVariableBounds(typeVariable);
+		return ResolvableType.NONE;
 	}
 
 	/**

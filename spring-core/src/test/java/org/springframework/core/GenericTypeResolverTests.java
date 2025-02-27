@@ -243,6 +243,13 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType.toString()).isEqualTo("java.util.List<E>");
 	}
 
+	@Test
+	void resolveTypeFromGenericDefaultMethod() {
+		Type type = method(InterfaceWithDefaultMethod.class, "get", InheritsDefaultMethod.AbstractType.class).getGenericParameterTypes()[0];
+		Type resolvedType = resolveType(type, InheritsDefaultMethod.class);
+		assertThat(resolvedType).isEqualTo(InheritsDefaultMethod.ConcreteType.class);
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -451,6 +458,22 @@ class GenericTypeResolverTests {
 
 		List<T> get() {
 			return List.of();
+		}
+	}
+
+	public interface InterfaceWithDefaultMethod<T extends InheritsDefaultMethod.AbstractType> {
+
+		default String get(T input) {
+			throw new UnsupportedOperationException();
+		}
+
+		interface AbstractType {
+		}
+	}
+
+	public static class InheritsDefaultMethod implements InterfaceWithDefaultMethod<InheritsDefaultMethod.ConcreteType> {
+
+		static class ConcreteType implements AbstractType {
 		}
 	}
 
