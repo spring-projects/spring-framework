@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1234,7 +1234,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		int rsIndex = 0;
 		int updateIndex = 0;
 		boolean moreResults;
-		if (!this.skipResultsProcessing) {
+		if (!isSkipResultsProcessing()) {
 			do {
 				if (updateCount == -1) {
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
@@ -1243,7 +1243,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						rsIndex++;
 					}
 					else {
-						if (!this.skipUndeclaredResults) {
+						if (!isSkipUndeclaredResults()) {
 							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
 							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
 							if (logger.isTraceEnabled()) {
@@ -1262,7 +1262,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						updateIndex++;
 					}
 					else {
-						if (!this.skipUndeclaredResults) {
+						if (!isSkipUndeclaredResults()) {
 							String undeclaredName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
 							if (logger.isTraceEnabled()) {
 								logger.trace("Added default SqlReturnUpdateCount parameter named '" + undeclaredName + "'");
