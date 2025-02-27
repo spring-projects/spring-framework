@@ -1,7 +1,6 @@
 plugins {
-	id "com.gradle.develocity" version "3.19"
-	id "io.spring.ge.conventions" version "0.0.17"
-	id "org.gradle.toolchains.foojay-resolver-convention" version "0.7.0"
+	id "io.spring.develocity.conventions" version "0.0.22"
+	id "org.gradle.toolchains.foojay-resolver-convention" version "0.9.0"
 }
 
 include "spring-aop"
