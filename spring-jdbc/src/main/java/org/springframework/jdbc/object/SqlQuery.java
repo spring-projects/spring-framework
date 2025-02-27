@@ -26,9 +26,11 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
+import org.springframework.util.Assert;
 
 /**
  * Reusable operation object representing an SQL query.
@@ -112,7 +114,10 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	public List<T> execute(Object @Nullable [] params, @Nullable Map<?, ?> context) throws DataAccessException {
 		validateParameters(params);
 		RowMapper<T> rowMapper = newRowMapper(params, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(params), rowMapper);
+		List<T> result = getJdbcTemplate().query(newPreparedStatementCreator(params),
+				new RowMapperResultSetExtractor<>(rowMapper, getRowsExpected()));
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 	/**
@@ -229,7 +234,10 @@ public abstract class SqlQuery<T> extends SqlOperation {
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
 		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
 		RowMapper<T> rowMapper = newRowMapper(params, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
+		List<T> result = getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params),
+				new RowMapperResultSetExtractor<>(rowMapper, getRowsExpected()));
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 	/**
