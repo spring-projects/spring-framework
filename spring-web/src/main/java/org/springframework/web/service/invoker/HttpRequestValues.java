@@ -465,7 +465,7 @@ public class HttpRequestValues {
 
 			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
 			for (Map.Entry<String, List<String>> entry : requestParams.entrySet()) {
-				String nameVar = entry.getKey().replace(":", "%3A"); // suppress treatment as regex
+				String nameVar = "queryParam-" + entry.getKey().replace(":", "%3A"); // suppress treatment as regex
 				uriVars.put(nameVar, entry.getKey());
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					String valueVar = nameVar + "[" + j + "]";

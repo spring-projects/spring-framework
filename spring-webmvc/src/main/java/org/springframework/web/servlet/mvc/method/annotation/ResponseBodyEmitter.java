@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
@@ -72,20 +72,19 @@ public class ResponseBodyEmitter {
 
 	private @Nullable Handler handler;
 
+	private final AtomicReference<State> state = new AtomicReference<>(State.START);
+
 	/** Store send data before handler is initialized. */
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
-
-	/** Store successful completion before the handler is initialized. */
-	private final AtomicBoolean complete = new AtomicBoolean();
 
 	/** Store an error before the handler is initialized. */
 	private @Nullable Throwable failure;
 
-	private final DefaultCallback timeoutCallback = new DefaultCallback();
+	private final TimeoutCallback timeoutCallback = new TimeoutCallback();
 
 	private final ErrorCallback errorCallback = new ErrorCallback();
 
-	private final DefaultCallback completionCallback = new DefaultCallback();
+	private final CompletionCallback completionCallback = new CompletionCallback();
 
 
 	/**
@@ -125,7 +124,7 @@ public class ResponseBodyEmitter {
 			this.earlySendAttempts.clear();
 		}
 
-		if (this.complete.get()) {
+		if (this.state.get() == State.COMPLETE) {
 			if (this.failure != null) {
 				this.handler.completeWithError(this.failure);
 			}
@@ -141,7 +140,7 @@ public class ResponseBodyEmitter {
 	}
 
 	void initializeWithError(Throwable ex) {
-		if (this.complete.compareAndSet(false, true)) {
+		if (this.state.compareAndSet(State.START, State.COMPLETE)) {
 			this.failure = ex;
 			this.earlySendAttempts.clear();
 			this.errorCallback.accept(ex);
@@ -183,8 +182,7 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		Assert.state(!this.complete.get(), () -> "ResponseBodyEmitter has already completed" +
-				(this.failure != null ? " with error: " + this.failure : ""));
+		assertNotComplete();
 		if (this.handler != null) {
 			try {
 				this.handler.send(object, mediaType);
@@ -211,9 +209,13 @@ public class ResponseBodyEmitter {
 	 * @since 6.0.12
 	 */
 	public synchronized void send(Set<DataWithMediaType> items) throws IOException {
-		Assert.state(!this.complete.get(), () -> "ResponseBodyEmitter has already completed" +
-				(this.failure != null ? " with error: " + this.failure : ""));
+		assertNotComplete();
 		sendInternal(items);
+	}
+
+	private void assertNotComplete() {
+		Assert.state(this.state.get() == State.START, () -> "ResponseBodyEmitter has already completed" +
+				(this.failure != null ? " with error: " + this.failure : ""));
 	}
 
 	private void sendInternal(Set<DataWithMediaType> items) throws IOException {
@@ -245,7 +247,7 @@ public class ResponseBodyEmitter {
 	 * related events such as an error while {@link #send(Object) sending}.
 	 */
 	public void complete() {
-		if (this.complete.compareAndSet(false, true) && this.handler != null) {
+		if (trySetComplete() && this.handler != null) {
 			this.handler.complete();
 		}
 	}
@@ -262,12 +264,17 @@ public class ResponseBodyEmitter {
 	 * {@link #send(Object) sending}.
 	 */
 	public void completeWithError(Throwable ex) {
-		if (this.complete.compareAndSet(false, true)) {
+		if (trySetComplete()) {
 			this.failure = ex;
 			if (this.handler != null) {
 				this.handler.completeWithError(ex);
 			}
 		}
+	}
+
+	private boolean trySetComplete() {
+		return (this.state.compareAndSet(State.START, State.COMPLETE) ||
+				(this.state.compareAndSet(State.TIMEOUT, State.COMPLETE)));
 	}
 
 	/**
@@ -364,7 +371,7 @@ public class ResponseBodyEmitter {
 	}
 
 
-	private class DefaultCallback implements Runnable {
+	private class TimeoutCallback implements Runnable {
 
 		private final List<Runnable> delegates = new ArrayList<>(1);
 
@@ -374,9 +381,10 @@ public class ResponseBodyEmitter {
 
 		@Override
 		public void run() {
-			ResponseBodyEmitter.this.complete.compareAndSet(false, true);
-			for (Runnable delegate : this.delegates) {
-				delegate.run();
+			if (ResponseBodyEmitter.this.state.compareAndSet(State.START, State.TIMEOUT)) {
+				for (Runnable delegate : this.delegates) {
+					delegate.run();
+				}
 			}
 		}
 	}
@@ -392,11 +400,51 @@ public class ResponseBodyEmitter {
 
 		@Override
 		public void accept(Throwable t) {
-			ResponseBodyEmitter.this.complete.compareAndSet(false, true);
-			for(Consumer<Throwable> delegate : this.delegates) {
-				delegate.accept(t);
+			if (ResponseBodyEmitter.this.state.compareAndSet(State.START, State.COMPLETE)) {
+				for (Consumer<Throwable> delegate : this.delegates) {
+					delegate.accept(t);
+				}
 			}
 		}
+	}
+
+
+	private class CompletionCallback implements Runnable {
+
+		private final List<Runnable> delegates = new ArrayList<>(1);
+
+		public synchronized void addDelegate(Runnable delegate) {
+			this.delegates.add(delegate);
+		}
+
+		@Override
+		public void run() {
+			if (ResponseBodyEmitter.this.state.compareAndSet(State.START, State.COMPLETE)) {
+				for (Runnable delegate : this.delegates) {
+					delegate.run();
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Represents a state for {@link ResponseBodyEmitter}.
+	 * <p><pre>
+	 *     START ----+
+	 *       |       |
+	 *       v       |
+	 *    TIMEOUT    |
+	 *       |       |
+	 *       v       |
+	 *   COMPLETE <--+
+	 * </pre>
+	 * @since 6.2.4
+	 */
+	private enum State {
+		START,
+		TIMEOUT, // handling a timeout
+		COMPLETE
 	}
 
 }

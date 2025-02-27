@@ -79,17 +79,19 @@ class HttpRequestValuesTests {
 
 		assertThat(uriTemplate)
 				.isEqualTo("/path?" +
-						"{param1}={param1[0]}&" +
-						"{param2}={param2[0]}&" +
-						"{param2}={param2[1]}");
+						"{queryParam-param1}={queryParam-param1[0]}&" +
+						"{queryParam-param2}={queryParam-param2[0]}&" +
+						"{queryParam-param2}={queryParam-param2[1]}");
 
 		assertThat(requestValues.getUriVariables())
-				.containsOnlyKeys("param1", "param2", "param1[0]", "param2[0]", "param2[1]")
-				.containsEntry("param1", "param1")
-				.containsEntry("param2", "param2")
-				.containsEntry("param1[0]", "1st value")
-				.containsEntry("param2[0]", "2nd value A")
-				.containsEntry("param2[1]", "2nd value B");
+				.containsOnlyKeys(
+						"queryParam-param1", "queryParam-param2", "queryParam-param1[0]",
+						"queryParam-param2[0]", "queryParam-param2[1]")
+				.containsEntry("queryParam-param1", "param1")
+				.containsEntry("queryParam-param2", "param2")
+				.containsEntry("queryParam-param1[0]", "1st value")
+				.containsEntry("queryParam-param2[0]", "2nd value A")
+				.containsEntry("queryParam-param2[1]", "2nd value B");
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
 				.encode()
@@ -107,7 +109,7 @@ class HttpRequestValuesTests {
 				.build();
 
 		String uriTemplate = requestValues.getUriTemplate();
-		assertThat(uriTemplate).isEqualTo("/path?{userId%3Aeq}={userId%3Aeq[0]}");
+		assertThat(uriTemplate).isEqualTo("/path?{queryParam-userId%3Aeq}={queryParam-userId%3Aeq[0]}");
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
 				.encode()
@@ -162,7 +164,7 @@ class HttpRequestValuesTests {
 		String uriTemplate = requestValues.getUriTemplate();
 		assertThat(uriTemplate).isNotNull();
 
-		assertThat(uriTemplate).isEqualTo("/path?{query param}={query param[0]}");
+		assertThat(uriTemplate).isEqualTo("/path?{queryParam-query param}={queryParam-query param[0]}");
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
 				.encode()
