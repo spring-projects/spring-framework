@@ -85,14 +85,18 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * Set the number of rows expected.
 	 * <p>This can be used to ensure efficient storage of results. The
 	 * default behavior is not to expect any specific number of rows.
+	 * @deprecated since 6.2.4 with no replacement; it's for internal use only
 	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
 	public void setRowsExpected(int rowsExpected) {
 		this.rowsExpected = rowsExpected;
 	}
 
 	/**
 	 * Get the number of rows expected.
+	 * @deprecated since 6.2.4 with no replacement; it's for internal use only
 	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
 	public int getRowsExpected() {
 		return this.rowsExpected;
 	}
