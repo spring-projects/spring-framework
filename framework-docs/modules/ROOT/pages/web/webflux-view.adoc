@@ -1,5 +1,6 @@
 [[webflux-view]]
 = View Technologies
+
 [.small]#xref:web/webmvc-view.adoc[See equivalent in the Servlet stack]#
 
 The rendering of views in Spring WebFlux is pluggable. Whether you decide to
