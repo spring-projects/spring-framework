@@ -1,6 +1,7 @@
 [[mvc-view]]
 = View Technologies
 :page-section-summary-toc: 1
+
 [.small]#xref:web/webflux-view.adoc[See equivalent in the Reactive stack]#
 
 The rendering of views in Spring MVC is pluggable. Whether you decide to use

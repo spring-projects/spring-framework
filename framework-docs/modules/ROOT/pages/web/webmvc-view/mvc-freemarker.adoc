@@ -130,6 +130,7 @@ the `Configuration` object.
 
 [[mvc-view-freemarker-forms]]
 == Form Handling
+[.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-forms[See equivalent in the Reactive stack]#
 
 Spring provides a tag library for use in JSPs that contains, among others, a
 `<spring:bind/>` element. This element primarily lets forms display values from
