@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.jspecify.annotations.Nullable;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * {@link WebSocketHandlerRegistry} with Spring MVC handler mappings for the
@@ -47,8 +42,6 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	private final List<ServletWebSocketHandlerRegistration> registrations = new ArrayList<>(4);
 
 	private int order = 1;
-
-	private @Nullable UrlPathHelper urlPathHelper;
 
 
 	public ServletWebSocketHandlerRegistry() {
@@ -74,23 +67,6 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	public int getOrder() {
 		return this.order;
-	}
-
-	/**
-	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
-	 * used to map handshake requests.
-	 * @deprecated use of {@link PathMatcher} and {@link UrlPathHelper} is deprecated
-	 * for use at runtime in web modules in favor of parsed patterns with
-	 * {@link PathPatternParser}.
-	 */
-	@Deprecated(since = "7.0", forRemoval = true)
-	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
-		this.urlPathHelper = urlPathHelper;
-	}
-
-	@Deprecated(since = "7.0", forRemoval = true)
-	public @Nullable UrlPathHelper getUrlPathHelper() {
-		return this.urlPathHelper;
 	}
 
 
@@ -132,9 +108,6 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 		WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
 		hm.setUrlMap(urlMap);
 		hm.setOrder(this.order);
-		if (this.urlPathHelper != null) {
-			hm.setUrlPathHelper(this.urlPathHelper);
-		}
 		return hm;
 	}
 
