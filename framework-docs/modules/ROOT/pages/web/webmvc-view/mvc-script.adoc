@@ -47,7 +47,7 @@ through https://www.webjars.org/[WebJars].
 
 [[mvc-view-script-integrate]]
 == Script Templates
-[.small]#xref:web/webflux-view.adoc#webflux-view-script[See equivalent in the Reactive stack]#
+[.small]#xref:web/webflux-view.adoc#webflux-view-script-integrate[See equivalent in the Reactive stack]#
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
