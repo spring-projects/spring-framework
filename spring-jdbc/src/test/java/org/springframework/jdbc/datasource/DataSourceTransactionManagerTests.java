@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class DataSourceTransactionManagerTests {
 
 	protected DataSource ds = mock();
 
-	protected Connection con = mock();
+	protected ConnectionProxy con = mock();
 
 	protected DataSourceTransactionManager tm;
 
@@ -81,6 +81,7 @@ public class DataSourceTransactionManagerTests {
 	void setup() throws Exception {
 		tm = createTransactionManager(ds);
 		given(ds.getConnection()).willReturn(con);
+		given(con.getTargetConnection()).willThrow(new UnsupportedOperationException());
 	}
 
 	protected DataSourceTransactionManager createTransactionManager(DataSource ds) {
@@ -1073,9 +1074,9 @@ public class DataSourceTransactionManagerTests {
 					Connection tCon = dsProxy.getConnection();
 					tCon.getWarnings();
 					tCon.clearWarnings();
-					assertThat(((ConnectionProxy) dsProxy.getConnection()).getTargetConnection()).isEqualTo(con);
+					assertThat(((ConnectionProxy) tCon).getTargetConnection()).isEqualTo(con);
 					// should be ignored
-					dsProxy.getConnection().close();
+					tCon.close();
 				}
 				catch (SQLException ex) {
 					throw new UncategorizedSQLException("", "", ex);
@@ -1109,9 +1110,9 @@ public class DataSourceTransactionManagerTests {
 					Connection tCon = dsProxy.getConnection();
 					assertThatExceptionOfType(SQLException.class).isThrownBy(tCon::getWarnings);
 					tCon.clearWarnings();
-					assertThat(((ConnectionProxy) dsProxy.getConnection()).getTargetConnection()).isEqualTo(con);
+					assertThat(((ConnectionProxy) tCon).getTargetConnection()).isEqualTo(con);
 					// should be ignored
-					dsProxy.getConnection().close();
+					tCon.close();
 				}
 				catch (SQLException ex) {
 					throw new UncategorizedSQLException("", "", ex);
@@ -1120,6 +1121,42 @@ public class DataSourceTransactionManagerTests {
 		});
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(con).commit();
+		ordered.verify(con).setAutoCommit(true);
+		verify(con).close();
+	}
+
+	@Test
+	void testTransactionAwareDataSourceProxyWithEarlyConnection() throws Exception {
+		given(ds.getConnection()).willReturn(mock(Connection.class), con);
+		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
+
+		TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
+		dsProxy.setLazyTransactionalConnections(false);
+		Connection tCon = dsProxy.getConnection();
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				// something transactional
+				assertThat(DataSourceUtils.getConnection(ds)).isEqualTo(con);
+				try {
+					// should close the early Connection obtained before the transaction
+					tCon.close();
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
+			}
+		});
+
+		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
+
 		InOrder ordered = inOrder(con);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).commit();
