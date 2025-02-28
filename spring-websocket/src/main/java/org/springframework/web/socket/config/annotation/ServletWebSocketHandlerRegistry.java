@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.jspecify.annotations.Nullable;
-
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
@@ -31,7 +29,6 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@link WebSocketHandlerRegistry} with Spring MVC handler mappings for the
@@ -45,8 +42,6 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	private final List<ServletWebSocketHandlerRegistration> registrations = new ArrayList<>(4);
 
 	private int order = 1;
-
-	private @Nullable UrlPathHelper urlPathHelper;
 
 
 	public ServletWebSocketHandlerRegistry() {
@@ -72,27 +67,6 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 
 	public int getOrder() {
 		return this.order;
-	}
-
-	/**
-	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
-	 * used to map handshake requests.
-	 * @deprecated without a replacement since effectively the UrlPathHelper is
-	 * no longer used with {@code PathPatternParser} used by the default in
-	 * all extensions of {@code AbstractHandlerMapping}. To be removed in 7.0.
-	 */
-	@Deprecated(since = "6.2.4", forRemoval = true)
-	public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
-		this.urlPathHelper = urlPathHelper;
-	}
-
-	/**
-	 * Return the configured {@code UrlPathHelper}.
-	 * @deprecated without a replacement; see notice on {@link #setUrlPathHelper}
-	 */
-	@Deprecated(since = "6.2.4", forRemoval = true)
-		public @Nullable UrlPathHelper getUrlPathHelper() {
-		return this.urlPathHelper;
 	}
 
 
@@ -134,9 +108,6 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 		WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
 		hm.setUrlMap(urlMap);
 		hm.setOrder(this.order);
-		if (this.urlPathHelper != null) {
-			hm.setUrlPathHelper(this.urlPathHelper);
-		}
 		return hm;
 	}
 
