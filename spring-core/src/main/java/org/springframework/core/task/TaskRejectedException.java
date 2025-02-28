@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,13 @@ public class TaskRejectedException extends RejectedExecutionException {
 
 	private static String executorDescription(Executor executor) {
 		if (executor instanceof ExecutorService executorService) {
-			return "ExecutorService in " + (executorService.isShutdown() ? "shutdown" : "active") + " state";
+			try {
+				return "ExecutorService in " + (executorService.isShutdown() ? "shutdown" : "active") + " state";
+			}
+			catch (Exception ex) {
+				// UnsupportedOperationException/IllegalStateException from ManagedExecutorService.isShutdown()
+				// Falling back to toString() below.
+			}
 		}
 		return executor.toString();
 	}
