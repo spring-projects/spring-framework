@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,13 +209,23 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 						sb.append('[').append(this.target).append(']');
 					}
 					else {
-						sb.append(" from DataSource [").append(this.targetDataSource).append(']');
+						sb.append("from DataSource [").append(this.targetDataSource).append(']');
 					}
 					return sb.toString();
 				}
 				case "close" -> {
 					// Handle close method: only close if not within a transaction.
-					DataSourceUtils.doReleaseConnection(this.target, this.targetDataSource);
+					if (this.target != null) {
+						ConnectionHolder conHolder = (ConnectionHolder)
+								TransactionSynchronizationManager.getResource(this.targetDataSource);
+						if (conHolder != null && conHolder.hasConnection() && conHolder.getConnection() == this.target) {
+							// It's the transactional Connection: Don't close it.
+							conHolder.released();
+						}
+						else {
+							DataSourceUtils.doCloseConnection(this.target, this.targetDataSource);
+						}
+					}
 					this.closed = true;
 					return null;
 				}
