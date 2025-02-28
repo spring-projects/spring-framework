@@ -148,6 +148,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 								.secure(cookie.isSecure())
 								.httpOnly(cookie.isHttpOnly())
 								.sameSite(getSameSite(cookie))
+								.partitioned(getPartitioned(cookie))
 								.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
@@ -158,6 +159,13 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 			return defaultCookie.sameSite().name();
 		}
 		return null;
+	}
+
+	private static boolean getPartitioned(Cookie cookie) {
+		if (cookie instanceof DefaultCookie defaultCookie) {
+			return defaultCookie.isPartitioned();
+		}
+		return false;
 	}
 
 	/**

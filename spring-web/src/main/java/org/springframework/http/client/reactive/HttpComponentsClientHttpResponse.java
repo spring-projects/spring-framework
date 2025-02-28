@@ -90,6 +90,7 @@ class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 										.maxAge(getMaxAgeSeconds(cookie))
 										.secure(cookie.isSecure())
 										.httpOnly(cookie.containsAttribute("httponly"))
+										.partitioned(cookie.containsAttribute("partitioned"))
 										.sameSite(cookie.getAttribute("samesite"))
 										.build());
 					}
