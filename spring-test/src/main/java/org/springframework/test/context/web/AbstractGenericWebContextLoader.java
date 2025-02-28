@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import jakarta.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
@@ -120,10 +121,41 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * @throws Exception if context loading failed
 	 * @since 6.0
 	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @deprecated as of Spring Framework 6.2.4, in favor of
+	 * {@link #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)};
+	 * to be removed in Spring Framework 8.0
 	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
 	@Override
+	@SuppressWarnings("removal")
 	public final GenericWebApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig)
 			throws Exception {
+
+		return loadContext(mergedConfig, true);
+	}
+
+	/**
+	 * Load a {@link GenericWebApplicationContext} for AOT build-time processing based
+	 * on the supplied {@link MergedContextConfiguration}.
+	 * <p>In contrast to {@link #loadContext(MergedContextConfiguration)}, this
+	 * method does not
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
+	 * refresh} the {@code ApplicationContext} or
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
+	 * register a JVM shutdown hook} for it. Otherwise, this method implements
+	 * behavior identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @param runtimeHints the runtime hints
+	 * @return a new web application context
+	 * @throws Exception if context loading failed
+	 * @since 6.2.4
+	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
+	 */
+	@Override
+	public final GenericWebApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig,
+			RuntimeHints runtimeHints) throws Exception {
+
 		return loadContext(mergedConfig, true);
 	}
 
@@ -187,7 +219,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * register a JVM shutdown hook for it
 	 * @return a new web application context
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
-	 * @see org.springframework.test.context.aot.AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see org.springframework.test.context.aot.AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
 	 */
 	private GenericWebApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean forAotProcessing) throws Exception {
