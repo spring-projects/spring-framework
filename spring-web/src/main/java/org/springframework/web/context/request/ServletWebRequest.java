@@ -236,6 +236,9 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private boolean validateIfNoneMatch(@Nullable String etag) {
 		Enumeration<String> ifNoneMatchHeaders = getRequest().getHeaders(HttpHeaders.IF_NONE_MATCH);
+		if(ifNoneMatchHeaders==null){
+			return false;
+		}
 		if (!ifNoneMatchHeaders.hasMoreElements()) {
 			return false;
 		}
