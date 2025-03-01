@@ -251,7 +251,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Boolean lockFlag = isCurrentThreadAllowedToHoldSingletonLock();
 		boolean acquireLock = !Boolean.FALSE.equals(lockFlag);
 		boolean locked = (acquireLock && this.singletonLock.tryLock());
-		boolean lenient = false;
 		try {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
@@ -266,7 +265,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 									Thread.currentThread().getName() + "\" while other thread holds " +
 									"singleton lock for other beans " + this.singletonsCurrentlyInCreation);
 						}
-						lenient = true;
 						this.lenientCreationLock.lock();
 						try {
 							this.singletonsInLenientCreation.add(beanName);
@@ -327,7 +325,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					// Try late locking for waiting on specific bean to be finished.
 					this.singletonLock.lock();
 					locked = true;
-					// Singleton object should have appeared in the meantime.
+					// Lock-created singleton object should have appeared in the meantime.
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject != null) {
 						return singletonObject;
@@ -341,8 +339,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					this.suppressedExceptions = new LinkedHashSet<>();
 				}
 				try {
-					singletonObject = singletonFactory.getObject();
-					newSingleton = true;
+					// Leniently created singleton object could have appeared in the meantime.
+					singletonObject = this.singletonObjects.get(beanName);
+					if (singletonObject == null) {
+						singletonObject = singletonFactory.getObject();
+						newSingleton = true;
+					}
 				}
 				catch (IllegalStateException ex) {
 					// Has the singleton object implicitly appeared in the meantime ->
@@ -386,15 +388,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			if (locked) {
 				this.singletonLock.unlock();
 			}
-			if (lenient) {
-				this.lenientCreationLock.lock();
-				try {
-					this.singletonsInLenientCreation.remove(beanName);
-					this.lenientCreationFinished.signalAll();
-				}
-				finally {
-					this.lenientCreationLock.unlock();
-				}
+			this.lenientCreationLock.lock();
+			try {
+				this.singletonsInLenientCreation.remove(beanName);
+				this.lenientCreationFinished.signalAll();
+			}
+			finally {
+				this.lenientCreationLock.unlock();
 			}
 		}
 	}
