@@ -59,6 +59,16 @@ class BackgroundBootstrapTests {
 	@Test
 	@Timeout(5)
 	@EnabledForTestGroups(LONG_RUNNING)
+	void bootstrapWithCircularReference() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CircularReferenceBeanConfig.class);
+		ctx.getBean("testBean1", TestBean.class);
+		ctx.getBean("testBean2", TestBean.class);
+		ctx.close();
+	}
+
+	@Test
+	@Timeout(5)
+	@EnabledForTestGroups(LONG_RUNNING)
 	void bootstrapWithCustomExecutor() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CustomExecutorBeanConfig.class);
 		ctx.getBean("testBean1", TestBean.class);
@@ -127,6 +137,34 @@ class BackgroundBootstrapTests {
 
 		@Bean
 		public TestBean testBean4() {
+			try {
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class CircularReferenceBeanConfig {
+
+		@Bean
+		public TestBean testBean1(ObjectProvider<TestBean> testBean2) {
+			new Thread(testBean2::getObject).start();
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean();
+		}
+
+		@Bean
+		public TestBean testBean2(TestBean testBean1) {
 			try {
 				Thread.sleep(2000);
 			}
