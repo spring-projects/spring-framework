@@ -1,12 +1,10 @@
 <?xml version="1.0"?>
 <!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
-
 	<!-- Suppressions -->
 	<module name="SuppressionFilter">
 		<property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
 	</module>
-
 	<!-- Root Checks -->
 	<module name="io.spring.javaformat.checkstyle.check.SpringHeaderCheck">
 		<property name="fileExtensions" value="java"/>
@@ -15,11 +13,13 @@
 		<property name="packageInfoHeaderType" value="none"/>
 	</module>
 	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
-	<module name="JavadocPackage" /><!-- package-info.java -->
-
+	<module name="JavadocPackage"/> <!-- package-info.java -->
 	<!-- TreeWalker Checks -->
 	<module name="TreeWalker">
-
+		<!-- Imports -->
+		<module name="AvoidStarImport"/>
+		<module name="UnusedImports"/> <!-- review: needs to be explicit activated -->
+		<module name="RedundantImport"/>
 		<!-- Annotations -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationUseStyleCheck">
 			<property name="elementStyle" value="compact"/>
@@ -27,7 +27,6 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck"/>
-
 		<!-- Block Checks -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyBlockCheck">
 			<property name="option" value="text"/>
@@ -38,7 +37,6 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.AvoidNestedBlocksCheck"/>
-
 		<!-- Class Design -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.InterfaceIsTypeCheck"/>
@@ -48,7 +46,6 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.InnerTypeLastCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.OneTopLevelClassCheck"/>
-
 		<!-- Type Names -->
 		<module name="TypeName">
 			<property name="format" value="^[A-Z][a-zA-Z0-9_$]*(?&lt;!Test)$"/>
@@ -56,10 +53,8 @@
 			<message key="name.invalidPattern"
 				value="Class name ''{0}'' must not end with ''Test'' (checked pattern ''{1}'')."/>
 		</module>
-
 		<!-- Coding -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.CovariantEqualsCheck"/>
-		<module name="com.puppycrawl.tools.checkstyle.checks.coding.EmptyStatementCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.EqualsHashCodeCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanExpressionCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanReturnCheck"/>
@@ -74,7 +69,6 @@
 			<property name="max" value="3"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.MultipleVariableDeclarationsCheck"/>
-
 		<module name="io.spring.javaformat.checkstyle.filter.RequiresOuterThisFilter"/>
 		<module name="io.spring.javaformat.checkstyle.filter.IdentCheckFilter">
 			<property name="names" value="logger"/>
@@ -87,11 +81,7 @@
 			<property name="names" value="logger"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.coding.OneStatementPerLineCheck"/>
-
 		<!-- Imports -->
-		<module name="AvoidStarImport"/>
-		<module name="UnusedImports"/>
-		<module name="RedundantImport"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck">
 			<property name="groups" value="java,javax,*,org.springframework"/>
 			<property name="ordered" value="true"/>
@@ -131,7 +121,6 @@
 			<property name="regexp" value="true"/>
 			<property name="illegalClasses" value="^org\.hamcrest\..+"/>
 		</module>
-
 		<!-- Javadoc Comments -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck">
 			<property name="scope" value="package"/>
@@ -159,14 +148,11 @@
 			<property name="target" value="METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
 			<property name="tagOrder" value="@param, @return, @throws, @since, @see, @deprecated"/>
 		</module>
-
 		<!-- Modifiers -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
-
 		<!-- Whitespace -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.whitespace.MethodParamPadCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.whitespace.SingleSpaceSeparatorCheck"/>
-
 		<!-- Miscellaneous -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.indentation.CommentsIndentationCheck">
 			<property name="tokens" value="BLOCK_COMMENT_BEGIN"/>
@@ -175,7 +161,6 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.ArrayTypeStyleCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.OuterTypeFilenameCheck"/>
 		<module name="UnnecessarySemicolonInEnumeration"/>
-
 		<!-- Regexp -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
 			<property name="format" value="^\t* +\t*\S"/>
@@ -256,7 +241,6 @@
 			<property name="message" value="Please use AssertJ assertions."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
-
 		<!-- Spring Conventions -->
 		<module name="io.spring.javaformat.checkstyle.check.SpringLambdaCheck">
 			<property name="singleArgumentParentheses" value="false"/>
@@ -264,7 +248,9 @@
 		<module name="io.spring.javaformat.checkstyle.check.SpringCatchCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check"/>
-
+		<!-- Best Practice -->
+		<module name="EmptyStatement"/>
+		<module name="UnusedLocalVariable"/>
+		<!-- <module name="VariableDeclarationUsageDistance"/>--> <!-- wait for https://github.com/openrewrite/rewrite-static-analysis/issues/469 -->
 	</module>
-
 </module>

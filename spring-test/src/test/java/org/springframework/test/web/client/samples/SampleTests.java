@@ -70,10 +70,9 @@ public class SampleTests {
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
 		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
-		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		// We are only validating the request. The response is mocked out.
 		// hotel.getId() == 42
@@ -90,8 +89,7 @@ public class SampleTests {
 		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
-		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		// We are only validating the request. The response is mocked out.
 		// hotel.getId() == 42
@@ -142,8 +140,7 @@ public class SampleTests {
 		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
-		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		// hotel.getId() == 42
 		// hotel.getName().equals("Holiday Inn")
@@ -155,16 +152,16 @@ public class SampleTests {
 	public void verify() {
 
 		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("1", MediaType.TEXT_PLAIN));
+				.andRespond(withSuccess("1", MediaType.TEXT_PLAIN));
 
 		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("2", MediaType.TEXT_PLAIN));
+				.andRespond(withSuccess("2", MediaType.TEXT_PLAIN));
 
 		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("4", MediaType.TEXT_PLAIN));
+				.andRespond(withSuccess("4", MediaType.TEXT_PLAIN));
 
 		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
+				.andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
 
 		@SuppressWarnings("unused")
 		String result1 = this.restTemplate.getForObject("/number", String.class);
@@ -215,7 +212,7 @@ public class SampleTests {
 
 		@Override
 		public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-				ClientHttpRequestExecution execution) throws IOException {
+											ClientHttpRequestExecution execution) throws IOException {
 
 			ClientHttpResponse response = execution.execute(request, body);
 			byte[] expected = FileCopyUtils.copyToByteArray(this.resource.getInputStream());
