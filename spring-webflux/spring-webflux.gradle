@@ -8,6 +8,7 @@ dependencies {
 	api(project(":spring-core"))
 	api(project(":spring-web"))
 	api("io.projectreactor:reactor-core")
+	compileOnly("com.google.code.findbugs:jsr305")
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("com.fasterxml.jackson.core:jackson-databind")
