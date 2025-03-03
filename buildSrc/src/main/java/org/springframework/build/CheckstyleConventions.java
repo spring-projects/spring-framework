@@ -63,8 +63,8 @@ public class CheckstyleConventions {
 		project.getPlugins().apply(NoHttpPlugin.class);
 		NoHttpExtension noHttp = project.getExtensions().getByType(NoHttpExtension.class);
 		noHttp.setAllowlistFile(project.file("src/nohttp/allowlist.lines"));
-		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**",
-				"**/.classpath", "**/.project", "**/.gradle/**", "**/node_modules/**", "**/spring-jcl/**", "buildSrc/**");
+		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**", "**/.classpath",
+				"**/.project", "**/.gradle/**", "**/node_modules/**", "**/spring-jcl/**", "buildSrc/build/**");
 		List<String> buildFolders = List.of("bin", "build", "out");
 		project.allprojects(subproject -> {
 			Path rootPath = project.getRootDir().toPath();
