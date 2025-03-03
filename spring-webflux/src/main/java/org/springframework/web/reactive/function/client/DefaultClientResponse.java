@@ -232,8 +232,7 @@ class DefaultClientResponse implements ClientResponse {
 				});
 	}
 
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
-	private Function<ResolvableType, ? extends @Nullable Object> initDecodeFunction(byte[] body, @Nullable MediaType contentType) {
+	private Function<ResolvableType, @Nullable Object> initDecodeFunction(byte[] body, @Nullable MediaType contentType) {
 		return targetType -> {
 			if (ObjectUtils.isEmpty(body)) {
 				return null;

@@ -162,7 +162,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 	 * @return the singleton supplier, or {@code null} if the instance supplier was {@code null}
 	 */
 	@Contract("null -> null; !null -> !null")
-	public static <T> @Nullable SingletonSupplier<T> ofNullable(@Nullable Supplier<? extends @Nullable T> supplier) {
+	public static <T> @Nullable SingletonSupplier<T> ofNullable(@Nullable Supplier<@Nullable T> supplier) {
 		return (supplier != null ? new SingletonSupplier<>(supplier) : null);
 	}
 

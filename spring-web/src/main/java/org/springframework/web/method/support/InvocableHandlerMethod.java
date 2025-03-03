@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 import kotlin.Unit;
 import kotlin.jvm.JvmClassMappingKt;
@@ -317,7 +318,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 							KType type = parameter.getType();
 							if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
 									&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-								KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
+								KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
 								if (!KCallablesJvm.isAccessible(constructor)) {
 									KCallablesJvm.setAccessible(constructor, true);
 								}

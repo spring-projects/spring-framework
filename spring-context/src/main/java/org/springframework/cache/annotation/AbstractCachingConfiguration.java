@@ -50,13 +50,13 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 
 	protected @Nullable AnnotationAttributes enableCaching;
 
-	protected @Nullable Supplier<? extends @Nullable CacheManager> cacheManager;
+	protected @Nullable Supplier<@Nullable CacheManager> cacheManager;
 
-	protected @Nullable Supplier<? extends @Nullable CacheResolver> cacheResolver;
+	protected @Nullable Supplier<@Nullable CacheResolver> cacheResolver;
 
-	protected @Nullable Supplier<? extends @Nullable KeyGenerator> keyGenerator;
+	protected @Nullable Supplier<@Nullable KeyGenerator> keyGenerator;
 
-	protected @Nullable Supplier<? extends @Nullable CacheErrorHandler> errorHandler;
+	protected @Nullable Supplier<@Nullable CacheErrorHandler> errorHandler;
 
 
 	@Override
@@ -70,9 +70,8 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	}
 
 	@Autowired
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 	void setConfigurers(ObjectProvider<CachingConfigurer> configurers) {
-		Supplier<? extends @Nullable CachingConfigurer> configurer = () -> {
+		Supplier<@Nullable CachingConfigurer> configurer = () -> {
 			List<CachingConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
@@ -91,7 +90,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	/**
 	 * Extract the configuration from the nominated {@link CachingConfigurer}.
 	 */
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	protected void useCachingConfigurer(CachingConfigurerSupplier cachingConfigurerSupplier) {
 		this.cacheManager = cachingConfigurerSupplier.adapt(CachingConfigurer::cacheManager);
 		this.cacheResolver = cachingConfigurerSupplier.adapt(CachingConfigurer::cacheResolver);
@@ -104,7 +103,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 
 		private final SingletonSupplier<CachingConfigurer> supplier;
 
-		public CachingConfigurerSupplier(Supplier<? extends @Nullable CachingConfigurer> supplier) {
+		public CachingConfigurerSupplier(Supplier<@Nullable CachingConfigurer> supplier) {
 			this.supplier = SingletonSupplier.ofNullable(supplier);
 		}
 
@@ -117,7 +116,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 		 * @param <T> the type of the supplier
 		 * @return another supplier mapped by the specified function
 		 */
-		public <T> Supplier<@Nullable T> adapt(Function<CachingConfigurer, ? extends @Nullable T> provider) {
+		public <T> Supplier<@Nullable T> adapt(Function<CachingConfigurer, @Nullable T> provider) {
 			return () -> {
 				CachingConfigurer cachingConfigurer = this.supplier.get();
 				return (cachingConfigurer != null ? provider.apply(cachingConfigurer) : null);

@@ -60,7 +60,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 	public SpringSessionContext(SessionFactoryImplementor sessionFactory) {
 		this.sessionFactory = sessionFactory;
 		try {
-			JtaPlatform jtaPlatform = sessionFactory.getServiceRegistry().getService(JtaPlatform.class);
+			JtaPlatform jtaPlatform = sessionFactory.getServiceRegistry().requireService(JtaPlatform.class);
 			this.transactionManager = jtaPlatform.retrieveTransactionManager();
 			if (this.transactionManager != null) {
 				this.jtaSessionContext = new SpringJtaSessionContext(sessionFactory);

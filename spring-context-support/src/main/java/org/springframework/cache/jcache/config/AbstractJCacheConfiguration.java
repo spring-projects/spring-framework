@@ -41,11 +41,11 @@ import org.springframework.context.annotation.Role;
 @Configuration(proxyBeanMethods = false)
 public abstract class AbstractJCacheConfiguration extends AbstractCachingConfiguration {
 
-	protected @Nullable Supplier<? extends @Nullable CacheResolver> exceptionCacheResolver;
+	protected @Nullable Supplier<@Nullable CacheResolver> exceptionCacheResolver;
 
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	protected void useCachingConfigurer(CachingConfigurerSupplier cachingConfigurerSupplier) {
 		super.useCachingConfigurer(cachingConfigurerSupplier);
 		this.exceptionCacheResolver = cachingConfigurerSupplier.adapt(config -> {

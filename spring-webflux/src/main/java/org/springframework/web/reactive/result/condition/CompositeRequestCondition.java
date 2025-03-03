@@ -92,7 +92,6 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
 	protected Collection<? extends @Nullable Object> getContent() {
 		return (!isEmpty() ? getConditions() : Collections.emptyList());
 	}

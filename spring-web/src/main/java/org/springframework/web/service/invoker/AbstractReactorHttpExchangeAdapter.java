@@ -94,6 +94,7 @@ public abstract class AbstractReactorHttpExchangeAdapter implements ReactorHttpE
 	}
 
 	@Override
+	@Nullable
 	public <T> T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return (this.blockTimeout != null ?
 				exchangeForBodyMono(requestValues, bodyType).block(this.blockTimeout) :

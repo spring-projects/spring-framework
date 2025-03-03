@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import kotlin.Unit;
@@ -355,7 +356,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								KType type = parameter.getType();
 								if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
 										&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-									KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
+									KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
 									if (!KCallablesJvm.isAccessible(constructor)) {
 										KCallablesJvm.setAccessible(constructor, true);
 									}

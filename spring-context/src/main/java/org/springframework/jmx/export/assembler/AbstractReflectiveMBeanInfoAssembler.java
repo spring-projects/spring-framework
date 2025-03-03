@@ -506,7 +506,6 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * of the {@code MBeanExporter}
 	 * @return the {@code MBeanParameterInfo} array
 	 */
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1127
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
 		ParameterNameDiscoverer paramNameDiscoverer = getParameterNameDiscoverer();
 		@Nullable String[] paramNames = (paramNameDiscoverer != null ? paramNameDiscoverer.getParameterNames(method) : null);
