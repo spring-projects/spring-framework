@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.agent.EnabledIfRuntimeHintsAgent;
-import org.springframework.aot.test.agent.RuntimeHintsInvocations;
+import org.springframework.aot.test.agent.RuntimeHintsRecorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,11 +34,10 @@ class ReflectionInvocationsTests {
 		RuntimeHints hints = new RuntimeHints();
 		hints.reflection().registerType(String.class);
 
-		RuntimeHintsInvocations invocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
+		assertThat(RuntimeHintsRecorder.record(() -> {
 			SampleReflection sample = new SampleReflection();
-			sample.sample(); // does Method[] methods = String.class.getMethods();
-		});
-		assertThat(invocations).match(hints);
+			sample.sample(); // String.class.getMethods();
+		})).match(hints);
 	}
 
 	@Test
@@ -46,11 +45,11 @@ class ReflectionInvocationsTests {
 		RuntimeHints hints = new RuntimeHints();
 		hints.reflection().registerType(String.class);
 		hints.reflection().registerType(Integer.class);
-		RuntimeHintsInvocations invocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
+
+		assertThat(RuntimeHintsRecorder.record(() -> {
 			SampleReflection sample = new SampleReflection();
-			sample.multipleCalls(); // does Method[] methods = String.class.getMethods(); methods = Integer.class.getMethods();
-		});
-		assertThat(invocations).match(hints);
+			sample.multipleCalls(); // String.class.getMethods(); Integer.class.getMethods();
+		})).match(hints);
 	}
 
 }

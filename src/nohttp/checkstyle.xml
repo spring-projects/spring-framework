@@ -3,7 +3,6 @@
 <module name="Checker">
 	<property name="charset" value="UTF-8"/>
 	<property name="fileExtensions" value=""/>
-
 	<!-- nohttp workaround, see https://github.com/spring-io/nohttp/issues/55 -->
 	<module name="io.spring.nohttp.checkstyle.check.NoHttpCheck">
 		<property name="allowlistFileName" value="${config_loc}/allowlist.lines" default=""/>
@@ -13,4 +12,14 @@
 		<property name="optional" value="true"/>
 	</module>
 	<module name="SuppressWithPlainTextCommentFilter"/>
+	<!-- TreeWalker Checks -->
+	<module name="TreeWalker">
+		<!-- Imports -->
+		<module name="AvoidStarImport"/>
+		<module name="RedundantImport"/>
+		<!-- ignored as samples need some flexibility https://github.com/spring-projects/spring-framework/pull/34477 -->
+		<!-- <module name="UnusedImports"/>-->
+		<!-- <module name="UnusedLocalVariable"/>-->
+		<!-- <module name="VariableDeclarationUsageDistance"/>-->
+	</module>
 </module>
