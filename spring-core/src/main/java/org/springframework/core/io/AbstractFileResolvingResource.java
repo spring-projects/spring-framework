@@ -81,7 +81,10 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						}
 					}
 				}
-				if (con.getContentLengthLong() > 0) {
+				// Check content-length entry but not for JarURLConnection where
+				// this would open the jar file but effectively never close it ->
+				// for jar entries, always fall back to stream existence instead.
+				if (!(con instanceof JarURLConnection) && con.getContentLengthLong() > 0) {
 					return true;
 				}
 				if (httpCon != null) {
