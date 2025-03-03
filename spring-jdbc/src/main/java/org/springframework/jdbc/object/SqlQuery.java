@@ -57,10 +57,6 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  */
 public abstract class SqlQuery<T> extends SqlOperation {
 
-	/** The number of rows to expect; if 0, unknown. */
-	private int rowsExpected = 0;
-
-
 	/**
 	 * Constructor to allow use as a JavaBean.
 	 * <p>The {@code DataSource} and SQL must be supplied before
@@ -78,29 +74,6 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	public SqlQuery(DataSource ds, String sql) {
 		setDataSource(ds);
 		setSql(sql);
-	}
-
-
-	/**
-	 * Set the number of rows expected.
-	 * <p>This can be used to ensure efficient storage of results. The
-	 * default behavior is not to expect any specific number of rows.
-	 * @deprecated since 6.2.4 with no replacement since the property has never
-	 * had any affect on behavior; to be removed in 7.0
-	 */
-	@Deprecated(since = "6.2.4", forRemoval = true)
-	public void setRowsExpected(int rowsExpected) {
-		this.rowsExpected = rowsExpected;
-	}
-
-	/**
-	 * Get the number of rows expected.
-	 * @deprecated since 6.2.4 with no replacement since the property has never
-	 * had any affect on behavior; to be removed in 7.0
-	 */
-	@Deprecated(since = "6.2.4", forRemoval = true)
-	public int getRowsExpected() {
-		return this.rowsExpected;
 	}
 
 

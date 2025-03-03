@@ -64,9 +64,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * @see #setSql
 	 * @see #compile
 	 */
-	@SuppressWarnings("removal")
 	public SqlFunction() {
-		setRowsExpected(1);
 	}
 
 	/**
@@ -75,9 +73,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * @param ds the DataSource to obtain connections from
 	 * @param sql the SQL to execute
 	 */
-	@SuppressWarnings("removal")
 	public SqlFunction(DataSource ds, String sql) {
-		setRowsExpected(1);
 		setDataSource(ds);
 		setSql(sql);
 	}
@@ -90,9 +86,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
-	@SuppressWarnings("removal")
 	public SqlFunction(DataSource ds, String sql, int[] types) {
-		setRowsExpected(1);
 		setDataSource(ds);
 		setSql(sql);
 		setTypes(types);
@@ -108,9 +102,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * @see #setResultType(Class)
 	 * @see java.sql.Types
 	 */
-	@SuppressWarnings("removal")
 	public SqlFunction(DataSource ds, String sql, int[] types, Class<T> resultType) {
-		setRowsExpected(1);
 		setDataSource(ds);
 		setSql(sql);
 		setTypes(types);
