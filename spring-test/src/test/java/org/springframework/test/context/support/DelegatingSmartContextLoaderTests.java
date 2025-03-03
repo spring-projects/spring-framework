@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -181,7 +182,7 @@ class DelegatingSmartContextLoaderTests {
 		private void assertApplicationContextLoadsForAotProcessing(MergedContextConfiguration mergedConfig,
 				String expectedBeanDefName) throws Exception {
 
-			ApplicationContext context = loader.loadContextForAotProcessing(mergedConfig);
+			ApplicationContext context = loader.loadContextForAotProcessing(mergedConfig, new RuntimeHints());
 			assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
 			assertThat(cac.isActive()).as("ApplicationContext is active").isFalse();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -225,8 +226,13 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 	 * {@code ApplicationContext} from the supplied merged context configuration
 	 * @since 6.0
 	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @deprecated as of Spring Framework 6.2.4, in favor of
+	 * {@link #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)};
+	 * to be removed in Spring Framework 8.0
 	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
 	@Override
+	@SuppressWarnings("removal")
 	public final ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
 		AotContextLoader loader = getAotContextLoader(mergedConfig);
 		if (logger.isTraceEnabled()) {
@@ -234,6 +240,33 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 					.formatted(name(loader), mergedConfig));
 		}
 		return loader.loadContextForAotProcessing(mergedConfig);
+	}
+
+	/**
+	 * Delegates to an appropriate candidate {@code SmartContextLoader} to load
+	 * an {@link ApplicationContext} for AOT processing.
+	 * <p>Delegation is based on explicit knowledge of the implementations of the
+	 * default loaders. See {@link #loadContext(MergedContextConfiguration)} for
+	 * details.
+	 * @param mergedConfig the merged context configuration to use to load the application context
+	 * @param runtimeHints the runtime hints
+	 * @return a new application context
+	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
+	 * @throws IllegalStateException if neither candidate loader is capable of loading an
+	 * {@code ApplicationContext} from the supplied merged context configuration
+	 * @since 6.2.4
+	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
+	 */
+	@Override
+	public final ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig,
+			RuntimeHints runtimeHints) throws Exception {
+
+		AotContextLoader loader = getAotContextLoader(mergedConfig);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Delegating to %s to load context for AOT processing for %s"
+					.formatted(name(loader), mergedConfig));
+		}
+		return loader.loadContextForAotProcessing(mergedConfig, runtimeHints);
 	}
 
 	/**
