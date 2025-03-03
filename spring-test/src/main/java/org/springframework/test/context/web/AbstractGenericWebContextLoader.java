@@ -41,9 +41,9 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * Abstract, generic extension of {@link AbstractContextLoader} that loads a
  * {@link GenericWebApplicationContext}.
  *
- * <p>If instances of concrete subclasses are invoked via the
+ * <p>Instances of concrete subclasses are invoked via the
  * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
- * SPI, the context will be loaded from the {@link MergedContextConfiguration}
+ * SPI, and the context will be loaded from the {@link MergedContextConfiguration}
  * provided to {@link #loadContext(MergedContextConfiguration)}. In such cases, a
  * {@code SmartContextLoader} will decide whether to load the context from
  * <em>locations</em> or <em>annotated classes</em>. Note that {@code
@@ -58,7 +58,6 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @author Phillip Webb
  * @since 3.2
  * @see #loadContext(MergedContextConfiguration)
- * @see #loadContext(String...)
  */
 public abstract class AbstractGenericWebContextLoader extends AbstractContextLoader implements AotContextLoader {
 
