@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -787,9 +787,9 @@ public abstract class StringUtils {
 			pathElements.addFirst(CURRENT_PATH);
 		}
 
-		final String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
-		// avoid string concatenation with empty prefix
-		return prefix.isEmpty() ? joined : prefix + joined;
+		String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
+		// Avoid String concatenation with empty prefix
+		return (prefix.isEmpty() ? joined : prefix + joined);
 	}
 
 	/**
