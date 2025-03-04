@@ -49,7 +49,7 @@ class AotContextLoaderRuntimeHintsTests {
 
 		generator.processAheadOfTime(Stream.of(TestCase.class));
 
-		assertThat(reflection().onMethod(ConfigWithMain.class, "main").invoke()).accepts(runtimeHints);
+		assertThat(reflection().onMethodInvocation(ConfigWithMain.class, "main")).accepts(runtimeHints);
 	}
 
 
