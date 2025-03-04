@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -100,7 +101,11 @@ public class DisconnectedClientHelper {
 	 * <li>IOException "Broken pipe" or "connection reset by peer"
 	 * </ul>
 	 */
-	public static boolean isClientDisconnectedException(Throwable ex) {
+	public static boolean isClientDisconnectedException(@Nullable Throwable ex) {
+		if (ex == null) {
+			return false;
+		}
+
 		Throwable currentEx = ex;
 		Throwable lastEx = null;
 		while (currentEx != null && currentEx != lastEx) {
