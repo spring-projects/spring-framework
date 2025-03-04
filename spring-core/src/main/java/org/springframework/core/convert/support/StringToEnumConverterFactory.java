@@ -18,8 +18,11 @@ package org.springframework.core.convert.support;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.util.Assert;
 
 /**
  * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
@@ -29,11 +32,18 @@ import org.springframework.core.convert.converter.ConverterFactory;
  * @since 3.0
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
+final class StringToEnumConverterFactory implements ConverterFactory<String, Enum>, ConditionalConverter {
 
 	@Override
 	public <T extends Enum> Converter<String, @Nullable T> getConverter(Class<T> targetType) {
-		return new StringToEnum(ConversionUtils.getEnumType(targetType));
+		Class<?> enumType = ConversionUtils.resolveEnumType(targetType);
+		Assert.notNull(enumType, () -> "The target type " + targetType.getName() + " does not refer to an enum");
+		return new StringToEnum(enumType);
+	}
+
+	@Override
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return (ConversionUtils.resolveEnumType(targetType.getType()) != null);
 	}
 
 
