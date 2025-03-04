@@ -440,6 +440,7 @@ public class InstanceSupplierCodeGenerator {
 		}
 	}
 
+
 	record ConstructorDescriptor(String beanName, Constructor<?> constructor, Class<?> publicType) {
 
 		Class<?> actualType() {

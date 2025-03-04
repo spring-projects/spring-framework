@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogFormatUtils;
@@ -60,11 +61,14 @@ public abstract class ResourceHandlerUtils {
 			if (location instanceof org.springframework.core.io.PathResource) {
 				return;
 			}
-			else if (location instanceof UrlResource) {
-				path = location.getURL().toExternalForm();
+			else if (location instanceof FileSystemResource fileSystemResource) {
+				path = fileSystemResource.getPath();
 			}
 			else if (location instanceof ClassPathResource classPathResource) {
 				path = classPathResource.getPath();
+			}
+			else if (location instanceof UrlResource) {
+				path = location.getURL().toExternalForm();
 			}
 			else {
 				path = location.getURL().getPath();

@@ -784,9 +784,9 @@ public abstract class StringUtils {
 			pathElements.addFirst(CURRENT_PATH);
 		}
 
-		final String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
-		// avoid string concatenation with empty prefix
-		return prefix.isEmpty() ? joined : prefix + joined;
+		String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
+		// Avoid String concatenation with empty prefix
+		return (prefix.isEmpty() ? joined : prefix + joined);
 	}
 
 	/**
