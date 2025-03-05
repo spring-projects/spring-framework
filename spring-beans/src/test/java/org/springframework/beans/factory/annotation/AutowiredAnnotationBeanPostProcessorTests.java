@@ -1770,6 +1770,10 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		parent.registerBeanDefinition("testBean4", tb4);
 		bf.setParentBeanFactory(parent);
 
+		RootBeanDefinition tb5 = new RootBeanDefinition(NullFactoryMethods.class);
+		tb5.setFactoryMethodName("createTestBean");
+		bf.registerBeanDefinition("testBean5", tb5);
+
 		ObjectProviderInjectionBean bean = bf.getBean("annotatedBean", ObjectProviderInjectionBean.class);
 		assertThat(bean.streamTestBeans()).containsExactly(bf.getBean("testBean1", TestBean.class),
 				bf.getBean("testBean2", TestBean.class));
@@ -1789,7 +1793,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		Map<String, TestBean> typeMatches = BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, TestBean.class);
 		assertThat(typeMatches.remove("testBean3")).isNotNull();
 		Map<String, TestBean> candidates = SimpleAutowireCandidateResolver.resolveAutowireCandidates(bf, TestBean.class);
-		assertThat(candidates).containsExactlyEntriesOf(candidates);
+		assertThat(candidates).containsExactlyEntriesOf(typeMatches);
 	}
 
 	@Test
