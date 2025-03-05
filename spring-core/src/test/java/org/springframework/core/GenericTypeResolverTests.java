@@ -473,7 +473,7 @@ class GenericTypeResolverTests {
 
 	public static class InheritsDefaultMethod implements InterfaceWithDefaultMethod<InheritsDefaultMethod.ConcreteType> {
 
-		static class ConcreteType implements AbstractType {
+		static class ConcreteType implements InterfaceWithDefaultMethod.AbstractType {
 		}
 	}
 
