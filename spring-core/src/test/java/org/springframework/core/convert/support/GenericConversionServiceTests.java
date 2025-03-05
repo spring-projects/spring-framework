@@ -581,6 +581,18 @@ class GenericConversionServiceTests {
 		assertThat(bList).allMatch(e -> e instanceof BRaw);
 	}
 
+	@Test
+	void stringToListOfMapConverterWithFallbackMatch() {
+		conversionService.addConverter(new StringToListOfMapConverter());
+
+		List<Map<String, Object>> result = (List<Map<String, Object>>) conversionService.convert("foo",
+				TypeDescriptor.valueOf(String.class),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Map.class))
+		);
+
+		assertThat("foo").isEqualTo(result.get(0).get("bar"));
+	}
+
 
 	@ExampleAnnotation(active = true)
 	public String annotatedString;
@@ -966,6 +978,15 @@ class GenericConversionServiceTests {
 		@Override
 		public List<BRaw> convert(List<String> source) {
 			return List.of(new BRaw());
+		}
+	}
+
+
+	private static class StringToListOfMapConverter implements Converter<String, List<? extends Map<String, ?>>> {
+
+		@Override
+		public List<? extends Map<String, ?>> convert(String source) {
+			return List.of(Map.of("bar", source));
 		}
 	}
 
