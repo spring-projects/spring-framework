@@ -46,6 +46,17 @@ need to use `name != null && !name.isEmpty()` as the predicate to be compatible 
 semantics of the SpEL Elvis operator.
 ====
 
+[TIP]
+====
+As of Spring Framework 7.0, the SpEL Elvis operator supports `java.util.Optional` with
+transparent unwrapping semantics.
+
+For example, given the expression `A ?: B`, if `A` is `null` or an _empty_ `Optional`,
+the expression evaluates to `B`. However, if `A` is a non-empty `Optional` the expression
+evaluates to the object contained in the `Optional`, thereby effectively unwrapping the
+`Optional` which correlates to `A.get()`.
+====
+
 The following listing shows a more complex example:
 
 [tabs]

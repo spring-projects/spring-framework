@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
@@ -42,6 +43,19 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>Basically a subset of the input data is returned based on the evaluation of
  * the expression supplied as selection criteria.
+ *
+ * <h3>Null-safe Selection</h3>
+ *
+ * <p>Null-safe selection is supported via the {@code '?.?'} operator. For example,
+ * {@code 'names?.?[#this.length > 5]'} will evaluate to {@code null} if {@code names}
+ * is {@code null} and will otherwise evaluate to a sequence containing the names
+ * whose length is greater than 5. As of Spring Framework 7.0, null-safe selection
+ * also applies when performing selection on an {@link Optional} target. For example,
+ * if {@code names} is of type {@code Optional<List<String>>}, the expression
+ * {@code 'names?.?[#this.length > 5]'} will evaluate to {@code null} if {@code names}
+ * is {@code null} or {@link Optional#isEmpty() empty} and will otherwise evaluate
+ * to a sequence containing the names whose lengths are greater than 5, effectively
+ * {@code names.get().stream().filter(s -> s.length() > 5).toList()}.
  *
  * @author Andy Clement
  * @author Mark Fisher
@@ -96,6 +110,23 @@ public class Selection extends SpelNodeImpl {
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue contextObject = state.getActiveContextObject();
 		Object operand = contextObject.getValue();
+
+		if (isNullSafe()) {
+			if (operand == null) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
+			if (operand instanceof Optional<?> optional) {
+				if (optional.isEmpty()) {
+					return ValueRef.NullValueRef.INSTANCE;
+				}
+				operand = optional.get();
+			}
+		}
+
+		if (operand == null) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
+		}
+
 		SpelNodeImpl selectionCriteria = this.children[0];
 
 		if (operand instanceof Map<?, ?> mapdata) {
@@ -196,13 +227,6 @@ public class Selection extends SpelNodeImpl {
 			Object resultArray = Array.newInstance(elementType, result.size());
 			System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray), this);
-		}
-
-		if (operand == null) {
-			if (isNullSafe()) {
-				return ValueRef.NullValueRef.INSTANCE;
-			}
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
 		}
 
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,

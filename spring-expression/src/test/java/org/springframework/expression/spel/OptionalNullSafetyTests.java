@@ -215,6 +215,144 @@ class OptionalNullSafetyTests {
 
 	}
 
+	@Nested
+	class NullSafeTests {
+
+		@Test
+		void accessPropertyOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findJediByName('')?.name");
+
+			// Invoke multiple times to ensure there are no caching issues.
+			assertThat(expr.getValue(context)).isNull();
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		void accessPropertyOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findJediByName('Yoda')?.name");
+
+			// Invoke multiple times to ensure there are no caching issues.
+			assertThat(expr.getValue(context)).isEqualTo("Yoda");
+			assertThat(expr.getValue(context)).isEqualTo("Yoda");
+		}
+
+		@Test
+		void invokeMethodOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findJediByName('')?.salutation('Master')");
+
+			// Invoke multiple times to ensure there are no caching issues.
+			assertThat(expr.getValue(context)).isNull();
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		void invokeMethodOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findJediByName('Yoda')?.salutation('Master')");
+
+			// Invoke multiple times to ensure there are no caching issues.
+			assertThat(expr.getValue(context)).isEqualTo("Master Yoda");
+			assertThat(expr.getValue(context)).isEqualTo("Master Yoda");
+		}
+
+		@Test
+		void accessIndexOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('')?.[1]");
+
+			// Invoke multiple times to ensure there are no caching issues.
+			assertThat(expr.getValue(context)).isNull();
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		void accessIndexOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('yellow')?.[1]");
+
+			// Invoke multiple times to ensure there are no caching issues.
+			assertThat(expr.getValue(context)).isEqualTo("lemon");
+			assertThat(expr.getValue(context)).isEqualTo("lemon");
+		}
+
+		@Test
+		void projectionOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('')?.![#this.length]");
+
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void projectionOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('yellow')?.![#this.length]");
+
+			assertThat(expr.getValue(context, List.class)).containsExactly(6, 5, 5, 9);
+		}
+
+		@Test
+		void selectAllOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('')?.?[#this.length > 5]");
+
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void selectAllOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('yellow')?.?[#this.length > 5]");
+
+			assertThat(expr.getValue(context, List.class)).containsExactly("banana", "pineapple");
+		}
+
+		@Test
+		void selectFirstOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('')?.^[#this.length > 5]");
+
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void selectFirstOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('yellow')?.^[#this.length > 5]");
+
+			assertThat(expr.getValue(context, List.class)).containsExactly("banana");
+		}
+
+		@Test
+		void selectLastOnEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('')?.$[#this.length > 5]");
+
+			assertThat(expr.getValue(context)).isNull();
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void selectLastOnNonEmptyOptionalViaNullSafeOperator() {
+			Expression expr = parser.parseExpression("#service.findFruitsByColor('yellow')?.$[#this.length > 5]");
+
+			assertThat(expr.getValue(context, List.class)).containsExactly("pineapple");
+		}
+
+	}
+
+	@Nested
+	class ElvisTests {
+
+		@Test
+		void elvisOperatorOnEmptyOptional() {
+			Expression expr = parser.parseExpression("#service.findJediByName('') ?: 'unknown'");
+
+			assertThat(expr.getValue(context)).isEqualTo("unknown");
+		}
+
+		@Test
+		void elvisOperatorOnNonEmptyOptional() {
+			Expression expr = parser.parseExpression("#service.findJediByName('Yoda') ?: 'unknown'");
+
+			assertThat(expr.getValue(context)).isEqualTo(new Jedi("Yoda"));
+		}
+
+	}
+
 
 	record Jedi(String name) {
 
