@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,5 +93,11 @@ public @interface PatchMapping {
 	 */
 	@AliasFor(annotation = RequestMapping.class)
 	String[] produces() default {};
+
+	/**
+	 * Alias for {@link RequestMapping#version()}.
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String version() default "";
 
 }

@@ -131,6 +131,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
 		super.handleMatch(info, lookupPath, request);
 
+		info.getVersionCondition().handleMatch(request);
+
 		RequestCondition<?> condition = info.getActivePatternsCondition();
 		if (condition instanceof PathPatternsRequestCondition pprc) {
 			extractMatchDetails(pprc, lookupPath, request);

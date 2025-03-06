@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,15 @@ public interface WebMvcConfigurer {
 	 * Configure content negotiation options.
 	 */
 	default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+	}
+
+	/**
+	 * Configure API versioning for the application. In order for versioning to
+	 * be enabled, you must configure at least one way to resolve the API
+	 * version from a request (e.g. via request header).
+	 * @since 7.0
+	 */
+	default void configureApiVersioning(ApiVersionConfigurer configurer) {
 	}
 
 	/**

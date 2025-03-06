@@ -42,7 +42,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,6 +85,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private Map<String, Predicate<Class<?>>> pathPrefixes = Collections.emptyMap();
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
+
+	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -130,6 +134,23 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.contentNegotiationManager;
 	}
 
+	/**
+	 * Configure a strategy to manage API versioning.
+	 * @param strategy the strategy to use
+	 * @since 7.0
+	 */
+	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
+		this.apiVersionStrategy = strategy;
+	}
+
+	/**
+	 * Return the configured {@link ApiVersionStrategy} strategy.
+	 * @since 7.0
+	 */
+	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
+		return this.apiVersionStrategy;
+	}
+
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
@@ -140,6 +161,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	public void afterPropertiesSet() {
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
+		this.config.setApiVersionStrategy(getApiVersionStrategy());
 
 		if (getPatternParser() != null) {
 			this.config.setPatternParser(getPatternParser());
@@ -245,6 +267,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			requestMappingInfo = createRequestMappingInfo((HttpExchange) httpExchanges.get(0).annotation, customCondition);
 		}
 
+		if (requestMappingInfo != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
+			String version = requestMappingInfo.getVersionCondition().getVersion();
+			if (version != null) {
+				davs.addSupportedVersion(version);
+			}
+		}
+
 		return requestMappingInfo;
 	}
 
@@ -294,6 +323,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				.headers(requestMapping.headers())
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
+				.version(requestMapping.version())
 				.mappingName(requestMapping.name());
 
 		if (customCondition != null) {

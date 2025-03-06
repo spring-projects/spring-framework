@@ -126,7 +126,7 @@ class WebMvcConfigurationSupportExtensionTests {
 	@Test
 	void handlerMappings() throws Exception {
 		RequestMappingHandlerMapping rmHandlerMapping = this.config.requestMappingHandlerMapping(
-				this.config.mvcContentNegotiationManager(),
+				this.config.mvcContentNegotiationManager(), this.config.mvcApiVersionStrategy(),
 				this.config.mvcConversionService(), this.config.mvcResourceUrlProvider());
 		rmHandlerMapping.setApplicationContext(this.context);
 		rmHandlerMapping.afterPropertiesSet();
@@ -266,8 +266,8 @@ class WebMvcConfigurationSupportExtensionTests {
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 
 		RequestMappingHandlerMapping mapping = this.config.requestMappingHandlerMapping(
-				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
-				this.config.mvcResourceUrlProvider());
+				this.config.mvcContentNegotiationManager(), this.config.mvcApiVersionStrategy(),
+				this.config.mvcConversionService(), this.config.mvcResourceUrlProvider());
 
 		request.setParameter("f", "json");
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
@@ -347,7 +347,7 @@ class WebMvcConfigurationSupportExtensionTests {
 	 * plus WebMvcConfigurer can switch to extending WebMvcConfigurationSupport directly for
 	 * more advanced configuration needs.
 	 */
-	private class TestWebMvcConfigurationSupport extends WebMvcConfigurationSupport implements WebMvcConfigurer {
+	private static class TestWebMvcConfigurationSupport extends WebMvcConfigurationSupport implements WebMvcConfigurer {
 
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
@@ -382,6 +382,11 @@ class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 			configurer.favorParameter(true).parameterName("f");
+		}
+
+		@Override
+		public void configureApiVersioning(ApiVersionConfigurer configurer) {
+			configurer.useRequestHeader("X-API-Version");
 		}
 
 		@Override

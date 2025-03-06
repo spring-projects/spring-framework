@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,9 +264,8 @@ public class DelegatingWebMvcConfigurationTests {
 		};
 
 		RequestMappingHandlerMapping annotationsMapping = webMvcConfig.requestMappingHandlerMapping(
-				webMvcConfig.mvcContentNegotiationManager(),
-				webMvcConfig.mvcConversionService(),
-				webMvcConfig.mvcResourceUrlProvider());
+				webMvcConfig.mvcContentNegotiationManager(), webMvcConfig.mvcApiVersionStrategy(),
+				webMvcConfig.mvcConversionService(), webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
 		configAssertion.accept(annotationsMapping.getUrlPathHelper(), annotationsMapping.getPathMatcher());
@@ -330,9 +329,8 @@ public class DelegatingWebMvcConfigurationTests {
 		};
 
 		RequestMappingHandlerMapping annotationsMapping = webMvcConfig.requestMappingHandlerMapping(
-				webMvcConfig.mvcContentNegotiationManager(),
-				webMvcConfig.mvcConversionService(),
-				webMvcConfig.mvcResourceUrlProvider());
+				webMvcConfig.mvcContentNegotiationManager(), webMvcConfig.mvcApiVersionStrategy(),
+				webMvcConfig.mvcConversionService(), webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
 		assertThat(annotationsMapping.getPatternParser())

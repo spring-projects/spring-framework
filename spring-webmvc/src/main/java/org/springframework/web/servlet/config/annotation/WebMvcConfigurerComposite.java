@@ -64,6 +64,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void configureApiVersioning(ApiVersionConfigurer configurer) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureApiVersioning(configurer);
+		}
+	}
+
+	@Override
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureAsyncSupport(configurer);

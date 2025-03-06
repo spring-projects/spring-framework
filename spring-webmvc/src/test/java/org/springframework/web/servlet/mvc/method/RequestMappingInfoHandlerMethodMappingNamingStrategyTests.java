@@ -40,7 +40,7 @@ class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
 
 		@SuppressWarnings("deprecation")
-		RequestMappingInfo rmi = new RequestMappingInfo("foo", null, null, null, null, null, null, null);
+		RequestMappingInfo rmi = new RequestMappingInfo("foo", null, null, null, null, null, null, null, null);
 
 		HandlerMethodMappingNamingStrategy<RequestMappingInfo> strategy = new RequestMappingInfoHandlerMethodMappingNamingStrategy();
 
