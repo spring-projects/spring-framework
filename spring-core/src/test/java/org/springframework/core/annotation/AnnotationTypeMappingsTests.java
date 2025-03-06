@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,12 +280,6 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void getConventionMappingReturnsAttributes() throws Exception {
-		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(Mapped.class).get(1);
-		assertThat(getConventionMapping(mapping, 1)).isEqualTo(Mapped.class.getDeclaredMethod("convention"));
-	}
-
-	@Test
 	void getMirrorSetWhenAliasPairReturnsMirrors() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(AliasPair.class).get(0);
 		MirrorSets mirrorSets = mapping.getMirrorSets();
@@ -411,14 +405,6 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void getConventionMappingWhenConventionToExplicitAliasesReturnsMappedAttributes() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(ConventionToExplicitAliases.class);
-		AnnotationTypeMapping mapping = getMapping(mappings, ConventionToExplicitAliasesTarget.class);
-		assertThat(mapping.getConventionMapping(0)).isEqualTo(0);
-		assertThat(mapping.getConventionMapping(1)).isEqualTo(0);
-	}
-
-	@Test
 	void isEquivalentToDefaultValueWhenValueAndDefaultAreNullReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ClassValue.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0, null, ReflectionUtils::invokeMethod)).isTrue();
@@ -478,11 +464,6 @@ class AnnotationTypeMappingsTests {
 
 	private @Nullable Method getAliasMapping(AnnotationTypeMapping mapping, int attributeIndex) {
 		int mapped = mapping.getAliasMapping(attributeIndex);
-		return mapped != -1 ? mapping.getRoot().getAttributes().get(mapped) : null;
-	}
-
-	private @Nullable Method getConventionMapping(AnnotationTypeMapping mapping, int attributeIndex) {
-		int mapped = mapping.getConventionMapping(attributeIndex);
 		return mapped != -1 ? mapping.getRoot().getAttributes().get(mapped) : null;
 	}
 
@@ -888,23 +869,6 @@ class AnnotationTypeMappingsTests {
 
 		@AliasFor(annotation = MultipleRoutesToAliasB.class, attribute = "b2")
 		String a1() default "";
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface ConventionToExplicitAliasesTarget {
-
-		@AliasFor("test")
-		String value() default "";
-
-		@AliasFor("value")
-		String test() default "";
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@ConventionToExplicitAliasesTarget
-	@interface ConventionToExplicitAliases {
-
-		String test() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

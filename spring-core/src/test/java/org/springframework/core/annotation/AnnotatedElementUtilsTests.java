@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import javax.annotation.meta.When;
 
 import jakarta.annotation.Resource;
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +53,6 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.core.annotation.AnnotatedElementUtils.findAllMergedAnnotations;
 import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation;
 import static org.springframework.core.annotation.AnnotatedElementUtils.getAllAnnotationAttributes;
@@ -94,31 +92,18 @@ class AnnotatedElementUtilsTests {
 			AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
 			assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
-			assertThat(attributes.getStringArray("locations")).as("locations").containsExactly("explicitDeclaration");
-			assertThat(attributes.getStringArray("value")).as("value").containsExactly("explicitDeclaration");
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "explicitDeclaration".
+			assertThat(attributes.getStringArray("locations")).as("locations").isEmpty();
+			assertThat(attributes.getStringArray("value")).as("value").isEmpty();
 
 			// Verify contracts between utility methods:
 			assertThat(isAnnotated(element, name)).isTrue();
 		}
 
-		/**
-		 * This test should never pass, simply because Spring does not support a hybrid
-		 * approach for annotation attribute overrides with transitive implicit aliases.
-		 * See SPR-13554 for details.
-		 * <p>Furthermore, if you choose to execute this test, it can fail for either
-		 * the first test class or the second one (with different exceptions), depending
-		 * on the order in which the JVM returns the attribute methods via reflection.
-		 */
-		@Disabled("Permanently disabled but left in place for illustrative purposes")
 		@Test
-		void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation() {
-			for (Class<?> clazz : asList(HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class,
-					HalfConventionBasedAndHalfAliasedComposedContextConfigClassV2.class)) {
-				getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(clazz);
-			}
-		}
-
-		private void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(Class<?> clazz) {
+		void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotationV1() {
+			Class<?> clazz = HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class;
 			String name = ContextConfig.class.getName();
 			String simpleName = clazz.getSimpleName();
 			AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
@@ -134,18 +119,27 @@ class AnnotatedElementUtilsTests {
 		}
 
 		@Test
-		void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
-			Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
-			assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-					getMergedAnnotationAttributes(element, ContextConfig.class))
-					.withMessageContaining("Different @AliasFor mirror values for annotation")
-					.withMessageContaining("attribute 'locations' and its alias 'value'")
-					.withMessageContaining("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]");
+		void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotationV2() {
+			Class<?> clazz = HalfConventionBasedAndHalfAliasedComposedContextConfigClassV2.class;
+			String name = ContextConfig.class.getName();
+			String simpleName = clazz.getSimpleName();
+			AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
+
+			assertThat(attributes).as("Should find @ContextConfig on " + simpleName).isNotNull();
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "explicitDeclaration".
+			assertThat(attributes.getStringArray("locations")).as("locations for class [" + simpleName + "]").isEmpty();
+			assertThat(attributes.getStringArray("value")).as("value for class [" + simpleName + "]").isEmpty();
+
+			// Verify contracts between utility methods:
+			assertThat(isAnnotated(clazz, name)).isTrue();
 		}
 
 		@Test
 		void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaConvention() {
-			assertComponentScanAttributes(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "com.example.app.test".
+			assertComponentScanAttributes(ConventionBasedSinglePackageComponentScanClass.class);
 		}
 
 		@Test
@@ -157,12 +151,16 @@ class AnnotatedElementUtilsTests {
 			assertThat(contextConfig.locations()).as("locations for " + element).isEmpty();
 			// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
 			assertThat(contextConfig.value()).as("value for " + element).isEmpty();
-			assertThat(contextConfig.classes()).as("classes for " + element).containsExactly(Number.class);
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect Number.class.
+			assertThat(contextConfig.classes()).as("classes for " + element).isEmpty();
 		}
 
 		@Test
 		void findMergedAnnotationWithSingleElementOverridingAnArrayViaConvention() throws Exception {
-			assertWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"));
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "/test".
+			assertWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"), "");
 		}
 
 	}
@@ -831,15 +829,15 @@ class AnnotatedElementUtilsTests {
 
 	@Test
 	void findMergedAnnotationWithSingleElementOverridingAnArrayViaAliasFor() throws Exception {
-		assertWebMapping(WebController.class.getMethod("getMappedWithValueAttribute"));
-		assertWebMapping(WebController.class.getMethod("getMappedWithPathAttribute"));
+		assertWebMapping(WebController.class.getMethod("getMappedWithValueAttribute"), "/test");
+		assertWebMapping(WebController.class.getMethod("getMappedWithPathAttribute"), "/test");
 	}
 
-	private void assertWebMapping(AnnotatedElement element) {
+	private void assertWebMapping(AnnotatedElement element, String expectedPath) {
 		WebMapping webMapping = findMergedAnnotation(element, WebMapping.class);
 		assertThat(webMapping).isNotNull();
-		assertThat(webMapping.value()).as("value attribute: ").isEqualTo(asArray("/test"));
-		assertThat(webMapping.path()).as("path attribute: ").isEqualTo(asArray("/test"));
+		assertThat(webMapping.value()).as("value attribute: ").isEqualTo(asArray(expectedPath));
+		assertThat(webMapping.path()).as("path attribute: ").isEqualTo(asArray(expectedPath));
 	}
 
 	@Test
@@ -1090,8 +1088,7 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedComposedContextConfig {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class)
+		// Do NOT use @AliasFor here
 		String[] locations() default {};
 	}
 
@@ -1099,8 +1096,7 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InvalidConventionBasedComposedContextConfig {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class)
+		// Do NOT use @AliasFor here
 		String[] locations();
 	}
 
@@ -1258,13 +1254,11 @@ class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] locations() default {};
 
-		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class, attribute = "classes")
+		// Do NOT use @AliasFor(annotation = ...)
 		@AliasFor("value")
 		Class<?>[] classes() default {};
 
-		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class, attribute = "classes")
+		// Do NOT use @AliasFor(annotation = ...)
 		@AliasFor("classes")
 		Class<?>[] value() default {};
 	}
@@ -1303,8 +1297,7 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedSinglePackageComponentScan {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ComponentScan.class)
+		// Do NOT use @AliasFor here
 		String basePackages();
 	}
 

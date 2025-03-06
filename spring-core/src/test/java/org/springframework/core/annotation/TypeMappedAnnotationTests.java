@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * for a much more extensive collection of tests.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 class TypeMappedAnnotationTests {
 
@@ -63,10 +64,18 @@ class TypeMappedAnnotationTests {
 	void mappingConventionAliasToMetaAnnotationReturnsMappedValues() {
 		TypeMappedAnnotation<?> annotation = getTypeMappedAnnotation(
 				WithConventionAliasToMetaAnnotation.class,
+				ConventionAliasToMetaAnnotation.class);
+		assertThat(annotation.getString("value")).isEqualTo("value");
+		assertThat(annotation.getString("convention")).isEqualTo("convention");
+
+		annotation = getTypeMappedAnnotation(
+				WithConventionAliasToMetaAnnotation.class,
 				ConventionAliasToMetaAnnotation.class,
 				ConventionAliasMetaAnnotationTarget.class);
 		assertThat(annotation.getString("value")).isEmpty();
-		assertThat(annotation.getString("convention")).isEqualTo("convention");
+		// Convention-based annotation attribute overrides are no longer supported as of
+		// Spring Framework 7.0. Otherwise, we would expect "convention".
+		assertThat(annotation.getString("convention")).isEmpty();
 	}
 
 	@Test
@@ -195,8 +204,7 @@ class TypeMappedAnnotationTests {
 
 		String value() default "";
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ConventionAliasMetaAnnotationTarget.class)
+		// Do NOT use @AliasFor here
 		String convention() default "";
 	}
 

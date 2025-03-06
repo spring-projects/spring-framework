@@ -199,7 +199,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Override
 	public boolean hasDefaultValue(String attributeName) {
 		int attributeIndex = getAttributeIndex(attributeName, true);
-		Object value = getValue(attributeIndex, true, false);
+		Object value = getValue(attributeIndex, false);
 		return (value == null || this.mapping.isEquivalentToDefaultValue(attributeIndex, value, this.valueExtractor));
 	}
 
@@ -377,20 +377,17 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private <T> @Nullable T getValue(int attributeIndex, Class<T> type) {
 		Method attribute = this.mapping.getAttributes().get(attributeIndex);
-		Object value = getValue(attributeIndex, true, false);
+		Object value = getValue(attributeIndex, false);
 		if (value == null) {
 			value = attribute.getDefaultValue();
 		}
 		return adapt(attribute, value, type);
 	}
 
-	private @Nullable Object getValue(int attributeIndex, boolean useConventionMapping, boolean forMirrorResolution) {
+	private @Nullable Object getValue(int attributeIndex, boolean forMirrorResolution) {
 		AnnotationTypeMapping mapping = this.mapping;
 		if (this.useMergedValues) {
 			int mappedIndex = this.mapping.getAliasMapping(attributeIndex);
-			if (mappedIndex == -1 && useConventionMapping) {
-				mappedIndex = this.mapping.getConventionMapping(attributeIndex);
-			}
 			if (mappedIndex != -1) {
 				mapping = mapping.getRoot();
 				attributeIndex = mappedIndex;
@@ -425,8 +422,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private @Nullable Object getValueForMirrorResolution(Method attribute, @Nullable Object annotation) {
 		int attributeIndex = this.mapping.getAttributes().indexOf(attribute);
-		boolean valueAttribute = VALUE.equals(attribute.getName());
-		return getValue(attributeIndex, !valueAttribute, true);
+		return getValue(attributeIndex, true);
 	}
 
 	@SuppressWarnings("unchecked")

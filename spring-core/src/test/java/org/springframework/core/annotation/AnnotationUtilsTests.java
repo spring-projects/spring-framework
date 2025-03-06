@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1362,8 +1362,7 @@ class AnnotationUtilsTests {
 	@WebMapping(method = RequestMethod.POST, name = "")
 	@interface Post {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = WebMapping.class)
+		// Do NOT use @AliasFor here
 		String path() default "";
 	}
 

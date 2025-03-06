@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,8 @@ import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Tests for {@link MergedAnnotations} and {@link MergedAnnotation}. These tests
- * cover common usage scenarios and were mainly ported from the original
- * {@code AnnotationUtils} and {@code AnnotatedElementUtils} tests.
+ * cover common usage scenarios and were mainly ported from the original tests in
+ * {@link AnnotationUtilsTests} and {@link AnnotatedElementUtilsTests}.
  *
  * @author Phillip Webb
  * @author Rod Johnson
@@ -218,8 +218,10 @@ class MergedAnnotationsTests {
 					MergedAnnotations.from(ConventionBasedComposedContextConfigurationClass.class,
 							SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
 			assertThat(annotation.isPresent()).isTrue();
-			assertThat(annotation.getStringArray("locations")).containsExactly("explicitDeclaration");
-			assertThat(annotation.getStringArray("value")).containsExactly("explicitDeclaration");
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "explicitDeclaration".
+			assertThat(annotation.getStringArray("locations")).isEmpty();
+			assertThat(annotation.getStringArray("value")).isEmpty();
 		}
 
 		@Test
@@ -245,15 +247,10 @@ class MergedAnnotationsTests {
 		}
 
 		@Test
-		void getWithInheritedAnnotationsFromInvalidConventionBasedComposedAnnotation() {
-			assertThatExceptionOfType(AnnotationConfigurationException.class)
-				.isThrownBy(() -> MergedAnnotations.from(InvalidConventionBasedComposedContextConfigurationClass.class,
-							SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class));
-		}
-
-		@Test
 		void getWithTypeHierarchyWithSingleElementOverridingAnArrayViaConvention() {
-			testGetWithTypeHierarchy(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "com.example.app.test".
+			testGetWithTypeHierarchy(ConventionBasedSinglePackageComponentScanClass.class);
 		}
 
 		@Test
@@ -263,12 +260,16 @@ class MergedAnnotationsTests {
 							.get(ContextConfiguration.class);
 			assertThat(annotation.getStringArray("locations")).isEmpty();
 			assertThat(annotation.getStringArray("value")).isEmpty();
-			assertThat(annotation.getClassArray("classes")).containsExactly(Number.class);
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect Number.class.
+			assertThat(annotation.getClassArray("classes")).isEmpty();
 		}
 
 		@Test
 		void getWithTypeHierarchyOnMethodWithSingleElementOverridingAnArrayViaConvention() throws Exception {
-			testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"));
+			// Convention-based annotation attribute overrides are no longer supported as of
+			// Spring Framework 7.0. Otherwise, we would expect "/test".
+			testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"), "");
 		}
 	}
 
@@ -781,15 +782,15 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getWithTypeHierarchyOnMethodWithSingleElementOverridingAnArrayViaAliasFor() throws Exception {
-		testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("getMappedWithValueAttribute"));
-		testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("getMappedWithPathAttribute"));
+		testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("getMappedWithValueAttribute"), "/test");
+		testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("getMappedWithPathAttribute"), "/test");
 	}
 
-	private void testGetWithTypeHierarchyWebMapping(AnnotatedElement element) {
+	private void testGetWithTypeHierarchyWebMapping(AnnotatedElement element, String expectedPath) {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY)
 				.get(RequestMapping.class);
-		assertThat(annotation.getStringArray("value")).containsExactly("/test");
-		assertThat(annotation.getStringArray("path")).containsExactly("/test");
+		assertThat(annotation.getStringArray("value")).containsExactly(expectedPath);
+		assertThat(annotation.getStringArray("path")).containsExactly(expectedPath);
 	}
 
 	@Test
@@ -2160,9 +2161,11 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getValueWhenHasDefaultOverride() {
-		MergedAnnotation<?> annotation = MergedAnnotations.from(DefaultOverrideClass.class)
-				.get(DefaultOverrideRoot.class);
-		assertThat(annotation.getString("text")).isEqualTo("metameta");
+		MergedAnnotation<?> annotation =
+				MergedAnnotations.from(DefaultOverrideClass.class).get(DefaultOverrideRoot.class);
+		// Convention-based annotation attribute overrides are no longer supported as of
+		// Spring Framework 7.0. Otherwise, we would expect "metameta".
+		assertThat(annotation.getString("text")).isEqualTo("root");
 	}
 
 	@Test // gh-22654
@@ -2370,22 +2373,11 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedComposedContextConfiguration {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfiguration.class)
+		// Do NOT use @AliasFor here
 		String[] locations() default {};
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfiguration.class)
+		// Do NOT use @AliasFor here
 		Class<?>[] classes() default {};
-	}
-
-	@ContextConfiguration(value = "duplicateDeclaration")
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface InvalidConventionBasedComposedContextConfiguration {
-
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfiguration.class)
-		String[] locations();
 	}
 
 	/**
@@ -2396,8 +2388,7 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface HalfConventionBasedAndHalfAliasedComposedContextConfiguration {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfiguration.class)
+		// Do NOT use @AliasFor here
 		String[] locations() default {};
 
 		@AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
@@ -2519,13 +2510,11 @@ class MergedAnnotationsTests {
 		@AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
 		String[] locations() default {};
 
-		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
-		// @AliasFor(annotation = ContextConfiguration.class, attribute = "classes")
+		// Do NOT use @AliasFor(annotation = ...)
 		@AliasFor("value")
 		Class<?>[] classes() default {};
 
-		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
-		// @AliasFor(annotation = ContextConfiguration.class, attribute = "classes")
+		// Do NOT use @AliasFor(annotation = ...)
 		@AliasFor("classes")
 		Class<?>[] value() default {};
 	}
@@ -2562,8 +2551,7 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedSinglePackageComponentScan {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ComponentScan.class)
+		// Do NOT use @AliasFor here
 		String basePackages();
 	}
 
@@ -2696,10 +2684,6 @@ class MergedAnnotationsTests {
 
 	@ConventionBasedComposedContextConfiguration(locations = "explicitDeclaration")
 	static class ConventionBasedComposedContextConfigurationClass {
-	}
-
-	@InvalidConventionBasedComposedContextConfiguration(locations = "requiredLocationsDeclaration")
-	static class InvalidConventionBasedComposedContextConfigurationClass {
 	}
 
 	@HalfConventionBasedAndHalfAliasedComposedContextConfiguration(xmlConfigFiles = "explicitDeclaration")
@@ -3153,8 +3137,7 @@ class MergedAnnotationsTests {
 	@RequestMapping(method = RequestMethod.POST, name = "")
 	@interface PostMapping {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = RequestMapping.class)
+		// Do NOT use @AliasFor here
 		String path() default "";
 	}
 
@@ -3645,13 +3628,11 @@ class MergedAnnotationsTests {
 	@interface DefaultOverrideRoot {
 
 		String text() default "root";
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@DefaultOverrideRoot
 	@interface DefaultOverrideMeta {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -3659,18 +3640,15 @@ class MergedAnnotationsTests {
 	@interface DefaultOverrideMetaMeta {
 
 		String text() default "metameta";
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@DefaultOverrideMetaMeta
 	@interface DefaultOverrideMetaMetaMeta {
-
 	}
 
 	@DefaultOverrideMetaMetaMeta
 	static class DefaultOverrideClass {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
