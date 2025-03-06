@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ package org.springframework.test.context;
  * the listener is registered.
  *
  * <p>Note that not all testing frameworks support all lifecycle callbacks defined
- * in this API. For example, {@link #beforeTestExecution} and
- * {@link #afterTestExecution} are not supported in conjunction with JUnit 4 when
+ * in this API. For example, the {@link #beforeTestExecution(TestContext)
+ * beforeTestExecution} and {@link #afterTestExecution(TestContext)
+ * afterTestExecution} callbacks are not supported in conjunction with JUnit 4 when
  * using the {@link org.springframework.test.context.junit4.rules.SpringMethodRule
  * SpringMethodRule}.
  *
