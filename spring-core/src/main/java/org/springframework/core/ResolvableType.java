@@ -334,7 +334,7 @@ public class ResolvableType implements Serializable {
 				return otherBounds.isAssignableFrom(this, matchedBefore);
 			}
 			else if (!strict) {
-				return (matchedBefore != null ? otherBounds.equalsType(this) :
+				return (matchedBefore != null ? otherBounds.equalsType(this, matchedBefore) :
 						otherBounds.isAssignableTo(this, matchedBefore));
 			}
 			else {
@@ -1775,11 +1775,13 @@ public class ResolvableType implements Serializable {
 		 * Return {@code true} if these bounds are equal to the specified type.
 		 * @param type the type to test against
 		 * @return {@code true} if these bounds are equal to the type
-		 * @since 6.2.3
+		 * @since 6.2.4
 		 */
-		public boolean equalsType(ResolvableType type) {
+		public boolean equalsType(ResolvableType type, @Nullable Map<Type, Type> matchedBefore) {
 			for (ResolvableType bound : this.bounds) {
-				if (!type.equalsType(bound)) {
+				if (this.kind == Kind.UPPER && bound.hasUnresolvableGenerics() ?
+						!type.isAssignableFrom(bound, true, matchedBefore, false) :
+						!type.equalsType(bound)) {
 					return false;
 				}
 			}
