@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ package org.springframework.test.context;
  * the listener is registered.
  *
  * <p>Note that not all testing frameworks support all lifecycle callbacks defined
- * in this API. For example, {@link #beforeTestExecution} and
- * {@link #afterTestExecution} are not supported in conjunction with JUnit 4 when
+ * in this API. For example, the {@link #beforeTestExecution(TestContext)
+ * beforeTestExecution} and {@link #afterTestExecution(TestContext)
+ * afterTestExecution} callbacks are not supported in conjunction with JUnit 4 when
  * using the {@link org.springframework.test.context.junit4.rules.SpringMethodRule
  * SpringMethodRule}.
  *
@@ -40,6 +41,35 @@ package org.springframework.test.context;
  * {@link org.springframework.core.Ordered Ordered} interface or
  * {@link org.springframework.core.annotation.Order @Order} annotation. See
  * {@link TestContextBootstrapper#getTestExecutionListeners()} for details.
+ *
+ * <h3>Wrapping Behavior for Listeners</h3>
+ *
+ * <p>The {@link TestContextManager} guarantees <em>wrapping</em> behavior for
+ * multiple registered listeners that implement lifecycle callbacks such as
+ * {@link #beforeTestClass(TestContext) beforeTestClass},
+ * {@link #afterTestClass(TestContext) afterTestClass},
+ * {@link #beforeTestMethod(TestContext) beforeTestMethod},
+ * {@link #afterTestMethod(TestContext) afterTestMethod},
+ * {@link #beforeTestExecution(TestContext) beforeTestExecution}, and
+ * {@link #afterTestExecution(TestContext) afterTestExecution}. This means that,
+ * given two listeners {@code Listener1} and {@code Listener2} with {@code Listener1}
+ * registered before {@code Listener2}, any <em>before</em> callbacks implemented
+ * by {@code Listener1} are guaranteed to be invoked <strong>before</strong> any
+ * <em>before</em> callbacks implemented by {@code Listener2}. Similarly, given
+ * the same two listeners registered in the same order, any <em>after</em>
+ * callbacks implemented by {@code Listener1} are guaranteed to be invoked
+ * <strong>after</strong> any <em>after</em> callbacks implemented by
+ * {@code Listener2}. {@code Listener1} is therefore said to <em>wrap</em>
+ * {@code Listener2}.
+ *
+ * <p>For a concrete example, consider the relationship between the
+ * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * TransactionalTestExecutionListener} and the
+ * {@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+ * SqlScriptsTestExecutionListener}. The {@code SqlScriptsTestExecutionListener}
+ * is registered after the {@code TransactionalTestExecutionListener}, so that
+ * SQL scripts are executed within a transaction managed by the
+ * {@code TransactionalTestExecutionListener}.
  *
  * <h3>Registering TestExecutionListener Implementations</h3>
  *
@@ -100,6 +130,8 @@ public interface TestExecutionListener {
 	 * the class.
 	 * <p>This method should be called immediately before framework-specific
 	 * <em>before class</em> lifecycle callbacks.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
@@ -118,6 +150,8 @@ public interface TestExecutionListener {
 	 * {@link org.springframework.test.context.junit4.rules.SpringMethodRule
 	 * SpringMethodRule}). In any case, this method must be called prior to any
 	 * framework-specific lifecycle callbacks.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for listeners.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
@@ -137,6 +171,8 @@ public interface TestExecutionListener {
 	 * this method might be something like {@code beforeTestSetUp} or
 	 * {@code beforeEach}; however, it is unfortunately impossible to rename
 	 * this method due to backward compatibility concerns.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context in which the test method will be
@@ -156,6 +192,8 @@ public interface TestExecutionListener {
 	 * or logging purposes.
 	 * <p>This method <strong>must</strong> be called after framework-specific
 	 * <em>before</em> lifecycle callbacks.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context in which the test method will be
@@ -176,6 +214,8 @@ public interface TestExecutionListener {
 	 * or logging purposes.
 	 * <p>This method <strong>must</strong> be called before framework-specific
 	 * <em>after</em> lifecycle callbacks.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context in which the test method will be
@@ -200,6 +240,8 @@ public interface TestExecutionListener {
 	 * this method might be something like {@code afterTestTearDown} or
 	 * {@code afterEach}; however, it is unfortunately impossible to rename
 	 * this method due to backward compatibility concerns.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context in which the test method was
@@ -217,6 +259,8 @@ public interface TestExecutionListener {
 	 * the class.
 	 * <p>This method should be called immediately after framework-specific
 	 * <em>after class</em> lifecycle callbacks.
+	 * <p>See the {@linkplain TestExecutionListener class-level documentation}
+	 * for details on wrapping behavior for lifecycle callbacks.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
