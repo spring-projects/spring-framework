@@ -1,0 +1,88 @@
+[[beans-java-programmatic-registration]]
+= Programmatic Bean Registration
+
+As of Spring Framework 7, a first-class support for programmatic bean registration is
+provided via the {spring-framework-api}/beans/factory/BeanRegistrar.html[`BeanRegistrar`]
+interface that can be implemented to register beans programmatically in a concise and
+flexible way. For example, it allows custom registration through an `if` expression, a
+`for` loop, etc.
+
+Those bean registrar implementations are typically imported with an `@Import` annotation
+on `@Configuration` classes.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+     @Configuration
+     @Import(MyBeanRegistrar.class)
+     class MyConfiguration {
+     }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+    @Configuration
+    @Import(MyBeanRegistrar::class)
+    class MyConfiguration {
+    }
+----
+======
+
+NOTE: You can leverage type-level conditional annotations ({spring-framework-api}/context/annotation/Conditional.html[`@Conditional`],
+but also other variants) to conditionally import the related bean registrars.
+
+The bean registrar implementation uses {spring-framework-api}/beans/factory/BeanRegistry.html[`BeanRegistry`] and
+{spring-framework-api}/core/env/Environment.html[`Environment`] APIs to register beans programmatically in a concise
+and flexible way.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    class MyBeanRegistrar implements BeanRegistrar {
+
+        @Override
+        public void register(BeanRegistry registry, Environment env) {
+            registry.registerBean("foo", Foo.class);
+            registry.registerBean("bar", Bar.class, spec -> spec
+                    .prototype()
+                    .lazyInit()
+                    .description("Custom description")
+                    .supplier(context -> new Bar(context.bean(Foo.class))));
+            if (env.matchesProfiles("baz")) {
+                registry.registerBean(Baz.class, spec -> spec
+                        .supplier(context -> new Baz("Hello World!")));
+            }
+        }
+    }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+    class MyBeanRegistrar : BeanRegistrarDsl({
+        registerBean<Foo>()
+        registerBean<Bar>(
+            name = "bar",
+            prototype = true,
+            lazyInit = true,
+            description = "Custom description") {
+                Bar(bean<Foo>())
+        }
+        profile("baz") {
+            registerBean { Baz("Hello World!") }
+        }
+    })
+----
+======
+
+NOTE: Bean registrars are supported with xref:core/aot.adoc[Ahead of Time Optimizations],
+either on the JVM or with GraalVM native images, including when instance suppliers are used.

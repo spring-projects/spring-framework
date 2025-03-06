@@ -32,6 +32,7 @@
 **** xref:core/beans/java/bean-annotation.adoc[]
 **** xref:core/beans/java/configuration-annotation.adoc[]
 **** xref:core/beans/java/composing-configuration-classes.adoc[]
+**** xref:core/beans/java/programmatic-bean-registration.adoc[]
 *** xref:core/beans/environment.adoc[]
 *** xref:core/beans/context-load-time-weaver.adoc[]
 *** xref:core/beans/context-introduction.adoc[]
