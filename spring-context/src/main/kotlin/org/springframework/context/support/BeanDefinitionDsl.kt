@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
 package org.springframework.context.support
 
 import org.springframework.aot.AotDetector
@@ -25,6 +26,8 @@ import org.springframework.beans.factory.getBeanProvider
 import org.springframework.beans.factory.support.AbstractBeanDefinition
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.ResolvableType
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.core.env.Profiles
 import java.util.function.Supplier
@@ -68,6 +71,7 @@ import java.util.function.Supplier
  * @see BeanDefinitionDsl
  * @since 5.0
  */
+@Deprecated(message = "Use BeanRegistrarDsl instead")
 fun beans(init: BeanDefinitionDsl.() -> Unit) = BeanDefinitionDsl(init)
 
 /**
@@ -79,6 +83,9 @@ fun beans(init: BeanDefinitionDsl.() -> Unit) = BeanDefinitionDsl(init)
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Deprecated(
+	replaceWith = ReplaceWith("BeanRegistrarDsl", "org.springframework.beans.factory.BeanRegistrarDsl"),
+	message = "Use BeanRegistrarDsl instead")
 open class BeanDefinitionDsl internal constructor (private val init: BeanDefinitionDsl.() -> Unit,
 							 private val condition: (ConfigurableEnvironment) -> Boolean = { true })
 	: ApplicationContextInitializer<GenericApplicationContext> {
@@ -102,6 +109,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	/**
 	 * Scope enum constants.
 	 */
+	@Deprecated(message = "Use BeanRegistrarDsl instead")
 	enum class Scope {
 
 		/**
@@ -120,6 +128,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	/**
 	 * Role enum constants.
 	 */
+	@Deprecated(message = "Use BeanRegistrarDsl instead")
 	enum class Role {
 
 		/**
