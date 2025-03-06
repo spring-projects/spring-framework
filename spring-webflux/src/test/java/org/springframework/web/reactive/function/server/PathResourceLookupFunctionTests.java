@@ -31,6 +31,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
+
 /**
  * @author Arjen Poutsma
  */
@@ -128,13 +130,13 @@ class PathResourceLookupFunctionTests {
 	@SuppressWarnings("removal")
 	void withPathResource() {
 		org.springframework.core.io.PathResource location = new org.springframework.core.io.PathResource("/static/");
-		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
+		assertThatNoException().isThrownBy(() -> new PathResourceLookupFunction("/resources/**", location));
 	}
 
 	@Test
 	void withFileSystemResource() {
 		FileSystemResource location = new FileSystemResource("/static/");
-		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
+		assertThatNoException().isThrownBy(() -> new PathResourceLookupFunction("/resources/**", location));
 	}
 
 }

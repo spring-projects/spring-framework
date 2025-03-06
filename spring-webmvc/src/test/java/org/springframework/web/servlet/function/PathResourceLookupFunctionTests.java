@@ -29,6 +29,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * @author Arjen Poutsma
@@ -107,13 +108,13 @@ class PathResourceLookupFunctionTests {
 	@SuppressWarnings("removal")
 	void withPathResource() {
 		org.springframework.core.io.PathResource location = new org.springframework.core.io.PathResource("/static/");
-		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
+		assertThatNoException().isThrownBy(() -> new PathResourceLookupFunction("/resources/**", location));
 	}
 
 	@Test
 	void withFileSystemResource() {
 		FileSystemResource location = new FileSystemResource("/static/");
-		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
+		assertThatNoException().isThrownBy(() -> new PathResourceLookupFunction("/resources/**", location));
 	}
 
 }
