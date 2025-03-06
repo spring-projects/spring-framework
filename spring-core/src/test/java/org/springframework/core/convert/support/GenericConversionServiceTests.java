@@ -582,6 +582,7 @@ class GenericConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void stringToListOfMapConverterWithFallbackMatch() {
 		conversionService.addConverter(new StringToListOfMapConverter());
 
