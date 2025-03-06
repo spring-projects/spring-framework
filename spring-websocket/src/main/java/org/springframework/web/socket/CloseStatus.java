@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public final class CloseStatus implements Serializable {
 	 */
 	public static final CloseStatus NOT_ACCEPTABLE = new CloseStatus(1003);
 
-	// 10004: Reserved.
+	// 1004: Reserved.
 	// The specific meaning might be defined in the future.
 
 	/**

@@ -60,7 +60,7 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus NOT_ACCEPTABLE = new CloseStatus(1003);
 
-	// 10004: Reserved.
+	// 1004: Reserved.
 	// The specific meaning might be defined in the future.
 
 	/**
