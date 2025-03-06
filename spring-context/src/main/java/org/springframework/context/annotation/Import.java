@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.springframework.beans.factory.BeanRegistrar;
 
 /**
  * Indicates one or more <em>component classes</em> to import &mdash; typically
@@ -57,7 +59,8 @@ public @interface Import {
 
 	/**
 	 * {@link Configuration @Configuration}, {@link ImportSelector},
-	 * {@link ImportBeanDefinitionRegistrar}, or regular component classes to import.
+	 * {@link ImportBeanDefinitionRegistrar}, {@link BeanRegistrar} or regular
+	 * component classes to import.
 	 */
 	Class<?>[] value();
 

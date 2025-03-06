@@ -30,6 +30,7 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -150,6 +151,7 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 		private @Nullable CodeBlock apply(ClassName className) {
 			String name = className.canonicalName();
 			if (name.equals(DefaultListableBeanFactory.class.getName())
+					|| name.equals(ListableBeanFactory.class.getName())
 					|| name.equals(ConfigurableListableBeanFactory.class.getName())) {
 				return CodeBlock.of(BEAN_FACTORY_VARIABLE);
 			}

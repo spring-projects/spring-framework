@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -64,6 +65,8 @@ final class ConfigurationClass {
 
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<>();
+
+	private final Set<BeanRegistrar> beanRegistrars = new LinkedHashSet<>();
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
@@ -217,6 +220,14 @@ final class ConfigurationClass {
 
 	Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
 		return this.importedResources;
+	}
+
+	void addBeanRegistrar(BeanRegistrar beanRegistrar) {
+		this.beanRegistrars.add(beanRegistrar);
+	}
+
+	public Set<BeanRegistrar> getBeanRegistrars() {
+		return this.beanRegistrars;
 	}
 
 	void addImportBeanDefinitionRegistrar(ImportBeanDefinitionRegistrar registrar, AnnotationMetadata importingClassMetadata) {
