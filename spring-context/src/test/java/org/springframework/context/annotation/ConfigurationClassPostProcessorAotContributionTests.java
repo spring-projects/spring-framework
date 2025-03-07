@@ -500,6 +500,7 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 			});
 		}
 
+		@SuppressWarnings("unchecked")
 		private void compile(BiConsumer<Consumer<GenericApplicationContext>, Compiled> result) {
 			MethodReference methodReference = beanFactoryInitializationCode.getInitializers().get(0);
 			beanFactoryInitializationCode.getTypeBuilder().set(type -> {
