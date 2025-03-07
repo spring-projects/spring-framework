@@ -160,7 +160,7 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 	private void throwIfNotNullSafe(List<TypeDescriptor> argumentTypes) {
-		if (!this.nullSafe) {
+		if (!isNullSafe()) {
 			throw new SpelEvaluationException(getStartPosition(),
 					SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
 					FormatHelper.formatMethodForMessage(this.name, argumentTypes));
@@ -258,7 +258,7 @@ public class MethodReference extends SpelNodeImpl {
 		if (executorToCheck != null && executorToCheck.get() instanceof ReflectiveMethodExecutor reflectiveMethodExecutor) {
 			Method method = reflectiveMethodExecutor.getMethod();
 			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
-			if (this.nullSafe && CodeFlow.isPrimitive(descriptor) && (descriptor.charAt(0) != 'V')) {
+			if (isNullSafe() && CodeFlow.isPrimitive(descriptor) && (descriptor.charAt(0) != 'V')) {
 				this.originalPrimitiveExitTypeDescriptor = descriptor.charAt(0);
 				this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 			}
@@ -324,7 +324,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		Label skipIfNull = null;
-		if (this.nullSafe && (descriptor != null || !isStatic)) {
+		if (isNullSafe() && (descriptor != null || !isStatic)) {
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
 			mv.visitInsn(DUP);

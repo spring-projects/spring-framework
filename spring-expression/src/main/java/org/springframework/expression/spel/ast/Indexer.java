@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public class Indexer extends SpelNodeImpl {
 		Object target = context.getValue();
 
 		if (target == null) {
-			if (this.nullSafe) {
+			if (isNullSafe()) {
 				return ValueRef.NullValueRef.INSTANCE;
 			}
 			// Raise a proper exception in case of a null target
@@ -330,7 +330,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		Label skipIfNull = null;
-		if (this.nullSafe) {
+		if (isNullSafe()) {
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
@@ -439,7 +439,7 @@ public class Indexer extends SpelNodeImpl {
 		// If this indexer would return a primitive - and yet it is also marked
 		// null-safe - then the exit type descriptor must be promoted to the box
 		// type to allow a null value to be passed on.
-		if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+		if (isNullSafe() && CodeFlow.isPrimitive(descriptor)) {
 			this.originalPrimitiveExitTypeDescriptor = descriptor;
 			this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 		}
