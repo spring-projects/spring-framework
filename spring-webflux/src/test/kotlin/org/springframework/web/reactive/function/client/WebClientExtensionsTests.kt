@@ -25,11 +25,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.reactive.function.client.CoExchangeFilterFunction.Companion.COROUTINE_CONTEXT_ATTRIBUTE
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.concurrent.CompletableFuture
@@ -224,6 +228,69 @@ class WebClientExtensionsTests {
 	fun `ResponseSpec#toEntityFlux with reified type parameters`() {
 		responseSpec.toEntityFlux<List<Foo>>()
 		verify { responseSpec.toEntityFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#awaitEntityOrNull with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val mockClientHeaders = mockk<ClientResponse.Headers>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		every { exchangeFunction.exchange(capture(slot)) } returns Mono.just(mockResponse)
+		every { mockResponse.statusCode() } returns HttpStatus.OK
+		every { mockResponse.headers() } returns mockClientHeaders
+		every { mockClientHeaders.asHttpHeaders() } returns HttpHeaders()
+		every { mockResponse.bodyToMono(Foo::class.java) } returns Mono.just(foo)
+		runBlocking {
+			withContext(FooContextElement(foo)) {
+				val responseEntity = WebClient.builder()
+					.exchangeFunction(exchangeFunction)
+					.filter(object : CoExchangeFilterFunction() {
+						override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+							assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+							return next.exchange(request)
+						}
+					})
+					.build().get().uri("/path").retrieve().awaitEntityOrNull<Foo>()
+				val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+				assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+				assertThat(responseEntity!!.body).isEqualTo(foo)
+			}
+		}
+	}
+
+	@Test
+	fun `ResponseSpec#awaitEntityOrNull with coroutine context propagation to multiple CoExchangeFilterFunctions`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val mockClientHeaders = mockk<ClientResponse.Headers>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		every { exchangeFunction.exchange(capture(slot)) } returns Mono.just(mockResponse)
+		every { mockResponse.statusCode() } returns HttpStatus.OK
+		every { mockResponse.headers() } returns mockClientHeaders
+		every { mockClientHeaders.asHttpHeaders() } returns HttpHeaders()
+		every { mockResponse.bodyToMono(Foo::class.java) } returns Mono.just(foo)
+		runBlocking {
+			val responseEntity = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						return withContext(FooContextElement(foo)) { next.exchange(request) }
+					}
+				})
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").retrieve().awaitEntityOrNull<Foo>()
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseEntity!!.body).isEqualTo(foo)
+		}
 	}
 
 	class Foo

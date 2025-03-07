@@ -20,17 +20,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactor.asFlux
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.reactor.*
+import kotlinx.coroutines.withContext
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
+import org.springframework.web.reactive.function.client.CoExchangeFilterFunction.Companion.COROUTINE_CONTEXT_ATTRIBUTE
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.util.context.Context
 
 /**
  * Extension for [WebClient.RequestBodySpec.body] providing a `body(Publisher<T>)` variant
@@ -203,3 +203,18 @@ inline fun <reified T : Any> WebClient.ResponseSpec.toEntityList(): Mono<Respons
  */
 inline fun <reified T : Any> WebClient.ResponseSpec.toEntityFlux(): Mono<ResponseEntity<Flux<T>>> =
 		toEntityFlux(object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [WebClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
+ * leveraging Kotlin reified type parameters and allows [kotlin.coroutines.CoroutineContext]
+ * propagation to the [CoExchangeFilterFunction]. This extension is not subject to type erasure
+ * and retains actual generic type arguments.
+ *
+ * @since 7.0.0
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntityOrNull(): ResponseEntity<T>? {
+	val coroutineContext = currentCoroutineContext().minusKey(Job.Key).minusKey(ReactorContext.Key)
+	val reactorContext = currentCoroutineContext()[ReactorContext.Key]?.context ?: Context.empty()
+	val newReactorContext = reactorContext.put(COROUTINE_CONTEXT_ATTRIBUTE, coroutineContext)
+	return withContext(newReactorContext.asCoroutineContext()) { toEntity(T::class.java).awaitSingleOrNull() }
+}
