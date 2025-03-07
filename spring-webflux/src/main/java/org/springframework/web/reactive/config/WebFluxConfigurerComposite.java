@@ -90,6 +90,13 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
+	public void configureApiVersioning(ApiVersionConfigurer configurer) {
+		for (WebFluxConfigurer delegate : this.delegates) {
+			delegate.configureApiVersioning(configurer);
+		}
+	}
+
+	@Override
 	public void configurePathMatching(PathMatchConfigurer configurer) {
 		this.delegates.forEach(delegate -> delegate.configurePathMatching(configurer));
 	}

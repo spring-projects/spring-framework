@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
@@ -97,6 +98,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	private @Nullable BlockingExecutionConfigurer blockingExecutionConfigurer;
 
+	private @Nullable ApiVersionStrategy apiVersionStrategy;
+
 	private @Nullable List<ErrorResponse.Interceptor> errorResponseInterceptors;
 
 	private @Nullable ViewResolverRegistry viewResolverRegistry;
@@ -132,13 +135,17 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(
-			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver,
+			@Qualifier("mvcApiVersionStrategy") @Nullable ApiVersionStrategy apiVersionStrategy) {
 
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
 		mapping.setContentTypeResolver(contentTypeResolver);
+		mapping.setApiVersionStrategy(apiVersionStrategy);
+
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		configureAbstractHandlerMapping(mapping, configurer);
+
 		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
 		if (pathPrefixes != null) {
 			mapping.setPathPrefixes(pathPrefixes);
@@ -173,6 +180,31 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * Override to configure how the requested content type is resolved.
 	 */
 	protected void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+	}
+
+	/**
+	 * Return the central strategy to manage API versioning with, or {@code null}
+	 * if the application does not use versioning.
+	 * @since 7.0
+	 */
+	@Bean
+	public @Nullable ApiVersionStrategy mvcApiVersionStrategy() {
+		if (this.apiVersionStrategy == null) {
+			ApiVersionConfigurer configurer = new ApiVersionConfigurer();
+			configureApiVersioning(configurer);
+			ApiVersionStrategy strategy = configurer.getApiVersionStrategy();
+			if (strategy != null) {
+				this.apiVersionStrategy = strategy;
+			}
+		}
+		return this.apiVersionStrategy;
+	}
+
+	/**
+	 * Override this method to configure API versioning.
+	 * @since 7.0
+	 */
+	protected void configureApiVersioning(ApiVersionConfigurer configurer) {
 	}
 
 	/**

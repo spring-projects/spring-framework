@@ -47,6 +47,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
+import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
@@ -77,6 +79,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
+
+	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -126,6 +130,23 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.contentTypeResolver;
 	}
 
+	/**
+	 * Configure a strategy to manage API versioning.
+	 * @param strategy the strategy to use
+	 * @since 7.0
+	 */
+	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
+		this.apiVersionStrategy = strategy;
+	}
+
+	/**
+	 * Return the configured {@link ApiVersionStrategy} strategy.
+	 * @since 7.0
+	 */
+	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
+		return this.apiVersionStrategy;
+	}
+
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
@@ -136,6 +157,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setPatternParser(getPathPatternParser());
 		this.config.setContentTypeResolver(getContentTypeResolver());
+		this.config.setApiVersionStrategy(getApiVersionStrategy());
 
 		super.afterPropertiesSet();
 	}
@@ -214,6 +236,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			requestMappingInfo = createRequestMappingInfo((HttpExchange) httpExchanges.get(0).annotation, customCondition);
 		}
 
+		if (requestMappingInfo != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
+			String version = requestMappingInfo.getVersionCondition().getVersion();
+			if (version != null) {
+				davs.addSupportedVersion(version);
+			}
+		}
+
 		return requestMappingInfo;
 	}
 
@@ -269,6 +298,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				.headers(requestMapping.headers())
 				.consumes(requestMapping.consumes())
 				.produces(requestMapping.produces())
+				.version(requestMapping.version())
 				.mappingName(requestMapping.name());
 
 		if (customCondition != null) {

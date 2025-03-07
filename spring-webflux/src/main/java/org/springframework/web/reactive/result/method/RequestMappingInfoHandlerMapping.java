@@ -120,6 +120,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		super.handleMatch(info, handlerMethod, exchange);
 
+		info.getVersionCondition().handleMatch(exchange);
+
 		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 
 		PathPattern bestPattern;
