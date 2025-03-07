@@ -74,7 +74,7 @@ class BeanRegistrarDslConfigurationTests {
 
 	private class SampleBeanRegistrar : BeanRegistrarDsl({
 		registerBean<Foo>()
-		registerBean<Bar>(
+		registerBean(
 			name = "bar",
 			prototype = true,
 			lazyInit = true,

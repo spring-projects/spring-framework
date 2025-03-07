@@ -3,9 +3,8 @@
 
 As of Spring Framework 7, a first-class support for programmatic bean registration is
 provided via the {spring-framework-api}/beans/factory/BeanRegistrar.html[`BeanRegistrar`]
-interface that can be implemented to register beans programmatically in a concise and
-flexible way. For example, it allows custom registration through an `if` expression, a
-`for` loop, etc.
+interface that can be implemented to register beans programmatically in a flexible and
+efficient way.
 
 Those bean registrar implementations are typically imported with an `@Import` annotation
 on `@Configuration` classes.
@@ -38,7 +37,8 @@ but also other variants) to conditionally import the related bean registrars.
 
 The bean registrar implementation uses {spring-framework-api}/beans/factory/BeanRegistry.html[`BeanRegistry`] and
 {spring-framework-api}/core/env/Environment.html[`Environment`] APIs to register beans programmatically in a concise
-and flexible way.
+and flexible way. For example, it allows custom registration through an `if` expression, a
+`for` loop, etc.
 
 [tabs]
 ======
@@ -70,7 +70,7 @@ Kotlin::
 ----
     class MyBeanRegistrar : BeanRegistrarDsl({
         registerBean<Foo>()
-        registerBean<Bar>(
+        registerBean(
             name = "bar",
             prototype = true,
             lazyInit = true,

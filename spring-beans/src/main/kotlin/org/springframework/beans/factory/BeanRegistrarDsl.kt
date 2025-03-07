@@ -37,7 +37,7 @@ import org.springframework.core.env.Environment
  * ```
  * class MyBeanRegistrar : BeanRegistrarDsl({
  * 	   registerBean<Foo>()
- * 	   registerBean<Bar>(
+ * 	   registerBean(
  *         name = "bar",
  *         prototype = true,
  *         lazyInit = true,
