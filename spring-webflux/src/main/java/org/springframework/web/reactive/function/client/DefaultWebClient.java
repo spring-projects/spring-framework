@@ -58,6 +58,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
+import static org.springframework.web.reactive.function.client.CoExchangeFilterFunction.COROUTINE_CONTEXT_ATTRIBUTE;
+
 /**
  * The default implementation of {@link WebClient},
  * as created by the static factory methods.
@@ -430,6 +432,8 @@ final class DefaultWebClient implements WebClient {
 				if (filterFunctions != null) {
 					filterFunction = filterFunctions.andThen(filterFunction);
 				}
+				contextView.getOrEmpty(COROUTINE_CONTEXT_ATTRIBUTE)
+						.ifPresent(context -> requestBuilder.attribute(COROUTINE_CONTEXT_ATTRIBUTE, context));
 				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				observationContext.setRequest(request);
