@@ -47,6 +47,21 @@ import org.springframework.core.OrderComparator;
  * Alternatively, you may implement the specific methods that your callers expect,
  * for example, just {@link #getObject()} or {@link #getIfAvailable()}.
  *
+ * <p>Note that {@link #getObject()} never returns {@code null} - it will throw a
+ * {@link NoSuchBeanDefinitionException} instead -, whereas {@link #getIfAvailable()}
+ * will return {@code null} if no matching bean is present at all. However, both
+ * methods will throw a {@link NoUniqueBeanDefinitionException} if more than one
+ * matching bean is found without a clear unique winner (see below). Last but not
+ * least, {@link #getIfUnique()} will return {@code null} both when no matching bean
+ * is found and when more than one matching bean is found without a unique winner.
+ *
+ * <p>Uniqueness is generally up to the container's candidate resolution algorithm
+ * but always honors the "primary" flag (with only one of the candidate beans marked
+ * as primary) and the "fallback" flag (with only one of the candidate beans not
+ * marked as fallback). The default-candidate flag is consistently taken into
+ * account as well, even for non-annotation-based injection points, with a single
+ * default candidate winning in case of no clear primary/fallback indication.
+ *
  * @author Juergen Hoeller
  * @since 4.3
  * @param <T> the object type
@@ -187,7 +202,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * if unique (not called otherwise)
 	 * @throws BeansException in case of creation errors
 	 * @since 5.0
-	 * @see #getIfAvailable()
+	 * @see #getIfUnique()
 	 */
 	default void ifUnique(Consumer<T> dependencyConsumer) throws BeansException {
 		T dependency = getIfUnique();
