@@ -13,4 +13,14 @@
 		<property name="optional" value="true"/>
 	</module>
 	<module name="SuppressWithPlainTextCommentFilter"/>
+	<!-- TreeWalker Checks -->
+	<module name="TreeWalker">
+		<!-- Imports -->
+		<module name="AvoidStarImport"/>
+		<module name="RedundantImport"/>
+		<!-- ignored as samples need some flexibility https://github.com/spring-projects/spring-framework/pull/34477 -->
+		<!-- <module name="UnusedImports"/>-->
+		<!-- <module name="UnusedLocalVariable"/>-->
+		<!-- <module name="VariableDeclarationUsageDistance"/>-->
+	</module>
 </module>
