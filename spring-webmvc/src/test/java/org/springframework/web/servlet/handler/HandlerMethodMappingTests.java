@@ -289,7 +289,7 @@ public class HandlerMethodMappingTests {
 
 		this.mapping.setApplicationContext(context);
 		this.mapping.registerMapping(key, beanName, this.method1);
-		HandlerMethod handlerMethod = this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
+		this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
 	}
 
 	@Test
