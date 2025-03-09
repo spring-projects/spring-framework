@@ -31,6 +31,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -46,21 +48,26 @@ public class BeanRegistryAdapter implements BeanRegistry {
 
 	private final ListableBeanFactory beanFactory;
 
+	private final Environment environment;
+
 	private final Class<? extends BeanRegistrar> beanRegistrarClass;
 
 	private final @Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers;
 
 
 	public BeanRegistryAdapter(BeanDefinitionRegistry beanRegistry, ListableBeanFactory beanFactory,
-			Class<? extends BeanRegistrar> beanRegistrarClass) {
-		this(beanRegistry, beanFactory, beanRegistrarClass, null);
+			Environment environment, Class<? extends BeanRegistrar> beanRegistrarClass) {
+
+		this(beanRegistry, beanFactory, environment, beanRegistrarClass, null);
 	}
 
 	public BeanRegistryAdapter(BeanDefinitionRegistry beanRegistry, ListableBeanFactory beanFactory,
-			Class<? extends BeanRegistrar> beanRegistrarClass, @Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers) {
+			Environment environment, Class<? extends BeanRegistrar> beanRegistrarClass,
+			@Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers) {
 
 		this.beanRegistry = beanRegistry;
 		this.beanFactory = beanFactory;
+		this.environment = environment;
 		this.beanRegistrarClass = beanRegistrarClass;
 		this.customizers = customizers;
 	}
@@ -100,6 +107,12 @@ public class BeanRegistryAdapter implements BeanRegistry {
 			}
 		}
 		this.beanRegistry.registerBeanDefinition(name, beanDefinition);
+	}
+
+	@Override
+	public void register(BeanRegistrar registrar) {
+		Assert.notNull(registrar, "'registrar' must not be null");
+		registrar.register(this, this.environment);
 	}
 
 
