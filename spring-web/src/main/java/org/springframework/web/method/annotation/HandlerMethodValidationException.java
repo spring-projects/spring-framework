@@ -224,8 +224,8 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 		/**
 		 * An additional {@code @RequestBody} callback for validation failures
 		 * for constraints on the method parameter. For example:
-		 * <pre>
-		 * &#064;RequestBody List<&#064;NotEmpty String> ids
+		 * <pre class="code">
+		 * &#064;RequestBody List&lt;&#064;NotEmpty String&gt; ids
 		 * </pre>
 		 * Handle results for {@code @RequestBody} method parameters.
 		 * @param requestBody the annotation declared on the parameter
