@@ -122,6 +122,10 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			if (prototype) {
 				it.prototype()
 			}
+			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
+			if (resolvableType.hasGenerics()) {
+				it.targetType(resolvableType)
+			}
 		}
 		registry.registerBean(name, T::class.java, customizer)
 	}
@@ -183,6 +187,10 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			}
 			if (prototype) {
 				it.prototype()
+			}
+			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
+			if (resolvableType.hasGenerics()) {
+				it.targetType(resolvableType)
 			}
 		}
 		return registry.registerBean(T::class.java, customizer)
@@ -250,6 +258,10 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			it.supplier {
 				SupplierContextDsl<T>(it).supplier()
 			}
+			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
+			if (resolvableType.hasGenerics()) {
+				it.targetType(resolvableType)
+			}
 		}
 		registry.registerBean(name, T::class.java, customizer)
 	}
@@ -313,6 +325,10 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			}
 			it.supplier {
 				SupplierContextDsl<T>(it).supplier()
+			}
+			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
+			if (resolvableType.hasGenerics()) {
+				it.targetType(resolvableType)
 			}
 		}
 		return registry.registerBean(T::class.java, customizer)

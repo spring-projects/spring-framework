@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.BeanRegistry;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 
@@ -203,6 +205,22 @@ public class BeanRegistryAdapterTests {
 		assertThat(supplier.get()).isNotNull().isInstanceOf(Foo.class);
 	}
 
+	@Test
+	void customTargetTypeFromResolvableType() {
+		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, TargetTypeBeanRegistrar.class);
+		new TargetTypeBeanRegistrar().register(adapter, env);
+		RootBeanDefinition beanDefinition = (RootBeanDefinition)this.beanFactory.getBeanDefinition("fooSupplierFromResolvableType");
+		assertThat(beanDefinition.getResolvableType().resolveGeneric(0)).isEqualTo(Foo.class);
+	}
+
+	@Test
+	void customTargetTypeFromTypeReference() {
+		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, TargetTypeBeanRegistrar.class);
+		new TargetTypeBeanRegistrar().register(adapter, env);
+		RootBeanDefinition beanDefinition = (RootBeanDefinition)this.beanFactory.getBeanDefinition("fooSupplierFromTypeReference");
+		assertThat(beanDefinition.getResolvableType().resolveGeneric(0)).isEqualTo(Foo.class);
+	}
+
 
 	private static class DefaultBeanRegistrar implements BeanRegistrar {
 
@@ -289,6 +307,18 @@ public class BeanRegistryAdapterTests {
 		@Override
 		public void register(BeanRegistry registry, Environment env) {
 			registry.registerBean("foo", Foo.class, spec -> spec.supplier(context -> new Foo()));
+		}
+	}
+
+	private static class TargetTypeBeanRegistrar implements BeanRegistrar {
+
+		@Override
+		public void register(BeanRegistry registry, Environment env) {
+			registry.registerBean("fooSupplierFromResolvableType", Foo.class,
+					spec -> spec.targetType(ResolvableType.forClassWithGenerics(Supplier.class, Foo.class)));
+			ParameterizedTypeReference<Supplier<Foo>> type = new ParameterizedTypeReference<>() {};
+			registry.registerBean("fooSupplierFromTypeReference", Supplier.class,
+					spec -> spec.targetType(type));
 		}
 	}
 

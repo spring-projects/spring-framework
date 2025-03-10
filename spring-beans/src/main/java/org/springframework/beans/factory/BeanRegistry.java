@@ -24,6 +24,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 
@@ -149,6 +151,20 @@ public interface BeanRegistry {
 		 * @see AbstractBeanDefinition#setInstanceSupplier(Supplier)
 		 */
 		Spec<T> supplier(Function<SupplierContext, T> supplier);
+
+		/**
+		 * Set a generics-containing target type of this bean.
+		 * @see #targetType(ResolvableType)
+		 * @see RootBeanDefinition#setTargetType(ResolvableType)
+		 */
+		Spec<T> targetType(ParameterizedTypeReference<? extends T> type);
+
+		/**
+		 * Set a generics-containing target type of this bean.
+		 * @see #targetType(ParameterizedTypeReference)
+		 * @see RootBeanDefinition#setTargetType(ResolvableType)
+		 */
+		Spec<T> targetType(ResolvableType type);
 	}
 
 	/**

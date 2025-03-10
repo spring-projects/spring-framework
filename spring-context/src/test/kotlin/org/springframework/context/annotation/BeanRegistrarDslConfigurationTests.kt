@@ -20,11 +20,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.ThrowableAssert
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.BeanRegistrarDsl
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.getBean
-import org.springframework.beans.factory.BeanRegistrarDsl
+import org.springframework.beans.factory.support.RootBeanDefinition
+import java.util.function.Supplier
 
 /**
  * Kotlin tests leveraging [BeanRegistrarDsl].
@@ -56,6 +58,13 @@ class BeanRegistrarDslConfigurationTests {
 		assertThat(context.getBean<Init>().initialized).isTrue()
 	}
 
+	@Test
+	fun genericBeanRegistrar() {
+		val context = AnnotationConfigApplicationContext(GenericBeanRegistrarKotlinConfiguration::class.java)
+		val beanDefinition = context.getBeanDefinition("fooSupplier") as RootBeanDefinition
+		assertThat(beanDefinition.resolvableType.resolveGeneric(0)).isEqualTo(Foo::class.java)
+	}
+
 	class Foo
 	data class Bar(val foo: Foo)
 	data class Baz(val message: String = "")
@@ -85,5 +94,19 @@ class BeanRegistrarDslConfigurationTests {
 			registerBean { Baz("Hello World!") }
 		}
 		registerBean<Init>()
+	})
+
+	@Configuration
+	@Import(GenericBeanRegistrar::class)
+	internal class GenericBeanRegistrarKotlinConfiguration
+
+	private class GenericBeanRegistrar : BeanRegistrarDsl({
+		registerBean<Supplier<Foo>>(name = "fooSupplier") {
+			object: Supplier<Foo> {
+				override fun get(): Foo {
+					return Foo()
+				}
+			}
+		}
 	})
 }
