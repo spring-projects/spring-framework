@@ -207,7 +207,7 @@ public class BeanRegistryAdapterTests {
 
 	@Test
 	void customTargetTypeFromResolvableType() {
-		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, TargetTypeBeanRegistrar.class);
+		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, env, TargetTypeBeanRegistrar.class);
 		new TargetTypeBeanRegistrar().register(adapter, env);
 		RootBeanDefinition beanDefinition = (RootBeanDefinition)this.beanFactory.getBeanDefinition("fooSupplierFromResolvableType");
 		assertThat(beanDefinition.getResolvableType().resolveGeneric(0)).isEqualTo(Foo.class);
@@ -215,7 +215,7 @@ public class BeanRegistryAdapterTests {
 
 	@Test
 	void customTargetTypeFromTypeReference() {
-		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, TargetTypeBeanRegistrar.class);
+		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, env, TargetTypeBeanRegistrar.class);
 		new TargetTypeBeanRegistrar().register(adapter, env);
 		RootBeanDefinition beanDefinition = (RootBeanDefinition)this.beanFactory.getBeanDefinition("fooSupplierFromTypeReference");
 		assertThat(beanDefinition.getResolvableType().resolveGeneric(0)).isEqualTo(Foo.class);
@@ -223,12 +223,19 @@ public class BeanRegistryAdapterTests {
 
 	@Test
 	void registerViaAnotherRegistrar() {
-		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, this.env, DefaultBeanRegistrar.class);
-		BeanRegistrar registrar = (registry, env) -> registry.register(new DefaultBeanRegistrar());
-		registrar.register(adapter, env);
+		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, this.env, ChainedBeanRegistrar.class);
+		new ChainedBeanRegistrar().register(adapter, env);
 		assertThat(this.beanFactory.getBeanDefinition("foo")).isNotNull();
 	}
 
+
+	private static class ChainedBeanRegistrar implements BeanRegistrar {
+
+		@Override
+		public void register(BeanRegistry registry, Environment env) {
+			registry.register(new DefaultBeanRegistrar());
+		}
+	}
 
 	private static class DefaultBeanRegistrar implements BeanRegistrar {
 
