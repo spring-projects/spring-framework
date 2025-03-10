@@ -231,7 +231,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 		 * Handle results for {@code @RequestBody} method parameters.
 		 * @param requestBody the annotation declared on the parameter
 		 * @param result the validation result
-		 * @since 7.0
+		 * @since 6.2.4
 		 */
 		default void requestBodyValidationResult(RequestBody requestBody, ParameterValidationResult result) {
 		}
