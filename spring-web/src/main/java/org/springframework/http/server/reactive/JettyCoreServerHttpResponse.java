@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,10 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		super(dataBufferFactory, new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
 		this.response = response;
 
-		// remove all existing cookies from the response and add them to the cookie map, to be added back later
-		for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
-			HttpField f = i.next();
-			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
+		// Remove all existing cookies from the response and add them to the cookie map, to be added back later
+		for (ListIterator<HttpField> it = this.response.getHeaders().listIterator(); it.hasNext();) {
+			HttpField field = it.next();
+			if (field instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
 				HttpCookie httpCookie = setCookieHttpField.getHttpCookie();
 				ResponseCookie responseCookie = ResponseCookie.from(httpCookie.getName(), httpCookie.getValue())
 						.httpOnly(httpCookie.isHttpOnly())
@@ -72,8 +72,8 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 						.secure(httpCookie.isSecure())
 						.partitioned(httpCookie.isPartitioned())
 						.build();
-				this.addCookie(responseCookie);
-				i.remove();
+				addCookie(responseCookie);
+				it.remove();
 			}
 		}
 	}
@@ -94,7 +94,9 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 	@Override
 	protected void applyStatusCode() {
 		HttpStatusCode status = getStatusCode();
-		this.response.setStatus(status == null ? 0 : status.value());
+		if (status != null){
+			this.response.setStatus(status.value());
+		}
 	}
 
 	@Override
@@ -103,7 +105,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 
 	@Override
 	protected void applyCookies() {
-		this.getCookies().values().stream()
+		getCookies().values().stream()
 				.flatMap(List::stream)
 				.forEach(cookie -> Response.addCookie(this.response, new ResponseHttpCookie(cookie)));
 	}
@@ -165,11 +167,9 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 
 		private final ResponseCookie responseCookie;
 
-
 		ResponseHttpCookie(ResponseCookie responseCookie) {
 			this.responseCookie = responseCookie;
 		}
-
 
 		@Override
 		public String getName() {
@@ -231,7 +231,6 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		public Map<String, String> getAttributes() {
 			return Collections.emptyMap();
 		}
-
 	}
 
 }
