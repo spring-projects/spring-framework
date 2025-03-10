@@ -265,6 +265,10 @@
 		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check"/>
 
+		<!-- Best Practice -->
+		<module name="EmptyStatement"/>
+		<module name="UnusedLocalVariable"/>
+		<!-- <module name="VariableDeclarationUsageDistance"/>--> <!-- wait for https://github.com/openrewrite/rewrite-static-analysis/issues/469 -->
 	</module>
 
 </module>
