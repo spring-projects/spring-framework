@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -600,9 +601,7 @@ class ConfigurationClassParser {
 					}
 					else if (candidate.isAssignable(BeanRegistrar.class)) {
 						Class<?> candidateClass = candidate.loadClass();
-						BeanRegistrar registrar =
-								ParserStrategyUtils.instantiateClass(candidateClass, BeanRegistrar.class,
-										this.environment, this.resourceLoader, this.registry);
+						BeanRegistrar registrar = (BeanRegistrar) BeanUtils.instantiateClass(candidateClass);
 						configClass.addBeanRegistrar(registrar);
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
