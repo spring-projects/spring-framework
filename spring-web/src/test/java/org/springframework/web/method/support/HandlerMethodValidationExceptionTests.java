@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -67,7 +68,7 @@ class HandlerMethodValidationExceptionTests {
 
 
 	private final HandlerMethod handlerMethod = handlerMethod(new ValidController(),
-			controller -> controller.handle(person, person, person, person, "", "", "", "", "", ""));
+			controller -> controller.handle(person, person, person, List.of(), person, "", "", "", "", "", ""));
 
 	private final TestVisitor visitor = new TestVisitor();
 
@@ -84,7 +85,7 @@ class HandlerMethodValidationExceptionTests {
 
 		assertThat(this.visitor.getOutput()).isEqualTo("""
 				@ModelAttribute: modelAttribute1, @ModelAttribute: modelAttribute2, \
-				@RequestBody: requestBody, @RequestPart: requestPart, \
+				@RequestBody: requestBody, @RequestBody: requestBodyList, @RequestPart: requestPart, \
 				@RequestParam: requestParam1, @RequestParam: requestParam2, \
 				@RequestHeader: header, @PathVariable: pathVariable, \
 				@CookieValue: cookie, @MatrixVariable: matrixVariable""");
@@ -100,7 +101,7 @@ class HandlerMethodValidationExceptionTests {
 
 		assertThat(this.visitor.getOutput()).isEqualTo("""
 				Other: modelAttribute1, @ModelAttribute: modelAttribute2, \
-				@RequestBody: requestBody, @RequestPart: requestPart, \
+				@RequestBody: requestBody, @RequestBody: requestBodyList, @RequestPart: requestPart, \
 				Other: requestParam1, @RequestParam: requestParam2, \
 				@RequestHeader: header, @PathVariable: pathVariable, \
 				@CookieValue: cookie, @MatrixVariable: matrixVariable""");
@@ -155,6 +156,7 @@ class HandlerMethodValidationExceptionTests {
 				@Valid Person modelAttribute1,
 				@Valid @ModelAttribute Person modelAttribute2,
 				@Valid @RequestBody Person requestBody,
+				@RequestBody List<@NotEmpty String> requestBodyList,
 				@Valid @RequestPart Person requestPart,
 				@Size(min = 5) String requestParam1,
 				@Size(min = 5) @RequestParam String requestParam2,
@@ -220,6 +222,11 @@ class HandlerMethodValidationExceptionTests {
 		@Override
 		public void requestBody(RequestBody requestBody, ParameterErrors errors) {
 			handle(requestBody, errors);
+		}
+
+		@Override
+		public void requestBodyValidationResult(RequestBody requestBody, ParameterValidationResult result) {
+			handle(requestBody, result);
 		}
 
 		@Override

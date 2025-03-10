@@ -90,4 +90,9 @@ public class DisconnectedClientHelperTests {
 		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isFalse();
 	}
 
+	@Test // gh-34533
+	void nullException() {
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(null)).isFalse();
+	}
+
 }
