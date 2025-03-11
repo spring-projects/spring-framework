@@ -310,4 +310,28 @@ class ContentDispositionTests {
 				.isEqualTo(filename);
 	}
 
+	@Test
+	void attachmentType(){
+		ContentDisposition attachment = ContentDisposition.attachment().build();
+		assertThat(attachment.isAttachment()).isTrue();
+		assertThat(attachment.isFormData()).isFalse();
+		assertThat(attachment.isInline()).isFalse();
+	}
+
+	@Test
+	void formDataType(){
+		ContentDisposition formData = ContentDisposition.formData().build();
+		assertThat(formData.isAttachment()).isFalse();
+		assertThat(formData.isFormData()).isTrue();
+		assertThat(formData.isInline()).isFalse();
+	}
+
+	@Test
+	void inlineType(){
+		ContentDisposition inline = ContentDisposition.inline().build();
+		assertThat(inline.isAttachment()).isFalse();
+		assertThat(inline.isFormData()).isFalse();
+		assertThat(inline.isInline()).isTrue();
+	}
+
 }
