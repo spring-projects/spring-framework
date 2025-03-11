@@ -30,6 +30,7 @@ import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.BeanRegistryAdapter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -592,6 +594,21 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 		String nameToUse = (beanName != null ? beanName : beanClass.getName());
 		registerBeanDefinition(nameToUse, beanDefinition);
+	}
+
+	/**
+	 * Invoke the given registrars for registering their beans with this
+	 * application context.
+	 * <p>This can be used to apply encapsulated pieces of programmatic
+	 * bean registration to this application context without relying on
+	 * individual calls to its context-level {@code registerBean} methods.
+	 * @param registrars one or more {@link BeanRegistrar} instances
+	 * @since 7.0
+	 */
+	public void register(BeanRegistrar... registrars) {
+		for (BeanRegistrar registrar : registrars) {
+			new BeanRegistryAdapter(this.beanFactory, getEnvironment(), registrar.getClass()).register(registrar);
+		}
 	}
 
 

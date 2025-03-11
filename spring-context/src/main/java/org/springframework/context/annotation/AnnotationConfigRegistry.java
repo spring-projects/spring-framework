@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.beans.factory.BeanRegistrar;
+
 /**
  * Common interface for annotation config application contexts,
  * defining {@link #register} and {@link #scan} methods.
@@ -26,17 +28,33 @@ package org.springframework.context.annotation;
 public interface AnnotationConfigRegistry {
 
 	/**
-	 * Register one or more component classes to be processed.
+	 * Invoke the given registrars for registering their beans with this
+	 * application context.
+	 * <p>This can be used to register custom beans without inferring
+	 * annotation-based characteristics for primary/fallback/lazy-init,
+	 * rather specifying those programmatically if needed.
+	 * @param registrars one or more {@link BeanRegistrar} instances
+	 * @since 7.0
+	 * @see #register(Class[])
+	 */
+	void register(BeanRegistrar... registrars);
+
+	/**
+	 * Register one or more component classes to be processed, inferring
+	 * annotation-based characteristics for primary/fallback/lazy-init
+	 * just like for scanned component classes.
 	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * component class more than once has no additional effect.
 	 * @param componentClasses one or more component classes,
 	 * for example, {@link Configuration @Configuration} classes
+	 * @see #scan(String...)
 	 */
 	void register(Class<?>... componentClasses);
 
 	/**
 	 * Perform a scan within the specified base packages.
 	 * @param basePackages the packages to scan for component classes
+	 * @see #register(Class[])
 	 */
 	void scan(String... basePackages);
 

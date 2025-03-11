@@ -56,6 +56,12 @@ public class BeanRegistryAdapter implements BeanRegistry {
 	private final @Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers;
 
 
+	public BeanRegistryAdapter(DefaultListableBeanFactory beanFactory, Environment environment,
+			Class<? extends BeanRegistrar> beanRegistrarClass) {
+
+		this(beanFactory, beanFactory, environment, beanRegistrarClass, null);
+	}
+
 	public BeanRegistryAdapter(BeanDefinitionRegistry beanRegistry, ListableBeanFactory beanFactory,
 			Environment environment, Class<? extends BeanRegistrar> beanRegistrarClass) {
 
@@ -72,6 +78,7 @@ public class BeanRegistryAdapter implements BeanRegistry {
 		this.beanRegistrarClass = beanRegistrarClass;
 		this.customizers = customizers;
 	}
+
 
 	@Override
 	public <T> String registerBean(Class<T> beanClass) {
@@ -154,7 +161,8 @@ public class BeanRegistryAdapter implements BeanRegistry {
 		}
 	}
 
-	static class BeanSpecAdapter<T> implements Spec<T> {
+
+	private static class BeanSpecAdapter<T> implements Spec<T> {
 
 		private final RootBeanDefinition beanDefinition;
 
@@ -239,7 +247,8 @@ public class BeanRegistryAdapter implements BeanRegistry {
 		}
 	}
 
-	static class SupplierContextAdapter implements SupplierContext {
+
+	private static class SupplierContextAdapter implements SupplierContext {
 
 		private final ListableBeanFactory beanFactory;
 

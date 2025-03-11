@@ -60,9 +60,10 @@ import org.springframework.core.env.Environment;
 public interface BeanRegistrar {
 
 	/**
-	 * Register beans in a programmatic way.
-	 * @param registry the bean registry
+	 * Register beans on the given {@link BeanRegistry} in a programmatic way.
+	 * @param registry the bean registry to operate on
 	 * @param env the environment that can be used to get the active profile or some properties
 	 */
 	void register(BeanRegistry registry, Environment env);
+
 }

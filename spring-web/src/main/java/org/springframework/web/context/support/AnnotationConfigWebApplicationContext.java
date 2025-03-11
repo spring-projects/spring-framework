@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.BeanRegistryAdapter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigRegistry;
@@ -104,6 +106,8 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 
 	private @Nullable ScopeMetadataResolver scopeMetadataResolver;
 
+	private final Set<BeanRegistrar> beanRegistrars = new LinkedHashSet<>();
+
 	private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
 
 	private final Set<String> basePackages = new LinkedHashSet<>();
@@ -147,6 +151,20 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		return this.scopeMetadataResolver;
 	}
 
+
+	/**
+	 * Invoke the given registrars for registering their beans with this
+	 * application context.
+	 * <p>Note that {@link #refresh()} must be called in order for the context
+	 * to fully process the new classes.
+	 * @param registrars one or more {@link BeanRegistrar} instances
+	 * @since 7.0
+	 */
+	@Override
+	public void register(BeanRegistrar... registrars) {
+		Assert.notEmpty(registrars, "At least one BeanRegistrar must be specified");
+		Collections.addAll(this.beanRegistrars, registrars);
+	}
 
 	/**
 	 * Register one or more component classes to be processed.
@@ -220,6 +238,16 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		if (scopeMetadataResolver != null) {
 			reader.setScopeMetadataResolver(scopeMetadataResolver);
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
+		}
+
+		if (!this.beanRegistrars.isEmpty()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Applying bean registrars: [" +
+						StringUtils.collectionToCommaDelimitedString(this.beanRegistrars) + "]");
+			}
+			for (BeanRegistrar registrar : this.beanRegistrars) {
+				new BeanRegistryAdapter(beanFactory, getEnvironment(), registrar.getClass()).register(registrar);
+			}
 		}
 
 		if (!this.componentClasses.isEmpty()) {
