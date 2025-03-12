@@ -624,11 +624,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 
 			if (this.member instanceof Method method) {
-				String getterName = "get" + StringUtils.capitalize(name);
+				String capitalizedName = StringUtils.capitalize(name);
+				String getterName = "get" + capitalizedName;
 				if (getterName.equals(method.getName())) {
 					return true;
 				}
-				getterName = "is" + StringUtils.capitalize(name);
+				getterName = "is" + capitalizedName;
 				if (getterName.equals(method.getName())) {
 					return true;
 				}
