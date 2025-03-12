@@ -99,7 +99,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isAttachment() {
-		return isDepositionType("attachment");
+		return isDispositionType("attachment");
 	}
 
 	/**
@@ -107,7 +107,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isFormData() {
-		return isDepositionType("form-data");
+		return isDispositionType("form-data");
 	}
 
 	/**
@@ -115,7 +115,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isInline() {
-		return isDepositionType("inline");
+		return isDispositionType("inline");
 	}
 
 	/**
@@ -555,7 +555,7 @@ public final class ContentDisposition {
 		return Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 	}
 
-	private boolean isDepositionType(String type) {
+	private boolean isDispositionType(String type) {
 		return this.type != null && this.type.equalsIgnoreCase(type);
 	}
 
