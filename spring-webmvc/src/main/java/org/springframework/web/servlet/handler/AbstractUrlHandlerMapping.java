@@ -72,6 +72,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	private final Map<PathPattern, Object> pathPatternHandlerMap = new LinkedHashMap<>();
 
+	/**
+	 * Handler for "/*", to be checked after all other handlers.
+	 * Effectively similar to {@link #getDefaultHandler}, but processed at our level,
+	 * within {@link #getHandlerInternal} where the request is available.
+	 * @see org.springframework.web.socket.server.support.WebSocketHandlerMapping
+	 */
+	private @Nullable Object wildcardHandler;
+
 
 	@Override
 	public void setPatternParser(@Nullable PathPatternParser patternParser) {
@@ -166,9 +174,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 			else if (urlPath.equals("/*")) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Default mapping to " + getHandlerDescription(handler));
+					logger.trace("Wildcard mapping to " + getHandlerDescription(handler));
 				}
-				setDefaultHandler(resolvedHandler);
+				this.wildcardHandler = resolvedHandler;
 			}
 			else {
 				this.handlerMap.put(urlPath, resolvedHandler);
@@ -197,9 +205,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 		else if (urlPath.equals("/*")) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Removing default mapping: " + getDefaultHandler());
+				logger.trace("Removing wildcard mapping: " + getDefaultHandler());
 			}
-			setDefaultHandler(null);
+			this.wildcardHandler = null;
 		}
 		else {
 			Object mappedHandler = this.handlerMap.get(urlPath);
@@ -247,6 +255,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			Object rawHandler = null;
 			if (StringUtils.matchesCharacter(lookupPath, '/')) {
 				rawHandler = getRootHandler();
+			}
+			if (rawHandler == null) {
+				rawHandler = this.wildcardHandler;
 			}
 			if (rawHandler == null) {
 				rawHandler = getDefaultHandler();

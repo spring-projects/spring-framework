@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.server.support;
 
-import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +40,7 @@ class WebSocketHandlerMappingTests {
 		HttpRequestHandler handler = new WebSocketHttpRequestHandler(mock());
 
 		WebSocketHandlerMapping mapping = new WebSocketHandlerMapping();
-		mapping.setUrlMap(Collections.singletonMap("/path", handler));
+		mapping.setUrlMap(Map.of("/path", handler));
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
@@ -64,6 +64,23 @@ class WebSocketHandlerMappingTests {
 
 		chain = mapping.getHandler(request);
 		assertThat(chain).isNull();
+	}
+
+	@Test // gh-34503
+	void defaultHandler() throws Exception {
+		HttpRequestHandler handler = new WebSocketHttpRequestHandler(mock());
+
+		WebSocketHandlerMapping mapping = new WebSocketHandlerMapping();
+		mapping.setUrlMap(Map.of("/*", handler));
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+
+		assertThat(mapping.getDefaultHandler()).isNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler()).isSameAs(handler);
 	}
 
 }

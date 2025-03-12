@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,10 +46,11 @@ class AbstractUrlHandlerMappingTests {
 	}
 
 	@Test
-	void registerDefaultHandler() {
-		TestController defaultHandler = new TestController();
-		mapping.registerHandler("/*", defaultHandler);
-		assertThat(mapping).satisfies(hasMappings(null, defaultHandler, Map.of()));
+	void registerWildcardHandler() throws Exception {
+		TestController handler = new TestController();
+		mapping.registerHandler("/*", handler);
+		assertThat(mapping).satisfies(hasMappings(null, null, Map.of()));
+		assertThat(getHandlerForPath("/abc")).isNotNull();
 	}
 
 	@Test
@@ -70,43 +72,41 @@ class AbstractUrlHandlerMappingTests {
 	@Test
 	void unregisterRootHandler() {
 		TestController rootHandler = new TestController();
-		TestController defaultHandler = new TestController();
 		TestController specificHandler = new TestController();
 		mapping.registerHandler("/", rootHandler);
-		mapping.registerHandler("/*", defaultHandler);
 		mapping.registerHandler("/test", specificHandler);
-		assertThat(mapping).satisfies(hasMappings(rootHandler, defaultHandler, Map.of("/test", specificHandler)));
+		assertThat(mapping).satisfies(hasMappings(rootHandler, null, Map.of("/test", specificHandler)));
 
 		mapping.unregisterHandler("/");
-		assertThat(mapping).satisfies(hasMappings(null, defaultHandler, Map.of("/test", specificHandler)));
+		assertThat(mapping).satisfies(hasMappings(null, null, Map.of("/test", specificHandler)));
 	}
 
 	@Test
-	void unregisterDefaultHandler() {
-		TestController rootHandler = new TestController();
-		TestController defaultHandler = new TestController();
+	void unregisterDefaultHandler() throws Exception {
+		TestController wildcardHandler = new TestController();
 		TestController specificHandler = new TestController();
-		mapping.registerHandler("/", rootHandler);
-		mapping.registerHandler("/*", defaultHandler);
+		mapping.registerHandler("/*", wildcardHandler);
 		mapping.registerHandler("/test", specificHandler);
-		assertThat(mapping).satisfies(hasMappings(rootHandler, defaultHandler, Map.of("/test", specificHandler)));
+		assertThat(mapping).satisfies(hasMappings(null, null, Map.of("/test", specificHandler)));
+		assertThat(getHandlerForPath("/abc")).isNotNull();
 
 		mapping.unregisterHandler("/*");
-		assertThat(mapping).satisfies(hasMappings(rootHandler, null, Map.of("/test", specificHandler)));
+		assertThat(mapping).satisfies(hasMappings(null, null, Map.of("/test", specificHandler)));
+		assertThat(getHandlerForPath("/abc")).isNull();
 	}
 
 	@Test
 	void unregisterSpecificHandler() {
 		TestController rootHandler = new TestController();
-		TestController defaultHandler = new TestController();
+		TestController wildcardHandler = new TestController();
 		TestController specificHandler = new TestController();
 		mapping.registerHandler("/", rootHandler);
-		mapping.registerHandler("/*", defaultHandler);
+		mapping.registerHandler("/*", wildcardHandler);
 		mapping.registerHandler("/test", specificHandler);
-		assertThat(mapping).satisfies(hasMappings(rootHandler, defaultHandler, Map.of("/test", specificHandler)));
+		assertThat(mapping).satisfies(hasMappings(rootHandler, null, Map.of("/test", specificHandler)));
 
 		mapping.unregisterHandler("/test");
-		assertThat(mapping).satisfies(hasMappings(rootHandler, defaultHandler, Map.of()));
+		assertThat(mapping).satisfies(hasMappings(rootHandler, null, Map.of()));
 	}
 
 	@Test
@@ -129,14 +129,21 @@ class AbstractUrlHandlerMappingTests {
 	}
 
 
-	private Consumer<AbstractUrlHandlerMapping> hasMappings(@Nullable Object rootHandler,
-			@Nullable Object defaultHandler, Map<String, Object> handlerMap) {
+	private Consumer<AbstractUrlHandlerMapping> hasMappings(
+			@Nullable Object rootHandler, @Nullable Object defaultHandler, Map<String, Object> handlerMap) {
+
 		return actual -> {
 			assertThat(actual.getRootHandler()).isEqualTo(rootHandler);
 			assertThat(actual.getDefaultHandler()).isEqualTo(defaultHandler);
 			assertThat(actual.getHandlerMap()).containsExactlyEntriesOf(handlerMap);
 		};
 	}
+
+	private Object getHandlerForPath(String path) throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
+		return mapping.getHandlerInternal(request);
+	}
+
 
 	private static class TestController {}
 
