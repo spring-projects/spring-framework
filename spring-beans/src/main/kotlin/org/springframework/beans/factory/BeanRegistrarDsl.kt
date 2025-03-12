@@ -335,6 +335,15 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	}
 
 	/**
+	 * Register beans using the given [BeanRegistrar].
+	 * @param registrar the bean registrar that will be called to register
+	 * additional beans
+	 */
+	fun register(registrar: BeanRegistrar) {
+		return registry.register(registrar)
+	}
+
+	/**
 	 * Apply the nested block if the given profile expression matches the
 	 * active profiles.
 	 *

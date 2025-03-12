@@ -65,6 +65,12 @@ class BeanRegistrarDslConfigurationTests {
 		assertThat(beanDefinition.resolvableType.resolveGeneric(0)).isEqualTo(Foo::class.java)
 	}
 
+	@Test
+	fun chainedBeanRegistrar() {
+		val context = AnnotationConfigApplicationContext(ChainedBeanRegistrarKotlinConfiguration::class.java)
+		assertThat(context.getBean<Bar>().foo).isEqualTo(context.getBean<Foo>())
+	}
+
 	class Foo
 	data class Bar(val foo: Foo)
 	data class Baz(val message: String = "")
@@ -108,5 +114,13 @@ class BeanRegistrarDslConfigurationTests {
 				}
 			}
 		}
+	})
+
+	@Configuration
+	@Import(ChainedBeanRegistrar::class)
+	internal class ChainedBeanRegistrarKotlinConfiguration
+
+	private class ChainedBeanRegistrar : BeanRegistrarDsl({
+		register(SampleBeanRegistrar())
 	})
 }
