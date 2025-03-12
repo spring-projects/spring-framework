@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,8 @@ public class MockCookie extends Cookie {
 				cookie.setComment(extractAttributeValue(attribute, setCookieHeader));
 			}
 			else if (!attribute.isEmpty()) {
-				cookie.setAttribute(attribute, extractOptionalAttributeValue(attribute, setCookieHeader));
+				String[] nameAndValue = extractOptionalAttributeNameAndValue(attribute, setCookieHeader);
+				cookie.setAttribute(nameAndValue[0], nameAndValue[1]);
 			}
 		}
 		return cookie;
@@ -188,9 +189,9 @@ public class MockCookie extends Cookie {
 		return nameAndValue[1];
 	}
 
-	private static String extractOptionalAttributeValue(String attribute, String header) {
+	private static String[] extractOptionalAttributeNameAndValue(String attribute, String header) {
 		String[] nameAndValue = attribute.split("=");
-		return nameAndValue.length == 2 ? nameAndValue[1] : "";
+		return (nameAndValue.length == 2 ? nameAndValue : new String[] {attribute, ""});
 	}
 
 	@Override
