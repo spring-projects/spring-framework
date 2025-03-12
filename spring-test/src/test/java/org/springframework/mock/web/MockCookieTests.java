@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ class MockCookieTests {
 		assertCookie(cookie, "SESSION", "123");
 	}
 
-	@SuppressWarnings("removal")
 	@Test
+	@SuppressWarnings("removal")
 	void parseHeaderWithAttributes() {
 		MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
 				"Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; Partitioned; SameSite=Lax");
@@ -85,6 +85,19 @@ class MockCookieTests {
 				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 		assertThat(cookie.getComment()).isNull();
+	}
+
+	@Test  // gh-34575
+	void parseHeaderWithOptionalAttributes() {
+		MockCookie cookie = MockCookie.parse("SESSION=123; HttpOnly; Version=1; Partitioned; Secure");
+
+		assertCookie(cookie, "SESSION", "123");
+		assertThat(cookie.isHttpOnly()).isTrue();
+		assertThat(cookie.getSecure()).isTrue();
+		assertThat(cookie.isPartitioned()).isTrue();
+		assertThat(cookie.getAttribute("Partitioned")).isEmpty();
+		assertThat(cookie.getAttribute("Version")).isEqualTo("1");
+		assertThat(cookie.getAttribute("BOGUS")).isNull();
 	}
 
 	@ParameterizedTest
@@ -209,10 +222,13 @@ class MockCookieTests {
 	void setPartitioned() {
 		MockCookie cookie = new MockCookie("SESSION", "123");
 		assertThat(cookie.isPartitioned()).isFalse();
+		assertThat(cookie.getAttribute("Partitioned")).isNull();
 		cookie.setPartitioned(true);
 		assertThat(cookie.isPartitioned()).isTrue();
+		assertThat(cookie.getAttribute("Partitioned")).isEmpty();
 		cookie.setPartitioned(false);
 		assertThat(cookie.isPartitioned()).isFalse();
+		assertThat(cookie.getAttribute("Partitioned")).isNull();
 	}
 
 }
