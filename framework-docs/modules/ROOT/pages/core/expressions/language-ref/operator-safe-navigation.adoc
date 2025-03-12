@@ -252,7 +252,6 @@ Kotlin::
 <1> Use "null-safe select first" operator on potentially null `members` list
 ======
 
-
 The following example shows how to use the "null-safe select last" operator for
 collections (`?.$`).
 

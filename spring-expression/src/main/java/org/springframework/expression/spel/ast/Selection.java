@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents selection over a map or collection.
+ * Represents selection over a {@link Map}, {@link Iterable}, or array.
  *
  * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this)]</code> evaluates
  * to {@code [2, 4, 6, 8, 10]}.
@@ -94,8 +94,8 @@ public class Selection extends SpelNodeImpl {
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		TypedValue op = state.getActiveContextObject();
-		Object operand = op.getValue();
+		TypedValue contextObject = state.getActiveContextObject();
+		Object operand = contextObject.getValue();
 		SpelNodeImpl selectionCriteria = this.children[0];
 
 		if (operand instanceof Map<?, ?> mapdata) {
@@ -151,9 +151,9 @@ public class Selection extends SpelNodeImpl {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope();
-					Object val = selectionCriteria.getValueInternal(state).getValue();
-					if (val instanceof Boolean b) {
-						if (b) {
+					Object criteria = selectionCriteria.getValueInternal(state).getValue();
+					if (criteria instanceof Boolean match) {
+						if (match) {
 							if (this.variant == FIRST) {
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element), this);
 							}
@@ -184,7 +184,7 @@ public class Selection extends SpelNodeImpl {
 			}
 
 			Class<?> elementType = null;
-			TypeDescriptor typeDesc = op.getTypeDescriptor();
+			TypeDescriptor typeDesc = contextObject.getTypeDescriptor();
 			if (typeDesc != null) {
 				TypeDescriptor elementTypeDesc = typeDesc.getElementTypeDescriptor();
 				if (elementTypeDesc != null) {

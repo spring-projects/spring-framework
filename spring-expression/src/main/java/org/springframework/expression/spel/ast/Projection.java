@@ -33,8 +33,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents projection, where a given operation is performed on all elements in some
- * input sequence, returning a new sequence of the same size.
+ * Represents projection, where a given operation is performed on all elements in
+ * some input sequence, returning a new sequence of the same size.
  *
  * <p>For example: <code>{1,2,3,4,5,6,7,8,9,10}.![#isEven(#this)]</code> evaluates
  * to {@code [n, y, n, y, n, y, n, y, n, y]}.
@@ -72,8 +72,8 @@ public class Projection extends SpelNodeImpl {
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		TypedValue op = state.getActiveContextObject();
-		Object operand = op.getValue();
+		TypedValue contextObject = state.getActiveContextObject();
+		Object operand = contextObject.getValue();
 
 		// When the input is a map, we push a Map.Entry on the stack before calling
 		// the specified operation. Map.Entry has two properties 'key' and 'value'
