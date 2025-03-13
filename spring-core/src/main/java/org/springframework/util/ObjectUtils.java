@@ -118,46 +118,47 @@ public abstract class ObjectUtils {
 		return (array == null || array.length == 0);
 	}
 
+
+	/**
+	 * Returns the first non-null element from the provided varargs.
+	 *
+	 * @param objects The objects to check for non-null values.
+	 * @param <T>     The type of the objects.
+	 * @return An Optional containing the first non-null object, or an empty Optional if all objects are null.
+	 */
+	@SafeVarargs
+	public static <T> Optional<T> getNonNull(@Nullable final T... objects) {
+		return Optional.ofNullable(objects)
+				.map(arr -> Arrays.stream(arr).filter(Objects::nonNull).findFirst())
+				.orElse(Optional.empty());
+	}
+
 	/**
 	 * Returns the object if it is not {@code null}; otherwise, returns the default value.
 	 *
-	 * <pre>
-	 * ObjectUtils.getIfNull(null, null)      = null
-	 * ObjectUtils.getIfNull(null, "")        = ""
-	 * ObjectUtils.getIfNull(null, "zz")      = "zz"
-	 * ObjectUtils.getIfNull("abc", *)        = "abc"
-	 * ObjectUtils.getIfNull(Boolean.TRUE, *) = Boolean.TRUE
-	 * </pre>
-	 *
-	 * @param <T>          the type of the object
 	 * @param object       the object to test, may be {@code null}
 	 * @param defaultValue the default value to return if the object is {@code null}, may be {@code null}
-	 * @return {@code object} if it is not {@code null}; otherwise, {@code defaultValue}
+	 * @param <T>          the type of the object
+	 * @return An Optional containing either the object if not null, or the default value wrapped in an Optional.
 	 */
-	@Nullable
-	public static <T> T getIfNull(@Nullable final T object, @Nullable final T defaultValue) {
-		return Objects.nonNull(object) ? object : defaultValue;
+	public static <T> Optional<T> getIfNull(@Nullable final T object, @Nullable final T defaultValue) {
+		return Optional.ofNullable(object).or(() -> Optional.ofNullable(defaultValue));
 	}
 
 	/**
 	 * Returns the collection if it is not {@code null} and not empty; otherwise, returns the default value.
 	 *
-	 * <pre>
-	 * ObjectUtils.getIfEmpty(List.of("a"), List.of("b"))     			= List.of("a")
-	 * ObjectUtils.getIfEmpty(null, List.of("b"))            			= List.of("b")
-	 * ObjectUtils.getIfEmpty(Collections.emptyList(), List.of("b")) 	= List.of("b")
-	 * ObjectUtils.getIfEmpty(null, null)                    			= null
-	 * </pre>
-	 *
-	 * @param <T>          the type of elements in the collection
 	 * @param object       the collection to test, may be {@code null}
 	 * @param defaultValue the default value to return if the collection is {@code null} or empty, may be {@code null}
-	 * @return {@code object} if it is not {@code null} and not empty; otherwise, {@code defaultValue}
+	 * @param <T>          the type of elements in the collection
+	 * @return An Optional containing the collection if not null and not empty, otherwise an Optional of the default
+	 * value.
 	 */
-	@Nullable
-	public static <T> Collection<T> getIfEmpty(@Nullable final Collection<T> object,
-											   @Nullable final Collection<T> defaultValue) {
-		return Objects.nonNull(object) && !object.isEmpty() ? object : defaultValue;
+	public static <T> Optional<Collection<T>> getIfEmpty(@Nullable final Collection<T> object,
+														 @Nullable final Collection<T> defaultValue) {
+		return Optional.ofNullable(object)
+				.filter(collection -> !collection.isEmpty())
+				.or(() -> Optional.ofNullable(defaultValue));
 	}
 
 	/**

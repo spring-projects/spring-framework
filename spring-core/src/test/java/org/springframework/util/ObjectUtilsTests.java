@@ -55,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.util.ObjectUtils.getIfEmpty;
 import static org.springframework.util.ObjectUtils.getIfNull;
+import static org.springframework.util.ObjectUtils.getNonNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
@@ -118,13 +119,15 @@ class ObjectUtilsTests {
 	void getIfNullObject() {
 		String value = UUID.randomUUID().toString();
 		String backup = UUID.randomUUID().toString();
-		assertThat(getIfNull(value, backup)).isEqualTo(value);
-		assertThat(getIfNull(value, value)).isEqualTo(value);
-		assertThat(getIfNull(backup, backup)).isEqualTo(backup);
-		assertThat(getIfNull(null, value)).isEqualTo(value);
-		assertThat(getIfNull(null, backup)).isEqualTo(backup);
-		assertThat(getIfNull("null", backup)).isEqualTo("null");
-		assertThat(Optional.ofNullable(getIfNull(null, null))).isEmpty();
+
+		assertThat(getIfNull(value, backup)).contains(value);
+		assertThat(getIfNull(value, backup)).contains(value);
+		assertThat(getIfNull(value, value)).contains(value);
+		assertThat(getIfNull(backup, backup)).contains(backup);
+		assertThat(getIfNull(null, value)).contains(value);
+		assertThat(getIfNull(null, backup)).contains(backup);
+		assertThat(getIfNull("null", backup)).contains("null");
+		assertThat(getIfNull(null, null)).isEmpty();
 	}
 
 	@Test
@@ -132,15 +135,33 @@ class ObjectUtilsTests {
 		Collection<String> empty = Collections.emptyList();
 		Collection<String> value = List.of(UUID.randomUUID().toString());
 		Collection<String> backup = List.of(UUID.randomUUID().toString());
-		assertThat(getIfEmpty(value, backup)).isEqualTo(value);
-		assertThat(getIfEmpty(null, backup)).isEqualTo(backup);
-		assertThat(getIfEmpty(empty, backup)).isEqualTo(backup);
-		assertThat(getIfEmpty(value, empty)).isEqualTo(value);
-		assertThat(getIfEmpty(empty, empty)).isEqualTo(empty);
-		assertThat(getIfEmpty(backup, backup)).isEqualTo(backup);
-		assertThat(getIfEmpty(null, empty)).isEqualTo(empty);
-		assertThat(getIfEmpty(null, backup)).isEqualTo(backup);
-		assertThat(Optional.ofNullable(getIfEmpty(null, null))).isEmpty();
+
+		assertThat(getIfEmpty(value, backup)).contains(value);
+		assertThat(getIfEmpty(null, backup)).contains(backup);
+		assertThat(getIfEmpty(empty, backup)).contains(backup);
+		assertThat(getIfEmpty(value, empty)).contains(value);
+		assertThat(getIfEmpty(empty, empty)).contains(empty);
+		assertThat(getIfEmpty(backup, backup)).contains(backup);
+		assertThat(getIfEmpty(null, empty)).contains(empty);
+		assertThat(getIfEmpty(null, backup)).contains(backup);
+		assertThat(getIfEmpty(null, null)).isEmpty();
+	}
+
+	@Test
+	void getNonNullObject() {
+		String value = UUID.randomUUID().toString();
+		String backup = UUID.randomUUID().toString();
+
+		assertThat(getNonNull(backup, value, value)).contains(backup);
+		assertThat(getNonNull(value, null, backup)).contains(value);
+		assertThat(getNonNull(backup, value, null)).contains(backup);
+		assertThat(getNonNull(value, backup)).contains(value);
+		assertThat(getNonNull(null, null, value)).contains(value);
+
+		String _null = null;
+		assertThat(getNonNull(null, null, _null)).isEmpty();
+		assertThat(getNonNull(null, "null", backup)).contains("null");
+		assertThat(getNonNull(null, null)).isEmpty();
 	}
 
 	@Test
