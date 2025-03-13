@@ -206,6 +206,9 @@ final class Jackson2Tokenizer {
 
 	private void assertInMemorySize(int currentBufferSize, List<TokenBuffer> result) {
 		if (this.maxInMemorySize >= 0) {
+			if (currentBufferSize > this.maxInMemorySize) {
+				raiseLimitException();
+			}
 			if (!result.isEmpty()) {
 				this.byteCount = 0;
 			}

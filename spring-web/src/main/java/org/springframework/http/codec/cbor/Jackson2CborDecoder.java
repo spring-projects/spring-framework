@@ -23,9 +23,13 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.context.ContextView;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -58,4 +62,15 @@ public class Jackson2CborDecoder extends AbstractJackson2Decoder {
 		throw new UnsupportedOperationException("Does not support stream decoding yet");
 	}
 
+	@Override
+	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+		return Mono.deferContextual(contextView -> {
+
+			Map<String, Object> hintsToUse = contextView.isEmpty() ? hints :
+					Hints.merge(hints, ContextView.class.getName(), contextView);
+
+			return DataBufferUtils.join(input, this.getMaxInMemorySize()).flatMap(dataBuffer ->
+					Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hintsToUse)));
+		});
+	}
 }

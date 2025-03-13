@@ -128,7 +128,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return decodeToFlux(input, elementType, mimeType, hints,null);
+		return decodeToFlux(input, elementType, mimeType, hints, null);
 	}
 
 	private Flux<Object> decodeToFlux(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints,@Nullable Boolean tokenizeArrays) {
