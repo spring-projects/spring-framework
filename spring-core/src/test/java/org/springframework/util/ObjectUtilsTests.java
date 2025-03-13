@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
@@ -52,6 +53,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.util.ObjectUtils.getIfEmpty;
+import static org.springframework.util.ObjectUtils.getIfNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
@@ -109,6 +112,35 @@ class ObjectUtilsTests {
 		assertThat(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), exception)).isFalse();
 		assertThat(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), sqlAndIO)).isFalse();
 		assertThat(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), throwable)).isTrue();
+	}
+
+	@Test
+	void getIfNullObject() {
+		String value = UUID.randomUUID().toString();
+		String backup = UUID.randomUUID().toString();
+		assertThat(getIfNull(value, backup)).isEqualTo(value);
+		assertThat(getIfNull(value, value)).isEqualTo(value);
+		assertThat(getIfNull(backup, backup)).isEqualTo(backup);
+		assertThat(getIfNull(null, value)).isEqualTo(value);
+		assertThat(getIfNull(null, backup)).isEqualTo(backup);
+		assertThat(getIfNull("null", backup)).isEqualTo("null");
+		assertThat(Optional.ofNullable(getIfNull(null, null))).isEmpty();
+	}
+
+	@Test
+	void getIfEmptyObject() {
+		Collection<String> empty = Collections.emptyList();
+		Collection<String> value = List.of(UUID.randomUUID().toString());
+		Collection<String> backup = List.of(UUID.randomUUID().toString());
+		assertThat(getIfEmpty(value, backup)).isEqualTo(value);
+		assertThat(getIfEmpty(null, backup)).isEqualTo(backup);
+		assertThat(getIfEmpty(empty, backup)).isEqualTo(backup);
+		assertThat(getIfEmpty(value, empty)).isEqualTo(value);
+		assertThat(getIfEmpty(empty, empty)).isEqualTo(empty);
+		assertThat(getIfEmpty(backup, backup)).isEqualTo(backup);
+		assertThat(getIfEmpty(null, empty)).isEqualTo(empty);
+		assertThat(getIfEmpty(null, backup)).isEqualTo(backup);
+		assertThat(Optional.ofNullable(getIfEmpty(null, null))).isEmpty();
 	}
 
 	@Test

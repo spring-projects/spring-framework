@@ -119,6 +119,48 @@ public abstract class ObjectUtils {
 	}
 
 	/**
+	 * Returns the object if it is not {@code null}; otherwise, returns the default value.
+	 *
+	 * <pre>
+	 * ObjectUtils.getIfNull(null, null)      = null
+	 * ObjectUtils.getIfNull(null, "")        = ""
+	 * ObjectUtils.getIfNull(null, "zz")      = "zz"
+	 * ObjectUtils.getIfNull("abc", *)        = "abc"
+	 * ObjectUtils.getIfNull(Boolean.TRUE, *) = Boolean.TRUE
+	 * </pre>
+	 *
+	 * @param <T>          the type of the object
+	 * @param object       the object to test, may be {@code null}
+	 * @param defaultValue the default value to return if the object is {@code null}, may be {@code null}
+	 * @return {@code object} if it is not {@code null}; otherwise, {@code defaultValue}
+	 */
+	@Nullable
+	public static <T> T getIfNull(@Nullable final T object, @Nullable final T defaultValue) {
+		return Objects.nonNull(object) ? object : defaultValue;
+	}
+
+	/**
+	 * Returns the collection if it is not {@code null} and not empty; otherwise, returns the default value.
+	 *
+	 * <pre>
+	 * ObjectUtils.getIfEmpty(List.of("a"), List.of("b"))     			= List.of("a")
+	 * ObjectUtils.getIfEmpty(null, List.of("b"))            			= List.of("b")
+	 * ObjectUtils.getIfEmpty(Collections.emptyList(), List.of("b")) 	= List.of("b")
+	 * ObjectUtils.getIfEmpty(null, null)                    			= null
+	 * </pre>
+	 *
+	 * @param <T>          the type of elements in the collection
+	 * @param object       the collection to test, may be {@code null}
+	 * @param defaultValue the default value to return if the collection is {@code null} or empty, may be {@code null}
+	 * @return {@code object} if it is not {@code null} and not empty; otherwise, {@code defaultValue}
+	 */
+	@Nullable
+	public static <T> Collection<T> getIfEmpty(@Nullable final Collection<T> object,
+											   @Nullable final Collection<T> defaultValue) {
+		return Objects.nonNull(object) && !object.isEmpty() ? object : defaultValue;
+	}
+
+	/**
 	 * Determine whether the given object is empty.
 	 * <p>This method supports the following object types.
 	 * <ul>
