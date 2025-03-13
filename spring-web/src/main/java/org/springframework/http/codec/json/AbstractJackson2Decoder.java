@@ -128,6 +128,10 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		return decodeToFlux(input, elementType, mimeType, hints,null);
+	}
+
+	private Flux<Object> decodeToFlux(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints,@Nullable Boolean tokenizeArrays) {
 		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
 		if (mapper == null) {
 			return Flux.error(new IllegalStateException("No ObjectMapper for " + elementType));
@@ -138,8 +142,10 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 			forceUseOfBigDecimal = true;
 		}
 
-		boolean tokenizeArrays = (!elementType.isArray() &&
-				!Collection.class.isAssignableFrom(elementType.resolve(Object.class)));
+		if (tokenizeArrays == null) {
+			tokenizeArrays = (!elementType.isArray() &&
+					!Collection.class.isAssignableFrom(elementType.resolve(Object.class)));
+		}
 
 		Flux<DataBuffer> processed = processInput(input, elementType, mimeType, hints);
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, mapper.getFactory(), mapper,
@@ -188,15 +194,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
-		return Mono.deferContextual(contextView -> {
-
-			Map<String, Object> hintsToUse = contextView.isEmpty() ? hints :
-					Hints.merge(hints, ContextView.class.getName(), contextView);
-
-			return DataBufferUtils.join(input, this.maxInMemorySize).flatMap(dataBuffer ->
-					Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hintsToUse)));
-		});
+		return decodeToFlux(input, elementType, mimeType, hints, false).singleOrEmpty();
 	}
 
 	@Override
