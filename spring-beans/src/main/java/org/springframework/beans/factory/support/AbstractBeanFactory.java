@@ -594,9 +594,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						ResolvableType targetResolvableType = targetMbd.targetType;
 						if (targetResolvableType == null) {
 							targetResolvableType = targetMbd.factoryMethodReturnType;
-						}
-						if (targetResolvableType == null) {
-							targetResolvableType = ResolvableType.forClass(targetMbd.getBeanClass());
+							if (targetResolvableType == null) {
+								targetResolvableType = ResolvableType.forClass(targetMbd.getBeanClass());
+							}
 						}
 
 						if (typeToMatch.isAssignableFrom(targetResolvableType)) {
