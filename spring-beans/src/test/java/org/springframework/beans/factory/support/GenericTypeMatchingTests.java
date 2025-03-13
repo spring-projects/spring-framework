@@ -3,6 +3,7 @@ package org.springframework.beans.factory.support;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,8 +17,8 @@ class ScopedProxyGenericTypeMatchTests {
 	void scopedProxyBeanTypeMatching() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
-		String targetBeanName = "scopedTarget.wordBean";
-		String proxyBeanName = "wordBean";
+		String proxyBeanName = "wordBean-" + UUID.randomUUID();
+		String targetBeanName = "scopedTarget." + proxyBeanName;
 
 		RootBeanDefinition targetDef = new RootBeanDefinition(SomeGenericSupplier.class);
 		targetDef.setScope("request");
@@ -31,11 +32,9 @@ class ScopedProxyGenericTypeMatchTests {
 
 		ResolvableType supplierType = ResolvableType.forClassWithGenerics(Supplier.class, String.class);
 
-		boolean isMatch = factory.isTypeMatch(proxyBeanName, supplierType);
-		assertThat(isMatch).isTrue();
+		assertThat(factory.isTypeMatch(proxyBeanName, supplierType)).isTrue();
 
-		String[] names = factory.getBeanNamesForType(supplierType);
-		assertThat(names).contains(proxyBeanName);
+		assertThat(factory.getBeanNamesForType(supplierType)).contains(proxyBeanName);
 	}
 
 	static class SomeGenericSupplier implements Supplier<String> {
