@@ -16,25 +16,26 @@ class ScopedProxyGenericTypeMatchTests {
 	void scopedProxyBeanTypeMatching() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
+		String targetBeanName = "scopedTarget.wordBean";
+		String proxyBeanName = "wordBean";
+
 		RootBeanDefinition targetDef = new RootBeanDefinition(SomeGenericSupplier.class);
 		targetDef.setScope("request");
-		factory.registerBeanDefinition("scopedTarget.wordBean", targetDef);
+		factory.registerBeanDefinition(targetBeanName, targetDef);
 
 		RootBeanDefinition proxyDef = new RootBeanDefinition();
 		proxyDef.setScope("singleton");
 		proxyDef.setTargetType(ResolvableType.forClassWithGenerics(Supplier.class, String.class));
-		proxyDef.setAttribute("targetBeanName", "scopedTarget.wordBean");
-		factory.registerBeanDefinition("wordBean", proxyDef);
+		proxyDef.setAttribute("targetBeanName", targetBeanName);
+		factory.registerBeanDefinition(proxyBeanName, proxyDef);
 
 		ResolvableType supplierType = ResolvableType.forClassWithGenerics(Supplier.class, String.class);
 
-		boolean isMatch = factory.isTypeMatch("wordBean", supplierType);
-
-
+		boolean isMatch = factory.isTypeMatch(proxyBeanName, supplierType);
 		assertThat(isMatch).isTrue();
 
 		String[] names = factory.getBeanNamesForType(supplierType);
-		assertThat(names).contains("wordBean");
+		assertThat(names).contains(proxyBeanName);
 	}
 
 	static class SomeGenericSupplier implements Supplier<String> {
