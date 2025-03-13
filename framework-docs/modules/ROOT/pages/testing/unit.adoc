@@ -47,8 +47,7 @@ out-of-container tests for code that depends on environment-specific properties.
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
 mock objects that are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
-convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock])
-or alternative Servlet API mock objects (such as http://www.mockobjects.com[MockObjects]).
+convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock]).
 
 TIP: Since Spring Framework 6.0, the mock objects in `org.springframework.mock.web` are
 based on the Servlet 6.0 API.
