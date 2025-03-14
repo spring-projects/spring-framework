@@ -127,7 +127,7 @@ public abstract class ObjectUtils {
 	 * @return An Optional containing the first non-null object, or an empty Optional if all objects are null.
 	 */
 	@SafeVarargs
-	public static <T> Optional<T> getNonNull(@Nullable final T... objects) {
+	public static <T> Optional<T> firstNonNull(@Nullable final T... objects) {
 		return Optional.ofNullable(objects)
 				.map(arr -> Arrays.stream(arr).filter(Objects::nonNull).findFirst())
 				.orElse(Optional.empty());

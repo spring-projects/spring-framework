@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.util.ObjectUtils.getIfEmpty;
 import static org.springframework.util.ObjectUtils.getIfNull;
-import static org.springframework.util.ObjectUtils.getNonNull;
+import static org.springframework.util.ObjectUtils.firstNonNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
@@ -148,20 +148,20 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void getNonNullObject() {
+	void firstNonNullObject() {
 		String value = UUID.randomUUID().toString();
 		String backup = UUID.randomUUID().toString();
 
-		assertThat(getNonNull(backup, value, value)).contains(backup);
-		assertThat(getNonNull(value, null, backup)).contains(value);
-		assertThat(getNonNull(backup, value, null)).contains(backup);
-		assertThat(getNonNull(value, backup)).contains(value);
-		assertThat(getNonNull(null, null, value)).contains(value);
+		assertThat(firstNonNull(backup, value, value)).contains(backup);
+		assertThat(firstNonNull(value, null, backup)).contains(value);
+		assertThat(firstNonNull(backup, value, null)).contains(backup);
+		assertThat(firstNonNull(value, backup)).contains(value);
+		assertThat(firstNonNull(null, null, value)).contains(value);
 
 		String _null = null;
-		assertThat(getNonNull(null, null, _null)).isEmpty();
-		assertThat(getNonNull(null, "null", backup)).contains("null");
-		assertThat(getNonNull(null, null)).isEmpty();
+		assertThat(firstNonNull(null, null, _null)).isEmpty();
+		assertThat(firstNonNull(null, "null", backup)).contains("null");
+		assertThat(firstNonNull(null, null)).isEmpty();
 	}
 
 	@Test
