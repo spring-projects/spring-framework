@@ -131,11 +131,12 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void getIfEmptyObject() {
+	void getIfEmptyObjectCollection() {
 		Collection<String> empty = Collections.emptyList();
 		Collection<String> value = List.of(UUID.randomUUID().toString());
 		Collection<String> backup = List.of(UUID.randomUUID().toString());
 
+		assertThat(getIfEmpty(value, backup)).contains(value);
 		assertThat(getIfEmpty(value, backup)).contains(value);
 		assertThat(getIfEmpty(null, backup)).contains(backup);
 		assertThat(getIfEmpty(empty, backup)).contains(backup);
@@ -144,11 +145,44 @@ class ObjectUtilsTests {
 		assertThat(getIfEmpty(backup, backup)).contains(backup);
 		assertThat(getIfEmpty(null, empty)).contains(empty);
 		assertThat(getIfEmpty(null, backup)).contains(backup);
-		assertThat(getIfEmpty(null, null)).isEmpty();
 	}
 
 	@Test
-	void firstNonNullObject() {
+	void getIfEmptyObjectArray() {
+		String[] empty = new String[0];
+		String[] value = {UUID.randomUUID().toString()};
+		String[] backup = {UUID.randomUUID().toString()};
+
+		assertThat(getIfEmpty(value, backup)).contains(value);
+		assertThat(getIfEmpty(null, backup)).contains(backup);
+		assertThat(getIfEmpty(empty, backup)).contains(backup);
+		assertThat(getIfEmpty(value, empty)).contains(value);
+		assertThat(getIfEmpty(empty, empty)).isEmpty();
+		assertThat(getIfEmpty(backup, backup)).contains(backup);
+		assertThat(getIfEmpty(null, empty)).isEmpty();
+		assertThat(getIfEmpty(null, backup)).contains(backup);
+	}
+
+	@Test
+	void firstNonNullObjectCollection() {
+		String value = UUID.randomUUID().toString();
+		String backup = UUID.randomUUID().toString();
+
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(backup, value, value))).contains(backup);
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(value, null, backup))).contains(value);
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(backup, value, null))).contains(backup);
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(value, backup))).contains(value);
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(null, null, value))).contains(value);
+
+		String _null = null;
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(null, null, _null))).isEmpty();
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(null, "null", backup))).contains("null");
+		assertThat(ObjectUtils.firstNonNull(Arrays.asList(null, null))).isEmpty();
+		assertThat(ObjectUtils.firstNonNull(Collections.emptyList())).isEmpty();
+	}
+
+	@Test
+	void firstNonNullObjectArray() {
 		String value = UUID.randomUUID().toString();
 		String backup = UUID.randomUUID().toString();
 

@@ -118,7 +118,6 @@ public abstract class ObjectUtils {
 		return (array == null || array.length == 0);
 	}
 
-
 	/**
 	 * Returns the first non-null element from the provided varargs.
 	 *
@@ -131,6 +130,20 @@ public abstract class ObjectUtils {
 		return Optional.ofNullable(objects)
 				.map(arr -> Arrays.stream(arr).filter(Objects::nonNull).findFirst())
 				.orElse(Optional.empty());
+	}
+
+	/**
+	 * Returns the first non-null element from the provided collection.
+	 *
+	 * @param collection The objects to check for non-null values.
+	 * @param <T>        The type of the objects.
+	 * @return An Optional containing the first non-null object, or an empty Optional if all objects are null.
+	 */
+	public static <T> Optional<T> firstNonNull(@Nullable final Collection<T> collection) {
+		if (Objects.isNull(collection) || collection.isEmpty()) {
+			return Optional.empty();
+		}
+		return collection.stream().filter(Objects::nonNull).findFirst();
 	}
 
 	/**
@@ -159,6 +172,26 @@ public abstract class ObjectUtils {
 		return Optional.ofNullable(object)
 				.filter(collection -> !collection.isEmpty())
 				.or(() -> Optional.ofNullable(defaultValue));
+	}
+
+	/**
+	 * Returns the array if it is not {@code null} and not empty; otherwise, returns the default value.
+	 *
+	 * @param object       the array to test, may be {@code null}
+	 * @param defaultValue the default value to return if the array is {@code null} or empty, may be {@code null}
+	 * @param <T>          the type of elements in the array
+	 * @return An Optional containing the array if not null and not empty, otherwise an Optional of the default
+	 * value.
+	 */
+	public static <T> Optional<T[]> getIfEmpty(@Nullable final T[] object,
+											   @Nullable final T[] defaultValue) {
+		if (Objects.nonNull(object) && object.length > 0) {
+			return Optional.of(object);
+		}
+		if (Objects.nonNull(defaultValue) && defaultValue.length > 0) {
+			return Optional.of(defaultValue);
+		}
+		return Optional.empty();
 	}
 
 	/**
