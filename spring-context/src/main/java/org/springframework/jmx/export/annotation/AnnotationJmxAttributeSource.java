@@ -41,7 +41,6 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.util.StringUtils;
@@ -152,9 +151,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	public org.springframework.jmx.export.metadata.@Nullable ManagedOperationParameter[] getManagedOperationParameters(
 			Method method) throws InvalidMetadataException {
 
-		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(
-				method, ManagedOperationParameter.class, ManagedOperationParameters.class);
-
+		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(method, ManagedOperationParameter.class);
 		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedOperationParameter.class);
 	}
 
@@ -162,19 +159,15 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	public org.springframework.jmx.export.metadata.@Nullable ManagedNotification[] getManagedNotifications(Class<?> clazz)
 			throws InvalidMetadataException {
 
-		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(
-				clazz, ManagedNotification.class, ManagedNotifications.class);
-
+		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(clazz, ManagedNotification.class);
 		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedNotification.class);
 	}
 
 
 	private static List<MergedAnnotation<? extends Annotation>> getRepeatableAnnotations(
-			AnnotatedElement annotatedElement, Class<? extends Annotation> annotationType,
-			Class<? extends Annotation> containerAnnotationType) {
+			AnnotatedElement annotatedElement, Class<? extends Annotation> annotationType) {
 
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.TYPE_HIERARCHY,
-					RepeatableContainers.of(annotationType, containerAnnotationType))
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.TYPE_HIERARCHY)
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 				.map(MergedAnnotation::withNonMergedAttributes)
