@@ -49,6 +49,7 @@ import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -130,6 +131,27 @@ class FormHttpMessageConverterTests {
 		List<String> values = result.get("name 2");
 		assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
+	}
+
+	@Test
+	void readInvalidFormWithValueThatWontUrlDecode() {
+		//java.net.URLDecoder doesn't like negative integer values after a % character
+		String body = "name+1=value+1&name+2=value+2%" + ((char)-1);
+		assertInvalidFormIsRejectedWithSpecificException(body);
+	}
+
+	@Test
+	void readInvalidFormWithNameThatWontUrlDecode() {
+		//java.net.URLDecoder doesn't like negative integer values after a % character
+		String body = "name+1=value+1&name+2%" + ((char)-1) + "=value+2";
+		assertInvalidFormIsRejectedWithSpecificException(body);
+	}
+
+	@Test
+	void readInvalidFormWithNameWithNoValueThatWontUrlDecode() {
+		//java.net.URLDecoder doesn't like negative integer values after a % character
+		String body = "name+1=value+1&name+2%" + ((char)-1);
+		assertInvalidFormIsRejectedWithSpecificException(body);
 	}
 
 	@Test
@@ -408,6 +430,17 @@ class FormHttpMessageConverterTests {
 	private void assertCannotWrite(MediaType mediaType) {
 		Class<?> clazz = MultiValueMap.class;
 		assertThat(this.converter.canWrite(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isFalse();
+	}
+
+	private void assertInvalidFormIsRejectedWithSpecificException(String body) {
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+
+		assertThatThrownBy(() -> this.converter.read(null, inputMessage))
+				.isInstanceOf(HttpMessageNotReadableException.class)
+				.hasCauseInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Could not decode HTTP form payload");
 	}
 
 

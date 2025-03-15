@@ -353,12 +353,22 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
-				result.add(URLDecoder.decode(pair, charset), null);
+				try {
+					result.add(URLDecoder.decode(pair, charset), null);
+				}
+				catch (IllegalArgumentException ex) {
+					throw new HttpMessageNotReadableException("Could not decode HTTP form payload", ex, inputMessage);
+				}
 			}
 			else {
-				String name = URLDecoder.decode(pair.substring(0, idx), charset);
-				String value = URLDecoder.decode(pair.substring(idx + 1), charset);
-				result.add(name, value);
+				try {
+					String name = URLDecoder.decode(pair.substring(0, idx), charset);
+					String value = URLDecoder.decode(pair.substring(idx + 1), charset);
+					result.add(name, value);
+				}
+				catch (IllegalArgumentException ex) {
+					throw new HttpMessageNotReadableException("Could not decode HTTP form payload", ex, inputMessage);
+				}
 			}
 		}
 		return result;
