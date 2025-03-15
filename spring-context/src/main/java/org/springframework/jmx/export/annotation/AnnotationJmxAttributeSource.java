@@ -74,7 +74,9 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 
 
 	@Override
-	public org.springframework.jmx.export.metadata.@Nullable ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
+	public org.springframework.jmx.export.metadata.@Nullable ManagedResource getManagedResource(Class<?> beanClass)
+			throws InvalidMetadataException {
+
 		MergedAnnotation<ManagedResource> ann = MergedAnnotations.from(beanClass, SearchStrategy.TYPE_HIERARCHY)
 				.get(ManagedResource.class).withNonMergedAttributes();
 		if (!ann.isPresent()) {
@@ -86,7 +88,8 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 			throw new InvalidMetadataException("@ManagedResource class '" + target.getName() + "' must be public");
 		}
 
-		org.springframework.jmx.export.metadata.ManagedResource bean = new org.springframework.jmx.export.metadata.ManagedResource();
+		org.springframework.jmx.export.metadata.ManagedResource bean =
+				new org.springframework.jmx.export.metadata.ManagedResource();
 		Map<String, Object> map = ann.asMap();
 		List<PropertyValue> list = new ArrayList<>(map.size());
 		map.forEach((attrName, attrValue) -> {
@@ -103,14 +106,17 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public org.springframework.jmx.export.metadata.@Nullable ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
+	public org.springframework.jmx.export.metadata.@Nullable ManagedAttribute getManagedAttribute(Method method)
+			throws InvalidMetadataException {
+
 		MergedAnnotation<ManagedAttribute> ann = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
 				.get(ManagedAttribute.class).withNonMergedAttributes();
 		if (!ann.isPresent()) {
 			return null;
 		}
 
-		org.springframework.jmx.export.metadata.ManagedAttribute bean = new org.springframework.jmx.export.metadata.ManagedAttribute();
+		org.springframework.jmx.export.metadata.ManagedAttribute bean =
+				new org.springframework.jmx.export.metadata.ManagedAttribute();
 		Map<String, Object> map = ann.asMap();
 		MutablePropertyValues pvs = new MutablePropertyValues(map);
 		pvs.removePropertyValue("defaultValue");
@@ -123,7 +129,9 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public org.springframework.jmx.export.metadata.@Nullable ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
+	public org.springframework.jmx.export.metadata.@Nullable ManagedMetric getManagedMetric(Method method)
+			throws InvalidMetadataException {
+
 		MergedAnnotation<ManagedMetric> ann = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
 				.get(ManagedMetric.class).withNonMergedAttributes();
 
@@ -131,7 +139,9 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public org.springframework.jmx.export.metadata.@Nullable ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
+	public org.springframework.jmx.export.metadata.@Nullable ManagedOperation getManagedOperation(Method method)
+			throws InvalidMetadataException {
+
 		MergedAnnotation<ManagedOperation> ann = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
 				.get(ManagedOperation.class).withNonMergedAttributes();
 
@@ -139,8 +149,8 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public org.springframework.jmx.export.metadata.@Nullable ManagedOperationParameter[] getManagedOperationParameters(Method method)
-			throws InvalidMetadataException {
+	public org.springframework.jmx.export.metadata.@Nullable ManagedOperationParameter[] getManagedOperationParameters(
+			Method method) throws InvalidMetadataException {
 
 		List<MergedAnnotation<? extends Annotation>> anns = getRepeatableAnnotations(
 				method, ManagedOperationParameter.class, ManagedOperationParameters.class);
@@ -164,7 +174,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 			Class<? extends Annotation> containerAnnotationType) {
 
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.TYPE_HIERARCHY,
-				RepeatableContainers.of(annotationType, containerAnnotationType))
+					RepeatableContainers.of(annotationType, containerAnnotationType))
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 				.map(MergedAnnotation::withNonMergedAttributes)
