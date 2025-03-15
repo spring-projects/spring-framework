@@ -17,10 +17,12 @@
 package org.springframework.test.context.cache;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.MergedContextConfiguration;
+
+import java.util.concurrent.Future;
+import java.util.function.Function;
 
 /**
  * {@code ContextCache} defines the SPI for caching Spring
@@ -96,7 +98,10 @@ public interface ContextCache {
 	 * if not found in the cache
 	 * @see #remove
 	 */
-	@Nullable ApplicationContext get(MergedContextConfiguration key);
+	@Nullable
+	ApplicationContext get(MergedContextConfiguration key);
+
+	Future<ApplicationContext> computeIfAbsent(MergedContextConfiguration key, Function<MergedContextConfiguration, ApplicationContext> mappingFunction);
 
 	/**
 	 * Explicitly add an {@code ApplicationContext} instance to the cache
