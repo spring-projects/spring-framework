@@ -13,9 +13,9 @@ templating libraries on different script engines:
 |Scripting Library |Scripting Engine
 |https://handlebarsjs.com/[Handlebars] |https://openjdk.java.net/projects/nashorn/[Nashorn]
 |https://mustache.github.io/[Mustache] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://facebook.github.io/react/[React] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://www.embeddedjs.com/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://www.stuartellis.name/articles/erb/[ERB] |https://www.jruby.org[JRuby]
+|https://react.dev/[React] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://ejs.co/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://docs.ruby-lang.org/en/master/ERB.html[ERB] |https://www.jruby.org[JRuby]
 |https://docs.python.org/2/library/string.html#template-strings[String templates] |https://www.jython.org/[Jython]
 |https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |{kotlin-site}[Kotlin]
 |===
