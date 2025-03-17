@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,26 +350,21 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
-		for (String pair : pairs) {
-			int idx = pair.indexOf('=');
-			if (idx == -1) {
-				try {
+		try {
+			for (String pair : pairs) {
+				int idx = pair.indexOf('=');
+				if (idx == -1) {
 					result.add(URLDecoder.decode(pair, charset), null);
 				}
-				catch (IllegalArgumentException ex) {
-					throw new HttpMessageNotReadableException("Could not decode HTTP form payload", ex, inputMessage);
-				}
-			}
-			else {
-				try {
+				else {
 					String name = URLDecoder.decode(pair.substring(0, idx), charset);
 					String value = URLDecoder.decode(pair.substring(idx + 1), charset);
 					result.add(name, value);
 				}
-				catch (IllegalArgumentException ex) {
-					throw new HttpMessageNotReadableException("Could not decode HTTP form payload", ex, inputMessage);
-				}
 			}
+		}
+		catch (IllegalArgumentException ex) {
+			throw new HttpMessageNotReadableException("Could not decode HTTP form payload", ex, inputMessage);
 		}
 		return result;
 	}
