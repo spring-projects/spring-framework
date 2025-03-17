@@ -51,8 +51,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
@@ -132,6 +134,7 @@ class PathMatchingResourcePatternResolverTests {
 			resolver = new PathMatchingResourcePatternResolver(new DefaultResourceLoader(new URLClassLoader(new URL[] {root})));
 			assertExactFilenames("classpath*:scanned/*.txt", "resource#test1.txt", "resource#test2.txt");
 		}
+
 
 		@Nested
 		class WithHashtagsInTheirFilenames {
@@ -299,6 +302,7 @@ class PathMatchingResourcePatternResolverTests {
 		}
 	}
 
+
 	@Nested
 	class ClassPathManifestEntries {
 
@@ -313,8 +317,8 @@ class PathMatchingResourcePatternResolverTests {
 			writeApplicationJar(this.temp.resolve("app.jar"));
 			String java = ProcessHandle.current().info().command().get();
 			Process process = new ProcessBuilder(java, "-jar", "app.jar")
-				.directory(this.temp.toFile())
-				.start();
+					.directory(this.temp.toFile())
+					.start();
 			assertThat(process.waitFor()).isZero();
 			String result = StreamUtils.copyToString(process.getInputStream(), StandardCharsets.UTF_8);
 			assertThat(result.replace("\\", "/")).contains("!!!!").contains("/lib/asset.jar!/assets/file.txt");
@@ -328,6 +332,8 @@ class PathMatchingResourcePatternResolverTests {
 				StreamUtils.copy("test", StandardCharsets.UTF_8, jar);
 				jar.closeEntry();
 			}
+			assertThat(new FileSystemResource(path).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
 		}
 
 		private void writeApplicationJar(Path path) throws Exception {
@@ -338,8 +344,7 @@ class PathMatchingResourcePatternResolverTests {
 			mainAttributes.put(Name.MANIFEST_VERSION, "1.0");
 			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()), manifest)) {
 				String appClassResource = ClassUtils.convertClassNameToResourcePath(
-						ClassPathManifestEntriesTestApplication.class.getName())
-						+ ClassUtils.CLASS_FILE_SUFFIX;
+						ClassPathManifestEntriesTestApplication.class.getName()) + ClassUtils.CLASS_FILE_SUFFIX;
 				String folder = "";
 				for (String name : appClassResource.split("/")) {
 					if (!name.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
@@ -356,18 +361,19 @@ class PathMatchingResourcePatternResolverTests {
 					}
 				}
 			}
+			assertThat(new FileSystemResource(path).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
 		}
 
 		private String buildSpringClassPath() throws Exception {
-			return copyClasses(PathMatchingResourcePatternResolver.class, "spring-core")
-					+ copyClasses(LogFactory.class, "commons-logging");
+			return copyClasses(PathMatchingResourcePatternResolver.class, "spring-core") +
+					copyClasses(LogFactory.class, "commons-logging");
 		}
 
-		private String copyClasses(Class<?> sourceClass, String destinationName)
-				throws URISyntaxException, IOException {
+		private String copyClasses(Class<?> sourceClass, String destinationName) throws URISyntaxException, IOException {
 			Path destination = this.temp.resolve(destinationName);
-			String resourcePath = ClassUtils.convertClassNameToResourcePath(sourceClass.getName())
-					+ ClassUtils.CLASS_FILE_SUFFIX;
+			String resourcePath = ClassUtils.convertClassNameToResourcePath(
+					sourceClass.getName()) + ClassUtils.CLASS_FILE_SUFFIX;
 			URL resource = getClass().getClassLoader().getResource(resourcePath);
 			URL url = new URL(resource.toString().replace(resourcePath, ""));
 			URLConnection connection = url.openConnection();
@@ -393,7 +399,6 @@ class PathMatchingResourcePatternResolverTests {
 			}
 			return destinationName + "/ ";
 		}
-
 	}
 
 
