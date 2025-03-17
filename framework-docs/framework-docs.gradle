@@ -52,6 +52,7 @@ dependencies {
 	api(project(":spring-aspects"))
 	api(project(":spring-context"))
 	api(project(":spring-context-support"))
+	api(project(":spring-core-test"))
 	api(project(":spring-jdbc"))
 	api(project(":spring-jms"))
 	api(project(":spring-test"))
@@ -74,9 +75,9 @@ dependencies {
 	api("org.apache.activemq:activemq-ra:6.1.2")
 	api("org.apache.commons:commons-dbcp2:2.11.0")
 	api("org.aspectj:aspectjweaver")
+	api("org.assertj:assertj-core")
 	api("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
 	api("org.jetbrains.kotlin:kotlin-stdlib")
+	api("org.junit.jupiter:junit-jupiter-api")
 
-	implementation(project(":spring-core-test"))
-	implementation("org.assertj:assertj-core")
 }
