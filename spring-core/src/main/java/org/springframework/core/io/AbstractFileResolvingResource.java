@@ -56,6 +56,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try a URL connection content-length header
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
+
 				HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
 				if (httpCon != null) {
 					httpCon.setRequestMethod("HEAD");
@@ -81,12 +82,16 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						}
 					}
 				}
-				// Check content-length entry but not for JarURLConnection where
-				// this would open the jar file but effectively never close it ->
-				// for jar entries, always fall back to stream existence instead.
-				if (!(con instanceof JarURLConnection) && con.getContentLengthLong() > 0) {
+
+				if (con instanceof JarURLConnection jarCon) {
+					// For JarURLConnection, do not check content-length but rather the
+					// existence of the entry (or the jar root in case of no entryName).
+					return (jarCon.getEntryName() == null || jarCon.getJarEntry() != null);
+				}
+				else if (con.getContentLengthLong() > 0) {
 					return true;
 				}
+
 				if (httpCon != null) {
 					// No HTTP OK status, and no content-length header: give up
 					httpCon.disconnect();
@@ -346,8 +351,8 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 */
 	protected void customizeConnection(URLConnection con) throws IOException {
 		ResourceUtils.useCachesIfNecessary(con);
-		if (con instanceof HttpURLConnection httpConn) {
-			customizeConnection(httpConn);
+		if (con instanceof HttpURLConnection httpCon) {
+			customizeConnection(httpCon);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 		try {
 			int algorithmicStep = STEP_JOIN_POINT_BINDING;
-			while ((this.numberOfRemainingUnboundArguments > 0) && algorithmicStep < STEP_FINISHED) {
+			while (this.numberOfRemainingUnboundArguments > 0 && algorithmicStep < STEP_FINISHED) {
 				switch (algorithmicStep++) {
 					case STEP_JOIN_POINT_BINDING -> {
 						if (!maybeBindThisJoinPoint()) {
@@ -368,7 +368,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		if (this.returningName != null) {
 			if (this.numberOfRemainingUnboundArguments > 1) {
 				throw new AmbiguousBindingException("Binding of returning parameter '" + this.returningName +
-						"' is ambiguous: there are " + this.numberOfRemainingUnboundArguments + " candidates.");
+						"' is ambiguous: there are " + this.numberOfRemainingUnboundArguments + " candidates. " +
+						"Consider compiling with -parameters in order to make declared parameter names available.");
 			}
 
 			// We're all set... find the unbound parameter, and bind it.
@@ -479,8 +480,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	private void maybeBindThisOrTargetOrArgsFromPointcutExpression() {
 		if (this.numberOfRemainingUnboundArguments > 1) {
-			throw new AmbiguousBindingException("Still " + this.numberOfRemainingUnboundArguments
-					+ " unbound args at this()/target()/args() binding stage, with no way to determine between them");
+			throw new AmbiguousBindingException("Still " + this.numberOfRemainingUnboundArguments +
+					" unbound args at this()/target()/args() binding stage, with no way to determine between them");
 		}
 
 		List<String> varNames = new ArrayList<>();
@@ -529,8 +530,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	private void maybeBindReferencePointcutParameter() {
 		if (this.numberOfRemainingUnboundArguments > 1) {
-			throw new AmbiguousBindingException("Still " + this.numberOfRemainingUnboundArguments
-					+ " unbound args at reference pointcut binding stage, with no way to determine between them");
+			throw new AmbiguousBindingException("Still " + this.numberOfRemainingUnboundArguments +
+					" unbound args at reference pointcut binding stage, with no way to determine between them");
 		}
 
 		List<String> varNames = new ArrayList<>();
@@ -735,7 +736,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Simple record to hold the extracted text from a pointcut body, together
 	 * with the number of tokens consumed in extracting it.
 	 */
-	private record PointcutBody(int numTokensConsumed, @Nullable String text) {}
+	private record PointcutBody(int numTokensConsumed, @Nullable String text) {
+	}
+
 
 	/**
 	 * Thrown in response to an ambiguous binding being detected when
