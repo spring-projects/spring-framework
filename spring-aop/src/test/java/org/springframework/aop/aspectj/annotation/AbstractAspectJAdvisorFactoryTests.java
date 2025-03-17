@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +203,6 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		itb.getSpouse();
 
 		assertThat(maaif.isMaterialized()).isTrue();
-
 		assertThat(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null)).isTrue();
 
 		assertThat(itb.getAge()).as("Around advice must apply").isEqualTo(0);
@@ -301,7 +300,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	void bindingWithMultipleArgsDifferentlyOrdered() {
 		ManyValuedArgs target = new ManyValuedArgs();
 		ManyValuedArgs mva = createProxy(target, ManyValuedArgs.class,
-			getAdvisorFactory().getAdvisors(aspectInstanceFactory(new ManyValuedArgs(), "someBean")));
+				getAdvisorFactory().getAdvisors(aspectInstanceFactory(new ManyValuedArgs(), "someBean")));
 
 		String a = "a";
 		int b = 12;
@@ -320,7 +319,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		NotLockable notLockableTarget = new NotLockable();
 		assertThat(notLockableTarget).isNotInstanceOf(Lockable.class);
 		NotLockable notLockable1 = createProxy(notLockableTarget, NotLockable.class,
-			getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")));
+				getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")));
 		assertThat(notLockable1).isInstanceOf(Lockable.class);
 		Lockable lockable = (Lockable) notLockable1;
 		assertThat(lockable.locked()).isFalse();
@@ -329,7 +328,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 		NotLockable notLockable2Target = new NotLockable();
 		NotLockable notLockable2 = createProxy(notLockable2Target, NotLockable.class,
-			getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")));
+				getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")));
 		assertThat(notLockable2).isInstanceOf(Lockable.class);
 		Lockable lockable2 = (Lockable) notLockable2;
 		assertThat(lockable2.locked()).isFalse();
@@ -343,20 +342,19 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	void introductionAdvisorExcludedFromTargetImplementingInterface() {
 		assertThat(AopUtils.findAdvisorsThatCanApply(
 		getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new MakeLockable(), "someBean")),
+				aspectInstanceFactory(new MakeLockable(), "someBean")),
 		CannotBeUnlocked.class)).isEmpty();
 		assertThat(AopUtils.findAdvisorsThatCanApply(getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class)).hasSize(2);
+				aspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class)).hasSize(2);
 	}
 
 	@Test
 	void introductionOnTargetImplementingInterface() {
 		CannotBeUnlocked target = new CannotBeUnlocked();
 		Lockable proxy = createProxy(target, CannotBeUnlocked.class,
-				// Ensure that we exclude
 				AopUtils.findAdvisorsThatCanApply(
-					getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")),
-					CannotBeUnlocked.class));
+						getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")),
+						CannotBeUnlocked.class));
 		assertThat(proxy).isInstanceOf(Lockable.class);
 		Lockable lockable = proxy;
 		assertThat(lockable.locked()).as("Already locked").isTrue();
@@ -370,8 +368,8 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		ArrayList<Object> target = new ArrayList<>();
 		List<?> proxy = createProxy(target, List.class,
 				AopUtils.findAdvisorsThatCanApply(
-					getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")),
-					List.class));
+						getAdvisorFactory().getAdvisors(aspectInstanceFactory(new MakeLockable(), "someBean")),
+						List.class));
 		assertThat(proxy).as("Type pattern must have excluded mixin").isNotInstanceOf(Lockable.class);
 	}
 
@@ -379,7 +377,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	void introductionBasedOnAnnotationMatch() { // gh-9980
 		AnnotatedTarget target = new AnnotatedTargetImpl();
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new MakeAnnotatedTypeModifiable(), "someBean"));
+				aspectInstanceFactory(new MakeAnnotatedTypeModifiable(), "someBean"));
 		Object proxy = createProxy(target, AnnotatedTarget.class, advisors);
 		assertThat(proxy).isInstanceOf(Lockable.class);
 		Lockable lockable = (Lockable) proxy;
@@ -393,9 +391,9 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new MakeITestBeanModifiable(), "someBean"));
+				aspectInstanceFactory(new MakeITestBeanModifiable(), "someBean"));
 		advisors.addAll(getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new MakeLockable(), "someBean")));
+				aspectInstanceFactory(new MakeLockable(), "someBean")));
 
 		Modifiable modifiable = (Modifiable) createProxy(target, ITestBean.class, advisors);
 		assertThat(modifiable).isInstanceOf(Modifiable.class);
@@ -426,7 +424,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		UnsupportedOperationException expectedException = new UnsupportedOperationException();
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new ExceptionThrowingAspect(expectedException), "someBean"));
+				aspectInstanceFactory(new ExceptionThrowingAspect(expectedException), "someBean"));
 		assertThat(advisors).as("One advice method was found").hasSize(1);
 		ITestBean itb = createProxy(target, ITestBean.class, advisors);
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(itb::getAge);
@@ -439,12 +437,12 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		RemoteException expectedException = new RemoteException();
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(new ExceptionThrowingAspect(expectedException), "someBean"));
+				aspectInstanceFactory(new ExceptionThrowingAspect(expectedException), "someBean"));
 		assertThat(advisors).as("One advice method was found").hasSize(1);
 		ITestBean itb = createProxy(target, ITestBean.class, advisors);
 		assertThatExceptionOfType(UndeclaredThrowableException.class)
-			.isThrownBy(itb::getAge)
-			.withCause(expectedException);
+				.isThrownBy(itb::getAge)
+				.withCause(expectedException);
 	}
 
 	@Test
@@ -452,7 +450,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		TwoAdviceAspect twoAdviceAspect = new TwoAdviceAspect();
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(twoAdviceAspect, "someBean"));
+				aspectInstanceFactory(twoAdviceAspect, "someBean"));
 		assertThat(advisors).as("Two advice methods found").hasSize(2);
 		ITestBean itb = createProxy(target, ITestBean.class, advisors);
 		itb.setName("");
@@ -466,7 +464,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	void afterAdviceTypes() throws Exception {
 		InvocationTrackingAspect aspect = new InvocationTrackingAspect();
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(
-			aspectInstanceFactory(aspect, "exceptionHandlingAspect"));
+				aspectInstanceFactory(aspect, "exceptionHandlingAspect"));
 		Echo echo = createProxy(new Echo(), Echo.class, advisors);
 
 		assertThat(aspect.invocations).isEmpty();
@@ -475,7 +473,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 		aspect.invocations.clear();
 		assertThatExceptionOfType(FileNotFoundException.class)
-			.isThrownBy(() -> echo.echo(new FileNotFoundException()));
+				.isThrownBy(() -> echo.echo(new FileNotFoundException()));
 		assertThat(aspect.invocations).containsExactly("around - start", "before", "after throwing", "after", "around - end");
 	}
 
@@ -487,7 +485,6 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		assertThat(Modifier.isAbstract(aspect.getClass().getSuperclass().getModifiers())).isFalse();
 
 		List<Advisor> advisors = getAdvisorFactory().getAdvisors(aspectInstanceFactory(aspect, "incrementingAspect"));
-
 		ITestBean proxy = createProxy(new TestBean("Jane", 42), ITestBean.class, advisors);
 		assertThat(proxy.getAge()).isEqualTo(86); // (42 + 1) * 2
 	}
@@ -812,19 +809,19 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 			invocations.add("before");
 		}
 
-		@AfterReturning("echo()")
-		void afterReturning() {
-			invocations.add("after returning");
-		}
-
-		@AfterThrowing("echo()")
-		void afterThrowing() {
-			invocations.add("after throwing");
-		}
-
 		@After("echo()")
 		void after() {
 			invocations.add("after");
+		}
+
+		@AfterReturning(pointcut = "this(target) && execution(* echo(*))", returning = "returnValue")
+		void afterReturning(JoinPoint joinPoint, Echo target, Object returnValue) {
+			invocations.add("after returning");
+		}
+
+		@AfterThrowing(pointcut = "this(target) && execution(* echo(*))", throwing = "exception")
+		void afterThrowing(JoinPoint joinPoint, Echo target, Throwable exception) {
+			invocations.add("after throwing");
 		}
 	}
 
@@ -967,7 +964,7 @@ abstract class AbstractMakeModifiable {
 class MakeITestBeanModifiable extends AbstractMakeModifiable {
 
 	@DeclareParents(value = "org.springframework.beans.testfixture.beans.ITestBean+",
-			defaultImpl=ModifiableImpl.class)
+			defaultImpl = ModifiableImpl.class)
 	static MutableModifiable mixin;
 
 }
