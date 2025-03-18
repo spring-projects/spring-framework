@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,10 @@ import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for the {@link WebClient} {@link io.micrometer.observation.Observation observations}.
@@ -72,7 +71,7 @@ class WebClientObservationTests {
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
 		when(mockResponse.bodyToFlux(String.class)).thenReturn(Flux.just("first", "second"));
 		when(mockResponse.releaseBody()).thenReturn(Mono.empty());
-		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
+		when(this.exchangeFunction.exchange(this.request.capture())).thenReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction).observationRegistry(this.observationRegistry);
 		this.observationRegistry.observationConfig().observationHandler(new HeaderInjectingHandler());
 	}
@@ -113,7 +112,7 @@ class WebClientObservationTests {
 	@Test
 	void recordsObservationForErrorExchange() {
 		ExchangeFunction exchangeFunction = mock();
-		given(exchangeFunction.exchange(any())).willReturn(Mono.error(new IllegalStateException()));
+		when(exchangeFunction.exchange(any())).thenReturn(Mono.error(new IllegalStateException()));
 		WebClient client = WebClient.builder().observationRegistry(observationRegistry).exchangeFunction(exchangeFunction).build();
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
 				.expectError(IllegalStateException.class)

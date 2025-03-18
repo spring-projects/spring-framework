@@ -40,7 +40,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
-import static org.mockito.BDDMockito.when;
+import static org.mockito.Mockito.when;
 
 class DefaultServerHttpRequestBuilderTests {
 

@@ -27,12 +27,11 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-
 
 /**
  * Tests for {@link AsyncExecutionInterceptor}.
