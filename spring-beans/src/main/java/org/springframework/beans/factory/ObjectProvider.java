@@ -273,7 +273,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #orderedStream(Predicate)
 	 */
 	default Stream<T> stream(Predicate<Class<?>> customFilter) {
-		return stream().filter(obj -> customFilter.test(obj.getClass()));
+		return stream(customFilter, true);
 	}
 
 	/**
@@ -287,6 +287,44 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #stream(Predicate)
 	 */
 	default Stream<T> orderedStream(Predicate<Class<?>> customFilter) {
+		return orderedStream(customFilter, true);
+	}
+
+	/**
+	 * Return a custom-filtered {@link Stream} over all matching object instances,
+	 * without specific ordering guarantees (but typically in registration order).
+	 * @param customFilter a custom type filter for selecting beans among the raw
+	 * bean type matches (or {@link #UNFILTERED} for all raw type matches without
+	 * any default filtering)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @since 6.2.5
+	 * @see #stream(Predicate)
+	 * @see #orderedStream(Predicate, boolean)
+	 */
+	default Stream<T> stream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+		if (!includeNonSingletons) {
+			throw new UnsupportedOperationException("Only supports includeNonSingletons=true by default");
+		}
+		return stream().filter(obj -> customFilter.test(obj.getClass()));
+	}
+
+	/**
+	 * Return a custom-filtered {@link Stream} over all matching object instances,
+	 * pre-ordered according to the factory's common order comparator.
+	 * @param customFilter a custom type filter for selecting beans among the raw
+	 * bean type matches (or {@link #UNFILTERED} for all raw type matches without
+	 * any default filtering)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @since 6.2.5
+	 * @see #orderedStream()
+	 * @see #stream(Predicate)
+	 */
+	default Stream<T> orderedStream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+		if (!includeNonSingletons) {
+			throw new UnsupportedOperationException("Only supports includeNonSingletons=true by default");
+		}
 		return orderedStream().filter(obj -> customFilter.test(obj.getClass()));
 	}
 

@@ -476,14 +476,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@SuppressWarnings("unchecked")
 			@Override
 			public Stream<T> stream() {
-				return Arrays.stream(getBeanNamesForTypedStream(requiredType, allowEagerInit))
+				return Arrays.stream(beanNamesForStream(requiredType, true, allowEagerInit))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
 			}
 			@SuppressWarnings("unchecked")
 			@Override
 			public Stream<T> orderedStream() {
-				String[] beanNames = getBeanNamesForTypedStream(requiredType, allowEagerInit);
+				String[] beanNames = beanNamesForStream(requiredType, true, allowEagerInit);
 				if (beanNames.length == 0) {
 					return Stream.empty();
 				}
@@ -499,16 +499,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			@SuppressWarnings("unchecked")
 			@Override
-			public Stream<T> stream(Predicate<Class<?>> customFilter) {
-				return Arrays.stream(getBeanNamesForTypedStream(requiredType, allowEagerInit))
+			public Stream<T> stream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+				return Arrays.stream(beanNamesForStream(requiredType, includeNonSingletons, allowEagerInit))
 						.filter(name -> customFilter.test(getType(name)))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
 			}
 			@SuppressWarnings("unchecked")
 			@Override
-			public Stream<T> orderedStream(Predicate<Class<?>> customFilter) {
-				String[] beanNames = getBeanNamesForTypedStream(requiredType, allowEagerInit);
+			public Stream<T> orderedStream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+				String[] beanNames = beanNamesForStream(requiredType, includeNonSingletons, allowEagerInit);
 				if (beanNames.length == 0) {
 					return Stream.empty();
 				}
@@ -547,8 +547,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return null;
 	}
 
-	private String[] getBeanNamesForTypedStream(ResolvableType requiredType, boolean allowEagerInit) {
-		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType, true, allowEagerInit);
+	private String[] beanNamesForStream(ResolvableType requiredType, boolean includeNonSingletons, boolean allowEagerInit) {
+		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType, includeNonSingletons, allowEagerInit);
 	}
 
 	@Override
@@ -2508,8 +2508,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
-		public Stream<Object> stream(Predicate<Class<?>> customFilter) {
-			return Arrays.stream(getBeanNamesForTypedStream(this.descriptor.getResolvableType(), true))
+		public Stream<Object> stream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+			return Arrays.stream(beanNamesForStream(this.descriptor.getResolvableType(), includeNonSingletons, true))
 					.filter(name -> AutowireUtils.isAutowireCandidate(DefaultListableBeanFactory.this, name))
 					.filter(name -> customFilter.test(getType(name)))
 					.map(name -> getBean(name))
@@ -2517,8 +2517,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		@Override
-		public Stream<Object> orderedStream(Predicate<Class<?>> customFilter) {
-			String[] beanNames = getBeanNamesForTypedStream(this.descriptor.getResolvableType(), true);
+		public Stream<Object> orderedStream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+			String[] beanNames = beanNamesForStream(this.descriptor.getResolvableType(), includeNonSingletons, true);
 			if (beanNames.length == 0) {
 				return Stream.empty();
 			}
