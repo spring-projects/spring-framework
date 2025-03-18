@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public final class SpelCompiler implements Opcodes {
 		String className = "org/springframework/expression/spel/generated/CompiledExpression" + getNextSuffix();
 		String evaluationContextClass = "org/springframework/expression/EvaluationContext";
 		ClassWriter cw = new ExpressionClassWriter();
-		cw.visit(V1_8, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
+		cw.visit(V17, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
 
 		// Create default constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
