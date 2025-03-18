@@ -56,6 +56,8 @@ class BulkBeanEmitter extends ClassEmitter {
         Method[] setters = new Method[setterNames.length];
         validate(target, getterNames, setterNames, types, getters, setters);
 
+        // Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+        // which set static final fields outside the initializer method <clinit>.
         begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, BULK_BEAN, null, Constants.SOURCE_FILE);
         EmitUtils.null_constructor(this);
         generateGet(target, getters);

@@ -94,23 +94,25 @@ public class InterfaceMaker extends AbstractClassGenerator
     }
 
     @Override
-	protected ClassLoader getDefaultClassLoader() {
+    protected ClassLoader getDefaultClassLoader() {
         return null;
     }
 
     @Override
-	protected Object firstInstance(Class type) {
+    protected Object firstInstance(Class type) {
         return type;
     }
 
     @Override
-	protected Object nextInstance(Object instance) {
+    protected Object nextInstance(Object instance) {
         throw new IllegalStateException("InterfaceMaker does not cache");
     }
 
     @Override
-	public void generateClass(ClassVisitor v) throws Exception {
+    public void generateClass(ClassVisitor v) throws Exception {
         ClassEmitter ce = new ClassEmitter(v);
+        // Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+        // which set static final fields outside the initializer method <clinit>.
         ce.begin_class(Constants.V1_8,
                        Constants.ACC_PUBLIC | Constants.ACC_INTERFACE | Constants.ACC_ABSTRACT,
                        getClassName(),
