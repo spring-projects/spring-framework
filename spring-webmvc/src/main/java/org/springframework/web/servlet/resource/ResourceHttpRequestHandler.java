@@ -569,7 +569,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * If the resource exists, the request will be checked for the presence of the
 	 * {@code Last-Modified} header, and its value will be compared against the last-modified
 	 * timestamp of the given resource, returning a {@code 304} status code if the
-	 * {@code Last-Modified} value  is greater. If the resource is newer than the
+	 * {@code Last-Modified} value is greater. If the resource is newer than the
 	 * {@code Last-Modified} value, or the header is not present, the content resource
 	 * of the resource will be written to the response with caching headers
 	 * set to expire one year in the future.
@@ -593,6 +593,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// Supported methods and required session
 		checkRequest(request);
 
+		// Apply cache settings, if any
+		prepareResponse(response);
+
 		// Header phase
 		String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
 		long lastModified = (this.isUseLastModified()) ? resource.lastModified() : -1;
@@ -600,9 +603,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			logger.trace("Resource not modified");
 			return;
 		}
-
-		// Apply cache settings, if any
-		prepareResponse(response);
 
 		// Check the media type for the resource
 		MediaType mediaType = getMediaType(request, resource);
