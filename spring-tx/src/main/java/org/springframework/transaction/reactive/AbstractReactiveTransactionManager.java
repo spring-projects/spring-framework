@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -494,21 +494,17 @@ public abstract class AbstractReactiveTransactionManager
 								}));
 					}
 					else if (ErrorPredicates.RUNTIME_OR_ERROR.test(ex)) {
-						Mono<Void> mono;
+						Mono<Void> mono = Mono.empty();
 						if (!beforeCompletionInvoked.get()) {
 							mono = triggerBeforeCompletion(synchronizationManager, status);
-						}
-						else {
-							mono = Mono.empty();
 						}
 						result = mono.then(doRollbackOnCommitException(synchronizationManager, status, ex))
 								.then(propagateException);
 					}
-
 					return result;
 				})
 				.then(Mono.defer(() -> triggerAfterCommit(synchronizationManager, status).onErrorResume(ex ->
-						triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED).then(Mono.error(ex)))
+								triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED).then(Mono.error(ex)))
 						.then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED))
 						.then(Mono.defer(() -> {
 							if (status.isNewTransaction()) {
@@ -518,8 +514,8 @@ public abstract class AbstractReactiveTransactionManager
 						}))));
 
 		return commit
-				.onErrorResume(ex -> cleanupAfterCompletion(synchronizationManager, status)
-						.then(Mono.error(ex))).then(cleanupAfterCompletion(synchronizationManager, status));
+				.onErrorResume(ex -> cleanupAfterCompletion(synchronizationManager, status).then(Mono.error(ex)))
+				.then(cleanupAfterCompletion(synchronizationManager, status));
 	}
 
 	/**
@@ -571,8 +567,8 @@ public abstract class AbstractReactiveTransactionManager
 				}
 				return beforeCompletion;
 			}
-		})).onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR, ex -> triggerAfterCompletion(
-				synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN)
+		})).onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR, ex ->
+						triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN)
 						.then(Mono.defer(() -> {
 							if (status.isNewTransaction()) {
 								this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, ex));
@@ -623,7 +619,7 @@ public abstract class AbstractReactiveTransactionManager
 						return Mono.empty();
 					}))
 					.then(Mono.error(rbex));
-		}).then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK))
+		}).then(Mono.defer(() -> triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK)))
 				.then(Mono.defer(() -> {
 					this.transactionExecutionListeners.forEach(listener -> listener.afterRollback(status, null));
 					return Mono.empty();
