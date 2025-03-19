@@ -64,6 +64,41 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	 */
 	lateinit var env: Environment
 
+
+	/**
+	 * Apply the nested block if the given profile expression matches the
+	 * active profiles.
+	 *
+	 * A profile expression may contain a simple profile name (for example
+	 * `"production"`) or a compound expression. A compound expression allows
+	 * for more complicated profile logic to be expressed, for example
+	 * `"production & cloud"`.
+	 *
+	 * The following operators are supported in profile expressions:
+	 *  - `!` - A logical *NOT* of the profile name or compound expression
+	 *  - `&` - A logical *AND* of the profile names or compound expressions
+	 *  - `|` - A logical *OR* of the profile names or compound expressions
+	 *
+	 * Please note that the `&` and `|` operators may not be mixed
+	 * without using parentheses. For example, `"a & b | c"` is not a valid
+	 * expression: it must be expressed as `"(a & b) | c"` or `"a & (b | c)"`.
+	 * @param expression the profile expressions to evaluate
+	 */
+	fun profile(expression: String, init: BeanRegistrarDsl.() -> Unit) {
+		if (env.matchesProfiles(expression)) {
+			init()
+		}
+	}
+
+	/**
+	 * Register beans using the given [BeanRegistrar].
+	 * @param registrar the bean registrar that will be called to register
+	 * additional beans
+	 */
+	fun register(registrar: BeanRegistrar) {
+		return registry.register(registrar)
+	}
+
 	/**
 	 * Given a name, register an alias for it.
 	 * @param name the canonical name
@@ -345,39 +380,6 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 		return registry.registerBean(T::class.java, customizer)
 	}
 
-	/**
-	 * Register beans using the given [BeanRegistrar].
-	 * @param registrar the bean registrar that will be called to register
-	 * additional beans
-	 */
-	fun register(registrar: BeanRegistrar) {
-		return registry.register(registrar)
-	}
-
-	/**
-	 * Apply the nested block if the given profile expression matches the
-	 * active profiles.
-	 *
-	 * A profile expression may contain a simple profile name (for example
-	 * `"production"`) or a compound expression. A compound expression allows
-	 * for more complicated profile logic to be expressed, for example
-	 * `"production & cloud"`.
-	 *
-	 * The following operators are supported in profile expressions:
-	 *  - `!` - A logical *NOT* of the profile name or compound expression
-	 *  - `&` - A logical *AND* of the profile names or compound expressions
-	 *  - `|` - A logical *OR* of the profile names or compound expressions
-	 *
-	 * Please note that the `&` and `|` operators may not be mixed
-	 * without using parentheses. For example, `"a & b | c"` is not a valid
-	 * expression: it must be expressed as `"(a & b) | c"` or `"a & (b | c)"`.
-	 * @param expression the profile expressions to evaluate
-	 */
-	fun profile(expression: String, init: BeanRegistrarDsl.() -> Unit) {
-		if (env.matchesProfiles(expression)) {
-			init()
-		}
-	}
 
 	/**
 	 * Context available from the bean instance supplier designed to give access
