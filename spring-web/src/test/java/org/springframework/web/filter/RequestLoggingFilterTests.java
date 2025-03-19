@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,23 +258,25 @@ class RequestLoggingFilterTests {
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(filter.beforeRequestMessage)
-				.isEqualTo("Before request ["
-						+ "POST /hotels?booking=42"
-						+ ", client=4.2.2.2"
-						+ ", session=42"
-						+ ", user=Arthur"
-						+ ", headers=[Content-Type:\"application/json;charset=ISO-8859-1\", Content-Length:\"22\"]"
-						+ "]");
+				.isEqualTo("""
+						Before request [\
+						POST /hotels?booking=42, \
+						client=4.2.2.2, \
+						session=42, \
+						user=Arthur, \
+						headers=[Content-Type:"application/json;charset=ISO-8859-1", Content-Length:"22"]\
+						]""");
 
 		assertThat(filter.afterRequestMessage)
-				.isEqualTo("After request ["
-						+ "POST /hotels?booking=42"
-						+ ", client=4.2.2.2"
-						+ ", session=42"
-						+ ", user=Arthur"
-						+ ", headers=[Content-Type:\"application/json;charset=ISO-8859-1\", Content-Length:\"22\"]"
-						+ ", payload={\"msg\": \"Hello World\"}"
-						+ "]");
+				.isEqualTo("""
+						After request [\
+						POST /hotels?booking=42, \
+						client=4.2.2.2, \
+						session=42, \
+						user=Arthur, \
+						headers=[Content-Type:"application/json;charset=ISO-8859-1", Content-Length:"22"], \
+						payload={"msg": "Hello World"}\
+						]""");
 	}
 
 	private void applyFilter() throws Exception {

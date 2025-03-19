@@ -55,8 +55,8 @@ class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedHttpServerTest
 	void zeroCopy(HttpServer httpServer) throws Exception {
-		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer
-						|| httpServer instanceof JettyCoreHttpServer, "Zero-copy does not support Servlet");
+		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer ||
+				httpServer instanceof JettyCoreHttpServer, "Zero-copy does not support Servlet");
 
 		startServer(httpServer);
 

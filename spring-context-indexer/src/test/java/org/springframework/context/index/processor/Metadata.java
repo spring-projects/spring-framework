@@ -42,8 +42,8 @@ class Metadata {
 			ItemMetadata itemMetadata = metadata.getItems().stream()
 					.filter(item -> item.getType().equals(type))
 					.findFirst().orElse(null);
-			return itemMetadata != null && itemMetadata.getStereotypes().size() == stereotypes.size()
-					&& itemMetadata.getStereotypes().containsAll(stereotypes);
+			return (itemMetadata != null && itemMetadata.getStereotypes().size() == stereotypes.size() &&
+					itemMetadata.getStereotypes().containsAll(stereotypes));
 		}, "Candidates with type %s and stereotypes %s", type, stereotypes);
 	}
 

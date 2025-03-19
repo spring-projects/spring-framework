@@ -252,8 +252,8 @@ abstract class ContextLoaderUtils {
 			// annotated class.
 			if (currentAnnotation.equals(previousAnnotation) && hasResources(currentAnnotation)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Ignoring duplicate %s declaration on [%s], "
-							+ "since it is also declared on [%s].", currentAnnotation,
+					logger.debug(String.format("Ignoring duplicate %s declaration on [%s], " +
+							"since it is also declared on [%s].", currentAnnotation,
 							previousDeclaringClass.getName(), descriptor.getRootDeclaringClass().getName()));
 				}
 			}

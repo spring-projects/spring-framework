@@ -288,8 +288,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				throw new NoSuchBeanDefinitionException(CacheManager.class, "no CacheResolver specified - "
-						+ "register a CacheManager bean or remove the @EnableCaching annotation from your configuration.");
+				throw new NoSuchBeanDefinitionException(CacheManager.class, "no CacheResolver specified - " +
+						"register a CacheManager bean or remove the @EnableCaching annotation from your configuration.");
 			}
 		}
 		this.initialized = true;

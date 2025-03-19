@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +92,9 @@ class TestPropertySourceAttributes {
 	 */
 	void mergeWith(TestPropertySourceAttributes attributes) {
 		Assert.state(attributes.declaringClass == this.declaringClass,
-				() -> "Detected @TestPropertySource declarations within an aggregate index "
-						+ "with different sources: " + this.declaringClass.getName() + " and "
-						+ attributes.declaringClass.getName());
+				() -> "Detected @TestPropertySource declarations within an aggregate index " +
+						"with different sources: " + this.declaringClass.getName() + " and " +
+						attributes.declaringClass.getName());
 		logger.trace(LogMessage.format("Retrieved %s for declaring class [%s].",
 				attributes, this.declaringClass.getName()));
 		assertSameBooleanAttribute(this.inheritLocations, attributes.inheritLocations,

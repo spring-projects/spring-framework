@@ -104,7 +104,7 @@ abstract class MultipartUtils {
 
 	public static boolean isFormField(HttpHeaders headers) {
 		MediaType contentType = headers.getContentType();
-		return (contentType == null || MediaType.TEXT_PLAIN.equalsTypeAndSubtype(contentType))
-				&& headers.getContentDisposition().getFilename() == null;
+		return (contentType == null || MediaType.TEXT_PLAIN.equalsTypeAndSubtype(contentType)) &&
+				headers.getContentDisposition().getFilename() == null;
 	}
 }

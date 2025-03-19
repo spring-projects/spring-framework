@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.cache.jcache.interceptor;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.cache.annotation.CacheDefaults;
@@ -150,9 +149,9 @@ class JCacheKeyGeneratorTests {
 
 		@Override
 		public Object generate(Object target, Method method, Object... params) {
-			assertThat(Arrays.equals(expectedParams, params)).as("Unexpected parameters: expected: "
-					+ Arrays.toString(this.expectedParams) + " but got: " + Arrays.toString(params)).isTrue();
+			assertThat(params).as("Unexpected parameters").isEqualTo(expectedParams);
 			return new SimpleKey(params);
 		}
 	}
+
 }

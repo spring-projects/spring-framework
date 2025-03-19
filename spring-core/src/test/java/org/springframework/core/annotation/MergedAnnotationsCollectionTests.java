@@ -171,8 +171,7 @@ class MergedAnnotationsCollectionTests {
 	void getWithSelectorReturnsSelected() {
 		MergedAnnotations annotations = getMultiRoute1();
 		MergedAnnotationSelector<MultiRouteTarget> deepest = (existing,
-				candidate) -> candidate.getDistance() > existing.getDistance() ? candidate
-						: existing;
+				candidate) -> candidate.getDistance() > existing.getDistance() ? candidate : existing;
 		assertThat(annotations.get(MultiRouteTarget.class, null, deepest).getString(
 				MergedAnnotation.VALUE)).isEqualTo("111");
 	}

@@ -126,8 +126,8 @@ public class StompEncoder {
 			return;
 		}
 
-		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.STOMP
-				&& command != StompCommand.CONNECTED);
+		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.STOMP &&
+				command != StompCommand.CONNECTED);
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
 			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {

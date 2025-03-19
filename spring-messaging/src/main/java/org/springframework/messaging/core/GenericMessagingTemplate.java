@@ -176,8 +176,8 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 			accessor.removeHeader(this.receiveTimeoutHeader);
 			accessor.setImmutable();
 		}
-		else if (message.getHeaders().containsKey(this.sendTimeoutHeader)
-				|| message.getHeaders().containsKey(this.receiveTimeoutHeader)) {
+		else if (message.getHeaders().containsKey(this.sendTimeoutHeader) ||
+				message.getHeaders().containsKey(this.receiveTimeoutHeader)) {
 			messageToSend = MessageBuilder.fromMessage(message)
 					.setHeader(this.sendTimeoutHeader, null)
 					.setHeader(this.receiveTimeoutHeader, null)

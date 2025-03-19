@@ -493,8 +493,8 @@ final class PostProcessorRegistrationDelegate {
 
 		private void postProcessValue(List<MergedBeanDefinitionPostProcessor> postProcessors,
 				BeanDefinitionValueResolver valueResolver, @Nullable Object value) {
-			if (value instanceof BeanDefinitionHolder bdh
-					&& bdh.getBeanDefinition() instanceof AbstractBeanDefinition innerBd) {
+			if (value instanceof BeanDefinitionHolder bdh &&
+					bdh.getBeanDefinition() instanceof AbstractBeanDefinition innerBd) {
 
 				Class<?> innerBeanType = resolveBeanType(innerBd);
 				resolveInnerBeanDefinition(valueResolver, innerBd, (innerBeanName, innerBeanDefinition)

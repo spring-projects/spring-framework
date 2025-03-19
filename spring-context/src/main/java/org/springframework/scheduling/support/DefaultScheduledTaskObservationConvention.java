@@ -48,8 +48,8 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 
 	@Override
 	public String getContextualName(ScheduledTaskObservationContext context) {
-		return "task " + StringUtils.uncapitalize(context.getTargetClass().getSimpleName())
-				+ "." + context.getMethod().getName();
+		return "task " + StringUtils.uncapitalize(context.getTargetClass().getSimpleName()) +
+				"." + context.getMethod().getName();
 	}
 
 	@Override

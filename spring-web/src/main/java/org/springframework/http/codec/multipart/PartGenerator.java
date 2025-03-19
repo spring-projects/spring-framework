@@ -163,9 +163,8 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			return true;
 		}
 		else {
-			logger.warn("Could not switch from " + oldState +
-					" to " + newState + "; current state:"
-				+ this.state.get());
+			logger.warn("Could not switch from " + oldState + " to " + newState +
+					"; current state:" + this.state.get());
 			return false;
 		}
 	}

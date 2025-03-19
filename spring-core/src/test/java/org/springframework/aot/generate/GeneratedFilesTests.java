@@ -71,8 +71,8 @@ class GeneratedFilesTests {
 		TypeSpec helloWorld = TypeSpec.classBuilder("HelloWorld").build();
 		JavaFile javaFile = JavaFile.builder("", helloWorld).build();
 		assertThatIllegalArgumentException().isThrownBy(() -> this.generatedFiles.addSourceFile(javaFile))
-				.withMessage("Could not add 'HelloWorld', processing classes in the "
-						+ "default package is not supported. Did you forget to add a package statement?");
+				.withMessage("Could not add 'HelloWorld', processing classes in the " +
+						"default package is not supported. Did you forget to add a package statement?");
 	}
 
 	@Test
@@ -92,8 +92,8 @@ class GeneratedFilesTests {
 	void addSourceFileWithCharSequenceWhenClassNameIsInTheDefaultPackageThrowsException() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> this.generatedFiles.addSourceFile("HelloWorld", "{}"))
-				.withMessage("Could not add 'HelloWorld', processing classes in the "
-						+ "default package is not supported. Did you forget to add a package statement?");
+				.withMessage("Could not add 'HelloWorld', processing classes in the " +
+						"default package is not supported. Did you forget to add a package statement?");
 	}
 
 	@Test

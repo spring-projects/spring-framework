@@ -106,8 +106,8 @@ class AspectAndAdvicePrecedenceTests {
 		private void checkAdvice(String whatJustHappened) {
 			//System.out.println("[" + adviceInvocationNumber + "] " + whatJustHappened + " ==> " + EXPECTED[adviceInvocationNumber]);
 			if (adviceInvocationNumber > (EXPECTED.length - 1)) {
-				throw new AssertionError("Too many advice invocations, expecting " + EXPECTED.length
-						+ " but had " + adviceInvocationNumber);
+				throw new AssertionError("Too many advice invocations, expecting " + EXPECTED.length +
+						" but had " + adviceInvocationNumber);
 			}
 			String expecting = EXPECTED[adviceInvocationNumber++];
 			if (!whatJustHappened.equals(expecting)) {

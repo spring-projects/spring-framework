@@ -42,8 +42,9 @@ public class ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests extends SpringJ
 	 * @see SpringJUnit4ClassRunnerAppCtxTests#DEFAULT_CONTEXT_RESOURCE_PATH
 	 * @see ResourceUtils#CLASSPATH_URL_PREFIX
 	 */
-	public static final String CLASSPATH_CONTEXT_RESOURCE_PATH = ResourceUtils.CLASSPATH_URL_PREFIX
-			+ SpringJUnit4ClassRunnerAppCtxTests.DEFAULT_CONTEXT_RESOURCE_PATH;
+	public static final String CLASSPATH_CONTEXT_RESOURCE_PATH = ResourceUtils.CLASSPATH_URL_PREFIX +
+			SpringJUnit4ClassRunnerAppCtxTests.DEFAULT_CONTEXT_RESOURCE_PATH;
 
 	/* all tests are in the parent class. */
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,20 +64,17 @@ import static org.mockito.Mockito.verifyNoInteractions;
  */
 class ValueCodeGeneratorTests {
 
-
 	@Nested
 	class ConfigurationTests {
 
 		@Test
 		void createWithListOfDelegatesInvokeThemInOrder() {
-			Delegate first = mock(Delegate.class);
-			Delegate second = mock(Delegate.class);
-			Delegate third = mock(Delegate.class);
-			ValueCodeGenerator codeGenerator = ValueCodeGenerator
-					.with(List.of(first, second, third));
+			Delegate first = mock();
+			Delegate second = mock();
+			Delegate third = mock();
+			ValueCodeGenerator codeGenerator = ValueCodeGenerator.with(List.of(first, second, third));
 			Object value = "";
-			given(third.generateCode(codeGenerator, value))
-					.willReturn(CodeBlock.of("test"));
+			given(third.generateCode(codeGenerator, value)).willReturn(CodeBlock.of("test"));
 			CodeBlock code = codeGenerator.generateCode(value);
 			assertThat(code).hasToString("test");
 			InOrder ordered = inOrder(first, second, third);
@@ -88,13 +85,11 @@ class ValueCodeGeneratorTests {
 
 		@Test
 		void generateCodeWithMatchingDelegateStops() {
-			Delegate first = mock(Delegate.class);
-			Delegate second = mock(Delegate.class);
-			ValueCodeGenerator codeGenerator = ValueCodeGenerator
-					.with(List.of(first, second));
+			Delegate first = mock();
+			Delegate second = mock();
+			ValueCodeGenerator codeGenerator = ValueCodeGenerator.with(List.of(first, second));
 			Object value = "";
-			given(first.generateCode(codeGenerator, value))
-					.willReturn(CodeBlock.of("test"));
+			given(first.generateCode(codeGenerator, value)).willReturn(CodeBlock.of("test"));
 			CodeBlock code = codeGenerator.generateCode(value);
 			assertThat(code).hasToString("test");
 			verify(first).generateCode(codeGenerator, value);
@@ -198,7 +193,6 @@ class ValueCodeGeneratorTests {
 			assertThat(generateCode("test")).hasToString("\"test\"");
 		}
 
-
 		@Test
 		void generateWhenStringWithCarriageReturn() {
 			assertThat(generateCode("test\n")).isEqualTo(CodeBlock.of("$S", "test\n"));
@@ -285,9 +279,9 @@ class ValueCodeGeneratorTests {
 			ResolvableType resolvableType = ResolvableType.forClassWithGenerics(Map.class,
 					ResolvableType.forClass(Integer.class), stringList);
 			assertThat(resolve(generateCode(resolvableType)))
-					.hasImport(ResolvableType.class, List.class, Map.class).hasValueCode(
-							"ResolvableType.forClassWithGenerics(Map.class, ResolvableType.forClass(Integer.class), "
-									+ "ResolvableType.forClassWithGenerics(List.class, String.class))");
+					.hasImport(ResolvableType.class, List.class, Map.class).hasValueCode("""
+							ResolvableType.forClassWithGenerics(Map.class, ResolvableType.forClass(Integer.class), \
+							ResolvableType.forClassWithGenerics(List.class, String.class))""");
 		}
 
 		@Test

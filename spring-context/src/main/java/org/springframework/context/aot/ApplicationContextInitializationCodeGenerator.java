@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,12 +150,12 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 		@Nullable
 		private CodeBlock apply(ClassName className) {
 			String name = className.canonicalName();
-			if (name.equals(DefaultListableBeanFactory.class.getName())
-					|| name.equals(ConfigurableListableBeanFactory.class.getName())) {
+			if (name.equals(DefaultListableBeanFactory.class.getName()) ||
+					name.equals(ConfigurableListableBeanFactory.class.getName())) {
 				return CodeBlock.of(BEAN_FACTORY_VARIABLE);
 			}
-			else if (name.equals(ConfigurableEnvironment.class.getName())
-					|| name.equals(Environment.class.getName())) {
+			else if (name.equals(ConfigurableEnvironment.class.getName()) ||
+					name.equals(Environment.class.getName())) {
 				return CodeBlock.of("$L.getEnvironment()", APPLICATION_CONTEXT_VARIABLE);
 			}
 			else if (name.equals(ResourceLoader.class.getName())) {

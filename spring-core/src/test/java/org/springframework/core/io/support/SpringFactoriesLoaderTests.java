@@ -99,8 +99,8 @@ class SpringFactoriesLoaderTests {
 	void loadWhenIncompatibleTypeThrowsException() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> SpringFactoriesLoader.forDefaultResourceLocation().load(String.class))
-			.withMessageContaining("Unable to instantiate factory class "
-					+ "[org.springframework.core.io.support.MyDummyFactory1] for factory type [java.lang.String]");
+			.withMessageContaining("Unable to instantiate factory class " +
+					"[org.springframework.core.io.support.MyDummyFactory1] for factory type [java.lang.String]");
 	}
 
 	@Test
@@ -127,8 +127,8 @@ class SpringFactoriesLoaderTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> SpringFactoriesLoader.forDefaultResourceLocation(LimitedClassLoader.multipleArgumentFactories)
 							.load(DummyFactory.class, resolver))
-				.withMessageContaining("Unable to instantiate factory class "
-						+ "[org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] for factory type [org.springframework.core.io.support.DummyFactory]")
+				.withMessageContaining("Unable to instantiate factory class " +
+						"[org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] for factory type [org.springframework.core.io.support.DummyFactory]")
 				.havingRootCause().withMessageContaining("Class [org.springframework.core.io.support.MultipleConstructorArgsDummyFactory] has no suitable constructor");
 	}
 

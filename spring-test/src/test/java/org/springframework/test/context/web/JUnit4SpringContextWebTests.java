@@ -99,8 +99,7 @@ public class JUnit4SpringContextWebTests extends AbstractJUnit4SpringContextTest
 		assertThat(webRequest).as("ServletWebRequest should have been autowired from the WAC.").isNotNull();
 
 		Object rootWac = mockServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertThat(rootWac).as("Root WAC must be stored in the ServletContext as: "
-				+ WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE).isNotNull();
+		assertThat(rootWac).as("Root WAC must be stored in the ServletContext as: " + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE).isNotNull();
 		assertThat(rootWac).as("test WAC and Root WAC in ServletContext must be the same object.").isSameAs(wac);
 		assertThat(wac.getServletContext()).as("ServletContext instances must be the same object.").isSameAs(mockServletContext);
 		assertThat(request.getServletContext()).as("ServletContext in the WAC and in the mock request").isSameAs(mockServletContext);

@@ -50,9 +50,8 @@ public abstract class CorsUtils {
 	 */
 	public static boolean isPreFlightRequest(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
-		return (request.getMethod() == HttpMethod.OPTIONS
-				&& headers.containsKey(HttpHeaders.ORIGIN)
-				&& headers.containsKey(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD));
+		return (request.getMethod() == HttpMethod.OPTIONS && headers.containsKey(HttpHeaders.ORIGIN) &&
+				headers.containsKey(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD));
 	}
 
 	/**

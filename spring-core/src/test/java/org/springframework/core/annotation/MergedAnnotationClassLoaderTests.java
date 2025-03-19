@@ -120,9 +120,7 @@ class MergedAnnotationClassLoaderTests {
 
 		@Override
 		protected boolean isEligibleForOverriding(String className) {
-			return WITH_TEST_ANNOTATION.equals(className)
-					|| TEST_ANNOTATION.equals(className)
-					|| TEST_REFERENCE.equals(className);
+			return WITH_TEST_ANNOTATION.equals(className) || TEST_ANNOTATION.equals(className) || TEST_REFERENCE.equals(className);
 		}
 
 	}

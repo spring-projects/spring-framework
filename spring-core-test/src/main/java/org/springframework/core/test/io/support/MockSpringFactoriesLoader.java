@@ -122,8 +122,8 @@ public class MockSpringFactoriesLoader extends SpringFactoriesLoader {
 	public <T> void addInstance(String factoryType, T... factoryInstance) {
 		List<String> implementations = this.factories.computeIfAbsent(factoryType, key -> new ArrayList<>());
 		for (T factoryImplementation : factoryInstance) {
-			String reference = "!" + factoryType + ":" + factoryImplementation.getClass().getName()
-					+ this.sequence.getAndIncrement();
+			String reference = "!" + factoryType + ":" + factoryImplementation.getClass().getName() +
+					this.sequence.getAndIncrement();
 			implementations.add(reference);
 			this.implementations.put(reference, factoryImplementation);
 		}

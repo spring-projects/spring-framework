@@ -538,8 +538,8 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 
 		@Override
 		public String toString() {
-			return super.toString() + ", subscriptionId=\"" + this.subscriptionId
-					+ "\", destination=\"" + this.destination + "\", payload=\"" + getPayloadAsText() + "\"";
+			return super.toString() + ", subscriptionId=\"" + this.subscriptionId +
+					"\", destination=\"" + this.destination + "\", payload=\"" + getPayloadAsText() + "\"";
 		}
 
 		protected String getPayloadAsText() {

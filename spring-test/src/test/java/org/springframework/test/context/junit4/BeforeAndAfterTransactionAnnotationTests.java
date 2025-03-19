@@ -98,8 +98,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	@Before
 	public void before() {
 		assertShouldBeInTransaction();
-		long expected = (this.inTransaction ? 1
-				: 0);
+		long expected = (this.inTransaction ? 1 : 0);
 		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the number of rows in the person table before a test method.").isEqualTo(expected);
 	}
 

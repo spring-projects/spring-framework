@@ -530,8 +530,7 @@ class JmsTemplateTests {
 
 		if (!useTransactedTemplate() && !useTransactedSession()) {
 			given(this.session.getAcknowledgeMode()).willReturn(
-					clientAcknowledge ? Session.CLIENT_ACKNOWLEDGE
-							: Session.AUTO_ACKNOWLEDGE);
+					clientAcknowledge ? Session.CLIENT_ACKNOWLEDGE : Session.AUTO_ACKNOWLEDGE);
 		}
 
 		TextMessage textMessage = mock();
