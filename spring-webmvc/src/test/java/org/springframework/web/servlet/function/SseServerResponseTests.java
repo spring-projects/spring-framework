@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,6 +170,26 @@ class SseServerResponseTests {
 		assertThat(mav).isNull();
 
 		String expected = "event:custom\n\n";
+		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
+	}
+
+	@Test // gh-34608
+	void sendHeartbeat() throws Exception {
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.comment("").send();
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		ServerResponse.Context context = Collections::emptyList;
+
+		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(mav).isNull();
+
+		String expected = ":\n\n";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 

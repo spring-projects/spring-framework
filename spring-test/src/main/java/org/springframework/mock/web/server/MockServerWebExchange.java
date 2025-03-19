@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mock.web.server;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
@@ -39,9 +40,15 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public final class MockServerWebExchange extends DefaultServerWebExchange {
 
-	private MockServerWebExchange(MockServerHttpRequest request, WebSessionManager sessionManager) {
-		super(request, new MockServerHttpResponse(), sessionManager,
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
+
+	private MockServerWebExchange(
+			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
+			@Nullable ApplicationContext applicationContext) {
+
+		super(request, new MockServerHttpResponse(),
+				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
+				applicationContext);
 	}
 
 
@@ -100,6 +107,9 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private @Nullable WebSessionManager sessionManager;
 
+		@Nullable
+		private ApplicationContext applicationContext;
+
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;
 		}
@@ -127,11 +137,20 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		}
 
 		/**
+		 * Provide the {@code ApplicationContext} to expose through the exchange.
+		 * @param applicationContext the context to use
+		 * @since 6.2.5
+		 */
+		public Builder applicationContext(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+			return this;
+		}
+
+		/**
 		 * Build the {@code MockServerWebExchange} instance.
 		 */
 		public MockServerWebExchange build() {
-			return new MockServerWebExchange(this.request,
-					this.sessionManager != null ? this.sessionManager : new DefaultWebSessionManager());
+			return new MockServerWebExchange(this.request, this.sessionManager, this.applicationContext);
 		}
 	}
 
