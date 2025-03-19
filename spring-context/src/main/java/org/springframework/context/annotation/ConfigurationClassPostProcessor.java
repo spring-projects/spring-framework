@@ -875,8 +875,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 			for (String name : this.beanFactory.getBeanDefinitionNames()) {
 				BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition(name);
-				if (beanDefinition.getSource() instanceof Class<?> sourceClass
-						&& BeanRegistrar.class.isAssignableFrom(sourceClass)) {
+				if (beanDefinition.getSource() instanceof Class<?> sourceClass &&
+						BeanRegistrar.class.isAssignableFrom(sourceClass)) {
 
 					for (BeanRegistrationAotProcessor aotProcessor : this.aotProcessors) {
 						BeanRegistrationAotContribution contribution =
@@ -918,8 +918,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				throw new UnsupportedOperationException("AOT post processing of qualifiers is not supported yet with BeanRegistrar");
 			}
 			for (String attributeName : beanDefinition.attributeNames()) {
-				if (!attributeName.equals(AbstractBeanDefinition.ORDER_ATTRIBUTE)
-						&& !attributeName.equals("aotProcessingIgnoreRegistration")) {
+				if (!attributeName.equals(AbstractBeanDefinition.ORDER_ATTRIBUTE) &&
+						!attributeName.equals("aotProcessingIgnoreRegistration")) {
 					throw new UnsupportedOperationException("AOT post processing of attribute " + attributeName +
 							" is not supported yet with BeanRegistrar");
 				}
