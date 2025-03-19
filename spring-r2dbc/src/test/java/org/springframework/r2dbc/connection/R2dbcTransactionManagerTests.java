@@ -23,6 +23,7 @@ import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.IsolationLevel;
 import io.r2dbc.spi.R2dbcBadGrammarException;
+import io.r2dbc.spi.R2dbcTransientResourceException;
 import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.r2dbc.BadSqlGrammarException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -313,6 +315,31 @@ class R2dbcTransactionManagerTests {
 		verify(connectionMock, never()).commitTransaction();
 		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
+	}
+
+	@Test
+	void testCommitAndRollbackFails() {
+		when(connectionMock.isAutoCommit()).thenReturn(false);
+		when(connectionMock.commitTransaction()).thenReturn(Mono.defer(() ->
+				Mono.error(new R2dbcBadGrammarException("Commit should fail"))));
+		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() ->
+				Mono.error(new R2dbcTransientResourceException("Rollback should also fail"))));
+
+		TransactionalOperator operator = TransactionalOperator.create(tm);
+
+		ConnectionFactoryUtils.getConnection(connectionFactoryMock)
+				.doOnNext(connection -> connection.createStatement("foo")).then()
+				.as(operator::transactional)
+				.as(StepVerifier::create)
+				.verifyError(TransientDataAccessResourceException.class);
+
+		verify(connectionMock).isAutoCommit();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
+		verify(connectionMock).createStatement("foo");
+		verify(connectionMock).commitTransaction();
+		verify(connectionMock).rollbackTransaction();
+		verify(connectionMock).close();
+		verifyNoMoreInteractions(connectionMock);
 	}
 
 	@Test
