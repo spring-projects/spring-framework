@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,13 +84,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * {@link #relativeTo(org.springframework.web.util.UriComponentsBuilder)}.
  * </ul>
  *
- * <p><strong>Note:</strong> This class uses values from "Forwarded"
- * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
- * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
- * if present, in order to reflect the client-originated protocol and address.
- * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
- * central place whether to extract and use, or to discard such headers.
- * See the Spring Framework reference for more on this filter.
+ * <p><strong>Note:</strong> As of 5.1, methods in this class do not extract
+ * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+ * client-originated address. Please, use
+ * {@link org.springframework.web.filter.ForwardedHeaderFilter
+ * ForwardedHeaderFilter}, or similar from the underlying server, to extract
+ * and use such headers, or to discard them.
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
