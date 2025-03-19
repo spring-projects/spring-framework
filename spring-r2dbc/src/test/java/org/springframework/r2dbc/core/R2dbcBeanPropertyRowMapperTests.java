@@ -96,8 +96,8 @@ class R2dbcBeanPropertyRowMapperTests {
 
 		assertThatExceptionOfType(TypeMismatchException.class)
 				.isThrownBy(() -> mapper.apply(EXTENDED_PERSON_ROW))
-				.withMessage("Failed to convert property value of type 'java.lang.String' to required type "
-						+ "'java.lang.String' for property 'address'; simulating type mismatch for address");
+				.withMessage("Failed to convert property value of type 'java.lang.String' to required type " +
+						"'java.lang.String' for property 'address'; simulating type mismatch for address");
 	}
 
 	@ParameterizedTest

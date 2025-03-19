@@ -102,8 +102,8 @@ public class DefaultMethodReference implements MethodReference {
 			TypeName argumentType = argumentTypes[i];
 			CodeBlock argumentCode = argumentCodeGenerator.generateCode(argumentType);
 			if (argumentCode == null) {
-				throw new IllegalArgumentException("Could not generate code for " + this
-						+ ": parameter " + i + " of type " + argumentType + " is not supported");
+				throw new IllegalArgumentException("Could not generate code for " + this +
+						": parameter " + i + " of type " + argumentType + " is not supported");
 			}
 			arguments.add(argumentCode);
 		}

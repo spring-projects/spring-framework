@@ -243,8 +243,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			outputMessage.getServletResponse().setStatus(returnStatus.value());
 			if (returnStatus.value() == HttpStatus.OK.value()) {
 				HttpMethod method = inputMessage.getMethod();
-				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
-						&& isResourceNotModified(inputMessage, outputMessage)) {
+				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method)) &&
+						isResourceNotModified(inputMessage, outputMessage)) {
 					outputMessage.flush();
 					return;
 				}

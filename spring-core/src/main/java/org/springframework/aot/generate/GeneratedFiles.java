@@ -193,9 +193,9 @@ public interface GeneratedFiles {
 
 	private static void validatePackage(String packageName, String className) {
 		if (!StringUtils.hasLength(packageName)) {
-			throw new IllegalArgumentException("Could not add '" + className + "', "
-					+ "processing classes in the default package is not supported. "
-					+ "Did you forget to add a package statement?");
+			throw new IllegalArgumentException("Could not add '" + className + "', " +
+					"processing classes in the default package is not supported. " +
+					"Did you forget to add a package statement?");
 		}
 	}
 

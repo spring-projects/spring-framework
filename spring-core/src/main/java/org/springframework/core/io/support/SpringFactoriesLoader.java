@@ -461,8 +461,8 @@ public class SpringFactoriesLoader {
 
 		private static <T> void makeAccessible(Constructor<T> constructor,
 				KFunction<T> kotlinConstructor) {
-			if ((!Modifier.isPublic(constructor.getModifiers())
-					|| !Modifier.isPublic(constructor.getDeclaringClass().getModifiers()))) {
+			if ((!Modifier.isPublic(constructor.getModifiers()) ||
+					!Modifier.isPublic(constructor.getDeclaringClass().getModifiers()))) {
 				KCallablesJvm.setAccessible(kotlinConstructor, true);
 			}
 		}

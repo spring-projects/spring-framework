@@ -294,8 +294,8 @@ class ContextLoaderTests {
 	@Test
 	void frameworkServletWithCustomLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
-		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml "
-				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
+		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml " +
+				"/org/springframework/web/context/WEB-INF/context-addition.xml");
 		servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
 		assertThat(servlet.getWebApplicationContext().containsBean("kerry")).isTrue();
 		assertThat(servlet.getWebApplicationContext().containsBean("kerryX")).isTrue();

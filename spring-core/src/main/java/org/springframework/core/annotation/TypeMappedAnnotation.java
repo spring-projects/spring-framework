@@ -369,8 +369,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	private Object getRequiredValue(int attributeIndex, String attributeName) {
 		Object value = getValue(attributeIndex, Object.class);
 		if (value == null) {
-			throw new NoSuchElementException("No element at attribute index "
-					+ attributeIndex + " for name " + attributeName);
+			throw new NoSuchElementException("No element at attribute index " +
+					attributeIndex + " for name " + attributeName);
 		}
 		return value;
 	}

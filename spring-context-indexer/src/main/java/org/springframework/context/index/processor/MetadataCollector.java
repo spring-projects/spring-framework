@@ -93,8 +93,8 @@ class MetadataCollector {
 
 	private boolean shouldBeMerged(ItemMetadata itemMetadata) {
 		String sourceType = itemMetadata.getType();
-		return (sourceType != null && !deletedInCurrentBuild(sourceType)
-				&& !processedInCurrentBuild(sourceType));
+		return (sourceType != null && !deletedInCurrentBuild(sourceType) &&
+				!processedInCurrentBuild(sourceType));
 	}
 
 	private boolean deletedInCurrentBuild(String sourceType) {

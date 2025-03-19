@@ -108,8 +108,8 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 
 	private String formatStackTrace(Stream<StackWalker.StackFrame> stackTraceElements) {
 		return stackTraceElements
-				.map(f -> f.getClassName() + "#" + f.getMethodName()
-						+ ", Line " + f.getLineNumber()).collect(Collectors.joining(System.lineSeparator()));
+				.map(f -> f.getClassName() + "#" + f.getMethodName() + ", Line " +
+						f.getLineNumber()).collect(Collectors.joining(System.lineSeparator()));
 	}
 
 	/**

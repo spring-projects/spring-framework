@@ -150,13 +150,13 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 
 		private @Nullable CodeBlock apply(ClassName className) {
 			String name = className.canonicalName();
-			if (name.equals(DefaultListableBeanFactory.class.getName())
-					|| name.equals(ListableBeanFactory.class.getName())
-					|| name.equals(ConfigurableListableBeanFactory.class.getName())) {
+			if (name.equals(DefaultListableBeanFactory.class.getName()) ||
+					name.equals(ListableBeanFactory.class.getName()) ||
+					name.equals(ConfigurableListableBeanFactory.class.getName())) {
 				return CodeBlock.of(BEAN_FACTORY_VARIABLE);
 			}
-			else if (name.equals(ConfigurableEnvironment.class.getName())
-					|| name.equals(Environment.class.getName())) {
+			else if (name.equals(ConfigurableEnvironment.class.getName()) ||
+					name.equals(Environment.class.getName())) {
 				return CodeBlock.of("$L.getEnvironment()", APPLICATION_CONTEXT_VARIABLE);
 			}
 			else if (name.equals(ResourceLoader.class.getName())) {

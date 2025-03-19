@@ -86,8 +86,8 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		BeanRegistrationCodeFragments codeFragments = createInstance(registeredBean);
 		assertThatExceptionOfType(AotBeanProcessingException.class)
 				.isThrownBy(() -> codeFragments.getTarget(registeredBean))
-				.withMessageContaining("Error processing bean with name 'testBean' defined in my test resource: "
-						+ "instance supplier is not supported");
+				.withMessageContaining("Error processing bean with name 'testBean' defined in my test resource: " +
+						"instance supplier is not supported");
 	}
 
 	@Test

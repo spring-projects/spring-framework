@@ -104,8 +104,7 @@ public class RequestedContentTypeResolverBuilder {
 	}
 
 	private boolean isMediaTypeAll(List<MediaType> mediaTypes) {
-		return mediaTypes.size() == 1
-			&& mediaTypes.get(0).removeQualityValue().equals(MediaType.ALL);
+		return mediaTypes.size() == 1 && mediaTypes.get(0).removeQualityValue().equals(MediaType.ALL);
 	}
 
 

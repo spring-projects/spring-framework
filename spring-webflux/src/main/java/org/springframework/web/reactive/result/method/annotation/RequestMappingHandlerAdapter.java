@@ -362,8 +362,8 @@ public class RequestMappingHandlerAdapter
 		@Override
 		public boolean test(HandlerMethod handlerMethod) {
 			Class<?> returnType = handlerMethod.getReturnType().getParameterType();
-			return (this.adapterRegistry.getAdapter(returnType) == null
-					&& !KotlinDetector.isSuspendingFunction(handlerMethod.getMethod()));
+			return (this.adapterRegistry.getAdapter(returnType) == null &&
+					!KotlinDetector.isSuspendingFunction(handlerMethod.getMethod()));
 		}
 	}
 

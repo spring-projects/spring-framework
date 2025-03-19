@@ -82,8 +82,8 @@ class InternalResourceViewTests {
 		view.render(model, request, response);
 		assertThat(response.getForwardedUrl()).isEqualTo(url);
 
-		model.forEach((key, value) -> assertThat(request.getAttribute(key)).as("Values for model key '" + key
-						+ "' must match").isEqualTo(value));
+		model.forEach((key, value) -> assertThat(request.getAttribute(key))
+				.as("Values for model key '%s' must match", key).isEqualTo(value));
 	}
 
 	@Test

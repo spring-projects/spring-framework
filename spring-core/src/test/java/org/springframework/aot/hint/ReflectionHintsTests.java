@@ -217,10 +217,10 @@ class ReflectionHintsTests {
 				typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		assertThat(this.reflectionHints.typeHints()).hasSize(2)
 				.noneMatch(typeHint -> typeHint.getType().getCanonicalName().equals(Serializable.class.getCanonicalName()))
-				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(SecondInterface.class.getCanonicalName())
-						&& typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS))
-				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(FirstInterface.class.getCanonicalName())
-						&& typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(SecondInterface.class.getCanonicalName()) &&
+						typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(FirstInterface.class.getCanonicalName()) &&
+						typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 	}
 
 	private void assertTestTypeMethodHints(Consumer<ExecutableHint> methodHint) {

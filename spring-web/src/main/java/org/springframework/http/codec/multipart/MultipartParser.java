@@ -417,14 +417,13 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		 */
 		private boolean isLastBoundary(DataBuffer buf) {
 			return (this.buffers.isEmpty() &&
-					buf.readableByteCount() >= 2 &&
-					buf.getByte(0) == HYPHEN && buf.getByte(1) == HYPHEN)
-					||
+						buf.readableByteCount() >= 2 &&
+						buf.getByte(0) == HYPHEN && buf.getByte(1) == HYPHEN) ||
 					(this.buffers.size() == 1 &&
-							this.buffers.get(0).readableByteCount() == 1 &&
-							this.buffers.get(0).getByte(0) == HYPHEN &&
-							buf.readableByteCount() >= 1 &&
-							buf.getByte(0) == HYPHEN);
+						this.buffers.get(0).readableByteCount() == 1 &&
+						this.buffers.get(0).getByte(0) == HYPHEN &&
+						buf.readableByteCount() >= 1 &&
+						buf.getByte(0) == HYPHEN);
 		}
 
 		/**

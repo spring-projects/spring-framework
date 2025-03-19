@@ -737,8 +737,8 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			parser.parseExpression("Name").setValue(societyContext, "IEEE");
 			societyContext.setVariable("queryName", "Nikola Tesla");
 
-			String expression = "isMember(#queryName) ? #queryName + ' is a member of the ' "
-					+ "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
+			String expression = "isMember(#queryName) ? #queryName + ' is a member of the ' " +
+					"+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
 
 			String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);
 			assertThat(queryResultString).isEqualTo("Nikola Tesla is a member of the IEEE Society");

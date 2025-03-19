@@ -106,8 +106,8 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 	}
 
 	private int getExpectedFailedCount(Class<?> testClass) {
-		if (testClass == AlwaysFailingBeforeTestClassTestCase.class
-				|| testClass == AlwaysFailingAfterTestClassTestCase.class) {
+		if (testClass == AlwaysFailingBeforeTestClassTestCase.class ||
+				testClass == AlwaysFailingAfterTestClassTestCase.class) {
 			return 0;
 		}
 		return 1;

@@ -81,8 +81,8 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 		for (CacheParameterDetail keyParameterDetail : this.keyParameterDetails) {
 			int parameterPosition = keyParameterDetail.getParameterPosition();
 			if (parameterPosition >= values.length) {
-				throw new IllegalStateException("Values mismatch, key parameter at position "
-						+ parameterPosition + " cannot be matched against " + values.length + " value(s)");
+				throw new IllegalStateException("Values mismatch, key parameter at position " +
+						parameterPosition + " cannot be matched against " + values.length + " value(s)");
 			}
 			result.add(keyParameterDetail.toCacheInvocationParameter(values[parameterPosition]));
 		}

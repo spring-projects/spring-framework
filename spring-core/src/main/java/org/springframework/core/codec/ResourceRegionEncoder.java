@@ -71,8 +71,8 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return super.canEncode(elementType, mimeType)
-				&& ResourceRegion.class.isAssignableFrom(elementType.toClass());
+		return super.canEncode(elementType, mimeType) &&
+				ResourceRegion.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override

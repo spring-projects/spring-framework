@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,8 +201,8 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 		try {
 			int maxLength = Integer.parseInt(value.trim());
-			Assert.isTrue(maxLength > 0, () -> "Value [" + maxLength + "] for system property ["
-					+ MAX_SPEL_EXPRESSION_LENGTH_PROPERTY_NAME + "] must be positive");
+			Assert.isTrue(maxLength > 0, () -> "Value [" + maxLength + "] for system property [" +
+					MAX_SPEL_EXPRESSION_LENGTH_PROPERTY_NAME + "] must be positive");
 			return maxLength;
 		}
 		catch (NumberFormatException ex) {

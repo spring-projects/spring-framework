@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public abstract class JsonAssert {
 	 * @see JSONCompareMode#LENIENT
 	 */
 	public static JsonComparator comparator(JsonCompareMode compareMode) {
-		JSONCompareMode jsonAssertCompareMode = (compareMode != JsonCompareMode.LENIENT
-				? JSONCompareMode.STRICT : JSONCompareMode.LENIENT);
+		JSONCompareMode jsonAssertCompareMode = (compareMode != JsonCompareMode.LENIENT ?
+				JSONCompareMode.STRICT : JSONCompareMode.LENIENT);
 		return comparator(jsonAssertCompareMode);
 	}
 
@@ -80,18 +80,14 @@ public abstract class JsonAssert {
 		@Override
 		public JsonComparison compare(@Nullable String expectedJson, @Nullable String actualJson) {
 			if (actualJson == null) {
-				return (expectedJson != null)
-						? JsonComparison.mismatch("Expected null JSON")
-						: JsonComparison.match();
+				return (expectedJson != null) ? JsonComparison.mismatch("Expected null JSON") : JsonComparison.match();
 			}
 			if (expectedJson == null) {
 				return JsonComparison.mismatch("Expected non-null JSON");
 			}
 			try {
 				JSONCompareResult result = JSONCompare.compareJSON(expectedJson, actualJson, this.jsonAssertComparator);
-				return (!result.passed())
-						? JsonComparison.mismatch(result.getMessage())
-						: JsonComparison.match();
+				return (!result.passed()) ? JsonComparison.mismatch(result.getMessage()) : JsonComparison.match();
 			}
 			catch (JSONException ex) {
 				throw new IllegalStateException(ex);

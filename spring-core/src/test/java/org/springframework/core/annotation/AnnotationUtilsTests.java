@@ -923,8 +923,8 @@ class AnnotationUtilsTests {
 		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
 		assertThatIllegalStateException().isThrownBy(() ->
 				synthesizeAnnotation(map, Component.class, null).value())
-			.withMessageContaining("Attribute 'value' in annotation org.springframework.core.testfixture.stereotype.Component "
-					+ "should be compatible with java.lang.String but a java.lang.Long value was returned");
+			.withMessageContaining("Attribute 'value' in annotation org.springframework.core.testfixture.stereotype.Component " +
+					"should be compatible with java.lang.String but a java.lang.Long value was returned");
 	}
 
 	@Test

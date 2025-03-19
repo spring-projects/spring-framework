@@ -149,8 +149,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 			Map<String, String> pathVariables = request.pathVariables();
 			Map<String, String> attributePathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			assertThat((pathVariables.equals(attributePathVariables))
-						|| (pathVariables.isEmpty() && (attributePathVariables == null))).isTrue();
+			assertThat((pathVariables.equals(attributePathVariables)) ||
+					(pathVariables.isEmpty() && (attributePathVariables == null))).isTrue();
 
 			PathPattern pathPattern = matchingPattern(request);
 			String pattern = pathPattern != null ? pathPattern.getPatternString() : "";

@@ -69,8 +69,8 @@ class BeanDefinitionMethodGeneratorFactory {
 		this.excludeFilters = loader.load(BeanRegistrationExcludeFilter.class);
 		for (BeanRegistrationExcludeFilter excludeFilter : this.excludeFilters) {
 			if (this.excludeFilters.getSource(excludeFilter) == Source.BEAN_FACTORY) {
-				Assert.state(excludeFilter instanceof BeanRegistrationAotProcessor
-						|| excludeFilter instanceof BeanFactoryInitializationAotProcessor,
+				Assert.state(excludeFilter instanceof BeanRegistrationAotProcessor ||
+						excludeFilter instanceof BeanFactoryInitializationAotProcessor,
 						() -> "BeanRegistrationExcludeFilter bean of type %s must also implement an AOT processor interface"
 								.formatted(excludeFilter.getClass().getName()));
 			}

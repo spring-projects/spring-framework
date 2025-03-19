@@ -70,8 +70,8 @@ public class MessagingException extends NestedRuntimeException {
 
 	@Override
 	public String toString() {
-		return super.toString() + (this.failedMessage == null ? ""
-				: (", failedMessage=" + this.failedMessage));
+		return super.toString() + (this.failedMessage == null ? "" :
+				(", failedMessage=" + this.failedMessage));
 	}
 
 }

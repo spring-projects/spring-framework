@@ -71,8 +71,8 @@ class ParameterResolutionTests {
 	}
 
 	private void assertAutowirableParameters(Executable executable) {
-		int startIndex = (executable instanceof Constructor)
-				&& ClassUtils.isInnerClass(executable.getDeclaringClass()) ? 1 : 0;
+		int startIndex = (executable instanceof Constructor) &&
+				ClassUtils.isInnerClass(executable.getDeclaringClass()) ? 1 : 0;
 		Parameter[] parameters = executable.getParameters();
 		for (int parameterIndex = startIndex; parameterIndex < parameters.length; parameterIndex++) {
 			Parameter parameter = parameters[parameterIndex];

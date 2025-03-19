@@ -84,8 +84,8 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 			// Look for most specific name match.
 			String bestNameMatch = null;
 			for (String mappedName : this.nameMap.keySet()) {
-				if (isMatch(methodName, mappedName)
-						&& (bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
+				if (isMatch(methodName, mappedName) &&
+						(bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
 					ops = this.nameMap.get(mappedName);
 					bestNameMatch = mappedName;
 				}

@@ -549,9 +549,7 @@ public final class ConcurrentLruCache<K, V> {
 		}
 
 		private boolean contains(Node<K, V> e) {
-			return (e.getPrevious() != null)
-					|| (e.getNext() != null)
-					|| (e == this.first);
+			return (e.getPrevious() != null) || (e.getNext() != null) || (e == this.first);
 		}
 
 		private void linkLast(final Node<K, V> e) {

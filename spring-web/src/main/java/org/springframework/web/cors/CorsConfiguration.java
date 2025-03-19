@@ -733,8 +733,8 @@ public class CorsConfiguration {
 		}
 
 		boolean allowAnyHeader = this.allowedHeaders.contains(ALL);
-		int maxResultSize = allowAnyHeader ? requestHeaders.size()
-				: Math.min(requestHeaders.size(), this.allowedHeaders.size());
+		int maxResultSize = (allowAnyHeader ? requestHeaders.size() :
+				Math.min(requestHeaders.size(), this.allowedHeaders.size()));
 		List<String> result = new ArrayList<>(maxResultSize);
 		for (String requestHeader : requestHeaders) {
 			if (StringUtils.hasText(requestHeader)) {

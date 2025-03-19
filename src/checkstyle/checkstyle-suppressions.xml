@@ -47,6 +47,7 @@
 	<suppress files="ResolvableType" checks="FinalClass"/>
 	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="Target_ClassFinder" checks="HideUtilityClassConstructor"/>
+	<suppress files="StringDecoderBenchmark" checks="RegexpSinglelineJava" id="separatorSymbolLocation"/>
 
 	<!-- spring-core-test -->
 	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports" />
@@ -128,6 +129,7 @@
 	<suppress files="ServletAnnotationControllerHandlerMethodTests" checks="InterfaceIsType"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]servlet[\\/]resource[\\/]GzipSupport" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]servlet[\\/]handler[\\/]PathPatterns.+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
+	<suppress files="(ResponseBodyEmitterReturnValueHandlerTests|SseServerResponseTests)" checks="RegexpSinglelineJava" id="separatorSymbolLocation"/>
 
 	<!-- spring-websocket -->
 	<suppress files="web[\\/]socket[\\/]CloseStatus" checks="JavadocStyle"/>

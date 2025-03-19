@@ -66,8 +66,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 				String id = resolveId(element, definition, parserContext);
 				if (!StringUtils.hasText(id)) {
 					parserContext.getReaderContext().error(
-							"Id is required for element '" + parserContext.getDelegate().getLocalName(element)
-									+ "' when used as a top-level tag", element);
+							"Id is required for element '" + parserContext.getDelegate().getLocalName(element) +
+							"' when used as a top-level tag", element);
 				}
 				String[] aliases = null;
 				if (shouldParseNameAsAliases()) {

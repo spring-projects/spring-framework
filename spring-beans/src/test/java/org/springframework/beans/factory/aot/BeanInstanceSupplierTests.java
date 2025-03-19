@@ -102,8 +102,8 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.get(registerBean)).withMessage(
-						"Constructor with parameter types [java.io.InputStream] cannot be found on "
-								+ SingleArgConstructor.class.getName());
+						"Constructor with parameter types [java.io.InputStream] cannot be found on " +
+								SingleArgConstructor.class.getName());
 	}
 
 	@Test
@@ -150,8 +150,8 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.get(registerBean)).withMessage(
-						"Factory method 'single' with parameter types [java.io.InputStream] declared on class "
-								+ SingleArgFactory.class.getName() + " cannot be found");
+						"Factory method 'single' with parameter types [java.io.InputStream] declared on class " +
+								SingleArgFactory.class.getName() + " cannot be found");
 	}
 
 	@Test

@@ -334,8 +334,8 @@ public abstract class InstrumentedBridgeMethods {
 		Object result = null;
 		boolean accessibilityChanged = false;
 		try {
-			if (!Modifier.isPublic(method.getModifiers())
-				|| !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			if (!Modifier.isPublic(method.getModifiers()) ||
+					!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
 				method.setAccessible(true);
 				accessibilityChanged = true;
 			}

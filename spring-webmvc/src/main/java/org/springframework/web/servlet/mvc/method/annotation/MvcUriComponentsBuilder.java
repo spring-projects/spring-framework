@@ -666,8 +666,8 @@ public class MvcUriComponentsBuilder {
 	private static String resolveEmbeddedValue(String value) {
 		if (value.contains(SystemPropertyUtils.PLACEHOLDER_PREFIX)) {
 			WebApplicationContext webApplicationContext = getWebApplicationContext();
-			if (webApplicationContext != null
-					&& webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
+			if (webApplicationContext != null &&
+					webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
 				String resolvedEmbeddedValue = cbf.resolveEmbeddedValue(value);
 				if (resolvedEmbeddedValue != null) {
 					return resolvedEmbeddedValue;

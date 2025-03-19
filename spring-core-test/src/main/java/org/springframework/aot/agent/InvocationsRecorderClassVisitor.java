@@ -78,8 +78,8 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 		static {
 			for (InstrumentedMethod method : InstrumentedMethod.values()) {
 				MethodReference methodReference = method.methodReference();
-				instrumentedMethods.add(methodReference.getClassName().replace('.', '/')
-						+ "#" + methodReference.getMethodName());
+				instrumentedMethods.add(methodReference.getClassName().replace('.', '/') +
+						"#" + methodReference.getMethodName());
 			}
 		}
 
