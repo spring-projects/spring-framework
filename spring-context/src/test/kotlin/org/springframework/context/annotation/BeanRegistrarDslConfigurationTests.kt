@@ -39,6 +39,7 @@ class BeanRegistrarDslConfigurationTests {
 	fun beanRegistrar() {
 		val context = AnnotationConfigApplicationContext(BeanRegistrarKotlinConfiguration::class.java)
 		assertThat(context.getBean<Bar>().foo).isEqualTo(context.getBean<Foo>())
+		assertThat(context.getBean<Foo>("foo")).isEqualTo(context.getBean<Foo>("fooAlias"))
 		assertThatThrownBy(ThrowableAssert.ThrowingCallable { context.getBean<Baz>() }).isInstanceOf(NoSuchBeanDefinitionException::class.java)
 		assertThat(context.getBean<Init>().initialized).isTrue()
 		val beanDefinition = context.getBeanDefinition("bar")
@@ -88,7 +89,8 @@ class BeanRegistrarDslConfigurationTests {
 	internal class BeanRegistrarKotlinConfiguration
 
 	private class SampleBeanRegistrar : BeanRegistrarDsl({
-		registerBean<Foo>()
+		registerBean<Foo>("foo")
+		registerAlias("foo", "fooAlias")
 		registerBean(
 			name = "bar",
 			prototype = true,

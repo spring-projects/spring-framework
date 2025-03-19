@@ -65,6 +65,17 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	lateinit var env: Environment
 
 	/**
+	 * Given a name, register an alias for it.
+	 * @param name the canonical name
+	 * @param alias the alias to be registered
+	 * @throws IllegalStateException if the alias is already in use
+	 * and may not be overridden
+	 */
+	fun registerAlias(name: String, alias: String) {
+		registry.registerAlias(name, alias);
+	}
+
+	/**
 	 * Register a bean from the given bean class, which will be instantiated
 	 * using the related [resolvable constructor]
 	 * [org.springframework.beans.BeanUtils.getResolvableConstructor] if any.

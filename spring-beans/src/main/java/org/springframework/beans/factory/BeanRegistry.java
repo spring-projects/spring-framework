@@ -39,6 +39,15 @@ import org.springframework.core.env.Environment;
 public interface BeanRegistry {
 
 	/**
+	 * Given a name, register an alias for it.
+	 * @param name the canonical name
+	 * @param alias the alias to be registered
+	 * @throws IllegalStateException if the alias is already in use
+	 * and may not be overridden
+	 */
+	void registerAlias(String name, String alias);
+
+	/**
 	 * Register a bean from the given bean class, which will be instantiated
 	 * using the related {@link BeanUtils#getResolvableConstructor resolvable constructor}
 	 * if any.

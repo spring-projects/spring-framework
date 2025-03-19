@@ -27,6 +27,7 @@ public class SampleBeanRegistrar implements BeanRegistrar {
 	@Override
 	public void register(BeanRegistry registry, Environment env) {
 		registry.registerBean("foo", Foo.class);
+		registry.registerAlias("foo", "fooAlias");
 		registry.registerBean("bar", Bar.class, spec -> spec
 				.prototype()
 				.lazyInit()

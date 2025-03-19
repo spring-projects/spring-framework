@@ -81,6 +81,11 @@ public class BeanRegistryAdapter implements BeanRegistry {
 
 
 	@Override
+	public void registerAlias(String name, String alias) {
+		this.beanRegistry.registerAlias(name, alias);
+	}
+
+	@Override
 	public <T> String registerBean(Class<T> beanClass) {
 		String beanName = BeanDefinitionReaderUtils.uniqueBeanName(beanClass.getName(), this.beanRegistry);
 		registerBean(beanName, beanClass);

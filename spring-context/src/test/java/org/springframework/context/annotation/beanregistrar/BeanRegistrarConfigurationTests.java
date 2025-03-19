@@ -45,6 +45,7 @@ public class BeanRegistrarConfigurationTests {
 	void beanRegistrar() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(BeanRegistrarConfiguration.class);
 		assertThat(context.getBean(Bar.class).foo()).isEqualTo(context.getBean(Foo.class));
+		assertThat(context.getBean("foo", Foo.class)).isEqualTo(context.getBean("fooAlias", Foo.class));
 		assertThatThrownBy(() -> context.getBean(Baz.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
 		assertThat(context.getBean(Init.class).initialized).isTrue();
 		BeanDefinition beanDefinition = context.getBeanDefinition("bar");
