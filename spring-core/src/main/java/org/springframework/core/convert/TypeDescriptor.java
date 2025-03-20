@@ -18,7 +18,6 @@ package org.springframework.core.convert;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -32,6 +31,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementAdapter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
@@ -39,6 +39,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Contextual descriptor about a type to convert from or to.
+ *
  * <p>Capable of representing arrays and generic collection types.
  *
  * @author Keith Donald
@@ -728,82 +729,6 @@ public class TypeDescriptor implements Serializable {
 	private static String getName(Class<?> clazz) {
 		String canonicalName = clazz.getCanonicalName();
 		return (canonicalName != null ? canonicalName : clazz.getName());
-	}
-
-
-	/**
-	 * Adapter class for exposing a {@code TypeDescriptor}'s annotations as an
-	 * {@link AnnotatedElement}, in particular to {@link AnnotatedElementUtils}.
-	 * @see AnnotatedElementUtils#isAnnotated(AnnotatedElement, Class)
-	 * @see AnnotatedElementUtils#getMergedAnnotation(AnnotatedElement, Class)
-	 */
-	private static final class AnnotatedElementAdapter implements AnnotatedElement, Serializable {
-
-		private static final AnnotatedElementAdapter EMPTY = new AnnotatedElementAdapter(new Annotation[0]);
-
-		private final Annotation[] annotations;
-
-		private AnnotatedElementAdapter(Annotation[] annotations) {
-			this.annotations = annotations;
-		}
-
-		private static AnnotatedElementAdapter from(Annotation @Nullable [] annotations) {
-			if (annotations == null || annotations.length == 0) {
-				return EMPTY;
-			}
-			return new AnnotatedElementAdapter(annotations);
-		}
-
-		@Override
-		public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-			for (Annotation annotation : this.annotations) {
-				if (annotation.annotationType() == annotationClass) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends Annotation> @Nullable T getAnnotation(Class<T> annotationClass) {
-			for (Annotation annotation : this.annotations) {
-				if (annotation.annotationType() == annotationClass) {
-					return (T) annotation;
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public Annotation[] getAnnotations() {
-			return (isEmpty() ? this.annotations : this.annotations.clone());
-		}
-
-		@Override
-		public Annotation[] getDeclaredAnnotations() {
-			return getAnnotations();
-		}
-
-		public boolean isEmpty() {
-			return (this.annotations.length == 0);
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof AnnotatedElementAdapter that &&
-					Arrays.equals(this.annotations, that.annotations)));
-		}
-
-		@Override
-		public int hashCode() {
-			return Arrays.hashCode(this.annotations);
-		}
-
-		@Override
-		public String toString() {
-			return Arrays.toString(this.annotations);
-		}
 	}
 
 
