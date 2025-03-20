@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,11 +208,10 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 			throw new IllegalArgumentException("Attribute 'items' is required and must be a Collection, an Array or a Map");
 		}
 
-		if (itemsObject.getClass().isArray()) {
-			Object[] itemsArray = (Object[]) itemsObject;
-			for (int i = 0; i < itemsArray.length; i++) {
-				Object item = itemsArray[i];
-				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, i);
+		if (itemsObject instanceof Object[] itemsArray) {
+			for (int itemIndex = 0; itemIndex < itemsArray.length; itemIndex++) {
+				Object item = itemsArray[itemIndex];
+				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, itemIndex);
 			}
 		}
 		else if (itemsObject instanceof Collection<?> optionCollection) {

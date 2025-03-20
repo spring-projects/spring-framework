@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ public abstract class RepeatableContainers {
 					throw new NoSuchMethodException("No value method found");
 				}
 				Class<?> returnType = valueMethod.getReturnType();
-				if (!returnType.isArray() || returnType.componentType() != repeatable) {
+				if (returnType.componentType() != repeatable) {
 					throw new AnnotationConfigurationException(
 							"Container type [%s] must declare a 'value' attribute for an array of type [%s]"
 								.formatted(container.getName(), repeatable.getName()));

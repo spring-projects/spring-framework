@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -516,11 +516,9 @@ public class CodeFlow implements Opcodes {
 	 */
 	public static String toJvmDescriptor(Class<?> clazz) {
 		StringBuilder sb = new StringBuilder();
-		if (clazz.isArray()) {
-			while (clazz.isArray()) {
-				sb.append('[');
-				clazz = clazz.componentType();
-			}
+		while (clazz.isArray()) {
+			sb.append('[');
+			clazz = clazz.componentType();
 		}
 		if (clazz.isPrimitive()) {
 			if (clazz == boolean.class) {
