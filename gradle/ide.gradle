@@ -98,7 +98,7 @@ if (project.name == "spring-oxm") {
 }
 
 // Include project specific settings
-task eclipseSettings(type: Copy) {
+tasks.register('eclipseSettings', Copy) {
 	from rootProject.files(
 		'src/eclipse/org.eclipse.core.resources.prefs',
 		'src/eclipse/org.eclipse.jdt.core.prefs',
@@ -107,7 +107,7 @@ task eclipseSettings(type: Copy) {
 	outputs.upToDateWhen { false }
 }
 
-task cleanEclipseSettings(type: Delete) {
+tasks.register('cleanEclipseSettings', Delete) {
 	delete project.file('.settings/org.eclipse.core.resources.prefs')
 	delete project.file('.settings/org.eclipse.jdt.core.prefs')
 	delete project.file('.settings/org.eclipse.jdt.ui.prefs')
