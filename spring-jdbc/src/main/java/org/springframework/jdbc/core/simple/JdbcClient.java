@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -107,7 +108,22 @@ public interface JdbcClient {
 	 * @param jdbcTemplate the delegate to perform operations on
 	 */
 	static JdbcClient create(NamedParameterJdbcOperations jdbcTemplate) {
-		return new DefaultJdbcClient(jdbcTemplate);
+		return new DefaultJdbcClient(jdbcTemplate, null);
+	}
+
+	/**
+	 * Create a {@code JdbcClient} for the given {@link NamedParameterJdbcOperations} delegate,
+	 * typically an {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}.
+	 * <p>Use this factory method to reuse existing {@code NamedParameterJdbcTemplate}
+	 * configuration, including its underlying {@code JdbcTemplate} and {@code DataSource},
+	 * along with a custom {@link ConversionService} for queries with mapped classes.
+	 * @param jdbcTemplate the delegate to perform operations on
+	 * @param conversionService a {@link ConversionService} for converting fetched JDBC values
+	 * to mapped classes in {@link StatementSpec#query(Class)}
+	 * @since 7.0
+	 */
+	static JdbcClient create(NamedParameterJdbcOperations jdbcTemplate, ConversionService conversionService) {
+		return new DefaultJdbcClient(jdbcTemplate, conversionService);
 	}
 
 

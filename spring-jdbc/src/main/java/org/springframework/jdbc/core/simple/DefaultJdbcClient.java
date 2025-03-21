@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -64,24 +66,25 @@ final class DefaultJdbcClient implements JdbcClient {
 
 	private final NamedParameterJdbcOperations namedParamOps;
 
+	private final ConversionService conversionService;
+
 	private final Map<Class<?>, RowMapper<?>> rowMapperCache = new ConcurrentHashMap<>();
 
 
 	public DefaultJdbcClient(DataSource dataSource) {
-		this.classicOps = new JdbcTemplate(dataSource);
-		this.namedParamOps = new NamedParameterJdbcTemplate(this.classicOps);
+		this(new JdbcTemplate(dataSource));
 	}
 
 	public DefaultJdbcClient(JdbcOperations jdbcTemplate) {
-		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
-		this.classicOps = jdbcTemplate;
-		this.namedParamOps = new NamedParameterJdbcTemplate(jdbcTemplate);
+		this(new NamedParameterJdbcTemplate(jdbcTemplate), null);
 	}
 
-	public DefaultJdbcClient(NamedParameterJdbcOperations jdbcTemplate) {
+	public DefaultJdbcClient(NamedParameterJdbcOperations jdbcTemplate, @Nullable ConversionService conversionService) {
 		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
 		this.classicOps = jdbcTemplate.getJdbcOperations();
 		this.namedParamOps = jdbcTemplate;
+		this.conversionService =
+				(conversionService != null ? conversionService : DefaultConversionService.getSharedInstance());
 	}
 
 
@@ -201,8 +204,9 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public <T> MappedQuerySpec<T> query(Class<T> mappedClass) {
 			RowMapper<?> rowMapper = rowMapperCache.computeIfAbsent(mappedClass, key ->
-					BeanUtils.isSimpleProperty(mappedClass) ? new SingleColumnRowMapper<>(mappedClass) :
-							new SimplePropertyRowMapper<>(mappedClass));
+					BeanUtils.isSimpleProperty(mappedClass) ?
+							new SingleColumnRowMapper<>(mappedClass, conversionService) :
+							new SimplePropertyRowMapper<>(mappedClass, conversionService));
 			return query((RowMapper<T>) rowMapper);
 		}
 

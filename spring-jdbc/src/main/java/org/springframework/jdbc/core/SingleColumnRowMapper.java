@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,19 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 		}
 	}
 
+	/**
+	 * Create a new {@code SingleColumnRowMapper}.
+	 * @param requiredType the type that each result object is expected to match
+	 * @param conversionService a {@link ConversionService} for converting a fetched value
+	 * @since 7.0
+	 */
+	public SingleColumnRowMapper(Class<T> requiredType, @Nullable ConversionService conversionService) {
+		if (requiredType != Object.class) {
+			setRequiredType(requiredType);
+		}
+		setConversionService(conversionService);
+	}
+
 
 	/**
 	 * Set the type that each result object is expected to match.
@@ -84,11 +97,12 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * Set a {@link ConversionService} for converting a fetched value.
 	 * <p>Default is the {@link DefaultConversionService}.
 	 * @since 5.0.4
-	 * @see DefaultConversionService#getSharedInstance
+	 * @see DefaultConversionService#getSharedInstance()
 	 */
 	public void setConversionService(@Nullable ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	/**
 	 * Extract a value for the single column in the current row.
