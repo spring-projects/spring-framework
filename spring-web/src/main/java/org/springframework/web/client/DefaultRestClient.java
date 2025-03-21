@@ -150,6 +150,7 @@ final class DefaultRestClient implements RestClient {
 		this.builder = builder;
 	}
 
+
 	@Override
 	public RequestHeadersUriSpec<?> get() {
 		return methodInternal(HttpMethod.GET);
@@ -280,8 +281,6 @@ final class DefaultRestClient implements RestClient {
 		}
 		return (Class<T>) Object.class;
 	}
-
-
 
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
@@ -515,7 +514,6 @@ final class DefaultRestClient implements RestClient {
 				logger.debug(msg.toString());
 			}
 		}
-
 
 		@Override
 		public ResponseSpec retrieve() {
@@ -822,7 +820,6 @@ final class DefaultRestClient implements RestClient {
 				throw new UncheckedIOException(ex);
 			}
 		}
-
 	}
 
 
@@ -870,8 +867,6 @@ final class DefaultRestClient implements RestClient {
 		public void close() {
 			this.delegate.close();
 		}
-
 	}
-
 
 }
