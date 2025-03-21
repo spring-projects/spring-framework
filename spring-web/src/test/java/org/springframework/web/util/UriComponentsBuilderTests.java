@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,19 @@ class UriComponentsBuilderTests {
 		assertThat(result.getSchemeSpecificPart()).isEqualTo("foo@bar.com");
 		assertThat(result.getFragment()).isEqualTo("baz");
 		assertThat(result.toUri()).as("Invalid result URI").isEqualTo(uri);
+	}
+
+	@ParameterizedTest // see gh-34588
+	@EnumSource
+	void fromOpaqueUriWithUrnScheme(ParserType parserType) {
+		URI uri = UriComponentsBuilder
+				.fromUriString("urn:text:service-{region}:{prefix}/{id}", parserType).build()
+				.expand("US", "prefix1", "Id-2")
+				.toUri();
+
+		assertThat(uri.getScheme()).isEqualTo("urn");
+		assertThat(uri.isOpaque()).isTrue();
+		assertThat(uri.getSchemeSpecificPart()).isEqualTo("text:service-US:prefix1/Id-2");
 	}
 
 	@ParameterizedTest // see gh-9317
