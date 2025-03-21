@@ -136,7 +136,7 @@ class MergedAnnotationsTests {
 		@Test
 		void searchFromClassWithCustomRepeatableContainers() {
 			assertThat(MergedAnnotations.from(HierarchyClass.class).stream(TestConfiguration.class)).isEmpty();
-			RepeatableContainers containers = RepeatableContainers.of(TestConfiguration.class, Hierarchy.class);
+			RepeatableContainers containers = RepeatableContainers.explicitRepeatable(TestConfiguration.class, Hierarchy.class);
 
 			MergedAnnotations annotations = MergedAnnotations.search(SearchStrategy.DIRECT)
 					.withRepeatableContainers(containers)
@@ -1364,7 +1364,7 @@ class MergedAnnotationsTests {
 	@SuppressWarnings("deprecation")
 	void streamRepeatableDeclaredOnClassWithAttributeAliases() {
 		assertThat(MergedAnnotations.from(HierarchyClass.class).stream(TestConfiguration.class)).isEmpty();
-		RepeatableContainers containers = RepeatableContainers.of(TestConfiguration.class, Hierarchy.class);
+		RepeatableContainers containers = RepeatableContainers.explicitRepeatable(TestConfiguration.class, Hierarchy.class);
 		MergedAnnotations annotations = MergedAnnotations.from(HierarchyClass.class,
 				SearchStrategy.DIRECT, containers, AnnotationFilter.NONE);
 		assertThat(annotations.stream(TestConfiguration.class)
@@ -1440,7 +1440,7 @@ class MergedAnnotationsTests {
 
 	private void testExplicitRepeatables(SearchStrategy searchStrategy, Class<?> element, String[] expected) {
 		MergedAnnotations annotations = MergedAnnotations.from(element, searchStrategy,
-				RepeatableContainers.of(MyRepeatable.class, MyRepeatableContainer.class));
+				RepeatableContainers.explicitRepeatable(MyRepeatable.class, MyRepeatableContainer.class));
 		Stream<String> values = annotations.stream(MyRepeatable.class)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 				.map(annotation -> annotation.getString("value"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,7 +274,7 @@ class MergedAnnotationsRepeatableAnnotationTests {
 	private <A extends Annotation> Set<A> getAnnotations(Class<? extends Annotation> container,
 			Class<A> repeatable, SearchStrategy searchStrategy, AnnotatedElement element, AnnotationFilter annotationFilter) {
 
-		RepeatableContainers containers = RepeatableContainers.of(repeatable, container);
+		RepeatableContainers containers = RepeatableContainers.explicitRepeatable(repeatable, container);
 		MergedAnnotations annotations = MergedAnnotations.from(element, searchStrategy, containers, annotationFilter);
 		return annotations.stream(repeatable).collect(MergedAnnotationCollectors.toAnnotationSet());
 	}

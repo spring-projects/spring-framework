@@ -443,13 +443,17 @@ public abstract class AnnotatedElementUtils {
 	 * support such a use case, favor {@link #getMergedRepeatableAnnotations(AnnotatedElement, Class)}
 	 * over this method or alternatively use the {@link MergedAnnotations} API
 	 * directly in conjunction with {@link RepeatableContainers} that are
-	 * {@linkplain RepeatableContainers#and(Class, Class) composed} to support
-	 * multiple repeatable annotation types.
+	 * {@linkplain RepeatableContainers#plus(Class, Class) composed} to support
+	 * multiple repeatable annotation types &mdash; for example:
+	 * <pre class="code">
+	 * RepeatableContainers.standardRepeatables()
+	 *     .plus(MyRepeatable1.class, MyContainer1.class)
+	 *     .plus(MyRepeatable2.class, MyContainer2.class);</pre>
 	 * @param element the annotated element (never {@code null})
-	 * @param annotationType the annotation type to find (never {@code null})
-	 * @param containerType the type of the container that holds the annotations;
-	 * may be {@code null} if the container type should be looked up via
-	 * {@link java.lang.annotation.Repeatable}
+	 * @param annotationType the repeatable annotation type to find (never {@code null})
+	 * @param containerType the type of the container that holds the repeatable
+	 * annotations; may be {@code null} if the container type should be looked up
+	 * via {@link java.lang.annotation.Repeatable @Repeatable}
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
 	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
@@ -740,13 +744,17 @@ public abstract class AnnotatedElementUtils {
 	 * support such a use case, favor {@link #findMergedRepeatableAnnotations(AnnotatedElement, Class)}
 	 * over this method or alternatively use the {@link MergedAnnotations} API
 	 * directly in conjunction with {@link RepeatableContainers} that are
-	 * {@linkplain RepeatableContainers#and(Class, Class) composed} to support
-	 * multiple repeatable annotation types.
+	 * {@linkplain RepeatableContainers#plus(Class, Class) composed} to support
+	 * multiple repeatable annotation types &mdash; for example:
+	 * <pre class="code">
+	 * RepeatableContainers.standardRepeatables()
+	 *     .plus(MyRepeatable1.class, MyContainer1.class)
+	 *     .plus(MyRepeatable2.class, MyContainer2.class);</pre>
 	 * @param element the annotated element (never {@code null})
-	 * @param annotationType the annotation type to find (never {@code null})
-	 * @param containerType the type of the container that holds the annotations;
-	 * may be {@code null} if the container type should be looked up via
-	 * {@link java.lang.annotation.Repeatable}
+	 * @param annotationType the repeatable annotation type to find (never {@code null})
+	 * @param containerType the type of the container that holds the repeatable
+	 * annotations; may be {@code null} if the container type should be looked up
+	 * via {@link java.lang.annotation.Repeatable @Repeatable}
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
 	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
@@ -775,7 +783,7 @@ public abstract class AnnotatedElementUtils {
 
 		RepeatableContainers repeatableContainers;
 		if (containerType == null) {
-			// Invoke RepeatableContainers.of() in order to adhere to the contract of
+			// Invoke RepeatableContainers.explicitRepeatable() in order to adhere to the contract of
 			// getMergedRepeatableAnnotations() which states that an IllegalArgumentException
 			// will be thrown if the container cannot be resolved.
 			//
@@ -784,11 +792,11 @@ public abstract class AnnotatedElementUtils {
 			// annotation types).
 			//
 			// See https://github.com/spring-projects/spring-framework/issues/20279
-			RepeatableContainers.of(annotationType, null);
+			RepeatableContainers.explicitRepeatable(annotationType, null);
 			repeatableContainers = RepeatableContainers.standardRepeatables();
 		}
 		else {
-			repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+			repeatableContainers = RepeatableContainers.explicitRepeatable(annotationType, containerType);
 		}
 		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS, repeatableContainers);
 	}
@@ -802,7 +810,7 @@ public abstract class AnnotatedElementUtils {
 
 		RepeatableContainers repeatableContainers;
 		if (containerType == null) {
-			// Invoke RepeatableContainers.of() in order to adhere to the contract of
+			// Invoke RepeatableContainers.explicitRepeatable() in order to adhere to the contract of
 			// findMergedRepeatableAnnotations() which states that an IllegalArgumentException
 			// will be thrown if the container cannot be resolved.
 			//
@@ -811,11 +819,11 @@ public abstract class AnnotatedElementUtils {
 			// annotation types).
 			//
 			// See https://github.com/spring-projects/spring-framework/issues/20279
-			RepeatableContainers.of(annotationType, null);
+			RepeatableContainers.explicitRepeatable(annotationType, null);
 			repeatableContainers = RepeatableContainers.standardRepeatables();
 		}
 		else {
-			repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+			repeatableContainers = RepeatableContainers.explicitRepeatable(annotationType, containerType);
 		}
 		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, repeatableContainers);
 	}
