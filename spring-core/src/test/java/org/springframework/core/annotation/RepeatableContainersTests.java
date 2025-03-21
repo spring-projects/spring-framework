@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,9 +161,9 @@ class RepeatableContainersTests {
 		RepeatableContainers repeatableContainers = RepeatableContainers.standardRepeatables()
 			.and(ExplicitContainer.class, ExplicitRepeatable.class);
 		assertThat(findRepeatedAnnotationValues(repeatableContainers, StandardRepeatablesTestCase.class, StandardContainer.class))
-			.containsExactly("a", "b");
+				.containsExactly("a", "b");
 		assertThat(findRepeatedAnnotationValues(repeatableContainers, ExplicitRepeatablesTestCase.class, ExplicitContainer.class))
-			.containsExactly("a", "b");
+				.containsExactly("a", "b");
 	}
 
 	@Test
