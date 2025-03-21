@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,8 +146,6 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
 	 * to include beans in ancestor factories too.
-	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
-	 * by other means than bean definitions.
 	 * <p>This version of {@code getBeanNamesForType} matches all kinds of beans,
 	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
@@ -177,8 +175,6 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
 	 * to include beans in ancestor factories too.
-	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
-	 * by other means than bean definitions.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the generically typed class or interface to match
@@ -211,8 +207,6 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
 	 * to include beans in ancestor factories too.
-	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
-	 * by other means than bean definitions.
 	 * <p>This version of {@code getBeanNamesForType} matches all kinds of beans,
 	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
@@ -240,8 +234,6 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
 	 * to include beans in ancestor factories too.
-	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
-	 * by other means than bean definitions.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the class or interface to match, or {@code null} for all bean names
@@ -266,21 +258,24 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * subclasses), judging from either bean definitions or the value of
 	 * {@code getObjectType} in the case of FactoryBeans.
 	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
-	 * check nested beans which might match the specified type as well.
+	 * check nested beans which might match the specified type as well. Also, it
+	 * <b>suppresses exceptions for beans that are currently in creation in a circular
+	 * reference scenario:</b> typically, references back to the caller of this method.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' {@code beansOfTypeIncludingAncestors}
 	 * to include beans in ancestor factories too.
-	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
-	 * by other means than bean definitions.
 	 * <p>This version of getBeansOfType matches all kinds of beans, be it
 	 * singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for {@code getBeansOfType(type, true, true)}.
 	 * <p>The Map returned by this method should always return bean names and
 	 * corresponding bean instances <i>in the order of definition</i> in the
 	 * backend configuration, as far as possible.
+	 * <p><b>Consider {@link #getBeanNamesForType(Class)} with selective {@link #getBean}
+	 * calls for specific bean names in preference to this Map-based retrieval method.</b>
+	 * Aside from lazy instantiation benefits, this also avoids any exception suppression.
 	 * @param type the class or interface to match, or {@code null} for all concrete beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
@@ -296,7 +291,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * subclasses), judging from either bean definitions or the value of
 	 * {@code getObjectType} in the case of FactoryBeans.
 	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
-	 * check nested beans which might match the specified type as well.
+	 * check nested beans which might match the specified type as well. Also, it
+	 * <b>suppresses exceptions for beans that are currently in creation in a circular
+	 * reference scenario:</b> typically, references back to the caller of this method.
 	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
 	 * which means that FactoryBeans will get initialized. If the object created by the
 	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
@@ -305,11 +302,12 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' {@code beansOfTypeIncludingAncestors}
 	 * to include beans in ancestor factories too.
-	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
-	 * by other means than bean definitions.
 	 * <p>The Map returned by this method should always return bean names and
 	 * corresponding bean instances <i>in the order of definition</i> in the
 	 * backend configuration, as far as possible.
+	 * <p><b>Consider {@link #getBeanNamesForType(Class)} with selective {@link #getBean}
+	 * calls for specific bean names in preference to this Map-based retrieval method.</b>
+	 * Aside from lazy instantiation benefits, this also avoids any exception suppression.
 	 * @param type the class or interface to match, or {@code null} for all concrete beans
 	 * @param includeNonSingletons whether to include prototype or scoped beans too
 	 * or just singletons (also applies to FactoryBeans)

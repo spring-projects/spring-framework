@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,14 +249,18 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * @return the corresponding DataAccessException instance
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException jdbcEx) {
+		return convertHibernateAccessException(ex, ex);
+	}
+
+	private DataAccessException convertHibernateAccessException(HibernateException ex, HibernateException exToCheck) {
+		if (this.jdbcExceptionTranslator != null && exToCheck instanceof JDBCException jdbcEx) {
 			DataAccessException dae = this.jdbcExceptionTranslator.translate(
 					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
 			if (dae != null) {
 				return dae;
 			}
 		}
-		if (this.transactionExceptionTranslator != null && ex instanceof org.hibernate.TransactionException) {
+		if (this.transactionExceptionTranslator != null && exToCheck instanceof org.hibernate.TransactionException) {
 			if (ex.getCause() instanceof SQLException sqlEx) {
 				DataAccessException dae = this.transactionExceptionTranslator.translate(
 						"Hibernate transaction: " + ex.getMessage(), null, sqlEx);
@@ -266,74 +270,77 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			}
 		}
 
-		if (ex instanceof JDBCConnectionException) {
+		if (exToCheck instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof SQLGrammarException hibEx) {
+		if (exToCheck instanceof SQLGrammarException hibEx) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof QueryTimeoutException hibEx) {
+		if (exToCheck instanceof QueryTimeoutException hibEx) {
 			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof LockAcquisitionException hibEx) {
+		if (exToCheck instanceof LockAcquisitionException hibEx) {
 			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof PessimisticLockException hibEx) {
+		if (exToCheck instanceof PessimisticLockException hibEx) {
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof ConstraintViolationException hibEx) {
+		if (exToCheck instanceof ConstraintViolationException hibEx) {
 			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibEx.getSQL() +
 					"]; constraint [" + hibEx.getConstraintName() + "]", ex);
 		}
-		if (ex instanceof DataException hibEx) {
+		if (exToCheck instanceof DataException hibEx) {
 			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
 		// end of JDBCException subclass handling
 
-		if (ex instanceof QueryException) {
+		if (exToCheck instanceof QueryException) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof NonUniqueResultException) {
+		if (exToCheck instanceof NonUniqueResultException) {
 			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
 		}
-		if (ex instanceof NonUniqueObjectException) {
+		if (exToCheck instanceof NonUniqueObjectException) {
 			return new DuplicateKeyException(ex.getMessage(), ex);
 		}
-		if (ex instanceof PropertyValueException) {
+		if (exToCheck instanceof PropertyValueException) {
 			return new DataIntegrityViolationException(ex.getMessage(), ex);
 		}
-		if (ex instanceof PersistentObjectException) {
+		if (exToCheck instanceof PersistentObjectException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof TransientObjectException) {
+		if (exToCheck instanceof TransientObjectException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof ObjectDeletedException) {
+		if (exToCheck instanceof ObjectDeletedException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof UnresolvableObjectException hibEx) {
+		if (exToCheck instanceof UnresolvableObjectException hibEx) {
 			return new ObjectRetrievalFailureException(hibEx.getEntityName(), getIdentifier(hibEx), ex.getMessage(), ex);
 		}
-		if (ex instanceof WrongClassException hibEx) {
+		if (exToCheck instanceof WrongClassException hibEx) {
 			return new ObjectRetrievalFailureException(hibEx.getEntityName(), getIdentifier(hibEx), ex.getMessage(), ex);
 		}
-		if (ex instanceof StaleObjectStateException hibEx) {
+		if (exToCheck instanceof StaleObjectStateException hibEx) {
 			return new ObjectOptimisticLockingFailureException(hibEx.getEntityName(), getIdentifier(hibEx), ex.getMessage(), ex);
 		}
-		if (ex instanceof StaleStateException) {
+		if (exToCheck instanceof StaleStateException) {
 			return new ObjectOptimisticLockingFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof OptimisticEntityLockException) {
+		if (exToCheck instanceof OptimisticEntityLockException) {
 			return new ObjectOptimisticLockingFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof PessimisticEntityLockException) {
+		if (exToCheck instanceof PessimisticEntityLockException) {
 			if (ex.getCause() instanceof LockAcquisitionException) {
 				return new CannotAcquireLockException(ex.getMessage(), ex.getCause());
 			}
 			return new PessimisticLockingFailureException(ex.getMessage(), ex);
 		}
 
-		// fallback
+		// Fallback: check potentially more specific cause, otherwise JpaSystemException
+		if (exToCheck.getCause() instanceof HibernateException causeToCheck) {
+			return convertHibernateAccessException(ex, causeToCheck);
+		}
 		return new JpaSystemException(ex);
 	}
 

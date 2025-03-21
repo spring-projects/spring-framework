@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;
@@ -33,33 +34,37 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 class DefaultJpaDialectTests {
 
-	private JpaDialect dialect = new DefaultJpaDialect();
+	private final JpaDialect dialect = new DefaultJpaDialect();
 
-	@Test
-	void testDefaultTransactionDefinition() {
-		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-		definition.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertThatExceptionOfType(TransactionException.class).isThrownBy(() ->
-				dialect.beginTransaction(null, definition));
-	}
 
 	@Test
 	void testDefaultBeginTransaction() throws Exception {
 		TransactionDefinition definition = new DefaultTransactionDefinition();
 		EntityManager entityManager = mock();
 		EntityTransaction entityTx = mock();
-
 		given(entityManager.getTransaction()).willReturn(entityTx);
 
 		dialect.beginTransaction(entityManager, definition);
 	}
 
 	@Test
-	void testTranslateException() {
-		OptimisticLockException ex = new OptimisticLockException();
-		assertThat(dialect.translateExceptionIfPossible(ex).getCause()).isEqualTo(EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex).getCause());
+	void testCustomIsolationLevel() {
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+
+		assertThatExceptionOfType(TransactionException.class).isThrownBy(() ->
+				dialect.beginTransaction(null, definition));
 	}
+
+	@Test
+	void testTranslateException() {
+		PersistenceException ex = new OptimisticLockException();
+		assertThat(dialect.translateExceptionIfPossible(ex))
+				.isInstanceOf(JpaOptimisticLockingFailureException.class).hasCause(ex);
+	}
+
 }
