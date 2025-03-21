@@ -404,11 +404,11 @@ class ConfigurationClassBeanDefinitionReader {
 				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));
 	}
 
-	private void loadBeanDefinitionsFromBeanRegistrars(Set<BeanRegistrar> registrars) {
+	private void loadBeanDefinitionsFromBeanRegistrars(Map<String, BeanRegistrar> registrars) {
 		Assert.isInstanceOf(ListableBeanFactory.class, this.registry,
 				"Cannot support bean registrars since " + this.registry.getClass().getName() +
 						" does not implement BeanDefinitionRegistry");
-		registrars.forEach(registrar -> registrar.register(new BeanRegistryAdapter(this.registry,
+		registrars.values().forEach(registrar -> registrar.register(new BeanRegistryAdapter(this.registry,
 				(ListableBeanFactory) this.registry, this.environment, registrar.getClass()), this.environment));
 	}
 

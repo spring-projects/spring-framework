@@ -500,6 +500,22 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 			});
 		}
 
+		@Test
+		void applyToWhenIsImportAware() {
+			BeanFactoryInitializationAotContribution contribution = getContribution(CommonAnnotationBeanPostProcessor.class,
+					ImportAwareBeanRegistrarConfiguration.class);
+			assertThat(contribution).isNotNull();
+			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			compile((initializer, compiled) -> {
+				GenericApplicationContext freshContext = new GenericApplicationContext();
+				initializer.accept(freshContext);
+				freshContext.refresh();
+				assertThat(freshContext.getBean(ClassNameHolder.class).className())
+						.isEqualTo(ImportAwareBeanRegistrarConfiguration.class.getName());
+				freshContext.close();
+			});
+		}
+
 		@SuppressWarnings("unchecked")
 		private void compile(BiConsumer<Consumer<GenericApplicationContext>, Compiled> result) {
 			MethodReference methodReference = beanFactoryInitializationCode.getInitializers().get(0);
@@ -561,6 +577,31 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 			}
 		}
 
+		@Import(ImportAwareBeanRegistrar.class)
+		public static class ImportAwareBeanRegistrarConfiguration {
+		}
+
+		public static class ImportAwareBeanRegistrar implements BeanRegistrar, ImportAware {
+
+			@Nullable
+			private AnnotationMetadata importMetadata;
+
+			@Override
+			public void register(BeanRegistry registry, Environment env) {
+				registry.registerBean(ClassNameHolder.class, spec -> spec.supplier(context ->
+						new ClassNameHolder(this.importMetadata == null ? null : this.importMetadata.getClassName())));
+			}
+
+			@Override
+			public void setImportMetadata(AnnotationMetadata importMetadata) {
+				this.importMetadata = importMetadata;
+			}
+
+			public @Nullable AnnotationMetadata getImportMetadata() {
+				return this.importMetadata;
+			}
+		}
+
 		static class Foo {
 		}
 
@@ -575,6 +616,8 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 		}
 
 	}
+
+	public record ClassNameHolder(@Nullable String className) {}
 
 
 	private @Nullable BeanFactoryInitializationAotContribution getContribution(Class<?>... types) {

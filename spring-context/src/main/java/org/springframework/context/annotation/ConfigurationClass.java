@@ -66,7 +66,7 @@ final class ConfigurationClass {
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<>();
 
-	private final Set<BeanRegistrar> beanRegistrars = new LinkedHashSet<>();
+	private final Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
@@ -222,11 +222,11 @@ final class ConfigurationClass {
 		return this.importedResources;
 	}
 
-	void addBeanRegistrar(BeanRegistrar beanRegistrar) {
-		this.beanRegistrars.add(beanRegistrar);
+	void addBeanRegistrar(String sourceClassName, BeanRegistrar beanRegistrar) {
+		this.beanRegistrars.put(sourceClassName, beanRegistrar);
 	}
 
-	public Set<BeanRegistrar> getBeanRegistrars() {
+	public Map<String, BeanRegistrar> getBeanRegistrars() {
 		return this.beanRegistrars;
 	}
 

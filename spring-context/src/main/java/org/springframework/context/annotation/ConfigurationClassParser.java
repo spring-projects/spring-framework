@@ -602,7 +602,11 @@ class ConfigurationClassParser {
 					else if (candidate.isAssignable(BeanRegistrar.class)) {
 						Class<?> candidateClass = candidate.loadClass();
 						BeanRegistrar registrar = (BeanRegistrar) BeanUtils.instantiateClass(candidateClass);
-						configClass.addBeanRegistrar(registrar);
+						AnnotationMetadata metadata = currentSourceClass.getMetadata();
+						if (registrar instanceof ImportAware importAware) {
+							importAware.setImportMetadata(metadata);
+						}
+						configClass.addBeanRegistrar(metadata.getClassName(), registrar);
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
