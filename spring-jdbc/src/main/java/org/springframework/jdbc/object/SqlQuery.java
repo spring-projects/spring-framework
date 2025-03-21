@@ -108,6 +108,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a result Stream of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
+	 * @since 7.0
 	 */
 	public Stream<T> stream(Object @Nullable [] params, @Nullable Map<?, ?> context) throws DataAccessException {
 		validateParameters(params);
@@ -130,6 +131,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param params parameters for the query. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
 	 * significant.
+	 * @since 7.0
 	 */
 	public Stream<T> stream(Object... params) throws DataAccessException {
 		return stream(params, null);
@@ -146,6 +148,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	/**
 	 * Convenient method to stream without parameters.
 	 * @param context the contextual information for object creation
+	 * @since 7.0
 	 */
 	public Stream<T> stream(Map<?, ?> context) throws DataAccessException {
 		return stream(null, context);
@@ -160,6 +163,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 
 	/**
 	 * Convenient method to stream without parameters nor context.
+	 * @since 7.0
 	 */
 	public Stream<T> stream() throws DataAccessException {
 		return stream(null, null);
@@ -262,6 +266,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a Stream of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
+	 * @since 7.0
 	 */
 	public Stream<T> streamByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context) throws DataAccessException {
 		return queryByNamedParam(paramMap, context, getJdbcTemplate()::queryForStream);
@@ -282,10 +287,22 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param paramMap parameters associated with the name specified while declaring
 	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
 	 * type. The ordering of parameters is not significant.
+	 * @since 7.0
 	 */
 	public Stream<T> streamByNamedParam(Map<String, ? extends @Nullable Object> paramMap) throws DataAccessException {
 		return streamByNamedParam(paramMap, null);
 	}
+
+	private <R> R queryByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context, BiFunction<PreparedStatementCreator, RowMapper<T>, R> queryFunction) {
+		validateNamedParameters(paramMap);
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
+		RowMapper<T> rowMapper = newRowMapper(params, context);
+		return queryFunction.apply(newPreparedStatementCreator(sqlToUse, params), rowMapper);
+	}
+
 
 	/**
 	 * Generic object finder method, used by all other {@code findObject} methods.
@@ -406,15 +423,5 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @see #execute
 	 */
 	protected abstract RowMapper<T> newRowMapper(@Nullable Object @Nullable [] parameters, @Nullable Map<?, ?> context);
-
-	private <R> R queryByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context, BiFunction<PreparedStatementCreator, RowMapper<T>, R> queryFunction) {
-		validateNamedParameters(paramMap);
-		ParsedSql parsedSql = getParsedSql();
-		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
-		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
-		RowMapper<T> rowMapper = newRowMapper(params, context);
-		return queryFunction.apply(newPreparedStatementCreator(sqlToUse, params), rowMapper);
-	}
 
 }
