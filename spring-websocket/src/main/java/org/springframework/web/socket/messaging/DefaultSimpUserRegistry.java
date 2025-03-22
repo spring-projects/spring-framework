@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jspecify.annotations.Nullable;
 
@@ -45,6 +47,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author SeungHun Choi
  * @since 4.2
  */
 public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicationListener {
@@ -57,7 +60,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	/* Secondary lookup across all sessions by id */
 	private final Map<String, LocalSimpSession> sessions = new ConcurrentHashMap<>();
 
-	private final Object sessionLock = new Object();
+	private final Lock sessionLock = new ReentrantLock();
 
 
 	/**
@@ -110,7 +113,9 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			if (user instanceof DestinationUserNameProvider destinationUserNameProvider) {
 				name = destinationUserNameProvider.getDestinationUserName();
 			}
-			synchronized (this.sessionLock) {
+
+			this.sessionLock.lock();
+			try {
 				LocalSimpUser simpUser = this.users.get(name);
 				if (simpUser == null) {
 					simpUser = new LocalSimpUser(name, user);
@@ -119,10 +124,13 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 				LocalSimpSession session = new LocalSimpSession(sessionId, simpUser);
 				simpUser.addSession(session);
 				this.sessions.put(sessionId, session);
+			} finally {
+				this.sessionLock.unlock();
 			}
 		}
 		else if (event instanceof SessionDisconnectEvent) {
-			synchronized (this.sessionLock) {
+			this.sessionLock.lock();
+			try {
 				LocalSimpSession session = this.sessions.remove(sessionId);
 				if (session != null) {
 					LocalSimpUser user = session.getUser();
@@ -131,6 +139,8 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 						this.users.remove(user.getName());
 					}
 				}
+			} finally {
+				this.sessionLock.unlock();
 			}
 		}
 		else if (event instanceof SessionUnsubscribeEvent) {
