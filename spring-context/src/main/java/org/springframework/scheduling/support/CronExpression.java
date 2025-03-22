@@ -54,7 +54,30 @@ public final class CronExpression {
 			"@weekly", "0 0 0 * * 0",
 			"@daily", "0 0 0 * * *",
 			"@midnight", "0 0 0 * * *",
-			"@hourly", "0 0 * * * *"
+			"@hourly", "0 0 * * * *",
+			"@every_minute", "0 * * * * *",
+			"@every_2_minutes", "0 */2 * * * *",
+			"@every_5_minutes", "0 */5 * * * *",
+			"@every_10_minutes", "0 */10 * * * *",
+			"@every_15_minutes", "0 */15 * * * *",
+			"@every_30_minutes", "0 */30 * * * *",
+			"@every_45_minutes", "0 */45 * * * *",
+			"@every_2_hours", "0 0 */2 * * *",
+			"@every_3_hours", "0 0 */3 * * *",
+			"@every_4_hours", "0 0 */4 * * *",
+			"@every_6_hours", "0 0 */6 * * *",
+			"@every_8_hours", "0 0 */8 * * *",
+			"@every_12_hours", "0 0 */12 * * *",
+			"@every_weekday", "0 0 0 * * 1-5",
+			"@work_hours", "0 0 9-17 * * 1-5",
+			"@lunch_time", "0 0 12 * * 1-5",
+			"@mid_morning", "0 0 10 * * *",
+			"@evening", "0 0 18 * * *",
+			"@weekends", "0 0 0 * * 6,7",
+			"@last_day_of_month", "0 59 23 L * *",
+			"@every_quarter", "0 0 0 1 1,4,7,10 *",
+			"@every_half_year", "0 0 0 1 1,7 *",
+			"@every_decade", "0 0 0 1 1 */10"
 	};
 
 
@@ -158,6 +181,28 @@ public final class CronExpression {
 	 * <li>{@code "0 0 0 * * THUL"} = last Thursday of the month at midnight</li>
 	 * <li>{@code "0 0 0 ? * 5#2"} = the second Friday in the month at midnight</li>
 	 * <li>{@code "0 0 0 ? * MON#1"} = the first Monday in the month at midnight</li>
+	 * <li>{@code "@every_2_minutes"} = Every 2 minutes</li>
+	 * <li>{@code "@every_5_minutes"} = Every 5 minutes</li>
+	 * <li>{@code "@every_10_minutes"} = Every 10 minutes</li>
+	 * <li>{@code "@every_15_minutes"} = Every 15 minutes</li>
+	 * <li>{@code "@every_30_minutes"} = Every 30 minutes</li>
+	 * <li>{@code "@every_45_minutes"} = Every 45 minutes</li>
+	 * <li>{@code "@every_2_hours"} = Every 2 hours</li>
+	 * <li>{@code "@every_3_hours"} = Every 3 hours</li>
+	 * <li>{@code "@every_4_hours"} = Every 4 hours</li>
+	 * <li>{@code "@every_6_hours"} = Every 6 hours</li>
+	 * <li>{@code "@every_8_hours"} = Every 8 hours</li>
+	 * <li>{@code "@every_12_hours"} = Every 12 hours</li>
+	 * <li>{@code "@every_weekday"} = Every weekday at midnight</li>
+	 * <li>{@code "@work_hours"} = Every hour during work hours, Mon-Fri</li>
+	 * <li>{@code "@lunch_time"} =  At noon on weekdays</li>
+	 * <li>{@code "@mid_morning"} = At 10 AM every day</li>
+	 * <li>{@code "@evening"} = At 6 PM every day</li>
+	 * <li>{@code "@weekends"} = At midnight on Saturdays and Sundays</li>
+	 * <li>{@code "@last_day_of_month"} = Last day of the month at 11:59 PM</li>
+	 * <li>{@code "@every_quarter"} = First day of each quarter at midnight</li>
+	 * <li>{@code "@every_half_year"} = First day of January and July at midnight</li>
+	 * <li>{@code "@every_decade"} = Every 10 years on Jan 1st at midnight</li>
 	 * </ul>
 	 *
 	 * <p>The following macros are also supported.
@@ -167,6 +212,29 @@ public final class CronExpression {
 	 * <li>{@code "@weekly"} to run once a week, i.e. {@code "0 0 0 * * 0"}</li>
 	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"}</li>
 	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}</li>
+	 * <li>{@code "@every_minute"} = {@code "0 * * * * *"} (Every minute)</li>
+	 * <li>{@code "@every_2_minutes"} = {@code "0 0/2 * * * *"} (Every 2 minutes)</li>
+	 * <li>{@code "@every_5_minutes"} = {@code "0 0/5 * * * *"} (Every 5 minutes)</li>
+	 * <li>{@code "@every_10_minutes"} = {@code "0 0/10 * * * *"} (Every 10 minutes)</li>
+	 * <li>{@code "@every_15_minutes"} = {@code "0 0/15 * * * *"} (Every 15 minutes)</li>
+	 * <li>{@code "@every_30_minutes"} = {@code "0 0/30 * * * *"} (Every 30 minutes)</li>
+	 * <li>{@code "@every_45_minutes"} = {@code "0 0/45 * * * *"} (Every 45 minutes)</li>
+	 * <li>{@code "@every_2_hours"} = {@code "0 0 0/2 * * *"} (Every 2 hours)</li>
+	 * <li>{@code "@every_3_hours"} = {@code "0 0 0/3 * * *"} (Every 3 hours)</li>
+	 * <li>{@code "@every_4_hours"} = {@code "0 0 0/4 * * *"} (Every 4 hours)</li>
+	 * <li>{@code "@every_6_hours"} = {@code "0 0 0/6 * * *"} (Every 6 hours)</li>
+	 * <li>{@code "@every_8_hours"} = {@code "0 0 0/8 * * *"} (Every 8 hours)</li>
+	 * <li>{@code "@every_12_hours"} = {@code "0 0 0/12 * * *"} (Every 12 hours)</li>
+	 * <li>{@code "@every_weekday"} = {@code "0 0 0 * * 1-5"} (Every weekday at midnight)</li>
+	 * <li>{@code "@work_hours"} = {@code "0 0 9-17 * * 1-5"} (Every hour during work hours, Mon-Fri)</li>
+	 * <li>{@code "@lunch_time"} = {@code "0 0 12 * * 1-5"} (At noon on weekdays)</li>
+	 * <li>{@code "@mid_morning"} = {@code "0 0 10 * * *"} (At 10 AM every day)</li>
+	 * <li>{@code "@evening"} = {@code "0 0 18 * * *"} (At 6 PM every day)</li>
+	 * <li>{@code "@weekends"} = {@code "0 0 0 * * 6,7"} (At midnight on Saturdays and Sundays)</li>
+	 * <li>{@code "@last_day_of_month"} = {@code "0 59 23 L * *"} (Last day of the month at 11:59 PM)</li>
+	 * <li>{@code "@every_quarter"} = {@code "0 0 0 1 1,4,7,10 *"} (First day of each quarter at midnight)</li>
+	 * <li>{@code "@every_half_year"} = {@code "0 0 0 1 1,7 *"} (First day of January and July at midnight)</li>
+	 * <li>{@code "@every_decade"} = {@code "0 0 0 1 1 0/10"} (Every 10 years on Jan 1st at midnight)</li>
 	 * </ul>
 	 * @param expression the expression string to parse
 	 * @return the parsed {@code CronExpression} object
