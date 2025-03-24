@@ -166,10 +166,10 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <h3>Spring Annotations Supporting Attribute Aliases</h3>
- * <p>As of Spring Framework 4.2, several annotations within core Spring
- * have been updated to use {@code @AliasFor} to configure their internal
- * attribute aliases. Consult the Javadoc for individual annotations as well
- * as the reference manual for details.
+ * <p>Many annotations within the Spring Framework and across the Spring
+ * ecosystem rely on {@code @AliasFor} to configure attribute aliases. Consult
+ * the Javadoc for individual annotations as well as reference documentation for
+ * details.
  *
  * @author Sam Brannen
  * @since 4.2

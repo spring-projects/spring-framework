@@ -237,8 +237,8 @@ public abstract class AnnotatedElementUtils {
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)}.
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
@@ -262,8 +262,8 @@ public abstract class AnnotatedElementUtils {
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
 	 * @param element the annotated element
@@ -321,8 +321,8 @@ public abstract class AnnotatedElementUtils {
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy, and synthesize
 	 * the result back into an annotation of the specified {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
@@ -348,8 +348,8 @@ public abstract class AnnotatedElementUtils {
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
 	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element (never {@code null})
@@ -375,8 +375,8 @@ public abstract class AnnotatedElementUtils {
 	 * <em>matching</em> attributes from annotations in lower levels of the
 	 * annotation hierarchy and synthesize the results back into an annotation
 	 * of the corresponding {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element (never {@code null})
@@ -402,9 +402,9 @@ public abstract class AnnotatedElementUtils {
 	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
 	 * <p>The container type that holds the repeatable annotations will be looked up
-	 * via {@link java.lang.annotation.Repeatable}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * via {@link java.lang.annotation.Repeatable @Repeatable}.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element (never {@code null})
@@ -431,8 +431,8 @@ public abstract class AnnotatedElementUtils {
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
 	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * <p><strong>WARNING</strong>: if the supplied {@code containerType} is not
@@ -621,8 +621,8 @@ public abstract class AnnotatedElementUtils {
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy, and synthesize
 	 * the result back into an annotation of the specified {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element
@@ -652,8 +652,8 @@ public abstract class AnnotatedElementUtils {
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
 	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element (never {@code null})
@@ -677,8 +677,8 @@ public abstract class AnnotatedElementUtils {
 	 * <em>matching</em> attributes from annotations in lower levels of the
 	 * annotation hierarchy and synthesize the results back into an annotation
 	 * of the corresponding {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element (never {@code null})
@@ -703,9 +703,9 @@ public abstract class AnnotatedElementUtils {
 	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
 	 * <p>The container type that holds the repeatable annotations will be looked up
-	 * via {@link java.lang.annotation.Repeatable}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * via {@link java.lang.annotation.Repeatable @Repeatable}.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element (never {@code null})
@@ -732,8 +732,8 @@ public abstract class AnnotatedElementUtils {
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
 	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
-	 * single annotation and within annotation hierarchies.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within
+	 * a single annotation and within the annotation hierarchy.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * <p><strong>WARNING</strong>: if the supplied {@code containerType} is not

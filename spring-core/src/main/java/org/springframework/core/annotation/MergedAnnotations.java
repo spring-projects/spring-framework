@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * "merged" from different source values, typically:
  *
  * <ul>
- * <li>Explicit and Implicit {@link AliasFor @AliasFor} declarations on one or
+ * <li>Explicit and implicit {@link AliasFor @AliasFor} declarations on one or
  * more attributes within the annotation</li>
  * <li>Explicit {@code @AliasFor} declarations for a meta-annotation</li>
  * <li>Convention based attribute aliases for a meta-annotation</li>
