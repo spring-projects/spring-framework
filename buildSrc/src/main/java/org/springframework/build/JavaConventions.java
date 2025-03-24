@@ -44,7 +44,7 @@ public class JavaConventions {
 	/**
 	 * The Java version we should use as the JVM baseline for building the project
 	 */
-	private static final JavaLanguageVersion DEFAULT_LANGUAGE_VERSION = JavaLanguageVersion.of(23);
+	private static final JavaLanguageVersion DEFAULT_LANGUAGE_VERSION = JavaLanguageVersion.of(24);
 
 	/**
 	 * The Java version we should use as the baseline for the compiled bytecode (the "-release" compiler argument)

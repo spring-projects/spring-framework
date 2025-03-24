@@ -228,7 +228,7 @@ class ConfigurationClassProcessingTests {
 		BeanFactory factory = initBeanFactory(true, ConfigWithMethodNameMismatch.class);
 
 		SpousyTestBean foo = factory.getBean("foo", SpousyTestBean.class);
-		assertThat(foo.getName()).isEqualTo("foo1");
+		assertThat(foo.getName()).isIn("foo1", "foo2");
 	}
 
 	@Test

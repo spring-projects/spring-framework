@@ -95,9 +95,10 @@ class AspectJEnableCachingIsolatedTests {
 		}
 		catch (NoUniqueBeanDefinitionException ex) {
 			assertThat(ex.getMessage()).contains(
-					"no CacheResolver specified and expected single matching CacheManager but found 2: cm1,cm2");
+					"no CacheResolver specified and expected single matching CacheManager but found 2")
+					.contains("cm1", "cm2");
 			assertThat(ex.getNumberOfBeansFound()).isEqualTo(2);
-			assertThat(ex.getBeanNamesFound()).containsExactly("cm1", "cm2");
+			assertThat(ex.getBeanNamesFound()).containsExactlyInAnyOrder("cm1", "cm2");
 		}
 	}
 
