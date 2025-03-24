@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,8 @@ import java.lang.annotation.Target;
  * <ol>
  * <li>The attribute that is an alias for an attribute in a meta-annotation
  * must be annotated with {@code @AliasFor}, and {@link #attribute} must
- * reference the attribute in the meta-annotation.</li>
+ * reference the attribute in the meta-annotation (unless both attributes have
+ * the same name).</li>
  * <li>Aliased attributes must declare the same return type.</li>
  * <li>{@link #annotation} must reference the meta-annotation.</li>
  * <li>The referenced meta-annotation must be <em>meta-present</em> on the
@@ -191,6 +192,8 @@ public @interface AliasFor {
 
 	/**
 	 * The name of the attribute that <em>this</em> attribute is an alias for.
+	 * <p>May be omitted if this attribute is an alias for an attribute in a
+	 * meta-annotation and both attributes have the same name.
 	 * @see #value
 	 */
 	@AliasFor("value")
