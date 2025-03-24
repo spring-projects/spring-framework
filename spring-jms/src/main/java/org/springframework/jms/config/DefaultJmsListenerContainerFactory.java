@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.BackOffPolicy;
 
 /**
  * A {@link JmsListenerContainerFactory} implementation to build a regular
@@ -32,6 +33,7 @@ import org.springframework.util.backoff.BackOff;
  * for those who are used to building such a container definition manually.
  *
  * @author Stephane Nicoll
+ * @author Mahmoud Ben Hassine
  * @since 4.1
  */
 public class DefaultJmsListenerContainerFactory
@@ -53,7 +55,7 @@ public class DefaultJmsListenerContainerFactory
 
 	private @Nullable Long recoveryInterval;
 
-	private @Nullable BackOff backOff;
+	private @Nullable BackOffPolicy backOffPolicy;
 
 
 	/**
@@ -114,9 +116,21 @@ public class DefaultJmsListenerContainerFactory
 
 	/**
 	 * @see DefaultMessageListenerContainer#setBackOff
+	 * @deprecated Since 7.0, in favor of {@link #setBackOffPolicy(BackOffPolicy)}.
 	 */
+	@Deprecated(since = "7.0")
 	public void setBackOff(@Nullable BackOff backOff) {
-		this.backOff = backOff;
+		this.backOffPolicy = backOff;
+	}
+
+	/**
+	 * Set the {@link BackOffPolicy} to use.
+	 * @param backOffPolicy the backoff policy to use.
+	 * @since 7.0
+	 * @see DefaultMessageListenerContainer#setBackOffPolicy(BackOffPolicy)
+	 */
+	public void setBackOffPolicy(@Nullable BackOffPolicy backOffPolicy) {
+		this.backOffPolicy = backOffPolicy;
 	}
 
 
@@ -151,8 +165,8 @@ public class DefaultJmsListenerContainerFactory
 			container.setReceiveTimeout(this.receiveTimeout);
 		}
 
-		if (this.backOff != null) {
-			container.setBackOff(this.backOff);
+		if (this.backOffPolicy != null) {
+			container.setBackOffPolicy(this.backOffPolicy);
 			if (this.recoveryInterval != null) {
 				logger.info("Ignoring recovery interval in DefaultJmsListenerContainerFactory in favor of BackOff");
 			}

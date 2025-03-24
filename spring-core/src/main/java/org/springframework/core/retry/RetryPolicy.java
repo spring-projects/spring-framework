@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.util.backoff;
+package org.springframework.core.retry;
 
 /**
- * A simple {@link BackOffPolicy} implementation that provides a fixed interval
- * between two attempts and a maximum number of retries.
+ * Strategy interface to define a retry policy.
  *
- * @author Stephane Nicoll
- * @since 4.1
- * @deprecated Since 7.0, use {@link FixedBackOffPolicy} instead.
+ * @author Mahmoud Ben Hassine
+ * @since 7.0
  */
-@Deprecated(since = "7.0")
-public class FixedBackOff extends FixedBackOffPolicy {
+public interface RetryPolicy {
 
-	public FixedBackOff() {
-		super();
-	}
+	/**
+	 * Start a new retry execution.
+	 * @return a fresh {@link RetryExecution} ready to be used
+	 */
+	RetryExecution start();
 
-	public FixedBackOff(long interval, long maxAttempts) {
-		super(interval, maxAttempts);
-	}
 }

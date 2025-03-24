@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Mahmoud Ben Hassine
  * @since 2.5
  */
 class JmsListenerContainerParser extends AbstractListenerContainerParser {
@@ -208,7 +209,7 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		String backOffBeanName = containerEle.getAttribute(BACK_OFF_ATTRIBUTE);
 		if (StringUtils.hasText(backOffBeanName)) {
 			if (!isSimpleContainer) {
-				properties.add("backOff", new RuntimeBeanReference(backOffBeanName));
+				properties.add("backOffPolicy", new RuntimeBeanReference(backOffBeanName));
 			}
 		}
 		else { // No need to consider this if back-off is set

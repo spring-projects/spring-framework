@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
-import org.springframework.util.backoff.BackOff;
-import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.util.backoff.BackOffPolicy;
+import org.springframework.util.backoff.FixedBackOffPolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -46,6 +46,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * @author Stephane Nicoll
+ * @author Mahmoud Ben Hassine
  */
 class JmsListenerContainerFactoryTests {
 
@@ -135,8 +136,8 @@ class JmsListenerContainerFactoryTests {
 	@Test
 	void backOffOverridesRecoveryInterval() {
 		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-		BackOff backOff = new FixedBackOff();
-		factory.setBackOff(backOff);
+		BackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+		factory.setBackOffPolicy(backOffPolicy);
 		factory.setRecoveryInterval(2000L);
 
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
@@ -145,7 +146,7 @@ class JmsListenerContainerFactoryTests {
 		endpoint.setDestination("myQueue");
 		DefaultMessageListenerContainer container = factory.createListenerContainer(endpoint);
 
-		assertThat(new DirectFieldAccessor(container).getPropertyValue("backOff")).isSameAs(backOff);
+		assertThat(new DirectFieldAccessor(container).getPropertyValue("backOffPolicy")).isSameAs(backOffPolicy);
 	}
 
 	@Test

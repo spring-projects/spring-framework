@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
-import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.util.backoff.BackOffPolicy;
+import org.springframework.util.backoff.FixedBackOffPolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -50,25 +50,26 @@ import static org.mockito.Mockito.verify;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mahmoud Ben Hassine
  */
 class DefaultMessageListenerContainerTests {
 
 	@Test
 	void applyBackOff() {
-		BackOff backOff = mock();
+		BackOffPolicy backOffPolicy = mock();
 		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(BackOffExecution.STOP);
-		given(backOff.start()).willReturn(execution);
+		given(backOffPolicy.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(createFailingContainerFactory());
-		container.setBackOff(backOff);
+		container.setBackOffPolicy(backOffPolicy);
 		container.start();
 		assertThat(container.isRunning()).isTrue();
 
 		container.refreshConnectionUntilSuccessful();
 
 		assertThat(container.isRunning()).isFalse();
-		verify(backOff).start();
+		verify(backOffPolicy).start();
 		verify(execution).nextBackOff();
 
 		container.destroy();
@@ -76,18 +77,18 @@ class DefaultMessageListenerContainerTests {
 
 	@Test
 	void applyBackOffRetry() {
-		BackOff backOff = mock();
+		BackOffPolicy backOffPolicy = mock();
 		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(50L, BackOffExecution.STOP);
-		given(backOff.start()).willReturn(execution);
+		given(backOffPolicy.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(createFailingContainerFactory());
-		container.setBackOff(backOff);
+		container.setBackOffPolicy(backOffPolicy);
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
 		assertThat(container.isRunning()).isFalse();
-		verify(backOff).start();
+		verify(backOffPolicy).start();
 		verify(execution, times(2)).nextBackOff();
 
 		container.destroy();
@@ -95,18 +96,18 @@ class DefaultMessageListenerContainerTests {
 
 	@Test
 	void recoverResetBackOff() {
-		BackOff backOff = mock();
+		BackOffPolicy backOffPolicy = mock();
 		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(50L, 50L, 50L);  // 3 attempts max
-		given(backOff.start()).willReturn(execution);
+		given(backOffPolicy.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(createRecoverableContainerFactory(1));
-		container.setBackOff(backOff);
+		container.setBackOffPolicy(backOffPolicy);
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
 		assertThat(container.isRunning()).isTrue();
-		verify(backOff).start();
+		verify(backOffPolicy).start();
 		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
 
 		container.destroy();
@@ -205,7 +206,7 @@ class DefaultMessageListenerContainerTests {
 	private static DefaultMessageListenerContainer createRunningContainer() {
 		DefaultMessageListenerContainer container = createContainer(createSuccessfulConnectionFactory());
 		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONNECTION);
-		container.setBackOff(new FixedBackOff(100, 1));
+		container.setBackOffPolicy(new FixedBackOffPolicy(100, 1));
 		container.afterPropertiesSet();
 		container.start();
 		return container;

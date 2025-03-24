@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
-import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.util.backoff.BackOffPolicy;
+import org.springframework.util.backoff.FixedBackOffPolicy;
 
 /**
  * Message listener container variant that uses plain JMS client APIs, specifically
@@ -121,6 +122,7 @@ import org.springframework.util.backoff.FixedBackOff;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mahmoud Ben Hassine
  * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
@@ -194,7 +196,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private boolean virtualThreads = false;
 
-	private BackOff backOff = new FixedBackOff(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
+	private BackOffPolicy backOffPolicy = new FixedBackOffPolicy(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
 
 	private int cacheLevel = CACHE_AUTO;
 
@@ -281,22 +283,37 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
 	 * when this property is set.
 	 * @since 4.1
+	 * @deprecated Since 7.0, use {@link #setBackOffPolicy(BackOffPolicy)} instead.
 	 */
+	@Deprecated(since = "7.0")
 	public void setBackOff(BackOff backOff) {
-		this.backOff = backOff;
+		this.backOffPolicy = backOff;
+	}
+
+	/**
+	 * Specify the {@link BackOffPolicy} to use to compute the interval
+	 * between recovery attempts. If the {@link BackOffExecution} implementation
+	 * returns {@link BackOffExecution#STOP}, this listener container will not further
+	 * attempt to recover.
+	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
+	 * when this property is set.
+	 * @since 7.0
+	 */
+	public void setBackOffPolicy(BackOffPolicy backOffPolicy) {
+		this.backOffPolicy = backOffPolicy;
 	}
 
 	/**
 	 * Specify the interval between recovery attempts, in <b>milliseconds</b>.
 	 * The default is 5000 ms, that is, 5 seconds. This is a convenience method
-	 * to create a {@link FixedBackOff} with the specified interval.
-	 * <p>For more recovery options, consider specifying a {@link BackOff}
+	 * to create a {@link FixedBackOffPolicy} with the specified interval.
+	 * <p>For more recovery options, consider specifying a {@link BackOffPolicy}
 	 * instance instead.
-	 * @see #setBackOff(BackOff)
+	 * @see #setBackOffPolicy(BackOffPolicy)
 	 * @see #handleListenerSetupFailure
 	 */
 	public void setRecoveryInterval(long recoveryInterval) {
-		this.backOff = new FixedBackOff(recoveryInterval, Long.MAX_VALUE);
+		this.backOffPolicy = new FixedBackOffPolicy(recoveryInterval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -1131,7 +1148,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #stop()
 	 */
 	protected void refreshConnectionUntilSuccessful() {
-		BackOffExecution execution = this.backOff.start();
+		BackOffExecution execution = this.backOffPolicy.start();
 		while (isRunning()) {
 			try {
 				if (sharedConnectionEnabled()) {
@@ -1509,7 +1526,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		 * specific).
 		 */
 		private void waitBeforeRecoveryAttempt() {
-			BackOffExecution execution = DefaultMessageListenerContainer.this.backOff.start();
+			BackOffExecution execution = DefaultMessageListenerContainer.this.backOffPolicy.start();
 			applyBackOffTime(execution);
 		}
 
