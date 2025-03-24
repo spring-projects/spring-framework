@@ -415,8 +415,8 @@ final class AnnotationTypeMapping {
 	 * Get a mapped attribute value from the most suitable
 	 * {@link #getAnnotation() meta-annotation}.
 	 * <p>The resulting value is obtained from the closest meta-annotation,
-	 * taking into consideration both convention and alias based mapping rules.
-	 * For root mappings, this method will always return {@code null}.
+	 * taking into consideration alias based mapping rules. For root mappings,
+	 * this method will always return {@code null}.
 	 * @param attributeIndex the attribute index of the source attribute
 	 * @param metaAnnotationsOnly if only meta annotations should be considered.
 	 * If this parameter is {@code false} then aliases within the annotation will

@@ -1356,7 +1356,9 @@ class AnnotationUtilsTests {
 
 	/**
 	 * Mock of {@code org.springframework.web.bind.annotation.PostMapping}, except
-	 * that the path is overridden by convention with single String element.
+	 * that the path is intended to be overridden by convention with single String
+	 * element. However, convention-based annotation attribute overrides are no
+	 * longer supported as of Spring Framework 7.0.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@WebMapping(method = RequestMethod.POST, name = "")

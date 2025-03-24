@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  * <li>Explicit and implicit {@link AliasFor @AliasFor} declarations on one or
  * more attributes within the annotation</li>
  * <li>Explicit {@code @AliasFor} declarations for a meta-annotation</li>
- * <li>Convention based attribute aliases for a meta-annotation</li>
  * <li>From a meta-annotation declaration</li>
  * </ul>
  *

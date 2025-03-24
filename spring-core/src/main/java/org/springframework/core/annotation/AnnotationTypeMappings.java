@@ -36,9 +36,9 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * meta-annotations to ultimately provide a quick way to map the attributes of
  * a root {@link Annotation}.
  *
- * <p>Supports convention based merging of meta-annotations as well as implicit
- * and explicit {@link AliasFor @AliasFor} aliases. Also provides information
- * about mirrored attributes.
+ * <p>Supports merging of meta-annotations as well as implicit and explicit
+ * {@link AliasFor @AliasFor} aliases. Also provides information about mirrored
+ * attributes.
  *
  * <p>This class is designed to be cached so that meta-annotations only need to
  * be searched once, regardless of how many times they are actually used.
