@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
@@ -87,7 +88,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 	private Object getSource() {
 		Source source = this.source;
 		if (source == null) {
-			source = new Source(this.declaringClassName, this.methodName, this.descriptor);
+			source = new Source(this.declaringClassName, this.methodName, this.access, this.descriptor);
 			this.source = source;
 		}
 		return source;
@@ -103,13 +104,16 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 		private final String methodName;
 
+		private final int access;
+
 		private final String descriptor;
 
 		private @Nullable String toStringValue;
 
-		Source(String declaringClassName, String methodName, String descriptor) {
+		Source(String declaringClassName, String methodName, int access, String descriptor) {
 			this.declaringClassName = declaringClassName;
 			this.methodName = methodName;
+			this.access = access;
 			this.descriptor = descriptor;
 		}
 
@@ -118,6 +122,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 			int result = 1;
 			result = 31 * result + this.declaringClassName.hashCode();
 			result = 31 * result + this.methodName.hashCode();
+			result = 31 * result + this.access;
 			result = 31 * result + this.descriptor.hashCode();
 			return result;
 		}
@@ -132,7 +137,8 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 			}
 			Source otherSource = (Source) other;
 			return (this.declaringClassName.equals(otherSource.declaringClassName) &&
-					this.methodName.equals(otherSource.methodName) && this.descriptor.equals(otherSource.descriptor));
+					this.methodName.equals(otherSource.methodName) &&
+					this.access == otherSource.access && this.descriptor.equals(otherSource.descriptor));
 		}
 
 		@Override
@@ -140,6 +146,27 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 			String value = this.toStringValue;
 			if (value == null) {
 				StringBuilder builder = new StringBuilder();
+				if ((this.access & Opcodes.ACC_PUBLIC) != 0) {
+					builder.append("public ");
+				}
+				if ((this.access & Opcodes.ACC_PROTECTED) != 0) {
+					builder.append("protected ");
+				}
+				if ((this.access & Opcodes.ACC_PRIVATE) != 0) {
+					builder.append("private ");
+				}
+				if ((this.access & Opcodes.ACC_ABSTRACT) != 0) {
+					builder.append("abstract ");
+				}
+				if ((this.access & Opcodes.ACC_STATIC) != 0) {
+					builder.append("static ");
+				}
+				if ((this.access & Opcodes.ACC_FINAL) != 0) {
+					builder.append("final ");
+				}
+				Type returnType = Type.getReturnType(this.descriptor);
+				builder.append(returnType.getClassName());
+				builder.append(' ');
 				builder.append(this.declaringClassName);
 				builder.append('.');
 				builder.append(this.methodName);
