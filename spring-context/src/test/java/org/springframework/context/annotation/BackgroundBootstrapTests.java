@@ -20,11 +20,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.context.annotation.Bean.Bootstrap.BACKGROUND;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
@@ -54,6 +58,21 @@ class BackgroundBootstrapTests {
 		ctx.getBean("testBean3", TestBean.class);
 		ctx.getBean("testBean4", TestBean.class);
 		ctx.close();
+	}
+
+	@Test
+	@Timeout(5)
+	@EnabledForTestGroups(LONG_RUNNING)
+	void bootstrapWithStrictLockingThread() {
+		SpringProperties.setFlag(DefaultListableBeanFactory.STRICT_LOCKING_PROPERTY_NAME);
+		try {
+			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(StrictLockingBeanConfig.class);
+			assertThat(ctx.getBean("testBean2", TestBean.class).getSpouse()).isSameAs(ctx.getBean("testBean1"));
+			ctx.close();
+		}
+		finally {
+			SpringProperties.setProperty(DefaultListableBeanFactory.STRICT_LOCKING_PROPERTY_NAME, null);
+		}
 	}
 
 	@Test
@@ -144,6 +163,28 @@ class BackgroundBootstrapTests {
 				throw new RuntimeException(ex);
 			}
 			return new TestBean();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class StrictLockingBeanConfig {
+
+		@Bean
+		public TestBean testBean1(ObjectProvider<TestBean> testBean2) {
+			new Thread(testBean2::getObject).start();
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean();
+		}
+
+		@Bean
+		public TestBean testBean2(ConfigurableListableBeanFactory beanFactory) {
+			return new TestBean((TestBean) beanFactory.getSingleton("testBean1"));
 		}
 	}
 
