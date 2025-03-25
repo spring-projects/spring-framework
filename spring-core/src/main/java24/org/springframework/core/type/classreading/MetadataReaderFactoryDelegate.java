@@ -16,27 +16,24 @@
 
 package org.springframework.core.type.classreading;
 
-import org.springframework.core.type.AbstractAnnotationMetadataTests;
-import org.springframework.core.type.AnnotationMetadata;
+import org.jspecify.annotations.Nullable;
+
+import org.springframework.core.io.ResourceLoader;
 
 /**
- * Tests for {@link SimpleAnnotationMetadata} and
- * {@link SimpleAnnotationMetadataReadingVisitor} on Java < 24,
- * and for the ClassFile API variant on Java >= 24.
+ * Internal delegate for instantiating {@link MetadataReaderFactory} implementations.
+ * For JDK >= 24, the {@link ClassFileMetadataReaderFactory} is being used.
  *
- * @author Phillip Webb
+ * @author Brian Clozel
+ * @see MetadataReaderFactory
  */
-class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
+abstract class MetadataReaderFactoryDelegate {
 
-	@Override
-	protected AnnotationMetadata get(Class<?> source) {
-		try {
-			return MetadataReaderFactory.create(source.getClassLoader())
-					.getMetadataReader(source.getName()).getAnnotationMetadata();
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
+	static MetadataReaderFactory create(@Nullable ResourceLoader resourceLoader) {
+		return new ClassFileMetadataReaderFactory(resourceLoader);
 	}
 
+	static MetadataReaderFactory create(@Nullable ClassLoader classLoader) {
+		return new ClassFileMetadataReaderFactory(classLoader);
+	}
 }
