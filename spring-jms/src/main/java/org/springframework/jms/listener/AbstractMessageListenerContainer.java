@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ import org.springframework.util.ErrorHandler;
  * (i.e. after your business logic executed but before the JMS part got committed),
  * so duplicate message detection is just there to cover a corner case.
  * <li>Or wrap your <i>entire processing with an XA transaction</i>, covering the
- * reception of the JMS message as well as the execution of the business logic in
+ * receipt of the JMS message as well as the execution of the business logic in
  * your message listener (including database operations etc). This is only
  * supported by {@link DefaultMessageListenerContainer}, through specifying
  * an external "transactionManager" (typically a
@@ -152,7 +152,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		implements MessageListenerContainer {
 
 	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
-			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", AbstractMessageListenerContainer.class.getClassLoader());
+			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation",
+			AbstractMessageListenerContainer.class.getClassLoader());
 
 	@Nullable
 	private volatile Object destination;
@@ -170,13 +171,13 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	@Nullable
 	private String subscriptionName;
 
+	private boolean pubSubNoLocal = false;
+
 	@Nullable
 	private Boolean replyPubSubDomain;
 
 	@Nullable
 	private QosSettings replyQosSettings;
-
-	private boolean pubSubNoLocal = false;
 
 	@Nullable
 	private MessageConverter messageConverter;
@@ -500,12 +501,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@Override
 	public boolean isReplyPubSubDomain() {
-		if (this.replyPubSubDomain != null) {
-			return this.replyPubSubDomain;
-		}
-		else {
-			return isPubSubDomain();
-		}
+		return (this.replyPubSubDomain != null ? this.replyPubSubDomain : isPubSubDomain());
 	}
 
 	/**
