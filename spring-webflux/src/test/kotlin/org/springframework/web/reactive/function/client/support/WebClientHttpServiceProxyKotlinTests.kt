@@ -49,7 +49,7 @@ import java.util.function.Consumer
  * @author Sebastien Deleuze
  * @author Olga Maciaszek-Sharma
  */
-class KotlinWebClientHttpServiceProxyTests {
+class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 
 	private lateinit var server: MockWebServer
 
