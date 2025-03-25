@@ -168,7 +168,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		this.timeoutPerShutdownPhase = timeoutPerShutdownPhase;
 	}
 
-	private long determineTimeout(int phase) {
+	protected long determineStopTimeout(int phase) {
 		Long timeout = this.timeoutsForShutdownPhases.get(phase);
 		return (timeout != null ? timeout : this.timeoutPerShutdownPhase);
 	}
@@ -182,7 +182,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		this.beanFactory = clbf;
 	}
 
-	private ConfigurableListableBeanFactory getBeanFactory() {
+	protected ConfigurableListableBeanFactory getBeanFactory() {
 		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
 		Assert.state(beanFactory != null, "No BeanFactory available");
 		return beanFactory;
@@ -275,7 +275,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 	}
 
-	private void startBeans(boolean autoStartupOnly) {
+	protected void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new TreeMap<>();
 
@@ -283,7 +283,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (!autoStartupOnly || isAutoStartupCandidate(beanName, bean)) {
 				int startupPhase = getPhase(bean);
 				phases.computeIfAbsent(startupPhase,
-						phase -> new LifecycleGroup(phase, determineTimeout(phase), lifecycleBeans, autoStartupOnly)
+						phase -> new LifecycleGroup(phase, determineStopTimeout(phase), lifecycleBeans, autoStartupOnly)
 				).add(beanName, bean);
 			}
 		});
@@ -293,7 +293,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 	}
 
-	private boolean isAutoStartupCandidate(String beanName, Lifecycle bean) {
+	protected boolean isAutoStartupCandidate(String beanName, Lifecycle bean) {
 		Set<String> stoppedBeans = this.stoppedBeans;
 		return (stoppedBeans != null ? stoppedBeans.contains(beanName) :
 				(bean instanceof SmartLifecycle smartLifecycle && smartLifecycle.isAutoStartup()));
@@ -305,7 +305,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param lifecycleBeans a Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to start
 	 */
-	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, boolean autoStartupOnly) {
+	protected void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, boolean autoStartupOnly) {
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null && bean != this) {
 			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
@@ -342,7 +342,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		lifecycleBeans.forEach((beanName, bean) -> {
 			int shutdownPhase = getPhase(bean);
 			phases.computeIfAbsent(shutdownPhase,
-					phase -> new LifecycleGroup(phase, determineTimeout(phase), lifecycleBeans, false)
+					phase -> new LifecycleGroup(phase, determineStopTimeout(phase), lifecycleBeans, false)
 			).add(beanName, bean);
 		});
 
@@ -357,7 +357,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param lifecycleBeans a Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to stop
 	 */
-	private void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, final String beanName,
+	protected void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, final String beanName,
 			final CountDownLatch latch, final Set<String> countDownBeanNames) {
 
 		Lifecycle bean = lifecycleBeans.remove(beanName);
@@ -466,17 +466,17 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * The group is expected to be created in an ad-hoc fashion and group members are
 	 * expected to always have the same 'phase' value.
 	 */
-	private class LifecycleGroup {
+	protected class LifecycleGroup {
 
-		private final int phase;
+		protected final int phase;
 
-		private final long timeout;
+		protected final long timeout;
 
-		private final Map<String, ? extends Lifecycle> lifecycleBeans;
+		protected final Map<String, ? extends Lifecycle> lifecycleBeans;
 
-		private final boolean autoStartupOnly;
+		protected final boolean autoStartupOnly;
 
-		private final List<LifecycleGroupMember> members = new ArrayList<>();
+		protected final List<LifecycleGroupMember> members = new ArrayList<>();
 
 		private int smartMemberCount;
 
@@ -545,7 +545,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * A simple record of a LifecycleGroup member.
 	 */
-	private record LifecycleGroupMember(String name, Lifecycle bean) {}
+	protected record LifecycleGroupMember(String name, Lifecycle bean) {}
 
 
 	/**
