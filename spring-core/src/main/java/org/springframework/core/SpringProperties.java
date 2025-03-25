@@ -39,6 +39,7 @@ import org.jspecify.annotations.Nullable;
  * @author Juergen Hoeller
  * @since 3.2.7
  * @see org.springframework.beans.StandardBeanInfoFactory#IGNORE_BEANINFO_PROPERTY_NAME
+ * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#STRICT_LOCKING_PROPERTY_NAME
  * @see org.springframework.core.env.AbstractEnvironment#IGNORE_GETENV_PROPERTY_NAME
  * @see org.springframework.expression.spel.SpelParserConfiguration#SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
  * @see org.springframework.jdbc.core.StatementCreatorUtils#IGNORE_GETPARAMETERTYPE_PROPERTY_NAME

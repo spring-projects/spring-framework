@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	private @Nullable Boolean sessionTransacted;
 
 	private @Nullable Integer sessionAcknowledgeMode;
+
+	private @Nullable Boolean acknowledgeAfterListener;
 
 	private @Nullable Boolean pubSubDomain;
 
@@ -126,6 +128,14 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @since 6.2.6
+	 * @see AbstractMessageListenerContainer#setAcknowledgeAfterListener(boolean)
+	 */
+	public void setAcknowledgeAfterListener(Boolean acknowledgeAfterListener) {
+		this.acknowledgeAfterListener = acknowledgeAfterListener;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setPubSubDomain(boolean)
 	 */
 	public void setPubSubDomain(Boolean pubSubDomain) {
@@ -193,6 +203,7 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		this.observationRegistry = observationRegistry;
 	}
 
+
 	@Override
 	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();
@@ -217,6 +228,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		}
 		if (this.sessionAcknowledgeMode != null) {
 			instance.setSessionAcknowledgeMode(this.sessionAcknowledgeMode);
+		}
+		if (this.acknowledgeAfterListener != null) {
+			instance.setAcknowledgeAfterListener(this.acknowledgeAfterListener);
 		}
 		if (this.pubSubDomain != null) {
 			instance.setPubSubDomain(this.pubSubDomain);

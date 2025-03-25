@@ -77,6 +77,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -127,6 +128,17 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
+
+	/**
+	 * System property that instructs Spring to enforce string locking during bean creation,
+	 * rather than the mix of strict and lenient locking that 6.2 applies by default. Setting
+	 * this flag to "true" restores 6.1.x style locking in the entire pre-instantiation phase.
+	 * @since 6.2.6
+	 * @see #preInstantiateSingletons()
+	 */
+	public static final String STRICT_LOCKING_PROPERTY_NAME = "spring.locking.strict";
+
+	private static final boolean lenientLockingAllowed = !SpringProperties.getFlag(STRICT_LOCKING_PROPERTY_NAME);
 
 	private static @Nullable Class<?> jakartaInjectProviderClass;
 
@@ -1015,7 +1027,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	protected @Nullable Boolean isCurrentThreadAllowedToHoldSingletonLock() {
-		return (this.preInstantiationPhase ? this.preInstantiationThread.get() != PreInstantiation.BACKGROUND : null);
+		return (lenientLockingAllowed && this.preInstantiationPhase ?
+				this.preInstantiationThread.get() != PreInstantiation.BACKGROUND : null);
 	}
 
 	@Override
