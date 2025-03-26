@@ -7,6 +7,7 @@ plugins {
 	id 'io.github.goooler.shadow' version '8.1.8' apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id "net.ltgt.errorprone" version "4.1.0" apply false
+	id 'k'
 }
 
 ext {
