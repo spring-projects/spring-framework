@@ -91,7 +91,9 @@ inline fun <reified T : Any> RequestBodySpec.bodyValueWithType(body: T): Request
  */
 suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(responseHandler: suspend (ClientResponse) -> T): T {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return withContext(context.toReactorContext()) { exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle() }
+	return withContext(context.toReactorContext()) {
+		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle()
+	}
 }
 
 /**
@@ -101,7 +103,9 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
  */
 suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return withContext(context.toReactorContext()) { exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull() }
+	return withContext(context.toReactorContext()) {
+		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+	}
 }
 
 /**
@@ -183,7 +187,9 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : 
  */
 suspend fun WebClient.ResponseSpec.awaitBodilessEntity(): ResponseEntity<Void> {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return withContext(context.toReactorContext()) { toBodilessEntity().awaitSingle() }
+	return withContext(context.toReactorContext()) {
+		toBodilessEntity().awaitSingle()
+	}
 }
 
 /**
@@ -222,11 +228,13 @@ inline fun <reified T : Any> WebClient.ResponseSpec.toEntityFlux(): Mono<Respons
  * propagation to the [CoExchangeFilterFunction]. This extension is not subject to type erasure
  * and retains actual generic type arguments.
  *
- * @since 7.0.0
+ * @since 7.0
  */
 suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntity(): ResponseEntity<T> {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return withContext(context.toReactorContext()) { toEntity(T::class.java).awaitSingle() }
+	return withContext(context.toReactorContext()) {
+		toEntity(T::class.java).awaitSingle()
+	}
 }
 
 @PublishedApi
