@@ -34,6 +34,8 @@ class MediaTypeFactoryTests {
 		assertThat(MediaTypeFactory.getMediaType("file.js")).contains(MediaType.parseMediaType("text/javascript"));
 		assertThat(MediaTypeFactory.getMediaType("file.css")).contains(MediaType.parseMediaType("text/css"));
 		assertThat(MediaTypeFactory.getMediaType("file.wasm")).contains(MediaType.parseMediaType("application/wasm"));
+		assertThat(MediaTypeFactory.getMediaType("file.heif")).contains(MediaType.parseMediaType("image/heif"));
+		assertThat(MediaTypeFactory.getMediaType("file.heic")).contains(MediaType.parseMediaType("image/heic"));
 		assertThat(MediaTypeFactory.getMediaType("file.foobar")).isNotPresent();
 	}
 
