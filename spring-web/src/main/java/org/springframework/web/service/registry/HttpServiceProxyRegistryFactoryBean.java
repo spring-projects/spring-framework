@@ -17,7 +17,6 @@
 package org.springframework.web.service.registry;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -90,19 +89,15 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		// Set client builders
 		this.groupAdapters.forEach((clientType, groupAdapter) ->
-			this.groupSet.stream()
-					.filter(group -> group.clientType().equals(clientType))
-					.forEach(group -> group.initialize(groupAdapter)));
+				this.groupSet.stream()
+						.filter(group -> group.clientType().equals(clientType))
+						.forEach(group -> group.initialize(groupAdapter)));
 
 		// Apply group configurers
-		this.groupAdapters.forEach((clientType, groupAdapter) -> {
-			Collection<? extends HttpServiceGroupConfigurer<?>> configurers =
-					this.applicationContext.getBeansOfType(groupAdapter.getConfigurerType()).values();
-
-			configurers.stream()
-					.filter(configurer -> groupAdapter.getConfigurerType().isInstance(configurer))
-					.forEach(configurer -> configurer.configureGroups(new DefaultGroups<>(clientType)));
-		});
+		this.groupAdapters.forEach((clientType, groupAdapter) ->
+				this.applicationContext.getBeanProvider(groupAdapter.getConfigurerType())
+						.orderedStream()
+						.forEach(configurer -> configurer.configureGroups(new DefaultGroups<>(clientType))));
 
 		// Create proxies
 		Map<String, Map<Class<?>, Object>> groupProxyMap = this.groupSet.stream()
