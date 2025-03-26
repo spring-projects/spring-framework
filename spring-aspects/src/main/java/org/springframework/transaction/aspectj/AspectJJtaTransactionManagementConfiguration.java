@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,11 @@ public class AspectJJtaTransactionManagementConfiguration extends AspectJTransac
 	@Bean(name = TransactionManagementConfigUtils.JTA_TRANSACTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JtaAnnotationTransactionAspect jtaTransactionAspect(TransactionAttributeSource transactionAttributeSource) {
-		JtaAnnotationTransactionAspect txAspect = JtaAnnotationTransactionAspect.aspectOf();
+		JtaAnnotationTransactionAspect txAspect = new JtaAnnotationTransactionAspect();
 		txAspect.setTransactionAttributeSource(transactionAttributeSource);
 		if (this.txManager != null) {
 			txAspect.setTransactionManager(this.txManager);
 		}
 		return txAspect;
 	}
-
 }
