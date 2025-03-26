@@ -89,14 +89,13 @@ public final class HttpServiceProxyRegistryFactoryBean
 		Assert.notNull(this.applicationContext, "ApplicationContext not initialized");
 
 		// Set client builders
-		groupAdapters.forEach((clientType, groupAdapter) -> {
+		this.groupAdapters.forEach((clientType, groupAdapter) ->
 			this.groupSet.stream()
 					.filter(group -> group.clientType().equals(clientType))
-					.forEach(group -> group.initialize(groupAdapter));
-		});
+					.forEach(group -> group.initialize(groupAdapter)));
 
 		// Apply group configurers
-		groupAdapters.forEach((clientType, groupAdapter) -> {
+		this.groupAdapters.forEach((clientType, groupAdapter) -> {
 			Collection<? extends HttpServiceGroupConfigurer<?>> configurers =
 					this.applicationContext.getBeansOfType(groupAdapter.getConfigurerType()).values();
 
@@ -181,7 +180,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 			return this.declaredGroup.clientType();
 		}
 
-		public <CB> void initialize(HttpServiceGroupAdapter<?> adapter) {
+		public void initialize(HttpServiceGroupAdapter<?> adapter) {
 			this.clientBuilder = adapter.createClientBuilder();
 			this.groupAdapter = adapter;
 		}

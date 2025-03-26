@@ -28,7 +28,7 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
- * Annotation to identify HTTP Service types (interfaces with
+ * Annotation to declare HTTP Service types (interfaces with
  * {@link HttpExchange @HttpExchange} methods) for which to create client proxies,
  * and have those proxies registered as beans.
  *

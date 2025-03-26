@@ -69,10 +69,10 @@ public interface HttpServiceGroup {
 		/**
 		 * Not specified, falling back on a default.
 		 * @see ImportHttpServices#clientType()
-		 * @see HttpServiceGroups#clientType() 
+		 * @see HttpServiceGroups#clientType()
 		 * @see AbstractHttpServiceRegistrar#setDefaultClientType
 		 */
-		UNSPECIFIED;
+		UNSPECIFIED
 	}
 
 }

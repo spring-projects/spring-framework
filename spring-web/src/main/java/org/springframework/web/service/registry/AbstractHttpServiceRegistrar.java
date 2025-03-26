@@ -169,8 +169,8 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 	private ClassPathScanningCandidateComponentProvider getScanner() {
 		if (this.scanner == null) {
-			Assert.state(environment != null, "Environment has not been set");
-			Assert.state(resourceLoader != null, "ResourceLoader has not been set");
+			Assert.state(this.environment != null, "Environment has not been set");
+			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
 			this.scanner = new HttpExchangeClassPathScanningCandidateComponentProvider();
 			this.scanner.setEnvironment(this.environment);
 			this.scanner.setResourceLoader(this.resourceLoader);
@@ -302,14 +302,14 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 			@Override
 			public GroupSpec register(Class<?>... serviceTypes) {
-				addHttpServiceTypes(groupName, clientType, serviceTypes);
+				addHttpServiceTypes(this.groupName, this.clientType, serviceTypes);
 				return this;
 			}
 
 			@Override
 			public GroupSpec detectInBasePackages(Class<?>... packageClasses) {
 				for (Class<?> packageClass : packageClasses) {
-					detect(groupName, clientType, packageClass.getPackageName());
+					detect(this.groupName, this.clientType, packageClass.getPackageName());
 				}
 				return this;
 			}
@@ -317,7 +317,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 			@Override
 			public GroupSpec detectInBasePackages(String... packageNames) {
 				for (String packageName : packageNames) {
-					detect(groupName, clientType, packageName);
+					detect(this.groupName, this.clientType, packageName);
 				}
 				return this;
 			}
