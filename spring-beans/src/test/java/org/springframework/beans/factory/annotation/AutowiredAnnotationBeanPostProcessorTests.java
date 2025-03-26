@@ -1727,6 +1727,40 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		tb2.setFactoryMethodName("newTestBean2");
 		tb2.setLazyInit(true);
 		bf.registerBeanDefinition("testBean2", tb2);
+		bf.registerAlias("testBean2", "testBean");
+
+		ObjectProviderInjectionBean bean = bf.getBean("annotatedBean", ObjectProviderInjectionBean.class);
+		TestBean testBean1 = bf.getBean("testBean1", TestBean.class);
+		assertThat(bean.getTestBean()).isSameAs(testBean1);
+		assertThat(bean.getOptionalTestBean()).isSameAs(testBean1);
+		assertThat(bean.consumeOptionalTestBean()).isSameAs(testBean1);
+		assertThat(bean.getUniqueTestBean()).isSameAs(testBean1);
+		assertThat(bean.consumeUniqueTestBean()).isSameAs(testBean1);
+		assertThat(bf.containsSingleton("testBean2")).isFalse();
+
+		TestBean testBean2 = bf.getBean("testBean2", TestBean.class);
+		assertThat(bean.iterateTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.forEachTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.streamTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.streamTestBeansInOrder()).containsExactly(testBean2, testBean1);
+		assertThat(bean.allTestBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.allTestBeansInOrder()).containsExactly(testBean2, testBean1);
+		assertThat(bean.allSingletonBeans()).containsExactly(testBean1, testBean2);
+		assertThat(bean.allSingletonBeansInOrder()).containsExactly(testBean2, testBean1);
+	}
+
+	@Test
+	void objectProviderInjectionWithLateMarkedTargetPrimary() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
+		RootBeanDefinition tb1 = new RootBeanDefinition(TestBeanFactory.class);
+		tb1.setFactoryMethodName("newTestBean1");
+		bf.registerBeanDefinition("testBean1", tb1);
+		RootBeanDefinition tb2 = new RootBeanDefinition(TestBeanFactory.class);
+		tb2.setFactoryMethodName("newTestBean2");
+		tb2.setLazyInit(true);
+		bf.registerBeanDefinition("testBean2", tb2);
+		bf.registerAlias("testBean2", "testBean");
+		tb1.setPrimary(true);
 
 		ObjectProviderInjectionBean bean = bf.getBean("annotatedBean", ObjectProviderInjectionBean.class);
 		TestBean testBean1 = bf.getBean("testBean1", TestBean.class);
