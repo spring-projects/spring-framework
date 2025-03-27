@@ -36,6 +36,7 @@ import org.springframework.util.CollectionUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.1
+ * @see OptionalToObjectConverter
  */
 final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 

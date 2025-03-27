@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,7 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
 		converterRegistry.addConverter(new FallbackObjectToStringConverter());
 		converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
+		converterRegistry.addConverter(new OptionalToObjectConverter((ConversionService) converterRegistry));
 	}
 
 	/**

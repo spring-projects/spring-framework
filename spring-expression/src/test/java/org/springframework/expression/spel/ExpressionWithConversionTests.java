@@ -18,8 +18,10 @@ package org.springframework.expression.spel;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Clement
  * @author Dave Syer
+ * @author Sam Brannen
  */
 class ExpressionWithConversionTests extends AbstractExpressionTests {
 
@@ -152,6 +155,27 @@ class ExpressionWithConversionTests extends AbstractExpressionTests {
 		assertThat(baz.value).isEqualTo("quux");
 	}
 
+	@Test  // gh-34544
+	void convertOptionalToContainedTargetForMethodInvocations() {
+		StandardEvaluationContext context = new StandardEvaluationContext(new JediService());
+
+		// Verify findByName('Yoda') returns an Optional.
+		Expression expression = parser.parseExpression("findByName('Yoda') instanceof T(java.util.Optional)");
+		assertThat(expression.getValue(context, Boolean.class)).isTrue();
+
+		// Verify we can pass a Jedi directly to greet().
+		expression = parser.parseExpression("greet(findByName('Yoda').get())");
+		assertThat(expression.getValue(context, String.class)).isEqualTo("Hello, Yoda");
+
+		// Verify that an Optional<Jedi> will be unwrapped to a Jedi to pass to greet().
+		expression = parser.parseExpression("greet(findByName('Yoda'))");
+		assertThat(expression.getValue(context, String.class)).isEqualTo("Hello, Yoda");
+
+		// Verify that an empty Optional will be converted to null to pass to greet().
+		expression = parser.parseExpression("greet(findByName(''))");
+		assertThat(expression.getValue(context, String.class)).isEqualTo("Hello, null");
+	}
+
 
 	public static class Foo {
 
@@ -177,6 +201,23 @@ class ExpressionWithConversionTests extends AbstractExpressionTests {
 
 		public Collection<?> getFoosAsObjects() {
 			return Set.of("quux");
+		}
+	}
+
+	record Jedi(String name) {
+	}
+
+	static class JediService {
+
+		public Optional<Jedi> findByName(String name) {
+			if (name.isEmpty()) {
+				return Optional.empty();
+			}
+			return Optional.of(new Jedi(name));
+		}
+
+		public String greet(@Nullable Jedi jedi) {
+			return "Hello, " + (jedi != null ? jedi.name() : null);
 		}
 	}
 
