@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,8 +147,6 @@ class AotIntegrationTests extends AbstractAotTests {
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
 				// TestNG EJB tests use @PersistenceContext which is not yet supported in tests in AOT mode.
 				.filter(clazz -> !clazz.getPackageName().contains("testng.transaction.ejb"))
-				// Uncomment the following to disable Bean Override tests since they are not yet supported in AOT mode.
-				// .filter(clazz -> !clazz.getPackageName().contains("test.context.bean.override"))
 				.toList();
 
 		// Optionally set failOnError flag to true to halt processing at the first failure.
@@ -169,7 +167,6 @@ class AotIntegrationTests extends AbstractAotTests {
 	void endToEndTestsForSelectedTestClasses() {
 		List<Class<?>> testClasses = List.of(
 				org.springframework.test.context.bean.override.easymock.EasyMockBeanIntegrationTests.class,
-				org.springframework.test.context.bean.override.mockito.MockitoBeanForByNameLookupIntegrationTests.class,
 				org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests.class,
 				org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests.class
 		);

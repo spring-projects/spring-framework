@@ -153,6 +153,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				// an existing bean definition.
 				if (beanFactory.containsBeanDefinition(beanName)) {
 					existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+					setQualifiedElement(existingBeanDefinition, handler);
 				}
 			}
 			else {
@@ -167,6 +168,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			if (candidates.contains(beanName)) {
 				// 3) We are overriding an existing bean by-name.
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+				setQualifiedElement(existingBeanDefinition, handler);
 			}
 			else if (requireExistingBean) {
 				Field field = handler.getField();
@@ -448,8 +450,23 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private static RootBeanDefinition createPseudoBeanDefinition(BeanOverrideHandler handler) {
 		RootBeanDefinition definition = new RootBeanDefinition(handler.getBeanType().resolve());
 		definition.setTargetType(handler.getBeanType());
-		definition.setQualifiedElement(handler.getField());
+		setQualifiedElement(definition, handler);
 		return definition;
+	}
+
+	/**
+	 * Set the {@linkplain RootBeanDefinition#setQualifiedElement(java.lang.reflect.AnnotatedElement)
+	 * qualified element} in the supplied {@link BeanDefinition} to the
+	 * {@linkplain BeanOverrideHandler#getField() field} of the supplied
+	 * {@code BeanOverrideHandler}.
+	 * <p>This is necessary for proper autowiring candidate resolution.
+	 * @since 6.2.6
+	 */
+	private static void setQualifiedElement(BeanDefinition beanDefinition, BeanOverrideHandler handler) {
+		Field field = handler.getField();
+		if (field != null && beanDefinition instanceof RootBeanDefinition rbd) {
+			rbd.setQualifiedElement(field);
+		}
 	}
 
 	/**
