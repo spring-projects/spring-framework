@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,8 +72,8 @@ public interface PreparedStatementCallback<T> {
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
 	 * to a DataAccessException by an SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
-	 * @see JdbcTemplate#queryForObject(String, Object[], Class)
-	 * @see JdbcTemplate#queryForList(String, Object[])
+	 * @see JdbcTemplate#queryForObject(String, Class, Object...)
+	 * @see JdbcTemplate#queryForList(String, Object...)
 	 */
 	@Nullable T doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException;
 

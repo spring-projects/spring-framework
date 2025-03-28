@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors
+ * Copyright 2002-2025 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,12 +67,11 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
-	@Suppress("DEPRECATION")
 	fun `queryForObject with reified type parameters and args`() {
 		val args = arrayOf(3, 4)
-		every { template.queryForObject(sql, args, any<Class<Int>>()) } returns 2
+		every { template.queryForObject(sql, any<Class<Int>>(), args) } returns 2
 		assertThat(template.queryForObject<Int>(sql, args)).isEqualTo(2)
-		verify { template.queryForObject(sql, args, any<Class<Int>>()) }
+		verify { template.queryForObject(sql, any<Class<Int>>(), args) }
 	}
 
 	@Test
@@ -94,13 +93,12 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
-	@Suppress("DEPRECATION")
 	fun `queryForList with reified type parameters and args`() {
 		val list = listOf(1, 2, 3)
 		val args = arrayOf(3, 4)
-		every { template.queryForList(sql, args, any<Class<Int>>()) } returns list
+		every { template.queryForList(sql, any<Class<Int>>(), args) } returns list
 		template.queryForList<Int>(sql, args)
-		verify { template.queryForList(sql, args, any<Class<Int>>()) }
+		verify { template.queryForList(sql, any<Class<Int>>(), args) }
 	}
 
 	@Test
