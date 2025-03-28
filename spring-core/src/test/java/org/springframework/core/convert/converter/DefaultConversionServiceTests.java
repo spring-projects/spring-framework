@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -948,29 +949,44 @@ class DefaultConversionServiceTests {
 		assertThat(converted).containsExactly(2, 3, 4);
 	}
 
-	@Test
-	@SuppressWarnings("unchecked")
-	void convertObjectToOptional() {
-		Method method = ClassUtils.getMethod(TestEntity.class, "handleOptionalValue", Optional.class);
-		MethodParameter parameter = new MethodParameter(method, 0);
-		TypeDescriptor descriptor = new TypeDescriptor(parameter);
-		Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
-		assertThat(actual.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
-	}
 
-	@Test
-	void convertObjectToOptionalNull() {
-		assertThat(conversionService.convert(null, TypeDescriptor.valueOf(Object.class),
-				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
-		assertThat((Object) conversionService.convert(null, Optional.class)).isSameAs(Optional.empty());
-	}
+	@Nested
+	class OptionalConversionTests {
 
-	@Test
-	void convertExistingOptional() {
-		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class),
-				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
-		assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
+		private static final TypeDescriptor rawOptionalType = TypeDescriptor.valueOf(Optional.class);
+
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void convertObjectToOptional() {
+			Method method = ClassUtils.getMethod(getClass(), "handleOptionalList", Optional.class);
+			MethodParameter parameter = new MethodParameter(method, 0);
+			TypeDescriptor descriptor = new TypeDescriptor(parameter);
+			Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
+			assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
+		}
+
+		@Test
+		void convertNullToOptional() {
+			assertThat((Object) conversionService.convert(null, Optional.class)).isSameAs(Optional.empty());
+			assertThat(conversionService.convert(null, TypeDescriptor.valueOf(Object.class), rawOptionalType))
+					.isSameAs(Optional.empty());
+		}
+
+		@Test
+		void convertNullOptionalToNull() {
+			assertThat(conversionService.convert(null, rawOptionalType, TypeDescriptor.valueOf(Object.class))).isNull();
+		}
+
+		@Test
+		void convertEmptyOptionalToOptional() {
+			assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
+			assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class), rawOptionalType))
+					.isSameAs(Optional.empty());
+		}
+
+		public void handleOptionalList(Optional<List<Integer>> value) {
+		}
 	}
 
 
@@ -1067,9 +1083,6 @@ class DefaultConversionServiceTests {
 
 		public static TestEntity findTestEntity(Long id) {
 			return new TestEntity(id);
-		}
-
-		public void handleOptionalValue(Optional<List<Integer>> value) {
 		}
 	}
 
