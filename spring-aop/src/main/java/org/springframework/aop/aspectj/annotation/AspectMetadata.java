@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.aop.support.ComposablePointcut;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Joshua Chen
  * @since 2.0
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
  */
@@ -81,23 +82,26 @@ public class AspectMetadata implements Serializable {
 	public AspectMetadata(Class<?> aspectClass, String aspectName) {
 		this.aspectName = aspectName;
 
-		Class<?> currClass = aspectClass;
-		AjType<?> ajType = null;
-		while (currClass != Object.class) {
-			AjType<?> ajTypeToCheck = AjTypeSystem.getAjType(currClass);
-			if (ajTypeToCheck.isAspect()) {
-				ajType = ajTypeToCheck;
-				break;
+		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
+		if(aspectClass.getSuperclass() != null) {
+			Class<?> currSupperClass = aspectClass;
+			while (currSupperClass != Object.class) {
+				AjType<?> ajTypeToCheck = AjTypeSystem.getAjType(currSupperClass);
+				if (ajTypeToCheck.isAspect()) {
+					ajType = ajTypeToCheck;
+					break;
+				}
+				currSupperClass = currSupperClass.getSuperclass();
 			}
-			currClass = currClass.getSuperclass();
 		}
-		if (ajType == null) {
+
+		if (ajType == null || !ajType.isAspect()) {
 			throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
 		}
 		if (ajType.getDeclarePrecedence().length > 0) {
 			throw new IllegalArgumentException("DeclarePrecedence not presently supported in Spring AOP");
 		}
-		this.aspectClass = ajType.getJavaClass();
+		this.aspectClass = aspectClass;
 		this.ajType = ajType;
 
 		switch (this.ajType.getPerClause().getKind()) {

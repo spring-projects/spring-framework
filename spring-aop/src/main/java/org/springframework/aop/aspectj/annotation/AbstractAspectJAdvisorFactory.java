@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.lang.Nullable;
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Joshua Chen
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
@@ -93,6 +94,17 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	@Override
 	public void validate(Class<?> aspectClass) throws AopConfigException {
 		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
+		if (aspectClass.getSuperclass() != null) {
+			Class<?> currSupperClass = aspectClass;
+			while (currSupperClass != Object.class) {
+				AjType<?> ajTypeToCheck = AjTypeSystem.getAjType(currSupperClass);
+				if (ajTypeToCheck.isAspect()) {
+					ajType = ajTypeToCheck;
+					break;
+				}
+				currSupperClass = currSupperClass.getSuperclass();
+			}
+		}
 		if (!ajType.isAspect()) {
 			throw new NotAnAtAspectException(aspectClass);
 		}

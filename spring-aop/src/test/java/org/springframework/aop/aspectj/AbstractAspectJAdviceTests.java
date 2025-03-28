@@ -45,31 +45,31 @@ class AbstractAspectJAdviceTests {
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsFirstParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsFirstParameter");
-		assertThat(advice).satisfies(hasArgumentNames("THIS_JOIN_POINT", "arg1", "arg2"));
+		assertThat(advice).satisfies(hasArgumentNames("thisJoinPoint", "arg1", "arg2"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsLastParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsLastParameter");
-		assertThat(advice).satisfies(hasArgumentNames("arg1", "arg2", "THIS_JOIN_POINT"));
+		assertThat(advice).satisfies(hasArgumentNames("arg1", "arg2", "thisJoinPoint"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withJoinPointAsMiddleParameter() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithJoinPointAsMiddleParameter");
-		assertThat(advice).satisfies(hasArgumentNames("arg1", "THIS_JOIN_POINT", "arg2"));
+		assertThat(advice).satisfies(hasArgumentNames("arg1", "thisJoinPoint", "arg2"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withProceedingJoinPoint() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithProceedingJoinPoint");
-		assertThat(advice).satisfies(hasArgumentNames("THIS_JOIN_POINT", "arg1", "arg2"));
+		assertThat(advice).satisfies(hasArgumentNames("thisJoinPoint", "arg1", "arg2"));
 	}
 
 	@Test
 	void setArgumentNamesFromStringArray_withStaticPart() {
 		AbstractAspectJAdvice advice = getAspectJAdvice("methodWithStaticPart");
-		assertThat(advice).satisfies(hasArgumentNames("THIS_JOIN_POINT", "arg1", "arg2"));
+		assertThat(advice).satisfies(hasArgumentNames("thisJoinPoint", "arg1", "arg2"));
 	}
 
 	private Consumer<AbstractAspectJAdvice> hasArgumentNames(String... argumentNames) {

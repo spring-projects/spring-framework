@@ -48,11 +48,11 @@ import org.springframework.util.StringUtils;
  * <h3>Algorithm Details</h3>
  * <p>This class interprets arguments in the following way:
  * <ol>
- * <li>If the first parameter of the method is of type {@link JoinPoint}
+ * <li>If the parameter of the method is of type {@link JoinPoint}
  * or {@link ProceedingJoinPoint}, it is assumed to be for passing
  * {@code thisJoinPoint} to the advice, and the parameter name will
  * be assigned the value {@code "thisJoinPoint"}.</li>
- * <li>If the first parameter of the method is of type
+ * <li>If the parameter of the method is of type
  * {@code JoinPoint.StaticPart}, it is assumed to be for passing
  * {@code "thisJoinPointStaticPart"} to the advice, and the parameter name
  * will be assigned the value {@code "thisJoinPointStaticPart"}.</li>
@@ -115,6 +115,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Joshua Chen
  * @since 2.0
  */
 public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -308,22 +309,29 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 	/**
-	 * If the first parameter is of type JoinPoint or ProceedingJoinPoint, bind "thisJoinPoint" as
+	 * If the parameter is of type JoinPoint or ProceedingJoinPoint, bind "thisJoinPoint" as
 	 * parameter name and return true, else return false.
 	 */
 	private boolean maybeBindThisJoinPoint() {
-		if ((this.argumentTypes[0] == JoinPoint.class) || (this.argumentTypes[0] == ProceedingJoinPoint.class)) {
-			bindParameterName(0, THIS_JOIN_POINT);
-			return true;
+		for (int i = 0; i < this.argumentTypes.length; i++) {
+			if (isUnbound(i) && (this.argumentTypes[i] == JoinPoint.class || this.argumentTypes[i] == ProceedingJoinPoint.class)) {
+				bindParameterName(i, THIS_JOIN_POINT);
+				return true;
+			}
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
+	/**
+	 * If the parameter is of type JoinPoint.StaticPart, bind "thisJoinPointStaticPart" as
+	 * parameter name.
+	 */
 	private void maybeBindThisJoinPointStaticPart() {
-		if (this.argumentTypes[0] == JoinPoint.StaticPart.class) {
-			bindParameterName(0, THIS_JOIN_POINT_STATIC_PART);
+		for (int i = 0; i < this.argumentTypes.length; i++) {
+			if (isUnbound(i) && this.argumentTypes[i] == JoinPoint.StaticPart.class) {
+				bindParameterName(i, THIS_JOIN_POINT_STATIC_PART);
+				return;
+			}
 		}
 	}
 

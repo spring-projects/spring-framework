@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.aspectj;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 
@@ -43,69 +44,76 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Joshua Chen
  * @since 2.0
  */
 public abstract aspect AbstractTransactionAspect extends TransactionAspectSupport implements DisposableBean {
 
-	/**
-	 * Construct the aspect using the given transaction metadata retrieval strategy.
-	 * @param tas TransactionAttributeSource implementation, retrieving Spring
-	 * transaction metadata for each joinpoint. Implement the subclass to pass in
-	 * {@code null} if it is intended to be configured through Setter Injection.
-	 */
-	protected AbstractTransactionAspect(TransactionAttributeSource tas) {
-		setTransactionAttributeSource(tas);
-	}
+    /**
+     * Construct the aspect using the given transaction metadata retrieval strategy.
+     * @param tas TransactionAttributeSource implementation, retrieving Spring
+     * transaction metadata for each joinpoint. Implement the subclass to pass in
+     * {@code null} if it is intended to be configured through Setter Injection.
+     */
+    protected AbstractTransactionAspect(TransactionAttributeSource tas) {
+        setTransactionAttributeSource(tas);
+    }
 
-	@Override
-	public void destroy() {
-		// An aspect is basically a singleton -> cleanup on destruction
-		clearTransactionManagerCache();
-	}
+    @Override
+    public void destroy() {
+        // An aspect is basically a singleton -> cleanup on destruction
+        clearTransactionManagerCache();
+    }
 
-	@SuppressAjWarnings("adviceDidNotMatch")
-	Object around(final Object txObject): transactionalMethodExecution(txObject) {
-		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
-		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		try {
-			return invokeWithinTransaction(methodSignature.getMethod(), txObject.getClass(), new InvocationCallback() {
-				public Object proceedWithInvocation() throws Throwable {
-					return proceed(txObject);
-				}
-			});
-		}
-		catch (RuntimeException | Error ex) {
-			throw ex;
-		}
-		catch (Throwable thr) {
-			Rethrower.rethrow(thr);
-			throw new IllegalStateException("Should never get here", thr);
-		}
-	}
+    @SuppressAjWarnings("adviceDidNotMatch")
+    Object around(final Object txObject): transactionalMethodExecution(txObject) {
+        ProceedingJoinPoint proceedingJoinPoint = (ProceedingJoinPoint) thisJoinPoint;
+        MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
+        // Adapt to TransactionAspectSupport's invokeWithinTransaction...
+        try {
+            return invokeWithinTransaction(methodSignature.getMethod(), txObject.getClass(), new InvocationCallback() {
+                public Object proceedWithInvocation() throws Throwable {
+                    if (proceedingJoinPoint.getArgs().length > 0) {
+                        // Support for method with arguments, in case of exception
+                        return proceed(txObject);
+                    }
+                    else {
+                        return proceedingJoinPoint.proceed();
+                    }
+                }
+            });
+        }
+        catch (RuntimeException | Error ex) {
+            throw ex;
+        }
+        catch (Throwable thr) {
+            Rethrower.rethrow(thr);
+            throw new IllegalStateException("Should never get here", thr);
+        }
+    }
 
-	/**
-	 * Concrete subaspects must implement this pointcut, to identify
-	 * transactional methods. For each selected joinpoint, TransactionMetadata
-	 * will be retrieved using Spring's TransactionAttributeSource interface.
-	 */
-	protected abstract pointcut transactionalMethodExecution(Object txObject);
+    /**
+     * Concrete subaspects must implement this pointcut, to identify
+     * transactional methods. For each selected joinpoint, TransactionMetadata
+     * will be retrieved using Spring's TransactionAttributeSource interface.
+     */
+    protected abstract pointcut transactionalMethodExecution(Object txObject);
 
+    /**
+     * Ugly but safe workaround: We need to be able to propagate checked exceptions,
+     * despite AspectJ around advice supporting specifically declared exceptions only.
+     */
+    private static class Rethrower {
 
-	/**
-	 * Ugly but safe workaround: We need to be able to propagate checked exceptions,
-	 * despite AspectJ around advice supporting specifically declared exceptions only.
-	 */
-	private static class Rethrower {
-
-		public static void rethrow(final Throwable exception) {
-			class CheckedExceptionRethrower<T extends Throwable> {
-				@SuppressWarnings("unchecked")
-				private void rethrow(Throwable exception) throws T {
-					throw (T) exception;
-				}
-			}
-			new CheckedExceptionRethrower<RuntimeException>().rethrow(exception);
-		}
-	}
+        public static void rethrow(final Throwable exception) {
+            class CheckedExceptionRethrower<T extends Throwable> {
+                @SuppressWarnings("unchecked")
+                private void rethrow(Throwable exception) throws T {
+                    throw (T) exception;
+                }
+            }
+            new CheckedExceptionRethrower<RuntimeException>().rethrow(exception);
+        }
+    }
 
 }
