@@ -16,11 +16,12 @@
 
 package org.springframework.web.service.registry;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
@@ -89,7 +90,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 	private @Nullable BeanFactory beanFactory;
 
-	private final Map<String, HttpServiceGroup> groupMap = new LinkedHashMap<>();
+	private final Map<String, RegisteredGroup> groupMap = new LinkedHashMap<>();
 
 	private @Nullable ClassPathScanningCandidateComponentProvider scanner;
 
@@ -143,11 +144,11 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		mergeHttpServices(proxyRegistryBeanDef);
 
-		this.groupMap.forEach((groupName, group) -> group.httpServiceTypes().forEach(type -> {
+		this.groupMap.forEach((groupName, group) -> group.httpServiceTypeNames().forEach(type -> {
 			GenericBeanDefinition proxyBeanDef = new GenericBeanDefinition();
-			proxyBeanDef.setBeanClass(type);
-			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(proxyRegistryBeanName, groupName, type));
+			proxyBeanDef.setBeanClassName(type);
 			String beanName = (groupName + "." + beanNameGenerator.generateBeanName(proxyBeanDef, beanRegistry));
+			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(proxyRegistryBeanName, groupName, type));
 			if (!beanRegistry.containsBeanDefinition(beanName)) {
 				beanRegistry.registerBeanDefinition(beanName, proxyBeanDef);
 			}
@@ -184,16 +185,16 @@ public abstract class AbstractHttpServiceRegistrar implements
 		ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
 		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, Map.class);
 		Assert.state(valueHolder != null, "Expected Map constructor argument at index 0");
-		Map<String, HttpServiceGroup> targetMap = (Map<String, HttpServiceGroup>) valueHolder.getValue();
+		Map<String, RegisteredGroup> targetMap = (Map<String, RegisteredGroup>) valueHolder.getValue();
 		Assert.state(targetMap != null, "No constructor argument value");
 
 		this.groupMap.forEach((name, group) -> {
-			HttpServiceGroup previousGroup = targetMap.putIfAbsent(name, group);
+			RegisteredGroup previousGroup = targetMap.putIfAbsent(name, group);
 			if (previousGroup != null) {
 				if (!compatibleClientTypes(group.clientType(), previousGroup.clientType())) {
 					throw new IllegalArgumentException("ClientType conflict for group '" + name + "'");
 				}
-				previousGroup.httpServiceTypes().addAll(group.httpServiceTypes());
+				previousGroup.addHttpServiceTypeNames(group.httpServiceTypeNames());
 			}
 		});
 	}
@@ -206,12 +207,21 @@ public abstract class AbstractHttpServiceRegistrar implements
 				clientTypeB == HttpServiceGroup.ClientType.UNSPECIFIED);
 	}
 
-	private Object getProxyInstance(String registryBeanName, String groupName, Class<?> type) {
+	private Object getProxyInstance(String registryBeanName, String groupName, String type) {
 		Assert.state(this.beanFactory != null, "BeanFactory has not been set");
 		HttpServiceProxyRegistry registry = this.beanFactory.getBean(registryBeanName, HttpServiceProxyRegistry.class);
-		Object proxy = registry.getClient(groupName, type);
-		Assert.notNull(proxy, "No proxy for HTTP Service [" + type.getName() + "]");
+		Object proxy = registry.getClient(groupName, loadClass(type));
+		Assert.notNull(proxy, "No proxy for HTTP Service [" + type + "]");
 		return proxy;
+	}
+
+	private static Class<?> loadClass(String type) {
+		try {
+			return ClassUtils.forName(type, AbstractHttpServiceRegistrar.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IllegalStateException("Failed to load '" + type + "'", ex);
+		}
 	}
 
 
@@ -303,7 +313,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 			@Override
 			public GroupSpec register(Class<?>... serviceTypes) {
-				addHttpServiceTypes(this.groupName, this.clientType, serviceTypes);
+				getOrCreateGroup(groupName, clientType).addHttpServiceTypes(serviceTypes);
 				return this;
 			}
 
@@ -325,29 +335,85 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 			private void detect(String groupName, HttpServiceGroup.ClientType clientType, String packageName) {
 				for (BeanDefinition definition : getScanner().findCandidateComponents(packageName)) {
-					String className = definition.getBeanClassName();
-					if (className != null) {
-						try {
-							Class<?> clazz = ClassUtils.forName(className, getClass().getClassLoader());
-							addHttpServiceTypes(groupName, clientType, clazz);
-						}
-						catch (ClassNotFoundException ex) {
-							throw new IllegalStateException("Failed to load '" + className + "'", ex);
-						}
+					if (definition.getBeanClassName() != null) {
+						getOrCreateGroup(groupName, clientType).addHttpServiceTypeName(definition.getBeanClassName());
 					}
 				}
 			}
 
-			private void addHttpServiceTypes(
-					String groupName, HttpServiceGroup.ClientType clientType, Class<?>... serviceTypes) {
+			private RegisteredGroup getOrCreateGroup(String groupName, HttpServiceGroup.ClientType clientType) {
+				return groupMap.computeIfAbsent(groupName, name -> new RegisteredGroup(name, clientType));
+			}
+		}
+	}
 
-				groupMap.computeIfAbsent(groupName, name -> new RegisteredGroup(name, new LinkedHashSet<>(), clientType))
-						.httpServiceTypes().addAll(Arrays.asList(serviceTypes));
+
+	/**
+	 * A simple holder of registered HTTP Service type names, deferring the
+	 * loading of classes until {@link #httpServiceTypes()} is called.
+	 */
+	private static class RegisteredGroup implements HttpServiceGroup {
+
+		private final String name;
+
+		private final Set<String> httpServiceTypeNames = new LinkedHashSet<>();
+
+		private final ClientType clientType;
+
+		public RegisteredGroup(String name, ClientType clientType) {
+			this.name = name;
+			this.clientType = clientType;
+		}
+
+		@Override
+		public String name() {
+			return this.name;
+		}
+
+		public Set<String> httpServiceTypeNames() {
+			return this.httpServiceTypeNames;
+		}
+
+		@Override
+		public Set<Class<?>> httpServiceTypes() {
+			return httpServiceTypeNames.stream()
+					.map(AbstractHttpServiceRegistrar::loadClass)
+					.collect(Collectors.toSet());
+		}
+
+		@Override
+		public ClientType clientType() {
+			return this.clientType;
+		}
+
+		public void addHttpServiceTypes(Class<?>... httpServiceTypes) {
+			for (Class<?> type : httpServiceTypes) {
+				this.httpServiceTypeNames.add(type.getName());
 			}
 		}
 
-		private record RegisteredGroup(
-				String name, Set<Class<?>> httpServiceTypes, ClientType clientType) implements HttpServiceGroup {
+		public void addHttpServiceTypeNames(Collection<String> httpServiceTypeNames) {
+			this.httpServiceTypeNames.addAll(httpServiceTypeNames);
+		}
+
+		public void addHttpServiceTypeName(String httpServiceTypeName) {
+			this.httpServiceTypeNames.add(httpServiceTypeName);
+		}
+
+		@Override
+		public final boolean equals(Object other) {
+			return (other instanceof RegisteredGroup otherGroup && this.name.equals(otherGroup.name));
+		}
+
+		@Override
+		public int hashCode() {
+			return this.name.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "RegisteredGroup[name='" + this.name + "', httpServiceTypes=" +
+					this.httpServiceTypeNames + ", clientType=" + this.clientType + "]";
 		}
 	}
 
