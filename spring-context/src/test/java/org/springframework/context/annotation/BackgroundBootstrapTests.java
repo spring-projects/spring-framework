@@ -19,7 +19,9 @@ package org.springframework.context.annotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -29,6 +31,7 @@ import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.context.annotation.Bean.Bootstrap.BACKGROUND;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
@@ -83,6 +86,15 @@ class BackgroundBootstrapTests {
 		ctx.getBean("testBean1", TestBean.class);
 		ctx.getBean("testBean2", TestBean.class);
 		ctx.close();
+	}
+
+	@Test
+	@Timeout(5)
+	@EnabledForTestGroups(LONG_RUNNING)
+	void bootstrapWithCircularReferenceInSameThread() {
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(CircularReferenceInSameThreadBeanConfig.class))
+				.withRootCauseInstanceOf(BeanCurrentlyInCreationException.class);
 	}
 
 	@Test
@@ -179,7 +191,7 @@ class BackgroundBootstrapTests {
 			catch (InterruptedException ex) {
 				throw new RuntimeException(ex);
 			}
-			return new TestBean();
+			return new TestBean("testBean1");
 		}
 
 		@Bean
@@ -212,6 +224,39 @@ class BackgroundBootstrapTests {
 			catch (InterruptedException ex) {
 				throw new RuntimeException(ex);
 			}
+			return new TestBean();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class CircularReferenceInSameThreadBeanConfig {
+
+		@Bean
+		public TestBean testBean1(ObjectProvider<TestBean> testBean2) {
+			new Thread(testBean2::getObject).start();
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean();
+		}
+
+		@Bean
+		public TestBean testBean2(TestBean testBean3) {
+			try {
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean();
+		}
+
+		@Bean
+		public TestBean testBean3(TestBean testBean2) {
 			return new TestBean();
 		}
 	}
