@@ -43,6 +43,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * <p>An application can autowire HTTP Service proxy beans, or autowire the
  * {@link HttpServiceProxyRegistry} from which to obtain proxies.
  *
+ * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  * @since 7.0
  * @see HttpServiceGroups

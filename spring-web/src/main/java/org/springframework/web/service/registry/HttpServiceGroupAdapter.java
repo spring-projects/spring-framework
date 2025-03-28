@@ -22,6 +22,7 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
  * Adapter that helps to configure a group independent of its client builder type.
  *
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 7.0
  * @param <CB> the type of client builder, i.e. {@code RestClient} or {@code WebClient} builder.
  */

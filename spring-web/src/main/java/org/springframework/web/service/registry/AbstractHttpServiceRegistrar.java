@@ -73,6 +73,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * {@link HttpServiceProxyRegistry} from which to obtain proxies.
  *
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 7.0
  * @see ImportHttpServices
  * @see HttpServiceProxyRegistryFactoryBean

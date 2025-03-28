@@ -23,6 +23,7 @@ import java.util.Set;
  * {@link org.springframework.web.service.invoker.HttpServiceProxyFactory} and
  * HTTP client setup.
  *
+ * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  * @since 7.0
  */
