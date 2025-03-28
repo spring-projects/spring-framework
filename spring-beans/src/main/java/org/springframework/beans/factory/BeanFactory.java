@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 
 /**
@@ -99,6 +100,7 @@ import org.springframework.core.ResolvableType;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
  * @since 13 April 2001
  * @see BeanNameAware#setBeanName
  * @see BeanClassLoaderAware#setBeanClassLoader
@@ -200,6 +202,25 @@ public interface BeanFactory {
 	 * @see ListableBeanFactory
 	 */
 	<T> T getBean(Class<T> requiredType) throws BeansException;
+
+	/**
+	 * Return the bean instance that uniquely matches the given object type, if any.
+	 * <p>This method goes into {@link ListableBeanFactory} by-type lookup territory
+	 * but may also be translated into a conventional by-name lookup based on the name
+	 * of the given type. For more extensive retrieval operations across sets of beans,
+	 * use {@link ListableBeanFactory} and/or {@link BeanFactoryUtils}.
+	 * @param typeReference the reference to obtain type the bean must match
+	 * @return an instance of the single bean matching the required type
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
+	 * @throws BeansException if the bean could not be created
+	 * @since 7.0
+	 * @see #getBean(Class)
+	 */
+	default <T> T getBean(ParameterizedTypeReference<T> typeReference) throws BeansException {
+		ObjectProvider<T> provider = getBeanProvider(ResolvableType.forType(typeReference));
+		return provider.getObject();
+	}
 
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
