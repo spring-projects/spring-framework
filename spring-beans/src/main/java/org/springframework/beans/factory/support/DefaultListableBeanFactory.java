@@ -138,8 +138,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public static final String STRICT_LOCKING_PROPERTY_NAME = "spring.locking.strict";
 
-	private static final boolean lenientLockingAllowed = !SpringProperties.getFlag(STRICT_LOCKING_PROPERTY_NAME);
-
 	@Nullable
 	private static Class<?> jakartaInjectProviderClass;
 
@@ -158,6 +156,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Map from serialized id to factory instance. */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
 			new ConcurrentHashMap<>(8);
+
+	/** Whether lenient locking is allowed in this factory. */
+	private final boolean lenientLockingAllowed = !SpringProperties.getFlag(STRICT_LOCKING_PROPERTY_NAME);
 
 	/** Optional id for this factory, for serialization purposes. */
 	@Nullable
@@ -1051,7 +1052,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	@Nullable
 	protected Boolean isCurrentThreadAllowedToHoldSingletonLock() {
-		return (lenientLockingAllowed && this.preInstantiationPhase ?
+		return (this.lenientLockingAllowed && this.preInstantiationPhase ?
 				this.preInstantiationThread.get() != PreInstantiation.BACKGROUND : null);
 	}
 
