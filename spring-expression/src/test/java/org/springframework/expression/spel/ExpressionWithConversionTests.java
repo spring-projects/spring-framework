@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -29,13 +30,12 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Expression evaluation where the TypeConverter plugged in uses the
+ * Expression evaluation where the {@link TypeConverter} plugged in uses the
  * {@link org.springframework.core.convert.support.GenericConversionService}.
  *
  * @author Andy Clement
@@ -49,30 +49,34 @@ class ExpressionWithConversionTests extends AbstractExpressionTests {
 
 	private static final TypeDescriptor typeDescriptorForListOfString =
 			new TypeDescriptor(ReflectionUtils.findField(ExpressionWithConversionTests.class, "listOfString"));
-	private static TypeDescriptor typeDescriptorForListOfInteger =
+	private static final TypeDescriptor typeDescriptorForListOfInteger =
 			new TypeDescriptor(ReflectionUtils.findField(ExpressionWithConversionTests.class, "listOfInteger"));
 
 
 	/**
 	 * Test the service can convert what we are about to use in the expression evaluation tests.
 	 */
-	@Test
-	void conversionsAreSupportedByStandardTypeConverter() {
-		StandardTypeConverter typeConverter = new StandardTypeConverter();
+	@BeforeAll
+	@SuppressWarnings("unchecked")
+	static void verifyConversionsAreSupportedByStandardTypeConverter() {
+		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+		TypeConverter typeConverter = evaluationContext.getTypeConverter();
 
 		// List<Integer> to List<String>
-		Class<?> clazz = typeDescriptorForListOfString.getElementTypeDescriptor().getType();
-		assertThat(clazz).isEqualTo(String.class);
-		List<?> l = (List<?>) typeConverter.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
-		assertThat(l).isNotNull();
+		assertThat(typeDescriptorForListOfString.getElementTypeDescriptor().getType())
+				.isEqualTo(String.class);
+		List<String> strings = (List<String>) typeConverter.convertValue(listOfInteger,
+				typeDescriptorForListOfInteger, typeDescriptorForListOfString);
+		assertThat(strings).containsExactly("4", "5", "6");
 
 		// List<String> to List<Integer>
-		clazz = typeDescriptorForListOfInteger.getElementTypeDescriptor().getType();
-		assertThat(clazz).isEqualTo(Integer.class);
-
-		l = (List<?>) typeConverter.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
-		assertThat(l).isNotNull();
+		assertThat(typeDescriptorForListOfInteger.getElementTypeDescriptor().getType())
+				.isEqualTo(Integer.class);
+		List<Integer> integers = (List<Integer>) typeConverter.convertValue(listOfString,
+				typeDescriptorForListOfString, typeDescriptorForListOfInteger);
+		assertThat(integers).containsExactly(1, 2, 3);
 	}
+
 
 	@Test
 	void setParameterizedList() {
@@ -82,10 +86,11 @@ class ExpressionWithConversionTests extends AbstractExpressionTests {
 		assertThat(e.getValue(context, Integer.class)).isZero();
 
 		// Assign a List<String> to the List<Integer> field - the component elements should be converted
-		parser.parseExpression("listOfInteger").setValue(context,listOfString);
+		parser.parseExpression("listOfInteger").setValue(context, listOfString);
 		// size now 3
 		assertThat(e.getValue(context, Integer.class)).isEqualTo(3);
-		Class<?> clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context, Class.class); // element type correctly Integer
+		// element type correctly Integer
+		Class<?> clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context, Class.class);
 		assertThat(clazz).isEqualTo(Integer.class);
 	}
 
@@ -95,11 +100,7 @@ class ExpressionWithConversionTests extends AbstractExpressionTests {
 		class TestTarget {
 			@SuppressWarnings("unused")
 			public int sum(Collection<Integer> numbers) {
-				int total = 0;
-				for (int i : numbers) {
-					total += i;
-				}
-				return total;
+				return numbers.stream().reduce(0, (a, b) -> a + b);
 			}
 		}
 
@@ -117,9 +118,8 @@ class ExpressionWithConversionTests extends AbstractExpressionTests {
 		evaluationContext.setVariable("target", new TestTarget());
 
 		// OK up to here, so the evaluation should be fine...
-		// ... but this fails
-		int result = parser.parseExpression("#target.sum(#root)").getValue(evaluationContext, "1,2,3,4", int.class);
-		assertThat(result).isEqualTo(10);
+		int sum = parser.parseExpression("#target.sum(#root)").getValue(evaluationContext, "1,2,3,4", int.class);
+		assertThat(sum).isEqualTo(10);
 	}
 
 	@Test
