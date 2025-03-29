@@ -200,6 +200,15 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithNestedValueClassParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNestedValueClassParameter") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithValueClassReturnValue() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassReturnValue") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
@@ -328,6 +337,11 @@ class CoroutinesUtilsTests {
 		return value.value
 	}
 
+	suspend fun suspendingFunctionWithNestedValueClassParameter(value: NestedValueClass): String {
+		delay(1)
+		return value.value.value
+	}
+
 	suspend fun suspendingFunctionWithValueClassReturnValue(): ValueClass {
 		delay(1)
 		return ValueClass("foo")
@@ -381,6 +395,9 @@ class CoroutinesUtilsTests {
 
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	@JvmInline
+	value class NestedValueClass(val value: ValueClass)
 
 	@JvmInline
 	value class ValueClassWithInit(val value: String) {
