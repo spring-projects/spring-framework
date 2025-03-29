@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
@@ -131,11 +132,7 @@ public abstract class CoroutinesUtils {
 									if (!(type.isMarkedNullable() && arg == null) &&
 											type.getClassifier() instanceof KClass<?> kClass &&
 											KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-										KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
-										if (!KCallablesJvm.isAccessible(constructor)) {
-											KCallablesJvm.setAccessible(constructor, true);
-										}
-										arg = constructor.call(arg);
+										arg = box(kClass, arg);
 									}
 									argMap.put(parameter, arg);
 								}
@@ -159,6 +156,20 @@ public abstract class CoroutinesUtils {
 			return mono.flatMapMany(o -> ((Publisher<?>)o));
 		}
 		return mono;
+	}
+
+	private static Object box(KClass<?> kClass, @Nullable Object arg) {
+		KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
+		KType type = constructor.getParameters().get(0).getType();
+		if (!(type.isMarkedNullable() && arg == null) &&
+				type.getClassifier() instanceof KClass<?> parameterClass &&
+				KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
+			arg = box(parameterClass, arg);
+		}
+		if (!KCallablesJvm.isAccessible(constructor)) {
+			KCallablesJvm.setAccessible(constructor, true);
+		}
+		return constructor.call(arg);
 	}
 
 	private static Flux<?> asFlux(Object flow) {
