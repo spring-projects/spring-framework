@@ -129,6 +129,22 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(beanFactory.getDependentBeans("config")).contains("bar");
 	}
 
+	@Test  // gh-34663
+	void enhancementIsPresentForAbstractConfigClassWithoutBeanMethods() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(AbstractConfigWithoutBeanMethods.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) beanFactory.getBeanDefinition("config");
+		assertThat(beanDefinition.hasBeanClass()).isTrue();
+		assertThat(beanDefinition.getBeanClass().getName()).contains(ClassUtils.CGLIB_CLASS_SEPARATOR);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertThat(bar.foo).isSameAs(foo);
+		assertThat(beanFactory.getDependentBeans("foo")).contains("bar");
+		String[] dependentsOfSingletonBeanConfig = beanFactory.getDependentBeans(SingletonBeanConfig.class.getName());
+		assertThat(dependentsOfSingletonBeanConfig).containsOnly("foo", "bar");
+	}
+
 	@Test
 	void enhancementIsNotPresentForProxyBeanMethodsFlagSetToFalse() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(NonEnhancedSingletonBeanConfig.class));
@@ -181,7 +197,7 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(bar.foo).isNotSameAs(foo);
 	}
 
-	@Test
+	@Test  // gh-34486
 	void enhancementIsNotPresentWithEmptyConfig() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(EmptyConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -1193,6 +1209,12 @@ class ConfigurationClassPostProcessorTests {
 		public static Bar bar() {
 			return new Bar(foo());
 		}
+	}
+
+	@Configuration
+	@Import(SingletonBeanConfig.class)
+	abstract static class AbstractConfigWithoutBeanMethods {
+		// This class intentionally does NOT declare @Bean methods.
 	}
 
 	@Configuration
