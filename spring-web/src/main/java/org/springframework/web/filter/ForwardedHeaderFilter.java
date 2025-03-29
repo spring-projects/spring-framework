@@ -73,6 +73,7 @@ import org.springframework.web.util.WebUtils;
  * @author Eddú Meléndez
  * @author Rob Winch
  * @author Brian Clozel
+ * @author Mengqi Xu
  * @since 4.3
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  * @see <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/filters.html#filters-forwarded-headers">Forwarded Headers</a>
@@ -92,6 +93,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-By");
 	}
 
 
@@ -255,6 +257,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final @Nullable InetSocketAddress remoteAddress;
 
+		private final @Nullable InetSocketAddress localAddress;
+
 		private final ForwardedPrefixExtractor forwardedPrefixExtractor;
 
 		ForwardedHeaderExtractingRequest(HttpServletRequest servletRequest) {
@@ -272,6 +276,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
 			this.remoteAddress = ForwardedHeaderUtils.parseForwardedFor(uri, headers, request.getRemoteAddress());
+			this.localAddress = ForwardedHeaderUtils.parseForwardedBy(uri, headers, request.getLocalAddress());
 
 			// Use Supplier as Tomcat updates delegate request on FORWARD
 			Supplier<HttpServletRequest> requestSupplier = () -> (HttpServletRequest) getRequest();
@@ -328,6 +333,16 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		public int getRemotePort() {
 			return (this.remoteAddress != null ? this.remoteAddress.getPort() : super.getRemotePort());
+		}
+
+		@Override
+		public @Nullable String getLocalAddr() {
+			return (this.localAddress != null ? this.localAddress.getHostString() : super.getLocalAddr());
+		}
+
+		@Override
+		public int getLocalPort() {
+			return (this.localAddress != null ? this.localAddress.getPort() : super.getLocalPort());
 		}
 
 		@SuppressWarnings("DataFlowIssue")
