@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * given user credentials to every standard methods that can also be used with
  * authentication, this  {@code createConnection()} and {@code createContext()}. In
  * other words, it is implicitly invoking {@code createConnection(username, password)} or
- * {@code createContext(username, password)}} on the target. All other methods simply
+ * {@code createContext(username, password)} on the target. All other methods simply
  * delegate to the corresponding methods of the target ConnectionFactory.
  *
  * <p>Can be used to proxy a target JNDI ConnectionFactory that does not have user

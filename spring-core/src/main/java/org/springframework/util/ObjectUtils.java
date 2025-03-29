@@ -410,10 +410,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a hash code for the given object; typically the value of
-	 * {@code Object#hashCode()}}. If the object is an array,
-	 * this method will delegate to any of the {@code Arrays.hashCode}
-	 * methods. If the object is {@code null}, this method returns 0.
+	 * Return a hash code for the given object, typically the value of
+	 * {@link Object#hashCode()}. If the object is an array, this method
+	 * will delegate to one of the {@code Arrays.hashCode} methods. If
+	 * the object is {@code null}, this method returns {@code 0}.
 	 * @see Object#hashCode()
 	 * @see Arrays
 	 */
