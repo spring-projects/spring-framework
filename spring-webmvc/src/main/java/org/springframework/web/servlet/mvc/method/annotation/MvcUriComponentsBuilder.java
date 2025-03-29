@@ -139,7 +139,7 @@ public class MvcUriComponentsBuilder {
 
 	/**
 	 * Create an instance of this class with a base URL. After that calls to one
-	 * of the instance based {@code withXxx(...}} methods will create URLs relative
+	 * of the instance based {@code withXxx(...)} methods will create URLs relative
 	 * to the given base URL.
 	 */
 	public static MvcUriComponentsBuilder relativeTo(UriComponentsBuilder baseUrl) {
@@ -490,7 +490,7 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * An alternative to {@link #fromMethodName(Class, String, Object...)}} for
+	 * An alternative to {@link #fromMethodName(Class, String, Object...)} for
 	 * use with an instance of this class created via {@link #relativeTo}.
 	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
 	 * and "X-Forwarded-*" headers if found. See class-level docs.

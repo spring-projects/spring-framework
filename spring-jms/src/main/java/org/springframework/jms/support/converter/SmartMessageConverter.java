@@ -40,7 +40,7 @@ public interface SmartMessageConverter extends MessageConverter {
 	 * @param object the object to convert
 	 * @param session the Session to use for creating a JMS Message
 	 * @param conversionHint an extra object passed to the {@link MessageConverter},
-	 * for example, the associated {@code MethodParameter} (may be {@code null}}
+	 * for example, the associated {@code MethodParameter} (may be {@code null})
 	 * @return the JMS Message
 	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure

@@ -89,7 +89,7 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE}} if no exception happened.
+		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE} if no exception happened.
 		 */
 		EXCEPTION {
 			@Override

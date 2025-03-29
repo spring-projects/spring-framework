@@ -411,7 +411,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return a hash code for the given object; typically the value of
-	 * {@code Object#hashCode()}}. If the object is an array,
+	 * {@code Object#hashCode()}. If the object is an array,
 	 * this method will delegate to any of the {@code Arrays.hashCode}
 	 * methods. If the object is {@code null}, this method returns 0.
 	 * @see Object#hashCode()
