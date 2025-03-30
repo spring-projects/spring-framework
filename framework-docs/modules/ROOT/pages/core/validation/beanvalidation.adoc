@@ -399,7 +399,7 @@ A `ConstraintViolation` on the `degrees` method parameter is adapted to a
 `MessageSourceResolvable` with the following:
 
 - Error codes `"Max.myService#addStudent.degrees"`, `"Max.degrees"`, `"Max.int"`, `"Max"`
-- Message arguments "degrees2 and 2 (the field name and the constraint attribute)
+- Message arguments "degrees" and 2 (the field name and the constraint attribute)
 - Default message "must be less than or equal to 2"
 
 To customize the above default message, you can add a property such as:
