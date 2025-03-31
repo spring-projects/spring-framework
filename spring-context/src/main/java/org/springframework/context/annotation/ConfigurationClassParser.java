@@ -180,8 +180,9 @@ class ConfigurationClassParser {
 				}
 
 				// Downgrade to lite (no enhancement) in case of no instance-level @Bean methods.
-				if (!configClass.hasNonStaticBeanMethods() && ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(
-						bd.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE))) {
+				if (!configClass.getMetadata().isAbstract() && !configClass.hasNonStaticBeanMethods() &&
+						ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(
+								bd.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE))) {
 					bd.setAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE,
 							ConfigurationClassUtils.CONFIGURATION_CLASS_LITE);
 				}
