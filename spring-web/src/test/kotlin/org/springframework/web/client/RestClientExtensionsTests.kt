@@ -67,7 +67,7 @@ class RestClientExtensionsTests {
 		val foo = Foo()
 		every { requestBodySpec.exchange(any<RequestHeadersSpec.ExchangeFunction<Foo>>(), any()) } returns foo
 		val exchangeFunction: (HttpRequest, RequestHeadersSpec.ConvertibleClientHttpResponse) -> Foo? =
-			{ request, response -> foo }
+			{ _, _ -> foo }
 		val value = requestBodySpec.requiredExchange(exchangeFunction)
 		assertThat(value).isEqualTo(foo)
 	}
@@ -76,7 +76,7 @@ class RestClientExtensionsTests {
 	fun `RequestHeadersSpec#requiredExchange with null response throws NoSuchElementException`() {
 		every { requestBodySpec.exchange(any<RequestHeadersSpec.ExchangeFunction<Foo>>(), any()) } returns null
 		val exchangeFunction: (HttpRequest, RequestHeadersSpec.ConvertibleClientHttpResponse) -> Foo? =
-			{ request, response -> null }
+			{ _, _ -> null }
 		assertThrows<NoSuchElementException> { requestBodySpec.requiredExchange(exchangeFunction) }
 	}
 
