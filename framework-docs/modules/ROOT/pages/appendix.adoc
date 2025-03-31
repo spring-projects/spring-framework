@@ -92,6 +92,12 @@ the repeated JNDI lookup overhead. See
 {spring-framework-api}++/jndi/JndiLocatorDelegate.html#IGNORE_JNDI_PROPERTY_NAME++[`JndiLocatorDelegate`]
 for details.
 
+| `spring.locking.strict`
+| Instructs Spring to enforce strict locking during bean creation, rather than the mix of
+strict and lenient locking that 6.2 applies by default. See
+{spring-framework-api}++/beans/factory/support/DefaultListableBeanFactory.html#STRICT_LOCKING_PROPERTY_NAME++[`DefaultListableBeanFactory`]
+for details.
+
 | `spring.objenesis.ignore`
 | Instructs Spring to ignore Objenesis, not even attempting to use it. See
 {spring-framework-api}++/objenesis/SpringObjenesis.html#IGNORE_OBJENESIS_PROPERTY_NAME++[`SpringObjenesis`]

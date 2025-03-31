@@ -215,6 +215,8 @@ import org.springframework.util.StringUtils;
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
+	private static final Resource[] EMPTY_RESOURCE_ARRAY = {};
+
 	private static final Log logger = LogFactory.getLog(PathMatchingResourcePatternResolver.class);
 
 	/**
@@ -255,6 +257,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private final ResourceLoader resourceLoader;
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
+
+	private boolean useCaches = true;
 
 	private final Map<String, Resource[]> rootDirCache = new ConcurrentHashMap<>();
 
@@ -328,6 +332,22 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		return this.pathMatcher;
 	}
 
+	/**
+	 * Specify whether this resolver should use jar caches. Default is {@code true}.
+	 * <p>Switch this flag to {@code false} in order to avoid any jar caching, at
+	 * the {@link JarURLConnection} level as well as within this resolver instance.
+	 * <p>Note that {@link JarURLConnection#setDefaultUseCaches} can be turned off
+	 * independently. This resolver-level setting is designed to only enforce
+	 * {@code JarURLConnection#setUseCaches(false)} if necessary but otherwise
+	 * leaves the JVM-level default in place.
+	 * @since 6.1.19
+	 * @see JarURLConnection#setUseCaches
+	 * @see #clearCache()
+	 */
+	public void setUseCaches(boolean useCaches) {
+		this.useCaches = useCaches;
+	}
+
 
 	@Override
 	public Resource getResource(String location) {
@@ -351,7 +371,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// all class path resources with the given name
 				Collections.addAll(resources, findAllClassPathResources(locationPatternWithoutPrefix));
 			}
-			return resources.toArray(new Resource[0]);
+			return resources.toArray(EMPTY_RESOURCE_ARRAY);
 		}
 		else {
 			// Generally only look for a pattern after a prefix here,
@@ -395,7 +415,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved class path location [" + path + "] to resources " + result);
 		}
-		return result.toArray(new Resource[0]);
+		return result.toArray(EMPTY_RESOURCE_ARRAY);
 	}
 
 	/**
@@ -532,7 +552,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set<ClassPathManifestEntry> entries = this.manifestEntriesCache;
 		if (entries == null) {
 			entries = getClassPathManifestEntries();
-			this.manifestEntriesCache = entries;
+			if (this.useCaches) {
+				this.manifestEntriesCache = entries;
+			}
 		}
 		for (ClassPathManifestEntry entry : entries) {
 			if (!result.contains(entry.resource()) &&
@@ -684,7 +706,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (rootDirResources == null) {
 				// Lookup for specific directory, creating a cache entry for it.
 				rootDirResources = getResources(rootDirPath);
-				this.rootDirCache.put(rootDirPath, rootDirResources);
+				if (this.useCaches) {
+					this.rootDirCache.put(rootDirPath, rootDirResources);
+				}
 			}
 		}
 
@@ -716,7 +740,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
-		return result.toArray(new Resource[0]);
+		return result.toArray(EMPTY_RESOURCE_ARRAY);
 	}
 
 	/**
@@ -837,6 +861,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		if (con instanceof JarURLConnection jarCon) {
 			// Should usually be the case for traditional JAR files.
+			if (!this.useCaches) {
+				jarCon.setUseCaches(false);
+			}
 			try {
 				jarFile = jarCon.getJarFile();
 				jarFileUrl = jarCon.getJarFileURL().toExternalForm();
@@ -900,8 +927,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					}
 				}
 			}
-			// Cache jar entries in TreeSet for efficient searching on re-encounter.
-			this.jarEntriesCache.put(jarFileUrl, entriesCache);
+			if (this.useCaches) {
+				// Cache jar entries in TreeSet for efficient searching on re-encounter.
+				this.jarEntriesCache.put(jarFileUrl, entriesCache);
+			}
 			return result;
 		}
 		finally {

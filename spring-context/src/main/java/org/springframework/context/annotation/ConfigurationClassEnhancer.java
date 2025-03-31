@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
+import org.springframework.aot.AotDetector;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -138,24 +139,20 @@ class ConfigurationClassEnhancer {
 		Enhancer enhancer = new Enhancer();
 		if (classLoader != null) {
 			enhancer.setClassLoader(classLoader);
+			if (classLoader instanceof SmartClassLoader smartClassLoader &&
+					smartClassLoader.isClassReloadable(configSuperClass)) {
+				enhancer.setUseCache(false);
+			}
 		}
 		enhancer.setSuperclass(configSuperClass);
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-		enhancer.setAttemptLoad(!isClassReloadable(configSuperClass, classLoader));
+		enhancer.setAttemptLoad(enhancer.getUseCache() && AotDetector.useGeneratedArtifacts());
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
-	}
-
-	/**
-	 * Checks whether the given configuration class is reloadable.
-	 */
-	private boolean isClassReloadable(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
-		return (classLoader instanceof SmartClassLoader smartClassLoader &&
-				smartClassLoader.isClassReloadable(configSuperClass));
 	}
 
 	/**
@@ -545,7 +542,7 @@ class ConfigurationClassEnhancer {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(factoryBean.getClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setAttemptLoad(true);
+			enhancer.setAttemptLoad(AotDetector.useGeneratedArtifacts());
 			enhancer.setCallbackType(MethodInterceptor.class);
 
 			// Ideally create enhanced FactoryBean proxy without constructor side effects,
