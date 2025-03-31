@@ -16,13 +16,6 @@
 
 package org.springframework.web.service.registry;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
@@ -45,7 +38,6 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.service.annotation.HttpExchange;
 
@@ -91,13 +83,13 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 	private @Nullable BeanFactory beanFactory;
 
-	private final Map<String, RegisteredGroup> groupMap = new LinkedHashMap<>();
+	private final GroupsMetadata groupsMetadata = new GroupsMetadata();
 
 	private @Nullable ClassPathScanningCandidateComponentProvider scanner;
 
 
 	/**
-	 * Set the client type to use when the client type for an HTTP Service group
+	 * Set the client type to use when an HTTP Service group's client type
 	 * remains {@link HttpServiceGroup.ClientType#UNSPECIFIED}.
 	 * <p>By default, when this property is not set, then {@code REST_CLIENT}
 	 * is used for any HTTP Service group whose client type remains unspecified.
@@ -141,7 +133,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 			proxyRegistryBeanDef = new GenericBeanDefinition();
 			proxyRegistryBeanDef.setBeanClass(HttpServiceProxyRegistryFactoryBean.class);
 			ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
-			args.addIndexedArgumentValue(0, new LinkedHashMap<String, HttpServiceGroup>());
+			args.addIndexedArgumentValue(0, new GroupsMetadata());
 			beanRegistry.registerBeanDefinition(proxyRegistryBeanName, proxyRegistryBeanDef);
 		}
 		else {
@@ -150,9 +142,10 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		mergeGroups(proxyRegistryBeanDef);
 
-		this.groupMap.forEach((groupName, group) -> group.httpServiceTypeNames().forEach(type -> {
+		this.groupsMetadata.forEachRegistration(group -> group.httpServiceTypeNames().forEach(type -> {
 			GenericBeanDefinition proxyBeanDef = new GenericBeanDefinition();
 			proxyBeanDef.setBeanClassName(type);
+			String groupName = group.name();
 			String beanName = (groupName + "#" + type);
 			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(proxyRegistryBeanName, groupName, type));
 			if (!beanRegistry.containsBeanDefinition(beanName)) {
@@ -182,48 +175,21 @@ public abstract class AbstractHttpServiceRegistrar implements
 		return this.scanner;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void mergeGroups(GenericBeanDefinition proxyRegistryBeanDef) {
 		ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
-		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, Map.class);
-		Assert.state(valueHolder != null, "Expected Map constructor argument at index 0");
-		Map<String, RegisteredGroup> targetMap = (Map<String, RegisteredGroup>) valueHolder.getValue();
-		Assert.state(targetMap != null, "No constructor argument value");
-
-		this.groupMap.forEach((name, group) -> {
-			RegisteredGroup previousGroup = targetMap.putIfAbsent(name, group);
-			if (previousGroup != null) {
-				if (!compatibleClientTypes(group.clientType(), previousGroup.clientType())) {
-					throw new IllegalArgumentException("ClientType conflict for group '" + name + "'");
-				}
-				previousGroup.addHttpServiceTypeNames(group.httpServiceTypeNames());
-			}
-		});
+		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, GroupsMetadata.class);
+		Assert.state(valueHolder != null, "Expected GroupsMetadata constructor argument at index 0");
+		GroupsMetadata target = (GroupsMetadata) valueHolder.getValue();
+		Assert.state(target != null, "No constructor argument value");
+		target.mergeWith(this.groupsMetadata);
 	}
 
-	private static boolean compatibleClientTypes(
-			HttpServiceGroup.ClientType clientTypeA, HttpServiceGroup.ClientType clientTypeB) {
-
-		return (clientTypeA == clientTypeB ||
-				clientTypeA == HttpServiceGroup.ClientType.UNSPECIFIED ||
-				clientTypeB == HttpServiceGroup.ClientType.UNSPECIFIED);
-	}
-
-	private Object getProxyInstance(String registryBeanName, String groupName, String type) {
+	private Object getProxyInstance(String registryBeanName, String groupName, String httpServiceType) {
 		Assert.state(this.beanFactory != null, "BeanFactory has not been set");
 		HttpServiceProxyRegistry registry = this.beanFactory.getBean(registryBeanName, HttpServiceProxyRegistry.class);
-		Object proxy = registry.getClient(groupName, loadClass(type));
-		Assert.notNull(proxy, "No proxy for HTTP Service [" + type + "]");
+		Object proxy = registry.getClient(groupName, GroupsMetadata.loadClass(httpServiceType));
+		Assert.notNull(proxy, "No proxy for HTTP Service [" + httpServiceType + "]");
 		return proxy;
-	}
-
-	private static Class<?> loadClass(String type) {
-		try {
-			return ClassUtils.forName(type, AbstractHttpServiceRegistrar.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("Failed to load '" + type + "'", ex);
-		}
 	}
 
 
@@ -287,32 +253,23 @@ public abstract class AbstractHttpServiceRegistrar implements
 			return new DefaultGroupSpec(name, clientType);
 		}
 
+		/**
+		 * Default implementation of {@link GroupSpec}.
+		 */
 		private class DefaultGroupSpec implements GroupSpec {
 
-			private final String groupName;
-
-			private final HttpServiceGroup.ClientType clientType;
+			private final GroupsMetadata.Registration registration;
 
 			public DefaultGroupSpec(String groupName, HttpServiceGroup.ClientType clientType) {
-				this.groupName = groupName;
-				this.clientType = initClientType(clientType);
-			}
-
-			private HttpServiceGroup.ClientType initClientType(HttpServiceGroup.ClientType clientType) {
-				if (clientType != HttpServiceGroup.ClientType.UNSPECIFIED) {
-					return clientType;
-				}
-				else if (defaultClientType != HttpServiceGroup.ClientType.UNSPECIFIED) {
-					return defaultClientType;
-				}
-				else {
-					return HttpServiceGroup.ClientType.REST_CLIENT;
-				}
+				clientType = (clientType != HttpServiceGroup.ClientType.UNSPECIFIED ? clientType : defaultClientType);
+				this.registration = groupsMetadata.getOrCreateGroup(groupName, clientType);
 			}
 
 			@Override
 			public GroupSpec register(Class<?>... serviceTypes) {
-				getOrCreateGroup().addHttpServiceTypes(serviceTypes);
+				for (Class<?> serviceType : serviceTypes) {
+					this.registration.httpServiceTypeNames().add(serviceType.getName());
+				}
 				return this;
 			}
 
@@ -335,84 +292,10 @@ public abstract class AbstractHttpServiceRegistrar implements
 			private void detect(String packageName) {
 				for (BeanDefinition definition : getScanner().findCandidateComponents(packageName)) {
 					if (definition.getBeanClassName() != null) {
-						getOrCreateGroup().addHttpServiceTypeName(definition.getBeanClassName());
+						this.registration.httpServiceTypeNames().add(definition.getBeanClassName());
 					}
 				}
 			}
-
-			private RegisteredGroup getOrCreateGroup() {
-				return groupMap.computeIfAbsent(this.groupName, name -> new RegisteredGroup(name, this.clientType));
-			}
-		}
-	}
-
-
-	/**
-	 * A simple holder of registered HTTP Service type names, deferring the
-	 * loading of classes until {@link #httpServiceTypes()} is called.
-	 */
-	private static class RegisteredGroup implements HttpServiceGroup {
-
-		private final String name;
-
-		private final Set<String> httpServiceTypeNames = new LinkedHashSet<>();
-
-		private final ClientType clientType;
-
-		public RegisteredGroup(String name, ClientType clientType) {
-			this.name = name;
-			this.clientType = clientType;
-		}
-
-		@Override
-		public String name() {
-			return this.name;
-		}
-
-		public Set<String> httpServiceTypeNames() {
-			return this.httpServiceTypeNames;
-		}
-
-		@Override
-		public Set<Class<?>> httpServiceTypes() {
-			return this.httpServiceTypeNames.stream()
-					.map(AbstractHttpServiceRegistrar::loadClass)
-					.collect(Collectors.toSet());
-		}
-
-		@Override
-		public ClientType clientType() {
-			return this.clientType;
-		}
-
-		public void addHttpServiceTypes(Class<?>... httpServiceTypes) {
-			for (Class<?> type : httpServiceTypes) {
-				this.httpServiceTypeNames.add(type.getName());
-			}
-		}
-
-		public void addHttpServiceTypeNames(Collection<String> httpServiceTypeNames) {
-			this.httpServiceTypeNames.addAll(httpServiceTypeNames);
-		}
-
-		public void addHttpServiceTypeName(String httpServiceTypeName) {
-			this.httpServiceTypeNames.add(httpServiceTypeName);
-		}
-
-		@Override
-		public final boolean equals(Object other) {
-			return (other instanceof RegisteredGroup otherGroup && this.name.equals(otherGroup.name));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.name.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return "RegisteredGroup[name='" + this.name + "', httpServiceTypes=" +
-					this.httpServiceTypeNames + ", clientType=" + this.clientType + "]";
 		}
 	}
 

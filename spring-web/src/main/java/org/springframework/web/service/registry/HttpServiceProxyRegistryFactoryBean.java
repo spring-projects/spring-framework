@@ -69,8 +69,8 @@ public final class HttpServiceProxyRegistryFactoryBean
 	private @Nullable HttpServiceProxyRegistry proxyRegistry;
 
 
-	HttpServiceProxyRegistryFactoryBean(Map<String, HttpServiceGroup> groupMap) {
-		this.groupSet = groupMap.values().stream()
+	HttpServiceProxyRegistryFactoryBean(GroupsMetadata groupsMetadata) {
+		this.groupSet = groupsMetadata.groups().stream()
 				.map(group -> {
 					HttpServiceGroupAdapter<?> adapter = groupAdapters.get(group.clientType());
 					Assert.state(adapter != null, "No HttpServiceGroupAdapter for type " + group.clientType());

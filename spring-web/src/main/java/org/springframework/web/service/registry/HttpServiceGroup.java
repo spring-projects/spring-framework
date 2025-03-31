@@ -73,7 +73,15 @@ public interface HttpServiceGroup {
 		 * @see HttpServiceGroups#clientType()
 		 * @see AbstractHttpServiceRegistrar#setDefaultClientType
 		 */
-		UNSPECIFIED
+		UNSPECIFIED;
+
+
+		/**
+		 * Shortcut to check if this is the UNSPECIFIED enum value.
+		 */
+		boolean isUnspecified() {
+			return (this == UNSPECIFIED);
+		}
 	}
 
 }

@@ -19,6 +19,8 @@ package org.springframework.web.service.registry;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -99,6 +101,17 @@ public class HttpServiceRegistrarTests {
 	}
 
 	@Test
+	void mergeWithClientTypeOverride() {
+		doRegister(
+				registry -> registry.forGroup(ECHO_GROUP).register(EchoA.class),
+				registry -> registry.forGroup(ECHO_GROUP, ClientType.WEB_CLIENT).register(EchoA.class));
+
+		assertRegistryBeanDef(new TestGroup(ECHO_GROUP, ClientType.WEB_CLIENT, EchoA.class));
+		assertProxyBeanDef(ECHO_GROUP, EchoA.class);
+		assertBeanDefinitionCount(2);
+	}
+
+	@Test
 	void defaultClientType() {
 		doRegister(ClientType.WEB_CLIENT, registry -> registry.forGroup(ECHO_GROUP).register(EchoA.class));
 		assertRegistryBeanDef(new TestGroup(ECHO_GROUP, ClientType.WEB_CLIENT, EchoA.class));
@@ -135,7 +148,6 @@ public class HttpServiceRegistrarTests {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, HttpServiceGroup> groupMap() {
 		BeanDefinition beanDef = this.beanDefRegistry.getBeanDefinition("httpServiceProxyRegistry");
 		assertThat(beanDef.getBeanClassName()).isEqualTo(HttpServiceProxyRegistryFactoryBean.class.getName());
@@ -144,10 +156,11 @@ public class HttpServiceRegistrarTests {
 		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, Map.class);
 		assertThat(valueHolder).isNotNull();
 
-		Map<String, HttpServiceGroup> groupMap = (Map<String, HttpServiceGroup>) valueHolder.getValue();
-		assertThat(groupMap).isNotNull();
+		GroupsMetadata metadata = (GroupsMetadata) valueHolder.getValue();
+		assertThat(metadata).isNotNull();
 
-		return groupMap;
+		return metadata.groups().stream()
+				.collect(Collectors.toMap(HttpServiceGroup::name, Function.identity()));
 	}
 
 	private void assertProxyBeanDef(String group, Class<?> httpServiceType) {
