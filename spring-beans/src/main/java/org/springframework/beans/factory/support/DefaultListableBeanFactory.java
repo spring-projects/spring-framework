@@ -130,7 +130,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
 	/**
-	 * System property that instructs Spring to enforce string locking during bean creation,
+	 * System property that instructs Spring to enforce strict locking during bean creation,
 	 * rather than the mix of strict and lenient locking that 6.2 applies by default. Setting
 	 * this flag to "true" restores 6.1.x style locking in the entire pre-instantiation phase.
 	 * @since 6.2.6
