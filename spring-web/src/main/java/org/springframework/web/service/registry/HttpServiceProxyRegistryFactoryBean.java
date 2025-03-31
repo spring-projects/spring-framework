@@ -96,10 +96,10 @@ public final class HttpServiceProxyRegistryFactoryBean
 		Assert.notNull(this.applicationContext, "ApplicationContext not initialized");
 
 		// Apply group configurers
-		this.groupSet.forEach(group ->
-			this.applicationContext.getBeanProvider(group.getConfigurerType())
-					.orderedStream()
-					.forEach(configurer -> configurer.configureGroups(new DefaultGroups<>(group.clientType()))));
+		groupAdapters.forEach((clientType, groupAdapter) ->
+				this.applicationContext.getBeanProvider(groupAdapter.getConfigurerType())
+						.orderedStream()
+						.forEach(configurer -> configurer.configureGroups(new DefaultGroups<>(clientType))));
 
 		// Create proxies
 		Map<String, Map<Class<?>, Object>> groupProxyMap = this.groupSet.stream()
@@ -193,13 +193,13 @@ public final class HttpServiceProxyRegistryFactoryBean
 		}
 
 		public Map<Class<?>, Object> createProxies() {
-			Map<Class<?>, Object> proxyMap = new LinkedHashMap<>(httpServiceTypes().size());
+			Map<Class<?>, Object> map = new LinkedHashMap<>(httpServiceTypes().size());
 			HttpExchangeAdapter exchangeAdapter = initExchangeAdapter();
 			HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builderFor(exchangeAdapter);
 			this.proxyFactoryConfigurer.accept(this, proxyFactoryBuilder);
-			HttpServiceProxyFactory proxyFactory = proxyFactoryBuilder.build();
-			httpServiceTypes().forEach(type -> proxyMap.put(type, proxyFactory.createClient(type)));
-			return proxyMap;
+			HttpServiceProxyFactory factory = proxyFactoryBuilder.build();
+			httpServiceTypes().forEach(type -> map.put(type, factory.createClient(type)));
+			return map;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -219,12 +219,10 @@ public final class HttpServiceProxyRegistryFactoryBean
 	 */
 	private final class DefaultGroups<CB> implements HttpServiceGroupConfigurer.Groups<CB> {
 
-		private final HttpServiceGroup.ClientType clientType;
-
-		private @Nullable Predicate<HttpServiceGroup> filter;
+		private Predicate<HttpServiceGroup> filter;
 
 		DefaultGroups(HttpServiceGroup.ClientType clientType) {
-			this.clientType = clientType;
+			this.filter = group -> group.clientType().equals(clientType);
 		}
 
 		@Override
@@ -234,7 +232,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<CB> filter(Predicate<HttpServiceGroup> predicate) {
-			this.filter = (this.filter != null ? this.filter.or(predicate) : predicate);
+			this.filter = this.filter.or(predicate);
 			return this;
 		}
 
@@ -260,10 +258,8 @@ public final class HttpServiceProxyRegistryFactoryBean
 				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
 				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
 
-			groupSet.stream()
-					.filter(group -> group.clientType().equals(this.clientType))
-					.filter(groups -> this.filter == null || this.filter.test(groups))
-					.forEach(group -> group.apply(clientConfigurer, proxyFactoryConfigurer));
+			groupSet.stream().filter(this.filter).forEach(group ->
+					group.apply(clientConfigurer, proxyFactoryConfigurer));
 		}
 	}
 

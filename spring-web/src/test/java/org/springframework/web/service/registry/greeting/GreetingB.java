@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client.support.greeting;
+package org.springframework.web.service.registry.greeting;
 
 
 import org.springframework.web.bind.annotation.RequestParam;

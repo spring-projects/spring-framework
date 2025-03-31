@@ -31,13 +31,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.web.client.support.echo.EchoA;
-import org.springframework.web.client.support.echo.EchoB;
-import org.springframework.web.client.support.greeting.GreetingA;
-import org.springframework.web.client.support.greeting.GreetingB;
 import org.springframework.web.service.registry.AbstractHttpServiceRegistrar;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.ImportHttpServices;
+import org.springframework.web.service.registry.echo.EchoA;
+import org.springframework.web.service.registry.echo.EchoB;
+import org.springframework.web.service.registry.greeting.GreetingA;
+import org.springframework.web.service.registry.greeting.GreetingB;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

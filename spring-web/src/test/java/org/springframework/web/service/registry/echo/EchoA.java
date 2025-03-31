@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client.support.echo;
+package org.springframework.web.service.registry.echo;
 
 
 import org.springframework.web.bind.annotation.RequestParam;

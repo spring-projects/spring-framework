@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client.support.echo;
+package org.springframework.web.service.registry.greeting;
 
 
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
-public interface EchoB {
+public interface GreetingA {
 
-	@GetExchange("/echoB")
+	@GetExchange("/greetingA")
 	String handle(@RequestParam String input);
 
 }

@@ -46,6 +46,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -123,12 +124,17 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 	@Override
 	public final void registerBeanDefinitions(
-			AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry beanRegistry,
-			BeanNameGenerator beanNameGenerator) {
+			AnnotationMetadata metadata, BeanDefinitionRegistry registry, BeanNameGenerator generator) {
 
-		registerHttpServices(new DefaultGroupRegistry(), importingClassMetadata);
+		registerBeanDefinitions(metadata, registry);
+	}
 
-		String proxyRegistryBeanName = HttpServiceProxyRegistry.class.getName();
+	@Override
+	public final void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry beanRegistry) {
+
+		registerHttpServices(new DefaultGroupRegistry(), metadata);
+
+		String proxyRegistryBeanName = StringUtils.uncapitalize(HttpServiceProxyRegistry.class.getSimpleName());
 		GenericBeanDefinition proxyRegistryBeanDef;
 
 		if (!beanRegistry.containsBeanDefinition(proxyRegistryBeanName)) {
@@ -142,21 +148,17 @@ public abstract class AbstractHttpServiceRegistrar implements
 			proxyRegistryBeanDef = (GenericBeanDefinition) beanRegistry.getBeanDefinition(proxyRegistryBeanName);
 		}
 
-		mergeHttpServices(proxyRegistryBeanDef);
+		mergeGroups(proxyRegistryBeanDef);
 
 		this.groupMap.forEach((groupName, group) -> group.httpServiceTypeNames().forEach(type -> {
 			GenericBeanDefinition proxyBeanDef = new GenericBeanDefinition();
 			proxyBeanDef.setBeanClassName(type);
-			String beanName = (groupName + "." + beanNameGenerator.generateBeanName(proxyBeanDef, beanRegistry));
+			String beanName = (groupName + "#" + type);
 			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(proxyRegistryBeanName, groupName, type));
 			if (!beanRegistry.containsBeanDefinition(beanName)) {
 				beanRegistry.registerBeanDefinition(beanName, proxyBeanDef);
 			}
 		}));
-	}
-
-	@Override
-	public final void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 	}
 
 	/**
@@ -181,7 +183,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private void mergeHttpServices(GenericBeanDefinition proxyRegistryBeanDef) {
+	private void mergeGroups(GenericBeanDefinition proxyRegistryBeanDef) {
 		ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
 		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, Map.class);
 		Assert.state(valueHolder != null, "Expected Map constructor argument at index 0");
@@ -233,7 +235,9 @@ public abstract class AbstractHttpServiceRegistrar implements
 		/**
 		 * Perform HTTP Service registrations for the given group.
 		 */
-		GroupSpec forGroup(String name);
+		default GroupSpec forGroup(String name) {
+			return forGroup(name, HttpServiceGroup.ClientType.UNSPECIFIED);
+		}
 
 		/**
 		 * Variant of {@link #forGroup(String)} with a client type.
@@ -279,11 +283,6 @@ public abstract class AbstractHttpServiceRegistrar implements
 	private class DefaultGroupRegistry implements GroupRegistry {
 
 		@Override
-		public GroupSpec forGroup(String name) {
-			return forGroup(name, HttpServiceGroup.ClientType.UNSPECIFIED);
-		}
-
-		@Override
 		public GroupSpec forGroup(String name, HttpServiceGroup.ClientType clientType) {
 			return new DefaultGroupSpec(name, clientType);
 		}
@@ -313,14 +312,14 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 			@Override
 			public GroupSpec register(Class<?>... serviceTypes) {
-				getOrCreateGroup(groupName, clientType).addHttpServiceTypes(serviceTypes);
+				getOrCreateGroup().addHttpServiceTypes(serviceTypes);
 				return this;
 			}
 
 			@Override
 			public GroupSpec detectInBasePackages(Class<?>... packageClasses) {
 				for (Class<?> packageClass : packageClasses) {
-					detect(this.groupName, this.clientType, packageClass.getPackageName());
+					detect(packageClass.getPackageName());
 				}
 				return this;
 			}
@@ -328,21 +327,21 @@ public abstract class AbstractHttpServiceRegistrar implements
 			@Override
 			public GroupSpec detectInBasePackages(String... packageNames) {
 				for (String packageName : packageNames) {
-					detect(this.groupName, this.clientType, packageName);
+					detect(packageName);
 				}
 				return this;
 			}
 
-			private void detect(String groupName, HttpServiceGroup.ClientType clientType, String packageName) {
+			private void detect(String packageName) {
 				for (BeanDefinition definition : getScanner().findCandidateComponents(packageName)) {
 					if (definition.getBeanClassName() != null) {
-						getOrCreateGroup(groupName, clientType).addHttpServiceTypeName(definition.getBeanClassName());
+						getOrCreateGroup().addHttpServiceTypeName(definition.getBeanClassName());
 					}
 				}
 			}
 
-			private RegisteredGroup getOrCreateGroup(String groupName, HttpServiceGroup.ClientType clientType) {
-				return groupMap.computeIfAbsent(groupName, name -> new RegisteredGroup(name, clientType));
+			private RegisteredGroup getOrCreateGroup() {
+				return groupMap.computeIfAbsent(this.groupName, name -> new RegisteredGroup(name, this.clientType));
 			}
 		}
 	}
@@ -376,7 +375,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		@Override
 		public Set<Class<?>> httpServiceTypes() {
-			return httpServiceTypeNames.stream()
+			return this.httpServiceTypeNames.stream()
 					.map(AbstractHttpServiceRegistrar::loadClass)
 					.collect(Collectors.toSet());
 		}
