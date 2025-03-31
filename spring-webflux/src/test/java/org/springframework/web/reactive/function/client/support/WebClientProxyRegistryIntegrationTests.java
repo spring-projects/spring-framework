@@ -37,9 +37,8 @@ import org.springframework.web.reactive.function.client.support.greeting.Greetin
 import org.springframework.web.reactive.function.client.support.greeting.GreetingB;
 import org.springframework.web.service.registry.AbstractHttpServiceRegistrar;
 import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
-import org.springframework.web.service.registry.ImportHttpServices;
-import org.springframework.web.service.registry.ImportHttpServiceGroups;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
+import org.springframework.web.service.registry.ImportHttpServices;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -126,19 +125,15 @@ public class WebClientProxyRegistryIntegrationTests {
 
 
 	@Configuration(proxyBeanMethods = false)
-	@ImportHttpServiceGroups(clientType = ClientType.WEB_CLIENT, groups = {
-			@ImportHttpServices(group = "echo", types = {EchoA.class, EchoB.class}),
-			@ImportHttpServices(group = "greeting", types = {GreetingA.class, GreetingB.class})
-	})
+	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = "echo", types = {EchoA.class, EchoB.class})
+	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = "greeting", types = {GreetingA.class, GreetingB.class})
 	private static class ListingConfig extends BaseEchoConfig {
 	}
 
 
 	@Configuration(proxyBeanMethods = false)
-	@ImportHttpServiceGroups(clientType = ClientType.WEB_CLIENT, groups = {
-			@ImportHttpServices(group = "echo", basePackageClasses = EchoA.class),
-			@ImportHttpServices(group = "greeting", basePackageClasses = GreetingA.class)
-	})
+	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = "echo", basePackageClasses = EchoA.class)
+	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = "greeting", basePackageClasses = GreetingA.class)
 	private static class DetectConfig extends BaseEchoConfig {
 	}
 

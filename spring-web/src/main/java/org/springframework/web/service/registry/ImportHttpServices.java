@@ -46,12 +46,12 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  * @since 7.0
- * @see ImportHttpServiceGroups
+ * @see Container
  * @see AbstractHttpServiceRegistrar
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Repeatable(ImportHttpServiceGroups.class)
+@Repeatable(ImportHttpServices.Container.class)
 @Import(AnnotationHttpServiceRegistrar.class)
 @Documented
 public @interface ImportHttpServices {
@@ -95,5 +95,20 @@ public @interface ImportHttpServices {
 	 * via {@link AbstractHttpServiceRegistrar#setDefaultClientType}.
 	 */
 	HttpServiceGroup.ClientType clientType() default HttpServiceGroup.ClientType.UNSPECIFIED;
+
+
+	/**
+	 * Container annotation that is necessary for the repeatable
+	 * {@link ImportHttpServices} annotation, but does not need to be declared
+	 * in application code.
+	 */
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@Import(AnnotationHttpServiceRegistrar.class)
+	@interface Container {
+
+		ImportHttpServices[] value() default {};
+	}
 
 }

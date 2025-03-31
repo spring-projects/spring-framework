@@ -63,8 +63,8 @@ public class AnnotationHttpServiceRegistrarTests {
 	}
 
 	@Test
-	void containerWithClientType() {
-		doRegister(ContainerConfig.class);
+	void clientType() {
+		doRegister(ClientTypeConfig.class);
 		assertGroups(
 				StubGroup.ofListing(ECHO_GROUP, ClientType.WEB_CLIENT, EchoA.class),
 				StubGroup.ofListing(GREETING_GROUP, ClientType.WEB_CLIENT, GreetingA.class));
@@ -97,19 +97,17 @@ public class AnnotationHttpServiceRegistrarTests {
 	private static class ScanConfig {
 	}
 
-	@ImportHttpServiceGroups(clientType = ClientType.WEB_CLIENT, groups = {
-			@ImportHttpServices(group = ECHO_GROUP, types = {EchoA.class}),
-			@ImportHttpServices(group = GREETING_GROUP, types = {GreetingA.class})
-	})
-	private static class ContainerConfig {
+	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = ECHO_GROUP, types = {EchoA.class})
+	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = GREETING_GROUP, types = {GreetingA.class})
+	private static class ClientTypeConfig {
 	}
 
 
 	private static class TestAnnotationHttpServiceRegistrar extends AnnotationHttpServiceRegistrar {
 
 		@Override
-		public void registerHttpServices(GroupRegistry registry, AnnotationMetadata importMetadata) {
-			super.registerHttpServices(registry, importMetadata);
+		public void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
+			super.registerHttpServices(registry, metadata);
 		}
 	}
 
