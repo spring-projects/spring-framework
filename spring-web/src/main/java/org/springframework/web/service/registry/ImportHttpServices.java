@@ -46,12 +46,12 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  * @since 7.0
- * @see HttpServiceGroups
+ * @see ImportHttpServiceGroups
  * @see AbstractHttpServiceRegistrar
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Repeatable(HttpServiceGroups.class)
+@Repeatable(ImportHttpServiceGroups.class)
 @Import(AnnotationHttpServiceRegistrar.class)
 @Documented
 public @interface ImportHttpServices {

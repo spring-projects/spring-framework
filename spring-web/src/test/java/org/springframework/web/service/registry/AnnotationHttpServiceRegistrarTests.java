@@ -97,7 +97,7 @@ public class AnnotationHttpServiceRegistrarTests {
 	private static class ScanConfig {
 	}
 
-	@HttpServiceGroups(clientType = ClientType.WEB_CLIENT, groups = {
+	@ImportHttpServiceGroups(clientType = ClientType.WEB_CLIENT, groups = {
 			@ImportHttpServices(group = ECHO_GROUP, types = {EchoA.class}),
 			@ImportHttpServices(group = GREETING_GROUP, types = {GreetingA.class})
 	})

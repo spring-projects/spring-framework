@@ -52,6 +52,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  *
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Olga Maciaszek-Sharma
  * @since 7.0
  * @see AbstractHttpServiceRegistrar
  */

@@ -22,6 +22,7 @@ import org.jspecify.annotations.Nullable;
  * A registry that contains HTTP Service client proxies.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 7.0
  * @see ImportHttpServices
  * @see HttpServiceProxyRegistryFactoryBean

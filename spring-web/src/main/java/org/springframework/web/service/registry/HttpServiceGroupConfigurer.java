@@ -26,6 +26,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  * Callback to configure the set of declared {@link HttpServiceGroup}s.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 7.0
  * @param <CB> the type of client builder, i.e. {@code RestClient} or {@code WebClient} builder.
  */

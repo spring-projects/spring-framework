@@ -23,8 +23,8 @@ import java.util.Set;
  * {@link org.springframework.web.service.invoker.HttpServiceProxyFactory} and
  * HTTP client setup.
  *
- * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 7.0
  */
 public interface HttpServiceGroup {
@@ -70,7 +70,7 @@ public interface HttpServiceGroup {
 		/**
 		 * Not specified, falling back on a default.
 		 * @see ImportHttpServices#clientType()
-		 * @see HttpServiceGroups#clientType()
+		 * @see ImportHttpServiceGroups#clientType()
 		 * @see AbstractHttpServiceRegistrar#setDefaultClientType
 		 */
 		UNSPECIFIED;

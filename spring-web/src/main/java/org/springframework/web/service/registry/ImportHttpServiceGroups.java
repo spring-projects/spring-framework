@@ -32,6 +32,7 @@ import org.springframework.core.annotation.AliasFor;
  * may be used to set the {@link #clientType()} and that would be inherited by
  * all nested annotations.
  *
+ * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
  * @since 7.0
  */
@@ -39,7 +40,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(AnnotationHttpServiceRegistrar.class)
-public @interface HttpServiceGroups {
+public @interface ImportHttpServiceGroups {
 
 	/**
 	 * Alias for {@link #groups()}.

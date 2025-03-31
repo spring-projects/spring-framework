@@ -25,6 +25,8 @@ import org.springframework.core.type.AnnotationMetadata;
  * to determine the HTTP services and groups to register.
  *
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
+ * @author Olga Maciaszek-Sharma
  * @since 7.0
  */
 class AnnotationHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
@@ -32,7 +34,7 @@ class AnnotationHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
 	@Override
 	protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata importMetadata) {
 
-		MergedAnnotation<?> groupsAnnot = importMetadata.getAnnotations().get(HttpServiceGroups.class);
+		MergedAnnotation<?> groupsAnnot = importMetadata.getAnnotations().get(ImportHttpServiceGroups.class);
 		if (groupsAnnot.isPresent()) {
 			HttpServiceGroup.ClientType clientType = groupsAnnot.getEnum("clientType", HttpServiceGroup.ClientType.class);
 			for (MergedAnnotation<?> annot : groupsAnnot.getAnnotationArray("value", ImportHttpServices.class)) {

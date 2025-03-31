@@ -68,6 +68,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  *
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Olga Maciaszek-Sharma
  * @since 7.0
  * @see ImportHttpServices
  * @see HttpServiceProxyRegistryFactoryBean
