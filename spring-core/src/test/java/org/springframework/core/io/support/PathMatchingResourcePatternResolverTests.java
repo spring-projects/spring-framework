@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,10 @@ class PathMatchingResourcePatternResolverTests {
 			Path rootDir = Paths.get("src/test/resources/custom%23root").toAbsolutePath();
 			URL root = new URL("file:" + rootDir + "/");
 			resolver = new PathMatchingResourcePatternResolver(new DefaultResourceLoader(new URLClassLoader(new URL[] {root})));
+			resolver.setUseCaches(false);
 			assertExactFilenames("classpath*:scanned/*.txt", "resource#test1.txt", "resource#test2.txt");
 		}
+
 
 		@Nested
 		class WithHashtagsInTheirFilenames {
@@ -332,7 +334,7 @@ class PathMatchingResourcePatternResolverTests {
 		// Tests fail if we use resource.getURL().getPath(). They would also fail on macOS when
 		// using resource.getURI().getPath() if the resource paths are not Unicode normalized.
 		//
-		// On the JVM, all tests should pass when using resouce.getFile().getPath(); however,
+		// On the JVM, all tests should pass when using resource.getFile().getPath(); however,
 		// we use FileSystemResource#getPath since this test class is sometimes run within a
 		// GraalVM native image which cannot support Path#toFile.
 		//
