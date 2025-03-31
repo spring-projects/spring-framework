@@ -142,10 +142,9 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		mergeGroups(proxyRegistryBeanDef);
 
-		this.groupsMetadata.forEachRegistration(group -> group.httpServiceTypeNames().forEach(type -> {
+		this.groupsMetadata.forEachRegistration((groupName, types) -> types.forEach(type -> {
 			GenericBeanDefinition proxyBeanDef = new GenericBeanDefinition();
 			proxyBeanDef.setBeanClassName(type);
-			String groupName = group.name();
 			String beanName = (groupName + "#" + type);
 			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(proxyRegistryBeanName, groupName, type));
 			if (!beanRegistry.containsBeanDefinition(beanName)) {
