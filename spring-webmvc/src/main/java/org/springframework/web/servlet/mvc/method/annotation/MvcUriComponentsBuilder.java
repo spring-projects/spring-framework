@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cglib.core.SpringNamingPolicy;
@@ -139,7 +140,7 @@ public class MvcUriComponentsBuilder {
 
 	/**
 	 * Create an instance of this class with a base URL. After that calls to one
-	 * of the instance based {@code withXxx(...}} methods will create URLs relative
+	 * of the instance based {@code withXxx(...)} methods will create URLs relative
 	 * to the given base URL.
 	 */
 	public static MvcUriComponentsBuilder relativeTo(UriComponentsBuilder baseUrl) {
@@ -463,7 +464,7 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * An alternative to {@link #fromMethodName(Class, String, Object...)}} for
+	 * An alternative to {@link #fromMethodName(Class, String, Object...)} for
 	 * use with an instance of this class created via {@link #relativeTo}.
 	 * @since 4.2
 	 */
@@ -631,8 +632,8 @@ public class MvcUriComponentsBuilder {
 	private static String resolveEmbeddedValue(String value) {
 		if (value.contains(SystemPropertyUtils.PLACEHOLDER_PREFIX)) {
 			WebApplicationContext webApplicationContext = getWebApplicationContext();
-			if (webApplicationContext != null
-					&& webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
+			if (webApplicationContext != null &&
+					webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
 				String resolvedEmbeddedValue = cbf.resolveEmbeddedValue(value);
 				if (resolvedEmbeddedValue != null) {
 					return resolvedEmbeddedValue;
@@ -793,7 +794,7 @@ public class MvcUriComponentsBuilder {
 				enhancer.setSuperclass(controllerType);
 				enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
 				enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-				enhancer.setAttemptLoad(true);
+				enhancer.setAttemptLoad(AotDetector.useGeneratedArtifacts());
 				enhancer.setCallbackType(MethodInterceptor.class);
 
 				Class<?> proxyClass = enhancer.createClass();
