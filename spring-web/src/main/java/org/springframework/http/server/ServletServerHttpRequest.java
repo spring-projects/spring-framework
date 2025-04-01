@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,22 +273,21 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
 		Map<String, String[]> form = request.getParameterMap();
-		for (Iterator<Map.Entry<String, String[]>> entryIterator = form.entrySet().iterator(); entryIterator.hasNext();) {
-			Map.Entry<String, String[]> entry = entryIterator.next();
-			String name = entry.getKey();
+		for (Iterator<Map.Entry<String, String[]>> entryItr = form.entrySet().iterator(); entryItr.hasNext();) {
+			Map.Entry<String, String[]> entry = entryItr.next();
 			List<String> values = Arrays.asList(entry.getValue());
-			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
-				String value = valueIterator.next();
-				writer.write(URLEncoder.encode(name, FORM_CHARSET));
+			for (Iterator<String> valueItr = values.iterator(); valueItr.hasNext();) {
+				String value = valueItr.next();
+				writer.write(URLEncoder.encode(entry.getKey(), FORM_CHARSET));
 				if (value != null) {
 					writer.write('=');
 					writer.write(URLEncoder.encode(value, FORM_CHARSET));
-					if (valueIterator.hasNext()) {
+					if (valueItr.hasNext()) {
 						writer.write('&');
 					}
 				}
 			}
-			if (entryIterator.hasNext()) {
+			if (entryItr.hasNext()) {
 				writer.append('&');
 			}
 		}
