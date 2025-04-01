@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.reflect.Type;
+
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
@@ -100,6 +102,7 @@ import org.springframework.core.ResolvableType;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
  * @since 13 April 2001
  * @see BeanNameAware#setBeanName
  * @see BeanClassLoaderAware#setBeanClassLoader
@@ -174,6 +177,37 @@ public interface BeanFactory {
 	 * @throws BeansException if the bean could not be created
 	 */
 	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
+
+	/**
+	 * Return an instance, which may be shared or independent, of the specified bean.
+	 * <p>Behaves the same as {@link #getBean(String)}, but provides a measure of type
+	 * safety by throwing a BeanNotOfRequiredTypeException if the bean is not of the
+	 * required type. This means that ClassCastException can't be thrown on casting
+	 * the result correctly, as can happen with {@link #getBean(String)}.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * @param name the name of the bean to retrieve
+	 * @param typeReference the reference to obtain type the bean must match
+	 * @return an instance of the bean.
+	 * Note that the return value will never be {@code null}. In case of a stub for
+	 * {@code null} from a factory method having been resolved for the requested bean, a
+	 * {@code BeanNotOfRequiredTypeException} against the NullBean stub will be raised.
+	 * Consider using {@link #getBeanProvider(Class)} for resolving optional dependencies.
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
+	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
+	 * @throws BeansException if the bean could not be created
+	 * @since 7.0
+	 * @see #getBean(String, Class)
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		Object bean = getBean(name);
+		Type requiredType = typeReference.getType();
+		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
+			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+		}
+		return (T) bean;
+	}
 
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.

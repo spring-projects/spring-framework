@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
 import org.springframework.beans.BeansException;
 import org.springframework.util.ClassUtils;
 
@@ -24,6 +27,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 @SuppressWarnings("serial")
 public class BeanNotOfRequiredTypeException extends BeansException {
@@ -37,6 +41,8 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	/** The offending type. */
 	private final Class<?> actualType;
 
+	/** The required generic type. */
+	private final Type requiredGenericType;
 
 	/**
 	 * Create a new BeanNotOfRequiredTypeException.
@@ -46,11 +52,32 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 * the expected type
 	 */
 	public BeanNotOfRequiredTypeException(String beanName, Class<?> requiredType, Class<?> actualType) {
-		super("Bean named '" + beanName + "' is expected to be of type '" + ClassUtils.getQualifiedName(requiredType) +
+		this(beanName, (Type) requiredType, actualType);
+	}
+
+	/**
+	 * Create a new BeanNotOfRequiredTypeException.
+	 * @param beanName the name of the bean requested
+	 * @param requiredType the required type
+	 * @param actualType the actual type returned, which did not match
+	 * the expected type
+	 * @since 7.0
+	 */
+	public BeanNotOfRequiredTypeException(String beanName, Type requiredType, Class<?> actualType) {
+		super("Bean named '" + beanName + "' is expected to be of type '" + requiredType.getTypeName() +
 				"' but was actually of type '" + ClassUtils.getQualifiedName(actualType) + "'");
 		this.beanName = beanName;
-		this.requiredType = requiredType;
+		this.requiredGenericType = requiredType;
 		this.actualType = actualType;
+		if (requiredType instanceof Class<?> requiredClass) {
+			this.requiredType = requiredClass;
+		}
+		else if (requiredType instanceof ParameterizedType parameterizedType) {
+			this.requiredType = (Class<?>) parameterizedType.getRawType();
+		}
+		else {
+			throw new IllegalArgumentException(requiredType + " is not supported");
+		}
 	}
 
 
@@ -66,6 +93,14 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 */
 	public Class<?> getRequiredType() {
 		return this.requiredType;
+	}
+
+	/**
+	 * Return the expected generic type for the bean.
+	 * @since 7.0
+	 */
+	public Type getRequiredGenericType() {
+		return this.requiredGenericType;
 	}
 
 	/**
