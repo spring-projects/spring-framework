@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,8 @@ import org.springframework.util.ClassUtils;
  * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
  *
  * <p>As of 6.1, this also includes support for JVM checkpoint/restore (Project CRaC)
- * when the {@code org.crac:crac} dependency on the classpath.
+ * when the {@code org.crac:crac} dependency is on the classpath. All running beans
+ * will get stopped and restarted according to the CRaC checkpoint/restore callbacks.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -379,7 +380,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 
-	// overridable hooks
+	// Overridable hooks
 
 	/**
 	 * Retrieve all applicable Lifecycle beans: all singletons that have already been created,
@@ -493,11 +494,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				}
 			}
 			try {
-				latch.await(this.timeout, TimeUnit.MILLISECONDS);
-				if (latch.getCount() > 0 && !countDownBeanNames.isEmpty() && logger.isInfoEnabled()) {
-					logger.info("Shutdown phase " + this.phase + " ends with " + countDownBeanNames.size() +
-							" bean" + (countDownBeanNames.size() > 1 ? "s" : "") +
-							" still running after timeout of " + this.timeout + "ms: " + countDownBeanNames);
+				if (!latch.await(this.timeout, TimeUnit.MILLISECONDS)) {
+					// Count is still >0 after timeout
+					if (!countDownBeanNames.isEmpty() && logger.isInfoEnabled()) {
+						logger.info("Shutdown phase " + this.phase + " ends with " + countDownBeanNames.size() +
+								" bean" + (countDownBeanNames.size() > 1 ? "s" : "") +
+								" still running after timeout of " + this.timeout + "ms: " + countDownBeanNames);
+					}
 				}
 			}
 			catch (InterruptedException ex) {
