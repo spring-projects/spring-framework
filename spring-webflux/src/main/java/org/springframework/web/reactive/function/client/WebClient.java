@@ -45,6 +45,8 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionFormatter;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -249,6 +251,15 @@ public interface WebClient {
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Configure an {@link ApiVersionInserter} to abstract how an API version
+		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
+		 * is inserted into the request.
+		 * @param apiVersionInserter the inserter to use
+		 * @since 7.0
+		 */
+		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Provide a consumer to customize every request being built.
@@ -474,6 +485,17 @@ public interface WebClient {
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set an API version for the request. The version is inserted into the
+		 * request by the {@link Builder#apiVersionInserter(ApiVersionInserter)
+		 * configured} {@code ApiVersionInserter}.
+		 * @param version the API version of the request; this can be a String or
+		 * some Object that can be formatted the inserter, e.g. through an
+		 * {@link ApiVersionFormatter}.
+		 * @since 7.0
+		 */
+		S apiVersion(Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.

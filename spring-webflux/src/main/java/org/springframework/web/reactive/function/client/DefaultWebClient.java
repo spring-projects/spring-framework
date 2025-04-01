@@ -52,6 +52,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -93,6 +94,8 @@ final class DefaultWebClient implements WebClient {
 
 	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private final @Nullable ApiVersionInserter apiVersionInserter;
+
 	private final @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest;
 
 	private final List<DefaultResponseSpec.StatusHandler> defaultStatusHandlers;
@@ -106,7 +109,9 @@ final class DefaultWebClient implements WebClient {
 
 	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable ExchangeFilterFunction filterFunctions,
 			UriBuilderFactory uriBuilderFactory, @Nullable HttpHeaders defaultHeaders,
-			@Nullable MultiValueMap<String, String> defaultCookies, @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
+			@Nullable MultiValueMap<String, String> defaultCookies,
+			@Nullable ApiVersionInserter apiVersionInserter,
+			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
 			ObservationRegistry observationRegistry, @Nullable ClientRequestObservationConvention observationConvention,
 			DefaultWebClientBuilder builder) {
@@ -116,6 +121,7 @@ final class DefaultWebClient implements WebClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
+		this.apiVersionInserter = apiVersionInserter;
 		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = initStatusHandlers(statusHandlerMap);
 		this.observationRegistry = observationRegistry;
@@ -204,6 +210,8 @@ final class DefaultWebClient implements WebClient {
 		private @Nullable HttpHeaders headers;
 
 		private @Nullable MultiValueMap<String, String> cookies;
+
+		private @Nullable Object apiVersion;
 
 		private @Nullable BodyInserter<?, ? super ClientHttpRequest> inserter;
 
@@ -320,6 +328,12 @@ final class DefaultWebClient implements WebClient {
 		@Override
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			return this;
+		}
+
+		@Override
+		public DefaultRequestBodyUriSpec apiVersion(Object version) {
+			this.apiVersion = version;
 			return this;
 		}
 
@@ -474,7 +488,12 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		private URI initUri() {
-			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
+			URI uriToUse = (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
+			if (this.apiVersion != null) {
+				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+				uriToUse = apiVersionInserter.insertVersion(this.apiVersion, uriToUse);
+			}
+			return uriToUse;
 		}
 
 		private void initHeaders(HttpHeaders out) {
@@ -483,6 +502,10 @@ final class DefaultWebClient implements WebClient {
 			}
 			if (this.headers != null && !this.headers.isEmpty()) {
 				out.putAll(this.headers);
+			}
+			if (this.apiVersion != null) {
+				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+				apiVersionInserter.insertVersion(this.apiVersion, out);
 			}
 		}
 

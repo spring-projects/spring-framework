@@ -32,6 +32,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -46,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.client.DefaultApiVersionInserter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -266,6 +268,22 @@ class RestClientAdapterTests {
 		assertThat(this.anotherServer.getRequestCount()).isEqualTo(0);
 	}
 
+	@Test
+	void apiVersion() throws Exception {
+		RestClient restClient = RestClient.builder()
+				.baseUrl(anotherServer.url("/").toString())
+				.apiVersionInserter(DefaultApiVersionInserter.fromHeader("X-API-Version").build())
+				.build();
+
+		RestClientAdapter adapter = RestClientAdapter.create(restClient);
+		Service service = HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+
+		service.getGreetingWithVersion();
+
+		RecordedRequest request = anotherServer.takeRequest();
+		assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2");
+	}
+
 
 	private static MockWebServer anotherServer() {
 		MockWebServer server = new MockWebServer();
@@ -286,6 +304,9 @@ class RestClientAdapterTests {
 
 		@GetExchange("/greeting/{id}")
 		Optional<String> getGreetingWithDynamicUri(@Nullable URI uri, @PathVariable String id);
+
+		@GetExchange(url = "/greeting", version = "1.2")
+		String getGreetingWithVersion();
 
 		@PostExchange("/greeting")
 		void postWithHeader(@RequestHeader("testHeaderName") String testHeader, @RequestBody String requestBody);

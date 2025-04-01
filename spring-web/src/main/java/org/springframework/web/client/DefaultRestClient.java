@@ -108,6 +108,8 @@ final class DefaultRestClient implements RestClient {
 
 	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private final @Nullable ApiVersionInserter apiVersionInserter;
+
 	private final @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest;
 
 	private final List<StatusHandler> defaultStatusHandlers;
@@ -128,6 +130,7 @@ final class DefaultRestClient implements RestClient {
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
 			@Nullable MultiValueMap<String, String> defaultCookies,
+			@Nullable ApiVersionInserter apiVersionInserter,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable List<StatusHandler> statusHandlers,
 			List<HttpMessageConverter<?>> messageConverters,
@@ -142,6 +145,7 @@ final class DefaultRestClient implements RestClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
+		this.apiVersionInserter = apiVersionInserter;
 		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
@@ -293,6 +297,8 @@ final class DefaultRestClient implements RestClient {
 
 		private @Nullable MultiValueMap<String, String> cookies;
 
+		private @Nullable Object apiVersion;
+
 		private @Nullable InternalBody body;
 
 		private @Nullable Map<String, Object> attributes;
@@ -414,6 +420,12 @@ final class DefaultRestClient implements RestClient {
 		@Override
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec apiVersion(Object version) {
+			this.apiVersion = version;
 			return this;
 		}
 
@@ -589,7 +601,12 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		private URI initUri() {
-			return (this.uri != null ? this.uri : DefaultRestClient.this.uriBuilderFactory.expand(""));
+			URI uriToUse = this.uri != null ? this.uri : DefaultRestClient.this.uriBuilderFactory.expand("");
+			if (this.apiVersion != null) {
+				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+				uriToUse = apiVersionInserter.insertVersion(this.apiVersion, uriToUse);
+			}
+			return uriToUse;
 		}
 
 		private @Nullable String serializeCookies() {
@@ -628,18 +645,29 @@ final class DefaultRestClient implements RestClient {
 
 		private @Nullable HttpHeaders initHeaders() {
 			HttpHeaders defaultHeaders = DefaultRestClient.this.defaultHeaders;
-			if (this.headers == null || this.headers.isEmpty()) {
-				return defaultHeaders;
+			if (this.apiVersion == null) {
+				if (this.headers == null || this.headers.isEmpty()) {
+					return defaultHeaders;
+				}
+				else if (defaultHeaders == null || defaultHeaders.isEmpty()) {
+					return this.headers;
+				}
 			}
-			else if (defaultHeaders == null || defaultHeaders.isEmpty()) {
-				return this.headers;
-			}
-			else {
-				HttpHeaders result = new HttpHeaders();
+
+			HttpHeaders result = new HttpHeaders();
+			if (defaultHeaders != null) {
 				result.putAll(defaultHeaders);
-				result.putAll(this.headers);
-				return result;
 			}
+			if (this.headers != null) {
+				result.putAll(this.headers);
+			}
+
+			if (this.apiVersion != null) {
+				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+				apiVersionInserter.insertVersion(this.apiVersion, result);
+			}
+
+			return result;
 		}
 
 		private ClientHttpRequest createRequest(URI uri) throws IOException {

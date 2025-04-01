@@ -67,6 +67,8 @@ public class HttpRequestValues {
 
 	private final MultiValueMap<String, String> cookies;
 
+	private @Nullable Object version;
+
 	private final Map<String, Object> attributes;
 
 	private final @Nullable Object bodyValue;
@@ -79,8 +81,8 @@ public class HttpRequestValues {
 	protected HttpRequestValues(@Nullable HttpMethod httpMethod,
 			@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
 			@Nullable String uriTemplate, Map<String, String> uriVariables,
-			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
-			@Nullable Object bodyValue) {
+			HttpHeaders headers, MultiValueMap<String, String> cookies, @Nullable Object version,
+			Map<String, Object> attributes, @Nullable Object bodyValue) {
 
 		Assert.isTrue(uri != null || uriTemplate != null, "Neither URI nor URI template");
 
@@ -91,6 +93,7 @@ public class HttpRequestValues {
 		this.uriVariables = uriVariables;
 		this.headers = headers;
 		this.cookies = cookies;
+		this.version = version;
 		this.attributes = attributes;
 		this.bodyValue = bodyValue;
 	}
@@ -152,6 +155,10 @@ public class HttpRequestValues {
 	 */
 	public MultiValueMap<String, String> getCookies() {
 		return this.cookies;
+	}
+
+	public @Nullable Object getApiVersion() {
+		return this.version;
 	}
 
 	/**
@@ -224,6 +231,8 @@ public class HttpRequestValues {
 		private @Nullable MultiValueMap<String, String> requestParams;
 
 		private @Nullable MultiValueMap<String, Object> parts;
+
+		private @Nullable Object version;
 
 		private @Nullable Map<String, Object> attributes;
 
@@ -348,6 +357,20 @@ public class HttpRequestValues {
 		}
 
 		/**
+		 * Set an API version for the request. The version is passed on to the
+		 * underlying {@code RestClient} or {@code WebClient} that in turn are
+		 * configured with an {@code ApiVersionInserter}.
+		 * @param version the API version of the request; this can be a String or
+		 * some Object that can be formatted the inserter, e.g. through an
+		 * {@link org.springframework.web.client.ApiVersionFormatter}.
+		 * @since 7.0
+		 */
+		public Builder setApiVersion(Object version) {
+			this.version = version;
+			return this;
+		}
+
+		/**
 		 * Configure an attribute to associate with the request.
 		 * @param name the attribute name
 		 * @param value the attribute value
@@ -439,7 +462,7 @@ public class HttpRequestValues {
 
 			return createRequestValues(
 					this.httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
-					headers, cookies, attributes, bodyValue);
+					headers, cookies, this.version, attributes, bodyValue);
 		}
 
 		protected boolean hasParts() {
@@ -484,12 +507,12 @@ public class HttpRequestValues {
 				@Nullable HttpMethod httpMethod,
 				@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory, @Nullable String uriTemplate,
 				Map<String, String> uriVars,
-				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
-				@Nullable Object bodyValue) {
+				HttpHeaders headers, MultiValueMap<String, String> cookies, @Nullable Object version,
+				Map<String, Object> attributes, @Nullable Object bodyValue) {
 
 			return new HttpRequestValues(
 					this.httpMethod, uri, uriBuilderFactory, uriTemplate,
-					uriVars, headers, cookies, attributes, bodyValue);
+					uriVars, headers, cookies, version, attributes, bodyValue);
 		}
 	}
 

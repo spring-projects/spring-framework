@@ -333,6 +333,15 @@ public interface RestClient {
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
+		 * Configure an {@link ApiVersionInserter} to abstract how an API version
+		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
+		 * is inserted into the request.
+		 * @param apiVersionInserter the inserter to use
+		 * @since 7.0
+		 */
+		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
+
+		/**
 		 * Provide a consumer to customize every request being built.
 		 * @param defaultRequest the consumer to use for modifying requests
 		 * @return this builder
@@ -595,6 +604,17 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set an API version for the request. The version is inserted into the
+		 * request by the {@link Builder#apiVersionInserter(ApiVersionInserter)
+		 * configured} {@code ApiVersionInserter}.
+		 * @param version the API version of the request; this can be a String or
+		 * some Object that can be formatted the inserter, e.g. through an
+		 * {@link ApiVersionFormatter}.
+		 * @since 7.0
+		 */
+		S apiVersion(Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.

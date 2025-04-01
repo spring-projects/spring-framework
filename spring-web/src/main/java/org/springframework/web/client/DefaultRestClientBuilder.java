@@ -150,6 +150,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private @Nullable ApiVersionInserter apiVersionInserter;
+
 	private @Nullable Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest;
 
 	private @Nullable List<StatusHandler> statusHandlers;
@@ -186,6 +188,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.defaultHeaders = null;
 		}
 		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.apiVersionInserter = other.apiVersionInserter;
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new ArrayList<>(other.statusHandlers) : null);
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
@@ -319,6 +322,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
+	}
+
+	@Override
+	public RestClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+		this.apiVersionInserter = apiVersionInserter;
+		return this;
 	}
 
 	@Override
@@ -513,9 +522,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return new DefaultRestClient(
 				requestFactory, this.interceptors, this.bufferingPredicate, this.initializers,
 				uriBuilderFactory, defaultHeaders, defaultCookies,
-				this.defaultRequest,
-				this.statusHandlers,
-				converters,
+				this.apiVersionInserter, this.defaultRequest,
+				this.statusHandlers, converters,
 				this.observationRegistry, this.observationConvention,
 				new DefaultRestClientBuilder(this));
 	}

@@ -158,7 +158,7 @@ final class HttpServiceMethod {
 	private record HttpRequestValuesInitializer(
 			@Nullable HttpMethod httpMethod, @Nullable String url,
 			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes,
-			MultiValueMap<String, String> headers,
+			MultiValueMap<String, String> headers, @Nullable String version,
 			Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
 		public HttpRequestValues.Builder initializeRequestValuesBuilder() {
@@ -177,6 +177,9 @@ final class HttpServiceMethod {
 			}
 			this.headers.forEach((name, values) ->
 					values.forEach(value -> requestValues.addHeader(name, value)));
+			if (this.version != null) {
+				requestValues.setApiVersion(this.version);
+			}
 			return requestValues;
 		}
 
@@ -208,9 +211,11 @@ final class HttpServiceMethod {
 			MediaType contentType = initContentType(typeAnnotation, methodAnnotation);
 			List<MediaType> acceptableMediaTypes = initAccept(typeAnnotation, methodAnnotation);
 			MultiValueMap<String, String> headers = initHeaders(typeAnnotation, methodAnnotation, embeddedValueResolver);
+			String version = initVersion(typeAnnotation, methodAnnotation);
 
 			return new HttpRequestValuesInitializer(
-					httpMethod, url, contentType, acceptableMediaTypes, headers, requestValuesSupplier);
+					httpMethod, url, contentType, acceptableMediaTypes, headers, version,
+					requestValuesSupplier);
 		}
 
 		private static @Nullable HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
@@ -254,7 +259,9 @@ final class HttpServiceMethod {
 			return (hasMethodLevelUrl ? methodLevelUrl : typeLevelUrl);
 		}
 
-		private static @Nullable MediaType initContentType(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+		private static @Nullable MediaType initContentType(
+				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+
 			String methodLevelContentType = methodAnnotation.contentType();
 			if (StringUtils.hasText(methodLevelContentType)) {
 				return MediaType.parseMediaType(methodLevelContentType);
@@ -268,7 +275,9 @@ final class HttpServiceMethod {
 			return null;
 		}
 
-		private static @Nullable List<MediaType> initAccept(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+		private static @Nullable List<MediaType> initAccept(
+				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+
 			String[] methodLevelAccept = methodAnnotation.accept();
 			if (!ObjectUtils.isEmpty(methodLevelAccept)) {
 				return MediaType.parseMediaTypes(List.of(methodLevelAccept));
@@ -292,6 +301,18 @@ final class HttpServiceMethod {
 			}
 			addHeaders(methodAnnotation.headers(), embeddedValueResolver, headers);
 			return headers;
+		}
+
+		private static @Nullable String initVersion(
+				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation) {
+
+			if (StringUtils.hasText(methodAnnotation.version())) {
+				return methodAnnotation.version();
+			}
+			if (typeAnnotation != null && StringUtils.hasText(typeAnnotation.version())) {
+				return typeAnnotation.version();
+			}
+			return null;
 		}
 
 		private static void addHeaders(

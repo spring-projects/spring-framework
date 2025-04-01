@@ -42,6 +42,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -79,6 +80,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	private @Nullable HttpHeaders defaultHeaders;
 
 	private @Nullable MultiValueMap<String, String> defaultCookies;
+
+	private @Nullable ApiVersionInserter apiVersionInserter;
 
 	private @Nullable Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
 
@@ -118,8 +121,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 			this.defaultHeaders = null;
 		}
 
-		this.defaultCookies = (other.defaultCookies != null ?
-				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.apiVersionInserter = other.apiVersionInserter;
+
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new LinkedHashMap<>(other.statusHandlers) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
@@ -188,6 +192,13 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
+	}
+
+
+	@Override
+	public WebClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+		this.apiVersionInserter = apiVersionInserter;
+		return this;
 	}
 
 	@Override
@@ -297,6 +308,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return new DefaultWebClient(
 				exchange, filterFunctions,
 				initUriBuilderFactory(), defaultHeaders, defaultCookies,
+				this.apiVersionInserter,
 				this.defaultRequest,
 				this.statusHandlers,
 				this.observationRegistry, this.observationConvention,
