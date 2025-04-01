@@ -248,8 +248,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		return executor;
 	}
 
-	@Nullable
-	private Long determineConcurrentStartup(int phase) {
+	private @Nullable Long determineConcurrentStartup(int phase) {
 		return this.concurrentStartupForPhases.get(phase);
 	}
 
