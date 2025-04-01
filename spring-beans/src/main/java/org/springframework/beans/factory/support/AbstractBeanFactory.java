@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,6 +67,7 @@ import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.log.LogMessage;
@@ -199,6 +201,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return doGetBean(name, requiredType, null, false);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		Object bean = getBean(name);
+		Type requiredType = typeReference.getType();
+		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
+			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+		}
+		return (T) bean;
 	}
 
 	@Override

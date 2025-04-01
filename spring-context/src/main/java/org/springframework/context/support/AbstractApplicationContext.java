@@ -132,6 +132,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Yanming Zhou
  * @since January 21, 2001
  * @see #refreshBeanFactory
  * @see #getBeanFactory
@@ -1303,6 +1304,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name, requiredType);
+	}
+
+	@Override
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBean(name, typeReference);
 	}
 
 	@Override

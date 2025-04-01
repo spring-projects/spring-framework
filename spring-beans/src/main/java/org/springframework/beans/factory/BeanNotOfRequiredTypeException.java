@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.reflect.Type;
+
 import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -24,6 +27,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 @SuppressWarnings("serial")
 public class BeanNotOfRequiredTypeException extends BeansException {
@@ -32,7 +36,7 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	private final String beanName;
 
 	/** The required type. */
-	private final Class<?> requiredType;
+	private final Type genericRequiredType;
 
 	/** The offending type. */
 	private final Class<?> actualType;
@@ -46,10 +50,22 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 * the expected type
 	 */
 	public BeanNotOfRequiredTypeException(String beanName, Class<?> requiredType, Class<?> actualType) {
-		super("Bean named '" + beanName + "' is expected to be of type '" + ClassUtils.getQualifiedName(requiredType) +
+		this(beanName, (Type) requiredType, actualType);
+	}
+
+	/**
+	 * Create a new BeanNotOfRequiredTypeException.
+	 * @param beanName the name of the bean requested
+	 * @param requiredType the required type
+	 * @param actualType the actual type returned, which did not match
+	 * the expected type
+	 * @since 7.1
+	 */
+	public BeanNotOfRequiredTypeException(String beanName, Type requiredType, Class<?> actualType) {
+		super("Bean named '" + beanName + "' is expected to be of type '" + requiredType.getTypeName() +
 				"' but was actually of type '" + ClassUtils.getQualifiedName(actualType) + "'");
 		this.beanName = beanName;
-		this.requiredType = requiredType;
+		this.genericRequiredType = requiredType;
 		this.actualType = actualType;
 	}
 
@@ -65,7 +81,15 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 * Return the expected type for the bean.
 	 */
 	public Class<?> getRequiredType() {
-		return this.requiredType;
+		return (this.genericRequiredType instanceof Class<?> clazz ? clazz : ResolvableType.forType(this.genericRequiredType).toClass());
+	}
+
+	/**
+	 * Return the expected generic type for the bean.
+	 * @since 7.1
+	 */
+	public Type getGenericRequiredType() {
+		return this.genericRequiredType;
 	}
 
 	/**
