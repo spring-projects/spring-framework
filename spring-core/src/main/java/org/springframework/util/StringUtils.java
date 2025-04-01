@@ -800,32 +800,27 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Decode the given encoded URI component value. Based on the following rules:
-	 * <ul>
-	 * <li>Alphanumeric characters {@code "a"} through {@code "z"}, {@code "A"} through {@code "Z"},
-	 * and {@code "0"} through {@code "9"} stay the same.</li>
-	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
-	 * <li>A sequence "<i>{@code %xy}</i>" is interpreted as a hexadecimal representation of the character.</li>
-	 * <li>For all other characters (including those already decoded), the output is undefined.</li>
-	 * </ul>
-	 * @param source the encoded String
-	 * @param charset the character set
+	 * Decode the given encoded URI component value by replacing "<i>{@code %xy}</i>" sequences
+	 * by an hexadecimal representation of the character in the specified charset, letting other
+	 * characters unchanged.
+	 * @param source the encoded {@code String}
+	 * @param charset the character encoding to use to decode the "<i>{@code %xy}</i>" sequences
 	 * @return the decoded value
 	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
 	 * @since 5.0
-	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String, String) java.net.URLDecoder#decode for HTML form decoding
 	 */
 	public static String uriDecode(String source, Charset charset) {
-		Assert.notNull(charset, "Charset must not be null");
 		int length = source.length();
-		if (length == 0) {
+		int firstPercentIndex = source.indexOf('%');
+		if (length == 0 || firstPercentIndex < 0) {
 			return source;
 		}
 
 		StringBuilder output = new StringBuilder(length);
-		boolean changed = false;
+		output.append(source, 0, firstPercentIndex);
 		byte[] bytes = null;
-		int i = 0;
+		int i = firstPercentIndex;
 		while (i < length) {
 			char ch = source.charAt(i);
 			if (ch == '%') {
@@ -848,7 +843,6 @@ public abstract class StringUtils {
 					}
 
 					output.append(new String(bytes, 0, pos, charset));
-					changed = true;
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
@@ -859,7 +853,7 @@ public abstract class StringUtils {
 				i++;
 			}
 		}
-		return (changed ? output.toString() : source);
+		return output.toString();
 	}
 
 	/**
