@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.web.client
 
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
-import org.springframework.web.client.RestClient.RequestHeadersSpec
-import org.springframework.web.client.RestClient.RequestHeadersSpec.ExchangeFunction
 
 /**
  * Extension for [RestClient.RequestBodySpec.body] providing a `bodyWithType<Foo>(...)` variant
@@ -54,15 +52,6 @@ inline fun <reified T : Any> RestClient.ResponseSpec.requiredBody(): T =
     body(object : ParameterizedTypeReference<T>() {}) ?: throw NoSuchElementException("Response body is required")
 
 /**
- * Extension for [RestClient.RequestHeadersSpec.exchange] providing a `requiredExchange(...)` variant with a
- * non-nullable return value.
- * @throws NoSuchElementException if there is no response value
- * @since 6.2.6
- */
-fun <T: Any> RequestHeadersSpec<*>.requiredExchange(exchangeFunction: ExchangeFunction<T>, close: Boolean = true): T =
-	exchange(exchangeFunction, close) ?: throw NoSuchElementException("Response value is required")
-
-/**
  * Extension for [RestClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
@@ -72,4 +61,3 @@ fun <T: Any> RequestHeadersSpec<*>.requiredExchange(exchangeFunction: ExchangeFu
  */
 inline fun <reified T : Any> RestClient.ResponseSpec.toEntity(): ResponseEntity<T> =
 	toEntity(object : ParameterizedTypeReference<T>() {})
-

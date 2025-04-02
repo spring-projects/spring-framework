@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,9 @@ package org.springframework.web.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpRequest
-import org.springframework.web.client.RestClient.RequestHeadersSpec
 
 /**
  * Mock object based tests for [RestClient] Kotlin extensions
@@ -60,24 +57,6 @@ class RestClientExtensionsTests {
 	fun `ResponseSpec#requiredBody with null response throws NoSuchElementException`() {
 		every { responseSpec.body(any<ParameterizedTypeReference<Foo>>()) } returns null
 		assertThrows<NoSuchElementException> { responseSpec.requiredBody<Foo>() }
-	}
-
-	@Test
-	fun `RequestHeadersSpec#requiredExchange`() {
-		val foo = Foo()
-		every { requestBodySpec.exchange(any<RequestHeadersSpec.ExchangeFunction<Foo>>(), any()) } returns foo
-		val exchangeFunction: (HttpRequest, RequestHeadersSpec.ConvertibleClientHttpResponse) -> Foo? =
-			{ _, _ -> foo }
-		val value = requestBodySpec.requiredExchange(exchangeFunction)
-		assertThat(value).isEqualTo(foo)
-	}
-
-	@Test
-	fun `RequestHeadersSpec#requiredExchange with null response throws NoSuchElementException`() {
-		every { requestBodySpec.exchange(any<RequestHeadersSpec.ExchangeFunction<Foo>>(), any()) } returns null
-		val exchangeFunction: (HttpRequest, RequestHeadersSpec.ConvertibleClientHttpResponse) -> Foo? =
-			{ _, _ -> null }
-		assertThrows<NoSuchElementException> { requestBodySpec.requiredExchange(exchangeFunction) }
 	}
 
 	@Test

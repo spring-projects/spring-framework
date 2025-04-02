@@ -679,8 +679,8 @@ public interface RestClient {
 		ResponseSpec retrieve();
 
 		/**
-		 * Exchange the {@link ClientHttpResponse} for a type {@code T}. This
-		 * can be useful for advanced scenarios, for example to decode the
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
 		 * response differently depending on the response status:
 		 * <pre class="code">
 		 * Person person = client.get()
@@ -700,15 +700,44 @@ public interface RestClient {
 		 * function has been invoked.
 		 * @param exchangeFunction the function to handle the response with
 		 * @param <T> the type the response will be transformed to
-		 * @return the value returned from the exchange function
+		 * @return the value returned from the exchange function, potentially {@code null}
+		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction)
 		 */
 		default <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
 
 		/**
-		 * Exchange the {@link ClientHttpResponse} for a type {@code T}. This
-		 * can be useful for advanced scenarios, for example to decode the
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
+		 * response differently depending on the response status:
+		 * <pre class="code">
+		 * Person person = client.get()
+		 *     .uri("/people/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchange((request, response) -&gt; {
+		 *         if (response.getStatusCode().equals(HttpStatus.OK)) {
+		 *             return deserialize(response.getBody());
+		 *         }
+		 *         else {
+		 *             throw new BusinessException();
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> The response is
+		 * {@linkplain ClientHttpResponse#close() closed} after the exchange
+		 * function has been invoked.
+		 * @param exchangeFunction the function to handle the response with
+		 * @param <T> the type the response will be transformed to
+		 * @return the value returned from the exchange function, never {@code null}
+		 */
+		default <T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction) {
+			return exchangeForRequiredValue(exchangeFunction, true);
+		}
+
+		/**
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
 		 * response differently depending on the response status:
 		 * <pre class="code">
 		 * Person person = client.get()
@@ -731,9 +760,39 @@ public interface RestClient {
 		 * @param close {@code true} to close the response after
 		 * {@code exchangeFunction} is invoked, {@code false} to keep it open
 		 * @param <T> the type the response will be transformed to
-		 * @return the value returned from the exchange function
+		 * @return the value returned from the exchange function, potentially {@code null}
+		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction, boolean)
 		 */
 		<T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
+
+		/**
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
+		 * response differently depending on the response status:
+		 * <pre class="code">
+		 * Person person = client.get()
+		 *     .uri("/people/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchange((request, response) -&gt; {
+		 *         if (response.getStatusCode().equals(HttpStatus.OK)) {
+		 *             return deserialize(response.getBody());
+		 *         }
+		 *         else {
+		 *             throw new BusinessException();
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> If {@code close} is {@code true},
+		 * then the response is {@linkplain ClientHttpResponse#close() closed}
+		 * after the exchange function has been invoked. When set to
+		 * {@code false}, the caller is responsible for closing the response.
+		 * @param exchangeFunction the function to handle the response with
+		 * @param close {@code true} to close the response after
+		 * {@code exchangeFunction} is invoked, {@code false} to keep it open
+		 * @param <T> the type the response will be transformed to
+		 * @return the value returned from the exchange function, never {@code null}
+		 */
+		<T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction, boolean close);
 
 
 		/**
@@ -744,15 +803,31 @@ public interface RestClient {
 		interface ExchangeFunction<T> {
 
 			/**
-			 * Exchange the given response into a type {@code T}.
+			 * Exchange the given response into a value of type {@code T}.
 			 * @param clientRequest the request
 			 * @param clientResponse the response
-			 * @return the exchanged type
+			 * @return the exchanged value, potentially {@code null}
 			 * @throws IOException in case of I/O errors
 			 */
 			@Nullable T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
+		/**
+		 * Variant of {@link ExchangeFunction} returning a non-null required value.
+		 * @param <T> the type the response will be transformed to
+		 */
+		@FunctionalInterface
+		interface RequiredValueExchangeFunction<T> extends ExchangeFunction<T> {
+
+			/**
+			 * Exchange the given response into a value of type {@code T}.
+			 * @param clientRequest the request
+			 * @param clientResponse the response
+			 * @return the exchanged value, never {@code null}
+			 * @throws IOException in case of I/O errors
+			 */
+			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+		}
 
 		/**
 		 * Extension of {@link ClientHttpResponse} that can convert the body.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.web.testfixture.xml.Pojo;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
@@ -763,6 +764,39 @@ class RestClientIntegrationTests {
 
 		expectRequestCount(1);
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
+	}
+
+	@ParameterizedRestClientTest
+	void exchangeForRequiredValue(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setBody("Hello Spring!"));
+
+		String result = this.restClient.get()
+				.uri("/greeting")
+				.header("X-Test-Header", "testvalue")
+				.exchangeForRequiredValue((request, response) -> new String(RestClientUtils.getBody(response), UTF_8));
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeader("X-Test-Header")).isEqualTo("testvalue");
+			assertThat(request.getPath()).isEqualTo("/greeting");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	@SuppressWarnings("DataFlowIssue")
+	void exchangeForNullRequiredValue(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setBody("Hello Spring!"));
+
+		assertThatIllegalStateException().isThrownBy(() -> this.restClient.get()
+				.uri("/greeting")
+				.header("X-Test-Header", "testvalue")
+				.exchangeForRequiredValue((request, response) -> null));
 	}
 
 	@ParameterizedRestClientTest
