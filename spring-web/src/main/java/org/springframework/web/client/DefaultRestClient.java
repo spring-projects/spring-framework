@@ -533,6 +533,13 @@ final class DefaultRestClient implements RestClient {
 			return exchangeInternal(exchangeFunction, close);
 		}
 
+		@Override
+		public <T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction, boolean close) {
+			T value = exchangeInternal(exchangeFunction, close);
+			Assert.state(value != null, "The exchanged value must not be null");
+			return value;
+		}
+
 		@Nullable
 		private <T> T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
 			Assert.notNull(exchangeFunction, "ExchangeFunction must not be null");
