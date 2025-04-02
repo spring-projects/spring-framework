@@ -46,10 +46,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Implementation of {@link ServerResponse} for sending
- * <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
+ * <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events</a>.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Taeik Lim
  * @since 5.3.2
  */
 final class SseServerResponse extends AbstractServerResponse {

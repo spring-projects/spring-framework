@@ -276,7 +276,7 @@ ServerResponse.async(asyncResponse);
 ----
 ======
 
-https://www.w3.org/TR/eventsource/[Server-Sent Events] can be provided via the
+https://html.spec.whatwg.org/multipage/server-sent-events.html[Server-Sent Events] can be provided via the
 static `sse` method on `ServerResponse`. The builder provided by that method
 allows you to send Strings, or other objects as JSON. For example:
 

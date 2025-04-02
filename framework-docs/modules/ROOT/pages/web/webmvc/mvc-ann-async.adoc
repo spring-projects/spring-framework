@@ -281,7 +281,7 @@ invokes the configured exception resolvers and completes the request.
 === SSE
 
 `SseEmitter` (a subclass of `ResponseBodyEmitter`) provides support for
-https://www.w3.org/TR/eventsource/[Server-Sent Events], where events sent from the server
+https://html.spec.whatwg.org/multipage/server-sent-events.html[Server-Sent Events], where events sent from the server
 are formatted according to the W3C SSE specification. To produce an SSE
 stream from a controller, return `SseEmitter`, as the following example shows:
 
