@@ -130,7 +130,7 @@ class TestBeanOverrideHandlerTests {
 		TestBean annotation = field.getAnnotation(TestBean.class);
 		String beanName = (StringUtils.hasText(annotation.name()) ? annotation.name() : null);
 		return new TestBeanOverrideHandler(
-				field, ResolvableType.forClass(field.getType()), beanName, BeanOverrideStrategy.REPLACE, overrideMethod);
+				field, ResolvableType.forClass(field.getType()), beanName, "", BeanOverrideStrategy.REPLACE, overrideMethod);
 	}
 
 	static class SampleOneOverride {
