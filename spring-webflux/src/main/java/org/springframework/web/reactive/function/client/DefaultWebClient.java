@@ -436,22 +436,23 @@ final class DefaultWebClient implements WebClient {
 
 		private Mono<ClientResponse> exchange() {
 			ClientRequest.Builder requestBuilder = initRequestBuilder();
-			ClientRequestObservationContext observationContext = new ClientRequestObservationContext(requestBuilder);
 			return Mono.deferContextual(contextView -> {
 				Observation observation = ClientHttpObservationDocumentation.HTTP_REACTIVE_CLIENT_EXCHANGES.observation(observationConvention,
-						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
+						DEFAULT_OBSERVATION_CONVENTION, () -> new ClientRequestObservationContext(requestBuilder), observationRegistry);
 				observation
 						.parentObservation(contextView.getOrDefault(ObservationThreadLocalAccessor.KEY, null))
 						.start();
-				ExchangeFilterFunction filterFunction = new ObservationFilterFunction(observationContext);
+				ExchangeFilterFunction filterFunction = new ObservationFilterFunction(observation.getContext());
 				if (filterFunctions != null) {
 					filterFunction = filterFunctions.andThen(filterFunction);
 				}
 				contextView.getOrEmpty(COROUTINE_CONTEXT_ATTRIBUTE)
 						.ifPresent(context -> requestBuilder.attribute(COROUTINE_CONTEXT_ATTRIBUTE, context));
 				ClientRequest request = requestBuilder.build();
-				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
-				observationContext.setRequest(request);
+				if (observation.getContext() instanceof ClientRequestObservationContext observationContext) {
+					observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
+					observationContext.setRequest(request);
+				}
 				final ExchangeFilterFunction finalFilterFunction = filterFunction;
 				Mono<ClientResponse> responseMono = Mono.defer(
 								() -> finalFilterFunction.apply(exchangeFunction).exchange(request))
@@ -464,7 +465,8 @@ final class DefaultWebClient implements WebClient {
 						.doOnNext(response -> responseReceived.set(true))
 						.doOnError(observation::error)
 						.doFinally(signalType -> {
-							if (signalType == SignalType.CANCEL && !responseReceived.get()) {
+							if (signalType == SignalType.CANCEL && !responseReceived.get() &&
+									observation.getContext() instanceof ClientRequestObservationContext observationContext) {
 								observationContext.setAborted(true);
 							}
 							observation.stop();
@@ -728,15 +730,19 @@ final class DefaultWebClient implements WebClient {
 
 	private static class ObservationFilterFunction implements ExchangeFilterFunction {
 
-		private final ClientRequestObservationContext observationContext;
+		private final Observation.Context observationContext;
 
-		ObservationFilterFunction(ClientRequestObservationContext observationContext) {
+		ObservationFilterFunction(Observation.Context observationContext) {
 			this.observationContext = observationContext;
 		}
 
 		@Override
 		public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
-			return next.exchange(request).doOnNext(this.observationContext::setResponse);
+			Mono<ClientResponse> exchange = next.exchange(request);
+			if (this.observationContext instanceof ClientRequestObservationContext clientContext) {
+				exchange = exchange.doOnNext(clientContext::setResponse);
+			}
+			return exchange;
 		}
 	}
 

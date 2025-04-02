@@ -69,6 +69,7 @@ class WebClientObservationTests {
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.headers()).thenReturn(new MockClientHeaders());
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
+		when(mockResponse.bodyToMono(String.class)).thenReturn(Mono.error(IllegalStateException::new), Mono.just("Hello"));
 		when(mockResponse.bodyToFlux(String.class)).thenReturn(Flux.just("first", "second"));
 		when(mockResponse.releaseBody()).thenReturn(Mono.empty());
 		when(this.exchangeFunction.exchange(this.request.capture())).thenReturn(Mono.just(mockResponse));
@@ -137,6 +138,16 @@ class WebClientObservationTests {
 				.expectNextCount(1)
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
+				.hasLowCardinalityKeyValue("status", "200");
+	}
+
+	@Test
+	void recordsSingleObservationForRetries() {
+		StepVerifier.create(this.builder.build().get().uri("/path").retrieve().bodyToMono(String.class).retry(1))
+				.expectNextCount(1)
+				.expectComplete()
+				.verify(Duration.ofSeconds(2));
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
 				.hasLowCardinalityKeyValue("status", "200");
 	}
