@@ -18,6 +18,7 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -215,6 +216,16 @@ class ServletServerHttpRequestTests {
 
 		int contentLength = assertFormContent("name=Test&lastName=Test%40er");
 		assertThat(request.getHeaders().getContentLength()).isEqualTo(contentLength);
+	}
+
+	@Test  // gh-34675
+	void getFormBodyWithNotUtf8Charset() throws IOException {
+		String charset = "windows-1251";
+		mockRequest.setContentType("application/x-www-form-urlencoded; charset=" + charset);
+		mockRequest.setMethod("POST");
+		mockRequest.addParameter("x", URLDecoder.decode("%e0%e0%e0", charset));
+
+		assertFormContent("x=%E0%E0%E0");
 	}
 
 	private int assertFormContent(String expected) throws IOException {

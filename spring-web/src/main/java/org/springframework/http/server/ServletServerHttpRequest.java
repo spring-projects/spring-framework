@@ -270,7 +270,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	 */
 	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
-		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
+		Charset charset = getFormCharset();
+		Writer writer = new OutputStreamWriter(bos, charset);
 
 		Map<String, String[]> form = request.getParameterMap();
 		for (Iterator<Map.Entry<String, String[]>> entryItr = form.entrySet().iterator(); entryItr.hasNext();) {
@@ -278,10 +279,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			List<String> values = Arrays.asList(entry.getValue());
 			for (Iterator<String> valueItr = values.iterator(); valueItr.hasNext();) {
 				String value = valueItr.next();
-				writer.write(URLEncoder.encode(entry.getKey(), FORM_CHARSET));
+				writer.write(URLEncoder.encode(entry.getKey(), charset));
 				if (value != null) {
 					writer.write('=');
-					writer.write(URLEncoder.encode(value, FORM_CHARSET));
+					writer.write(URLEncoder.encode(value, charset));
 					if (valueItr.hasNext()) {
 						writer.write('&');
 					}
@@ -299,6 +300,19 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 
 		return new ByteArrayInputStream(bytes);
+	}
+
+	private Charset getFormCharset() {
+		try {
+			MediaType contentType = getHeaders().getContentType();
+			if (contentType != null && contentType.getCharset() != null) {
+				return contentType.getCharset();
+			}
+		}
+		catch (Exception ex) {
+			// ignore
+		}
+		return FORM_CHARSET;
 	}
 
 
