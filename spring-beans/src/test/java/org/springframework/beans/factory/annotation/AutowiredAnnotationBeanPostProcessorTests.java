@@ -62,6 +62,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -93,6 +94,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 class AutowiredAnnotationBeanPostProcessorTests {
 
@@ -1295,6 +1297,32 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBeanMap()).containsKey("testBean");
 		assertThat(bean.getTestBeanMap()).containsValue(tb);
 		assertThat(bean.getTestBean()).isSameAs(tb);
+	}
+
+	@Test
+	void mapInjectionShouldHonorTheSortingOrder() {
+		RootBeanDefinition bd = new RootBeanDefinition(MapMethodInjectionBean.class);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(TestBean.class);
+		bd1.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
+		bf.registerBeanDefinition("bean1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(DerivedTestBean.class);
+		bd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
+		bd2.setPrimary(true);
+		bf.registerBeanDefinition("bean2", bd2);
+		RootBeanDefinition bd3 = new RootBeanDefinition();
+		bd3.setBeanClass(TestBean.class);
+		bd3.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE + 1);
+		bf.registerBeanDefinition("bean3", bd3);
+		RootBeanDefinition bd4 = new RootBeanDefinition();
+		bd4.setBeanClass(TestBean.class);
+		bd4.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE - 1);
+		bf.registerBeanDefinition("bean4", bd4);
+
+		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap().keySet()).containsExactly("bean2", "bean3", "bean4", "bean1");
 	}
 
 	@Test

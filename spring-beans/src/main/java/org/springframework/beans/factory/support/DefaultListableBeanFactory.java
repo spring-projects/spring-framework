@@ -119,6 +119,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 16 April 2001
  * @see #registerBeanDefinition
  * @see #addBeanPostProcessor
@@ -1806,6 +1807,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (autowiredBeanNames != null) {
 			autowiredBeanNames.addAll(matchingBeans.keySet());
 		}
+		Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
+		if (comparator != null) {
+			matchingBeans = sortMatchingBeans(matchingBeans, comparator);
+		}
 		TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 		return converter.convertIfNecessary(matchingBeans, descriptor.getDependencyType());
 	}
@@ -1817,6 +1822,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	private boolean isRequired(DependencyDescriptor descriptor) {
 		return getAutowireCandidateResolver().isRequired(descriptor);
+	}
+
+	private <T> Map<String, T> sortMatchingBeans(Map<String, T> matchingBeans, Comparator<Object> comparator) {
+		List<Map.Entry<String, T>> list = new ArrayList<>(matchingBeans.entrySet());
+		list.sort(Map.Entry.comparingByValue(comparator));
+		Map<String, T> result = CollectionUtils.newLinkedHashMap(list.size());
+		for(Map.Entry<String, T> entry : list) {
+			result.put(entry.getKey(), entry.getValue());
+		}
+		return result;
 	}
 
 	private @Nullable Comparator<Object> adaptDependencyComparator(Map<String, ?> matchingBeans) {
