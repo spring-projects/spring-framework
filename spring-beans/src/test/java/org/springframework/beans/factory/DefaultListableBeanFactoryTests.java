@@ -264,6 +264,32 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void nonInitializedFactoryBeanIgnoredByEagerTypeMatching() {
+		RootBeanDefinition bd = new RootBeanDefinition(DummyFactory.class);
+		bd.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, String.class);
+		lbf.registerBeanDefinition("x1", bd);
+
+		assertBeanNamesForType(TestBean.class, false, true);
+		assertThat(lbf.getBeanNamesForAnnotation(SuppressWarnings.class)).isEmpty();
+
+		assertThat(lbf.containsSingleton("x1")).isFalse();
+		assertThat(lbf.containsBean("x1")).isTrue();
+		assertThat(lbf.containsBean("&x1")).isTrue();
+		assertThat(lbf.isSingleton("x1")).isTrue();
+		assertThat(lbf.isSingleton("&x1")).isTrue();
+		assertThat(lbf.isPrototype("x1")).isFalse();
+		assertThat(lbf.isPrototype("&x1")).isFalse();
+		assertThat(lbf.isTypeMatch("x1", TestBean.class)).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", TestBean.class)).isFalse();
+		assertThat(lbf.isTypeMatch("&x1", DummyFactory.class)).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", ResolvableType.forClass(DummyFactory.class))).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class))).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, String.class))).isFalse();
+		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
+		assertThat(lbf.getType("&x1")).isEqualTo(DummyFactory.class);
+	}
+
+	@Test
 	void initializedFactoryBeanFoundByNonEagerTypeMatching() {
 		Properties p = new Properties();
 		p.setProperty("x1.(class)", DummyFactory.class.getName());
