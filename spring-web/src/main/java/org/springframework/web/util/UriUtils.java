@@ -360,30 +360,39 @@ public abstract class UriUtils {
 
 
 	/**
-	 * Decode the given encoded URI component.
-	 * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
-	 * @param source the encoded String
-	 * @param encoding the character encoding to use
+	 * Decode the given encoded URI component value by replacing each
+	 * "<i>{@code %xy}</i>" sequence with a hexadecimal representation of the
+	 * character in the specified character encoding, leaving other characters
+	 * unmodified.
+	 * @param source the encoded URI component value
+	 * @param encoding the character encoding to use to decode the "<i>{@code %xy}</i>"
+	 * sequences
 	 * @return the decoded value
-	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @throws IllegalArgumentException if the given source contains invalid encoded
+	 * sequences
 	 * @see StringUtils#uriDecode(String, Charset)
-	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String, String) java.net.URLDecoder#decode
+	 * for HTML form decoding
 	 */
 	public static String decode(String source, String encoding) {
 		return StringUtils.uriDecode(source, Charset.forName(encoding));
 	}
 
 	/**
-	 * Decode the given encoded URI component value by replacing "<i>{@code %xy}</i>" sequences
-	 * by an hexadecimal representation of the character in the specified charset, letting other
-	 * characters unchanged.
-	 * @param source the encoded {@code String}
-	 * @param charset the character encoding to use to decode the "<i>{@code %xy}</i>" sequences
+	 * Decode the given encoded URI component value by replacing each
+	 * "<i>{@code %xy}</i>" sequence with a hexadecimal representation of the
+	 * character in the specified character encoding, leaving other characters
+	 * unmodified.
+	 * @param source the encoded URI component value
+	 * @param charset the character encoding to use to decode the "<i>{@code %xy}</i>"
+	 * sequences
 	 * @return the decoded value
-	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @throws IllegalArgumentException if the given source contains invalid encoded
+	 * sequences
 	 * @since 5.0
 	 * @see StringUtils#uriDecode(String, Charset)
-	 * @see java.net.URLDecoder#decode(String, String) java.net.URLDecoder#decode for HTML form decoding
+	 * @see java.net.URLDecoder#decode(String, String) java.net.URLDecoder#decode
+	 * for HTML form decoding
 	 */
 	public static String decode(String source, Charset charset) {
 		return StringUtils.uriDecode(source, charset);

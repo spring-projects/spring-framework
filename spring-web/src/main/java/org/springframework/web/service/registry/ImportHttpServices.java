@@ -49,11 +49,11 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @see Container
  * @see AbstractHttpServiceRegistrar
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 @Repeatable(ImportHttpServices.Container.class)
 @Import(AnnotationHttpServiceRegistrar.class)
-@Documented
 public @interface ImportHttpServices {
 
 	/**
@@ -77,8 +77,9 @@ public @interface ImportHttpServices {
 
 	/**
 	 * Detect HTTP Services in the packages of the specified classes by looking
-	 * for interfaces with type or method level
-	 * {@link org.springframework.web.service.annotation.HttpExchange @HttpExchange}.
+	 * for interfaces with type-level or method-level
+	 * {@link org.springframework.web.service.annotation.HttpExchange @HttpExchange}
+	 * annotations.
 	 */
 	Class<?>[] basePackageClasses() default {};
 
@@ -91,7 +92,7 @@ public @interface ImportHttpServices {
 	/**
 	 * Specify the type of client to use for the group.
 	 * <p>By default, this is {@link HttpServiceGroup.ClientType#UNSPECIFIED}
-	 * in which case {@code RestClient} is used, but this default can be reset
+	 * in which case {@code RestClient} is used, but this default can be changed
 	 * via {@link AbstractHttpServiceRegistrar#setDefaultClientType}.
 	 */
 	HttpServiceGroup.ClientType clientType() default HttpServiceGroup.ClientType.UNSPECIFIED;
@@ -99,8 +100,8 @@ public @interface ImportHttpServices {
 
 	/**
 	 * Container annotation that is necessary for the repeatable
-	 * {@link ImportHttpServices} annotation, but does not need to be declared
-	 * in application code.
+	 * {@link ImportHttpServices @ImportHttpServices} annotation, but does not
+	 * need to be declared in application code.
 	 */
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)

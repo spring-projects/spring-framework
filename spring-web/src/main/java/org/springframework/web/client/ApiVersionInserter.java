@@ -30,17 +30,19 @@ import org.springframework.http.HttpHeaders;
 public interface ApiVersionInserter {
 
 	/**
-	 * Allows inserting the version into the URI.
+	 * Insert the version into the URI.
+	 * <p>The default implementation returns the supplied URI unmodified.
 	 * @param version the version to insert
 	 * @param uri the URI for the request
-	 * @return the updated or the same URI
+	 * @return the updated URI, or the original URI unmodified
 	 */
 	default URI insertVersion(Object version, URI uri) {
 		return uri;
 	}
 
 	/**
-	 * Allows inserting the version into request headers.
+	 * Insert the version into the request headers.
+	 * <p>The default implementation does not modify the supplied headers.
 	 * @param version the version to insert
 	 * @param headers the request headers
 	 */

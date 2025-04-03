@@ -44,11 +44,11 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
  * {@link FactoryBean} for {@link HttpServiceProxyRegistry} responsible for
- * initializing {@link HttpServiceGroup}s, and creating the HTTP Service client
+ * initializing {@link HttpServiceGroup}s and creating the HTTP Service client
  * proxies for each group.
  *
  * <p>This class is imported as a bean definition through an
- * {@link AbstractHttpServiceRegistrar}, and given .
+ * {@link AbstractHttpServiceRegistrar}.
  *
  * @author Rossen Stoyanchev
  * @author Phillip Webb

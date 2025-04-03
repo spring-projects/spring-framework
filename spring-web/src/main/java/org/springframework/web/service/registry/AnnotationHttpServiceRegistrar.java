@@ -20,7 +20,7 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
- * Built-in implementation {@link AbstractHttpServiceRegistrar} that uses
+ * Built-in implementation of {@link AbstractHttpServiceRegistrar} that uses
  * {@link ImportHttpServices} annotations on the importing configuration class
  * to determine the HTTP services and groups to register.
  *
