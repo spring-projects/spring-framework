@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
+ * @author Sumin Kim
  */
 class WebRequestDataBinderTests {
 
@@ -122,6 +123,18 @@ class WebRequestDataBinderTests {
 		request.addParameter("stringArray[]", "TWO");
 		binder.bind(new ServletWebRequest(request));
 		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
+	}
+
+	@Test
+	public void testFieldWithEmptyArrayIndex1() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("touchy", "ONE");
+		request.addParameter("touchy", "TWO");
+		binder.bind(new ServletWebRequest(request));
+		assertThat(target.getTouchy()).isEqualTo("ONE");
 	}
 
 	@Test

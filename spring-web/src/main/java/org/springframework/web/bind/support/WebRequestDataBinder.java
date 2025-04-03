@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.*;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,6 +35,10 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.support.StandardServletPartUtils;
+
+import java.beans.PropertyDescriptor;
+
+import static org.springframework.beans.BeanUtils.getPropertyDescriptor;
 
 /**
  * Special {@link org.springframework.validation.DataBinder} to perform data binding
@@ -167,6 +171,34 @@ public class WebRequestDataBinder extends WebDataBinder {
 		doBind(mpvs);
 	}
 
+	@Override
+	protected void doBind(MutablePropertyValues mpvs) {
+		Object target = getTarget();
+		if (target == null) {
+			super.doBind(mpvs);
+			return;
+		}
+
+		ConfigurablePropertyAccessor accessor = getPropertyAccessor();
+
+		for (PropertyValue pv : mpvs.getPropertyValues()) {
+			String name = pv.getName();
+			Object value = pv.getValue();
+			if (!name.endsWith("[]") && value instanceof String[] array && array.length > 0) {
+				try {
+					Class<?> propertyType = accessor.getPropertyType(name);
+					if (propertyType == null || !propertyType.isArray()) {
+						mpvs.add(name, new String[] { array[0] });
+					}
+				}
+				catch (InvalidPropertyException ex) {
+					mpvs.add(name, new String[] { array[0] });
+				}
+			}
+		}
+		super.doBind(mpvs);
+	}
+
 	/**
 	 * Treats errors as fatal.
 	 * <p>Use this method only if it's an error if the input isn't valid.
@@ -178,5 +210,4 @@ public class WebRequestDataBinder extends WebDataBinder {
 			throw new BindException(getBindingResult());
 		}
 	}
-
 }
