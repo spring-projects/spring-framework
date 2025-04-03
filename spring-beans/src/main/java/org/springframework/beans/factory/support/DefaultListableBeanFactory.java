@@ -627,9 +627,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							}
 						}
 						else {
-							if (includeNonSingletons || isNonLazyDecorated ||
-									(allowFactoryBeanInit && isSingleton(beanName, mbd, dbd))) {
+							if (includeNonSingletons || isNonLazyDecorated) {
 								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+							}
+							else if (allowFactoryBeanInit) {
+								// Type check before singleton check, avoiding FactoryBean instantiation
+								// for early FactoryBean.isSingleton() calls on non-matching beans.
+								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit) &&
+										isSingleton(beanName, mbd, dbd);
 							}
 							if (!matchFound) {
 								// In case of FactoryBean, try to match FactoryBean instance itself next.
