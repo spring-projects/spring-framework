@@ -63,6 +63,13 @@ public abstract class BeanFactoryUtils {
 	 */
 	private static final Map<String, String> transformedBeanNameCache = new ConcurrentHashMap<>();
 
+	/**
+	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
+	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
+	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
+	 * will return the factory, not the instance returned by the factory.
+	 */
+	private static final char FACTORY_BEAN_PREFIX = BeanFactory.FACTORY_BEAN_PREFIX.charAt(0);
 
 	/**
 	 * Return whether the given name is a factory dereference
@@ -72,7 +79,7 @@ public abstract class BeanFactoryUtils {
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static boolean isFactoryDereference(@Nullable String name) {
-		return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
+		return (name != null && !name.isEmpty()	&& name.charAt(0) == FACTORY_BEAN_PREFIX);
 	}
 
 	/**
@@ -84,14 +91,14 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
-		if (!name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
+		if (!isFactoryDereference(name)) {
 			return name;
 		}
 		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
 			do {
 				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
 			}
-			while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
+			while (isFactoryDereference(beanName));
 			return beanName;
 		});
 	}
