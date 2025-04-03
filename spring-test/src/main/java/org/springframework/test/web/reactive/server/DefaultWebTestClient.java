@@ -56,6 +56,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -88,6 +89,8 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private final @Nullable ApiVersionInserter apiVersionInserter;
+
 	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
 	private final Duration responseTimeout;
@@ -97,10 +100,11 @@ class DefaultWebTestClient implements WebTestClient {
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(ClientHttpConnector connector, ExchangeStrategies exchangeStrategies,
+	DefaultWebTestClient(
+			ClientHttpConnector connector, ExchangeStrategies exchangeStrategies,
 			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
-			Consumer<EntityExchangeResult<?>> entityResultConsumer,
+			@Nullable ApiVersionInserter apiVersionInserter, Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
 		this.wiretapConnector = new WiretapConnector(connector);
@@ -110,6 +114,7 @@ class DefaultWebTestClient implements WebTestClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;
 		this.defaultCookies = cookies;
+		this.apiVersionInserter = apiVersionInserter;
 		this.entityResultConsumer = entityResultConsumer;
 		this.responseTimeout = (responseTimeout != null ? responseTimeout : Duration.ofSeconds(5));
 		this.builder = clientBuilder;
@@ -185,6 +190,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final HttpHeaders headers;
 
 		private @Nullable MultiValueMap<String, String> cookies;
+
+		private @Nullable Object apiVersion;
 
 		private @Nullable BodyInserter<?, ? super ClientHttpRequest> inserter;
 
@@ -311,6 +318,12 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public RequestBodySpec apiVersion(Object version) {
+			this.apiVersion = version;
+			return this;
+		}
+
+		@Override
 		public RequestHeadersSpec<?> bodyValue(Object body) {
 			this.inserter = BodyInserters.fromValue(body);
 			return this;
@@ -373,6 +386,10 @@ class DefaultWebTestClient implements WebTestClient {
 						if (!this.headers.isEmpty()) {
 							headersToUse.putAll(this.headers);
 						}
+						if (this.apiVersion != null) {
+							Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+							apiVersionInserter.insertVersion(this.apiVersion, headersToUse);
+						}
 					})
 					.cookies(cookiesToUse -> {
 						if (!CollectionUtils.isEmpty(DefaultWebTestClient.this.defaultCookies)) {
@@ -386,7 +403,12 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		private URI initUri() {
-			return (this.uri != null ? this.uri : DefaultWebTestClient.this.uriBuilderFactory.expand(""));
+			URI uriToUse = this.uri != null ? this.uri : DefaultWebTestClient.this.uriBuilderFactory.expand("");
+			if (this.apiVersion != null) {
+				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+				uriToUse = apiVersionInserter.insertVersion(this.apiVersion, uriToUse);
+			}
+			return uriToUse;
 		}
 
 	}

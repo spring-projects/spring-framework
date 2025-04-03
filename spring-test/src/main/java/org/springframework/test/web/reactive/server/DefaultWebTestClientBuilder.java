@@ -37,6 +37,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunctions;
@@ -84,6 +85,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	private @Nullable HttpHeaders defaultHeaders;
 
 	private @Nullable MultiValueMap<String, String> defaultCookies;
+
+	private @Nullable ApiVersionInserter apiVersionInserter;
 
 	private @Nullable List<ExchangeFilterFunction> filters;
 
@@ -142,6 +145,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		}
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.apiVersionInserter = other.apiVersionInserter;
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 		this.entityResultConsumer = other.entityResultConsumer;
 		this.strategies = other.strategies;
@@ -198,6 +202,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
+	}
+
+	@Override
+	public WebTestClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+		this.apiVersionInserter = apiVersionInserter;
+		return this;
 	}
 
 	@Override
@@ -283,10 +293,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 					.orElse(exchange);
 
 		};
-		return new DefaultWebTestClient(connectorToUse, exchangeStrategies, exchangeFactory, initUriBuilderFactory(),
-				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
-				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
-				this.entityResultConsumer, this.responseTimeout, new DefaultWebTestClientBuilder(this));
+		return new DefaultWebTestClient(
+				connectorToUse, exchangeStrategies, exchangeFactory, initUriBuilderFactory(),
+				(this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null),
+				(this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null),
+				this.apiVersionInserter, this.entityResultConsumer,
+				this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
 	private static ClientHttpConnector initConnector() {
