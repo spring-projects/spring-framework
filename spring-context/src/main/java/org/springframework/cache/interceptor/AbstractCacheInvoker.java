@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class AbstractCacheInvoker {
 				return valueLoader.call();
 			}
 			catch (Exception ex2) {
-				throw new RuntimeException(ex2);
+				throw new Cache.ValueRetrievalException(key, valueLoader, ex);
 			}
 		}
 	}
@@ -124,15 +124,11 @@ public abstract class AbstractCacheInvoker {
 		try {
 			return cache.retrieve(key);
 		}
-		catch (Cache.ValueRetrievalException ex) {
-			throw ex;
-		}
 		catch (RuntimeException ex) {
 			getErrorHandler().handleCacheGetError(ex, cache, key);
 			return null;
 		}
 	}
-
 
 	/**
 	 * Execute {@link Cache#retrieve(Object, Supplier)} on the specified
@@ -145,9 +141,6 @@ public abstract class AbstractCacheInvoker {
 	protected <T> CompletableFuture<T> doRetrieve(Cache cache, Object key, Supplier<CompletableFuture<T>> valueLoader) {
 		try {
 			return cache.retrieve(key, valueLoader);
-		}
-		catch (Cache.ValueRetrievalException ex) {
-			throw ex;
 		}
 		catch (RuntimeException ex) {
 			getErrorHandler().handleCacheGetError(ex, cache, key);
