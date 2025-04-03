@@ -108,7 +108,7 @@ public @interface ImportHttpServices {
 	@Import(AnnotationHttpServiceRegistrar.class)
 	@interface Container {
 
-		ImportHttpServices[] value() default {};
+		ImportHttpServices[] value();
 	}
 
 }
