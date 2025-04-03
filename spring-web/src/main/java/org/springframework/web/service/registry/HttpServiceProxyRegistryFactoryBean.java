@@ -180,10 +180,6 @@ public final class HttpServiceProxyRegistryFactoryBean
 			return this.declaredGroup.clientType();
 		}
 
-		public Class<? extends HttpServiceGroupConfigurer<?>> getConfigurerType() {
-			return this.groupAdapter.getConfigurerType();
-		}
-
 		@SuppressWarnings("unchecked")
 		public <CB> void apply(
 				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
