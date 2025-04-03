@@ -475,6 +475,7 @@ public interface RestClient {
 
 	/**
 	 * Contract for specifying the URI for a request.
+	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
@@ -518,6 +519,7 @@ public interface RestClient {
 
 	/**
 	 * Contract for specifying request headers leading up to the exchange.
+	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
@@ -701,6 +703,7 @@ public interface RestClient {
 		 * @param exchangeFunction the function to handle the response with
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function, never {@code null}
+		 * @since 6.2.6
 		 */
 		default <T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction) {
 			return exchangeForRequiredValue(exchangeFunction, true);
@@ -763,12 +766,14 @@ public interface RestClient {
 		 * {@code exchangeFunction} is invoked, {@code false} to keep it open
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function, never {@code null}
+		 * @since 6.2.6
 		 */
 		<T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction, boolean close);
 
 
 		/**
 		 * Defines the contract for {@link #exchange(ExchangeFunction)}.
+		 *
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
@@ -787,6 +792,8 @@ public interface RestClient {
 
 		/**
 		 * Variant of {@link ExchangeFunction} returning a non-null required value.
+		 *
+		 * @since 6.2.6
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
@@ -799,6 +806,7 @@ public interface RestClient {
 			 * @return the exchanged value, never {@code null}
 			 * @throws IOException in case of I/O errors
 			 */
+			@Override
 			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
@@ -824,7 +832,6 @@ public interface RestClient {
 			 */
 			@Nullable
 			<T> T bodyTo(ParameterizedTypeReference<T> bodyType);
-
 		}
 	}
 
@@ -1006,6 +1013,7 @@ public interface RestClient {
 
 	/**
 	 * Contract for specifying request headers and URI for a request.
+	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>> extends UriSpec<S>, RequestHeadersSpec<S> {
@@ -1017,6 +1025,5 @@ public interface RestClient {
 	 */
 	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
 	}
-
 
 }
