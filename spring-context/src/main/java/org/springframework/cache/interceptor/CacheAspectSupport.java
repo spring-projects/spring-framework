@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
@@ -440,13 +441,40 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return cacheHit;
 	}
 
+	@SuppressWarnings("unchecked")
 	private @Nullable Object executeSynchronized(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 		CacheOperationContext context = contexts.get(CacheableOperation.class).iterator().next();
 		if (isConditionPassing(context, CacheOperationExpressionEvaluator.NO_RESULT)) {
 			Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
 			Cache cache = context.getCaches().iterator().next();
 			if (CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
-				return doRetrieve(cache, key, () -> (CompletableFuture<?>) invokeOperation(invoker));
+				AtomicBoolean invokeFailure = new AtomicBoolean(false);
+				CompletableFuture<?> result = doRetrieve(cache, key,
+						() -> {
+							CompletableFuture<?> invokeResult = ((CompletableFuture<?>) invokeOperation(invoker));
+							if (invokeResult == null) {
+								return null;
+							}
+							return invokeResult.exceptionallyCompose(ex -> {
+								invokeFailure.set(true);
+								return CompletableFuture.failedFuture(ex);
+							});
+						});
+				return result.exceptionallyCompose(ex -> {
+					if (!(ex instanceof RuntimeException rex)) {
+						return CompletableFuture.failedFuture(ex);
+					}
+					try {
+						getErrorHandler().handleCacheGetError(rex, cache, key);
+						if (invokeFailure.get()) {
+							return CompletableFuture.failedFuture(ex);
+						}
+						return (CompletableFuture) invokeOperation(invoker);
+					}
+					catch (Throwable ex2) {
+						return CompletableFuture.failedFuture(ex2);
+					}
+				});
 			}
 			if (this.reactiveCachingHandler != null) {
 				Object returnValue = this.reactiveCachingHandler.executeSynchronized(invoker, method, cache, key);
@@ -505,9 +533,17 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			if (CompletableFuture.class.isAssignableFrom(context.getMethod().getReturnType())) {
 				CompletableFuture<?> result = doRetrieve(cache, key);
 				if (result != null) {
-					return result.exceptionally(ex -> {
-						getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
-						return null;
+					return result.exceptionallyCompose(ex -> {
+						if (!(ex instanceof RuntimeException rex)) {
+							return CompletableFuture.failedFuture(ex);
+						}
+						try {
+							getErrorHandler().handleCacheGetError(rex, cache, key);
+							return CompletableFuture.completedFuture(null);
+						}
+						catch (Throwable ex2) {
+							return CompletableFuture.failedFuture(ex2);
+						}
 					}).thenCompose(value -> (CompletableFuture<?>) evaluate(
 							(value != null ? CompletableFuture.completedFuture(unwrapCacheValue(value)) : null),
 							invoker, method, contexts));
@@ -1075,31 +1111,71 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		public @Nullable Object executeSynchronized(CacheOperationInvoker invoker, Method method, Cache cache, Object key) {
+			AtomicBoolean invokeFailure = new AtomicBoolean(false);
 			ReactiveAdapter adapter = this.registry.getAdapter(method.getReturnType());
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
 					// Flux or similar
 					return adapter.fromPublisher(Flux.from(Mono.fromFuture(
-							cache.retrieve(key,
-									() -> Flux.from(adapter.toPublisher(invokeOperation(invoker))).collectList().toFuture())))
-							.flatMap(Flux::fromIterable));
+							doRetrieve(cache, key,
+									() -> Flux.from(adapter.toPublisher(invokeOperation(invoker))).collectList().doOnError(ex -> invokeFailure.set(true)).toFuture())))
+							.flatMap(Flux::fromIterable)
+							.onErrorResume(RuntimeException.class, ex -> {
+								try {
+									getErrorHandler().handleCacheGetError(ex, cache, key);
+									if (invokeFailure.get()) {
+										return Flux.error(ex);
+									}
+									return Flux.from(adapter.toPublisher(invokeOperation(invoker)));
+								}
+								catch (RuntimeException exception) {
+									return Flux.error(exception);
+								}
+							}));
 				}
 				else {
 					// Mono or similar
 					return adapter.fromPublisher(Mono.fromFuture(
-							cache.retrieve(key,
-									() -> Mono.from(adapter.toPublisher(invokeOperation(invoker))).toFuture())));
+							doRetrieve(cache, key,
+									() -> Mono.from(adapter.toPublisher(invokeOperation(invoker))).doOnError(ex -> invokeFailure.set(true)).toFuture()))
+							.onErrorResume(RuntimeException.class, ex -> {
+								try {
+									getErrorHandler().handleCacheGetError(ex, cache, key);
+									if (invokeFailure.get()) {
+										return Mono.error(ex);
+									}
+									return Mono.from(adapter.toPublisher(invokeOperation(invoker)));
+								}
+								catch (RuntimeException exception) {
+									return Mono.error(exception);
+								}
+							}));
 				}
 			}
 			if (KotlinDetector.isSuspendingFunction(method)) {
-				return Mono.fromFuture(cache.retrieve(key, () -> {
-					Mono<?> mono = ((Mono<?>) invokeOperation(invoker));
-					if (mono == null) {
+				return Mono.fromFuture(doRetrieve(cache, key, () -> {
+					Mono<?> mono = (Mono<?>) invokeOperation(invoker);
+					if (mono != null) {
+						mono = mono.doOnError(ex -> invokeFailure.set(true));
+					}
+					else {
 						mono = Mono.empty();
 					}
 					return mono.toFuture();
-				}));
+				})).onErrorResume(RuntimeException.class, ex -> {
+					try {
+						getErrorHandler().handleCacheGetError(ex, cache, key);
+						if (invokeFailure.get()) {
+							return Mono.error(ex);
+						}
+						return (Mono) invokeOperation(invoker);
+					}
+					catch (RuntimeException exception) {
+						return Mono.error(exception);
+					}
+				});
 			}
 			return NOT_HANDLED;
 		}
@@ -1113,7 +1189,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			return NOT_HANDLED;
 		}
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		public @Nullable Object findInCaches(CacheOperationContext context, Cache cache, Object key,
 				CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 

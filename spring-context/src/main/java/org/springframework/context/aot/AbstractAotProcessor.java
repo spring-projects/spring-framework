@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context.aot;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
 import org.jspecify.annotations.Nullable;
@@ -103,7 +104,7 @@ public abstract class AbstractAotProcessor<T> {
 				FileSystemUtils.deleteRecursively(path);
 			}
 			catch (IOException ex) {
-				throw new RuntimeException("Failed to delete existing output in '" + path + "'");
+				throw new UncheckedIOException("Failed to delete existing output in '" + path + "'", ex);
 			}
 		}
 	}
