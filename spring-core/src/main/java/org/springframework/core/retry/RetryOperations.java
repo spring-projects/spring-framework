@@ -35,7 +35,7 @@ public interface RetryOperations {
 	 * Retry the given callback (according to the retry policy configured at the implementation level)
 	 * until it succeeds or eventually throw an exception if the retry policy is exhausted.
 	 * @param retryCallback the callback to call initially and retry if needed
-	 * @param <R>           the type of the callback's result
+	 * @param <R> the type of the callback's result
 	 * @return the callback's result
 	 * @throws Exception if the retry policy is exhausted
 	 */

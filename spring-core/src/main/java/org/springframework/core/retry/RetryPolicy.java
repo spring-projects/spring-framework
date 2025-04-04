@@ -17,7 +17,7 @@
 package org.springframework.core.retry;
 
 /**
- * Strategy interface to define how to calculate the maximin number of retry attempts.
+ * Strategy interface to define how to calculate the maximum number of retry attempts.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
