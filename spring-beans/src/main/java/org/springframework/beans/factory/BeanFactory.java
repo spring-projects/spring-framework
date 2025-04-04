@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,8 +125,15 @@ public interface BeanFactory {
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
+	 * @see #FACTORY_BEAN_PREFIX_CHAR
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
+
+	/**
+	 * Character variant of {@link #FACTORY_BEAN_PREFIX}.
+	 * @since 6.2.6
+	 */
+	char FACTORY_BEAN_PREFIX_CHAR = '&';
 
 
 	/**

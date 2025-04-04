@@ -762,16 +762,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public String[] getAliases(String name) {
 		String beanName = transformedBeanName(name);
 		List<String> aliases = new ArrayList<>();
-		boolean factoryPrefix = name.startsWith(FACTORY_BEAN_PREFIX);
+		boolean hasFactoryPrefix = (!name.isEmpty() && name.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR);
 		String fullBeanName = beanName;
-		if (factoryPrefix) {
+		if (hasFactoryPrefix) {
 			fullBeanName = FACTORY_BEAN_PREFIX + beanName;
 		}
 		if (!fullBeanName.equals(name)) {
 			aliases.add(fullBeanName);
 		}
 		String[] retrievedAliases = super.getAliases(beanName);
-		String prefix = (factoryPrefix ? FACTORY_BEAN_PREFIX : "");
+		String prefix = (hasFactoryPrefix ? FACTORY_BEAN_PREFIX : "");
 		for (String retrievedAlias : retrievedAliases) {
 			String alias = prefix + retrievedAlias;
 			if (!alias.equals(name)) {
@@ -1137,7 +1137,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public BeanDefinition getMergedBeanDefinition(String name) throws BeansException {
 		String beanName = transformedBeanName(name);
 		// Efficiently check whether bean definition exists in this factory.
-		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory parent) {
+		if (getParentBeanFactory() instanceof ConfigurableBeanFactory parent && !containsBeanDefinition(beanName)) {
 			return parent.getMergedBeanDefinition(beanName);
 		}
 		// Resolve merged bean definition locally.
@@ -1276,7 +1276,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected String originalBeanName(String name) {
 		String beanName = transformedBeanName(name);
-		if (name.startsWith(FACTORY_BEAN_PREFIX)) {
+		if (!name.isEmpty() && name.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR) {
 			beanName = FACTORY_BEAN_PREFIX + beanName;
 		}
 		return beanName;

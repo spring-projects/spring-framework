@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -926,8 +926,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	private boolean isExcluded(String beanName) {
 		return (this.excludedBeans.contains(beanName) ||
-					(beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) &&
-							this.excludedBeans.contains(beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length()))));
+					(!beanName.isEmpty() && (beanName.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR) &&
+							this.excludedBeans.contains(beanName.substring(1))));  // length of '&'
 	}
 
 	/**
