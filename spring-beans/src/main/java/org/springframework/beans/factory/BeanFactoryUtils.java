@@ -63,6 +63,7 @@ public abstract class BeanFactoryUtils {
 	 */
 	private static final Map<String, String> transformedBeanNameCache = new ConcurrentHashMap<>();
 
+
 	/**
 	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
@@ -79,7 +80,7 @@ public abstract class BeanFactoryUtils {
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static boolean isFactoryDereference(@Nullable String name) {
-		return (name != null && !name.isEmpty()	&& name.charAt(0) == FACTORY_BEAN_PREFIX);
+		return (name != null && !name.isEmpty() && name.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR);
 	}
 
 	/**
