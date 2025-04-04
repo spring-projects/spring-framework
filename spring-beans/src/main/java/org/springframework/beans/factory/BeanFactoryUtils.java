@@ -65,14 +65,6 @@ public abstract class BeanFactoryUtils {
 
 
 	/**
-	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
-	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
-	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
-	 * will return the factory, not the instance returned by the factory.
-	 */
-	private static final char FACTORY_BEAN_PREFIX = BeanFactory.FACTORY_BEAN_PREFIX.charAt(0);
-
-	/**
 	 * Return whether the given name is a factory dereference
 	 * (beginning with the factory dereference prefix).
 	 * @param name the name of the bean
@@ -92,14 +84,14 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
-		if (!isFactoryDereference(name)) {
+		if (name.isEmpty() || name.charAt(0) != BeanFactory.FACTORY_BEAN_PREFIX_CHAR) {
 			return name;
 		}
 		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
 			do {
-				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
+				beanName = beanName.substring(1);  // length of '&'
 			}
-			while (isFactoryDereference(beanName));
+			while (beanName.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR);
 			return beanName;
 		});
 	}
