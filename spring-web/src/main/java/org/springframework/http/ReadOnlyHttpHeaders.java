@@ -86,7 +86,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	@Override
 	public @Nullable List<String> get(String headerName) {
 		List<String> values = this.headers.get(headerName);
-		return (values != null ? Collections.unmodifiableList(values) : null);
+		return (values != null ? List.copyOf(values) : null);
 	}
 
 	@Override
@@ -179,7 +179,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	@Override
 	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
-		this.headers.forEach((k, vs) -> action.accept(k, Collections.unmodifiableList(vs)));
+		this.headers.forEach((k, vs) -> action.accept(k, List.copyOf(vs)));
 	}
 
 }
