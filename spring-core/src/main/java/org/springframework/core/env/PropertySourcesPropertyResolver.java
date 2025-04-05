@@ -18,6 +18,11 @@ package org.springframework.core.env;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * {@link PropertyResolver} implementation that resolves property values against
  * an underlying set of {@link PropertySources}.
@@ -81,11 +86,11 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 				if (value != null) {
 					if (resolveNestedPlaceholders) {
 						if (value instanceof String string) {
-							value = resolveNestedPlaceholders(string);
+							value = resolveNestedPlaceholdersWithEscapePreservation(string);
 						}
 						else if ((value instanceof CharSequence cs) && (String.class.equals(targetValueType) ||
 								CharSequence.class.equals(targetValueType))) {
-							value = resolveNestedPlaceholders(cs.toString());
+							value = resolveNestedPlaceholdersWithEscapePreservation(cs.toString());
 						}
 					}
 					logKeyFound(key, propertySource, value);
@@ -97,6 +102,42 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			logger.trace("Could not find key '" + key + "' in any property source");
 		}
 		return null;
+	}
+
+	/**
+	 * Resolves nested placeholders while preserving escaped placeholders.
+	 * This method ensures that escaped placeholders like \\${...} remain as literal ${...}
+	 * in the final output without being evaluated.
+	 *
+	 * @param value the value containing possible placeholders
+	 * @return the resolved value with escaped placeholders preserved
+	 */
+	private String resolveNestedPlaceholdersWithEscapePreservation(String value) {
+		final String ESCAPE_MARKER = "__ESCAPED_PH_MARKER__";
+
+		Pattern escapedPattern = Pattern.compile("\\\\(\\$\\{[^}]+\\})");
+		Matcher escapedMatcher = escapedPattern.matcher(value);
+		StringBuilder tempBuffer = new StringBuilder();
+
+		List<String> escapedValues = new ArrayList<>();
+		while (escapedMatcher.find()) {
+			String fullPlaceholder = escapedMatcher.group(1);
+			escapedValues.add(fullPlaceholder);
+			escapedMatcher.appendReplacement(tempBuffer, ESCAPE_MARKER + (escapedValues.size() - 1));
+		}
+		escapedMatcher.appendTail(tempBuffer);
+		String markedValue = tempBuffer.toString();
+
+		String resolvedValue = resolveNestedPlaceholders(markedValue);
+
+		for (int i = 0; i < escapedValues.size(); i++) {
+			resolvedValue = resolvedValue.replace(
+					ESCAPE_MARKER + i,
+					escapedValues.get(i)
+			);
+		}
+
+		return resolvedValue;
 	}
 
 	/**
