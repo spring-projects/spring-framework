@@ -366,4 +366,56 @@ class PropertySourcesPropertyResolverTests {
 			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 	}
 
+	@Test
+	void escapedPlaceholders_areNotEvaluated() {
+		testProperties.put("prop1", "value1");
+		testProperties.put("prop2", "value2\\${prop1}");
+
+		assertThat(propertyResolver.getProperty("prop2")).isEqualTo("value2${prop1}");
+	}
+
+	@Test
+	void multipleEscapedPlaceholders_arePreserved() {
+		testProperties.put("prop1", "value1");
+		testProperties.put("prop2", "value2");
+		testProperties.put("complex", "start\\${prop1}middle\\${prop2}end");
+
+		assertThat(propertyResolver.getProperty("complex")).isEqualTo("start${prop1}middle${prop2}end");
+	}
+
+	@Test
+	void doubleBackslashes_areProcessedCorrectly() {
+		testProperties.put("prop1", "value1");
+		testProperties.put("doubleEscaped", "value2\\\\${prop1}");
+
+		assertThat(propertyResolver.getProperty("doubleEscaped")).isEqualTo("value2\\${prop1}");
+	}
+
+	@Test
+	void escapedPlaceholdersInNestedProperties() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource()
+				.withProperty("p1", "v1")
+				.withProperty("p2", "v2")
+				.withProperty("escaped", "prefix-\\${p1}")
+				.withProperty("nested", "${escaped}-${p2}")
+		);
+		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+
+		assertThat(pr.getProperty("nested")).isEqualTo("prefix-${p1}-v2");
+	}
+
+
+	@Test
+	void escapedPlaceholders_withCharSequenceValues() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource()
+				.withProperty("p1", "v1")
+				.withProperty("charseq", new StringBuilder("prefix-\\${p1}"))
+		);
+		PropertyResolver resolver = new PropertySourcesPropertyResolver(ps);
+
+		assertThat(resolver.getProperty("charseq")).isEqualTo("prefix-${p1}");
+	}
+
 }
