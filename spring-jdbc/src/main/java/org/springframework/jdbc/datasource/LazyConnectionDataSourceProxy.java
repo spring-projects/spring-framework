@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,9 @@ import org.springframework.util.Assert;
  * communicate with the database at all for such read-only operations.
  * You will get the same effect with non-transactional reads, but lazy fetching
  * of JDBC Connections allows you to still perform reads in transactions.
+ *
+ * <p>As of 6.2.6, this DataSource proxy also suppresses a rollback attempt
+ * in case of a timeout where the connection has been closed in the meantime.
  *
  * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections
  * (which implement the {@link ConnectionProxy} interface) in order to handle
@@ -425,11 +428,19 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				return null;
 			}
 
-			// Target Connection already fetched,
-			// or target Connection necessary for current operation ->
-			// invoke method on target connection.
+
+			// Target Connection already fetched, or target Connection necessary for current operation
+			// -> invoke method on target connection.
 			try {
-				return method.invoke(getTargetConnection(method), args);
+				Connection conToUse = getTargetConnection(method);
+
+				if ("rollback".equals(method.getName()) && conToUse.isClosed()) {
+					// Connection closed in the meantime, probably due to a resource timeout. Since a
+					// rollback attempt typically happens right before close, we leniently suppress it.
+					return null;
+				}
+
+				return method.invoke(conToUse, args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
