@@ -342,10 +342,50 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		public boolean matchesFallback(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return (this.typeInfo.getTargetType() == targetType.getObjectType() &&
-					this.targetType.hasUnresolvableGenerics() &&
-					(!(this.converter instanceof ConditionalConverter conditionalConverter) ||
-							conditionalConverter.matches(sourceType, targetType)));
+			if (this.typeInfo.getTargetType() != targetType.getObjectType()) {
+				return false;
+			}
+
+			if (!this.targetType.hasUnresolvableGenerics()) {
+				return false;
+			}
+
+			boolean assignable = isAssignableTo(targetType.getResolvableType());
+			if (!assignable) {
+				return false;
+			}
+
+			return !(this.converter instanceof ConditionalConverter conditionalConverter) ||
+					conditionalConverter.matches(sourceType, targetType);
+		}
+
+		private boolean isAssignableTo(ResolvableType expected) {
+			return isAssignable(this.targetType, expected);
+		}
+
+		private boolean isAssignable(ResolvableType actual, ResolvableType expected) {
+			Class<?> actualResolved = actual.resolve(Object.class);
+			Class<?> expectedResolved = expected.resolve(Object.class);
+			if (!expectedResolved.isAssignableFrom(actualResolved)) {
+				return false;
+			}
+
+			ResolvableType[] actualGenerics = actual.getGenerics();
+			ResolvableType[] expectedGenerics = expected.getGenerics();
+
+			if (actualGenerics.length != expectedGenerics.length) {
+				return false;
+			}
+
+			for (int i = 0; i < actualGenerics.length; i++) {
+				ResolvableType actualGeneric = actualGenerics[i];
+				ResolvableType expectedGeneric = expectedGenerics[i];
+				if (!isAssignable(actualGeneric, expectedGeneric)) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		@Override
