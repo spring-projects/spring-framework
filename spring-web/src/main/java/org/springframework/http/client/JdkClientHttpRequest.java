@@ -96,12 +96,13 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		CompletableFuture<HttpResponse<InputStream>> responseFuture = null;
+		TimeoutHandler timeoutHandler = null;
 		try {
 			HttpRequest request = buildRequest(headers, body);
 			responseFuture = this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
 
 			if (this.timeout != null) {
-				TimeoutHandler timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);
+				timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);
 				HttpResponse<InputStream> response = responseFuture.get();
 				InputStream inputStream = timeoutHandler.wrapInputStream(response);
 				return new JdkClientHttpResponse(response, inputStream);
@@ -135,6 +136,9 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 				String message = (cause == null ? null : cause.getMessage());
 				throw (message == null ? new IOException(cause) : new IOException(message, cause));
 			}
+		}
+		catch (CancellationException ex) {
+			throw new HttpTimeoutException("Request timed out");
 		}
 	}
 
@@ -224,6 +228,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	private static final class TimeoutHandler {
 
 		private final CompletableFuture<Void> timeoutFuture;
+		private boolean isTimeout=false;
 
 		private TimeoutHandler(CompletableFuture<HttpResponse<InputStream>> future, Duration timeout) {
 
@@ -232,6 +237,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 			this.timeoutFuture.thenRun(() -> {
 				if (future.cancel(true) || future.isCompletedExceptionally() || !future.isDone()) {
+					this.isTimeout = true;
 					return;
 				}
 				try {
