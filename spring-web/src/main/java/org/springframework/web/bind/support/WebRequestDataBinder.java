@@ -21,7 +21,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -73,6 +76,7 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  *
  * @author Juergen Hoeller
  * @author Brian Clozel
+ * @author Sumin Kim
  * @since 2.5.2
  * @see #bind(org.springframework.web.context.request.WebRequest)
  * @see #registerCustomEditor
@@ -165,6 +169,46 @@ public class WebRequestDataBinder extends WebDataBinder {
 			}
 		}
 		doBind(mpvs);
+	}
+
+	/**
+	 * Binds the given property values to this binder's target.
+	 * <p>This implementation handles the case where string array values need to be
+	 * converted to single string values if the property is not array-typed.
+	 * <p>For properties that don't have the "[]" suffix but contain string array values,
+	 * this method will use only the first array element when the target property
+	 * is not of array type.
+	 *
+	 * @param mpvs the property values to bind
+	 * @see #getTarget()
+	 * @see #getPropertyAccessor()
+	 */
+	@Override
+	protected void doBind(MutablePropertyValues mpvs) {
+		Object target = getTarget();
+		if (target == null) {
+			super.doBind(mpvs);
+			return;
+		}
+
+		ConfigurablePropertyAccessor accessor = getPropertyAccessor();
+
+		for (PropertyValue pv : mpvs.getPropertyValues()) {
+			String propertyName = pv.getName();
+			Object value = pv.getValue();
+			if (!propertyName.endsWith("[]") && value instanceof String[] array && array.length > 0) {
+				try {
+					Class<?> propertyType = accessor.getPropertyType(propertyName);
+					if (propertyType == null || !propertyType.isArray()) {
+						mpvs.add(propertyName, new String[] { array[0] });
+					}
+				}
+				catch (InvalidPropertyException ex) {
+					mpvs.add(propertyName, new String[] { array[0] });
+				}
+			}
+		}
+		super.doBind(mpvs);
 	}
 
 	/**
