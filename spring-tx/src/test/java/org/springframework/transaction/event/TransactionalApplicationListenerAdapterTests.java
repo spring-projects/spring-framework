@@ -25,8 +25,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * @author Juergen Hoeller
+ * @author Réda Housni Alaoui
  */
 class TransactionalApplicationListenerAdapterTests {
 
@@ -86,6 +89,44 @@ class TransactionalApplicationListenerAdapterTests {
 		assertThat(callback.ex).isNull();
 		assertThat(adapter.getTransactionPhase()).isEqualTo(TransactionPhase.BEFORE_COMMIT);
 		assertThat(adapter.getListenerId()).isEqualTo("identifier");
+	}
+
+	@Test
+	void invokesNothingOutsideOfTransaction() {
+		CapturingSynchronizationCallback callback = new CapturingSynchronizationCallback();
+		PayloadApplicationEvent<Object> event = new PayloadApplicationEvent<>(this, new Object());
+
+		AtomicReference<Object> consumedPayload = new AtomicReference<>();
+		TransactionalApplicationListener<PayloadApplicationEvent<Object>> adapter =
+				TransactionalApplicationListener.forPayload(consumedPayload::set);
+		adapter.addCallback(callback);
+		adapter.onApplicationEvent(event);
+
+		assertThat(consumedPayload.get()).isNull();
+		assertThat(callback.preEvent).isNull();
+		assertThat(callback.postEvent).isNull();
+		assertThat(callback.ex).isNull();
+		assertThat(adapter.getTransactionPhase()).isEqualTo(TransactionPhase.AFTER_COMMIT);
+		assertThat(adapter.getListenerId()).isEmpty();
+	}
+
+	@Test
+	void invokesConsumerOutsideOfTransactionIfFallbackExecutionEnabled() {
+		CapturingSynchronizationCallback callback = new CapturingSynchronizationCallback();
+		PayloadApplicationEvent<Object> event = new PayloadApplicationEvent<>(this, new Object());
+
+		AtomicReference<Object> consumedPayload = new AtomicReference<>();
+		TransactionalApplicationListener<PayloadApplicationEvent<Object>> adapter =
+				TransactionalApplicationListener.forPayload(TransactionPhase.AFTER_COMMIT, true, consumedPayload::set);
+		adapter.addCallback(callback);
+		adapter.onApplicationEvent(event);
+
+		assertThat(consumedPayload.get()).isSameAs(event.getPayload());
+		assertThat(callback.preEvent).isNull();
+		assertThat(callback.postEvent).isNull();
+		assertThat(callback.ex).isNull();
+		assertThat(adapter.getTransactionPhase()).isEqualTo(TransactionPhase.AFTER_COMMIT);
+		assertThat(adapter.getListenerId()).isEmpty();
 	}
 
 
