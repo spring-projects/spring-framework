@@ -115,14 +115,14 @@ components.java.withVariantsFromConfiguration(configurations.testFixturesApiElem
 components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
 
 tasks.withType(JavaCompile).configureEach {
-    options.errorprone {
-    	disableAllChecks = true
+	options.errorprone {
+		disableAllChecks = true
 		option("NullAway:OnlyNullMarked", "true")
 		option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
 		option("NullAway:JSpecifyMode", "true")
-    }
+	}
 }
 tasks.compileJava {
-    // The check defaults to a warning, bump it up to an error for the main sources
-    options.errorprone.error("NullAway")
+	// The check defaults to a warning, bump it up to an error for the main sources
+	options.errorprone.error("NullAway")
 }
