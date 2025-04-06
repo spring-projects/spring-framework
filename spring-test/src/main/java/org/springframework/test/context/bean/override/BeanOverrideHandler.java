@@ -89,6 +89,15 @@ public abstract class BeanOverrideHandler {
 	private final BeanOverrideStrategy strategy;
 
 
+	/**
+	 * Construct a new {@code BeanOverrideHandler} from the supplied values.
+	 * @param field the {@link Field} annotated with {@link BeanOverride @BeanOverride},
+	 * or {@code null} if {@code @BeanOverride} was declared at the type level
+	 * @param beanType the {@linkplain ResolvableType type} of bean to override
+	 * @param beanName the name of the bean to override, or {@code null} to look
+	 * for a single matching bean by type
+	 * @param strategy the {@link BeanOverrideStrategy} to use
+	 */
 	protected BeanOverrideHandler(@Nullable Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy) {
 
@@ -214,7 +223,7 @@ public abstract class BeanOverrideHandler {
 
 
 	/**
-	 * Get the annotated {@link Field}.
+	 * Get the {@link Field} annotated with {@link BeanOverride @BeanOverride}.
 	 */
 	public final @Nullable Field getField() {
 		return this.field;
