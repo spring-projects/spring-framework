@@ -45,7 +45,7 @@ repositories {
 
 // To avoid a redeclaration error with Kotlin compiler
 tasks.named('compileKotlin', KotlinCompilationTask.class) {
-    javaSources.from = []
+	javaSources.from = []
 }
 
 dependencies {
