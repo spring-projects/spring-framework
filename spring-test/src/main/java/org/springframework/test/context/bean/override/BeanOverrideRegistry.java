@@ -23,9 +23,9 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -114,8 +114,7 @@ class BeanOverrideRegistry {
 	 * @since 6.2.6
 	 * @see #registerBeanOverrideHandler(BeanOverrideHandler, String)
 	 */
-	@Nullable
-	Object getBeanForHandler(BeanOverrideHandler handler, Class<?> requiredType) {
+	@Nullable Object getBeanForHandler(BeanOverrideHandler handler, Class<?> requiredType) {
 		String beanName = this.handlerToBeanNameMap.get(handler);
 		if (beanName != null) {
 			return this.beanFactory.getBean(beanName, requiredType);
