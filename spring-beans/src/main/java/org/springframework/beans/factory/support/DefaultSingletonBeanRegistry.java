@@ -315,7 +315,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 						while ((singletonObject = this.singletonObjects.get(beanName)) == null) {
 							Thread otherThread = this.currentCreationThreads.get(beanName);
 							if (otherThread != null && (otherThread == currentThread ||
-									this.lenientWaitingThreads.get(otherThread) == currentThread)) {
+									checkDependentWaitingThreads(otherThread, currentThread))) {
 								throw ex;
 							}
 							if (!this.singletonsInLenientCreation.contains(beanName)) {
@@ -429,6 +429,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				this.lenientCreationLock.unlock();
 			}
 		}
+	}
+
+	private boolean checkDependentWaitingThreads(Thread waitingThread, Thread candidateThread) {
+		Thread threadToCheck = waitingThread;
+		while ((threadToCheck = this.lenientWaitingThreads.get(threadToCheck)) != null) {
+			if (threadToCheck == candidateThread) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
