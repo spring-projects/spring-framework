@@ -16,8 +16,6 @@
 
 package org.springframework.core.retry;
 
-import java.util.concurrent.Callable;
-
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -28,6 +26,7 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
+ * @see RetryTemplate
  */
 public interface RetryOperations {
 
@@ -37,9 +36,9 @@ public interface RetryOperations {
 	 * @param retryCallback the callback to call initially and retry if needed
 	 * @param <R> the type of the callback's result
 	 * @return the callback's result
-	 * @throws Exception if the retry policy is exhausted
+	 * @throws RetryException if the retry policy is exhausted
 	 */
-	<R> @Nullable R execute(Callable<R> retryCallback) throws Exception;
+	<R> @Nullable R execute(RetryCallback<R> retryCallback) throws RetryException;
 
 }
 

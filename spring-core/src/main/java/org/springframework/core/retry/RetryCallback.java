@@ -16,30 +16,27 @@
 
 package org.springframework.core.retry;
 
-import java.util.function.Predicate;
-
 /**
- * Strategy interface to define how to calculate the maximum number of retry attempts
- * and which exceptions to retry.
+ * Callback interface for a retryable piece of code. Used in conjunction with {@link RetryOperations}.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
+ * @param <R> the type of the result
+ * @see RetryOperations
  */
-public interface RetryPolicy {
+public interface RetryCallback<R> {
 
 	/**
-	 * Return the maximum number of retry attempts.
-	 * @return the maximum number of retry attempts
+	 * Method to execute and retry if needed.
+	 * @return the result of the callback
+	 * @throws Exception if an error occurs during the execution of the callback
 	 */
-	int getMaxAttempts();
+	R run() throws Exception;
 
 	/**
-	 * Return a predicate that specifies which exceptions to retry. Defaults to a
-	 * predicate that retries all exceptions.
-	 * @return a predicate that specifies which exceptions to retry
+	 * A unique logical name for this callback to distinguish retries around
+	 * business operations.
+	 * @return the name of the callback
 	 */
-	default Predicate<Exception> retryOn() {
-		return exception -> true;
-	}
-
+	String getName();
 }

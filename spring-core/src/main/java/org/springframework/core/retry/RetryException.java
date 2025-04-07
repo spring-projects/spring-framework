@@ -16,30 +16,35 @@
 
 package org.springframework.core.retry;
 
-import java.util.function.Predicate;
+import java.io.Serial;
 
 /**
- * Strategy interface to define how to calculate the maximum number of retry attempts
- * and which exceptions to retry.
+ * Exception class for exhausted retries.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
+ * @see RetryOperations
  */
-public interface RetryPolicy {
+public class RetryException extends Exception {
+
+	@Serial
+	private static final long serialVersionUID = 5439915454935047936L;
 
 	/**
-	 * Return the maximum number of retry attempts.
-	 * @return the maximum number of retry attempts
+	 * Create a new exception with a message.
+	 * @param message the exception's message
 	 */
-	int getMaxAttempts();
+	public RetryException(String message) {
+		super(message);
+	}
 
 	/**
-	 * Return a predicate that specifies which exceptions to retry. Defaults to a
-	 * predicate that retries all exceptions.
-	 * @return a predicate that specifies which exceptions to retry
+	 * Create a new exception with a message and a cause.
+	 * @param message the exception's message
+	 * @param cause the exception's cause
 	 */
-	default Predicate<Exception> retryOn() {
-		return exception -> true;
+	public RetryException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

@@ -17,7 +17,7 @@
 package org.springframework.core.retry;
 
 import java.time.Duration;
-import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
@@ -37,24 +37,28 @@ class RetryTemplateTests {
 
 	@Test
 	void testRetryWithSuccess() throws Exception {
-		// given some unreliable code
-		Callable<String> callable = new Callable<>() {
+		// given
+		RetryCallback<String> retryCallback = new RetryCallback<>() {
 			int failure;
 			@Override
-			public String call() throws Exception {
+			public String run() throws Exception {
 				if (failure++ < 2) {
-					throw new Exception("Error while invoking service");
+					throw new Exception("Error while invoking greeting service");
 				}
 				return "hello world";
 			}
+
+			@Override
+			public String getName() {
+				return "greeting service";
+			}
 		};
-		// and a configured retry template
 		RetryTemplate retryTemplate = new RetryTemplate();
 		retryTemplate.setRetryPolicy(new MaxAttemptsRetryPolicy(3));
 		retryTemplate.setBackOffPolicy(new FixedBackOffPolicy(Duration.ofMillis(100)));
 
 		// when
-		String result = retryTemplate.execute(callable);
+		String result = retryTemplate.execute(retryCallback);
 
 		// then
 		assertThat(result).isEqualTo("hello world");
@@ -62,19 +66,69 @@ class RetryTemplateTests {
 
 	@Test
 	void testRetryWithFailure() {
-		// given some unreliable code
-		Callable<String> callable = () -> {
-			throw new Exception("Error while invoking service");
+		// given
+		RetryCallback<String> retryCallback = new RetryCallback<>() {
+			@Override
+			public String run() throws Exception {
+				throw new Exception("Error while invoking greeting service");
+			}
+
+			@Override
+			public String getName() {
+				return "greeting service";
+			}
 		};
-		// and a configured retry template
 		RetryTemplate retryTemplate = new RetryTemplate();
 		retryTemplate.setRetryPolicy(new MaxAttemptsRetryPolicy(3));
 		retryTemplate.setBackOffPolicy(new FixedBackOffPolicy(Duration.ofMillis(100)));
 
 		// when
-		ThrowingCallable throwingCallable = () -> retryTemplate.execute(callable);
+		ThrowingCallable throwingCallable = () -> retryTemplate.execute(retryCallback);
 
 		// then
-		assertThatThrownBy(throwingCallable).hasMessage("Error while invoking service");
+		assertThatThrownBy(throwingCallable)
+				.isInstanceOf(RetryException.class)
+				.hasMessage("Retry callback 'greeting service' exceeded maximum retry attempts 3, aborting execution")
+				.cause().isInstanceOf(Exception.class).hasMessage("Error while invoking greeting service");
 	}
+
+	@Test
+	void testRetrySpecificException() {
+		// given
+		class TechnicalException extends Exception {
+			public TechnicalException(String message) {
+				super(message);
+			}
+		}
+		RetryCallback<String> retryCallback = new RetryCallback<>() {
+			@Override
+			public String run() throws TechnicalException {
+				throw new TechnicalException("Error while invoking greeting service");
+			}
+
+			@Override
+			public String getName() {
+				return "greeting service";
+			}
+		};
+		MaxAttemptsRetryPolicy retryPolicy = new MaxAttemptsRetryPolicy(3) {
+			@Override
+			public Predicate<Exception> retryOn() {
+				return exception -> exception instanceof TechnicalException;
+			}
+		};
+		RetryTemplate retryTemplate = new RetryTemplate();
+		retryTemplate.setRetryPolicy(retryPolicy);
+		retryTemplate.setBackOffPolicy(new FixedBackOffPolicy(Duration.ofMillis(100)));
+
+		// when
+		ThrowingCallable throwingCallable = () -> retryTemplate.execute(retryCallback);
+
+		// then
+		assertThatThrownBy(throwingCallable)
+				.isInstanceOf(RetryException.class)
+				.cause().isInstanceOf(TechnicalException.class)
+				.hasMessage("Error while invoking greeting service");
+	}
+
 }

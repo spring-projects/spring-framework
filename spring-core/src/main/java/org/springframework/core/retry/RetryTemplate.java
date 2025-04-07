@@ -60,6 +60,32 @@ public class RetryTemplate implements RetryOperations {
 	};
 
 	/**
+	 * Create a new retry template with default settings.
+	 */
+	public RetryTemplate() {
+	}
+
+	/**
+	 * Create a new retry template with a custom {@link RetryPolicy}.
+	 * @param retryPolicy the retry policy to use
+	 */
+	public RetryTemplate(RetryPolicy retryPolicy) {
+		Assert.notNull(retryPolicy, "Retry policy must not be null");
+		this.retryPolicy = retryPolicy;
+	}
+
+	/**
+	 * Create a new retry template with a custom {@link RetryPolicy} and {@link BackOffPolicy}.
+	 * @param retryPolicy the retry policy to use
+	 * @param backOffPolicy the backoff policy to use
+	 */
+	public RetryTemplate(RetryPolicy retryPolicy, BackOffPolicy backOffPolicy) {
+		this(retryPolicy);
+		Assert.notNull(backOffPolicy, "BackOff policy must not be null");
+		this.backOffPolicy = backOffPolicy;
+	}
+
+	/**
 	 * Set the {@link RetryPolicy} to use. Defaults to <code>MaxAttemptsRetryPolicy(3)</code>.
 	 * @param retryPolicy the retry policy to use. Must not be <code>null</code>.
 	 */
@@ -92,41 +118,50 @@ public class RetryTemplate implements RetryOperations {
 	 * If the callback succeeds, its result is returned. Otherwise, the last exception will
 	 * be propagated to the caller.
 	 * @param retryCallback the callback to call initially and retry if needed
-	 * @param <R>           the type of the result
+	 * @param <R> the type of the result
 	 * @return the result of the callback if any
-	 * @throws Exception thrown if the retry policy is exhausted
+	 * @throws RetryException thrown if the retry policy is exhausted
 	 */
 	@Override
-	public <R> @Nullable R execute(Callable<R> retryCallback) throws Exception {
+	public <R> @Nullable R execute(RetryCallback<R> retryCallback) throws RetryException {
 		Assert.notNull(retryCallback, "Retry Callback must not be null");
 		int attempts = 0;
 		int maxAttempts = this.retryPolicy.getMaxAttempts();
 		while (attempts++ <= maxAttempts) {
+			String callbackName = retryCallback.getName();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Retry attempt #" + attempts);
+				logger.debug("Retry callback '" + callbackName + "'  attempt #" + attempts);
 			}
 			try {
 				this.retryListener.beforeRetry();
-				R result = retryCallback.call();
+				R result = retryCallback.run();
 				this.retryListener.onSuccess(result);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Retry attempt #" + attempts + " succeeded");
+					logger.debug("Retry callback '" + callbackName + "' attempt #" + attempts + " succeeded");
 				}
 				return result;
 			}
 			catch (Exception exception) {
+				if (!this.retryPolicy.retryOn().test(exception)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Retry callback '" + callbackName + "' aborted on " + exception.getMessage(), exception);
+					}
+					break;
+				}
 				this.retryListener.onFailure(exception);
 				Duration duration = this.backOffPolicy.backOff();
-				Thread.sleep(duration.toMillis());
 				if (logger.isDebugEnabled()) {
-					logger.debug("Attempt #" + attempts + " failed, backing off for " + duration.toMillis() + "ms");
+					logger.debug("Retry callback '" + callbackName + "' attempt #" + attempts + " failed, backing off for " + duration.toMillis() + "ms");
+				}
+				try {
+					Thread.sleep(duration.toMillis());
+				}
+				catch (InterruptedException interruptedException) {
+					throw new RetryException("Unable to backoff for retry callback '" + callbackName + "'", interruptedException);
 				}
 				if (attempts >= maxAttempts) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Maximum retry attempts " + attempts + " exhausted, aborting execution");
-					}
 					this.retryListener.onMaxAttempts(exception);
-					throw exception;
+					throw new RetryException("Retry callback '" + callbackName + "' exceeded maximum retry attempts " + attempts + ", aborting execution", exception);
 				}
 			}
 		}
