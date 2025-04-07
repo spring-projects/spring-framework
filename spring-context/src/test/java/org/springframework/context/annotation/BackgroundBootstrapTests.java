@@ -139,7 +139,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -150,7 +150,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(2000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -170,7 +170,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -191,7 +191,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(2000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -208,7 +208,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean("testBean1");
 		}
@@ -230,7 +230,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -241,7 +241,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(2000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -253,37 +253,25 @@ class BackgroundBootstrapTests {
 
 		@Bean
 		public TestBean testBean1(ObjectProvider<TestBean> testBean2) {
-			Thread thread = new Thread(testBean2::getObject);
-			thread.setUncaughtExceptionHandler((t, ex) -> System.out.println(System.currentTimeMillis() + " " + ex + " " + t));
-			thread.start();
+			new Thread(testBean2::getObject).start();
 			try {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean(testBean2.getObject());
 		}
 
 		@Bean
 		public TestBean testBean2(ObjectProvider<TestBean> testBean1) {
-			System.out.println(System.currentTimeMillis() + " testBean2 begin " + Thread.currentThread());
 			try {
 				Thread.sleep(2000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
-			try {
-				return new TestBean(testBean1.getObject());
-			}
-			catch (RuntimeException ex) {
-				System.out.println(System.currentTimeMillis() + " testBean2 exception " + Thread.currentThread());
-				throw ex;
-			}
-			finally {
-				System.out.println(System.currentTimeMillis() + " testBean2 end " + Thread.currentThread());
-			}
+			return new TestBean(testBean1.getObject());
 		}
 	}
 
@@ -298,7 +286,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -309,7 +297,7 @@ class BackgroundBootstrapTests {
 				Thread.sleep(2000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -325,14 +313,17 @@ class BackgroundBootstrapTests {
 	static class CircularReferenceInMultipleThreadsBeanConfig {
 
 		@Bean
-		public TestBean testBean1(ObjectProvider<TestBean> testBean2, ObjectProvider<TestBean> testBean3) {
+		public TestBean testBean1(ObjectProvider<TestBean> testBean2, ObjectProvider<TestBean> testBean3,
+				ObjectProvider<TestBean> testBean4) {
+
 			new Thread(testBean2::getObject).start();
 			new Thread(testBean3::getObject).start();
+			new Thread(testBean4::getObject).start();
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(3000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean();
 		}
@@ -343,18 +334,29 @@ class BackgroundBootstrapTests {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean(testBean3.getObject());
 		}
 
 		@Bean
-		public TestBean testBean3(ObjectProvider<TestBean> testBean2) {
+		public TestBean testBean3(ObjectProvider<TestBean> testBean4) {
 			try {
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
+				Thread.currentThread().interrupt();
+			}
+			return new TestBean(testBean4.getObject());
+		}
+
+		@Bean
+		public TestBean testBean4(ObjectProvider<TestBean> testBean2) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
 			}
 			return new TestBean(testBean2.getObject());
 		}
