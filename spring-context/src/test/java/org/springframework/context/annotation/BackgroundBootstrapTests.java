@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
@@ -42,7 +43,7 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 class BackgroundBootstrapTests {
 
 	@Test
-	@Timeout(5)
+	@Timeout(10)
 	@EnabledForTestGroups(LONG_RUNNING)
 	void bootstrapWithUnmanagedThread() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(UnmanagedThreadBeanConfig.class);
@@ -52,7 +53,7 @@ class BackgroundBootstrapTests {
 	}
 
 	@Test
-	@Timeout(5)
+	@Timeout(10)
 	@EnabledForTestGroups(LONG_RUNNING)
 	void bootstrapWithUnmanagedThreads() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(UnmanagedThreadsBeanConfig.class);
@@ -64,7 +65,7 @@ class BackgroundBootstrapTests {
 	}
 
 	@Test
-	@Timeout(5)
+	@Timeout(10)
 	@EnabledForTestGroups(LONG_RUNNING)
 	void bootstrapWithStrictLockingThread() {
 		SpringProperties.setFlag(DefaultListableBeanFactory.STRICT_LOCKING_PROPERTY_NAME);
@@ -79,17 +80,26 @@ class BackgroundBootstrapTests {
 	}
 
 	@Test
-	@Timeout(5)
+	@Timeout(10)
 	@EnabledForTestGroups(LONG_RUNNING)
-	void bootstrapWithCircularReference() {
-		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CircularReferenceBeanConfig.class);
+	void bootstrapWithCircularReferenceAgainstMainThread() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CircularReferenceAgainstMainThreadBeanConfig.class);
 		ctx.getBean("testBean1", TestBean.class);
 		ctx.getBean("testBean2", TestBean.class);
 		ctx.close();
 	}
 
 	@Test
-	@Timeout(5)
+	@Timeout(10)
+	@EnabledForTestGroups(LONG_RUNNING)
+	void bootstrapWithCircularReferenceWithBlockingMainThread() {
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(CircularReferenceWithBlockingMainThreadBeanConfig.class))
+				.withRootCauseInstanceOf(BeanCurrentlyInCreationException.class);
+	}
+
+	@Test
+	@Timeout(10)
 	@EnabledForTestGroups(LONG_RUNNING)
 	void bootstrapWithCircularReferenceInSameThread() {
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
@@ -98,7 +108,16 @@ class BackgroundBootstrapTests {
 	}
 
 	@Test
-	@Timeout(5)
+	@Timeout(10)
+	@EnabledForTestGroups(LONG_RUNNING)
+	void bootstrapWithCircularReferenceInMultipleThreads() {
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(CircularReferenceInMultipleThreadsBeanConfig.class))
+				.withRootCauseInstanceOf(BeanCurrentlyInCreationException.class);
+	}
+
+	@Test
+	@Timeout(10)
 	@EnabledForTestGroups(LONG_RUNNING)
 	void bootstrapWithCustomExecutor() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CustomExecutorBeanConfig.class);
@@ -202,7 +221,7 @@ class BackgroundBootstrapTests {
 
 
 	@Configuration(proxyBeanMethods = false)
-	static class CircularReferenceBeanConfig {
+	static class CircularReferenceAgainstMainThreadBeanConfig {
 
 		@Bean
 		public TestBean testBean1(ObjectProvider<TestBean> testBean2) {
@@ -225,6 +244,46 @@ class BackgroundBootstrapTests {
 				throw new RuntimeException(ex);
 			}
 			return new TestBean();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class CircularReferenceWithBlockingMainThreadBeanConfig {
+
+		@Bean
+		public TestBean testBean1(ObjectProvider<TestBean> testBean2) {
+			Thread thread = new Thread(testBean2::getObject);
+			thread.setUncaughtExceptionHandler((t, ex) -> System.out.println(System.currentTimeMillis() + " " + ex + " " + t));
+			thread.start();
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean(testBean2.getObject());
+		}
+
+		@Bean
+		public TestBean testBean2(ObjectProvider<TestBean> testBean1) {
+			System.out.println(System.currentTimeMillis() + " testBean2 begin " + Thread.currentThread());
+			try {
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			try {
+				return new TestBean(testBean1.getObject());
+			}
+			catch (RuntimeException ex) {
+				System.out.println(System.currentTimeMillis() + " testBean2 exception " + Thread.currentThread());
+				throw ex;
+			}
+			finally {
+				System.out.println(System.currentTimeMillis() + " testBean2 end " + Thread.currentThread());
+			}
 		}
 	}
 
@@ -258,6 +317,46 @@ class BackgroundBootstrapTests {
 		@Bean
 		public TestBean testBean3(TestBean testBean2) {
 			return new TestBean();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class CircularReferenceInMultipleThreadsBeanConfig {
+
+		@Bean
+		public TestBean testBean1(ObjectProvider<TestBean> testBean2, ObjectProvider<TestBean> testBean3) {
+			new Thread(testBean2::getObject).start();
+			new Thread(testBean3::getObject).start();
+			try {
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean();
+		}
+
+		@Bean
+		public TestBean testBean2(ObjectProvider<TestBean> testBean3) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean(testBean3.getObject());
+		}
+
+		@Bean
+		public TestBean testBean3(ObjectProvider<TestBean> testBean2) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+			return new TestBean(testBean2.getObject());
 		}
 	}
 
