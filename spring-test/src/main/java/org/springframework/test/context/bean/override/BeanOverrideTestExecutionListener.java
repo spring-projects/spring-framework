@@ -16,11 +16,15 @@
 
 package org.springframework.test.context.bean.override;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code TestExecutionListener} that enables {@link BeanOverride @BeanOverride}
@@ -94,8 +98,22 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 					.getBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME, BeanOverrideRegistry.class);
 
 			for (BeanOverrideHandler handler : handlers) {
-				beanOverrideRegistry.inject(testInstance, handler);
+				Field field = handler.getField();
+				Assert.state(field != null, () -> "BeanOverrideHandler must have a non-null field: " + handler);
+				Object bean = beanOverrideRegistry.getBeanForHandler(handler, field.getType());
+				Assert.state(bean != null, () -> "No bean found for BeanOverrideHandler: " + handler);
+				injectField(field, testInstance, bean);
 			}
+		}
+	}
+
+	private static void injectField(Field field, Object target, Object bean) {
+		try {
+			ReflectionUtils.makeAccessible(field);
+			ReflectionUtils.setField(field, target, bean);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException("Could not inject field '" + field + "'", ex);
 		}
 	}
 
