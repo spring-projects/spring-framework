@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,10 @@ import org.springframework.util.Assert;
  * with the {@code @Repository} annotation, along with defining this post-processor
  * as a bean in the application context.
  *
- * <p>As of 5.3, {@code PersistenceExceptionTranslator} beans will be sorted according
- * to Spring's dependency ordering rules: see {@link org.springframework.core.Ordered}
- * and {@link org.springframework.core.annotation.Order}. Note that such beans will
- * get retrieved from any scope, not just singleton scope, as of this 5.3 revision.
+ * <p>{@code PersistenceExceptionTranslator} beans are sorted according to Spring's
+ * dependency ordering rules: see {@link org.springframework.core.Ordered} and
+ * {@link org.springframework.core.annotation.Order}. Note that such beans will
+ * get retrieved from any scope, not just singleton scope.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

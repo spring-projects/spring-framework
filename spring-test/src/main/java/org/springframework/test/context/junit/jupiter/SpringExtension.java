@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,9 +147,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 
 	/**
 	 * Delegates to {@link TestContextManager#prepareTestInstance}.
-	 * <p>As of Spring Framework 5.3.2, this method also validates that test
-	 * methods and test lifecycle methods are not annotated with
-	 * {@link Autowired @Autowired}.
+	 * <p>This method also validates that test methods and test lifecycle methods
+	 * are not annotated with {@link Autowired @Autowired}.
 	 */
 	@Override
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {

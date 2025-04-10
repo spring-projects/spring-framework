@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,8 @@ import org.springframework.util.Assert;
  * Simple utility for finding available TCP ports on {@code localhost} for use in
  * integration testing scenarios.
  *
- * <p>This is a limited form of {@code org.springframework.util.SocketUtils}, which
- * has been deprecated since Spring Framework 5.3.16 and removed in Spring
- * Framework 6.0.
+ * <p>This is a limited form of the original {@code org.springframework.util.SocketUtils}
+ * class which was removed in Spring Framework 6.0.
  *
  * <p>{@code TestSocketUtils} can be used in integration tests which start an
  * external server on an available random port. However, these utilities make no

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,10 +89,10 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 
 	/**
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
-	 * {@link UrlPathHelper} and a {@link PathMatcher}, and whether to match
-	 * trailing slashes.
-	 * <p>As of 5.3 the path is obtained through the static method
-	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
+	 * {@link UrlPathHelper}, a {@link PathMatcher}, and a flag to indicate
+	 * whether to match trailing slashes.
+	 * <p>The path is obtained through the static method
+	 * {@link UrlPathHelper#getResolvedLookupPath}, and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @since 5.2.4
 	 * @deprecated as of 5.3 in favor of
@@ -107,10 +107,10 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 
 	/**
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
-	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
+	 * {@link UrlPathHelper}, a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes.
-	 * <p>As of 5.3 the path is obtained through the static method
-	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
+	 * <p>The path is obtained through the static method
+	 * {@link UrlPathHelper#getResolvedLookupPath}, and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
@@ -125,10 +125,10 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 
 	/**
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
-	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
+	 * {@link UrlPathHelper}, a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes, along with specific extensions.
-	 * <p>As of 5.3 the path is obtained through the static method
-	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
+	 * <p>The path is obtained through the static method
+	 * {@link UrlPathHelper#getResolvedLookupPath}, and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in
 	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,10 +123,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * more fine-grained control over specific suffixes to allow.
 	 * <p><strong>Note:</strong> This property is ignored when
 	 * {@link #setPatternParser(PathPatternParser)} is configured.
-	 * @deprecated as of 5.2.4. See class level note on the deprecation of
-	 * path extension config options. As there is no replacement for this method,
-	 * in 5.2.x it is necessary to set it to {@code false}. In 5.3 the default
-	 * changes to {@code false} and use of this property becomes unnecessary.
+	 * @deprecated as of 5.2.4. See class-level note on the deprecation of
+	 * path extension config options.
 	 */
 	@Deprecated
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {

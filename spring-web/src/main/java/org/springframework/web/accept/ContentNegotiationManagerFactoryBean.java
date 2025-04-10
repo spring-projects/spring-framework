@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.web.context.ServletContextAware;
  * </tr>
  * <tr>
  * <td>{@link #setFavorPathExtension favorPathExtension}</td>
- * <td>false (as of 5.3)</td>
+ * <td>false</td>
  * <td>{@link PathExtensionContentNegotiationStrategy}</td>
  * <td>Off</td>
  * </tr>
@@ -167,9 +167,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * <p>By default this is set to {@code false} in which case path extensions
 	 * have no impact on content negotiation.
 	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
-	 * extension config options. As there is no replacement for this method,
-	 * in 5.2.x it is necessary to set it to {@code false}. In 5.3 the default
-	 * changes to {@code false} and use of this property becomes unnecessary.
+	 * extension config options.
 	 */
 	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
