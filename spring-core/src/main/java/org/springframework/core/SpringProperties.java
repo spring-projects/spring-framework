@@ -150,8 +150,7 @@ public final class SpringProperties {
 	 * {@code null} if it is not set at all
 	 * @since 6.2.6
 	 */
-	@Nullable
-	public static Boolean checkFlag(String key) {
+	public static @Nullable Boolean checkFlag(String key) {
 		String flag = getProperty(key);
 		return (flag != null ? Boolean.valueOf(flag) : null);
 	}
