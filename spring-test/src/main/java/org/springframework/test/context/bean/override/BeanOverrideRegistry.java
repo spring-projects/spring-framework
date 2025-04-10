@@ -29,8 +29,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.util.Assert;
 
-import static org.springframework.test.context.bean.override.BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME;
-
 /**
  * An internal class used to track {@link BeanOverrideHandler}-related state after
  * the bean factory has been processed and to provide lookup facilities to test
@@ -45,6 +43,8 @@ import static org.springframework.test.context.bean.override.BeanOverrideContext
  * @since 6.2
  */
 class BeanOverrideRegistry {
+
+	static final String BEAN_NAME = "org.springframework.test.context.bean.override.internalBeanOverrideRegistry";
 
 	private static final Log logger = LogFactory.getLog(BeanOverrideRegistry.class);
 
@@ -63,8 +63,8 @@ class BeanOverrideRegistry {
 		Assert.notNull(beanFactory, "ConfigurableBeanFactory must not be null");
 		this.beanFactory = beanFactory;
 		BeanFactory parentBeanFactory = beanFactory.getParentBeanFactory();
-		this.parent = (parentBeanFactory != null && parentBeanFactory.containsBean(REGISTRY_BEAN_NAME) ?
-				parentBeanFactory.getBean(REGISTRY_BEAN_NAME, BeanOverrideRegistry.class) : null);
+		this.parent = (parentBeanFactory != null && parentBeanFactory.containsBean(BEAN_NAME) ?
+				parentBeanFactory.getBean(BEAN_NAME, BeanOverrideRegistry.class) : null);
 	}
 
 	/**

@@ -98,14 +98,14 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 			Object testInstance = testContext.getTestInstance();
 			ApplicationContext applicationContext = testContext.getApplicationContext();
 
-			Assert.state(applicationContext.containsBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME), () -> """
+			Assert.state(applicationContext.containsBean(BeanOverrideRegistry.BEAN_NAME), () -> """
 					Test class %s declares @BeanOverride fields %s, but no BeanOverrideHandler has been registered. \
 					If you are using @ContextHierarchy, ensure that context names for bean overrides match \
 					configured @ContextConfiguration names.""".formatted(testContext.getTestClass().getSimpleName(),
 							handlers.stream().map(BeanOverrideHandler::getField).filter(Objects::nonNull)
 								.map(Field::getName).toList()));
-			BeanOverrideRegistry beanOverrideRegistry = applicationContext
-					.getBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME, BeanOverrideRegistry.class);
+			BeanOverrideRegistry beanOverrideRegistry = applicationContext.getBean(BeanOverrideRegistry.BEAN_NAME,
+					BeanOverrideRegistry.class);
 
 			for (BeanOverrideHandler handler : handlers) {
 				Field field = handler.getField();
