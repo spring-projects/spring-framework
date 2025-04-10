@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
 
@@ -44,7 +45,7 @@ public abstract class BeanOverrideContextCustomizerTestUtils {
 	 */
 	@Nullable
 	public static ContextCustomizer createContextCustomizer(Class<?> testClass) {
-		return factory.createContextCustomizer(testClass, Collections.emptyList());
+		return factory.createContextCustomizer(testClass, List.of(new ContextConfigurationAttributes(testClass)));
 	}
 
 	/**

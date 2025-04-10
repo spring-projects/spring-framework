@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito.integration;
+package org.springframework.test.context.bean.override.mockito.hierarchies;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.bean.override.example.ExampleService;
@@ -45,8 +44,6 @@ public class MockitoBeanAndContextHierarchyParentIntegrationTests {
 	@MockitoBean
 	ExampleService service;
 
-	@Autowired
-	ApplicationContext context;
 
 	@BeforeEach
 	void configureServiceMock() {
@@ -54,7 +51,7 @@ public class MockitoBeanAndContextHierarchyParentIntegrationTests {
 	}
 
 	@Test
-	void test() {
+	void test(ApplicationContext context) {
 		assertThat(context.getBeanNamesForType(ExampleService.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(ExampleServiceCaller.class)).isEmpty();
 

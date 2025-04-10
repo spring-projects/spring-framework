@@ -24,14 +24,21 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import static org.springframework.test.context.bean.override.BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME;
 
 /**
  * An internal class used to track {@link BeanOverrideHandler}-related state after
  * the bean factory has been processed and to provide lookup facilities to test
  * execution listeners.
+ *
+ * <p>As of Spring Framework 6.2.6, {@code BeanOverrideRegistry} is hierarchical
+ * and has access to a potential parent in order to provide first-class support
+ * for {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
  *
  * @author Simon Baslé
  * @author Sam Brannen
@@ -48,10 +55,16 @@ class BeanOverrideRegistry {
 
 	private final ConfigurableBeanFactory beanFactory;
 
+	@Nullable
+	private final BeanOverrideRegistry parent;
+
 
 	BeanOverrideRegistry(ConfigurableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "ConfigurableBeanFactory must not be null");
 		this.beanFactory = beanFactory;
+		BeanFactory parentBeanFactory = beanFactory.getParentBeanFactory();
+		this.parent = (parentBeanFactory != null && parentBeanFactory.containsBean(REGISTRY_BEAN_NAME) ?
+				parentBeanFactory.getBean(REGISTRY_BEAN_NAME, BeanOverrideRegistry.class) : null);
 	}
 
 	/**
@@ -110,7 +123,7 @@ class BeanOverrideRegistry {
 	 * @param handler the {@code BeanOverrideHandler} that created the bean
 	 * @param requiredType the required bean type
 	 * @return the bean instance, or {@code null} if the provided handler is not
-	 * registered in this registry
+	 * registered in this registry or a parent registry
 	 * @since 6.2.6
 	 * @see #registerBeanOverrideHandler(BeanOverrideHandler, String)
 	 */
@@ -119,6 +132,9 @@ class BeanOverrideRegistry {
 		String beanName = this.handlerToBeanNameMap.get(handler);
 		if (beanName != null) {
 			return this.beanFactory.getBean(beanName, requiredType);
+		}
+		if (this.parent != null) {
+			return this.parent.getBeanForHandler(handler, requiredType);
 		}
 		return null;
 	}

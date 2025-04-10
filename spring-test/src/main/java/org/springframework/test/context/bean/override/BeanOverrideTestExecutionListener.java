@@ -18,8 +18,10 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -94,14 +96,25 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testContext.getTestClass());
 		if (!handlers.isEmpty()) {
 			Object testInstance = testContext.getTestInstance();
-			BeanOverrideRegistry beanOverrideRegistry = testContext.getApplicationContext()
+			ApplicationContext applicationContext = testContext.getApplicationContext();
+
+			Assert.state(applicationContext.containsBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME), () -> """
+					Test class %s declares @BeanOverride fields %s, but no BeanOverrideHandler has been registered. \
+					If you are using @ContextHierarchy, ensure that context names for bean overrides match \
+					configured @ContextConfiguration names.""".formatted(testContext.getTestClass().getSimpleName(),
+							handlers.stream().map(BeanOverrideHandler::getField).filter(Objects::nonNull)
+								.map(Field::getName).toList()));
+			BeanOverrideRegistry beanOverrideRegistry = applicationContext
 					.getBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME, BeanOverrideRegistry.class);
 
 			for (BeanOverrideHandler handler : handlers) {
 				Field field = handler.getField();
 				Assert.state(field != null, () -> "BeanOverrideHandler must have a non-null field: " + handler);
 				Object bean = beanOverrideRegistry.getBeanForHandler(handler, field.getType());
-				Assert.state(bean != null, () -> "No bean found for BeanOverrideHandler: " + handler);
+				Assert.state(bean != null, () -> """
+						No bean override instance found for BeanOverrideHandler %s. If you are using \
+						@ContextHierarchy, ensure that context names for bean overrides match configured \
+						@ContextConfiguration names.""".formatted(handler));
 				injectField(field, testInstance, bean);
 			}
 		}
