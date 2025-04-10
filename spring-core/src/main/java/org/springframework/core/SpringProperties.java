@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public final class SpringProperties {
 	 * @param key the property key
 	 */
 	public static void setFlag(String key) {
-		localProperties.put(key, Boolean.TRUE.toString());
+		localProperties.setProperty(key, Boolean.TRUE.toString());
 	}
 
 	/**
