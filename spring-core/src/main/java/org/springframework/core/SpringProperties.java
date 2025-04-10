@@ -118,7 +118,18 @@ public final class SpringProperties {
 	 * @param key the property key
 	 */
 	public static void setFlag(String key) {
-		localProperties.put(key, Boolean.TRUE.toString());
+		localProperties.setProperty(key, Boolean.TRUE.toString());
+	}
+
+	/**
+	 * Programmatically set a local flag to the given value, overriding
+	 * an entry in the {@code spring.properties} file (if any).
+	 * @param key the property key
+	 * @param value the associated boolean value
+	 * @since 6.2.6
+	 */
+	public static void setFlag(String key, boolean value) {
+		localProperties.setProperty(key, Boolean.toString(value));
 	}
 
 	/**
@@ -129,6 +140,21 @@ public final class SpringProperties {
 	 */
 	public static boolean getFlag(String key) {
 		return Boolean.parseBoolean(getProperty(key));
+	}
+
+	/**
+	 * Retrieve the flag for the given property key, returning {@code null}
+	 * instead of {@code false} in case of no actual flag set.
+	 * @param key the property key
+	 * @return {@code true} if the property is set to the string "true"
+	 * (ignoring case), {@code} false if it is set to any other value,
+	 * {@code null} if it is not set at all
+	 * @since 6.2.6
+	 */
+	@Nullable
+	public static Boolean checkFlag(String key) {
+		String flag = getProperty(key);
+		return (flag != null ? Boolean.valueOf(flag) : null);
 	}
 
 }
