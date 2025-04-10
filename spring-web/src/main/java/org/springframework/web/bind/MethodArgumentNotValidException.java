@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.util.BindErrorUtils;
 
 /**
- * Exception to be thrown when validation on an argument annotated with {@code @Valid} fails.
- * Extends {@link BindException} as of 5.3.
+ * {@link BindException} to be thrown when validation on an argument annotated
+ * with {@code @Valid} fails.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

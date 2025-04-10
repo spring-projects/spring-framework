@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,8 @@ import org.springframework.web.server.ServerWebExchange;
  * which checks the WebSocket handshake request parameters, upgrades to a
  * WebSocket interaction, and uses the {@link WebSocketHandler} to handle it.
  *
- * <p>As of 5.3 the WebFlux Java configuration, imported via
- * {@code @EnableWebFlux}, includes a declaration of this adapter and therefore
- * it no longer needs to be present in application configuration.
+ * <p>Note that the WebFlux Java configuration, imported via {@code @EnableWebFlux},
+ * includes a declaration of this adapter.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

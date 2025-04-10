@@ -103,7 +103,7 @@ public abstract class CollectionUtils {
 	 * <p>This differs from the regular {@link LinkedHashMap} constructor
 	 * which takes an initial capacity relative to a load factor but is
 	 * aligned with Spring's own {@link LinkedCaseInsensitiveMap} and
-	 * {@link LinkedMultiValueMap} constructor semantics as of 5.3.
+	 * {@link LinkedMultiValueMap} constructor semantics.
 	 * @param expectedSize the expected number of elements (with a corresponding
 	 * capacity to be derived so that no resize/rehash operations are needed)
 	 * @since 5.3

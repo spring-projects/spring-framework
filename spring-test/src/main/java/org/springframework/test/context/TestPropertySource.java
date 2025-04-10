@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,9 +80,8 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * of both annotations can lead to ambiguity during the attribute resolution
  * process. Note, however, that ambiguity can be avoided via explicit annotation
  * attribute overrides using {@link AliasFor @AliasFor}.</li>
- * <li>As of Spring Framework 5.3, this annotation will be inherited from an
- * enclosing test class by default. See
- * {@link NestedTestConfiguration @NestedTestConfiguration} for details.</li>
+ * <li>This annotation will be inherited from an enclosing test class by default.
+ * See {@link NestedTestConfiguration @NestedTestConfiguration} for details.</li>
  * </ul>
  *
  * @author Sam Brannen

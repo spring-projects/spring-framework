@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,8 +186,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * {@code Resource} locations provided via {@link #setLocations(List) setLocations}.
 	 * <p>Note that the returned list is fully initialized only after
 	 * initialization via {@link #afterPropertiesSet()}.
-	 * <p><strong>Note:</strong> As of 5.3.11 the list of locations may be filtered to
-	 * exclude those that don't actually exist and therefore the list returned from this
+	 * <p><strong>Note:</strong> The list of locations may be filtered to exclude
+	 * those that don't actually exist, and therefore the list returned from this
 	 * method may be a subset of all given locations. See {@link #setOptimizeLocations}.
 	 * @see #setLocationValues
 	 * @see #setLocations

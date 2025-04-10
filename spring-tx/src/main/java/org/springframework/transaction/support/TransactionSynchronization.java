@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.springframework.core.Ordered;
  * allowing for fine-grained interaction with their execution order (if necessary).
  *
  * <p>Implements the {@link Ordered} interface to enable the execution order of
- * synchronizations to be controlled declaratively, as of 5.3. The default
- * {@link #getOrder() order} is {@link Ordered#LOWEST_PRECEDENCE}, indicating
- * late execution; return a lower value for earlier execution.
+ * synchronizations to be controlled declaratively. The default {@link #getOrder()
+ * order} is {@link Ordered#LOWEST_PRECEDENCE}, indicating late execution; return
+ * a lower value for earlier execution.
  *
  * @author Juergen Hoeller
  * @since 02.06.2003
