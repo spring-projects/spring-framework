@@ -20,6 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.springframework.core.Ordered;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -31,12 +32,21 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  * @param <CB> the type of client builder, i.e. {@code RestClient} or {@code WebClient} builder.
  */
 @FunctionalInterface
-public interface HttpServiceGroupConfigurer<CB> {
+public interface HttpServiceGroupConfigurer<CB> extends Ordered {
 
 	/**
 	 * Configure the underlying infrastructure for all group.
 	 */
 	void configureGroups(Groups<CB> groups);
+
+	/**
+	 * Determine the order of this configurer relative to others.
+	 * <p>By default, this is {@link Ordered#LOWEST_PRECEDENCE}.
+	 */
+	@Override
+	default int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;
+	}
 
 
 	/**
