@@ -133,6 +133,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * System property that instructs Spring to enforce strict locking during bean creation,
 	 * rather than the mix of strict and lenient locking that 6.2 applies by default. Setting
 	 * this flag to "true" restores 6.1.x style locking in the entire pre-instantiation phase.
+	 * <p>By default, the factory infers strict locking from the encountered thread names:
+	 * If additional threads have names that match the thread prefix of the main bootstrap thread,
+	 * they are considered external (multiple external bootstrap threads calling into the factory)
+	 * and therefore have strict locking applied to them. This inference can be turned off through
+	 * explicitly setting this flag to "false" rather than leaving it unspecified.
 	 * @since 6.2.6
 	 * @see #preInstantiateSingletons()
 	 */
@@ -156,8 +161,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
 			new ConcurrentHashMap<>(8);
 
-	/** Whether lenient locking is allowed in this factory. */
-	private final boolean lenientLockingAllowed = !SpringProperties.getFlag(STRICT_LOCKING_PROPERTY_NAME);
+	/** Whether strict locking is enforced or relaxed in this factory. */
+	private @Nullable final Boolean strictLocking = SpringProperties.checkFlag(STRICT_LOCKING_PROPERTY_NAME);
 
 	/** Optional id for this factory, for serialization purposes. */
 	private @Nullable String serializationId;
@@ -207,6 +212,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private volatile boolean configurationFrozen;
 
 	private volatile boolean preInstantiationPhase;
+
+	private @Nullable volatile String mainThreadPrefix;
 
 	private final NamedThreadLocal<PreInstantiation> preInstantiationThread =
 			new NamedThreadLocal<>("Pre-instantiation thread marker");
@@ -1030,7 +1037,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		else {
-			// Bean intended to be initialized in main bootstrap thread
+			// Bean intended to be initialized in main bootstrap thread.
 			if (this.preInstantiationThread.get() == PreInstantiation.BACKGROUND) {
 				throw new BeanCurrentlyInCreationException(beanName, "Bean marked for mainline initialization " +
 						"but requested in background thread - enforce early instantiation in mainline thread " +
@@ -1041,8 +1048,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	protected @Nullable Boolean isCurrentThreadAllowedToHoldSingletonLock() {
-		return (this.lenientLockingAllowed && this.preInstantiationPhase ?
-				this.preInstantiationThread.get() != PreInstantiation.BACKGROUND : null);
+		if (this.preInstantiationPhase) {
+			// We only differentiate in the preInstantiateSingletons phase.
+			PreInstantiation preInstantiation = this.preInstantiationThread.get();
+			if (preInstantiation != null) {
+				// A Spring-managed thread:
+				// MAIN is allowed to lock (true) or even forced to lock (null),
+				// BACKGROUND is never allowed to lock (false).
+				return switch (preInstantiation) {
+					case MAIN -> (Boolean.TRUE.equals(this.strictLocking) ? null : true);
+					case BACKGROUND -> false;
+				};
+			}
+			if (Boolean.FALSE.equals(this.strictLocking) ||
+					(this.strictLocking == null && !getThreadNamePrefix().equals(this.mainThreadPrefix))) {
+				// An unmanaged thread (assumed to be application-internal) with lenient locking,
+				// and not part of the same thread pool that provided the main bootstrap thread
+				// (excluding scenarios where we are hit by multiple external bootstrap threads).
+				return true;
+			}
+		}
+		// Traditional behavior: forced to always hold a full lock.
+		return null;
 	}
 
 	@Override
@@ -1060,6 +1087,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		this.preInstantiationPhase = true;
 		this.preInstantiationThread.set(PreInstantiation.MAIN);
+		this.mainThreadPrefix = getThreadNamePrefix();
 		try {
 			for (String beanName : beanNames) {
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
@@ -1072,6 +1100,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		finally {
+			this.mainThreadPrefix = null;
 			this.preInstantiationThread.remove();
 			this.preInstantiationPhase = false;
 		}
@@ -1164,6 +1193,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else {
 			getBean(beanName);
 		}
+	}
+
+	private static String getThreadNamePrefix() {
+		String name = Thread.currentThread().getName();
+		int numberSeparator = name.lastIndexOf('-');
+		return (numberSeparator >= 0 ? name.substring(0, numberSeparator) : name);
 	}
 
 

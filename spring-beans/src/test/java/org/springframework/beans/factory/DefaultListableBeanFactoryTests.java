@@ -77,7 +77,6 @@ import org.springframework.beans.testfixture.beans.NestedTestBean;
 import org.springframework.beans.testfixture.beans.SideEffectBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -1419,7 +1418,6 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("rod", bd);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		lbf.registerBeanDefinition("rod2", bd2);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> lbf.autowire(ConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false))
@@ -1490,7 +1488,6 @@ class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependenciesBean.class);
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("bean", bd);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		ConstructorDependenciesBean bean = lbf.getBean(ConstructorDependenciesBean.class);
 		Object spouse1 = lbf.getBean("spouse1");
@@ -1508,7 +1505,6 @@ class DefaultListableBeanFactoryTests {
 		bd.setAttribute(GenericBeanDefinition.PREFERRED_CONSTRUCTORS_ATTRIBUTE,
 				ConstructorDependenciesBean.class.getConstructors());
 		lbf.registerBeanDefinition("bean", bd);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		ConstructorDependenciesBean bean = lbf.getBean(ConstructorDependenciesBean.class);
 		Object spouse1 = lbf.getBean("spouse1");
@@ -1526,7 +1522,6 @@ class DefaultListableBeanFactoryTests {
 		bd.setAttribute(GenericBeanDefinition.PREFERRED_CONSTRUCTORS_ATTRIBUTE,
 				ConstructorDependenciesBean.class.getConstructor(TestBean.class));
 		lbf.registerBeanDefinition("bean", bd);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		ConstructorDependenciesBean bean = lbf.getBean(ConstructorDependenciesBean.class);
 		Object spouse = lbf.getBean("spouse1");
