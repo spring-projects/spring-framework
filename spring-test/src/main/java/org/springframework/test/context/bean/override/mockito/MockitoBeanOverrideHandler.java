@@ -63,15 +63,15 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
 	MockitoBeanOverrideHandler(@Nullable Field field, ResolvableType typeToMock, MockitoBean mockitoBean) {
 		this(field, typeToMock, (!mockitoBean.name().isBlank() ? mockitoBean.name() : null),
-			(mockitoBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE),
-			mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
+				mockitoBean.contextName(), (mockitoBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE),
+				mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
 	}
 
 	private MockitoBeanOverrideHandler(@Nullable Field field, ResolvableType typeToMock, @Nullable String beanName,
-			BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces, Answers answers,
-			boolean serializable) {
+			String contextName, BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces,
+			Answers answers, boolean serializable) {
 
-		super(field, typeToMock, beanName, strategy, reset);
+		super(field, typeToMock, beanName, contextName, strategy, reset);
 		Assert.notNull(typeToMock, "'typeToMock' must not be null");
 		this.extraInterfaces = asClassSet(extraInterfaces);
 		this.answers = answers;
@@ -160,6 +160,7 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 				.append("field", getField())
 				.append("beanType", getBeanType())
 				.append("beanName", getBeanName())
+				.append("contextName", getContextName())
 				.append("strategy", getStrategy())
 				.append("reset", getReset())
 				.append("extraInterfaces", getExtraInterfaces())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A dummy {@link BeanOverride} implementation that only handles {@link CharSequence}
- * and {@link Integer} and replace them with {@code "overridden"} and {@code 42},
+ * and {@link Integer} and replaces them with {@code "overridden"} and {@code 42},
  * respectively.
  *
  * @author Stephane Nicoll
@@ -46,6 +46,8 @@ import org.springframework.util.StringUtils;
 
 	String beanName() default "";
 
+	String contextName() default "";
+
 	BeanOverrideStrategy strategy() default BeanOverrideStrategy.REPLACE;
 
 	class DummyBeanOverrideProcessor implements BeanOverrideProcessor {
@@ -55,7 +57,7 @@ import org.springframework.util.StringUtils;
 			DummyBean dummyBean = (DummyBean) annotation;
 			String beanName = (StringUtils.hasText(dummyBean.beanName()) ? dummyBean.beanName() : null);
 			return new DummyBeanOverrideProcessor.DummyBeanOverrideHandler(field, field.getType(), beanName,
-					dummyBean.strategy());
+					dummyBean.contextName(), dummyBean.strategy());
 		}
 
 		// Bare bone, "dummy", implementation that should not override anything
@@ -63,9 +65,9 @@ import org.springframework.util.StringUtils;
 		static class DummyBeanOverrideHandler extends BeanOverrideHandler {
 
 			DummyBeanOverrideHandler(Field field, Class<?> typeToOverride, @Nullable String beanName,
-					BeanOverrideStrategy strategy) {
+					String contextName, BeanOverrideStrategy strategy) {
 
-				super(field, ResolvableType.forClass(typeToOverride), beanName, strategy);
+				super(field, ResolvableType.forClass(typeToOverride), beanName, contextName, strategy);
 			}
 
 			@Override

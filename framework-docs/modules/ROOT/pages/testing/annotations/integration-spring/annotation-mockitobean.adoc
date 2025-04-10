@@ -47,6 +47,21 @@ the same bean in several test classes, make sure to name the fields consistently
 creating unnecessary contexts.
 ====
 
+[WARNING]
+====
+Using `@MockitoBean` or `@MockitoSpyBean` in conjunction with `@ContextHierarchy` can
+lead to undesirable results since each `@MockitoBean` or `@MockitoSpyBean` will be
+applied to all context hierarchy levels by default. To ensure that a particular
+`@MockitoBean` or `@MockitoSpyBean` is applied to a single context hierarchy level, set
+the `contextName` attribute to match a configured `@ContextConfiguration` name – for
+example, `@MockitoBean(contextName = "app-config")` or
+`@MockitoSpyBean(contextName = "app-config")`.
+
+See
+xref:testing/testcontext-framework/ctx-management/hierarchies.adoc#testcontext-ctx-management-ctx-hierarchies-with-bean-overrides[context
+hierarchies with bean overrides] for further details and examples.
+====
+
 Each annotation also defines Mockito-specific attributes to fine-tune the mocking behavior.
 
 The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE`

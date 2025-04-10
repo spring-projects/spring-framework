@@ -44,9 +44,9 @@ final class TestBeanOverrideHandler extends BeanOverrideHandler {
 
 
 	TestBeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
-			BeanOverrideStrategy strategy, Method factoryMethod) {
+			String contextName, BeanOverrideStrategy strategy, Method factoryMethod) {
 
-		super(field, beanType, beanName, strategy);
+		super(field, beanType, beanName, contextName, strategy);
 		this.factoryMethod = factoryMethod;
 	}
 
@@ -91,6 +91,7 @@ final class TestBeanOverrideHandler extends BeanOverrideHandler {
 				.append("field", getField())
 				.append("beanType", getBeanType())
 				.append("beanName", getBeanName())
+				.append("contextName", getContextName())
 				.append("strategy", getStrategy())
 				.append("factoryMethod", this.factoryMethod)
 				.toString();

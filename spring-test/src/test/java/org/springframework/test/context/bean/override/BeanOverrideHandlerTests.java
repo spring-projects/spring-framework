@@ -30,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor;
 import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyBeanOverrideHandler;
 import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
@@ -116,7 +117,7 @@ class BeanOverrideHandlerTests {
 	}
 
 	@Test
-	void isEqualToWithSameMetadataAndBeanNames() {
+	void isEqualToWithSameMetadataAndSameBeanNames() {
 		BeanOverrideHandler handler1 = createBeanOverrideHandler(field(ConfigA.class, "noQualifier"), "testBean");
 		BeanOverrideHandler handler2 = createBeanOverrideHandler(field(ConfigA.class, "noQualifier"), "testBean");
 		assertThat(handler1).isEqualTo(handler2);
@@ -124,10 +125,29 @@ class BeanOverrideHandlerTests {
 	}
 
 	@Test
-	void isNotEqualToWithSameMetadataAndDifferentBeaName() {
+	void isNotEqualToWithSameMetadataButDifferentBeanNames() {
 		BeanOverrideHandler handler1 = createBeanOverrideHandler(field(ConfigA.class, "noQualifier"), "testBean");
 		BeanOverrideHandler handler2 = createBeanOverrideHandler(field(ConfigA.class, "noQualifier"), "testBean2");
 		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
+	}
+
+	@Test
+	void isEqualToWithSameMetadataSameBeanNamesAndSameContextNames() {
+		Class<?> testClass = MultipleAnnotationsWithSameNameInDifferentContext.class;
+		BeanOverrideHandler handler1 = createBeanOverrideHandler(testClass, field(testClass, "parentMessageBean"));
+		BeanOverrideHandler handler2 = createBeanOverrideHandler(testClass, field(testClass, "parentMessageBean2"));
+		assertThat(handler1).isEqualTo(handler2);
+		assertThat(handler1).hasSameHashCodeAs(handler2);
+	}
+
+	@Test
+	void isEqualToWithSameMetadataAndSameBeanNamesButDifferentContextNames() {
+		Class<?> testClass = MultipleAnnotationsWithSameNameInDifferentContext.class;
+		BeanOverrideHandler handler1 = createBeanOverrideHandler(testClass, field(testClass, "parentMessageBean"));
+		BeanOverrideHandler handler2 = createBeanOverrideHandler(testClass, field(testClass, "childMessageBean"));
+		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
 	}
 
 	@Test
@@ -173,6 +193,7 @@ class BeanOverrideHandlerTests {
 		BeanOverrideHandler handler1 = createBeanOverrideHandler(field(ConfigA.class, "directQualifier"));
 		BeanOverrideHandler handler2 = createBeanOverrideHandler(field(ConfigA.class, "differentDirectQualifier"));
 		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
 	}
 
 	@Test
@@ -180,6 +201,7 @@ class BeanOverrideHandlerTests {
 		BeanOverrideHandler handler1 = createBeanOverrideHandler(field(ConfigA.class, "directQualifier"));
 		BeanOverrideHandler handler2 = createBeanOverrideHandler(field(ConfigA.class, "customQualifier"));
 		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
 	}
 
 	@Test
@@ -187,6 +209,7 @@ class BeanOverrideHandlerTests {
 		BeanOverrideHandler handler1 = createBeanOverrideHandler(field(ConfigA.class, "noQualifier"));
 		BeanOverrideHandler handler2 = createBeanOverrideHandler(field(ConfigB.class, "example"));
 		assertThat(handler1).isNotEqualTo(handler2);
+		assertThat(handler1).doesNotHaveSameHashCodeAs(handler2);
 	}
 
 	private static BeanOverrideHandler createBeanOverrideHandler(Field field) {
@@ -194,7 +217,11 @@ class BeanOverrideHandlerTests {
 	}
 
 	private static BeanOverrideHandler createBeanOverrideHandler(Field field, @Nullable String name) {
-		return new DummyBeanOverrideHandler(field, field.getType(), name, BeanOverrideStrategy.REPLACE);
+		return new DummyBeanOverrideHandler(field, field.getType(), name, "", BeanOverrideStrategy.REPLACE);
+	}
+
+	private static BeanOverrideHandler createBeanOverrideHandler(Class<?> testClass, Field field) {
+		return new DummyBeanOverrideProcessor().createHandler(field.getAnnotation(DummyBean.class), testClass, field);
 	}
 
 	private static Field field(Class<?> target, String fieldName) {
@@ -232,6 +259,18 @@ class BeanOverrideHandlerTests {
 
 		@DummyBean
 		Integer counter;
+	}
+
+	static class MultipleAnnotationsWithSameNameInDifferentContext {
+
+		@DummyBean(beanName = "messageBean", contextName = "parent")
+		String parentMessageBean;
+
+		@DummyBean(beanName = "messageBean", contextName = "parent")
+		String parentMessageBean2;
+
+		@DummyBean(beanName = "messageBean", contextName = "child")
+		String childMessageBean;
 	}
 
 	static class MultipleAnnotationsDuplicate {

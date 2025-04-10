@@ -99,6 +99,16 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *     }
  * }</code></pre>
  *
+ * <p><strong>WARNING</strong>: Using {@code @TestBean} in conjunction with
+ * {@code @ContextHierarchy} can lead to undesirable results since each
+ * {@code @TestBean} will be applied to all context hierarchy levels by default.
+ * To ensure that a particular {@code @TestBean} is applied to a single context
+ * hierarchy level, set the {@link #contextName() contextName} to match a
+ * configured {@code @ContextConfiguration}
+ * {@link org.springframework.test.context.ContextConfiguration#name() name}.
+ * See the Javadoc for {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}
+ * for further details and examples.
+ *
  * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
  * Any attempt to override a non-singleton bean will result in an exception. When
  * overriding a bean created by a {@link org.springframework.beans.factory.FactoryBean
@@ -163,6 +173,19 @@ public @interface TestBean {
 	 * of the bean.
 	 */
 	String methodName() default "";
+
+	/**
+	 * The name of the context hierarchy level in which this {@code @TestBean}
+	 * should be applied.
+	 * <p>Defaults to an empty string which indicates that this {@code @TestBean}
+	 * should be applied to all application contexts.
+	 * <p>If a context name is configured, it must match a name configured via
+	 * {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name() @ContextConfiguration(name=...)
+	 */
+	String contextName() default "";
 
 	/**
 	 * Whether to require the existence of the bean being overridden.

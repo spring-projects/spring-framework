@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyBeanOverrideHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,7 +92,7 @@ class BeanOverrideContextCustomizerFactoryTests {
 	}
 
 	private @Nullable BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass) {
-		return this.factory.createContextCustomizer(testClass, Collections.emptyList());
+		return this.factory.createContextCustomizer(testClass, List.of(new ContextConfigurationAttributes(testClass)));
 	}
 
 

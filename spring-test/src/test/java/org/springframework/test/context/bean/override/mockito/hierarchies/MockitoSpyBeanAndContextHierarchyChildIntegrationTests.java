@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito.integration;
+package org.springframework.test.context.bean.override.mockito.hierarchies;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,18 +49,14 @@ public class MockitoSpyBeanAndContextHierarchyChildIntegrationTests extends
 	@MockitoSpyBean
 	ExampleServiceCaller serviceCaller;
 
-	@Autowired
-	ApplicationContext context;
-
 
 	@Test
 	@Override
-	void test() {
-		assertThat(context).as("child ApplicationContext").isNotNull();
-		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
-		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
-
+	void test(ApplicationContext context) {
 		ApplicationContext parentContext = context.getParent();
+		assertThat(parentContext).as("parent ApplicationContext").isNotNull();
+		assertThat(parentContext.getParent()).as("grandparent ApplicationContext").isNull();
+
 		assertThat(parentContext.getBeanNamesForType(ExampleService.class)).hasSize(1);
 		assertThat(parentContext.getBeanNamesForType(ExampleServiceCaller.class)).isEmpty();
 
