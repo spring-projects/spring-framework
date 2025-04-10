@@ -527,15 +527,26 @@ public class ReflectUtils {
 				c = lookup.defineClass(b);
 			}
 			catch (LinkageError | IllegalAccessException ex) {
-				throw new CodeGenerationException(ex) {
-					@Override
-					public String getMessage() {
-						return "ClassLoader mismatch for [" + contextClass.getName() +
-								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
-								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName() +
-								"; consider co-locating the affected class in that target ClassLoader instead.";
+				if (ex instanceof LinkageError) {
+					// Could be a ClassLoader mismatch with the class pre-existing in a
+					// parent ClassLoader -> try loadClass before giving up completely.
+					try {
+						c = contextClass.getClassLoader().loadClass(className);
 					}
-				};
+					catch (ClassNotFoundException cnfe) {
+					}
+				}
+				if (c == null) {
+					throw new CodeGenerationException(ex) {
+						@Override
+						public String getMessage() {
+							return "ClassLoader mismatch for [" + contextClass.getName() +
+									"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
+									"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName() +
+									"; consider co-locating the affected class in that target ClassLoader instead.";
+						}
+					};
+				}
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
