@@ -53,7 +53,6 @@ import static org.mockito.Mockito.when;
  */
 class WebClientObservationTests {
 
-
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
 	private final ExchangeFunction exchangeFunction = mock();
@@ -63,6 +62,7 @@ class WebClientObservationTests {
 	private WebClient.Builder builder;
 
 	@BeforeEach
+	@SuppressWarnings("unchecked")
 	void setup() {
 		Hooks.enableAutomaticContextPropagation();
 		ClientResponse mockResponse = mock();
