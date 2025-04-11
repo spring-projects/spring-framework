@@ -19,6 +19,8 @@ package org.springframework.transaction.event;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
@@ -35,6 +37,7 @@ import org.springframework.util.Assert;
  * as a convenient alternative to custom usage of this adapter class.
  *
  * @author Juergen Hoeller
+ * @author Réda Housni Alaoui
  * @since 5.3
  * @param <E> the specific {@code ApplicationEvent} subclass to listen to
  * @see TransactionalApplicationListener
@@ -44,11 +47,14 @@ import org.springframework.util.Assert;
 public class TransactionalApplicationListenerAdapter<E extends ApplicationEvent>
 		implements TransactionalApplicationListener<E>, Ordered {
 
+	private final Log logger = LogFactory.getLog(getClass());
+
 	private final ApplicationListener<E> targetListener;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private TransactionPhase transactionPhase = TransactionPhase.AFTER_COMMIT;
+	private boolean fallbackExecution;
 
 	private String listenerId = "";
 
@@ -98,6 +104,13 @@ public class TransactionalApplicationListenerAdapter<E extends ApplicationEvent>
 	}
 
 	/**
+	 * @param fallbackExecution Whether the event should be handled if no transaction is running.
+	 */
+	public void setFallbackExecution(boolean fallbackExecution) {
+		this.fallbackExecution = fallbackExecution;
+	}
+
+	/**
 	 * Specify an id to identify the listener with.
 	 * <p>The default is an empty String.
 	 */
@@ -127,7 +140,23 @@ public class TransactionalApplicationListenerAdapter<E extends ApplicationEvent>
 
 	@Override
 	public void onApplicationEvent(E event) {
-		TransactionalApplicationListenerSynchronization.register(event, this, this.callbacks);
+		if (TransactionalApplicationListenerSynchronization.register(event, this, this.callbacks)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registered transaction synchronization for " + event);
+			}
+		}
+		else if (fallbackExecution) {
+			if (getTransactionPhase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
+				logger.warn("Processing " + event + " as a fallback execution on AFTER_ROLLBACK phase");
+			}
+			processEvent(event);
+		}
+		else {
+			// No transactional event execution at all
+			if (logger.isDebugEnabled()) {
+				logger.debug("No transaction is active - skipping " + event);
+			}
+		}
 	}
 
 }

@@ -43,6 +43,7 @@ import org.springframework.core.Ordered;
  *
  * @author Juergen Hoeller
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  * @since 5.3
  * @param <E> the specific {@code ApplicationEvent} subclass to listen to
  * @see TransactionalEventListener
@@ -134,10 +135,26 @@ public interface TransactionalApplicationListener<E extends ApplicationEvent>
 	 */
 	static <T> TransactionalApplicationListener<PayloadApplicationEvent<T>> forPayload(
 			TransactionPhase phase, Consumer<T> consumer) {
+		return forPayload(phase, false, consumer);
+	}
+
+	/**
+	 * Create a new {@code TransactionalApplicationListener} for the given payload consumer.
+	 * @param phase the transaction phase in which to invoke the listener
+	 * @param fallbackExecution Whether the event should be handled if no transaction is running.
+	 * @param consumer the event payload consumer
+	 * @param <T> the type of the event payload
+	 * @return a corresponding {@code TransactionalApplicationListener} instance
+	 * @see PayloadApplicationEvent#getPayload()
+	 * @see TransactionalApplicationListenerAdapter
+	 */
+	static <T> TransactionalApplicationListener<PayloadApplicationEvent<T>> forPayload(
+			TransactionPhase phase, boolean fallbackExecution, Consumer<T> consumer) {
 
 		TransactionalApplicationListenerAdapter<PayloadApplicationEvent<T>> listener =
 				new TransactionalApplicationListenerAdapter<>(event -> consumer.accept(event.getPayload()));
 		listener.setTransactionPhase(phase);
+		listener.setFallbackExecution(fallbackExecution);
 		return listener;
 	}
 
