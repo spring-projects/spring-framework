@@ -207,14 +207,14 @@ Kotlin::
 	class ExampleHandler : WebSocketHandler {
 
 		override fun handle(session: WebSocketSession): Mono<Void> {
-			return session.receive()            // <1>
+			return session.receive()			// <1>
 					.doOnNext {
 						// ...					// <2>
 					}
 					.concatMap {
 						// ...					// <3>
 					}
-					.then()                     // <4>
+					.then()						// <4>
 		}
 	}
 ----
@@ -268,16 +268,16 @@ Kotlin::
 
 		override fun handle(session: WebSocketSession): Mono<Void> {
 
-			val output = session.receive()                      // <1>
+			val output = session.receive()						// <1>
 					.doOnNext {
 						// ...
 					}
 					.concatMap {
 						// ...
 					}
-					.map { session.textMessage("Echo $it") }    // <2>
+					.map { session.textMessage("Echo $it") }	// <2>
 
-			return session.send(output)                         // <3>
+			return session.send(output)							// <3>
 		}
 	}
 ----

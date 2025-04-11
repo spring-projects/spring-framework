@@ -31,7 +31,7 @@ Java::
 ----
 public class MyBean {
 	private final Log log = LogFactory.getLog(getClass());
-    // ...
+	// ...
 }
 ----
 
@@ -40,8 +40,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 class MyBean {
-  private val log = LogFactory.getLog(javaClass)
-  // ...
+	private val log = LogFactory.getLog(javaClass)
+	// ...
 }
 ----
 ======

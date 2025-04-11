@@ -469,20 +469,20 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    RootBeanDefinition beanDefinition = new RootBeanDefinition(ClientFactoryBean.class);
-    beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean.class, MyClient.class));
-    // ...
-    registry.registerBeanDefinition("myClient", beanDefinition);
+	RootBeanDefinition beanDefinition = new RootBeanDefinition(ClientFactoryBean.class);
+	beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean.class, MyClient.class));
+	// ...
+	registry.registerBeanDefinition("myClient", beanDefinition);
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val beanDefinition = RootBeanDefinition(ClientFactoryBean::class.java)
-    beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean::class.java, MyClient::class.java));
-    // ...
-    registry.registerBeanDefinition("myClient", beanDefinition)
+	val beanDefinition = RootBeanDefinition(ClientFactoryBean::class.java)
+	beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean::class.java, MyClient::class.java));
+	// ...
+	registry.registerBeanDefinition("myClient", beanDefinition)
 ----
 ======
 

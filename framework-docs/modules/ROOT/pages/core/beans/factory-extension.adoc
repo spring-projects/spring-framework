@@ -226,7 +226,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.beans.factory.getBean
+	import org.springframework.beans.factory.getBean
 
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("scripting/beans.xml")

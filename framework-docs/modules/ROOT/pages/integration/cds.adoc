@@ -55,11 +55,11 @@ a "shared objects file" source, as shown in the following example:
 
 [source,shell,indent=0,subs="verbatim"]
 ----
-    [0.064s][info][class,load] org.springframework.core.env.EnvironmentCapable source: shared objects file (top)
-    [0.064s][info][class,load] org.springframework.beans.factory.BeanFactory source: shared objects file (top)
-    [0.064s][info][class,load] org.springframework.beans.factory.ListableBeanFactory source: shared objects file (top)
-    [0.064s][info][class,load] org.springframework.beans.factory.HierarchicalBeanFactory source: shared objects file (top)
-    [0.065s][info][class,load] org.springframework.context.MessageSource source: shared objects file (top)
+	[0.064s][info][class,load] org.springframework.core.env.EnvironmentCapable source: shared objects file (top)
+	[0.064s][info][class,load] org.springframework.beans.factory.BeanFactory source: shared objects file (top)
+	[0.064s][info][class,load] org.springframework.beans.factory.ListableBeanFactory source: shared objects file (top)
+	[0.064s][info][class,load] org.springframework.beans.factory.HierarchicalBeanFactory source: shared objects file (top)
+	[0.065s][info][class,load] org.springframework.context.MessageSource source: shared objects file (top)
 ----
 
 If CDS can't be enabled or if you have a large number of classes that are not loaded from the cache, make sure that

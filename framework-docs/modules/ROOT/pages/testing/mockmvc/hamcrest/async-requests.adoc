@@ -26,16 +26,16 @@ Java::
 
 	@Test
 	void test() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(get("/path"))
-                .andExpect(status().isOk()) <1>
-                .andExpect(request().asyncStarted()) <2>
-                .andExpect(request().asyncResult("body")) <3>
-                .andReturn();
+		MvcResult mvcResult = this.mockMvc.perform(get("/path"))
+				.andExpect(status().isOk()) <1>
+				.andExpect(request().asyncStarted()) <2>
+				.andExpect(request().asyncResult("body")) <3>
+				.andReturn();
 
-        this.mockMvc.perform(asyncDispatch(mvcResult)) <4>
-                .andExpect(status().isOk()) <5>
-                .andExpect(content().string("body"));
-    }
+		this.mockMvc.perform(asyncDispatch(mvcResult)) <4>
+				.andExpect(status().isOk()) <5>
+				.andExpect(content().string("body"));
+	}
 ----
 <1> Check response status is still unchanged
 <2> Async processing must have started

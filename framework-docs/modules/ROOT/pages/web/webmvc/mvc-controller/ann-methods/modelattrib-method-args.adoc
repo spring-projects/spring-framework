@@ -97,7 +97,7 @@ Java::
 ----
 	class Account {
 
-	    private final String firstName;
+		private final String firstName;
 
 		public Account(@BindParam("first-name") String firstName) {
 			this.firstName = firstName;

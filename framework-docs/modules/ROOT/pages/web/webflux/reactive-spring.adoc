@@ -782,8 +782,8 @@ Java::
 ----
 	WebClient webClient = WebClient.builder()
 			.codecs(configurer -> {
-					CustomDecoder decoder = new CustomDecoder();
-                    configurer.customCodecs().registerWithDefaultConfig(decoder);
+				CustomDecoder decoder = new CustomDecoder();
+				configurer.customCodecs().registerWithDefaultConfig(decoder);
 			})
 			.build();
 ----
@@ -794,8 +794,8 @@ Kotlin::
 ----
 	val webClient = WebClient.builder()
 			.codecs({ configurer ->
-					val decoder = CustomDecoder()
-            		configurer.customCodecs().registerWithDefaultConfig(decoder)
+				val decoder = CustomDecoder()
+				configurer.customCodecs().registerWithDefaultConfig(decoder)
 			 })
 			.build()
 ----

@@ -513,7 +513,7 @@ the classes above:
 		<property name="notificationAddress" value="blockedlist@example.org"/>
 	</bean>
 
-    <!-- optional: a custom ApplicationEventMulticaster definition -->
+	<!-- optional: a custom ApplicationEventMulticaster definition -->
 	<bean id="applicationEventMulticaster" class="org.springframework.context.event.SimpleApplicationEventMulticaster">
 		<property name="taskExecutor" ref="..."/>
 		<property name="errorHandler" ref="..."/>
