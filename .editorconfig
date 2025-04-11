@@ -1,10 +1,16 @@
 root = true
 
-[*.{adoc,bat,groovy,html,java,js,jsp,kt,kts,md,properties,py,rb,sh,sql,svg,txt,xml,xsd}]
+[*]
 charset = utf-8
+end_of_line = lf
+# indent_style = tab todo: verify
+insert_final_newline = true
 
 [*.{groovy,java,kt,kts,xml,xsd}]
 indent_style = tab
 indent_size = 4
-continuation_indent_size = 8
-end_of_line = lf
+ij_continuation_indent_size = 8
+
+[*.java]
+ij_java_class_count_to_use_import_on_demand = 999
+ij_java_names_count_to_use_import_on_demand = 999

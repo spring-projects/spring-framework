@@ -21,6 +21,9 @@
 		<!-- Modifiers -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>
 
+		<!-- Best Practice -->
+		<module name="EmptyStatement"/>
+		<module name="UnusedLocalVariable"/>
+		<module name="VariableDeclarationUsageDistance"/>
 	</module>
-
 </module>
