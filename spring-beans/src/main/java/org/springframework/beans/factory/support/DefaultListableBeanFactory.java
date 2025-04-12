@@ -211,9 +211,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Whether bean definition metadata may be cached for all beans. */
 	private volatile boolean configurationFrozen;
 
-	private volatile boolean preInstantiationPhase;
-
-	private @Nullable volatile String mainThreadPrefix;
+	/** Name prefix of main thread: only set during pre-instantiation phase. */
+	private volatile @Nullable String mainThreadPrefix;
 
 	private final NamedThreadLocal<PreInstantiation> preInstantiationThread =
 			new NamedThreadLocal<>("Pre-instantiation thread marker");
@@ -1048,11 +1047,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	protected @Nullable Boolean isCurrentThreadAllowedToHoldSingletonLock() {
-		if (this.preInstantiationPhase) {
+		String mainThreadPrefix = this.mainThreadPrefix;
+		if (this.mainThreadPrefix != null) {
 			// We only differentiate in the preInstantiateSingletons phase.
+
 			PreInstantiation preInstantiation = this.preInstantiationThread.get();
 			if (preInstantiation != null) {
-				// A Spring-managed thread:
+				// A Spring-managed bootstrap thread:
 				// MAIN is allowed to lock (true) or even forced to lock (null),
 				// BACKGROUND is never allowed to lock (false).
 				return switch (preInstantiation) {
@@ -1060,14 +1061,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					case BACKGROUND -> false;
 				};
 			}
-			if (Boolean.FALSE.equals(this.strictLocking) ||
-					(this.strictLocking == null && !getThreadNamePrefix().equals(this.mainThreadPrefix))) {
-				// An unmanaged thread (assumed to be application-internal) with lenient locking,
-				// and not part of the same thread pool that provided the main bootstrap thread
-				// (excluding scenarios where we are hit by multiple external bootstrap threads).
+
+			// Not a Spring-managed bootstrap thread...
+			if (Boolean.FALSE.equals(this.strictLocking)) {
+				// Explicitly configured to use lenient locking wherever possible.
 				return true;
 			}
+			else if (this.strictLocking == null) {
+				// No explicit locking configuration -> infer appropriate locking.
+				if (mainThreadPrefix != null && !getThreadNamePrefix().equals(mainThreadPrefix)) {
+					// An unmanaged thread (assumed to be application-internal) with lenient locking,
+					// and not part of the same thread pool that provided the main bootstrap thread
+					// (excluding scenarios where we are hit by multiple external bootstrap threads).
+					return true;
+				}
+			}
 		}
+
 		// Traditional behavior: forced to always hold a full lock.
 		return null;
 	}
@@ -1085,7 +1095,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Trigger initialization of all non-lazy singleton beans...
 		List<CompletableFuture<?>> futures = new ArrayList<>();
 
-		this.preInstantiationPhase = true;
 		this.preInstantiationThread.set(PreInstantiation.MAIN);
 		this.mainThreadPrefix = getThreadNamePrefix();
 		try {
@@ -1102,7 +1111,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		finally {
 			this.mainThreadPrefix = null;
 			this.preInstantiationThread.remove();
-			this.preInstantiationPhase = false;
 		}
 
 		if (!futures.isEmpty()) {
