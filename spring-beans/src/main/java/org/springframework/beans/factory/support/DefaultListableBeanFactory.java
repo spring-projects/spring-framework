@@ -1069,7 +1069,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else if (this.strictLocking == null) {
 				// No explicit locking configuration -> infer appropriate locking.
-				if (mainThreadPrefix != null && !getThreadNamePrefix().equals(mainThreadPrefix)) {
+				if (!getThreadNamePrefix().equals(mainThreadPrefix)) {
 					// An unmanaged thread (assumed to be application-internal) with lenient locking,
 					// and not part of the same thread pool that provided the main bootstrap thread
 					// (excluding scenarios where we are hit by multiple external bootstrap threads).
