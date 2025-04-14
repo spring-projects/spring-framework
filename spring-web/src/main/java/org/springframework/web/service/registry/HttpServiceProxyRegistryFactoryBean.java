@@ -278,16 +278,36 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <P> @Nullable P getClient(Class<P> type) {
-			List<Object> proxies = this.directLookupMap.getOrDefault(type, Collections.emptyList());
-			Assert.state(proxies.size() <= 1, "No unique client of type " + type.getName());
-			return (!proxies.isEmpty() ? (P) proxies.get(0) : null);
+		public <P> P getClient(Class<P> type) {
+			List<Object> map = this.directLookupMap.getOrDefault(type, Collections.emptyList());
+			Assert.notEmpty(map, "No client of type " + type.getName());
+			Assert.isTrue(map.size() <= 1, "No unique client of type " + type.getName());
+			return (P) map.get(0);
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <P> @Nullable P getClient(String groupName, Class<P> httpServiceType) {
-			return (P) this.groupProxyMap.getOrDefault(groupName, Collections.emptyMap()).get(httpServiceType);
+		public <P> P getClient(String groupName, Class<P> type) {
+			Map<Class<?>, Object> map = getProxyMapForGroup(groupName);
+			P proxy = (P) map.get(type);
+			Assert.notNull(proxy, "No client of type " + type + " in group '" + groupName + "': " + map.keySet());
+			return proxy;
+		}
+
+		@Override
+		public Set<String> getGroupNames() {
+			return this.groupProxyMap.keySet();
+		}
+
+		@Override
+		public Set<Class<?>> getClientTypesInGroup(String groupName) {
+			return getProxyMapForGroup(groupName).keySet();
+		}
+
+		private Map<Class<?>, Object> getProxyMapForGroup(String groupName) {
+			Map<Class<?>, Object> map = this.groupProxyMap.get(groupName);
+			Assert.notNull(map, "No group with name '" + groupName + "'");
+			return map;
 		}
 	}
 

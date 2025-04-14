@@ -16,7 +16,7 @@
 
 package org.springframework.web.service.registry;
 
-import org.jspecify.annotations.Nullable;
+import java.util.Set;
 
 /**
  * A registry that contains HTTP Service client proxies.
@@ -35,18 +35,34 @@ public interface HttpServiceProxyRegistry {
 	 * @param httpServiceType the type of client proxy
 	 * @return the proxy, or {@code null} if not found
 	 * @param <P> the type of HTTP Interface client proxy
-	 * @throws IllegalArgumentException if more than one client proxy of the
+	 * @throws IllegalArgumentException if there is no client proxy of the given
+	 * type, or there is more than one client proxy of the given type.
 	 * given type exists across groups
 	 */
-	<P> @Nullable P getClient(Class<P> httpServiceType);
+	<P> P getClient(Class<P> httpServiceType);
 
 	/**
 	 * Return an HTTP service client proxy from the given group.
 	 * @param groupName the name of the group
 	 * @param httpServiceType the type of client proxy
 	 * @return the proxy, or {@code null} if not found
+	 * @throws IllegalArgumentException if there is no group with the given
+	 * name, or no client proxy of the given type in the group.
 	 * @param <P> the type of HTTP Interface client proxy
 	 */
-	<P> @Nullable P getClient(String groupName, Class<P> httpServiceType);
+	<P> P getClient(String groupName, Class<P> httpServiceType);
+
+	/**
+	 * Return the names of all groups in the registry.
+	 */
+	Set<String> getGroupNames();
+
+	/**
+	 * Return the HTTP service types for all client proxies in the given group.
+	 * @param groupName the name of the group
+	 * @return the HTTP service types
+	 * @throws IllegalArgumentException if there is no group with the given name.
+	 */
+	Set<Class<?>> getClientTypesInGroup(String groupName);
 
 }
