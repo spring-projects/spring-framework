@@ -119,7 +119,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
+	val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 ----
 ======
 
@@ -309,16 +309,16 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.beans.factory.getBean
+	import org.springframework.beans.factory.getBean
 
 	// create and configure beans
-    val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
+	val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 
-    // retrieve configured instance
-    val service = context.getBean<PetStoreService>("petStore")
+	// retrieve configured instance
+	val service = context.getBean<PetStoreService>("petStore")
 
-    // use configured instance
-    var userList = service.getUsernameList()
+	// use configured instance
+	var userList = service.getUsernameList()
 ----
 ======
 

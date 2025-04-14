@@ -78,27 +78,27 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Configuration
-    public class DataSourceConfig {
+	@Configuration
+	public class DataSourceConfig {
 
-        @Bean
-        public DataSource dataSource() {
-            return new EmbeddedDatabaseBuilder()
-                    .setDatabaseConfigurer(EmbeddedDatabaseConfigurers
-                            .customizeConfigurer(H2, this::customize))
-                    .addScript("schema.sql")
-                    .build();
-        }
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()
+					.setDatabaseConfigurer(EmbeddedDatabaseConfigurers
+							.customizeConfigurer(H2, this::customize))
+					.addScript("schema.sql")
+					.build();
+		}
 
-        private EmbeddedDatabaseConfigurer customize(EmbeddedDatabaseConfigurer defaultConfigurer) {
-            return new EmbeddedDatabaseConfigurerDelegate(defaultConfigurer) {
-                @Override
-                public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-                    super.configureConnectionProperties(properties, databaseName);
-                    properties.setDriverClass(CustomDriver.class);
-                }
-            };
-        }
+		private EmbeddedDatabaseConfigurer customize(EmbeddedDatabaseConfigurer defaultConfigurer) {
+			return new EmbeddedDatabaseConfigurerDelegate(defaultConfigurer) {
+				@Override
+				public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
+					super.configureConnectionProperties(properties, databaseName);
+					properties.setDriverClass(CustomDriver.class);
+				}
+			};
+		}
 	}
 ----
 

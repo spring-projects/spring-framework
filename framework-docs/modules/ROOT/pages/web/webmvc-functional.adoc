@@ -781,7 +781,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    ClassPathResource index = new ClassPathResource("static/index.html");
+	ClassPathResource index = new ClassPathResource("static/index.html");
 	List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
 	RequestPredicate spaPredicate = path("/api/**").or(path("/error")).negate();
 	RouterFunction<ServerResponse> redirectToIndex = route()
@@ -793,7 +793,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val redirectToIndex = router {
+	val redirectToIndex = router {
 		val index = ClassPathResource("static/index.html")
 		val spaPredicate = !(path("/api/**") or path("/error"))
 		resource(spaPredicate, index)
@@ -812,16 +812,16 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    Resource location = new FileUrlResource("public-resources/");
-    RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
+	Resource location = new FileUrlResource("public-resources/");
+	RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val location = FileUrlResource("public-resources/")
-    val resources = router { resources("/resources/**", location) }
+	val location = FileUrlResource("public-resources/")
+	val resources = router { resources("/resources/**", location) }
 ----
 ======
 

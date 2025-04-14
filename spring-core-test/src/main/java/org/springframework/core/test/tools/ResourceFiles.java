@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,11 +81,11 @@ public final class ResourceFiles implements Iterable<ResourceFile> {
 	/**
 	 * Return a new {@link ResourceFiles} instance that merges files from
 	 * another {@link ResourceFiles} instance.
-	 * @param ResourceFiles the instance to merge
+	 * @param resourceFiles the instance to merge
 	 * @return a new {@link ResourceFiles} instance containing merged content
 	 */
-	public ResourceFiles and(ResourceFiles ResourceFiles) {
-		return new ResourceFiles(this.files.and(ResourceFiles.files));
+	public ResourceFiles and(ResourceFiles resourceFiles) {
+		return new ResourceFiles(this.files.and(resourceFiles.files));
 	}
 
 	@Override

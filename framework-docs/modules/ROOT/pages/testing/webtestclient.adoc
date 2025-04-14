@@ -396,7 +396,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.test.web.reactive.server.expectBody
+	import org.springframework.test.web.reactive.server.expectBody
 
 	client.get().uri("/persons/1")
 			.exchange()

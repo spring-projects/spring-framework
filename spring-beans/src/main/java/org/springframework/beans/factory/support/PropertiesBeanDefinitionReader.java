@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -404,10 +404,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Get all property values, given a prefix (which will be stripped)
 	 * and add the bean they define to the factory with the given name.
-	 * @param beanName name of the bean to define
+	 * @param beanName the name of the bean to define
 	 * @param map a Map containing string pairs
-	 * @param prefix prefix of each entry, which will be stripped
-	 * @param resourceDescription description of the resource that the
+	 * @param prefix the prefix of each entry, which will be stripped
+	 * @param resourceDescription the description of the resource that the
 	 * Map came from (for logging purposes)
 	 * @throws BeansException if the bean definition could not be parsed or registered
 	 */

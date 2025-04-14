@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -996,8 +996,8 @@ class PathPatternTests {
 	private void checkNoMatch(String uriTemplate, String path) {
 		PathPatternParser p = new PathPatternParser();
 		PathPattern pattern = p.parse(uriTemplate);
-		PathContainer PathContainer = toPathContainer(path);
-		assertThat(pattern.matches(PathContainer)).isFalse();
+		PathContainer pathContainer = toPathContainer(path);
+		assertThat(pattern.matches(pathContainer)).isFalse();
 	}
 
 	private PathPattern.PathMatchInfo checkCapture(String uriTemplate, String path, String... keyValues) {

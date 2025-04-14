@@ -390,29 +390,29 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    HttpClient httpClient = HttpClient.newBuilder()
-        .followRedirects(Redirect.NORMAL)
-        .connectTimeout(Duration.ofSeconds(20))
-        .build();
+	HttpClient httpClient = HttpClient.newBuilder()
+		.followRedirects(Redirect.NORMAL)
+		.connectTimeout(Duration.ofSeconds(20))
+		.build();
 
-    ClientHttpConnector connector =
-            new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory());
+	ClientHttpConnector connector =
+			new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory());
 
-    WebClient webClient = WebClient.builder().clientConnector(connector).build();
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val httpClient = HttpClient.newBuilder()
-        .followRedirects(Redirect.NORMAL)
-        .connectTimeout(Duration.ofSeconds(20))
-        .build()
+	val httpClient = HttpClient.newBuilder()
+		.followRedirects(Redirect.NORMAL)
+		.connectTimeout(Duration.ofSeconds(20))
+		.build()
 
-    val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory())
+	val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory())
 
-    val webClient = WebClient.builder().clientConnector(connector).build()
+	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 ======
 

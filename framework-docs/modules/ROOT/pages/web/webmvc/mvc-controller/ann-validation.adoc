@@ -73,12 +73,12 @@ Java::
 
 		@Override
 		public void requestHeader(RequestHeader requestHeader, ParameterValidationResult result) {
-				// ...
+			// ...
 		}
 
 		@Override
 		public void requestParam(@Nullable RequestParam requestParam, ParameterValidationResult result) {
-				// ...
+			// ...
 		}
 
 		@Override
@@ -88,7 +88,7 @@ Java::
 
 		@Override
 		public void other(ParameterValidationResult result) {
-				// ...
+			// ...
 		}
 	});
 ----
@@ -103,22 +103,22 @@ Kotlin::
 	ex.visitResults(object : HandlerMethodValidationException.Visitor {
 
 		override fun requestHeader(requestHeader: RequestHeader, result: ParameterValidationResult) {
-				// ...
-        }
+			// ...
+		}
 
 		override fun requestParam(requestParam: RequestParam?, result: ParameterValidationResult) {
-				// ...
-        }
+			// ...
+		}
 
 		override fun modelAttribute(modelAttribute: ModelAttribute?, errors: ParameterErrors) {
-				// ...
-        }
+			// ...
+		}
 
 		// ...
 
 		override fun other(result: ParameterValidationResult) {
-				// ...
-        }
+			// ...
+		}
 	})
 ----
 ======

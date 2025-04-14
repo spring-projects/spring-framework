@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class MethodOverrides {
 
 	/**
 	 * Return the override for the given method, if any.
-	 * @param method method to check for overrides for
+	 * @param method the method to check for overrides for
 	 * @return the method override, or {@code null} if none
 	 */
 	public @Nullable MethodOverride getOverride(Method method) {

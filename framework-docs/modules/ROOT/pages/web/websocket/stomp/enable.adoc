@@ -22,11 +22,11 @@ The following example code is based on it:
 [source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	const stompClient = new StompJs.Client({
-        brokerURL: 'ws://domain.com/portfolio',
-        onConnect: () => {
-            // ...
-        }
-    });
+		brokerURL: 'ws://domain.com/portfolio',
+		onConnect: () => {
+			// ...
+		}
+	});
 ----
 
 Alternatively, if you connect through SockJS, you can enable the
@@ -46,6 +46,4 @@ For more example code see:
 interactive web application] -- a getting started guide.
 * https://github.com/rstoyanchev/spring-websocket-portfolio[Stock Portfolio] -- a sample
 application.
-
-
 

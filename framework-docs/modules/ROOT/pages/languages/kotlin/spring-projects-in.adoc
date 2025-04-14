@@ -296,17 +296,17 @@ for example when writing a `org.springframework.core.convert.converter.Converter
 
 [source,kotlin,indent=0]
 ----
-class ListOfFooConverter : Converter<List<Foo>, CustomJavaList<out Foo>> {
-    // ...
-}
+	class ListOfFooConverter : Converter<List<Foo>, CustomJavaList<out Foo>> {
+		// ...
+	}
 ----
 
 When converting any kind of objects, star projection with `*` can be used instead of `out Any`.
 [source,kotlin,indent=0]
 ----
-class ListOfAnyConverter : Converter<List<*>, CustomJavaList<*>> {
-    // ...
-}
+	class ListOfAnyConverter : Converter<List<*>, CustomJavaList<*>> {
+		// ...
+	}
 ----
 
 NOTE: Spring Framework does not leverage yet declaration-site variance type information for injecting beans,
@@ -340,13 +340,14 @@ file with a `spring.test.constructor.autowire.mode = all` property.
 
 [source,kotlin,indent=0]
 ----
-@SpringJUnitConfig(TestConfig::class)
-@TestConstructor(autowireMode = AutowireMode.ALL)
-class OrderServiceIntegrationTests(val orderService: OrderService,
-                                   val customerService: CustomerService) {
-
-    // tests that use the injected OrderService and CustomerService
-}
+	@SpringJUnitConfig(TestConfig::class)
+	@TestConstructor(autowireMode = AutowireMode.ALL)
+	class OrderServiceIntegrationTests(
+					val orderService: OrderService,
+					val customerService: CustomerService) {
+	
+		// tests that use the injected OrderService and CustomerService
+	}
 ----
 
 
@@ -368,29 +369,29 @@ The following example demonstrates `@BeforeAll` and `@AfterAll` annotations on n
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class IntegrationTests {
 
-  val application = Application(8181)
-  val client = WebClient.create("http://localhost:8181")
+	val application = Application(8181)
+	val client = WebClient.create("http://localhost:8181")
 
-  @BeforeAll
-  fun beforeAll() {
-    application.start()
-  }
+	@BeforeAll
+	fun beforeAll() {
+		application.start()
+	}
 
-  @Test
-  fun `Find all users on HTML page`() {
-    client.get().uri("/users")
-        .accept(TEXT_HTML)
-        .retrieve()
-        .bodyToMono<String>()
-        .test()
-        .expectNextMatches { it.contains("Foo") }
-        .verifyComplete()
-  }
+	@Test
+	fun `Find all users on HTML page`() {
+		client.get().uri("/users")
+				.accept(TEXT_HTML)
+				.retrieve()
+				.bodyToMono<String>()
+				.test()
+				.expectNextMatches { it.contains("Foo") }
+				.verifyComplete()
+	}
 
-  @AfterAll
-  fun afterAll() {
-    application.stop()
-  }
+	@AfterAll
+	fun afterAll() {
+		application.stop()
+	}
 }
 ----
 
@@ -403,26 +404,27 @@ The following example shows how to do so:
 
 [source,kotlin,indent=0]
 ----
-class SpecificationLikeTests {
+	class SpecificationLikeTests {
+	
+		@Nested
+		@DisplayName("a calculator")
+		inner class Calculator {
 
-  @Nested
-  @DisplayName("a calculator")
-  inner class Calculator {
-     val calculator = SampleCalculator()
-
-     @Test
-     fun `should return the result of adding the first number to the second number`() {
-        val sum = calculator.sum(2, 4)
-        assertEquals(6, sum)
-     }
-
-     @Test
-     fun `should return the result of subtracting the second number from the first number`() {
-        val subtract = calculator.subtract(4, 2)
-        assertEquals(2, subtract)
-     }
-  }
-}
+			val calculator = SampleCalculator()
+	
+			@Test
+			fun `should return the result of adding the first number to the second number`() {
+				val sum = calculator.sum(2, 4)
+				assertEquals(6, sum)
+			}
+	
+			@Test
+			fun `should return the result of subtracting the second number from the first number`() {
+				val subtract = calculator.subtract(4, 2)
+				assertEquals(2, subtract)
+			}
+		}
+	}
 ----
 
 

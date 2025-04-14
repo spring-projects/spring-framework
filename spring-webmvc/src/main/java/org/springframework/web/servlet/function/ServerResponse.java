@@ -281,7 +281,7 @@ public interface ServerResponse {
 	 *         .send("Hello World!"));
 	 * }
 	 * </pre>
-	 * @param consumer consumer that will be provided with an event builder
+	 * @param consumer the consumer that will be provided with an event builder
 	 * @return the server-side event response
 	 * @since 5.3.2
 	 * @see <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events</a>
@@ -310,8 +310,8 @@ public interface ServerResponse {
 	 *         .send("Hello World!"));
 	 * }
 	 * </pre>
-	 * @param consumer consumer that will be provided with an event builder
-	 * @param timeout  maximum time period to wait before timing out
+	 * @param consumer the consumer that will be provided with an event builder
+	 * @param timeout maximum time period to wait before timing out
 	 * @return the server-side event response
 	 * @since 5.3.2
 	 * @see <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events</a>
@@ -329,7 +329,7 @@ public interface ServerResponse {
 
 		/**
 		 * Add the given header value(s) under the given name.
-		 * @param headerName   the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
