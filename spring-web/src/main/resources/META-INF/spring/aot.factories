@@ -6,4 +6,8 @@ org.springframework.http.converter.json.ProblemDetailRuntimeHints,\
 org.springframework.web.util.WebUtilRuntimeHints
 
 org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
-org.springframework.web.service.annotation.HttpExchangeBeanRegistrationAotProcessor
+org.springframework.web.service.annotation.HttpExchangeBeanRegistrationAotProcessor,\
+org.springframework.web.service.registry.HttpServiceProxyBeanRegistrationAotProcessor
+
+org.springframework.aot.generate.ValueCodeGenerator$Delegate=\
+org.springframework.web.service.registry.GroupsMetadataValueDelegate

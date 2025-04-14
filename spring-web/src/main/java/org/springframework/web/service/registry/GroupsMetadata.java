@@ -17,12 +17,14 @@
 package org.springframework.web.service.registry;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -37,8 +39,16 @@ import org.springframework.util.ClassUtils;
  */
 final class GroupsMetadata {
 
-	private final Map<String, DefaultRegistration> groupMap = new LinkedHashMap<>();
+	private final Map<String, DefaultRegistration> groupMap;
 
+	public GroupsMetadata() {
+		this(Collections.emptyList());
+	}
+
+	GroupsMetadata(Iterable<DefaultRegistration> registrations) {
+		this.groupMap = new LinkedHashMap<>();
+		registrations.forEach(registration -> this.groupMap.put(registration.name(), registration));
+	}
 
 	/**
 	 * Create a registration for the given group name, or return an existing
@@ -85,6 +95,13 @@ final class GroupsMetadata {
 		}
 	}
 
+	/**
+	 * Return the raw {@link DefaultRegistration registrations}.
+	 */
+	Stream<DefaultRegistration> registrations() {
+		return this.groupMap.values().stream();
+	}
+
 
 	/**
 	 * Registration metadata for an {@link HttpServiceGroup}.
@@ -102,17 +119,22 @@ final class GroupsMetadata {
 	/**
 	 * Default implementation of {@link Registration}.
 	 */
-	private static class DefaultRegistration implements Registration {
+	static class DefaultRegistration implements Registration {
 
 		private final String name;
 
 		private HttpServiceGroup.ClientType clientType;
 
-		private final Set<String> typeNames = new LinkedHashSet<>();
+		private final Set<String> typeNames;
 
 		DefaultRegistration(String name, HttpServiceGroup.ClientType clientType) {
+			this(name, clientType, new LinkedHashSet<>());
+		}
+
+		DefaultRegistration(String name, HttpServiceGroup.ClientType clientType, Set<String> typeNames) {
 			this.name = name;
 			this.clientType = clientType;
+			this.typeNames = typeNames;
 		}
 
 		@Override

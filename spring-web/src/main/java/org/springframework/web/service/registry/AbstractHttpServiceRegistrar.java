@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -38,7 +38,6 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -69,12 +68,20 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Olga Maciaszek-Sharma
+ * @author Stephane Nicoll
  * @since 7.0
  * @see ImportHttpServices
  * @see HttpServiceProxyRegistryFactoryBean
  */
 public abstract class AbstractHttpServiceRegistrar implements
 		ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware, BeanFactoryAware {
+
+	/**
+	 * The bean name of the {@link HttpServiceProxyRegistry}.
+	 */
+	public static final String HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME = "httpServiceProxyRegistry";
+
+	static final String HTTP_SERVICE_GROUP_NAME_ATTRIBUTE = "httpServiceGroupName";
 
 	private HttpServiceGroup.ClientType defaultClientType = HttpServiceGroup.ClientType.UNSPECIFIED;
 
@@ -127,31 +134,34 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		registerHttpServices(new DefaultGroupRegistry(), metadata);
 
-		String proxyRegistryBeanName = StringUtils.uncapitalize(HttpServiceProxyRegistry.class.getSimpleName());
-		GenericBeanDefinition proxyRegistryBeanDef;
-
-		if (!beanRegistry.containsBeanDefinition(proxyRegistryBeanName)) {
-			proxyRegistryBeanDef = new GenericBeanDefinition();
-			proxyRegistryBeanDef.setBeanClass(HttpServiceProxyRegistryFactoryBean.class);
-			ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
-			args.addIndexedArgumentValue(0, new GroupsMetadata());
-			beanRegistry.registerBeanDefinition(proxyRegistryBeanName, proxyRegistryBeanDef);
-		}
-		else {
-			proxyRegistryBeanDef = (GenericBeanDefinition) beanRegistry.getBeanDefinition(proxyRegistryBeanName);
-		}
+		RootBeanDefinition proxyRegistryBeanDef = createOrGetRegistry(beanRegistry);
 
 		mergeGroups(proxyRegistryBeanDef);
 
 		this.groupsMetadata.forEachRegistration((groupName, types) -> types.forEach(type -> {
-			GenericBeanDefinition proxyBeanDef = new GenericBeanDefinition();
+			RootBeanDefinition proxyBeanDef = new RootBeanDefinition();
 			proxyBeanDef.setBeanClassName(type);
+			proxyBeanDef.setAttribute(HTTP_SERVICE_GROUP_NAME_ATTRIBUTE, groupName);
+			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(groupName, type));
 			String beanName = (groupName + "#" + type);
-			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(proxyRegistryBeanName, groupName, type));
 			if (!beanRegistry.containsBeanDefinition(beanName)) {
 				beanRegistry.registerBeanDefinition(beanName, proxyBeanDef);
 			}
 		}));
+	}
+
+	private RootBeanDefinition createOrGetRegistry(BeanDefinitionRegistry beanRegistry) {
+		if (!beanRegistry.containsBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME)) {
+			RootBeanDefinition proxyRegistryBeanDef = new RootBeanDefinition();
+			proxyRegistryBeanDef.setBeanClass(HttpServiceProxyRegistryFactoryBean.class);
+			ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
+			args.addIndexedArgumentValue(0, new GroupsMetadata());
+			beanRegistry.registerBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME, proxyRegistryBeanDef);
+			return proxyRegistryBeanDef;
+		}
+		else {
+			return (RootBeanDefinition) beanRegistry.getBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME);
+		}
 	}
 
 	/**
@@ -175,7 +185,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 		return this.scanner;
 	}
 
-	private void mergeGroups(GenericBeanDefinition proxyRegistryBeanDef) {
+	private void mergeGroups(RootBeanDefinition proxyRegistryBeanDef) {
 		ConstructorArgumentValues args = proxyRegistryBeanDef.getConstructorArgumentValues();
 		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, GroupsMetadata.class);
 		Assert.state(valueHolder != null, "Expected GroupsMetadata constructor argument at index 0");
@@ -184,12 +194,10 @@ public abstract class AbstractHttpServiceRegistrar implements
 		target.mergeWith(this.groupsMetadata);
 	}
 
-	private Object getProxyInstance(String registryBeanName, String groupName, String httpServiceType) {
+	private Object getProxyInstance(String groupName, String httpServiceType) {
 		Assert.state(this.beanFactory != null, "BeanFactory has not been set");
-		HttpServiceProxyRegistry registry = this.beanFactory.getBean(registryBeanName, HttpServiceProxyRegistry.class);
-		Object proxy = registry.getClient(groupName, GroupsMetadata.loadClass(httpServiceType));
-		Assert.notNull(proxy, "No proxy for HTTP Service [" + httpServiceType + "]");
-		return proxy;
+		HttpServiceProxyRegistry registry = this.beanFactory.getBean(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME, HttpServiceProxyRegistry.class);
+		return registry.getClient(groupName, GroupsMetadata.loadClass(httpServiceType));
 	}
 
 
