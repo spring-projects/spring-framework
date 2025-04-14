@@ -143,8 +143,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private final Set<Class<?>> ignoredDependencyTypes = new HashSet<>();
 
 	/**
-	 * Dependency interfaces to ignore on dependency check and autowire, as Set of
-	 * Class objects. By default, only the BeanFactory interface is ignored.
+	 * Dependency interfaces to ignore on dependency check and autowire, as a Set
+	 * of Class objects.
+	 * <p>By default, the {@code BeanNameAware}, {@code BeanFactoryAware}, and
+	 * {@code BeanClassLoaderAware} interfaces are ignored.
 	 */
 	private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
 
@@ -283,11 +285,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Ignore the given dependency interface for autowiring.
 	 * <p>This will typically be used by application contexts to register
-	 * dependencies that are resolved in other ways, like BeanFactory through
-	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
-	 * <p>By default, only the BeanFactoryAware interface is ignored.
+	 * dependencies that are resolved in other ways, like {@code BeanFactory}
+	 * through {@code BeanFactoryAware} or {@code ApplicationContext} through
+	 * {@code ApplicationContextAware}.
+	 * <p>By default, the {@code BeanNameAware}, {@code BeanFactoryAware}, and
+	 * {@code BeanClassLoaderAware} interfaces are ignored.
 	 * For further types to ignore, invoke this method for each type.
+	 * @see org.springframework.beans.factory.BeanNameAware
 	 * @see org.springframework.beans.factory.BeanFactoryAware
+	 * @see org.springframework.beans.factory.BeanClassLoaderAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
 	public void ignoreDependencyInterface(Class<?> ifc) {
