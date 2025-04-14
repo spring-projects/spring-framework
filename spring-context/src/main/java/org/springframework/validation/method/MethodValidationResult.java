@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public interface MethodValidationResult {
 	 * on their fields and properties.
 	 * @see #getValueResults()
 	 * @see #getBeanResults()
-	 * @deprecated deprecated in favor of {@link #getParameterValidationResults()}
+	 * @deprecated As of Spring Framework 6.2, in favor of {@link #getParameterValidationResults()}
 	 */
 	@Deprecated(since = "6.2", forRemoval = true)
 	default List<ParameterValidationResult> getAllValidationResults() {

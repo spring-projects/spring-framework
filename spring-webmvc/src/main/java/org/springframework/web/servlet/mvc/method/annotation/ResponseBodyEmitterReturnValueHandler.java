@@ -135,7 +135,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	 * @param executor for blocking I/O writes of items emitted from reactive types
 	 * @param manager for detecting streaming media types
 	 * @param viewResolvers resolvers for fragment stream rendering
-	 * @param localeResolver localeResolver for fragment stream rendering
+	 * @param localeResolver the {@link LocaleResolver} for fragment stream rendering
 	 * @since 6.2
 	 */
 	public ResponseBodyEmitterReturnValueHandler(

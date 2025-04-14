@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public abstract class RouterFunctions {
 	 * Resource resource = new ClassPathResource("static/index.html")
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 	 * </pre>
-	 * @param predicate predicate to match
+	 * @param predicate the predicate to match
 	 * @param resource the resources to serve
 	 * @return a router function that routes to a resource
 	 * @since 6.1.4
@@ -152,7 +152,7 @@ public abstract class RouterFunctions {
 	 * Resource resource = new ClassPathResource("static/index.html")
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 	 * </pre>
-	 * @param predicate predicate to match
+	 * @param predicate the predicate to match
 	 * @param resource the resources to serve
 	 * @param headersConsumer provides access to the HTTP headers for served resources
 	 * @return a router function that routes to a resource
@@ -298,7 +298,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code GET} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -350,7 +350,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code HEAD} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -393,7 +393,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code POST} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -444,7 +444,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code PUT} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -495,7 +495,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code PATCH} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -546,7 +546,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code DELETE} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -589,7 +589,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code OPTIONS} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -648,7 +648,7 @@ public abstract class RouterFunctions {
 		 * Resource resource = new ClassPathResource("static/index.html")
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 		 * </pre>
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param resource the resources to serve
 		 * @return a router function that routes to a resource
 		 * @since 6.1.4
@@ -662,7 +662,7 @@ public abstract class RouterFunctions {
 		 * Resource resource = new ClassPathResource("static/index.html")
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 		 * </pre>
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param resource the resources to serve
 		 * @param headersConsumer provides access to the HTTP headers for served resources
 		 * @return a router function that routes to a resource
