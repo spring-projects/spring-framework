@@ -441,7 +441,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return cacheHit;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private @Nullable Object executeSynchronized(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 		CacheOperationContext context = contexts.get(CacheableOperation.class).iterator().next();
 		if (isConditionPassing(context, CacheOperationExpressionEvaluator.NO_RESULT)) {
