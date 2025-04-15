@@ -68,20 +68,10 @@ public class SimpleMapScope implements Scope, Serializable {
 		this.callbacks.add(callback);
 	}
 
-	@Override
-	public Object resolveContextualObject(String key) {
-		return null;
-	}
-
 	public void close() {
 		for (Runnable runnable : this.callbacks) {
 			runnable.run();
 		}
-	}
-
-	@Override
-	public String getConversationId() {
-		return null;
 	}
 
 }

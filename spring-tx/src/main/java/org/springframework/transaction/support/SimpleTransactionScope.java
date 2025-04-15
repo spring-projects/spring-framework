@@ -82,11 +82,6 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 	@Override
-	public @Nullable Object resolveContextualObject(String key) {
-		return null;
-	}
-
-	@Override
 	public @Nullable String getConversationId() {
 		return TransactionSynchronizationManager.getCurrentTransactionName();
 	}

@@ -354,11 +354,6 @@ class ScopingTests {
 		}
 
 		@Override
-		public String getConversationId() {
-			return null;
-		}
-
-		@Override
 		public void registerDestructionCallback(String name, Runnable callback) {
 			throw new IllegalStateException("Not supposed to be called");
 		}
@@ -368,10 +363,6 @@ class ScopingTests {
 			return beans.remove(name);
 		}
 
-		@Override
-		public Object resolveContextualObject(String key) {
-			return null;
-		}
 	}
 
 }

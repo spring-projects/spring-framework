@@ -71,11 +71,6 @@ public class SimpSessionScope implements Scope {
 	}
 
 	@Override
-	public @Nullable Object resolveContextualObject(String key) {
-		return null;
-	}
-
-	@Override
 	public String getConversationId() {
 		return SimpAttributesContextHolder.currentAttributes().getSessionId();
 	}
