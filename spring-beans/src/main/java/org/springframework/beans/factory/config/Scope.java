@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,9 @@ public interface Scope {
 	 * @return the corresponding object, or {@code null} if none found
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable Object resolveContextualObject(String key);
+	default @Nullable Object resolveContextualObject(String key) {
+		return null;
+	}
 
 	/**
 	 * Return the <em>conversation ID</em> for the current underlying scope, if any.
@@ -147,6 +149,8 @@ public interface Scope {
 	 * conversation ID for the current scope
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable String getConversationId();
+	default @Nullable String getConversationId() {
+		return null;
+	}
 
 }
