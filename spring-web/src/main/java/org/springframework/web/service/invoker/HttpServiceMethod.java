@@ -77,6 +77,8 @@ final class HttpServiceMethod {
 
 	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
+	private final HttpRequestValues.Processor requestValuesProcessor;
+
 	private final HttpRequestValuesInitializer requestValuesInitializer;
 
 	private final ResponseFunction responseFunction;
@@ -84,11 +86,13 @@ final class HttpServiceMethod {
 
 	HttpServiceMethod(
 			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
-			HttpExchangeAdapter adapter, @Nullable StringValueResolver embeddedValueResolver) {
+			HttpRequestValues.Processor valuesProcessor, HttpExchangeAdapter adapter,
+			@Nullable StringValueResolver embeddedValueResolver) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
+		this.requestValuesProcessor = valuesProcessor;
 
 		boolean isReactorAdapter = (REACTOR_PRESENT && adapter instanceof ReactorHttpExchangeAdapter);
 
@@ -129,6 +133,7 @@ final class HttpServiceMethod {
 	public @Nullable Object invoke(@Nullable Object[] arguments) {
 		HttpRequestValues.Builder requestValues = this.requestValuesInitializer.initializeRequestValuesBuilder();
 		applyArguments(requestValues, arguments);
+		this.requestValuesProcessor.process(this.method, arguments, requestValues);
 		return this.responseFunction.execute(requestValues.build());
 	}
 

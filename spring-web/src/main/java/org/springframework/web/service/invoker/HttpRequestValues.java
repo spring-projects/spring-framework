@@ -16,6 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
@@ -176,6 +177,9 @@ public class HttpRequestValues {
 	}
 
 
+	/**
+	 * Return a builder for {@link HttpRequestValues}.
+	 */
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -210,6 +214,28 @@ public class HttpRequestValues {
 
 
 	/**
+	 * A contract that allows further customization of {@link HttpRequestValues}
+	 * in addition to those added by argument resolvers.
+	 * <p>Use {@link HttpServiceProxyFactory.Builder#httpRequestValuesProcessor(Processor)}
+	 * to add such a processor.
+	 * @since 7.0
+	 */
+	public interface Processor {
+
+		/**
+		 * Invoked after argument resolvers have been called, and before the
+		 * {@link HttpRequestValues} is built.
+		 * @param method the {@code @HttpExchange} method
+		 * @param arguments the raw argument values to the method
+		 * @param builder the builder to add request values too; the builder
+		 * also exposes method {@link Metadata} from the {@code HttpExchange} method.
+		 */
+		void process(Method method, @Nullable Object[] arguments, Builder builder);
+
+	}
+
+
+	/**
 	 * Builder for {@link HttpRequestValues}.
 	 */
 	public static class Builder implements Metadata {
@@ -237,6 +263,9 @@ public class HttpRequestValues {
 		private @Nullable Map<String, Object> attributes;
 
 		private @Nullable Object bodyValue;
+
+		protected Builder() {
+		}
 
 		/**
 		 * Set the HTTP method for the request.

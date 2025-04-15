@@ -94,6 +94,9 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 
 		private @Nullable ParameterizedTypeReference<?> bodyElementType;
 
+		private Builder() {
+		}
+
 		@Override
 		public Builder setHttpMethod(HttpMethod httpMethod) {
 			super.setHttpMethod(httpMethod);

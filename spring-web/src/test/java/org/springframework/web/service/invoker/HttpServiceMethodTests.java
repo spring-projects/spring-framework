@@ -198,12 +198,12 @@ class HttpServiceMethodTests {
 
 	@Test
 	void typeAndMethodAnnotatedService() {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder()
-			.exchangeAdapter(this.client)
-			.embeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
-			.build();
 
-		MethodLevelAnnotatedService service = proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
+		MethodLevelAnnotatedService service = HttpServiceProxyFactory.builder()
+				.exchangeAdapter(this.client)
+				.embeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
+				.build()
+				.createClient(TypeAndMethodLevelAnnotatedService.class);
 
 		service.performGet();
 
@@ -220,6 +220,19 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/base/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void httpRequestValuesProcessor() {
+
+		HttpServiceProxyFactory.builder()
+				.exchangeAdapter(this.client)
+				.httpRequestValuesProcessor((m, a, builder) -> builder.addAttribute("foo", "a"))
+				.build()
+				.createClient(Service.class)
+				.execute();
+
+		assertThat(this.client.getRequestValues().getAttributes().get("foo")).isEqualTo("a");
 	}
 
 	@Test  // gh-32049

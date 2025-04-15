@@ -58,15 +58,19 @@ public final class HttpServiceProxyFactory {
 
 	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
+	private final HttpRequestValues.Processor requestValuesProcessor;
+
 	private final @Nullable StringValueResolver embeddedValueResolver;
 
 
 	private HttpServiceProxyFactory(
 			HttpExchangeAdapter exchangeAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
+			List<HttpRequestValues.Processor> requestValuesProcessor,
 			@Nullable StringValueResolver embeddedValueResolver) {
 
 		this.exchangeAdapter = exchangeAdapter;
 		this.argumentResolvers = argumentResolvers;
+		this.requestValuesProcessor = new CompositeHttpRequestValuesProcessor(requestValuesProcessor);
 		this.embeddedValueResolver = embeddedValueResolver;
 	}
 
@@ -97,7 +101,8 @@ public final class HttpServiceProxyFactory {
 				"No argument resolvers: afterPropertiesSet was not called");
 
 		return new HttpServiceMethod(
-				method, serviceType, this.argumentResolvers, this.exchangeAdapter, this.embeddedValueResolver);
+				method, serviceType, this.argumentResolvers, this.requestValuesProcessor,
+				this.exchangeAdapter, this.embeddedValueResolver);
 	}
 
 
@@ -126,6 +131,8 @@ public final class HttpServiceProxyFactory {
 
 		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
+		private final List<HttpRequestValues.Processor> requestValuesProcessors = new ArrayList<>();
+
 		private @Nullable ConversionService conversionService;
 
 		private @Nullable StringValueResolver embeddedValueResolver;
@@ -151,6 +158,18 @@ public final class HttpServiceProxyFactory {
 		 */
 		public Builder customArgumentResolver(HttpServiceArgumentResolver resolver) {
 			this.customArgumentResolvers.add(resolver);
+			return this;
+		}
+
+		/**
+		 * Register an {@link HttpRequestValues} processor that can further
+		 * customize request values based on the method and all arguments.
+		 * @param processor the processor to add
+		 * @return this same builder instance
+		 * @since 7.0
+		 */
+		public Builder httpRequestValuesProcessor(HttpRequestValues.Processor processor) {
+			this.requestValuesProcessors.add(processor);
 			return this;
 		}
 
@@ -183,7 +202,8 @@ public final class HttpServiceProxyFactory {
 			Assert.notNull(this.exchangeAdapter, "HttpClientAdapter is required");
 
 			return new HttpServiceProxyFactory(
-					this.exchangeAdapter, initArgumentResolvers(), this.embeddedValueResolver);
+					this.exchangeAdapter, initArgumentResolvers(), this.requestValuesProcessors,
+					this.embeddedValueResolver);
 		}
 
 		@SuppressWarnings({"DataFlowIssue", "NullAway"})
@@ -251,7 +271,21 @@ public final class HttpServiceProxyFactory {
 			System.arraycopy(args, 0, functionArgs, 0, args.length - 1);
 			return functionArgs;
 		}
+	}
 
+
+	/**
+	 * Processor that delegates to a list of other processors.
+	 */
+	private record CompositeHttpRequestValuesProcessor(List<HttpRequestValues.Processor> processors)
+			implements HttpRequestValues.Processor {
+
+		@Override
+		public void process(Method method, @Nullable Object[] arguments, HttpRequestValues.Builder builder) {
+			for (HttpRequestValues.Processor processor : this.processors) {
+				processor.process(method, arguments, builder);
+			}
+		}
 	}
 
 }
