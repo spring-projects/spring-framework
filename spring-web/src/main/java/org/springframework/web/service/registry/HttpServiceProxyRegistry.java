@@ -19,7 +19,7 @@ package org.springframework.web.service.registry;
 import java.util.Set;
 
 /**
- * A registry that contains HTTP Service client proxies.
+ * A registry for HTTP service clients organized by {@link HttpServiceGroup}.
  *
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
@@ -30,24 +30,23 @@ import java.util.Set;
 public interface HttpServiceProxyRegistry {
 
 	/**
-	 * Return an HTTP service client proxy from any group as long as there is
-	 * only one client proxy of the given type across all groups.
-	 * @param httpServiceType the type of client proxy
-	 * @return the proxy, or {@code null} if not found
-	 * @param <P> the type of HTTP Interface client proxy
-	 * @throws IllegalArgumentException if there is no client proxy of the given
-	 * type, or there is more than one client proxy of the given type
+	 * Return an HTTP service client from any group as long as there is only one
+	 * client of this type across all groups.
+	 * @param httpServiceType the type of client
+	 * @param <P> the type of HTTP interface client
+	 * @return the matched client
+	 * @throws IllegalArgumentException if there is no client of the given type,
+	 * or there is more than one client of the given type.
 	 */
 	<P> P getClient(Class<P> httpServiceType);
 
 	/**
-	 * Return an HTTP service client proxy from the given group.
+	 * Return an HTTP service client from the named group.
 	 * @param groupName the name of the group
-	 * @param httpServiceType the type of client proxy
-	 * @return the proxy, or {@code null} if not found
-	 * @throws IllegalArgumentException if there is no group with the given
-	 * name, or no client proxy of the given type in the group
-	 * @param <P> the type of HTTP Interface client proxy
+	 * @param httpServiceType the type of client
+	 * @param <P> the type of HTTP interface client
+	 * @return the matched client
+	 * @throws IllegalArgumentException if there is no matching client.
 	 */
 	<P> P getClient(String groupName, Class<P> httpServiceType);
 
@@ -57,10 +56,10 @@ public interface HttpServiceProxyRegistry {
 	Set<String> getGroupNames();
 
 	/**
-	 * Return the HTTP service types for all client proxies in the given group.
+	 * Return all HTTP service client types in the named group.
 	 * @param groupName the name of the group
 	 * @return the HTTP service types
-	 * @throws IllegalArgumentException if there is no group with the given name
+	 * @throws IllegalArgumentException if there is no matching group.
 	 */
 	Set<Class<?>> getClientTypesInGroup(String groupName);
 
