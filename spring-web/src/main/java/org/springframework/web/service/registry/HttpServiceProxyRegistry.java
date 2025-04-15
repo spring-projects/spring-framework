@@ -36,8 +36,7 @@ public interface HttpServiceProxyRegistry {
 	 * @return the proxy, or {@code null} if not found
 	 * @param <P> the type of HTTP Interface client proxy
 	 * @throws IllegalArgumentException if there is no client proxy of the given
-	 * type, or there is more than one client proxy of the given type.
-	 * given type exists across groups
+	 * type, or there is more than one client proxy of the given type
 	 */
 	<P> P getClient(Class<P> httpServiceType);
 
@@ -47,7 +46,7 @@ public interface HttpServiceProxyRegistry {
 	 * @param httpServiceType the type of client proxy
 	 * @return the proxy, or {@code null} if not found
 	 * @throws IllegalArgumentException if there is no group with the given
-	 * name, or no client proxy of the given type in the group.
+	 * name, or no client proxy of the given type in the group
 	 * @param <P> the type of HTTP Interface client proxy
 	 */
 	<P> P getClient(String groupName, Class<P> httpServiceType);
@@ -61,7 +60,7 @@ public interface HttpServiceProxyRegistry {
 	 * Return the HTTP service types for all client proxies in the given group.
 	 * @param groupName the name of the group
 	 * @return the HTTP service types
-	 * @throws IllegalArgumentException if there is no group with the given name.
+	 * @throws IllegalArgumentException if there is no group with the given name
 	 */
 	Set<Class<?>> getClientTypesInGroup(String groupName);
 

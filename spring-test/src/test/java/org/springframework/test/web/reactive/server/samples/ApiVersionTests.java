@@ -62,7 +62,7 @@ public class ApiVersionTests {
 	private Map<String, String> performRequest(Consumer<DefaultApiVersionInserter.Builder> consumer) {
 		DefaultApiVersionInserter.Builder builder = DefaultApiVersionInserter.builder();
 		consumer.accept(builder);
-		return (Map<String, String>) WebTestClient.bindToController(new TestController())
+		return WebTestClient.bindToController(new TestController())
 				.configureClient()
 				.baseUrl("/path")
 				.apiVersionInserter(builder.build())

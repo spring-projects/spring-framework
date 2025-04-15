@@ -656,11 +656,11 @@ public interface WebTestClient {
 
 		/**
 		 * Set an API version for the request. The version is inserted into the
-		 * request by the {@link Builder#apiVersionInserter(ApiVersionInserter)
+		 * request by the {@linkplain Builder#apiVersionInserter(ApiVersionInserter)
 		 * configured} {@code ApiVersionInserter}.
 		 * @param version the API version of the request; this can be a String or
-		 * some Object that can be formatted the inserter, e.g. through an
-		 * {@link ApiVersionFormatter}.
+		 * some Object that can be formatted by the inserter &mdash; for example,
+		 * through an {@link ApiVersionFormatter}
 		 * @since 7.0
 		 */
 		S apiVersion(Object version);
