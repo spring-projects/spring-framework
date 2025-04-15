@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,7 +47,7 @@ import org.springframework.javapoet.CodeBlock;
  * @author Stephane Nicoll
  * @since 6.1.2
  */
-abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
+public abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 
 	/**
 	 * A list of {@link Delegate} implementations for the following common bean
@@ -71,6 +72,26 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 			new BeanReferenceDelegate(),
 			new TypedStringValueDelegate()
 	);
+
+
+	/**
+	 * Create a {@link ValueCodeGenerator} instance with both these
+	 * {@link #INSTANCES delegate} and the {@link ValueCodeGeneratorDelegates#INSTANCES
+	 * core delegates}.
+	 * @param generatedMethods the {@link GeneratedMethods} to use
+	 * @param customDelegates additional delegates that should be considered first
+	 * @return a configured value code generator
+	 * @since 7.0
+	 * @see ValueCodeGenerator#add(List)
+	 */
+	public static ValueCodeGenerator createValueCodeGenerator(
+			GeneratedMethods generatedMethods, List<Delegate> customDelegates) {
+		List<Delegate> allDelegates = new ArrayList<>();
+		allDelegates.addAll(customDelegates);
+		allDelegates.addAll(INSTANCES);
+		allDelegates.addAll(ValueCodeGeneratorDelegates.INSTANCES);
+		return ValueCodeGenerator.with(allDelegates).scoped(generatedMethods);
+	}
 
 
 	/**
