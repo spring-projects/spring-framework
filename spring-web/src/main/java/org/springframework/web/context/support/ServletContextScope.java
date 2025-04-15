@@ -96,17 +96,6 @@ public class ServletContextScope implements Scope, DisposableBean {
 		}
 	}
 
-	@Override
-	public @Nullable Object resolveContextualObject(String key) {
-		return null;
-	}
-
-	@Override
-	public @Nullable String getConversationId() {
-		return null;
-	}
-
-
 	/**
 	 * Invoke all registered destruction callbacks.
 	 * To be called on ServletContext shutdown.

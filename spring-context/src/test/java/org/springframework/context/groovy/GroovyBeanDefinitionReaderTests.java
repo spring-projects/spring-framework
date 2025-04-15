@@ -1215,19 +1215,9 @@ class TestScope implements Scope {
 	}
 
 	@Override
-	public String getConversationId() {
-		return null;
-	}
-
-	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		instanceCount++;
 		return objectFactory.getObject();
-	}
-
-	@Override
-	public Object resolveContextualObject(String s) {
-		return null;
 	}
 }
 

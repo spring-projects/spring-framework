@@ -130,7 +130,9 @@ public interface Scope {
 	 * @return the corresponding object, or {@code null} if none found
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable Object resolveContextualObject(String key);
+	default @Nullable Object resolveContextualObject(String key) {
+		return null;
+	}
 
 	/**
 	 * Return the <em>conversation ID</em> for the current underlying scope, if any.
@@ -147,6 +149,8 @@ public interface Scope {
 	 * conversation ID for the current scope
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable String getConversationId();
+	default @Nullable String getConversationId() {
+		return null;
+	}
 
 }

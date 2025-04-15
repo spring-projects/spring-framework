@@ -83,16 +83,6 @@ class Spr10744Tests {
 		@Override
 		public void registerDestructionCallback(String name, Runnable callback) {
 		}
-
-		@Override
-		public Object resolveContextualObject(String key) {
-			return null;
-		}
-
-		@Override
-		public String getConversationId() {
-			return null;
-		}
 	}
 
 

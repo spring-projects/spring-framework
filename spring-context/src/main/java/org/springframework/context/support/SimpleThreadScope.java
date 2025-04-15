@@ -84,11 +84,6 @@ public class SimpleThreadScope implements Scope {
 	}
 
 	@Override
-	public @Nullable Object resolveContextualObject(String key) {
-		return null;
-	}
-
-	@Override
 	public String getConversationId() {
 		return Thread.currentThread().getName();
 	}
