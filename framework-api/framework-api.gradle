@@ -31,8 +31,9 @@ javadoc {
 		destinationDir = project.java.docsDir.dir("javadoc-api").get().asFile
 		splitIndex = true
 		links(rootProject.ext.javadocLinks)
-		addBooleanOption('Xdoclint:syntax,reference', true) // only check syntax and reference with doclint
-		addBooleanOption('Werror', true) // fail build on Javadoc warnings
+		// Check for 'syntax' and 'reference' during linting.
+		addBooleanOption('Xdoclint:syntax,reference', true)
+		addBooleanOption('Werror', true)  // fail build on Javadoc warnings
 	}
 	maxMemory = "1024m"
 	doFirst {

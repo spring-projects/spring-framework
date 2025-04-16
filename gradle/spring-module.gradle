@@ -70,21 +70,19 @@ normalization {
 javadoc {
 	description = "Generates project-level javadoc for use in -javadoc jar"
 
-	options.encoding = "UTF-8"
-	options.memberLevel = JavadocMemberLevel.PROTECTED
-	options.author = true
-	options.header = project.name
-	options.use = true
-	options.links(project.ext.javadocLinks)
-	// Check for syntax during linting. 'none' doesn't seem to work in suppressing
-	// all linting warnings all the time (see/link references most notably).
-	options.addStringOption("Xdoclint:syntax", "-quiet")
-
-	// Suppress warnings due to cross-module @see and @link references.
-	// Note that global 'api' task does display all warnings, and
-	// checks for 'reference' on top of 'syntax'.
-	logging.captureStandardError LogLevel.INFO
-	logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
+	options {
+		encoding = "UTF-8"
+		memberLevel = JavadocMemberLevel.PROTECTED
+		author = true
+		header = project.name
+		use = true
+		links(project.ext.javadocLinks)
+		// Check for 'syntax' during linting. Note that the global
+		// 'framework-api:javadoc' task checks for 'reference' in addition
+		// to 'syntax'.
+		addBooleanOption("Xdoclint:syntax,-reference", true)
+		addBooleanOption('Werror', true)  // fail build on Javadoc warnings
+	}
 }
 
 tasks.register('sourcesJar', Jar) {
