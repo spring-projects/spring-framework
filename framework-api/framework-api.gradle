@@ -33,7 +33,11 @@ javadoc {
 		links(rootProject.ext.javadocLinks)
 		// Check for 'syntax' and 'reference' during linting.
 		addBooleanOption('Xdoclint:syntax,reference', true)
-		addBooleanOption('Werror', true)  // fail build on Javadoc warnings
+		// Change modularity mismatch from warn to info.
+		// See https://github.com/spring-projects/spring-framework/issues/27497
+		addStringOption("-link-modularity-mismatch", "info")
+		// Fail build on Javadoc warnings.
+		addBooleanOption('Werror', true)
 	}
 	maxMemory = "1024m"
 	doFirst {

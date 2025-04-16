@@ -82,6 +82,9 @@ javadoc {
 		// 'framework-api:javadoc' task checks for 'reference' in addition
 		// to 'syntax'.
 		addBooleanOption("Xdoclint:syntax,-reference", true)
+		// Change modularity mismatch from warn to info.
+		// See https://github.com/spring-projects/spring-framework/issues/27497
+		addStringOption("-link-modularity-mismatch", "info")
 		// With the javadoc tool on Java 24, it appears that the 'reference'
 		// group is always active and the '-reference' flag is not honored.
 		// Thus, we do NOT fail the build on Javadoc warnings due to
