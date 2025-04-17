@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Task;
@@ -70,18 +71,18 @@ public abstract class ArchitectureCheck extends DefaultTask {
 				allPackagesShouldBeFreeOfTangles(),
 				noClassesShouldCallStringToLowerCaseWithoutLocale(),
 				noClassesShouldCallStringToUpperCaseWithoutLocale());
-		getRuleDescriptions().set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).toList()));
+		getRuleDescriptions().set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).collect(Collectors.toList())));
 	}
 
 	@TaskAction
 	void checkArchitecture() throws IOException {
 		JavaClasses javaClasses = new ClassFileImporter()
-				.importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
+				.importPaths(this.classes.getFiles().stream().map(File::toPath).collect(Collectors.toList()));
 		List<EvaluationResult> violations = getRules().get()
 				.stream()
 				.map((rule) -> rule.evaluate(javaClasses))
 				.filter(EvaluationResult::hasViolation)
-				.toList();
+				.collect(Collectors.toList());
 		File outputFile = getOutputDirectory().file("failure-report.txt").get().getAsFile();
 		outputFile.getParentFile().mkdirs();
 		if (!violations.isEmpty()) {
