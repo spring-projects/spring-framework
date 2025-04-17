@@ -20,6 +20,10 @@ dependencies {
 }
 
 javadoc {
+	javadocTool.set(javaToolchains.javadocToolFor({
+		languageVersion = JavaLanguageVersion.of(24)
+	}))
+
 	title = "${rootProject.description} ${version} API"
 	options {
 		encoding = "UTF-8"
