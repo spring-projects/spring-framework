@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.jdbc.core.simple;
+
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -141,6 +143,52 @@ class JdbcClientIntegrationTests {
 		assertThat(generatedKeyHolder.getKey()).isEqualTo(expectedId);
 		assertNumUsers(2);
 		assertUser(expectedId, firstName, lastName);
+	}
+
+	@Test  // gh-34768
+	void selectWithReusedNamedParameter() {
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "John").update();
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "Smith").update();
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Smith", "Smith").update();
+		assertNumUsers(4);
+
+		String sql = """
+				select * from users
+					where
+						first_name in ('Bogus', :name) or
+						last_name in (:name, 'Bogus')
+					order by last_name
+				""";
+
+		List<User> users = this.jdbcClient.sql(sql)
+				.param("name", "John")
+				.query(User.class)
+				.list();
+
+		assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
+	}
+
+	@Test  // gh-34768
+	void selectWithReusedNamedParameterList() {
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "John").update();
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "Smith").update();
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Smith", "Smith").update();
+		assertNumUsers(4);
+
+		String sql = """
+				select * from users
+					where
+						first_name in (:names) or
+						last_name in (:names)
+					order by last_name
+				""";
+
+		List<User> users = this.jdbcClient.sql(sql)
+				.param("names", List.of("John", "Bogus"))
+				.query(User.class)
+				.list();
+
+		assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
 	}
 
 
