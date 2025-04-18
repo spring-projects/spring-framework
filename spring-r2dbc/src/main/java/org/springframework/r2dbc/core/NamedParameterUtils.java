@@ -528,17 +528,25 @@ abstract class NamedParameterUtils {
 			if (parameter.getValue() instanceof Collection collection) {
 				Iterator<Object> iterator = collection.iterator();
 				Iterator<BindMarker> markers = bindMarkers.iterator();
-				while (iterator.hasNext()) {
-					Object valueToBind = iterator.next();
-					if (valueToBind instanceof Object[] objects) {
-						for (Object object : objects) {
-							bind(target, markers, object);
+				do {
+					while (iterator.hasNext()) {
+						Object valueToBind = iterator.next();
+						if (valueToBind instanceof Object[] objects) {
+							for (Object object : objects) {
+								bind(target, markers, object);
+							}
+						}
+						else {
+							bind(target, markers, valueToBind);
 						}
 					}
-					else {
-						bind(target, markers, valueToBind);
+
+					if (markers.hasNext()) {
+						iterator = collection.iterator();
+					} else {
+						break;
 					}
-				}
+				} while (true);
 			}
 			else {
 				for (BindMarker bindMarker : bindMarkers) {
