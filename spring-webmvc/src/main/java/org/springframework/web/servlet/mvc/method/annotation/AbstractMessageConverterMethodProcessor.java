@@ -459,7 +459,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		for (MediaType requestedType : acceptableTypes) {
 			for (MediaType producibleType : producibleTypes) {
 				if (requestedType.isCompatibleWith(producibleType)) {
-					mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
+					MediaType mostSpecificMediaType = getMostSpecificMediaType(requestedType, producibleType);
+					if (!mediaTypesToUse.contains(mostSpecificMediaType)) {
+						mediaTypesToUse.add(mostSpecificMediaType);
+					}
 				}
 			}
 		}
