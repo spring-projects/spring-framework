@@ -631,6 +631,20 @@ class UriComponentsBuilderTests {
 
 	@ParameterizedTest
 	@EnumSource
+	void parseBuildAndExpandHierarchicalWithDuplicateQueryKeys(ParserType parserType) {
+		UriComponents result = UriComponentsBuilder.fromUriString("/?{pk1}={pv1}&{pk2}={pv2}", parserType)
+				.buildAndExpand("k1", "v1", "k1", "v2");
+		assertThat(result.getQuery()).isEqualTo("k1=v1&k1=v2");
+		assertThat(result.getQueryParams().get("k1")).containsExactly("v1", "v2");
+
+		UriComponents result2 = UriComponentsBuilder.fromUriString("/?{pk1}={pv1}&{pk2}={pv2}", parserType)
+				.buildAndExpand(Map.of("pk1", "k1", "pv1", "v1", "pk2", "k1", "pv2", "v2"));
+		assertThat(result2.getQuery()).isEqualTo("k1=v1&k1=v2");
+		assertThat(result.getQueryParams().get("k1")).containsExactly("v1", "v2");
+	}
+
+	@ParameterizedTest
+	@EnumSource
 	void buildAndExpandOpaque(ParserType parserType) {
 		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}", parserType)
 				.buildAndExpand("foo", "example.com");
