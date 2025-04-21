@@ -16,6 +16,8 @@
 
 package org.springframework.mock.web.server;
 
+import java.security.Principal;
+
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -39,22 +41,31 @@ import org.springframework.web.server.session.WebSessionManager;
  * @since 5.0
  */
 public final class MockServerWebExchange extends DefaultServerWebExchange {
+	private final Mono<Principal> principalMono;
 
 
 	private MockServerWebExchange(
 			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
-			@Nullable ApplicationContext applicationContext) {
+			@Nullable ApplicationContext applicationContext, Mono<Principal> principalMono) {
 
 		super(request, new MockServerHttpResponse(),
 				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
 				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
 				applicationContext);
+
+		this.principalMono = principalMono;
 	}
 
 
 	@Override
 	public MockServerHttpResponse getResponse() {
 		return (MockServerHttpResponse) super.getResponse();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Principal> Mono<T> getPrincipal() {
+		return (Mono<T>)this.principalMono;
 	}
 
 
@@ -111,6 +122,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		@Nullable
 		private ApplicationContext applicationContext;
 
+		private Mono<Principal> principalMono = Mono.empty();
+
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;
 		}
@@ -147,11 +160,16 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 			return this;
 		}
 
+		public Builder principal(@Nullable Principal principal) {
+			this.principalMono = (principal == null) ? Mono.empty() : Mono.just(principal);
+			return this;
+		}
+
 		/**
 		 * Build the {@code MockServerWebExchange} instance.
 		 */
 		public MockServerWebExchange build() {
-			return new MockServerWebExchange(this.request, this.sessionManager, this.applicationContext);
+			return new MockServerWebExchange(this.request, this.sessionManager, this.applicationContext, this.principalMono);
 		}
 	}
 
