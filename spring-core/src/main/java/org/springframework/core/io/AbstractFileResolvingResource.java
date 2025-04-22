@@ -86,7 +86,16 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				if (con instanceof JarURLConnection jarCon) {
 					// For JarURLConnection, do not check content-length but rather the
 					// existence of the entry (or the jar root in case of no entryName).
-					return (jarCon.getEntryName() == null || jarCon.getJarEntry() != null);
+					try {
+						if (jarCon.getEntryName() == null) {
+							// Jar root: check for the existence of any actual jar entries.
+							return jarCon.getJarFile().entries().hasMoreElements();
+						}
+						return (jarCon.getJarEntry() != null);
+					}
+					finally {
+						jarCon.getJarFile().close();
+					}
 				}
 				else if (con.getContentLengthLong() > 0) {
 					return true;
