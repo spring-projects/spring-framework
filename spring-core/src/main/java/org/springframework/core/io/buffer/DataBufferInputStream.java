@@ -18,6 +18,8 @@ package org.springframework.core.io.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
@@ -103,10 +105,44 @@ final class DataBufferInputStream extends InputStream {
 		this.closed = true;
 	}
 
+	@Override
+	public byte[] readNBytes(int len) throws IOException {
+		if (len < 0) {
+			throw new IllegalArgumentException("len < 0");
+		}
+		checkClosed();
+		int size = Math.min(available(), len);
+		byte[] out = new byte[size];
+		this.dataBuffer.read(out);
+		return out;
+	}
+
+	@Override
+	public long skip(long n) throws IOException {
+		checkClosed();
+		if (n <= 0) {
+			return 0L;
+		}
+		int skipped = Math.min(available(), n > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) n);
+		this.dataBuffer.readPosition(Math.min(this.end, this.dataBuffer.readPosition() + skipped));
+		return skipped;
+	}
+
+	@Override
+	public long transferTo(OutputStream out) throws IOException {
+		Objects.requireNonNull(out, "out");
+		checkClosed();
+		if (available() == 0) {
+			return 0L;
+		}
+		byte[] buf = readAllBytes();
+		out.write(buf);
+		return buf.length;
+	}
+
 	private void checkClosed() throws IOException {
 		if (this.closed) {
 			throw new IOException("DataBufferInputStream is closed");
 		}
 	}
-
 }
