@@ -356,16 +356,12 @@ abstract class AnnotationsScanner {
 	}
 
 	private static boolean hasSameParameterTypes(Method rootMethod, Method candidateMethod) {
-		if (candidateMethod.getParameterCount() != rootMethod.getParameterCount()) {
-			return false;
-		}
 		Class<?>[] rootParameterTypes = rootMethod.getParameterTypes();
 		Class<?>[] candidateParameterTypes = candidateMethod.getParameterTypes();
 		if (Arrays.equals(candidateParameterTypes, rootParameterTypes)) {
 			return true;
 		}
-		return hasSameGenericTypeParameters(rootMethod, candidateMethod,
-				rootParameterTypes);
+		return hasSameGenericTypeParameters(rootMethod, candidateMethod, rootParameterTypes);
 	}
 
 	private static boolean hasSameGenericTypeParameters(
