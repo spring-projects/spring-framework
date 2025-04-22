@@ -1049,7 +1049,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected @Nullable Boolean isCurrentThreadAllowedToHoldSingletonLock() {
 		String mainThreadPrefix = this.mainThreadPrefix;
 		if (mainThreadPrefix != null) {
-			// We only differentiate in the preInstantiateSingletons phase.
+			// We only differentiate in the preInstantiateSingletons phase, using
+			// the volatile mainThreadPrefix field as an indicator for that phase.
 
 			PreInstantiation preInstantiation = this.preInstantiationThread.get();
 			if (preInstantiation != null) {
