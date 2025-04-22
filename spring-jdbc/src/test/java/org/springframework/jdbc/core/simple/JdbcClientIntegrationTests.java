@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
@@ -145,14 +146,11 @@ class JdbcClientIntegrationTests {
 		assertUser(expectedId, firstName, lastName);
 	}
 
-	@Test  // gh-34768
-	void selectWithReusedNamedParameter() {
-		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "John").update();
-		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "Smith").update();
-		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Smith", "Smith").update();
-		assertNumUsers(4);
 
-		String sql = """
+	@Nested  // gh-34768
+	class ReusedNamedParameterTests {
+
+		private static final String QUERY1 = """
 				select * from users
 					where
 						first_name in ('Bogus', :name) or
@@ -160,22 +158,7 @@ class JdbcClientIntegrationTests {
 					order by last_name
 				""";
 
-		List<User> users = this.jdbcClient.sql(sql)
-				.param("name", "John")
-				.query(User.class)
-				.list();
-
-		assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
-	}
-
-	@Test  // gh-34768
-	void selectWithReusedNamedParameterList() {
-		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "John").update();
-		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "Smith").update();
-		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Smith", "Smith").update();
-		assertNumUsers(4);
-
-		String sql = """
+		private static final String QUERY2 = """
 				select * from users
 					where
 						first_name in (:names) or
@@ -183,12 +166,64 @@ class JdbcClientIntegrationTests {
 					order by last_name
 				""";
 
-		List<User> users = this.jdbcClient.sql(sql)
-				.param("names", List.of("John", "Bogus"))
-				.query(User.class)
-				.list();
 
-		assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
+		@BeforeEach
+		void insertTestUsers() {
+			jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "John").update();
+			jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "Smith").update();
+			jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Smith", "Smith").update();
+			assertNumUsers(4);
+		}
+
+		@Test
+		void selectWithReusedNamedParameter() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.param("name", "John")
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
+		void selectWithReusedNamedParameterFromBeanProperties() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.paramSource(new Name("John"))
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
+		void selectWithReusedNamedParameterList() {
+			List<User> users = jdbcClient.sql(QUERY2)
+					.param("names", List.of("John", "Bogus"))
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
+		void selectWithReusedNamedParameterListFromBeanProperties() {
+			List<User> users = jdbcClient.sql(QUERY2)
+					.paramSource(new Names(List.of("John", "Bogus")))
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+
+		private static void assertResults(List<User> users) {
+			assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
+		}
+
+		record Name(String name) {}
+
+		record Names(List<String> names) {}
+
 	}
 
 

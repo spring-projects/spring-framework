@@ -23,6 +23,7 @@ import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Parameters;
 import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Mingyuan Wu
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 abstract class AbstractDatabaseClientIntegrationTests {
 
@@ -121,7 +123,8 @@ abstract class AbstractDatabaseClientIntegrationTests {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
 		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
-				.bindValues(Map.of("id", 42055,
+				.bindValues(Map.of(
+						"id", 42055,
 						"name", Parameters.in("SCHAUFELRADBAGGER"),
 						"manual", Parameters.in(Integer.class)))
 				.fetch().rowsUpdated()
@@ -199,8 +202,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 	void shouldEmitGeneratedKey() {
 		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
-		databaseClient.sql(
-				"INSERT INTO legoset ( name, manual) VALUES(:name, :manual)")
+		databaseClient.sql("INSERT INTO legoset ( name, manual) VALUES(:name, :manual)")
 				.bind("name","SCHAUFELRADBAGGER")
 				.bindNull("manual", Integer.class)
 				.filter(statement -> statement.returnGeneratedValues("id"))
@@ -211,69 +213,129 @@ abstract class AbstractDatabaseClientIntegrationTests {
 				.verifyComplete();
 	}
 
-	@Test  // gh-34768
-	void executeInsertWithReusedNamedParameter() {
-		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
-		Lego lego = new Lego(1, 42, "Star Wars", 42);
+	@Nested
+	class ReusedNamedParameterTests {
 
-		databaseClient.sql(() -> "INSERT INTO legoset (id, version, name, manual) VALUES(:id, :number, :name, :number)")
-				.bind("id", lego.id)
-				.bind("name", lego.name)
-				.bind("number", lego.version)
-				.fetch().rowsUpdated()
-				.as(StepVerifier::create)
-				.expectNext(1L)
-				.verifyComplete();
+		@Test  // gh-34768
+		void executeInsertWithReusedNamedParameter() {
+			DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
-		databaseClient.sql("SELECT * FROM legoset")
-				.mapProperties(Lego.class)
-				.first()
-				.as(StepVerifier::create)
-				.assertNext(actual -> assertThat(actual).isEqualTo(lego))
-				.verifyComplete();
+			Lego lego = new Lego(1, 42, "Star Wars", 42);
+
+			// ":number" is reused.
+			databaseClient.sql("INSERT INTO legoset (id, version, name, manual) VALUES(:id, :number, :name, :number)")
+					.bind("id", lego.id)
+					.bind("name", lego.name)
+					.bind("number", lego.version)
+					.fetch().rowsUpdated()
+					.as(StepVerifier::create)
+					.expectNext(1L)
+					.verifyComplete();
+
+			databaseClient.sql("SELECT * FROM legoset")
+					.mapProperties(Lego.class)
+					.first()
+					.as(StepVerifier::create)
+					.assertNext(actual -> assertThat(actual).isEqualTo(lego))
+					.verifyComplete();
+		}
+
+		@Test  // gh-34768
+		void executeSelectWithReusedNamedParameterList() {
+			DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+			String insertSql = "INSERT INTO legoset (id, version, name, manual) VALUES(:id, :version, :name, :manual)";
+			// ":numbers" is reused.
+			String selectSql = "SELECT * FROM legoset WHERE version IN (:numbers) OR manual IN (:numbers)";
+			Lego lego = new Lego(1, 42, "Star Wars", 99);
+
+			databaseClient.sql(insertSql)
+					.bind("id", lego.id)
+					.bind("version", lego.version)
+					.bind("name", lego.name)
+					.bind("manual", lego.manual)
+					.fetch().rowsUpdated()
+					.as(StepVerifier::create)
+					.expectNext(1L)
+					.verifyComplete();
+
+			databaseClient.sql(selectSql)
+					// match version
+					.bind("numbers", List.of(2, 3, lego.version, 4))
+					.mapProperties(Lego.class)
+					.first()
+					.as(StepVerifier::create)
+					.assertNext(actual -> assertThat(actual).isEqualTo(lego))
+					.verifyComplete();
+
+			databaseClient.sql(selectSql)
+					// match manual
+					.bind("numbers", List.of(2, 3, lego.manual, 4))
+					.mapProperties(Lego.class)
+					.first()
+					.as(StepVerifier::create)
+					.assertNext(actual -> assertThat(actual).isEqualTo(lego))
+					.verifyComplete();
+		}
+
+		@Test  // gh-34768
+		void executeSelectWithReusedNamedParameterListFromBeanProperties() {
+			DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+			String insertSql = "INSERT INTO legoset (id, version, name, manual) VALUES(:id, :version, :name, :manual)";
+			// ":numbers" is reused.
+			String selectSql = "SELECT * FROM legoset WHERE version IN (:numbers) OR manual IN (:numbers)";
+			Lego lego = new Lego(1, 42, "Star Wars", 99);
+
+			databaseClient.sql(insertSql)
+					.bind("id", lego.id)
+					.bind("version", lego.version)
+					.bind("name", lego.name)
+					.bind("manual", lego.manual)
+					.fetch().rowsUpdated()
+					.as(StepVerifier::create)
+					.expectNext(1L)
+					.verifyComplete();
+
+			databaseClient.sql(selectSql)
+					// match version
+					.bindProperties(new LegoRequest(List.of(lego.version)))
+					.mapProperties(Lego.class)
+					.first()
+					.as(StepVerifier::create)
+					.assertNext(actual -> assertThat(actual).isEqualTo(lego))
+					.verifyComplete();
+
+			databaseClient.sql(selectSql)
+					// match manual
+					.bindProperties(new LegoRequest(List.of(lego.manual)))
+					.mapProperties(Lego.class)
+					.first()
+					.as(StepVerifier::create)
+					.assertNext(actual -> assertThat(actual).isEqualTo(lego))
+					.verifyComplete();
+		}
+
+
+		record Lego(int id, Integer version, String name, Integer manual) {
+		}
+
+		static class LegoRequest {
+
+			private final List<Integer> numbers;
+
+			LegoRequest(List<Integer> numbers) {
+				this.numbers = numbers;
+			}
+
+			public List<Integer> getNumbers() {
+				return numbers;
+			}
+		}
+
 	}
 
-	@Test  // gh-34768
-	void executeSelectWithReusedNamedParameterList() {
-		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
-
-		String insertSql = "INSERT INTO legoset (id, version, name, manual) VALUES(:id, :version, :name, :manual)";
-		String selectSql = "SELECT * FROM legoset WHERE version IN (:numbers) OR manual IN (:numbers)";
-		Lego lego = new Lego(1, 42, "Star Wars", 99);
-
-		databaseClient.sql(insertSql)
-				.bind("id", lego.id)
-				.bind("version", lego.version)
-				.bind("name", lego.name)
-				.bind("manual", lego.manual)
-				.fetch().rowsUpdated()
-				.as(StepVerifier::create)
-				.expectNext(1L)
-				.verifyComplete();
-
-		databaseClient.sql(selectSql)
-				// match version
-				.bind("numbers", List.of(2, 3, lego.version, 4))
-				.mapProperties(Lego.class)
-				.first()
-				.as(StepVerifier::create)
-				.assertNext(actual -> assertThat(actual).isEqualTo(lego))
-				.verifyComplete();
-
-		databaseClient.sql(selectSql)
-				// match manual
-				.bind("numbers", List.of(2, 3, lego.manual, 4))
-				.mapProperties(Lego.class)
-				.first()
-				.as(StepVerifier::create)
-				.assertNext(actual -> assertThat(actual).isEqualTo(lego))
-				.verifyComplete();
-	}
-
-
-	record Lego(int id, Integer version, String name, Integer manual) {
-	}
 
 	record ParameterRecord(int id, String name, Integer manual) {
 	}
