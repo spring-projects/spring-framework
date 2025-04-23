@@ -443,11 +443,10 @@ final class HierarchicalUriComponents extends UriComponents {
 		UriTemplateVariables queryVariables = new QueryUriTemplateVariables(variables);
 		this.queryParams.forEach((key, values) -> {
 			String name = expandUriComponent(key, queryVariables, this.variableEncoder);
-			List<String> expandedValues = new ArrayList<>(values.size());
+			List<String> expandedValues = result.computeIfAbsent(name, k -> new ArrayList<>(values.size()));
 			for (String value : values) {
 				expandedValues.add(expandUriComponent(value, queryVariables, this.variableEncoder));
 			}
-			result.put(name, expandedValues);
 		});
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
