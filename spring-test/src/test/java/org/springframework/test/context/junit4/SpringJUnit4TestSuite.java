@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,6 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
-import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.DefaultConfigClassesBaseTests;
-import org.springframework.test.context.junit4.annotation.DefaultConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.DefaultLoaderDefaultConfigClassesBaseTests;
-import org.springframework.test.context.junit4.annotation.DefaultLoaderDefaultConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.DefaultLoaderExplicitConfigClassesBaseTests;
-import org.springframework.test.context.junit4.annotation.DefaultLoaderExplicitConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.annotation.ExplicitConfigClassesBaseTests;
-import org.springframework.test.context.junit4.annotation.ExplicitConfigClassesInheritedTests;
-import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
-import org.springframework.test.context.junit4.profile.annotation.DefaultProfileAnnotationConfigTests;
-import org.springframework.test.context.junit4.profile.annotation.DevProfileAnnotationConfigTests;
-import org.springframework.test.context.junit4.profile.annotation.DevProfileResolverAnnotationConfigTests;
-import org.springframework.test.context.junit4.profile.xml.DefaultProfileXmlConfigTests;
-import org.springframework.test.context.junit4.profile.xml.DevProfileResolverXmlConfigTests;
-import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTests;
 
 /**
  * JUnit test suite for tests involving {@link SpringRunner} and the
@@ -64,24 +43,6 @@ StandardJUnit4FeaturesTests.class,//
 	StandardJUnit4FeaturesSpringRunnerTests.class,//
 	SpringJUnit47ClassRunnerRuleTests.class,//
 	AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
-	DefaultConfigClassesBaseTests.class,//
-	DefaultConfigClassesInheritedTests.class,//
-	BeanOverridingDefaultConfigClassesInheritedTests.class,//
-	ExplicitConfigClassesBaseTests.class,//
-	ExplicitConfigClassesInheritedTests.class,//
-	BeanOverridingExplicitConfigClassesInheritedTests.class,//
-	DefaultLoaderDefaultConfigClassesBaseTests.class,//
-	DefaultLoaderDefaultConfigClassesInheritedTests.class,//
-	DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests.class,//
-	DefaultLoaderExplicitConfigClassesBaseTests.class,//
-	DefaultLoaderExplicitConfigClassesInheritedTests.class,//
-	DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests.class,//
-	DefaultProfileAnnotationConfigTests.class,//
-	DevProfileAnnotationConfigTests.class,//
-	DevProfileResolverAnnotationConfigTests.class,//
-	DefaultProfileXmlConfigTests.class,//
-	DevProfileXmlConfigTests.class,//
-	DevProfileResolverXmlConfigTests.class,//
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
 	RepeatedSpringRunnerTests.class,//
@@ -102,8 +63,7 @@ StandardJUnit4FeaturesTests.class,//
 	RollbackOverrideDefaultRollbackTrueTransactionalTests.class,//
 	RollbackOverrideDefaultRollbackFalseTransactionalTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
-	TimedTransactionalSpringRunnerTests.class,//
-	HibernateSessionFlushingTests.class //
+	TimedTransactionalSpringRunnerTests.class//
 })
 public class SpringJUnit4TestSuite {
 	/* this test case consists entirely of tests loaded as a suite. */
