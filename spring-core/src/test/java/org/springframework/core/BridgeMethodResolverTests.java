@@ -802,8 +802,6 @@ class BridgeMethodResolverTests {
 	public abstract static class GenericEventBroadcasterImpl<T extends Event>
 			extends GenericBroadcasterImpl implements EventBroadcaster {
 
-		private Class<T>[] subscribingEvents;
-
 		private Channel<T> channel;
 
 		/**

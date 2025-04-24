@@ -377,15 +377,11 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 	@XmlRootElement
 	@SuppressWarnings("unused")
 	public static class DummyRootElement {
-
-		private DummyType t = new DummyType();
 	}
 
 	@XmlType
 	@SuppressWarnings("unused")
 	public static class DummyType {
-
-		private String s = "Hello";
 	}
 
 	@SuppressWarnings("unused")

@@ -37,7 +37,6 @@ public class Inventor {
 	public String publicName;
 	private PlaceOfBirth placeOfBirth;
 	private Date birthdate;
-	private int sinNumber;
 	private String nationality;
 	private String[] inventions;
 	public String randomField;

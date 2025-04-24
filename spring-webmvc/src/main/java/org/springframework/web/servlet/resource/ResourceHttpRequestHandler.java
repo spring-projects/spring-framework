@@ -53,7 +53,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.cors.CorsConfiguration;
@@ -122,8 +121,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private @Nullable ResourceHttpMessageConverter resourceHttpMessageConverter;
 
 	private @Nullable ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
-
-	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
 	private final Map<String, MediaType> mediaTypes = new HashMap<>(4);
 
