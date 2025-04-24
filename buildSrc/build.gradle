@@ -1,10 +1,16 @@
 plugins {
-	id 'java-gradle-plugin'
-	id 'checkstyle'
+	id("java")
+	id("java-gradle-plugin")
+	id("checkstyle")
+	id("org.openrewrite.rewrite") version("7.4.1")
+}
+
+rewrite {
+	activeRecipe("org.openrewrite.staticanalysis.CodeCleanup")
 }
 
 repositories {
-	mavenCentral()
+	mavenCentral() // rewrite is published to Maven Central
 	gradlePluginPortal()
 }
 
@@ -18,6 +24,7 @@ ext {
 }
 
 dependencies {
+	rewrite("org.openrewrite.recipe:rewrite-static-analysis:latest.release")
 	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
 	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
 	implementation "com.tngtech.archunit:archunit:1.4.0"
