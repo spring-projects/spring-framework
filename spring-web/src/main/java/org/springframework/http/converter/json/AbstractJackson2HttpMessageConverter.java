@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,7 +181,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * or empty if in case of no registrations for the given class.
 	 * @since 5.3.4
 	 */
-	public @Nullable Map<MediaType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
+	public Map<MediaType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
 		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
 			if (entry.getKey().isAssignableFrom(clazz)) {
 				return entry.getValue();
