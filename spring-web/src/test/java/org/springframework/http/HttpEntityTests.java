@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class HttpEntityTests {
 
@@ -121,6 +122,13 @@ class HttpEntityTests {
 		assertThat(requestEntity).isNotEqualTo(httpEntity);
 		assertThat(requestEntity).isEqualTo(requestEntity2);
 		assertThat(requestEntity2).isEqualTo(requestEntity);
+	}
+
+	@Test
+	void emptyHttpEntityShouldBeImmutable() {
+		HttpHeaders newHeaders = new HttpHeaders(HttpEntity.EMPTY.getHeaders());
+		newHeaders.add("Authorization", "Bearer some-token");
+		assertThat(HttpEntity.EMPTY.getHeaders().headerNames()).isEmpty();
 	}
 
 }
