@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,9 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.asser
 import static org.springframework.test.context.cache.ContextCacheTestUtils.resetContextCache;
 
 /**
- * Unit tests which verify correct {@link ContextCache
- * application context caching} in conjunction with the
- * {@link SpringExtension} and the {@link DirtiesContext
- * &#064;DirtiesContext} annotation at the method level.
+ * JUnit based integration test which verifies correct {@linkplain ContextCache
+ * application context caching} in conjunction with the {@link SpringExtension} and
+ * {@link DirtiesContext @DirtiesContext} at the method level.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
