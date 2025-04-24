@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.serializer.support.SerializationDelegate;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link Serializer}, {@link Deserializer}, and {@link SerializationDelegate}.

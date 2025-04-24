@@ -19,7 +19,7 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import org.junit.jupiter.api.Test;
 import reactor.netty.http.server.WebsocketServerSpec;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link ReactorNettyRequestUpgradeStrategy}.

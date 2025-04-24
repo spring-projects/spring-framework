@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link PathApiVersionResolver}.
