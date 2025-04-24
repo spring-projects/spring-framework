@@ -41,19 +41,20 @@ import org.springframework.web.server.session.WebSessionManager;
  * @since 5.0
  */
 public final class MockServerWebExchange extends DefaultServerWebExchange {
+
 	private final Mono<Principal> principalMono;
 
 
 	private MockServerWebExchange(
 			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
-			@Nullable ApplicationContext applicationContext, Mono<Principal> principalMono) {
+			@Nullable ApplicationContext applicationContext, @Nullable Principal principal) {
 
 		super(request, new MockServerHttpResponse(),
 				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
 				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
 				applicationContext);
 
-		this.principalMono = principalMono;
+		this.principalMono = (principal != null) ? Mono.just(principal) : Mono.empty();
 	}
 
 
@@ -62,10 +63,14 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		return (MockServerHttpResponse) super.getResponse();
 	}
 
+	/**
+	 * Return the user set via {@link Builder#principal(Principal)}.
+	 * @since 6.2.7
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Principal> Mono<T> getPrincipal() {
-		return (Mono<T>)this.principalMono;
+		return (Mono<T>) this.principalMono;
 	}
 
 
@@ -122,7 +127,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		@Nullable
 		private ApplicationContext applicationContext;
 
-		private Mono<Principal> principalMono = Mono.empty();
+		@Nullable
+		private Principal principal;
 
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;
@@ -160,8 +166,13 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 			return this;
 		}
 
+		/**
+		 * Provide a user to associate with the exchange.
+		 * @param principal the principal to use
+		 * @since 6.2.7
+		 */
 		public Builder principal(@Nullable Principal principal) {
-			this.principalMono = (principal == null) ? Mono.empty() : Mono.just(principal);
+			this.principal = principal;
 			return this;
 		}
 
@@ -169,7 +180,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		 * Build the {@code MockServerWebExchange} instance.
 		 */
 		public MockServerWebExchange build() {
-			return new MockServerWebExchange(this.request, this.sessionManager, this.applicationContext, this.principalMono);
+			return new MockServerWebExchange(
+					this.request, this.sessionManager, this.applicationContext, this.principal);
 		}
 	}
 
