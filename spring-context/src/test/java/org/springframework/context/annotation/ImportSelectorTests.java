@@ -62,6 +62,7 @@ import static org.mockito.Mockito.spy;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Daeho Kwon
  */
 @SuppressWarnings("resource")
 public class ImportSelectorTests {
@@ -203,6 +204,38 @@ public class ImportSelectorTests {
 		assertThat(TestImportGroup.environment).isEqualTo(context.getEnvironment());
 	}
 
+	@Test
+	void importAnnotationOnImplementedInterfaceIsRespected() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(InterfaceBasedConfig.class);
+		context.refresh();
+
+		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
+		assertThat(context.getBean(ImportedBean.class)).isNotNull();
+		assertThat(context.getBean(ImportedBean.class).name()).isEqualTo("imported");
+	}
+
+	@Import(ImportedConfig.class)
+	interface ConfigImportMarker {
+	}
+
+	@Configuration
+	static class InterfaceBasedConfig implements ConfigImportMarker {
+	}
+
+	static class ImportedBean {
+		String name() {
+			return "imported";
+		}
+	}
+
+	@Configuration
+	static class ImportedConfig {
+		@Bean
+		ImportedBean importedBean() {
+			return new ImportedBean();
+		}
+	}
 
 	@Configuration
 	@Import(SampleImportSelector.class)
