@@ -50,6 +50,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 3.0.2
  * @param <T> the body type
  * @see org.springframework.web.client.RestTemplate
@@ -61,7 +62,7 @@ public class HttpEntity<T> {
 	/**
 	 * The empty {@code HttpEntity}, with no body or headers.
 	 */
-	public static final HttpEntity<?> EMPTY = new HttpEntity<>();
+	public static final HttpEntity<?> EMPTY = new HttpEntity<>(HttpHeaders.EMPTY);
 
 
 	private final HttpHeaders headers;
