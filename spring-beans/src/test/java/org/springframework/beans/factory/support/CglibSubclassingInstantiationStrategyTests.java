@@ -25,8 +25,8 @@ import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
  * Tests for {@link CglibSubclassingInstantiationStrategy}.

@@ -48,7 +48,7 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.transaction.annotation.RollbackOn.ALL_EXCEPTIONS;
 
 /**
