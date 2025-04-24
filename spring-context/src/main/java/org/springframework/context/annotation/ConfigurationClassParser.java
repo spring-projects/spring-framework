@@ -98,6 +98,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Daeho Kwon
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -549,6 +550,9 @@ class ConfigurationClassParser {
 	 * <p>For example, it is common for a {@code @Configuration} class to declare direct
 	 * {@code @Import}s in addition to meta-imports originating from an {@code @Enable}
 	 * annotation.
+	 * <p>As of Spring Framework 7.0, {@code @Import} annotations declared on interfaces implemented by
+	 * the configuration class are also considered. This allows imports to be triggered
+	 * indirectly via marker interfaces or shared base interfaces.
 	 * @param sourceClass the class to search
 	 * @param imports the imports collected so far
 	 * @param visited used to track visited classes to prevent infinite recursion
@@ -558,6 +562,9 @@ class ConfigurationClassParser {
 			throws IOException {
 
 		if (visited.add(sourceClass)) {
+			for (SourceClass ifc : sourceClass.getInterfaces()) {
+				collectImports(ifc, imports, visited);
+			}
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
 				if (!annName.equals(Import.class.getName())) {
