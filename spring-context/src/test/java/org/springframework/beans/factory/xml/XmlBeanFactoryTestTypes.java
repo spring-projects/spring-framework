@@ -215,14 +215,6 @@ class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 		setAge(age);
 		setName(name);
 	}
-
-	private void init() {
-		this.initialized = true;
-	}
-
-	private void destroy() {
-		this.destroyed = true;
-	}
 }
 
 
