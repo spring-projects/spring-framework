@@ -26,13 +26,11 @@ public class SampleReflection {
 
 	@SuppressWarnings("unused")
 	public void sample() {
-		String value = "Sample";
 		Method[] methods = String.class.getMethods();
 	}
 
 	@SuppressWarnings("unused")
 	public void multipleCalls() {
-		String value = "Sample";
 		Method[] methods = String.class.getMethods();
 		methods = Integer.class.getMethods();
 	}

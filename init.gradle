@@ -1,0 +1,30 @@
+initscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2" }
+    }
+    dependencies { classpath("org.openrewrite:plugin:7.2.1") }
+}
+rootProject {
+    plugins.apply(org.openrewrite.gradle.RewritePlugin)
+    dependencies {
+        rewrite("org.openrewrite.recipe:rewrite-migrate-java:3.4.0")
+    }
+    rewrite {
+//        activeRecipe("org.openrewrite.java.migrate.UpgradeToJava17")
+//        activeRecipe("org.openrewrite.java.migrate.UpgradeToJava21")
+//        activeRecipe("org.openrewrite.java.migrate.lang.var.UseVarForObject")
+//        activeRecipe("org.openrewrite.java.migrate.lang.var.UseVarForPrimitive")
+//        activeRecipe("org.openrewrite.staticanalysis.FinalizeLocalVariables")
+        activeRecipe("org.openrewrite.staticanalysis.RemoveUnusedLocalVariables")
+//        activeRecipe("org.openrewrite.staticanalysis.RemoveUnusedPrivateFields")
+//        activeRecipe("org.openrewrite.staticanalysis.RemoveUnusedPrivateMethods")
+        setExportDatatables(true)
+    }
+    afterEvaluate {
+        if (repositories.isEmpty()) {
+            repositories {
+                mavenCentral()
+            }
+        }
+    }
+}
