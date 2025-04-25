@@ -16,7 +16,10 @@
 
 		<!-- Imports -->
 		<module name="AvoidStarImport"/>
+		<!-- Unused -->
 		<module name="UnusedImports"/>
+		<module name="UnusedLocalVariable"/>
+		<!-- <module name="UnusedLocalMethodCheck"/> https://github.com/checkstyle/checkstyle/pull/16894 -->
 		<module name="RedundantImport"/>
 		<!-- Modifiers -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.modifier.ModifierOrderCheck"/>

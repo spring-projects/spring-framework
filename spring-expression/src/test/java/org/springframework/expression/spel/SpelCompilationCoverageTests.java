@@ -7145,8 +7145,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	static class HttpServlet3RequestFactory {
 
 		static Servlet3SecurityContextHolderAwareRequestWrapper getOne() {
-			HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
-			return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
+			return new HttpServlet3RequestFactory().new Servlet3SecurityContextHolderAwareRequestWrapper();
 		}
 
 		// private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper

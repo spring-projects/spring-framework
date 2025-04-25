@@ -44,8 +44,7 @@ class SampleReflectionRuntimeHintsTests {
 
 		// Invoke the relevant piece of code we want to test within a recording lambda
 		RuntimeHintsInvocations invocations = org.springframework.aot.test.agent.RuntimeHintsRecorder.record(() -> {
-			SampleReflection sample = new SampleReflection();
-			sample.performReflection();
+			new SampleReflection().performReflection();
 		});
 		// assert that the recorded invocations are covered by the contributed hints
 		assertThat(invocations).match(runtimeHints);
