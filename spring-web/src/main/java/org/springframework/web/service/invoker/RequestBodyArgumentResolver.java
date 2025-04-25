@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,15 +83,16 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 		if (this.reactiveAdapterRegistry != null) {
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
 			if (adapter != null) {
-				MethodParameter nestedParameter = parameter.nested();
+				MethodParameter nestedParam = parameter.nested();
 
 				String message = "Async type for @RequestBody should produce value(s)";
 				Assert.isTrue(!adapter.isNoValue(), message);
-				Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
+				Assert.isTrue(nestedParam.getNestedParameterType() != Void.class, message);
 
-				if (requestValues instanceof ReactiveHttpRequestValues.Builder reactiveRequestValues) {
-					reactiveRequestValues.setBodyPublisher(
-							adapter.toPublisher(argument), asParameterizedTypeRef(nestedParameter));
+				if (requestValues instanceof ReactiveHttpRequestValues.Builder rrv) {
+					rrv.setBodyPublisher(
+							adapter.toPublisher(argument),
+							ParameterizedTypeReference.forType(nestedParam.getNestedGenericParameterType()));
 				}
 				else {
 					throw new IllegalStateException(
@@ -103,12 +104,8 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 		}
 
 		// Not a reactive type
-		requestValues.setBodyValue(argument);
+		requestValues.setBodyValue(argument, ParameterizedTypeReference.forType(parameter.getGenericParameterType()));
 		return true;
-	}
-
-	private static ParameterizedTypeReference<Object> asParameterizedTypeRef(MethodParameter nestedParam) {
-		return ParameterizedTypeReference.forType(nestedParam.getNestedGenericParameterType());
 	}
 
 }

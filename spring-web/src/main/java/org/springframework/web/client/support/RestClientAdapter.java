@@ -85,7 +85,8 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		return newRequest(values).retrieve().toEntity(bodyType);
 	}
 
-	private RestClient.RequestBodySpec newRequest(HttpRequestValues values) {
+	@SuppressWarnings("unchecked")
+	private <B> RestClient.RequestBodySpec newRequest(HttpRequestValues values) {
 
 		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
@@ -127,8 +128,14 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 
-		if (values.getBodyValue() != null) {
-			bodySpec.body(values.getBodyValue());
+		B body = (B) values.getBodyValue();
+		if (body != null) {
+			if (values.getBodyValueType() != null) {
+				bodySpec.body(body, (ParameterizedTypeReference<? super B>) values.getBodyValueType());
+			}
+			else {
+				bodySpec.body(body);
+			}
 		}
 
 		return bodySpec;

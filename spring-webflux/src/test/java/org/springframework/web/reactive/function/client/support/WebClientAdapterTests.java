@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -39,6 +41,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -166,6 +169,22 @@ class WebClientAdapterTests {
 						"Content-Type: text/plain;charset=UTF-8", "Content-Length: 5", "test2");
 	}
 
+	@Test // gh-34793
+	void postSet() throws InterruptedException {
+		prepareResponse(response -> response.setResponseCode(201));
+
+		Set<Person> persons = new LinkedHashSet<>();
+		persons.add(new Person("John"));
+		persons.add(new Person("Richard"));
+
+		initService().postPersonSet(persons);
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("POST");
+		assertThat(request.getPath()).isEqualTo("/persons");
+		assertThat(request.getBody().readUtf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
+	}
+
 	@Test
 	void uriBuilderFactory() throws Exception {
 		String ignoredResponseBody = "hello";
@@ -249,6 +268,9 @@ class WebClientAdapterTests {
 		@PostExchange
 		void postMultipart(MultipartFile file, @RequestPart String anotherPart);
 
+		@PostExchange("/persons")
+		void postPersonSet(@RequestBody Set<Person> set);
+
 		@GetExchange("/greeting")
 		String getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
@@ -258,6 +280,21 @@ class WebClientAdapterTests {
 
 		@GetExchange("/greeting")
 		String getWithIgnoredUriBuilderFactory(URI uri, UriBuilderFactory uriBuilderFactory);
+	}
+
+
+	static final class Person {
+
+		private final String name;
+
+		Person(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
 	}
 
 }

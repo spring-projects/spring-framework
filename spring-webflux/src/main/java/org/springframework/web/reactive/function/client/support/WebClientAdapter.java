@@ -98,8 +98,8 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		return newRequest(requestValues).retrieve().toEntityFlux(bodyType);
 	}
 
-	@SuppressWarnings("ReactiveStreamsUnusedPublisher")
-	private WebClient.RequestBodySpec newRequest(HttpRequestValues values) {
+	@SuppressWarnings({"ReactiveStreamsUnusedPublisher", "unchecked"})
+	private <B> WebClient.RequestBodySpec newRequest(HttpRequestValues values) {
 
 		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
@@ -135,12 +135,18 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 
 		if (values.getBodyValue() != null) {
-			bodySpec.bodyValue(values.getBodyValue());
+			if (values.getBodyValueType() != null) {
+				B body = (B) values.getBodyValue();
+				bodySpec.bodyValue(body, (ParameterizedTypeReference<B>) values.getBodyValueType());
+			}
+			else {
+				bodySpec.bodyValue(values.getBodyValue());
+			}
 		}
-		else if (values instanceof ReactiveHttpRequestValues reactiveRequestValues) {
-			Publisher<?> body = reactiveRequestValues.getBodyPublisher();
+		else if (values instanceof ReactiveHttpRequestValues rhrv) {
+			Publisher<?> body = rhrv.getBodyPublisher();
 			if (body != null) {
-				ParameterizedTypeReference<?> elementType = reactiveRequestValues.getBodyPublisherElementType();
+				ParameterizedTypeReference<?> elementType = rhrv.getBodyPublisherElementType();
 				Assert.notNull(elementType, "Publisher body element type is required");
 				bodySpec.body(body, elementType);
 			}

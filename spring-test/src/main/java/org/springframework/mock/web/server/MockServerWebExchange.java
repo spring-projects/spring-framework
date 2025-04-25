@@ -16,6 +16,8 @@
 
 package org.springframework.mock.web.server;
 
+import java.security.Principal;
+
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -40,21 +42,35 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public final class MockServerWebExchange extends DefaultServerWebExchange {
 
+	private final Mono<Principal> principalMono;
+
 
 	private MockServerWebExchange(
 			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
-			@Nullable ApplicationContext applicationContext) {
+			@Nullable ApplicationContext applicationContext, @Nullable Principal principal) {
 
 		super(request, new MockServerHttpResponse(),
 				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
 				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
 				applicationContext);
+
+		this.principalMono = (principal != null) ? Mono.just(principal) : Mono.empty();
 	}
 
 
 	@Override
 	public MockServerHttpResponse getResponse() {
 		return (MockServerHttpResponse) super.getResponse();
+	}
+
+	/**
+	 * Return the user set via {@link Builder#principal(Principal)}.
+	 * @since 6.2.7
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Principal> Mono<T> getPrincipal() {
+		return (Mono<T>) this.principalMono;
 	}
 
 
@@ -107,8 +123,9 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private @Nullable WebSessionManager sessionManager;
 
-		@Nullable
-		private ApplicationContext applicationContext;
+		private @Nullable ApplicationContext applicationContext;
+
+		private @Nullable Principal principal;
 
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;
@@ -147,10 +164,21 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		}
 
 		/**
+		 * Provide a user to associate with the exchange.
+		 * @param principal the principal to use
+		 * @since 6.2.7
+		 */
+		public Builder principal(@Nullable Principal principal) {
+			this.principal = principal;
+			return this;
+		}
+
+		/**
 		 * Build the {@code MockServerWebExchange} instance.
 		 */
 		public MockServerWebExchange build() {
-			return new MockServerWebExchange(this.request, this.sessionManager, this.applicationContext);
+			return new MockServerWebExchange(
+					this.request, this.sessionManager, this.applicationContext, this.principal);
 		}
 	}
 

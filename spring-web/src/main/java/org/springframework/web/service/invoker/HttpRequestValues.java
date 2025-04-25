@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -73,6 +74,8 @@ public class HttpRequestValues {
 	private final Map<String, Object> attributes;
 
 	private final @Nullable Object bodyValue;
+
+	private @Nullable ParameterizedTypeReference<?> bodyValueType;
 
 
 	/**
@@ -176,6 +179,14 @@ public class HttpRequestValues {
 		return this.bodyValue;
 	}
 
+	/**
+	 * Return the type for the {@linkplain #getBodyValue() body value}.
+	 * @since 6.2.7
+	 */
+	public @Nullable ParameterizedTypeReference<?> getBodyValueType() {
+		return this.bodyValueType;
+	}
+
 
 	/**
 	 * Return a builder for {@link HttpRequestValues}.
@@ -263,6 +274,8 @@ public class HttpRequestValues {
 		private @Nullable Map<String, Object> attributes;
 
 		private @Nullable Object bodyValue;
+
+		private @Nullable ParameterizedTypeReference<?> bodyValueType;
 
 		protected Builder() {
 		}
@@ -417,6 +430,15 @@ public class HttpRequestValues {
 			this.bodyValue = bodyValue;
 		}
 
+		/**
+		 * Variant of {@link #setBodyValue(Object)} with the body type.
+		 * @since 6.2.7
+		 */
+		public void setBodyValue(@Nullable Object bodyValue, @Nullable ParameterizedTypeReference<?> valueType) {
+			setBodyValue(bodyValue);
+			this.bodyValueType = valueType;
+		}
+
 
 		// Implementation of {@link Metadata} methods
 
@@ -489,9 +511,14 @@ public class HttpRequestValues {
 			Map<String, Object> attributes = (this.attributes != null ?
 					new HashMap<>(this.attributes) : Collections.emptyMap());
 
-			return createRequestValues(
+			HttpRequestValues requestValues = createRequestValues(
 					this.httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
 					headers, cookies, this.version, attributes, bodyValue);
+
+			// In 6.2.x only, temporarily work around protected methods
+			requestValues.bodyValueType = this.bodyValueType;
+
+			return requestValues;
 		}
 
 		protected boolean hasParts() {

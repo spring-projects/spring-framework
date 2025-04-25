@@ -22,7 +22,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -284,6 +286,19 @@ class RestClientAdapterTests {
 		assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2");
 	}
 
+	@ParameterizedAdapterTest // gh-34793
+	void postSet(MockWebServer server, Service service) throws InterruptedException {
+		Set<Person> persons = new LinkedHashSet<>();
+		persons.add(new Person("John"));
+		persons.add(new Person("Richard"));
+		service.postPersonSet(persons);
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("POST");
+		assertThat(request.getPath()).isEqualTo("/persons");
+		assertThat(request.getBody().readUtf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
+	}
+
 
 	private static MockWebServer anotherServer() {
 		MockWebServer server = new MockWebServer();
@@ -317,6 +332,9 @@ class RestClientAdapterTests {
 		@PostExchange
 		void postMultipart(MultipartFile file, @RequestPart String anotherPart);
 
+		@PostExchange(url = "/persons", contentType = MediaType.APPLICATION_JSON_VALUE)
+		void postPersonSet(@RequestBody Set<Person> set);
+
 		@PutExchange
 		void putWithCookies(@CookieValue String firstCookie, @CookieValue String secondCookie);
 
@@ -333,6 +351,21 @@ class RestClientAdapterTests {
 
 		@GetExchange("/greeting")
 		ResponseEntity<String> getWithIgnoredUriBuilderFactory(URI uri, UriBuilderFactory uriBuilderFactory);
+	}
+
+
+	static final class Person {
+
+		private final String name;
+
+		Person(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
 	}
 
 }
