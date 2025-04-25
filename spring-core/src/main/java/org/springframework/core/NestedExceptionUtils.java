@@ -82,6 +82,9 @@ public abstract class NestedExceptionUtils {
 	 * @since 4.3.9
 	 */
 	public static Throwable getMostSpecificCause(Throwable original) {
+		if (original == null) {
+			throw new IllegalArgumentException("Original exception must not be null");
+		}
 		Throwable rootCause = getRootCause(original);
 		return (rootCause != null ? rootCause : original);
 	}
