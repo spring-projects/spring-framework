@@ -167,7 +167,6 @@ class AotIntegrationTests extends AbstractAotTests {
 	void endToEndTestsForSelectedTestClasses() {
 		List<Class<?>> testClasses = List.of(
 				org.springframework.test.context.bean.override.easymock.EasyMockBeanIntegrationTests.class,
-				org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests.class,
 				org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests.class
 		);
 
