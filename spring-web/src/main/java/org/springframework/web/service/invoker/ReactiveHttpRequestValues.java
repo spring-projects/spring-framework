@@ -50,12 +50,16 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 			@Nullable HttpMethod httpMethod,
 			@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
 			@Nullable String uriTemplate, Map<String, String> uriVars,
-			HttpHeaders headers, MultiValueMap<String, String> cookies, @Nullable Object version,
-			Map<String, Object> attributes,
-			@Nullable Object bodyValue, @Nullable Publisher<?> body,
-			@Nullable ParameterizedTypeReference<?> elementType) {
+			HttpHeaders headers, MultiValueMap<String, String> cookies,
+			@Nullable Object version, Map<String, Object> attributes,
+			@Nullable Object bodyValue, @Nullable ParameterizedTypeReference<?> bodyValueType,
+			@Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> elementType) {
 
-		super(httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars, headers, cookies, version, attributes, bodyValue);
+		super(httpMethod,
+				uri, uriBuilderFactory, uriTemplate, uriVars,
+				headers, cookies, version, attributes,
+				bodyValue, bodyValueType);
+
 		this.body = body;
 		this.bodyElementType = elementType;
 	}
@@ -237,12 +241,13 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 				@Nullable HttpMethod httpMethod,
 				@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
 				@Nullable String uriTemplate, Map<String, String> uriVars,
-				HttpHeaders headers, MultiValueMap<String, String> cookies, @Nullable Object version,
-				Map<String, Object> attributes, @Nullable Object bodyValue) {
+				HttpHeaders headers, MultiValueMap<String, String> cookies,
+				@Nullable Object version, Map<String, Object> attributes,
+				@Nullable Object bodyValue, @Nullable ParameterizedTypeReference<?> bodyValueType) {
 
 			return new ReactiveHttpRequestValues(
 					httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
-					headers, cookies, version, attributes, bodyValue, this.body, this.bodyElementType);
+					headers, cookies, version, attributes, bodyValue, bodyValueType, this.body, this.bodyElementType);
 		}
 	}
 
