@@ -45,13 +45,26 @@ import reactor.core.publisher.Mono;
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
  * 		Flux&lt;WebSocketMessage&gt; output = session.receive()
- *			.doOnNext(message -&gt; {
- * 				// ...
+ * 			.doOnNext(message -&gt; {
+ * 				// This is for side effects such as
+ * 				// - Logging incoming messages
+ * 				// - Updating some metrics or counters
+ * 				// - Performing access checks or validations (non-blocking)
+ * 				System.out.println("Got message: " + message.getPayloadAsText());
  * 			})
  * 			.concatMap(message -&gt; {
- * 				// ...
+ * 				// This is where you handle the actual processing of the incoming message. It
+ * 				// might involve:
+ * 				// - Parsing the message content (e.g., JSON parsing)
+ * 				// - Invoking a reactive service (e.g., database, HTTP call, etc.)
+ * 				// - Returning a transformed value, typically a Mono&lt;String&gt; or Mono&lt;SomeType&gt;
+ * 				// if you're mapping to another data format
+ * 				return Mono.just(message.getPayloadAsText());
  * 			})
- * 			.map(value -&gt; session.textMessage("Echo " + value));
+ * 			.map(value -&gt; {
+ * 				// This is where you produce one or more responses for the message
+ * 				return session.textMessage("Echo " + value));
+ * 			});
  *
  * 		return session.send(output);
  * 	}
