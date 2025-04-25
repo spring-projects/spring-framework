@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,8 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		return newRequest(values).retrieve().toEntity(bodyType);
 	}
 
-	private RestClient.RequestBodySpec newRequest(HttpRequestValues values) {
+	@SuppressWarnings("unchecked")
+	private <B> RestClient.RequestBodySpec newRequest(HttpRequestValues values) {
 
 		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
@@ -123,8 +124,14 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 
-		if (values.getBodyValue() != null) {
-			bodySpec.body(values.getBodyValue());
+		B body = (B) values.getBodyValue();
+		if (body != null) {
+			if (values.getBodyValueType() != null) {
+				bodySpec.body(body, (ParameterizedTypeReference<? super B>) values.getBodyValueType());
+			}
+			else {
+				bodySpec.body(body);
+			}
 		}
 
 		return bodySpec;

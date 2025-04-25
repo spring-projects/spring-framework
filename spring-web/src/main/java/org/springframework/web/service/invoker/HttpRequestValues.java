@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -74,6 +75,9 @@ public class HttpRequestValues {
 
 	@Nullable
 	private final Object bodyValue;
+
+	@Nullable
+	private ParameterizedTypeReference<?> bodyValueType;
 
 
 	/**
@@ -177,6 +181,15 @@ public class HttpRequestValues {
 		return this.bodyValue;
 	}
 
+	/**
+	 * Return the type for the {@linkplain #getBodyValue() body value}.
+	 * @since 6.2.7
+	 */
+	@Nullable
+	public ParameterizedTypeReference<?> getBodyValueType() {
+		return this.bodyValueType;
+	}
+
 
 	public static Builder builder() {
 		return new Builder();
@@ -252,6 +265,9 @@ public class HttpRequestValues {
 
 		@Nullable
 		private Object bodyValue;
+
+		@Nullable
+		private ParameterizedTypeReference<?> bodyValueType;
 
 		/**
 		 * Set the HTTP method for the request.
@@ -389,6 +405,15 @@ public class HttpRequestValues {
 			this.bodyValue = bodyValue;
 		}
 
+		/**
+		 * Variant of {@link #setBodyValue(Object)} with the body type.
+		 * @since 6.2.7
+		 */
+		public void setBodyValue(@Nullable Object bodyValue, @Nullable ParameterizedTypeReference<?> valueType) {
+			setBodyValue(bodyValue);
+			this.bodyValueType = valueType;
+		}
+
 
 		// Implementation of {@link Metadata} methods
 
@@ -465,9 +490,14 @@ public class HttpRequestValues {
 			Map<String, Object> attributes = (this.attributes != null ?
 					new HashMap<>(this.attributes) : Collections.emptyMap());
 
-			return createRequestValues(
+			HttpRequestValues requestValues = createRequestValues(
 					this.httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
 					headers, cookies, attributes, bodyValue);
+
+			// In 6.2.x only, temporarily work around protected methods
+			requestValues.bodyValueType = this.bodyValueType;
+
+			return requestValues;
 		}
 
 		protected boolean hasParts() {
