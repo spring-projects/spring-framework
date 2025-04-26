@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,22 +43,22 @@ public class SpringFailOnTimeoutTests {
 
 	@Test
 	public void nullNextStatement() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new SpringFailOnTimeout(null, 1));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new SpringFailOnTimeout(null, 1));
 	}
 
 	@Test
 	public void negativeTimeout() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new SpringFailOnTimeout(statement, -1));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new SpringFailOnTimeout(statement, -1));
 	}
 
 	@Test
 	public void userExceptionPropagates() throws Throwable {
 		willThrow(new Boom()).given(statement).evaluate();
 
-		assertThatExceptionOfType(Boom.class).isThrownBy(() ->
-				new SpringFailOnTimeout(statement, 1).evaluate());
+		assertThatExceptionOfType(Boom.class)
+				.isThrownBy(() -> new SpringFailOnTimeout(statement, 1).evaluate());
 	}
 
 	@Test
@@ -68,8 +68,8 @@ public class SpringFailOnTimeoutTests {
 			return null;
 		}).given(statement).evaluate();
 
-		assertThatExceptionOfType(TimeoutException.class).isThrownBy(() ->
-		new SpringFailOnTimeout(statement, 1).evaluate());
+		assertThatExceptionOfType(TimeoutException.class)
+				.isThrownBy(() -> new SpringFailOnTimeout(statement, 1).evaluate());
 	}
 
 	@Test

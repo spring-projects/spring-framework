@@ -47,7 +47,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
  * @see ContextCacheTests
  * @see LruContextCacheTests
  */
-@SpringJUnitConfig(locations = "../junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
+@SpringJUnitConfig(locations = "../config/CoreContextConfigurationAppCtxTests-context.xml")
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class SpringExtensionContextCacheTests {

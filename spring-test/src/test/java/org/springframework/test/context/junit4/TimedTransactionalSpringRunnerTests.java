@@ -38,7 +38,7 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  * @see org.springframework.test.context.junit.jupiter.transaction.TimedTransactionalSpringExtensionTests
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration("transactionalTests-context.xml")
+@ContextConfiguration("/org/springframework/test/context/transaction/transactionalTests-context.xml")
 @Transactional
 public class TimedTransactionalSpringRunnerTests {
 

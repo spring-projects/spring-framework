@@ -25,10 +25,7 @@ import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 
 import org.springframework.core.testfixture.TestGroup;
-import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
 import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.junit4.TimedTransactionalSpringRunnerTests;
 import org.springframework.test.context.junit4.rules.BaseAppCtxRuleTests;
@@ -70,12 +67,9 @@ public class SpringJUnit4ConcurrencyTests {
 
 	private final Class<?>[] testClasses = new Class<?>[] {
 		// Basics
-			SpringJUnit4ClassRunnerAppCtxTests.class,
-			InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
 			SpringJUnit47ClassRunnerRuleTests.class,
 			BaseAppCtxRuleTests.class,
 		// Transactional
-			MethodLevelTransactionalSpringRunnerTests.class,
 			TimedTransactionalSpringRunnerTests.class,
 		// Web and Scopes
 			BasicAnnotationConfigWacSpringRuleTests.class,

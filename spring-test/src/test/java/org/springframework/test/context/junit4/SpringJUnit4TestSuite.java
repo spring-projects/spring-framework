@@ -38,32 +38,18 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses({//
-StandardJUnit4FeaturesTests.class,//
-	StandardJUnit4FeaturesSpringRunnerTests.class,//
-	SpringJUnit47ClassRunnerRuleTests.class,//
-	AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
-	ExpectedExceptionSpringRunnerTests.class,//
-	TimedSpringRunnerTests.class,//
-	RepeatedSpringRunnerTests.class,//
-	EnabledAndIgnoredSpringRunnerTests.class,//
-	HardCodedProfileValueSourceSpringRunnerTests.class,//
-	SpringJUnit4ClassRunnerAppCtxTests.class,//
-	ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.class,//
-	AbsolutePathSpringJUnit4ClassRunnerAppCtxTests.class,//
-	RelativePathSpringJUnit4ClassRunnerAppCtxTests.class,//
-	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class,//
-	InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
-	ParameterizedDependencyInjectionTests.class,//
-	ConcreteTransactionalJUnit4SpringContextTests.class,//
-	ClassLevelTransactionalSpringRunnerTests.class,//
-	MethodLevelTransactionalSpringRunnerTests.class,//
-	DefaultRollbackTrueRollbackAnnotationTransactionalTests.class,//
-	DefaultRollbackFalseRollbackAnnotationTransactionalTests.class,//
-	RollbackOverrideDefaultRollbackTrueTransactionalTests.class,//
-	RollbackOverrideDefaultRollbackFalseTransactionalTests.class,//
-	BeforeAndAfterTransactionAnnotationTests.class,//
-	TimedTransactionalSpringRunnerTests.class//
+@SuiteClasses({
+	StandardJUnit4FeaturesTests.class,
+	StandardJUnit4FeaturesSpringRunnerTests.class,
+	SpringJUnit47ClassRunnerRuleTests.class,
+	ExpectedExceptionSpringRunnerTests.class,
+	TimedSpringRunnerTests.class,
+	RepeatedSpringRunnerTests.class,
+	EnabledAndIgnoredSpringRunnerTests.class,
+	HardCodedProfileValueSourceSpringRunnerTests.class,
+	ParameterizedDependencyInjectionTests.class,
+	ConcreteTransactionalJUnit4SpringContextTests.class,
+	TimedTransactionalSpringRunnerTests.class
 })
 public class SpringJUnit4TestSuite {
 	/* this test case consists entirely of tests loaded as a suite. */
