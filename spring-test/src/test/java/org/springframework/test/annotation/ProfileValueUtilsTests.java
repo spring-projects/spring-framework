@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.0
  */
+@SuppressWarnings("deprecation")
 class ProfileValueUtilsTests {
 
 	private static final String NON_ANNOTATED_METHOD = "nonAnnotatedMethod";
@@ -140,7 +141,6 @@ class ProfileValueUtilsTests {
 
 	@Test
 	void isTestEnabledInThisEnvironmentForProvidedProfileValueSourceMethodAndClass() throws Exception {
-
 		ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 
 		assertMethodIsEnabled(profileValueSource, NON_ANNOTATED_METHOD, NonAnnotated.class);

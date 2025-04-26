@@ -483,6 +483,13 @@ Kotlin::
 [[testcontext-junit4-runner]]
 === Spring JUnit 4 Runner
 
+[WARNING]
+====
+JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+and JUnit Jupiter.
+====
+
 The Spring TestContext Framework offers full integration with JUnit 4 through a custom
 runner (supported on JUnit 4.12 or higher). By annotating test classes with
 `@RunWith(SpringJUnit4ClassRunner.class)` or the shorter `@RunWith(SpringRunner.class)`
@@ -537,6 +544,13 @@ be configured through `@ContextConfiguration`.
 
 [[testcontext-junit4-rules]]
 === Spring JUnit 4 Rules
+
+[WARNING]
+====
+JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+and JUnit Jupiter.
+====
 
 The `org.springframework.test.context.junit4.rules` package provides the following JUnit
 4 rules (supported on JUnit 4.12 or higher):
@@ -606,6 +620,13 @@ Kotlin::
 
 [[testcontext-support-classes-junit4]]
 === JUnit 4 Base Classes
+
+[WARNING]
+====
+JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+for JUnit Jupiter.
+====
 
 The `org.springframework.test.context.junit4` package provides the following support
 classes for JUnit 4-based test cases (supported on JUnit 4.12 or higher):

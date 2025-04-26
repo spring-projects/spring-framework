@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextConfiguration
 @WebAppConfiguration
+@SuppressWarnings("deprecation")
 public class JUnit4SpringContextWebTests extends AbstractJUnit4SpringContextTests implements ServletContextAware {
 
 	@Configuration

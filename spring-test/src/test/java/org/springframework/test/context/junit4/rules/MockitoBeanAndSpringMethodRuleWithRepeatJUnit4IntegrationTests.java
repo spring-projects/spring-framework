@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
  * @author Sam Brannen
  * @see <a href="https://github.com/spring-projects/spring-boot/issues/27693">gh-27693</a>
  */
+@SuppressWarnings("deprecation")
 public class MockitoBeanAndSpringMethodRuleWithRepeatJUnit4IntegrationTests {
 
 	private static int invocations;

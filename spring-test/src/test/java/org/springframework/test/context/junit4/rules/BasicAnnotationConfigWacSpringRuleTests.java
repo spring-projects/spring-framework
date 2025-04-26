@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(JUnit4.class)
 @ContextConfiguration
+@SuppressWarnings("deprecation")
 public class BasicAnnotationConfigWacSpringRuleTests extends AbstractBasicWacTests {
 
 	@ClassRule

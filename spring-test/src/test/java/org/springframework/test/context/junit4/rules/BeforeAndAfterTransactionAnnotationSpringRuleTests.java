@@ -51,6 +51,7 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
 @RunWith(JUnit4.class)
 @ContextConfiguration("/org/springframework/test/context/transaction/transactionalTests-context.xml")
 @Transactional
+@SuppressWarnings("deprecation")
 public class BeforeAndAfterTransactionAnnotationSpringRuleTests {
 
 	private static final String JANE = "jane";

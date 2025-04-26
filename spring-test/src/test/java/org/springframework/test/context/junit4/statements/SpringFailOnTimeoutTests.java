@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mock;
  * @author Sam Brannen
  * @since 4.3.17
  */
+@SuppressWarnings("deprecation")
 public class SpringFailOnTimeoutTests {
 
 	private final Statement statement = mock();
