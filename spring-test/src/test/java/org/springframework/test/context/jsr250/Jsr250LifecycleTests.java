@@ -44,16 +44,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <h4>Expected Log Output</h4>
  * <pre>
- * INFO : org.springframework.test.context.junit4.spr4868.LifecycleBean - initializing
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - beforeAllTests()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - setUp()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - test1()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - tearDown()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - beforeAllTests()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - setUp()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - test2()
- * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - tearDown()
- * INFO : org.springframework.test.context.junit4.spr4868.LifecycleBean - destroying
+ * INFO : org.springframework.test.context.jsr250.LifecycleBean - initializing
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - beforeAllTests()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - setUp()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - test1()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - tearDown()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - beforeAllTests()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - setUp()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - test2()
+ * INFO : org.springframework.test.context.jsr250.Jsr250LifecycleTests - tearDown()
+ * INFO : org.springframework.test.context.jsr250.LifecycleBean - destroying
  * </pre>
  *
  * @author Sam Brannen

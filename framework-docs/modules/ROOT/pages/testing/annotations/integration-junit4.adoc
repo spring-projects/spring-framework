@@ -2,8 +2,9 @@
 = Spring JUnit 4 Testing Annotations
 
 The following annotations are supported only when used in conjunction with the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner], xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules]
-, or xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner],
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules], or
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
 
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-ifprofilevalue[`@IfProfileValue`]
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-profilevaluesourceconfiguration[`@ProfileValueSourceConfiguration`]
