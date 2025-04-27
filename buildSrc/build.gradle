@@ -26,8 +26,9 @@ dependencies {
 	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
 
 	testImplementation("org.assertj:assertj-core:${assertjVersion}")
-	testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
+	testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 gradlePlugin {
