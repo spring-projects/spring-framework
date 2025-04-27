@@ -25,6 +25,7 @@ javadoc {
 	}))
 
 	title = "${rootProject.description} ${version} API"
+	failOnError = true
 	options {
 		encoding = "UTF-8"
 		memberLevel = JavadocMemberLevel.PROTECTED
