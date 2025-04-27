@@ -69,7 +69,7 @@ normalization {
 
 javadoc {
 	description = "Generates project-level javadoc for use in -javadoc jar"
-
+	failOnError = true
 	options {
 		encoding = "UTF-8"
 		memberLevel = JavadocMemberLevel.PROTECTED
