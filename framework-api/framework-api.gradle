@@ -1,6 +1,6 @@
 plugins {
 	id 'java-platform'
-	id 'io.freefair.aggregate-javadoc' version '8.3'
+	id 'io.freefair.aggregate-javadoc' version '8.13.1'
 }
 
 description = "Spring Framework API Docs"
