@@ -131,7 +131,7 @@ class HttpEntityTests {
 		HttpHeaders headers = new HttpHeaders(HttpEntity.EMPTY.getHeaders());
 		headers.add("Authorization", "Bearer some-token");
 
-		assertThat(HttpEntity.EMPTY.getHeaders())
+		assertThat(HttpEntity.EMPTY.getHeaders().headerNames())
 				.as("Headers of HttpEntity.EMPTY should remain empty")
 				.isEmpty();
 	}
