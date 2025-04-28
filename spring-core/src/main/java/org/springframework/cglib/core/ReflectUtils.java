@@ -463,10 +463,21 @@ public class ReflectUtils {
 				c = lookup.defineClass(b);
 			}
 			catch (LinkageError | IllegalArgumentException ex) {
-				// in case of plain LinkageError (class already defined)
-				// or IllegalArgumentException (class in different package):
-				// fall through to traditional ClassLoader.defineClass below
-				t = ex;
+				if (ex instanceof LinkageError) {
+					// Could be a ClassLoader mismatch with the class pre-existing in a
+					// parent ClassLoader -> try loadClass before giving up completely.
+					try {
+						c = contextClass.getClassLoader().loadClass(className);
+					}
+					catch (ClassNotFoundException cnfe) {
+					}
+				}
+				if (c == null) {
+					// in case of plain LinkageError (class already defined)
+					// or IllegalArgumentException (class in different package):
+					// fall through to traditional ClassLoader.defineClass below
+					t = ex;
+				}
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
