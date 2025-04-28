@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @author Yanming Zhou
  * @since 3.0.2
  * @param <T> the body type
  * @see org.springframework.web.client.RestTemplate
@@ -59,7 +58,8 @@ import org.springframework.util.ObjectUtils;
 public class HttpEntity<T> {
 
 	/**
-	 * The empty {@code HttpEntity}, with no body or headers.
+	 * An {@code HttpEntity} instance with a {@code null} body and
+	 * {@link HttpHeaders#EMPTY empty headers}.
 	 */
 	public static final HttpEntity<?> EMPTY = new HttpEntity<>(HttpHeaders.EMPTY);
 
