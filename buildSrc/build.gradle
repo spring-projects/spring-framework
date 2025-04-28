@@ -1,11 +1,16 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
+	id 'org.openrewrite.rewrite' version '7.5.0'
 }
 
 repositories {
 	mavenCentral()
 	gradlePluginPortal()
+}
+
+rewrite {
+	activeRecipe("org.openrewrite.staticanalysis.CodeCleanup")
 }
 
 ext {
@@ -19,6 +24,7 @@ ext {
 
 dependencies {
 	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
+	rewrite "org.openrewrite.recipe:rewrite-static-analysis:latest.release"
 	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
 	implementation "com.tngtech.archunit:archunit:1.4.0"
 	implementation "org.gradle:test-retry-gradle-plugin:1.6.2"
