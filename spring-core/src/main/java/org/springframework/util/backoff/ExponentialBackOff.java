@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ public class ExponentialBackOff implements BackOff {
 	 * @since 6.1
 	 */
 	public static final int DEFAULT_MAX_ATTEMPTS = Integer.MAX_VALUE;
+
 
 	private long initialInterval = DEFAULT_INITIAL_INTERVAL;
 
@@ -204,6 +205,7 @@ public class ExponentialBackOff implements BackOff {
 		return this.maxAttempts;
 	}
 
+
 	@Override
 	public BackOffExecution start() {
 		return new ExponentialBackOffExecution();
@@ -224,6 +226,7 @@ public class ExponentialBackOff implements BackOff {
 				.add("maxAttempts=" + this.maxAttempts)
 				.toString();
 	}
+
 
 	private class ExponentialBackOffExecution implements BackOffExecution {
 
