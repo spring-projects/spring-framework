@@ -36,39 +36,64 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
  */
 public class DefaultApiVersionStrategiesTests {
 
-	private final SemanticApiVersionParser parser = new SemanticApiVersionParser();
+	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
+
+	private static final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test
-	void defaultVersion() {
-		SemanticApiVersionParser.Version version = this.parser.parseVersion("1.2.3");
-		ApiVersionStrategy strategy = initVersionStrategy(version.toString());
-
-		assertThat(strategy.getDefaultVersion()).isEqualTo(version);
+	void defaultVersionIsParsed() {
+		String version = "1.2.3";
+		ApiVersionStrategy strategy = apiVersionStrategy(version, false);
+		assertThat(strategy.getDefaultVersion()).isEqualTo(parser.parseVersion(version));
 	}
 
 	@Test
-	void supportedVersions() {
-		SemanticApiVersionParser.Version v1 = this.parser.parseVersion("1");
-		SemanticApiVersionParser.Version v2 = this.parser.parseVersion("2");
-		SemanticApiVersionParser.Version v9 = this.parser.parseVersion("9");
+	void validateSupportedVersion() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addSupportedVersion(version);
+		validateVersion(version, strategy);
+	}
 
-		DefaultApiVersionStrategy strategy = initVersionStrategy(null);
-		strategy.addSupportedVersion(v1.toString());
-		strategy.addSupportedVersion(v2.toString());
-
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
-		strategy.validateVersion(v1, exchange);
-		strategy.validateVersion(v2, exchange);
-
-		assertThatThrownBy(() -> strategy.validateVersion(v9, exchange))
+	@Test
+	void validateUnsupportedVersion() {
+		assertThatThrownBy(() -> validateVersion("1.2", apiVersionStrategy()))
 				.isInstanceOf(InvalidApiVersionException.class);
 	}
 
-	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
-		return new DefaultApiVersionStrategy(
+	@Test
+	void validateDetectedSupportedVersion() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, true);
+		strategy.addMappedVersion(version);
+		validateVersion(version, strategy);
+	}
+
+	@Test
+	void validateWhenDetectSupportedVersionsIsOff() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addMappedVersion(version);
+
+		assertThatThrownBy(() -> strategy.validateVersion(version, exchange))
+				.isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy() {
+		return apiVersionStrategy(null, false);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(
+			@Nullable String defaultValue, boolean detectSupportedVersions) {
+
+			return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				parser, true, defaultValue, detectSupportedVersions);
+	}
+
+	private static void validateVersion(String version, DefaultApiVersionStrategy strategy) {
+		strategy.validateVersion(parser.parseVersion(version), exchange);
 	}
 
 }
