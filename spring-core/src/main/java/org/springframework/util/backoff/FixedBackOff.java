@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public class FixedBackOff implements BackOff {
 	 * Constant value indicating an unlimited number of attempts.
 	 */
 	public static final long UNLIMITED_ATTEMPTS = Long.MAX_VALUE;
+
 
 	private long interval = DEFAULT_INTERVAL;
 
@@ -85,6 +86,7 @@ public class FixedBackOff implements BackOff {
 	public long getMaxAttempts() {
 		return this.maxAttempts;
 	}
+
 
 	@Override
 	public BackOffExecution start() {
