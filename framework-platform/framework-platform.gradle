@@ -124,7 +124,7 @@ dependencies {
 		api("org.glassfish:jakarta.el:4.0.2")
 		api("org.graalvm.sdk:graal-sdk:22.3.1")
 		api("org.hamcrest:hamcrest:3.0")
-		api("org.hibernate.orm:hibernate-core:7.0.0.Beta5")
+		api("org.hibernate.orm:hibernate-core:7.0.0.CR1")
 		api("org.hibernate.validator:hibernate-validator:9.0.0.CR1")
 		api("org.hsqldb:hsqldb:2.7.4")
 		api("org.htmlunit:htmlunit:4.10.0")
