@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client.support;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.registry.HttpServiceGroupAdapter;
@@ -28,6 +29,7 @@ import org.springframework.web.service.registry.HttpServiceGroupConfigurer;
  * @since 7.0
  */
 @SuppressWarnings("unused")
+@Reflective
 public class WebClientHttpServiceGroupAdapter implements HttpServiceGroupAdapter<WebClient.Builder> {
 
 	@Override
