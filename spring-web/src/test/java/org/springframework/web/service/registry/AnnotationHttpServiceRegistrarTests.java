@@ -180,19 +180,12 @@ public class AnnotationHttpServiceRegistrarTests {
 
 		@Override
 		public GroupSpec forGroup(String name, ClientType clientType) {
-			return new TestGroupSpec(name, clientType);
+			return new TestGroupSpec(this.groupMap, name, clientType);
 		}
 
-		private class TestGroupSpec implements GroupSpec {
 
-			private final String groupName;
-
-			private final ClientType clientType;
-
-			public TestGroupSpec(String groupName, ClientType clientType) {
-				this.groupName = groupName;
-				this.clientType = clientType;
-			}
+		private record TestGroupSpec(Map<String, StubGroup> groupMap, String groupName,
+				ClientType clientType) implements GroupSpec {
 
 			@Override
 			public GroupSpec register(Class<?>... serviceTypes) {
@@ -213,7 +206,7 @@ public class AnnotationHttpServiceRegistrarTests {
 			}
 
 			private StubGroup getOrCreateGroup() {
-				return groupMap.computeIfAbsent(this.groupName, name -> new StubGroup(name, this.clientType));
+				return this.groupMap.computeIfAbsent(this.groupName, name -> new StubGroup(name, this.clientType));
 			}
 		}
 	}
