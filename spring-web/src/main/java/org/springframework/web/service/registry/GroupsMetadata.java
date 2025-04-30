@@ -26,6 +26,8 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -82,17 +84,11 @@ final class GroupsMetadata {
 	/**
 	 * Create the {@link HttpServiceGroup}s for all registrations.
 	 */
-	public Collection<HttpServiceGroup> groups() {
-		return this.groupMap.values().stream().map(DefaultRegistration::toHttpServiceGroup).toList();
-	}
-
-	public static Class<?> loadClass(String type) {
-		try {
-			return ClassUtils.forName(type, GroupsMetadata.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("Failed to load '" + type + "'", ex);
-		}
+	public Collection<HttpServiceGroup> groups(@Nullable ClassLoader classLoader) {
+		return this.groupMap.values()
+			.stream()
+			.map(registration -> registration.toHttpServiceGroup(classLoader))
+			.toList();
 	}
 
 	/**
@@ -169,10 +165,12 @@ final class GroupsMetadata {
 		/**
 		 * Create the {@link HttpServiceGroup} from the metadata.
 		 */
-		public HttpServiceGroup toHttpServiceGroup() {
+		public HttpServiceGroup toHttpServiceGroup(@Nullable ClassLoader classLoader) {
 			return new RegisteredGroup(this.name,
 					(this.clientType.isUnspecified() ? HttpServiceGroup.ClientType.REST_CLIENT : this.clientType),
-					this.typeNames.stream().map(GroupsMetadata::loadClass).collect(Collectors.toSet()));
+					this.typeNames.stream()
+						.map(typeName -> ClassUtils.resolveClassName(typeName, classLoader))
+						.collect(Collectors.toSet()));
 		}
 
 		@Override

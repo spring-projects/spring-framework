@@ -159,7 +159,7 @@ public class HttpServiceRegistrarTests {
 		GroupsMetadata metadata = (GroupsMetadata) valueHolder.getValue();
 		assertThat(metadata).isNotNull();
 
-		return metadata.groups().stream()
+		return metadata.groups(null).stream()
 				.collect(Collectors.toMap(HttpServiceGroup::name, Function.identity()));
 	}
 

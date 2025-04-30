@@ -89,7 +89,14 @@ public final class HttpServiceProxyFactory {
 						.map(method -> createHttpServiceMethod(serviceType, method))
 						.toList();
 
-		return ProxyFactory.getProxy(serviceType, new HttpServiceMethodInterceptor(httpServiceMethods));
+		return getProxy(serviceType, httpServiceMethods);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <S> S getProxy(Class<S> serviceType, List<HttpServiceMethod> httpServiceMethods) {
+		MethodInterceptor interceptor = new HttpServiceMethodInterceptor(httpServiceMethods);
+		ProxyFactory proxyFactory = new ProxyFactory(serviceType, interceptor);
+		return (S) proxyFactory.getProxy(serviceType.getClassLoader());
 	}
 
 	private boolean isExchangeMethod(Method method) {

@@ -23,6 +23,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -30,7 +31,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.service.registry.AbstractHttpServiceRegistrar;
 import org.springframework.web.service.registry.HttpServiceProxyRegistry;
 import org.springframework.web.service.registry.ImportHttpServices;
@@ -112,6 +115,22 @@ public class RestClientProxyRegistryIntegrationTests {
 		assertThat(request.getPath()).isEqualTo("/greetingB?input=b");
 	}
 
+	@Test
+	void beansAreCreatedUsingBeanClassLoader() {
+		ClassLoader beanClassLoader = new OverridingClassLoader(getClass().getClassLoader()) {
+
+			protected boolean isEligibleForOverriding(String className) {
+				return className.contains("EchoA");
+			};
+		};
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.setClassLoader(beanClassLoader);
+		context.register(ClassUtils.resolveClassName(ListingConfig.class.getName(), beanClassLoader));
+		context.refresh();
+		assertThat(context.getBean(ClassUtils.resolveClassName(EchoA.class.getName(), beanClassLoader))
+			.getClass()
+			.getClassLoader()).isSameAs(beanClassLoader);
+	}
 
 	private static class ClientConfig {
 

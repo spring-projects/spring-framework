@@ -92,7 +92,7 @@ class GroupsMetadataValueDelegateTests {
 	@Test
 	void generateGroupsMetadataEmpty() {
 		compile(new GroupsMetadata(), (instance, compiled) -> assertThat(instance)
-				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups()).isEmpty()));
+				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups(compiled.getClassLoader())).isEmpty()));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ class GroupsMetadataValueDelegateTests {
 		GroupsMetadata groupsMetadata = new GroupsMetadata();
 		groupsMetadata.getOrCreateGroup("test-group", ClientType.REST_CLIENT).httpServiceTypeNames().add(EchoA.class.getName());
 		compile(groupsMetadata, (instance, compiled) -> assertThat(instance)
-				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups())
+				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups(compiled.getClassLoader()))
 						.singleElement().satisfies(hasHttpServiceGroup("test-group", ClientType.REST_CLIENT, EchoA.class))));
 	}
 
@@ -115,7 +115,7 @@ class GroupsMetadataValueDelegateTests {
 		Function<GeneratedClass, ValueCodeGenerator> valueCodeGeneratorFactory = generatedClass ->
 				ValueCodeGenerator.withDefaults().add(List.of(new GroupsMetadataValueDelegate()));
 		compile(valueCodeGeneratorFactory, groupsMetadata, (instance, compiled) -> assertThat(instance)
-				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups())
+				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups(compiled.getClassLoader()))
 						.satisfiesOnlyOnce(hasHttpServiceGroup("test-group", ClientType.REST_CLIENT, EchoA.class, EchoB.class))
 						.satisfiesOnlyOnce(hasHttpServiceGroup("another-group", ClientType.WEB_CLIENT, GreetingA.class, GreetingB.class))
 						.hasSize(2)));
@@ -130,7 +130,7 @@ class GroupsMetadataValueDelegateTests {
 				.addAll(List.of(GreetingA.class.getName(), GreetingB.class.getName()));
 
 		compile(groupsMetadata, (instance, compiled) -> assertThat(instance)
-				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups())
+				.isInstanceOfSatisfying(GroupsMetadata.class, metadata -> assertThat(metadata.groups(compiled.getClassLoader()))
 						.satisfiesOnlyOnce(hasHttpServiceGroup("test-group", ClientType.REST_CLIENT, EchoA.class, EchoB.class))
 						.satisfiesOnlyOnce(hasHttpServiceGroup("another-group", ClientType.WEB_CLIENT, GreetingA.class, GreetingB.class))
 						.hasSize(2)));

@@ -19,6 +19,7 @@ package org.springframework.web.service.registry;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -38,6 +39,7 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -74,7 +76,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @see HttpServiceProxyRegistryFactoryBean
  */
 public abstract class AbstractHttpServiceRegistrar implements
-		ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware, BeanFactoryAware {
+		ImportBeanDefinitionRegistrar, EnvironmentAware, ResourceLoaderAware, BeanFactoryAware, BeanClassLoaderAware {
 
 	/**
 	 * The bean name of the {@link HttpServiceProxyRegistry}.
@@ -90,6 +92,8 @@ public abstract class AbstractHttpServiceRegistrar implements
 	private @Nullable ResourceLoader resourceLoader;
 
 	private @Nullable BeanFactory beanFactory;
+
+	private @Nullable ClassLoader beanClassLoader;
 
 	private final GroupsMetadata groupsMetadata = new GroupsMetadata();
 
@@ -119,6 +123,11 @@ public abstract class AbstractHttpServiceRegistrar implements
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
+	}
+
+	@Override
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
 	}
 
 
@@ -197,7 +206,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 	private Object getProxyInstance(String groupName, String httpServiceType) {
 		Assert.state(this.beanFactory != null, "BeanFactory has not been set");
 		HttpServiceProxyRegistry registry = this.beanFactory.getBean(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME, HttpServiceProxyRegistry.class);
-		return registry.getClient(groupName, GroupsMetadata.loadClass(httpServiceType));
+		return registry.getClient(groupName, ClassUtils.resolveClassName(httpServiceType, this.beanClassLoader));
 	}
 
 
