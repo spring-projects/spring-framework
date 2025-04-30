@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.web.service.registry.GroupsMetadata.DefaultRegistration;
+import org.springframework.web.service.registry.GroupsMetadata.Registration;
 
 /**
  * {@link ValueCodeGenerator.Delegate} for {@link GroupsMetadata}.
@@ -41,7 +41,7 @@ final class GroupsMetadataValueDelegate implements ValueCodeGenerator.Delegate {
 
 	@Override
 	public @Nullable CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
-		if (value instanceof DefaultRegistration registration) {
+		if (value instanceof Registration registration) {
 			return generateRegistrationCode(valueCodeGenerator, registration);
 		}
 		if (value instanceof GroupsMetadata groupsMetadata) {
@@ -51,9 +51,9 @@ final class GroupsMetadataValueDelegate implements ValueCodeGenerator.Delegate {
 	}
 
 	public CodeBlock generateRegistrationCode(ValueCodeGenerator
-			valueCodeGenerator, DefaultRegistration value) {
+			valueCodeGenerator, Registration value) {
 		CodeBlock.Builder code = CodeBlock.builder();
-		code.add("new $T($S, $L, $L)", DefaultRegistration.class, value.name(),
+		code.add("new $T($S, $L, $L)", Registration.class, value.name(),
 				valueCodeGenerator.generateCode(value.clientType()),
 				!value.httpServiceTypeNames().isEmpty() ?
 						valueCodeGenerator.generateCode(value.httpServiceTypeNames()) :
@@ -62,7 +62,7 @@ final class GroupsMetadataValueDelegate implements ValueCodeGenerator.Delegate {
 	}
 
 	private CodeBlock generateGroupsMetadataCode(ValueCodeGenerator valueCodeGenerator, GroupsMetadata groupsMetadata) {
-		Collection<DefaultRegistration> registrations = groupsMetadata.registrations()
+		Collection<Registration> registrations = groupsMetadata.registrations()
 				.collect(Collectors.toCollection(ArrayList::new));
 		if (valueCodeGenerator.getGeneratedMethods() != null) {
 			return valueCodeGenerator.getGeneratedMethods().add("getGroupsMetadata", method -> method
@@ -77,11 +77,11 @@ final class GroupsMetadataValueDelegate implements ValueCodeGenerator.Delegate {
 	}
 
 	private CodeBlock generateGroupsMetadataMethod(
-			ValueCodeGenerator valueCodeGenerator, Collection<DefaultRegistration> registrations) {
+			ValueCodeGenerator valueCodeGenerator, Collection<Registration> registrations) {
 
 		CodeBlock.Builder code = CodeBlock.builder();
 		String registrationsVariable = "registrations";
-		code.addStatement("$T<$T> $L = new $T<>()", List.class, DefaultRegistration.class,
+		code.addStatement("$T<$T> $L = new $T<>()", List.class, Registration.class,
 				registrationsVariable, ArrayList.class);
 		registrations.forEach(registration ->
 				code.addStatement("$L.add($L)", registrationsVariable,
