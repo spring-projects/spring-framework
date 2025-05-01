@@ -123,13 +123,14 @@ public class RestClientProxyRegistryIntegrationTests {
 				return className.contains("EchoA");
 			};
 		};
+
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.setClassLoader(beanClassLoader);
 		context.register(ClassUtils.resolveClassName(ListingConfig.class.getName(), beanClassLoader));
 		context.refresh();
-		assertThat(context.getBean(ClassUtils.resolveClassName(EchoA.class.getName(), beanClassLoader))
-			.getClass()
-			.getClassLoader()).isSameAs(beanClassLoader);
+
+		Class<?> echoClass = ClassUtils.resolveClassName(EchoA.class.getName(), beanClassLoader);
+		assertThat(context.getBean(echoClass).getClass().getClassLoader()).isSameAs(beanClassLoader);
 	}
 
 	private static class ClientConfig {

@@ -95,8 +95,8 @@ public final class HttpServiceProxyFactory {
 	@SuppressWarnings("unchecked")
 	private <S> S getProxy(Class<S> serviceType, List<HttpServiceMethod> httpServiceMethods) {
 		MethodInterceptor interceptor = new HttpServiceMethodInterceptor(httpServiceMethods);
-		ProxyFactory proxyFactory = new ProxyFactory(serviceType, interceptor);
-		return (S) proxyFactory.getProxy(serviceType.getClassLoader());
+		ProxyFactory factory = new ProxyFactory(serviceType, interceptor);
+		return (S) factory.getProxy(serviceType.getClassLoader());
 	}
 
 	private boolean isExchangeMethod(Method method) {

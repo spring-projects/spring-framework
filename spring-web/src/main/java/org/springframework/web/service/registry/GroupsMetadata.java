@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Container for HTTP Service type registrations, initially storing HTTP Service
  * type names as {@link Registration}s, and later exposing access to those
- * registrations as {@link HttpServiceGroup}s via {@link #groups()}.
+ * registrations as {@link HttpServiceGroup}s via {@link #groups(ClassLoader)}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -85,14 +85,13 @@ final class GroupsMetadata {
 	 * Create the {@link HttpServiceGroup}s for all registrations.
 	 */
 	public Collection<HttpServiceGroup> groups(@Nullable ClassLoader classLoader) {
-		return this.groupMap.values()
-			.stream()
+		return this.groupMap.values().stream()
 			.map(registration -> registration.toHttpServiceGroup(classLoader))
 			.toList();
 	}
 
 	/**
-	 * Return the raw {@link DefaultRegistration registrations}.
+	 * Return the raw {@link Registration registrations}.
 	 */
 	Stream<Registration> registrations() {
 		return this.groupMap.values().stream();
@@ -146,11 +145,15 @@ final class GroupsMetadata {
 		 * Create the {@link HttpServiceGroup} from the metadata.
 		 */
 		public HttpServiceGroup toHttpServiceGroup(@Nullable ClassLoader classLoader) {
-			return new RegisteredGroup(this.name,
-					(this.clientType.isUnspecified() ? HttpServiceGroup.ClientType.REST_CLIENT : this.clientType),
-					this.httpServiceTypeNames.stream()
-						.map(typeName -> ClassUtils.resolveClassName(typeName, classLoader))
-						.collect(Collectors.toSet()));
+
+			HttpServiceGroup.ClientType clientTypeToUse =
+					(this.clientType.isUnspecified() ? HttpServiceGroup.ClientType.REST_CLIENT : this.clientType);
+
+			Set<Class<?>> httpServiceTypes = this.httpServiceTypeNames.stream()
+					.map(typeName -> ClassUtils.resolveClassName(typeName, classLoader))
+					.collect(Collectors.toSet());
+
+			return new RegisteredGroup(this.name, clientTypeToUse, httpServiceTypes);
 		}
 
 		@Override

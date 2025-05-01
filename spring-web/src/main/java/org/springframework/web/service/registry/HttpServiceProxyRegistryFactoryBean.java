@@ -101,10 +101,9 @@ public final class HttpServiceProxyRegistryFactoryBean
 		Assert.notNull(this.beanClassLoader, "BeanClassLoader not initialized");
 
 		// Create the groups from the metadata
-		Set<ProxyHttpServiceGroup> groups = this.groupsMetadata.groups(this.beanClassLoader)
-			.stream()
-			.map(ProxyHttpServiceGroup::new)
-			.collect(Collectors.toSet());
+		Set<ProxyHttpServiceGroup> groups = this.groupsMetadata.groups(this.beanClassLoader).stream()
+				.map(ProxyHttpServiceGroup::new)
+				.collect(Collectors.toSet());
 
 		// Apply group configurers
 		groupAdapters.forEach((clientType, groupAdapter) ->
@@ -170,15 +169,16 @@ public final class HttpServiceProxyRegistryFactoryBean
 		private BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer = (group, builder) -> {};
 
 		ProxyHttpServiceGroup(HttpServiceGroup group) {
-			this(group, getHttpServiceGroupAdapter(group.clientType()));
-		}
-
-		ProxyHttpServiceGroup(HttpServiceGroup group, HttpServiceGroupAdapter<?> groupAdapter) {
 			this.declaredGroup = group;
-			this.groupAdapter = groupAdapter;
-			this.clientBuilder = groupAdapter.createClientBuilder();
+			this.groupAdapter = getGroupAdapter(group.clientType());
+			this.clientBuilder = this.groupAdapter.createClientBuilder();
 		}
 
+		private static HttpServiceGroupAdapter<?> getGroupAdapter(HttpServiceGroup.ClientType clientType) {
+			HttpServiceGroupAdapter<?> adapter = groupAdapters.get(clientType);
+			Assert.state(adapter != null, "No HttpServiceGroupAdapter for type " + clientType);
+			return adapter;
+		}
 
 		@Override
 		public String name() {
@@ -224,11 +224,6 @@ public final class HttpServiceProxyRegistryFactoryBean
 			return getClass().getSimpleName() + "[id=" + name() + "]";
 		}
 
-		private static HttpServiceGroupAdapter<?> getHttpServiceGroupAdapter(HttpServiceGroup.ClientType clientType) {
-			HttpServiceGroupAdapter<?> adapter = groupAdapters.get(clientType);
-			Assert.state(adapter != null, "No HttpServiceGroupAdapter for type " + clientType);
-			return adapter;
-		}
 	}
 
 
