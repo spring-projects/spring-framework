@@ -31,14 +31,17 @@ import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
 /**
  * Integration tests for {@link MockitoBean @MockitoBean} which verify that
  * {@code @MockitoBean} fields are not discovered more than once when searching
- * intertwined enclosing class hierarchies and type hierarchies.
+ * intertwined enclosing class hierarchies and type hierarchies, when an enclosing
+ * class is <em>present</em> twice in the intertwined hierarchies.
  *
  * @author Sam Brannen
  * @since 6.2.3
+ * @see MockitoBeanNestedAndTypeHierarchiesWithSuperclassPresentTwiceTests
+ * @see MockitoBeanWithInterfacePresentTwiceTests
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/34324">gh-34324</a>
  */
 @ExtendWith(SpringExtension.class)
-class MockitoBeanNestedAndTypeHierarchiesTests {
+class MockitoBeanNestedAndTypeHierarchiesWithEnclosingClassPresentTwiceTests {
 
 	@Autowired
 	ApplicationContext enclosingContext;
@@ -50,6 +53,7 @@ class MockitoBeanNestedAndTypeHierarchiesTests {
 	@Test
 	void topLevelTest() {
 		assertIsMock(service);
+		assertThat(enclosingContext.getBeanNamesForType(ExampleService.class)).hasSize(1);
 
 		// The following are prerequisites for the reported regression.
 		assertThat(NestedTests.class.getSuperclass())
@@ -66,6 +70,7 @@ class MockitoBeanNestedAndTypeHierarchiesTests {
 		void nestedTest(ApplicationContext nestedContext) {
 			assertIsMock(service);
 			assertThat(enclosingContext).isSameAs(nestedContext);
+			assertThat(enclosingContext.getBeanNamesForType(ExampleService.class)).hasSize(1);
 		}
 	}
 
