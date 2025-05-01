@@ -314,8 +314,7 @@ public class TestContextAotGenerator {
 	ClassName processAheadOfTime(MergedContextConfiguration mergedConfig,
 			GenerationContext generationContext) throws TestContextAotException {
 
-		GenericApplicationContext gac = loadContextForAotProcessing(mergedConfig);
-		try {
+		try (GenericApplicationContext gac = loadContextForAotProcessing(mergedConfig)) {
 			return this.aotGenerator.processAheadOfTime(gac, generationContext);
 		}
 		catch (Throwable ex) {
@@ -333,7 +332,7 @@ public class TestContextAotGenerator {
 	 * context or if one of the prerequisites is not met
 	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
 	 */
-	private GenericApplicationContext loadContextForAotProcessing(
+	GenericApplicationContext loadContextForAotProcessing(
 			MergedContextConfiguration mergedConfig) throws TestContextAotException {
 
 		Class<?> testClass = mergedConfig.getTestClass();
