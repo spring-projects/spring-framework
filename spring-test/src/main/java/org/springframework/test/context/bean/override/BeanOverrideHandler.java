@@ -183,30 +183,32 @@ public abstract class BeanOverrideHandler {
 	 * @param testClass the original test class
 	 * @param handlers the list of handlers found
 	 * @param localFieldsOnly whether to search only on local fields within the type hierarchy
-	 * @param visitedEnclosingClasses the set of enclosing classes already visited
+	 * @param visitedTypes the set of types already visited
 	 * @since 6.2.2
 	 */
 	private static void findHandlers(Class<?> clazz, Class<?> testClass, List<BeanOverrideHandler> handlers,
-			boolean localFieldsOnly, Set<Class<?>> visitedEnclosingClasses) {
+			boolean localFieldsOnly, Set<Class<?>> visitedTypes) {
+
+		// 0) Ensure that we do not process the same class or interface multiple times.
+		if (!visitedTypes.add(clazz)) {
+			return;
+		}
 
 		// 1) Search enclosing class hierarchy.
 		if (!localFieldsOnly && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			Class<?> enclosingClass = clazz.getEnclosingClass();
-			if (visitedEnclosingClasses.add(enclosingClass)) {
-				findHandlers(enclosingClass, testClass, handlers, localFieldsOnly, visitedEnclosingClasses);
-			}
+			findHandlers(clazz.getEnclosingClass(), testClass, handlers, localFieldsOnly, visitedTypes);
 		}
 
 		// 2) Search class hierarchy.
 		Class<?> superclass = clazz.getSuperclass();
 		if (superclass != null && superclass != Object.class) {
-			findHandlers(superclass, testClass, handlers, localFieldsOnly, visitedEnclosingClasses);
+			findHandlers(superclass, testClass, handlers, localFieldsOnly, visitedTypes);
 		}
 
 		if (!localFieldsOnly) {
 			// 3) Search interfaces.
 			for (Class<?> ifc : clazz.getInterfaces()) {
-				findHandlers(ifc, testClass, handlers, localFieldsOnly, visitedEnclosingClasses);
+				findHandlers(ifc, testClass, handlers, localFieldsOnly, visitedTypes);
 			}
 
 			// 4) Process current class.
