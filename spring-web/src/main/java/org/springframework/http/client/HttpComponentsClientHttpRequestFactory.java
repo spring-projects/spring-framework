@@ -235,9 +235,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			context = HttpClientContext.create();
 		}
 
-		// Request configuration not set in the context
-		if (!(context instanceof HttpClientContext clientContext && clientContext.getRequestConfig() != null) &&
-				context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+		// No custom request configuration was set
+		if (!hasCustomRequestConfig(context)) {
 			RequestConfig config = null;
 			// Use request configuration given by the user, when available
 			if (httpRequest instanceof Configurable configurable) {
@@ -254,6 +253,18 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			}
 		}
 		return new HttpComponentsClientHttpRequest(client, httpRequest, context);
+	}
+
+	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
+	private static boolean hasCustomRequestConfig(HttpContext context) {
+		if (context instanceof HttpClientContext clientContext) {
+			// Prior to 5.4, the default config was set to RequestConfig.DEFAULT
+			// As of 5.4, it is set to null
+			RequestConfig requestConfig = clientContext.getRequestConfig();
+			return requestConfig != null && !requestConfig.equals(RequestConfig.DEFAULT);
+		}
+		// Prior to 5.4, the config was stored as an attribute
+		return context.getAttribute(HttpClientContext.REQUEST_CONFIG) != null;
 	}
 
 
