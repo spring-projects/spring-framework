@@ -116,7 +116,6 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private static final boolean kotlinSerializationProtobufPresent;
 
-
 	static {
 		ClassLoader loader = DefaultRestClientBuilder.class.getClassLoader();
 
@@ -149,6 +148,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	private @Nullable HttpHeaders defaultHeaders;
 
 	private @Nullable MultiValueMap<String, String> defaultCookies;
+
+	private @Nullable Object defaultApiVersion;
 
 	private @Nullable ApiVersionInserter apiVersionInserter;
 
@@ -188,6 +189,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.defaultHeaders = null;
 		}
 		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultApiVersion = other.defaultApiVersion;
 		this.apiVersionInserter = other.apiVersionInserter;
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new ArrayList<>(other.statusHandlers) : null);
@@ -322,6 +324,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
+	}
+
+	@Override
+	public RestClient.Builder defaultApiVersion(@Nullable Object version) {
+		this.defaultApiVersion = version;
+		return this;
 	}
 
 	@Override
@@ -521,7 +529,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 		return new DefaultRestClient(
 				requestFactory, this.interceptors, this.bufferingPredicate, this.initializers,
-				uriBuilderFactory, defaultHeaders, defaultCookies,
+				uriBuilderFactory, defaultHeaders, defaultCookies, this.defaultApiVersion,
 				this.apiVersionInserter, this.defaultRequest,
 				this.statusHandlers, converters,
 				this.observationRegistry, this.observationConvention,

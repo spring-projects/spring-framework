@@ -81,6 +81,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private @Nullable Object defaultApiVersion;
+
 	private @Nullable ApiVersionInserter apiVersionInserter;
 
 	private @Nullable Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
@@ -122,6 +124,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		}
 
 		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
+
+		this.defaultApiVersion = other.defaultApiVersion;
 		this.apiVersionInserter = other.apiVersionInserter;
 
 		this.defaultRequest = other.defaultRequest;
@@ -194,6 +198,11 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return this.defaultCookies;
 	}
 
+	@Override
+	public WebClient.Builder defaultApiVersion(Object version) {
+		this.defaultApiVersion = version;
+		return this;
+	}
 
 	@Override
 	public WebClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
@@ -308,7 +317,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return new DefaultWebClient(
 				exchange, filterFunctions,
 				initUriBuilderFactory(), defaultHeaders, defaultCookies,
-				this.apiVersionInserter,
+				this.defaultApiVersion, this.apiVersionInserter,
 				this.defaultRequest,
 				this.statusHandlers,
 				this.observationRegistry, this.observationConvention,
