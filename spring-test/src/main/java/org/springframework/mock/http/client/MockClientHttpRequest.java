@@ -104,7 +104,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 
 	/**
 	 * Set the {@link ClientHttpResponse} to be used as the result of executing
-	 * the this request.
+	 * this request.
 	 * @see #execute()
 	 */
 	public void setResponse(ClientHttpResponse clientHttpResponse) {
