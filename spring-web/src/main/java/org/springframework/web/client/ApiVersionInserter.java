@@ -18,6 +18,8 @@ package org.springframework.web.client;
 
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 
 /**
@@ -47,6 +49,69 @@ public interface ApiVersionInserter {
 	 * @param headers the request headers
 	 */
 	default void insertVersion(Object version, HttpHeaders headers) {
+	}
+
+
+	/**
+	 * Create a builder for an inserter that sets a header.
+	 * @param header the name of a header to hold the version
+	 */
+	static Builder fromHeader(@Nullable String header) {
+		return new DefaultApiVersionInserterBuilder(header, null, null);
+	}
+
+	/**
+	 * Create a builder for an inserter that sets a query parameter.
+	 * @param queryParam the name of a query parameter to hold the version
+	 */
+	static Builder fromQueryParam(@Nullable String queryParam) {
+		return new DefaultApiVersionInserterBuilder(null, queryParam, null);
+	}
+
+	/**
+	 * Create a builder for an inserter that inserts a path segment.
+	 * @param pathSegmentIndex the index of the path segment to hold the version
+	 */
+	static Builder fromPathSegment(@Nullable Integer pathSegmentIndex) {
+		return new DefaultApiVersionInserterBuilder(null, null, pathSegmentIndex);
+	}
+
+
+	/**
+	 * Builder for {@link ApiVersionInserter}.
+	 */
+	interface Builder {
+
+		/**
+		 * Configure the inserter to set a header.
+		 * @param header the name of the header to hold the version
+		 */
+		Builder fromHeader(@Nullable String header);
+
+		/**
+		 * Configure the inserter to set a query parameter.
+		 * @param queryParam the name of the query parameter to hold the version
+		 */
+		Builder fromQueryParam(@Nullable String queryParam);
+
+		/**
+		 * Configure the inserter to insert a path segment.
+		 * @param pathSegmentIndex the index of the path segment to hold the version
+		 */
+		Builder fromPathSegment(@Nullable Integer pathSegmentIndex);
+
+		/**
+		 * Format the version Object into a String using the given {@link ApiVersionFormatter}.
+		 * <p>By default, the version is formatted with {@link Object#toString()}.
+		 * @param versionFormatter the formatter to use
+		 */
+		Builder withVersionFormatter(ApiVersionFormatter versionFormatter);
+
+		/**
+		 * Build the {@link ApiVersionInserter} instance.
+		 */
+		ApiVersionInserter build();
+
 	}
 
 }

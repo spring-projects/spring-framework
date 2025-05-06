@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.client.DefaultApiVersionInserter;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -274,7 +274,7 @@ class RestClientAdapterTests {
 	void apiVersion() throws Exception {
 		RestClient restClient = RestClient.builder()
 				.baseUrl(anotherServer.url("/").toString())
-				.apiVersionInserter(DefaultApiVersionInserter.fromHeader("X-API-Version").build())
+				.apiVersionInserter(ApiVersionInserter.fromHeader("X-API-Version").build())
 				.build();
 
 		RestClientAdapter adapter = RestClientAdapter.create(restClient);
