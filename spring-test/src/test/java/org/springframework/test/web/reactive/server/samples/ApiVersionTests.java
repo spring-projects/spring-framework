@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.DefaultApiVersionInserter;
+import org.springframework.web.client.ApiVersionInserter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,30 +41,28 @@ public class ApiVersionTests {
 
 	@Test
 	void header() {
-		Map<String, String> result = performRequest(builder -> builder.fromHeader("X-API-Version"));
+		Map<String, String> result = performRequest(ApiVersionInserter.fromHeader("X-API-Version").build());
 		assertThat(result.get(HEADER_NAME)).isEqualTo("1.2");
 	}
 
 	@Test
 	void queryParam() {
-		Map<String, String> result = performRequest(builder -> builder.fromQueryParam("api-version"));
+		Map<String, String> result = performRequest(ApiVersionInserter.fromQueryParam("api-version").build());
 		assertThat(result.get("query")).isEqualTo("api-version=1.2");
 	}
 
 	@Test
 	void pathSegment() {
-		Map<String, String> result = performRequest(builder -> builder.fromPathSegment(0));
+		Map<String, String> result = performRequest(ApiVersionInserter.fromPathSegment(0).build());
 		assertThat(result.get("path")).isEqualTo("/1.2/path");
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, String> performRequest(Consumer<DefaultApiVersionInserter.Builder> consumer) {
-		DefaultApiVersionInserter.Builder builder = DefaultApiVersionInserter.builder();
-		consumer.accept(builder);
+	private Map<String, String> performRequest(ApiVersionInserter inserter) {
 		return WebTestClient.bindToController(new TestController())
 				.configureClient()
 				.baseUrl("/path")
-				.apiVersionInserter(builder.build())
+				.apiVersionInserter(inserter)
 				.build()
 				.get()
 				.apiVersion(1.2)
