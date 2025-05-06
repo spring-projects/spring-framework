@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package org.springframework.context.support;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -429,6 +431,150 @@ class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setNullValue("");
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(OptionalTestBean.class).getName()).isNotPresent();
+	}
+
+
+	/**
+	 * Tests that use the escape character (or disable it) with nested placeholder
+	 * resolution.
+	 */
+	@Nested
+	class EscapedNestedPlaceholdersTests {
+
+		@Test  // gh-34861
+		void singleEscapeWithDefaultEscapeCharacter() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin")
+					.withProperty("my.property", "\\DOMAIN\\${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.postProcessBeanFactory(bf);
+
+			// \DOMAIN\${user.home} resolves to \DOMAIN${user.home} instead of \DOMAIN\admin
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("\\DOMAIN${user.home}");
+		}
+
+		@Test  // gh-34861
+		void singleEscapeWithCustomEscapeCharacter() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin\\~${nested}")
+					.withProperty("my.property", "DOMAIN\\${user.home}\\~${enigma}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			// Set custom escape character.
+			ppc.setEscapeCharacter('~');
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("DOMAIN\\admin\\${nested}\\${enigma}");
+		}
+
+		@Test  // gh-34861
+		void singleEscapeWithEscapeCharacterDisabled() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin\\")
+					.withProperty("my.property", "\\DOMAIN\\${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			// Disable escape character.
+			ppc.setEscapeCharacter(null);
+			ppc.postProcessBeanFactory(bf);
+
+			// \DOMAIN\${user.home} resolves to \DOMAIN\admin
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("\\DOMAIN\\admin\\");
+		}
+
+		@Test  // gh-34861
+		void tripleEscapeWithDefaultEscapeCharacter() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin\\\\\\")
+					.withProperty("my.property", "DOMAIN\\\\\\${user.home}#${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("DOMAIN\\\\${user.home}#admin\\\\\\");
+		}
+
+		@Test  // gh-34861
+		void tripleEscapeWithCustomEscapeCharacter() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin\\~${enigma}")
+					.withProperty("my.property", "DOMAIN~~~${user.home}#${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			// Set custom escape character.
+			ppc.setEscapeCharacter('~');
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("DOMAIN~~${user.home}#admin\\${enigma}");
+		}
+
+		@Test  // gh-34861
+		void singleEscapeWithDefaultEscapeCharacterAndIgnoreUnresolvablePlaceholders() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "${enigma}")
+					.withProperty("my.property", "\\${DOMAIN}${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.setIgnoreUnresolvablePlaceholders(true);
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${DOMAIN}${enigma}");
+		}
+
+		@Test  // gh-34861
+		void singleEscapeWithCustomEscapeCharacterAndIgnoreUnresolvablePlaceholders() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "${enigma}")
+					.withProperty("my.property", "~${DOMAIN}\\${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			// Set custom escape character.
+			ppc.setEscapeCharacter('~');
+			ppc.setIgnoreUnresolvablePlaceholders(true);
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${DOMAIN}\\${enigma}");
+		}
+
+		@Test  // gh-34861
+		void tripleEscapeWithDefaultEscapeCharacterAndIgnoreUnresolvablePlaceholders() {
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "${enigma}")
+					.withProperty("my.property", "X:\\\\\\${DOMAIN}${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.setIgnoreUnresolvablePlaceholders(true);
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("X:\\\\${DOMAIN}${enigma}");
+		}
+
+		private static DefaultListableBeanFactory createBeanFactory() {
+			BeanDefinition beanDefinition = genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.property}")
+					.getBeanDefinition();
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			bf.registerBeanDefinition("testBean",beanDefinition);
+			return bf;
+		}
+
 	}
 
 
