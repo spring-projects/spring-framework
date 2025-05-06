@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,8 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 * <p>Default is {@link #DEFAULT_ESCAPE_CHARACTER}.
 	 * @since 6.2
 	 */
-	public void setEscapeCharacter(@Nullable Character escsEscapeCharacter) {
-		this.escapeCharacter = escsEscapeCharacter;
+	public void setEscapeCharacter(@Nullable Character escapeCharacter) {
+		this.escapeCharacter = escapeCharacter;
 	}
 
 	/**
