@@ -42,7 +42,7 @@ class PropertySourcesPropertyResolverTests {
 
 	private MutablePropertySources propertySources;
 
-	private ConfigurablePropertyResolver propertyResolver;
+	private PropertySourcesPropertyResolver propertyResolver;
 
 
 	@BeforeEach
