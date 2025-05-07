@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.r2dbc.spi.Parameters;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -382,6 +383,45 @@ class NamedParameterUtilsTests {
 				.containsEntry(0, List.of("foo"))
 				.containsEntry(1, List.of("bar"))
 				.containsEntry(2, List.of("baz"));
+	}
+
+	@Test  // gh-34768
+	@Disabled("Disabled until gh-34768 is addressed")
+	void multipleEqualCollectionParameterReferencesForAnonymousMarkersBindsValueTwice() {
+		String sql = "SELECT * FROM fund_info WHERE fund_code IN (:fundCodes) OR fund_code IN (:fundCodes)";
+
+		MapBindParameterSource source = new MapBindParameterSource(Map.of("fundCodes", Parameters.in(List.of("foo"))));
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(sql, ANONYMOUS_MARKERS, source);
+
+		assertThat(operation.toQuery())
+				.isEqualTo("SELECT * FROM fund_info WHERE fund_code IN (?) OR fund_code IN (?)");
+
+		Map<Integer, Object> bindings = new HashMap<>();
+
+		operation.bindTo(new BindTarget() {
+			@Override
+			public void bind(String identifier, Object value) {}
+
+			@Override
+			public void bind(int index, Object value) {
+				bindings.put(index, value);
+			}
+
+			@Override
+			public void bindNull(String identifier, Class<?> type) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void bindNull(int index, Class<?> type) {
+				throw new UnsupportedOperationException();
+			}
+		});
+
+		assertThat(bindings)
+				.hasSize(2)
+				.containsEntry(0, "foo")
+				.containsEntry(1, "foo");
 	}
 
 	@Test
