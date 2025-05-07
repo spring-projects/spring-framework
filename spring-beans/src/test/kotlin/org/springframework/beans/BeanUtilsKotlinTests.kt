@@ -157,6 +157,67 @@ class BeanUtilsKotlinTests {
 		assertThat(instance).isEqualTo(ConstructorWithNullablePrimitiveValueClass(null))
 	}
 
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with Foo`() {
+		val ctor = BeanUtils.findPrimaryConstructor(Foo::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("param1", "param2")
+	}
+
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with Bar`() {
+		val ctor = BeanUtils.findPrimaryConstructor(Bar::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("param1", "param2")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with Baz`() {
+		val ctor = BeanUtils.findPrimaryConstructor(Baz::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("param1", "param2")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with Qux`() {
+		val ctor = BeanUtils.findPrimaryConstructor(Qux::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("param1", "param2")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithValueClass::class.java)!!
+		assertThat(ctor).isNotNull()
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithNullableValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithNullableValueClass::class.java)!!
+		assertThat(ctor).isNotNull()
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithPrimitiveValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithPrimitiveValueClass::class.java)!!
+		assertThat(ctor).isNotNull()
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithNullablePrimitiveValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithNullablePrimitiveValueClass::class.java)!!
+		assertThat(ctor).isNotNull()
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
 
 	class Foo(val param1: String, val param2: Int)
 
