@@ -221,7 +221,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		@Override
 		public String toString() {
-			return getClass().getSimpleName() + "[id=" + name() + "]";
+			return getClass().getSimpleName() + "[name=" + name() + "]";
 		}
 
 	}
@@ -234,21 +234,24 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private final Set<ProxyHttpServiceGroup> groups;
 
+		private final Predicate<HttpServiceGroup> defaultFilter;
+
 		private Predicate<HttpServiceGroup> filter;
 
 		DefaultGroups(Set<ProxyHttpServiceGroup> groups, HttpServiceGroup.ClientType clientType) {
 			this.groups = groups;
-			this.filter = group -> group.clientType().equals(clientType);
+			this.defaultFilter = (group -> group.clientType().equals(clientType));
+			this.filter = this.defaultFilter;
 		}
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<CB> filterByName(String... groupNames) {
-			return filter(group -> Arrays.stream(groupNames).anyMatch(id -> id.equals(group.name())));
+			return filter(group -> Arrays.stream(groupNames).anyMatch(name -> name.equals(group.name())));
 		}
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<CB> filter(Predicate<HttpServiceGroup> predicate) {
-			this.filter = this.filter.or(predicate);
+			this.filter = this.filter.and(predicate);
 			return this;
 		}
 
@@ -274,8 +277,11 @@ public final class HttpServiceProxyRegistryFactoryBean
 				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
 				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
 
-			this.groups.stream().filter(this.filter).forEach(group ->
-					group.apply(clientConfigurer, proxyFactoryConfigurer));
+			this.groups.stream().filter(this.filter)
+					.forEach(group -> group.apply(clientConfigurer, proxyFactoryConfigurer));
+
+			// Reset filter
+			this.filter = this.defaultFilter;
 		}
 	}
 
