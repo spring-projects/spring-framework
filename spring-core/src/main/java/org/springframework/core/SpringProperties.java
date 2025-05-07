@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 3.2.7
+ * @see org.springframework.aot.AotDetector#AOT_ENABLED
  * @see org.springframework.beans.StandardBeanInfoFactory#IGNORE_BEANINFO_PROPERTY_NAME
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#STRICT_LOCKING_PROPERTY_NAME
  * @see org.springframework.core.env.AbstractEnvironment#IGNORE_GETENV_PROPERTY_NAME
