@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.StringValueResolver;
  * XSD documentation for complete details.
  *
  * <p>Any local properties (for example, those added via {@link #setProperties}, {@link #setLocations}
- * et al.) are added as a {@code PropertySource}. Search precedence of local properties is
+ * et al.) are added as a single {@link PropertySource}. Search precedence of local properties is
  * based on the value of the {@link #setLocalOverride localOverride} property, which is by
  * default {@code false} meaning that local properties are to be searched last, after all
  * environment property sources.
@@ -101,8 +101,9 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	}
 
 	/**
-	 * {@code PropertySources} from the given {@link Environment}
-	 * will be searched when replacing ${...} placeholders.
+	 * {@inheritDoc}
+	 * <p>{@code PropertySources} from the given {@link Environment} will be searched
+	 * when replacing ${...} placeholders.
 	 * @see #setPropertySources
 	 * @see #postProcessBeanFactory
 	 */
@@ -176,6 +177,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 
 	/**
 	 * Create a {@link ConfigurablePropertyResolver} for the specified property sources.
+	 * <p>The default implementation creates a {@link PropertySourcesPropertyResolver}.
 	 * @param propertySources the property sources to use
 	 * @since 6.0.12
 	 */
@@ -188,7 +190,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * placeholders with values from the given properties.
 	 */
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
-			final ConfigurablePropertyResolver propertyResolver) throws BeansException {
+			ConfigurablePropertyResolver propertyResolver) throws BeansException {
 
 		propertyResolver.setPlaceholderPrefix(this.placeholderPrefix);
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
