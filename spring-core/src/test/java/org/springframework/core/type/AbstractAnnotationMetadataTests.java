@@ -185,6 +185,13 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		@Test
+		void getMemberClassNamesWhenHasNestedMemberClassesReturnsOnlyFirstLevel() {
+			assertThat(get(TestNestedMemberClass.class).getMemberClassNames()).containsOnly(
+					TestNestedMemberClass.TestMemberClassInnerClassA.class.getName(),
+					TestNestedMemberClass.TestMemberClassInnerClassB.class.getName());
+		}
+
+		@Test
 		void getMemberClassNamesWhenHasNoMemberClassesReturnsEmptyArray() {
 			assertThat(get(TestClass.class).getMemberClassNames()).isEmpty();
 		}
@@ -216,6 +223,22 @@ public abstract class AbstractAnnotationMetadataTests {
 			}
 
 			interface TestMemberClassInnerInterface {
+			}
+
+		}
+
+		public static class TestNestedMemberClass {
+
+			public static class TestMemberClassInnerClassA {
+
+				public static class TestMemberClassInnerClassAA {
+
+				}
+
+			}
+
+			public static class TestMemberClassInnerClassB {
+
 			}
 
 		}
