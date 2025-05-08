@@ -162,6 +162,12 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		@Test
+		void getSuperClassNameWhenPackageInfoReturnsNull() throws Exception {
+			Class<?> packageClass = Class.forName(getClass().getPackageName() + ".package-info");
+			assertThat(get(packageClass).getSuperClassName()).isNull();
+		}
+
+		@Test
 		void getInterfaceNamesWhenHasInterfacesReturnsNames() {
 			assertThat(get(TestSubclass.class).getInterfaceNames()).containsExactly(TestInterface.class.getName());
 			assertThat(get(TestSubInterface.class).getInterfaceNames()).containsExactly(TestInterface.class.getName());
