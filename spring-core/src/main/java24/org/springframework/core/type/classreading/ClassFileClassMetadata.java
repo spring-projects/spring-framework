@@ -268,18 +268,16 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 		void nestMembers(String currentClassName, InnerClassesAttribute innerClasses) {
 			for (InnerClassInfo classInfo : innerClasses.classes()) {
 				String innerClassName = classInfo.innerClass().name().stringValue();
-				// skip parent inner classes
-				if (!innerClassName.startsWith(currentClassName)) {
-					continue;
-				}
-				// the current class is an inner class
-				else if (currentClassName.equals(innerClassName)) {
+				if (currentClassName.equals(innerClassName)) {
+					// the current class is an inner class
 					this.innerAccessFlags = classInfo.flags();
 				}
-				// collecting data about actual inner classes
-				else {
-					this.memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
-				}
+				classInfo.outerClass().ifPresent(outerClass -> {
+					if (outerClass.name().stringValue().equals(currentClassName)) {
+						// collecting data about actual inner classes
+						this.memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
+					}
+				});
 			}
 		}
 
