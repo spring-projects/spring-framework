@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import io.r2dbc.spi.Parameters;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -350,7 +349,6 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // gh-34768
-	@Disabled("Disabled until gh-34768 is addressed")
 	void multipleEqualCollectionParameterReferencesForAnonymousMarkersBindsValuesTwice() {
 		String sql = "SELECT * FROM fund_info WHERE fund_code IN (:fundCodes) OR fund_code IN (:fundCodes)";
 

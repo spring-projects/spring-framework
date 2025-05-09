@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Mark Paluch
  * @author Anton Naydenov
+ * @author Sam Brannen
  * @since 5.3
  */
 abstract class NamedParameterUtils {
@@ -545,41 +546,43 @@ abstract class NamedParameterUtils {
 		}
 
 		private void bindNull(BindTarget target, String identifier, Parameter parameter) {
-			List<BindMarker> bindMarkers = getBindMarkers(identifier);
+			List<List<BindMarker>> bindMarkers = getBindMarkers(identifier);
 			if (bindMarkers == null) {
 				target.bind(identifier, parameter);
 				return;
 			}
-			for (BindMarker bindMarker : bindMarkers) {
-				bindMarker.bind(target, parameter);
+			for (List<BindMarker> outer : bindMarkers) {
+				for (BindMarker bindMarker : outer) {
+					bindMarker.bind(target, parameter);
+				}
 			}
 		}
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
 		private void bind(BindTarget target, String identifier, Parameter parameter) {
-			List<BindMarker> bindMarkers = getBindMarkers(identifier);
+			List<List<BindMarker>> bindMarkers = getBindMarkers(identifier);
 			if (bindMarkers == null) {
 				target.bind(identifier, parameter);
 				return;
 			}
-			if (parameter.getValue() instanceof Collection collection) {
-				Iterator<Object> iterator = collection.iterator();
-				Iterator<BindMarker> markers = bindMarkers.iterator();
-				while (iterator.hasNext()) {
-					Object valueToBind = iterator.next();
-					if (valueToBind instanceof Object[] objects) {
-						for (Object object : objects) {
-							bind(target, markers, object);
+
+			for (List<BindMarker> outer : bindMarkers) {
+				if (parameter.getValue() instanceof Collection<?> collection) {
+					Iterator<BindMarker> markers = outer.iterator();
+					for (Object valueToBind : collection) {
+						if (valueToBind instanceof Object[] objects) {
+							for (Object object : objects) {
+								bind(target, markers, object);
+							}
+						}
+						else {
+							bind(target, markers, valueToBind);
 						}
 					}
-					else {
-						bind(target, markers, valueToBind);
-					}
 				}
-			}
-			else {
-				for (BindMarker bindMarker : bindMarkers) {
-					bindMarker.bind(target, parameter);
+				else {
+					for (BindMarker bindMarker : outer) {
+						bindMarker.bind(target, parameter);
+					}
 				}
 			}
 		}
@@ -592,14 +595,14 @@ abstract class NamedParameterUtils {
 		}
 
 		@Nullable
-		private List<BindMarker> getBindMarkers(String identifier) {
+		private List<List<BindMarker>> getBindMarkers(String identifier) {
 			List<NamedParameters.NamedParameter> parameters = this.parameters.getMarker(identifier);
 			if (parameters == null) {
 				return null;
 			}
-			List<BindMarker> markers = new ArrayList<>();
+			List<List<BindMarker>> markers = new ArrayList<>();
 			for (NamedParameters.NamedParameter parameter : parameters) {
-				markers.addAll(parameter.placeholders);
+				markers.add(new ArrayList<>(parameter.placeholders));
 			}
 			return markers;
 		}
