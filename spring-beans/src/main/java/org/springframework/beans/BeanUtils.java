@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
+import kotlin.jvm.internal.DefaultConstructorMarker;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
@@ -659,7 +660,13 @@ public abstract class BeanUtils {
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 		@Nullable String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
-		Assert.state(paramNames.length == ctor.getParameterCount(),
+
+		// The generated param "DefaultConstructorMarker" is used to avoid collision of signatures
+		// and should be filtered out
+		long realParamsCount = Arrays.stream(ctor.getParameters())
+				.filter(p -> !DefaultConstructorMarker.class.equals(p.getType()))
+				.count();
+		Assert.state(paramNames.length == realParamsCount,
 				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 		return paramNames;
 	}
