@@ -90,7 +90,10 @@
 
 		<!-- Imports -->
 		<module name="AvoidStarImport"/>
+		<!-- Unused -->
 		<module name="UnusedImports"/>
+		<module name="UnusedLocalVariable"/>
+		<!-- <module name="UnusedLocalMethodCheck"/> https://github.com/checkstyle/checkstyle/pull/16894 -->
 		<module name="RedundantImport"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck">
 			<property name="groups" value="java,javax,*,org.springframework"/>
