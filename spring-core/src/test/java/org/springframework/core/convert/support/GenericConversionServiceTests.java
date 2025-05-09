@@ -594,6 +594,19 @@ class GenericConversionServiceTests {
 		assertThat("foo").isEqualTo(result.get(0).get("bar"));
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	void stringToListOfString() {
+		conversionService.addConverter(new StringToCollectionConverter(conversionService));
+		conversionService.addConverter(new StringToListOfMapConverter());
+
+		List<String> result = (List<String>) conversionService.convert("foo,bar",
+				TypeDescriptor.valueOf(String.class),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class))
+		);
+
+		assertThat(result.get(0)).isEqualTo("foo");
+	}
 
 	@ExampleAnnotation(active = true)
 	public String annotatedString;
@@ -990,5 +1003,4 @@ class GenericConversionServiceTests {
 			return List.of(Map.of("bar", source));
 		}
 	}
-
 }
