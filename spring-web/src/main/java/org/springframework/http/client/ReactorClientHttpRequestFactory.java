@@ -49,7 +49,9 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpRequestFactory.class);
 
 	private static final Function<HttpClient, HttpClient> defaultInitializer =
-			client -> client.compress(true).responseTimeout(Duration.ofSeconds(10));
+			client -> client.compress(true)
+					.responseTimeout(Duration.ofSeconds(10))
+					.proxyWithSystemProperties();
 
 
 	private final @Nullable ReactorResourceFactory resourceFactory;
@@ -69,7 +71,8 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 
 	/**
 	 * Constructor with default client, created via {@link HttpClient#create()},
-	 * and with {@link HttpClient#compress compression} enabled.
+	 * and with {@link HttpClient#compress compression} and
+	 * {@link HttpClient#proxyWithSystemProperties() proxyWithSystemProperties} enabled.
 	 */
 	public ReactorClientHttpRequestFactory() {
 		this(defaultInitializer.apply(HttpClient.create()));
