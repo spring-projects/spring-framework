@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -513,14 +513,50 @@ abstract class NamedParameterUtils {
 
 		private final BindParameterSource parameterSource;
 
+
 		ExpandedQuery(String expandedSql, NamedParameters parameters, BindParameterSource parameterSource) {
 			this.expandedSql = expandedSql;
 			this.parameters = parameters;
 			this.parameterSource = parameterSource;
 		}
 
+
+		@Override
+		public String toQuery() {
+			return this.expandedSql;
+		}
+
+		@Override
+		public String getSource() {
+			return this.expandedSql;
+		}
+
+		@Override
+		public void bindTo(BindTarget target) {
+			for (String namedParameter : this.parameterSource.getParameterNames()) {
+				Parameter parameter = this.parameterSource.getValue(namedParameter);
+				if (parameter.getValue() == null) {
+					bindNull(target, namedParameter, parameter);
+				}
+				else {
+					bind(target, namedParameter, parameter);
+				}
+			}
+		}
+
+		private void bindNull(BindTarget target, String identifier, Parameter parameter) {
+			List<BindMarker> bindMarkers = getBindMarkers(identifier);
+			if (bindMarkers == null) {
+				target.bind(identifier, parameter);
+				return;
+			}
+			for (BindMarker bindMarker : bindMarkers) {
+				bindMarker.bind(target, parameter);
+			}
+		}
+
 		@SuppressWarnings({"rawtypes", "unchecked"})
-		public void bind(BindTarget target, String identifier, Parameter parameter) {
+		private void bind(BindTarget target, String identifier, Parameter parameter) {
 			List<BindMarker> bindMarkers = getBindMarkers(identifier);
 			if (bindMarkers == null) {
 				target.bind(identifier, parameter);
@@ -555,19 +591,8 @@ abstract class NamedParameterUtils {
 			markers.next().bind(target, valueToBind);
 		}
 
-		public void bindNull(BindTarget target, String identifier, Parameter parameter) {
-			List<BindMarker> bindMarkers = getBindMarkers(identifier);
-			if (bindMarkers == null) {
-				target.bind(identifier, parameter);
-				return;
-			}
-			for (BindMarker bindMarker : bindMarkers) {
-				bindMarker.bind(target, parameter);
-			}
-		}
-
 		@Nullable
-		List<BindMarker> getBindMarkers(String identifier) {
+		private List<BindMarker> getBindMarkers(String identifier) {
 			List<NamedParameters.NamedParameter> parameters = this.parameters.getMarker(identifier);
 			if (parameters == null) {
 				return null;
@@ -579,28 +604,6 @@ abstract class NamedParameterUtils {
 			return markers;
 		}
 
-		@Override
-		public String getSource() {
-			return this.expandedSql;
-		}
-
-		@Override
-		public void bindTo(BindTarget target) {
-			for (String namedParameter : this.parameterSource.getParameterNames()) {
-				Parameter parameter = this.parameterSource.getValue(namedParameter);
-				if (parameter.getValue() == null) {
-					bindNull(target, namedParameter, parameter);
-				}
-				else {
-					bind(target, namedParameter, parameter);
-				}
-			}
-		}
-
-		@Override
-		public String toQuery() {
-			return this.expandedSql;
-		}
 	}
 
 }
