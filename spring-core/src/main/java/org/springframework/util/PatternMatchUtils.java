@@ -42,6 +42,7 @@ public abstract class PatternMatchUtils {
 
 	/**
 	 * Variant of {@link #simpleMatch(String, String)} that ignores upper/lower case.
+	 * @since 6.1.20
 	 */
 	public static boolean simpleMatchIgnoreCase(@Nullable String pattern, @Nullable String str) {
 		return simpleMatch(pattern, str, true);
@@ -125,6 +126,7 @@ public abstract class PatternMatchUtils {
 
 	/**
 	 * Variant of {@link #simpleMatch(String[], String)}  that ignores upper/lower case.
+	 * @since 6.1.20
 	 */
 	public static boolean simpleMatchIgnoreCase(String @Nullable [] patterns, @Nullable String str) {
 		if (patterns != null) {
