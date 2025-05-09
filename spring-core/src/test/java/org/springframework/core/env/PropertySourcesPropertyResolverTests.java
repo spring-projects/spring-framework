@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -366,56 +367,53 @@ class PropertySourcesPropertyResolverTests {
 			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 	}
 
-	@Test
-	void escapedPlaceholders_areNotEvaluated() {
-		testProperties.put("prop1", "value1");
-		testProperties.put("prop2", "value2\\${prop1}");
 
-		assertThat(propertyResolver.getProperty("prop2")).isEqualTo("value2${prop1}");
-	}
+	@Nested
+	class EscapedPlaceholderTests {
 
-	@Test
-	void multipleEscapedPlaceholders_arePreserved() {
-		testProperties.put("prop1", "value1");
-		testProperties.put("prop2", "value2");
-		testProperties.put("complex", "start\\${prop1}middle\\${prop2}end");
+		@Test  // gh-34720
+		void escapedPlaceholdersAreNotEvaluated() {
+			testProperties.put("prop1", "value1");
+			testProperties.put("prop2", "value2\\${prop1}");
 
-		assertThat(propertyResolver.getProperty("complex")).isEqualTo("start${prop1}middle${prop2}end");
-	}
+			assertThat(propertyResolver.getProperty("prop2")).isEqualTo("value2${prop1}");
+		}
 
-	@Test
-	void doubleBackslashes_areProcessedCorrectly() {
-		testProperties.put("prop1", "value1");
-		testProperties.put("doubleEscaped", "value2\\\\${prop1}");
+		@Test  // gh-34720
+		void escapedPlaceholdersAreNotEvaluatedWithCharSequenceValues() {
+			testProperties.put("prop1", "value1");
+			testProperties.put("prop2", new StringBuilder("value2\\${prop1}"));
 
-		assertThat(propertyResolver.getProperty("doubleEscaped")).isEqualTo("value2\\${prop1}");
-	}
+			assertThat(propertyResolver.getProperty("prop2")).isEqualTo("value2${prop1}");
+		}
 
-	@Test
-	void escapedPlaceholdersInNestedProperties() {
-		MutablePropertySources ps = new MutablePropertySources();
-		ps.addFirst(new MockPropertySource()
-				.withProperty("p1", "v1")
-				.withProperty("p2", "v2")
-				.withProperty("escaped", "prefix-\\${p1}")
-				.withProperty("nested", "${escaped}-${p2}")
-		);
-		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		@Test  // gh-34720
+		void multipleEscapedPlaceholdersArePreserved() {
+			testProperties.put("prop1", "value1");
+			testProperties.put("prop2", "value2");
+			testProperties.put("complex", "start\\${prop1}middle\\${prop2}end");
 
-		assertThat(pr.getProperty("nested")).isEqualTo("prefix-${p1}-v2");
-	}
+			assertThat(propertyResolver.getProperty("complex")).isEqualTo("start${prop1}middle${prop2}end");
+		}
 
+		@Test  // gh-34720
+		void doubleBackslashesAreProcessedCorrectly() {
+			testProperties.put("prop1", "value1");
+			testProperties.put("doubleEscaped", "value2\\\\${prop1}");
 
-	@Test
-	void escapedPlaceholders_withCharSequenceValues() {
-		MutablePropertySources ps = new MutablePropertySources();
-		ps.addFirst(new MockPropertySource()
-				.withProperty("p1", "v1")
-				.withProperty("charseq", new StringBuilder("prefix-\\${p1}"))
-		);
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(ps);
+			assertThat(propertyResolver.getProperty("doubleEscaped")).isEqualTo("value2\\${prop1}");
+		}
 
-		assertThat(resolver.getProperty("charseq")).isEqualTo("prefix-${p1}");
+		@Test  // gh-34720
+		void escapedPlaceholdersInNestedPropertiesAreNotEvaluated() {
+			testProperties.put("p1", "v1");
+			testProperties.put("p2", "v2");
+			testProperties.put("escaped", "prefix-\\${p1}");
+			testProperties.put("nested", "${escaped}-${p2}");
+
+			assertThat(propertyResolver.getProperty("nested")).isEqualTo("prefix-${p1}-v2");
+		}
+
 	}
 
 }
