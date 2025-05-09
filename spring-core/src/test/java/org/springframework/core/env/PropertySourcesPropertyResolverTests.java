@@ -39,18 +39,15 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class PropertySourcesPropertyResolverTests {
 
-	private Properties testProperties;
+	private final Properties testProperties = new Properties();
 
-	private MutablePropertySources propertySources;
+	private final MutablePropertySources propertySources = new MutablePropertySources();
 
-	private PropertySourcesPropertyResolver propertyResolver;
+	private final PropertySourcesPropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 
 
 	@BeforeEach
 	void setUp() {
-		propertySources = new MutablePropertySources();
-		propertyResolver = new PropertySourcesPropertyResolver(propertySources);
-		testProperties = new Properties();
 		propertySources.addFirst(new PropertiesPropertySource("testProperties", testProperties));
 	}
 
@@ -78,14 +75,12 @@ class PropertySourcesPropertyResolverTests {
 
 	@Test
 	void getProperty_propertySourceSearchOrderIsFIFO() {
-		MutablePropertySources sources = new MutablePropertySources();
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(sources);
-		sources.addFirst(new MockPropertySource("ps1").withProperty("pName", "ps1Value"));
-		assertThat(resolver.getProperty("pName")).isEqualTo("ps1Value");
-		sources.addFirst(new MockPropertySource("ps2").withProperty("pName", "ps2Value"));
-		assertThat(resolver.getProperty("pName")).isEqualTo("ps2Value");
-		sources.addFirst(new MockPropertySource("ps3").withProperty("pName", "ps3Value"));
-		assertThat(resolver.getProperty("pName")).isEqualTo("ps3Value");
+		propertySources.addFirst(new MockPropertySource("ps1").withProperty("pName", "ps1Value"));
+		assertThat(propertyResolver.getProperty("pName")).isEqualTo("ps1Value");
+		propertySources.addFirst(new MockPropertySource("ps2").withProperty("pName", "ps2Value"));
+		assertThat(propertyResolver.getProperty("pName")).isEqualTo("ps2Value");
+		propertySources.addFirst(new MockPropertySource("ps3").withProperty("pName", "ps3Value"));
+		assertThat(propertyResolver.getProperty("pName")).isEqualTo("ps3Value");
 	}
 
 	@Test
@@ -116,8 +111,8 @@ class PropertySourcesPropertyResolverTests {
 
 		class TestType { }
 
-		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
-				propertyResolver.getProperty("foo", TestType.class));
+		assertThatExceptionOfType(ConverterNotFoundException.class)
+				.isThrownBy(() -> propertyResolver.getProperty("foo", TestType.class));
 	}
 
 	@Test
@@ -128,7 +123,6 @@ class PropertySourcesPropertyResolverTests {
 
 		HashMap<String, Object> map = new HashMap<>();
 		map.put(key, value1); // before construction
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
 		PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 		assertThat(propertyResolver.getProperty(key)).isEqualTo(value1);
@@ -139,7 +133,6 @@ class PropertySourcesPropertyResolverTests {
 	@Test
 	void getProperty_doesNotCache_addNewKeyPostConstruction() {
 		HashMap<String, Object> map = new HashMap<>();
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
 		PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 		assertThat(propertyResolver.getProperty("foo")).isNull();
@@ -149,10 +142,9 @@ class PropertySourcesPropertyResolverTests {
 
 	@Test
 	void getPropertySources_replacePropertySource() {
-		propertySources = new MutablePropertySources();
-		propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 		propertySources.addLast(new MockPropertySource("local").withProperty("foo", "localValue"));
 		propertySources.addLast(new MockPropertySource("system").withProperty("foo", "systemValue"));
+		assertThat(propertySources).hasSize(3);
 
 		// 'local' was added first so has precedence
 		assertThat(propertyResolver.getProperty("foo")).isEqualTo("localValue");
@@ -163,7 +155,7 @@ class PropertySourcesPropertyResolverTests {
 		// 'system' now has precedence
 		assertThat(propertyResolver.getProperty("foo")).isEqualTo("newValue");
 
-		assertThat(propertySources).hasSize(2);
+		assertThat(propertySources).hasSize(3);
 	}
 
 	@Test
@@ -171,81 +163,65 @@ class PropertySourcesPropertyResolverTests {
 		testProperties.put("exists", "xyz");
 		assertThat(propertyResolver.getRequiredProperty("exists")).isEqualTo("xyz");
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				propertyResolver.getRequiredProperty("bogus"));
+		assertThatIllegalStateException().isThrownBy(() -> propertyResolver.getRequiredProperty("bogus"));
 	}
 
 	@Test
 	void getRequiredProperty_withStringArrayConversion() {
 		testProperties.put("exists", "abc,123");
-		assertThat(propertyResolver.getRequiredProperty("exists", String[].class)).isEqualTo(new String[] { "abc", "123" });
+		assertThat(propertyResolver.getRequiredProperty("exists", String[].class)).containsExactly("abc", "123");
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				propertyResolver.getRequiredProperty("bogus", String[].class));
+		assertThatIllegalStateException().isThrownBy(() -> propertyResolver.getRequiredProperty("bogus", String[].class));
 	}
 
 	@Test
 	void resolvePlaceholders() {
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThat(resolver.resolvePlaceholders("Replace this ${key}")).isEqualTo("Replace this value");
+		assertThat(propertyResolver.resolvePlaceholders("Replace this ${key}")).isEqualTo("Replace this value");
 	}
 
 	@Test
 	void resolvePlaceholders_withUnresolvable() {
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThat(resolver.resolvePlaceholders("Replace this ${key} plus ${unknown}"))
+		assertThat(propertyResolver.resolvePlaceholders("Replace this ${key} plus ${unknown}"))
 				.isEqualTo("Replace this value plus ${unknown}");
 	}
 
 	@Test
 	void resolvePlaceholders_withDefaultValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThat(resolver.resolvePlaceholders("Replace this ${key} plus ${unknown:defaultValue}"))
+		assertThat(propertyResolver.resolvePlaceholders("Replace this ${key} plus ${unknown:defaultValue}"))
 				.isEqualTo("Replace this value plus defaultValue");
 	}
 
 	@Test
 	void resolvePlaceholders_withNullInput() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new PropertySourcesPropertyResolver(new MutablePropertySources()).resolvePlaceholders(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> propertyResolver.resolvePlaceholders(null));
 	}
 
 	@Test
 	void resolveRequiredPlaceholders() {
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThat(resolver.resolveRequiredPlaceholders("Replace this ${key}")).isEqualTo("Replace this value");
+		assertThat(propertyResolver.resolveRequiredPlaceholders("Replace this ${key}")).isEqualTo("Replace this value");
 	}
 
 	@Test
 	void resolveRequiredPlaceholders_withUnresolvable() {
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
-				resolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown}"));
+		assertThatExceptionOfType(PlaceholderResolutionException.class)
+				.isThrownBy(() -> propertyResolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown}"));
 	}
 
 	@Test
 	void resolveRequiredPlaceholders_withDefaultValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThat(resolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown:defaultValue}"))
+		assertThat(propertyResolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown:defaultValue}"))
 				.isEqualTo("Replace this value plus defaultValue");
 	}
 
 	@Test
 	void resolveRequiredPlaceholders_withNullInput() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> propertyResolver.resolveRequiredPlaceholders(null));
 	}
 
 	@Test
@@ -257,17 +233,17 @@ class PropertySourcesPropertyResolverTests {
 		propertyResolver.setRequiredProperties("foo", "bar");
 
 		// neither foo nor bar properties are present -> validating should throw
-		assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(
-				propertyResolver::validateRequiredProperties)
-			.withMessage("The following properties were declared as required " +
-					"but could not be resolved: [foo, bar]");
+		assertThatExceptionOfType(MissingRequiredPropertiesException.class)
+				.isThrownBy(propertyResolver::validateRequiredProperties)
+				.withMessage("The following properties were declared as required " +
+						"but could not be resolved: [foo, bar]");
 
 		// add foo property -> validation should fail only on missing 'bar' property
 		testProperties.put("foo", "fooValue");
-		assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(
-				propertyResolver::validateRequiredProperties)
-			.withMessage("The following properties were declared as required " +
-					"but could not be resolved: [bar]");
+		assertThatExceptionOfType(MissingRequiredPropertiesException.class)
+				.isThrownBy(propertyResolver::validateRequiredProperties)
+				.withMessage("The following properties were declared as required " +
+						"but could not be resolved: [bar]");
 
 		// add bar property -> validation should pass, even with an empty string value
 		testProperties.put("bar", "");
@@ -292,13 +268,13 @@ class PropertySourcesPropertyResolverTests {
 		assertThat(pr.getProperty("p2")).isEqualTo("v2");
 		assertThat(pr.getProperty("p3")).isEqualTo("v1:v2");
 		assertThat(pr.getProperty("p4")).isEqualTo("v1:v2");
-		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
-				pr.getProperty("p5"))
-			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
+		assertThatExceptionOfType(PlaceholderResolutionException.class)
+				.isThrownBy(() -> pr.getProperty("p5"))
+				.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 		assertThat(pr.getProperty("p6")).isEqualTo("v1:v2:def");
-		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
-				pr.getProperty("pL"))
-			.withMessageContaining("Circular");
+		assertThatExceptionOfType(PlaceholderResolutionException.class)
+				.isThrownBy(() -> pr.getProperty("pL"))
+				.withMessageContaining("Circular");
 	}
 
 	@Test
@@ -350,9 +326,9 @@ class PropertySourcesPropertyResolverTests {
 
 		// placeholders nested within the value of "p4" are unresolvable and cause an
 		// exception by default
-		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
-				pr.getProperty("p4"))
-			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
+		assertThatExceptionOfType(PlaceholderResolutionException.class)
+				.isThrownBy(() -> pr.getProperty("p4"))
+				.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 
 		// relax the treatment of unresolvable nested placeholders
 		pr.setIgnoreUnresolvableNestedPlaceholders(true);
@@ -362,9 +338,9 @@ class PropertySourcesPropertyResolverTests {
 		// resolve[Nested]Placeholders methods behave as usual regardless the value of
 		// ignoreUnresolvableNestedPlaceholders
 		assertThat(pr.resolvePlaceholders("${p1}:${p2}:${bogus}")).isEqualTo("v1:v2:${bogus}");
-		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
-				pr.resolveRequiredPlaceholders("${p1}:${p2}:${bogus}"))
-			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
+		assertThatExceptionOfType(PlaceholderResolutionException.class)
+				.isThrownBy(() -> pr.resolveRequiredPlaceholders("${p1}:${p2}:${bogus}"))
+				.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 	}
 
 
