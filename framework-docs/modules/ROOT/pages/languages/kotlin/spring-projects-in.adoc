@@ -190,7 +190,7 @@ NOTE: If you use Spring Boot, you should probably use
 instead of `@Value` annotations.
 
 As an alternative, you can customize the property placeholder prefix by declaring the
-following configuration beans:
+following configuration bean:
 
 [source,kotlin,indent=0]
 ----
