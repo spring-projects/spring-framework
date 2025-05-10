@@ -143,9 +143,12 @@ class PlaceholderParserTests {
 
 		@Test
 		void placeholdersWithoutEscapeCharAreNotEscaped() {
-			PlaceholderResolver resolver = mockPlaceholderResolver("p1", "v1");
+			PlaceholderResolver resolver = mockPlaceholderResolver("p1", "v1", "p2", "v2", "p3", "v3", "p4", "v4");
 			assertThat(this.parser.replacePlaceholders("\\${p1}", resolver)).isEqualTo("\\v1");
-			verifyPlaceholderResolutions(resolver, "p1");
+			assertThat(this.parser.replacePlaceholders("\\\\${p2}", resolver)).isEqualTo("\\\\v2");
+			assertThat(this.parser.replacePlaceholders("\\${p3}\\", resolver)).isEqualTo("\\v3\\");
+			assertThat(this.parser.replacePlaceholders("a\\${p4}\\z", resolver)).isEqualTo("a\\v4\\z");
+			verifyPlaceholderResolutions(resolver, "p1", "p2", "p3", "p4");
 		}
 
 		@Test
@@ -295,7 +298,13 @@ class PlaceholderParserTests {
 					Arguments.of("${p4}", "adc${p1}"),
 					Arguments.of("${p5}", "adcv1"),
 					Arguments.of("${p6}", "adcdef${p1}"),
-					Arguments.of("${p7}", "adc\\${")
+					Arguments.of("${p7}", "adc\\${"),
+					// Double backslash
+					Arguments.of("DOMAIN\\\\${user.name}", "DOMAIN\\${user.name}"),
+					// Triple backslash
+					Arguments.of("triple\\\\\\${backslash}", "triple\\\\${backslash}"),
+					// Multiple escaped placeholders
+					Arguments.of("start\\${prop1}middle\\${prop2}end", "start${prop1}middle${prop2}end")
 				);
 		}
 
