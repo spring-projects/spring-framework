@@ -38,16 +38,16 @@ import org.springframework.util.StringValueResolver;
  *
  * <pre class="code">
  * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
- *   &lt;property name="driverClassName" value="${driver}" /&gt;
- *   &lt;property name="url" value="jdbc:${dbname}" /&gt;
+ *   &lt;property name="driverClassName" value="${jdbc.driver}" /&gt;
+ *   &lt;property name="url" value="jdbc:${jdbc.dbname}" /&gt;
  * &lt;/bean&gt;
  * </pre>
  *
  * Example properties file:
  *
  * <pre class="code">
- * driver=com.mysql.jdbc.Driver
- * dbname=mysql:mydb</pre>
+ * jdbc.driver=com.mysql.jdbc.Driver
+ * jdbc.dbname=mysql:mydb</pre>
  *
  * Annotated bean definitions may take advantage of property replacement using
  * the {@link org.springframework.beans.factory.annotation.Value @Value} annotation:
@@ -80,7 +80,7 @@ import org.springframework.util.StringValueResolver;
  * <p>Example XML property with default value:
  *
  * <pre class="code">
- *   &lt;property name="url" value="jdbc:${dbname:defaultdb}" /&gt;
+ *   &lt;property name="url" value="jdbc:${jdbc.dbname:defaultdb}" /&gt;
  * </pre>
  *
  * @author Chris Beams
@@ -103,6 +103,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/** Default escape character: {@code '\'}. */
 	public static final Character DEFAULT_ESCAPE_CHARACTER = '\\';
+
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
@@ -129,7 +130,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/**
 	 * Set the prefix that a placeholder string starts with.
-	 * The default is {@value #DEFAULT_PLACEHOLDER_PREFIX}.
+	 * <p>The default is {@value #DEFAULT_PLACEHOLDER_PREFIX}.
 	 */
 	public void setPlaceholderPrefix(String placeholderPrefix) {
 		this.placeholderPrefix = placeholderPrefix;
@@ -137,26 +138,25 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/**
 	 * Set the suffix that a placeholder string ends with.
-	 * The default is {@value #DEFAULT_PLACEHOLDER_SUFFIX}.
+	 * <p>The default is {@value #DEFAULT_PLACEHOLDER_SUFFIX}.
 	 */
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.placeholderSuffix = placeholderSuffix;
 	}
 
 	/**
-	 * Specify the separating character between the placeholder variable
-	 * and the associated default value, or {@code null} if no such
-	 * special character should be processed as a value separator.
-	 * The default is {@value #DEFAULT_VALUE_SEPARATOR}.
+	 * Specify the separating character between the placeholder variable and the
+	 * associated default value, or {@code null} if no such special character
+	 * should be processed as a value separator.
+	 * <p>The default is {@value #DEFAULT_VALUE_SEPARATOR}.
 	 */
 	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
 
 	/**
-	 * Specify the escape character to use to ignore placeholder prefix
-	 * or value separator, or {@code null} if no escaping should take
-	 * place.
+	 * Specify the escape character to use to ignore the placeholder prefix or
+	 * value separator, or {@code null} if no escaping should take place.
 	 * <p>Default is {@link #DEFAULT_ESCAPE_CHARACTER}.
 	 * @since 6.2
 	 */
