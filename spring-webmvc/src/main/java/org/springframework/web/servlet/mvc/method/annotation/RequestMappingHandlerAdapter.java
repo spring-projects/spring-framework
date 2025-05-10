@@ -123,6 +123,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Réda Housni Alaoui
  * @since 3.1
  * @see HandlerMethodArgumentResolver
  * @see HandlerMethodReturnValueHandler
@@ -201,6 +202,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache = new LinkedHashMap<>();
 
+	@Nullable
+	private SseEmitterHeartbeatExecutor sseEmitterHeartbeatExecutor;
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
@@ -527,6 +530,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * Set the {@link SseEmitterHeartbeatExecutor} that will be used to periodically prob the SSE connection health
+	 */
+	public void setSseEmitterHeartbeatExecutor(@Nullable SseEmitterHeartbeatExecutor sseEmitterHeartbeatExecutor) {
+		this.sseEmitterHeartbeatExecutor = sseEmitterHeartbeatExecutor;
+	}
+
+	/**
 	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
 	 * in method argument default values.
 	 */
@@ -735,7 +745,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ViewMethodReturnValueHandler());
 		handlers.add(new ResponseBodyEmitterReturnValueHandler(getMessageConverters(),
 				this.reactiveAdapterRegistry, this.taskExecutor, this.contentNegotiationManager,
-				initViewResolvers(), initLocaleResolver()));
+				initViewResolvers(), initLocaleResolver(), this.sseEmitterHeartbeatExecutor));
 		handlers.add(new StreamingResponseBodyReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(),
 				this.contentNegotiationManager, this.requestResponseBodyAdvice, this.errorResponseInterceptors));
