@@ -26,12 +26,12 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
@@ -131,27 +131,23 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		if (this.propertySources == null) {
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
-				PropertyResolver propertyResolver = this.environment;
-				// If the ignoreUnresolvablePlaceholders flag is set to true, we have to create a
-				// local PropertyResolver to enforce that setting, since the Environment is most
-				// likely not configured with ignoreUnresolvablePlaceholders set to true.
-				// See https://github.com/spring-projects/spring-framework/issues/27947
-				if (this.ignoreUnresolvablePlaceholders &&
-						(this.environment instanceof ConfigurableEnvironment configurableEnvironment)) {
-					PropertySourcesPropertyResolver resolver =
-							new PropertySourcesPropertyResolver(configurableEnvironment.getPropertySources());
-					resolver.setIgnoreUnresolvableNestedPlaceholders(true);
-					propertyResolver = resolver;
+				PropertySource<?> environmentPropertySource;
+				if (this.environment instanceof ConfigurableEnvironment configurableEnvironment) {
+					environmentPropertySource = new CompositePropertySource(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME,
+							configurableEnvironment.getPropertySources());
 				}
-				PropertyResolver propertyResolverToUse = propertyResolver;
-				this.propertySources.addLast(
-					new PropertySource<>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
-						@Override
-						public @Nullable String getProperty(String key) {
-							return propertyResolverToUse.getProperty(key);
-						}
-					}
-				);
+				else {
+					// Fallback code path that should never apply in a regular scenario, since the
+					// Environment in the ApplicationContext should always be a ConfigurableEnvironment.
+					environmentPropertySource =
+						new PropertySource<>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
+							@Override
+							public @Nullable Object getProperty(String key) {
+								return super.source.getProperty(key);
+							}
+						};
+				}
+				this.propertySources.addLast(environmentPropertySource);
 			}
 			try {
 				PropertySource<?> localPropertySource =
