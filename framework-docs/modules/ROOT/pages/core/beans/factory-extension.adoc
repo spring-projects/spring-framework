@@ -342,7 +342,7 @@ with placeholder values is defined:
 The example shows properties configured from an external `Properties` file. At runtime,
 a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
 properties of the DataSource. The values to replace are specified as placeholders of the
-form pass:q[`${property-name}`], which follows the Ant and log4j and JSP EL style.
+form pass:q[`${property-name}`], which follows the Ant, log4j, and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
@@ -357,9 +357,10 @@ jdbc.password=root
 Therefore, the `${jdbc.username}` string is replaced at runtime with the value, 'sa', and
 the same applies for other placeholder values that match keys in the properties file.
 The `PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
-attributes of a bean definition. Furthermore, you can customize the placeholder prefix and suffix.
+attributes of a bean definition. Furthermore, you can customize the placeholder prefix, suffix,
+default value separator, and escape character.
 
-With the `context` namespace introduced in Spring 2.5, you can configure property placeholders
+With the `context` namespace, you can configure property placeholders
 with a dedicated configuration element. You can provide one or more locations as a
 comma-separated list in the `location` attribute, as the following example shows:
 
