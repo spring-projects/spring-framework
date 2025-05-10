@@ -190,7 +190,7 @@ NOTE: If you use Spring Boot, you should probably use
 instead of `@Value` annotations.
 
 As an alternative, you can customize the property placeholder prefix by declaring the
-following configuration bean:
+following `PropertySourcesPlaceholderConfigurer` bean:
 
 [source,kotlin,indent=0]
 ----
@@ -200,8 +200,10 @@ following configuration bean:
 	}
 ----
 
-You can customize existing code (such as Spring Boot actuators or `@LocalServerPort`)
-that uses the `${...}` syntax, with configuration beans, as the following example shows:
+You can support components (such as Spring Boot actuators or `@LocalServerPort`) that use
+the standard `${...}` syntax alongside components that use the custom `%{...}` syntax by
+declaring multiple `PropertySourcesPlaceholderConfigurer` beans, as the following example
+shows:
 
 [source,kotlin,indent=0]
 ----
@@ -215,6 +217,9 @@ that uses the `${...}` syntax, with configuration beans, as the following exampl
 	fun defaultPropertyConfigurer() = PropertySourcesPlaceholderConfigurer()
 ----
 
+In addition, the default escape character can be changed or disabled globally by setting
+the `spring.placeholder.escapeCharacter.default` property via a JVM system property (or
+via the xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism).
 
 
 [[checked-exceptions]]

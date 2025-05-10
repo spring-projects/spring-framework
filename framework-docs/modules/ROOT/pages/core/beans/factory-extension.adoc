@@ -314,7 +314,7 @@ Thus, marking it for lazy initialization will be ignored, and the
 
 
 [[beans-factory-placeholderconfigurer]]
-=== Example: The Class Name Substitution `PropertySourcesPlaceholderConfigurer`
+=== Example: Property Placeholder Substitution with `PropertySourcesPlaceholderConfigurer`
 
 You can use the `PropertySourcesPlaceholderConfigurer` to externalize property values
 from a bean definition in a separate file by using the standard Java `Properties` format.
@@ -341,7 +341,7 @@ with placeholder values is defined:
 
 The example shows properties configured from an external `Properties` file. At runtime,
 a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
-properties of the DataSource. The values to replace are specified as placeholders of the
+properties of the `DataSource`. The values to replace are specified as placeholders of the
 form pass:q[`${property-name}`], which follows the Ant, log4j, and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
@@ -355,10 +355,13 @@ jdbc.password=root
 ----
 
 Therefore, the `${jdbc.username}` string is replaced at runtime with the value, 'sa', and
-the same applies for other placeholder values that match keys in the properties file.
-The `PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
-attributes of a bean definition. Furthermore, you can customize the placeholder prefix, suffix,
-default value separator, and escape character.
+the same applies for other placeholder values that match keys in the properties file. The
+`PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
+attributes of a bean definition. Furthermore, you can customize the placeholder prefix,
+suffix, default value separator, and escape character. In addition, the default escape
+character can be changed or disabled globally by setting the
+`spring.placeholder.escapeCharacter.default` property via a JVM system property (or via
+the xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism).
 
 With the `context` namespace, you can configure property placeholders
 with a dedicated configuration element. You can provide one or more locations as a
