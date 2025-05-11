@@ -267,7 +267,7 @@ class ConfigurationClassProcessingTests {
 	void configurationWithPostProcessor() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithPostProcessor.class);
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "removal"})
 		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(
 				org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.class);
 		placeholderConfigurer.getPropertyValues().add("properties", "myProp=myValue");
