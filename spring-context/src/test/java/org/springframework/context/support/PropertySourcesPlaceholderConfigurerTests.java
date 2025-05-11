@@ -16,6 +16,9 @@
 
 package org.springframework.context.support;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -34,6 +37,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
@@ -298,6 +302,60 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("bar");
+	}
+
+	@Test  // gh-34861
+	void withEnumerableAndNonEnumerablePropertySourcesInTheEnvironmentAndLocalProperties() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${foo:bogus}")
+					.addPropertyValue("jedi", "${local:false}")
+					.getBeanDefinition());
+
+		// 1) MockPropertySource is an EnumerablePropertySource.
+		MockPropertySource mockPropertySource = new MockPropertySource("mockPropertySource")
+				.withProperty("foo", "${bar}");
+
+		// 2) PropertySource is not an EnumerablePropertySource.
+		PropertySource<?> rawPropertySource = new PropertySource<>("rawPropertySource", new Object()) {
+			@Override
+			public Object getProperty(String key) {
+				return ("bar".equals(key) ? "quux" : null);
+			}
+		};
+
+		MockEnvironment env = new MockEnvironment();
+		env.getPropertySources().addFirst(mockPropertySource);
+		env.getPropertySources().addLast(rawPropertySource);
+
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+		ppc.setEnvironment(env);
+		// 3) Local properties are stored in a PropertiesPropertySource which is an EnumerablePropertySource.
+		ppc.setProperties(new Properties() {{
+			setProperty("local", "true");
+		}});
+		ppc.postProcessBeanFactory(bf);
+
+		// Verify all properties can be resolved via the Environment.
+		assertThat(env.getProperty("foo")).isEqualTo("quux");
+		assertThat(env.getProperty("bar")).isEqualTo("quux");
+
+		// Verify that placeholder resolution works.
+		TestBean testBean = bf.getBean(TestBean.class);
+		assertThat(testBean.getName()).isEqualTo("quux");
+		assertThat(testBean.isJedi()).isTrue();
+
+		// Verify that the presence of a non-EnumerablePropertySource does not prevent
+		// accessing EnumerablePropertySources via getAppliedPropertySources().
+		List<String> propertyNames = new ArrayList<>();
+		for (PropertySource<?> propertySource : ppc.getAppliedPropertySources()) {
+			if (propertySource instanceof EnumerablePropertySource<?> enumerablePropertySource) {
+				Collections.addAll(propertyNames, enumerablePropertySource.getPropertyNames());
+			}
+		}
+		// Should not contain "foo" or "bar" from the Environment.
+		assertThat(propertyNames).containsOnly("local");
 	}
 
 	@Test
