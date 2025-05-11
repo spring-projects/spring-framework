@@ -176,36 +176,33 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
-	Servlet servlet = new JettyHttpHandlerAdapter(handler);
+	JettyCoreHttpHandlerAdapter adapter = new JettyCoreHttpHandlerAdapter(handler);
 
 	Server server = new Server();
-	ServletContextHandler contextHandler = new ServletContextHandler(server, "");
-	contextHandler.addServlet(new ServletHolder(servlet), "/");
-	contextHandler.start();
-
 	ServerConnector connector = new ServerConnector(server);
 	connector.setHost(host);
 	connector.setPort(port);
 	server.addConnector(connector);
+
+	server.setHandler(adapter);
 	server.start();
 ----
+NOTE: As of Spring Framework 6.2, `JettyHttpHandlerAdapter` has been deprecated in favor of `JettyCoreHttpHandlerAdapter` which provides better integration with Jetty 12.
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
-	val servlet = JettyHttpHandlerAdapter(handler)
+	val adapter = JettyCoreHttpHandlerAdapter(handler)
 
 	val server = Server()
-	val contextHandler = ServletContextHandler(server, "")
-	contextHandler.addServlet(ServletHolder(servlet), "/")
-	contextHandler.start();
-
 	val connector = ServerConnector(server)
 	connector.host = host
 	connector.port = port
 	server.addConnector(connector)
+
+	server.setHandler(adapter)
 	server.start()
 ----
 ======
@@ -800,4 +797,3 @@ Kotlin::
 			.build()
 ----
 ======
-
