@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
- * @author Sam Brannen
  * @since 3.1.1
  */
 public class CompositePropertySource extends EnumerablePropertySource<Object> {
@@ -49,33 +48,11 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
 
 	/**
-	 * Create a new empty {@code CompositePropertySource} with the given name.
-	 * @param name the name of the composite property source
-	 * @see #CompositePropertySource(String, Iterable)
-	 * @see #addPropertySource(PropertySource)
-	 * @see #addFirstPropertySource(PropertySource)
+	 * Create a new {@code CompositePropertySource}.
+	 * @param name the name of the property source
 	 */
 	public CompositePropertySource(String name) {
 		super(name);
-	}
-
-	/**
-	 * Create a new {@code CompositePropertySource} with the given name and
-	 * property sources supplied as an {@link Iterable} or {@link PropertySources}
-	 * implementation, preserving the original order of the property sources.
-	 * @param name the name of the composite property source
-	 * @param propertySources the initial set of {@link PropertySource} instances
-	 * @since 6.2.7
-	 * @see PropertySources
-	 * @see MutablePropertySources
-	 * @see #addPropertySource(PropertySource)
-	 * @see #addFirstPropertySource(PropertySource)
-	 */
-	public CompositePropertySource(String name, Iterable<PropertySource<?>> propertySources) {
-		this(name);
-		for (PropertySource<?> propertySource : propertySources) {
-			this.propertySources.add(propertySource);
-		}
 	}
 
 
