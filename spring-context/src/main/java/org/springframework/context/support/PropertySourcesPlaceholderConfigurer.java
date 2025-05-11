@@ -26,7 +26,6 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.Environment;
@@ -131,22 +130,10 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		if (this.propertySources == null) {
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
-				PropertySource<?> environmentPropertySource;
-				if (this.environment instanceof ConfigurableEnvironment configurableEnvironment) {
-					environmentPropertySource = new CompositePropertySource(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME,
-							configurableEnvironment.getPropertySources());
-				}
-				else {
-					// Fallback code path that should never apply in a regular scenario, since the
-					// Environment in the ApplicationContext should always be a ConfigurableEnvironment.
-					environmentPropertySource =
-						new PropertySource<>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
-							@Override
-							public @Nullable Object getProperty(String key) {
-								return super.source.getProperty(key);
-							}
-						};
-				}
+				PropertySource<?> environmentPropertySource =
+						(this.environment instanceof ConfigurableEnvironment configurableEnvironment ?
+							new ConfigurableEnvironmentPropertySource(configurableEnvironment) :
+							new FallbackEnvironmentPropertySource(this.environment));
 				this.propertySources.addLast(environmentPropertySource);
 			}
 			try {
@@ -227,6 +214,75 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	public PropertySources getAppliedPropertySources() throws IllegalStateException {
 		Assert.state(this.appliedPropertySources != null, "PropertySources have not yet been applied");
 		return this.appliedPropertySources;
+	}
+
+
+	/**
+	 * Custom {@link PropertySource} that delegates to the
+	 * {@link ConfigurableEnvironment#getPropertySources() PropertySources} in a
+	 * {@link ConfigurableEnvironment}.
+	 * @since 6.2.7
+	 */
+	private static class ConfigurableEnvironmentPropertySource extends PropertySource<ConfigurableEnvironment> {
+
+		private final PropertySources propertySources;
+
+
+		ConfigurableEnvironmentPropertySource(ConfigurableEnvironment environment) {
+			super(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, environment);
+			this.propertySources = environment.getPropertySources();
+		}
+
+
+		@Override
+		public @Nullable Object getProperty(String name) {
+			for (PropertySource<?> propertySource : this.propertySources) {
+				Object candidate = propertySource.getProperty(name);
+				if (candidate != null) {
+					return candidate;
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public boolean containsProperty(String name) {
+			for (PropertySource<?> propertySource : this.propertySources) {
+				if (propertySource.containsProperty(name)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return "ConfigurableEnvironmentPropertySource {propertySources=" + this.propertySources + "}";
+		}
+	}
+
+	/**
+	 * Fallback {@link PropertySource} that delegates to a raw {@link Environment}.
+	 * <p>Should never apply in a regular scenario, since the {@code Environment}
+	 * in an {@code ApplicationContext} should always be a {@link ConfigurableEnvironment}.
+	 * @since 6.2.7
+	 */
+	private static class FallbackEnvironmentPropertySource extends PropertySource<Environment> {
+
+		FallbackEnvironmentPropertySource(Environment environment) {
+			super(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, environment);
+		}
+
+
+		@Override
+		public @Nullable Object getProperty(String name) {
+			return super.source.getProperty(name);
+		}
+
+		@Override
+		public String toString() {
+			return "FallbackEnvironmentPropertySource {environment=" + super.source + "}";
+		}
 	}
 
 }
