@@ -231,6 +231,16 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 
 
 		@Override
+		public boolean containsProperty(String name) {
+			for (PropertySource<?> propertySource : super.source.getPropertySources()) {
+				if (propertySource.containsProperty(name)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
 		public @Nullable Object getProperty(String name) {
 			for (PropertySource<?> propertySource : super.source.getPropertySources()) {
 				Object candidate = propertySource.getProperty(name);
@@ -239,16 +249,6 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				}
 			}
 			return null;
-		}
-
-		@Override
-		public boolean containsProperty(String name) {
-			for (PropertySource<?> propertySource : super.source.getPropertySources()) {
-				if (propertySource.containsProperty(name)) {
-					return true;
-				}
-			}
-			return false;
 		}
 
 		@Override
@@ -269,6 +269,11 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			super(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, environment);
 		}
 
+
+		@Override
+		public boolean containsProperty(String name) {
+			return super.source.containsProperty(name);
+		}
 
 		@Override
 		public @Nullable Object getProperty(String name) {
