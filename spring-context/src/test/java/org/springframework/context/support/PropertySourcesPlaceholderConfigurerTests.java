@@ -21,6 +21,8 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -90,14 +92,29 @@ class PropertySourcesPlaceholderConfigurerTests {
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("foo");
 	}
 
-	@Test
-	void localPropertiesOverrideFalse() {
-		localPropertiesOverride(false);
-	}
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void localPropertiesOverride(boolean override) {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${foo}")
+					.getBeanDefinition());
 
-	@Test
-	void localPropertiesOverrideTrue() {
-		localPropertiesOverride(true);
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+
+		ppc.setLocalOverride(override);
+		ppc.setProperties(new Properties() {{
+				setProperty("foo", "local");
+		}});
+		ppc.setEnvironment(new MockEnvironment().withProperty("foo", "enclosing"));
+		ppc.postProcessBeanFactory(bf);
+		if (override) {
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("local");
+		}
+		else {
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("enclosing");
+		}
 	}
 
 	@Test
@@ -281,30 +298,6 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("bar");
-	}
-
-	@SuppressWarnings("serial")
-	private void localPropertiesOverride(boolean override) {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("testBean",
-				genericBeanDefinition(TestBean.class)
-					.addPropertyValue("name", "${foo}")
-					.getBeanDefinition());
-
-		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
-
-		ppc.setLocalOverride(override);
-		ppc.setProperties(new Properties() {{
-				setProperty("foo", "local");
-		}});
-		ppc.setEnvironment(new MockEnvironment().withProperty("foo", "enclosing"));
-		ppc.postProcessBeanFactory(bf);
-		if (override) {
-			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("local");
-		}
-		else {
-			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("enclosing");
-		}
 	}
 
 	@Test
