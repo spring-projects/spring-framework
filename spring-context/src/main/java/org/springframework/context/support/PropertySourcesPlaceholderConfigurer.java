@@ -280,6 +280,11 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		}
 
 		@Override
+		public boolean containsProperty(String name) {
+			return super.source.containsProperty(name);
+		}
+
+		@Override
 		public String toString() {
 			return "FallbackEnvironmentPropertySource {environment=" + super.source + "}";
 		}
