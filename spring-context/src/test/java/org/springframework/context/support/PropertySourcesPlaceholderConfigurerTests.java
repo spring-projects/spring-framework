@@ -36,6 +36,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MutablePropertySources;
@@ -79,6 +80,43 @@ class PropertySourcesPlaceholderConfigurerTests {
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("myValue");
 		assertThat(ppc.getAppliedPropertySources()).isNotNull();
+	}
+
+	/**
+	 * Ensure that a {@link PropertySource} added to the {@code Environment} after context
+	 * refresh (i.e., after {@link PropertySourcesPlaceholderConfigurer#postProcessBeanFactory()}
+	 * has been invoked) can still contribute properties in late-binding scenarios.
+	 */
+	@Test  // gh-34861
+	void replacementFromEnvironmentPropertiesWithLateBinding() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
+		propertySources.addFirst(new MockPropertySource("early properties").withProperty("foo", "bar"));
+
+		context.register(PropertySourcesPlaceholderConfigurer.class);
+		context.register(PrototypeBean.class);
+		context.refresh();
+
+		// Verify that placeholder resolution works for early binding.
+		PrototypeBean prototypeBean = context.getBean(PrototypeBean.class);
+		assertThat(prototypeBean.getName()).isEqualTo("bar");
+		assertThat(prototypeBean.isJedi()).isFalse();
+
+		// Add new PropertySource after context refresh.
+		propertySources.addFirst(new MockPropertySource("late properties").withProperty("jedi", "true"));
+
+		// Verify that placeholder resolution works for late binding: isJedi() switches to true.
+		prototypeBean = context.getBean(PrototypeBean.class);
+		assertThat(prototypeBean.getName()).isEqualTo("bar");
+		assertThat(prototypeBean.isJedi()).isTrue();
+
+		// Add yet another PropertySource after context refresh.
+		propertySources.addFirst(new MockPropertySource("even later properties").withProperty("foo", "enigma"));
+
+		// Verify that placeholder resolution works for even later binding: getName() switches to enigma.
+		prototypeBean = context.getBean(PrototypeBean.class);
+		assertThat(prototypeBean.getName()).isEqualTo("enigma");
+		assertThat(prototypeBean.isJedi()).isTrue();
 	}
 
 	@Test
@@ -666,6 +704,25 @@ class PropertySourcesPlaceholderConfigurerTests {
 			PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 			pspc.setIgnoreUnresolvablePlaceholders(true);
 			return pspc;
+		}
+	}
+
+	@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+	static class PrototypeBean {
+
+		@Value("${foo:bogus}")
+		private String name;
+
+		@Value("${jedi:false}")
+		private boolean jedi;
+
+
+		public String getName() {
+			return this.name;
+		}
+
+		public boolean isJedi() {
+			return this.jedi;
 		}
 	}
 
