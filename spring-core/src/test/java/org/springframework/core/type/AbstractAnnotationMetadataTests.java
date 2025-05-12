@@ -309,6 +309,14 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		@Test
+		void getAnnotationAttributeVoidType() {
+			MultiValueMap<String, Object> attributes =
+					get(WithVoidType.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
+			assertThat(attributes).containsOnlyKeys("names", "count", "type", "subAnnotation");
+			assertThat(attributes.get("type")).containsAnyOf(Void.class, void.class);
+		}
+
+		@Test
 		void getRepeatableReturnsAttributes() {
 			MultiValueMap<String, Object> attributes =
 					get(WithRepeatableAnnotations.class).getAllAnnotationAttributes(RepeatableAnnotations.class.getName());
@@ -445,10 +453,17 @@ public abstract class AbstractAnnotationMetadataTests {
 
 		}
 
+
 		@ComplexAttributes(names = {"first", "second"}, count = TestEnum.ONE,
 				type = TestEnum.class, subAnnotation = @SubAnnotation(name="spring"))
 		@Metadata(mv = {42})
 		public static class WithComplexAttributeTypes {
+		}
+
+		@ComplexAttributes(names = "void", count = TestEnum.ONE, type = void.class,
+				subAnnotation = @SubAnnotation(name="spring"))
+		public static class WithVoidType {
+
 		}
 
 		@Retention(RetentionPolicy.RUNTIME)

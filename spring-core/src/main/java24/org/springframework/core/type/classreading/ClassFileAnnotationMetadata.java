@@ -21,6 +21,7 @@ import java.lang.classfile.Annotation;
 import java.lang.classfile.AnnotationElement;
 import java.lang.classfile.AnnotationValue;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
+import java.lang.constant.ClassDesc;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -36,6 +37,7 @@ import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Parse {@link RuntimeVisibleAnnotationsAttribute} into {@link MergedAnnotations}
@@ -97,8 +99,9 @@ abstract class ClassFileAnnotationMetadata {
 	}
 
 	private static String fromTypeDescriptor(String descriptor) {
-		return descriptor.substring(1, descriptor.length() - 1)
-				.replace('/', '.');
+		ClassDesc classDesc = ClassDesc.ofDescriptor(descriptor);
+		return classDesc.isPrimitive() ? "java.lang." + StringUtils.capitalize(classDesc.displayName()) :
+		classDesc.packageName() + "." + classDesc.displayName();
 	}
 
 	private static Object parseArrayValue(String className, @org.jetbrains.annotations.Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
