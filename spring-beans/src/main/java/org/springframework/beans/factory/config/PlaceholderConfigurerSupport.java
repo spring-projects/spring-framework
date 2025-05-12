@@ -160,9 +160,10 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	}
 
 	/**
-	 * Specify the escape character to use to ignore the placeholder prefix or
-	 * value separator, or {@code null} if no escaping should take place.
-	 * <p>Default is {@link #DEFAULT_ESCAPE_CHARACTER}.
+	 * Set the escape character to use to ignore the
+	 * {@linkplain #setPlaceholderPrefix(String) placeholder prefix} and the
+	 * {@linkplain #setValueSeparator(String) value separator}, or {@code null}
+	 * if no escaping should take place.
 	 * @since 6.2
 	 */
 	public void setEscapeCharacter(@Nullable Character escapeCharacter) {
