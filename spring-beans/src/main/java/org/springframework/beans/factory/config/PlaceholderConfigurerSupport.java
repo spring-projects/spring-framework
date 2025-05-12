@@ -22,6 +22,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Abstract base class for property resource configurers that resolve placeholders
@@ -92,16 +93,16 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 		implements BeanNameAware, BeanFactoryAware {
 
 	/** Default placeholder prefix: {@value}. */
-	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
+	public static final String DEFAULT_PLACEHOLDER_PREFIX = SystemPropertyUtils.PLACEHOLDER_PREFIX;
 
 	/** Default placeholder suffix: {@value}. */
-	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
+	public static final String DEFAULT_PLACEHOLDER_SUFFIX = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
 	/** Default value separator: {@value}. */
-	public static final String DEFAULT_VALUE_SEPARATOR = ":";
+	public static final String DEFAULT_VALUE_SEPARATOR = SystemPropertyUtils.VALUE_SEPARATOR;
 
 	/** Default escape character: {@code '\'}. */
-	public static final Character DEFAULT_ESCAPE_CHARACTER = '\\';
+	public static final Character DEFAULT_ESCAPE_CHARACTER = SystemPropertyUtils.ESCAPE_CHARACTER;
 
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
