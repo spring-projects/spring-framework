@@ -219,7 +219,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 						if (txObject.isNewConnectionHolder()) {
 							synchronizationManager.bindResource(obtainConnectionFactory(), txObject.getConnectionHolder());
 						}
-					}).thenReturn(con).onErrorResume(ex -> {
+					}).onErrorResume(ex -> {
 						if (txObject.isNewConnectionHolder()) {
 							return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory())
 									.doOnTerminate(() -> txObject.setConnectionHolder(null, false))
