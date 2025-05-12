@@ -23,6 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.util.StringValueResolver;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Abstract base class for property resource configurers that resolve placeholders
@@ -93,16 +94,16 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 		implements BeanNameAware, BeanFactoryAware {
 
 	/** Default placeholder prefix: {@value}. */
-	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
+	public static final String DEFAULT_PLACEHOLDER_PREFIX = SystemPropertyUtils.PLACEHOLDER_PREFIX;
 
 	/** Default placeholder suffix: {@value}. */
-	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
+	public static final String DEFAULT_PLACEHOLDER_SUFFIX = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
 	/** Default value separator: {@value}. */
-	public static final String DEFAULT_VALUE_SEPARATOR = ":";
+	public static final String DEFAULT_VALUE_SEPARATOR = SystemPropertyUtils.VALUE_SEPARATOR;
 
 	/** Default escape character: {@code '\'}. */
-	public static final Character DEFAULT_ESCAPE_CHARACTER = '\\';
+	public static final Character DEFAULT_ESCAPE_CHARACTER = SystemPropertyUtils.ESCAPE_CHARACTER;
 
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
@@ -155,9 +156,10 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	}
 
 	/**
-	 * Specify the escape character to use to ignore the placeholder prefix or
-	 * value separator, or {@code null} if no escaping should take place.
-	 * <p>Default is {@link #DEFAULT_ESCAPE_CHARACTER}.
+	 * Set the escape character to use to ignore the
+	 * {@linkplain #setPlaceholderPrefix(String) placeholder prefix} and the
+	 * {@linkplain #setValueSeparator(String) value separator}, or {@code null}
+	 * if no escaping should take place.
 	 * @since 6.2
 	 */
 	public void setEscapeCharacter(@Nullable Character escapeCharacter) {

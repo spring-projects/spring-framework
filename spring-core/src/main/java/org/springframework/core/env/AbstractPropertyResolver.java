@@ -86,9 +86,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
-	 * Set the prefix that placeholders replaced by this resolver must begin with.
-	 * <p>The default is "${".
-	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
+	 * {@inheritDoc}
+	 * <p>The default is <code>"${"</code>.
+	 * @see SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 */
 	@Override
 	public void setPlaceholderPrefix(String placeholderPrefix) {
@@ -97,9 +97,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
-	 * Set the suffix that placeholders replaced by this resolver must end with.
-	 * <p>The default is "}".
-	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
+	 * {@inheritDoc}
+	 * <p>The default is <code>"}"</code>.
+	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
 	 */
 	@Override
 	public void setPlaceholderSuffix(String placeholderSuffix) {
@@ -108,11 +108,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
-	 * Specify the separating character between the placeholders replaced by this
-	 * resolver and their associated default value, or {@code null} if no such
-	 * special character should be processed as a value separator.
-	 * <p>The default is ":".
-	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
+	 * {@inheritDoc}
+	 * <p>The default is {@code ":"}.
+	 * @see SystemPropertyUtils#VALUE_SEPARATOR
 	 */
 	@Override
 	public void setValueSeparator(@Nullable String valueSeparator) {
@@ -120,12 +118,10 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
-	 * Specify the escape character to use to ignore placeholder prefix
-	 * or value separator, or {@code null} if no escaping should take
-	 * place.
-	 * <p>The default is '\'.
+	 * {@inheritDoc}
+	 * <p>The default is {@code '\'}.
 	 * @since 6.2
-	 * @see org.springframework.util.SystemPropertyUtils#ESCAPE_CHARACTER
+	 * @see SystemPropertyUtils#ESCAPE_CHARACTER
 	 */
 	@Override
 	public void setEscapeCharacter(@Nullable Character escapeCharacter) {
