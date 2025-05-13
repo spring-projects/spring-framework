@@ -55,9 +55,8 @@ public interface BeanRegistry {
 	void registerAlias(String name, String alias);
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the related {@link BeanUtils#getResolvableConstructor resolvable constructor}
-	 * if any.
+	 * Register a bean from the given bean class, which will be instantiated using the
+	 * related {@link BeanUtils#getResolvableConstructor resolvable constructor} if any.
 	 * @param beanClass the class of the bean
 	 * @return the generated bean name
 	 */
@@ -65,10 +64,9 @@ public interface BeanRegistry {
 
 	/**
 	 * Register a bean from the given bean class, customizing it with the customizer
-	 * callback. The bean will be instantiated using the supplier that can be
-	 * configured in the customizer callback, or will be tentatively instantiated
-	 * with its {@link BeanUtils#getResolvableConstructor resolvable constructor}
-	 * otherwise.
+	 * callback. The bean will be instantiated using the supplier that can be configured
+	 * in the customizer callback, or will be tentatively instantiated with its
+	 * {@link BeanUtils#getResolvableConstructor resolvable constructor} otherwise.
 	 * @param beanClass the class of the bean
 	 * @param customizer callback to customize other bean properties than the name
 	 * @return the generated bean name
@@ -76,9 +74,8 @@ public interface BeanRegistry {
 	<T> String registerBean(Class<T> beanClass, Consumer<Spec<T>> customizer);
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the related {@link BeanUtils#getResolvableConstructor resolvable constructor}
-	 * if any.
+	 * Register a bean from the given bean class, which will be instantiated using the
+	 * related {@link BeanUtils#getResolvableConstructor resolvable constructor} if any.
 	 * @param name the name of the bean
 	 * @param beanClass the class of the bean
 	 */
@@ -86,8 +83,8 @@ public interface BeanRegistry {
 
 	/**
 	 * Register a bean from the given bean class, customizing it with the customizer
-	 * callback. The bean will be instantiated using the supplier that can be
-	 * configured in the customizer callback, or will be tentatively instantiated with its
+	 * callback. The bean will be instantiated using the supplier that can be configured
+	 * in the customizer callback, or will be tentatively instantiated with its
 	 * {@link BeanUtils#getResolvableConstructor resolvable constructor} otherwise.
 	 * @param name the name of the bean
 	 * @param beanClass the class of the bean
@@ -122,8 +119,8 @@ public interface BeanRegistry {
 		Spec<T> fallback();
 
 		/**
-		 * Hint that this bean has an infrastructure role, meaning it has no
-		 * relevance to the end-user.
+		 * Hint that this bean has an infrastructure role, meaning it has no relevance
+		 * to the end-user.
 		 * @see BeanDefinition#setRole(int)
 		 * @see BeanDefinition#ROLE_INFRASTRUCTURE
 		 */
@@ -136,8 +133,7 @@ public interface BeanRegistry {
 		Spec<T> lazyInit();
 
 		/**
-		 * Configure this bean as not a candidate for getting autowired into some
-		 * other bean.
+		 * Configure this bean as not a candidate for getting autowired into another bean.
 		 * @see BeanDefinition#setAutowireCandidate(boolean)
 		 */
 		Spec<T> notAutowirable();
@@ -184,6 +180,7 @@ public interface BeanRegistry {
 		Spec<T> targetType(ResolvableType type);
 	}
 
+
 	/**
 	 * Context available from the bean instance supplier designed to give access
 	 * to bean dependencies.
@@ -191,10 +188,8 @@ public interface BeanRegistry {
 	interface SupplierContext {
 
 		/**
-		 * Return the bean instance that uniquely matches the given object type,
-		 * if any.
-		 * @param requiredType type the bean must match; can be an interface or
-		 * superclass
+		 * Return the bean instance that uniquely matches the given object type, if any.
+		 * @param requiredType type the bean must match; can be an interface or superclass
 		 * @return an instance of the single bean matching the required type
 		 * @see BeanFactory#getBean(String)
 		 */
@@ -240,4 +235,5 @@ public interface BeanRegistry {
 		 */
 		<T> ObjectProvider<T> beanProvider(ResolvableType requiredType);
 	}
+
 }
