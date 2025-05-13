@@ -7,9 +7,9 @@ javaPlatform {
 }
 
 dependencies {
-	api(platform("com.fasterxml.jackson:jackson-bom:2.18.3"))
+	api(platform("com.fasterxml.jackson:jackson-bom:2.18.4"))
 	api(platform("io.micrometer:micrometer-bom:1.15.0-RC1"))
-	api(platform("io.netty:netty-bom:4.1.119.Final"))
+	api(platform("io.netty:netty-bom:4.1.121.Final"))
 	api(platform("io.projectreactor:reactor-bom:2025.0.0-M2"))
 	api(platform("io.rsocket:rsocket-bom:1.1.5"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.26"))
@@ -97,7 +97,7 @@ dependencies {
 		api("org.apache.derby:derby:10.16.1.1")
 		api("org.apache.derby:derbyclient:10.16.1.1")
 		api("org.apache.derby:derbytools:10.16.1.1")
-		api("org.apache.httpcomponents.client5:httpclient5:5.4.3")
+		api("org.apache.httpcomponents.client5:httpclient5:5.4.4")
 		api("org.apache.httpcomponents.core5:httpcore5-reactive:5.3.4")
 		api("org.apache.poi:poi-ooxml:5.2.5")
 		api("org.apache.tomcat.embed:tomcat-embed-core:11.0.5")
