@@ -73,7 +73,7 @@ public class XmlConfigTests {
 		this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+			.andExpect(content().string("{\"name\":\"Joe\",\"someBoolean\":false,\"someDouble\":0.0}"));
 	}
 
 }

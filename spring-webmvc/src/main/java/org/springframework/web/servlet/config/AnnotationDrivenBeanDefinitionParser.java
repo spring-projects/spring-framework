@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,16 +47,21 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.JacksonCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -151,6 +156,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @author Brian Clozel
  * @author Agim Emruli
  * @author Hyoungjune Kim
+ * @author Sebastien Deleuze
  * @since 3.0
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -168,13 +174,23 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jaxb2Present;
 
+	private static final boolean jacksonPresent;
+
 	private static final boolean jackson2Present;
+
+	private static final boolean jacksonXmlPresent;
 
 	private static final boolean jackson2XmlPresent;
 
+	private static final boolean jacksonSmilePresent;
+
 	private static final boolean jackson2SmilePresent;
 
+	private static final boolean jacksonCborPresent;
+
 	private static final boolean jackson2CborPresent;
+
+	private static final boolean jacksonYamlPresent;
 
 	private static final boolean jackson2YamlPresent;
 
@@ -185,12 +201,17 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		javaxValidationPresent = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
+		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
-		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
-		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
+		jacksonXmlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
+		jackson2XmlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
+		jacksonSmilePresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
+		jackson2SmilePresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jacksonCborPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
+		jackson2CborPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+		jacksonYamlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
+		jackson2YamlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 	}
 
@@ -446,19 +467,19 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			defaultMediaTypes.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
 			defaultMediaTypes.put("rss", MediaType.APPLICATION_RSS_XML_VALUE);
 		}
-		if (jaxb2Present || jackson2XmlPresent) {
+		if (jaxb2Present || jacksonXmlPresent || jackson2XmlPresent) {
 			defaultMediaTypes.put("xml", MediaType.APPLICATION_XML_VALUE);
 		}
-		if (jackson2Present || gsonPresent) {
+		if (jacksonPresent || jackson2Present || gsonPresent) {
 			defaultMediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
 		}
-		if (jackson2SmilePresent) {
+		if (jacksonSmilePresent || jackson2SmilePresent) {
 			defaultMediaTypes.put("smile", "application/x-jackson-smile");
 		}
-		if (jackson2CborPresent) {
+		if (jacksonCborPresent || jackson2CborPresent) {
 			defaultMediaTypes.put("cbor", MediaType.APPLICATION_CBOR_VALUE);
 		}
-		if (jackson2YamlPresent) {
+		if (jacksonYamlPresent || jackson2YamlPresent) {
 			defaultMediaTypes.put("yaml", MediaType.APPLICATION_YAML_VALUE);
 		}
 		return defaultMediaTypes;
@@ -568,7 +589,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverters.add(createConverterDefinition(RssChannelHttpMessageConverter.class, source));
 			}
 
-			if (jackson2XmlPresent) {
+			if (jacksonXmlPresent) {
+				messageConverters.add(createConverterDefinition(JacksonXmlHttpMessageConverter.class, source));
+			}
+			else if (jackson2XmlPresent) {
 				Class<?> type = MappingJackson2XmlHttpMessageConverter.class;
 				RootBeanDefinition jacksonConverterDef = createConverterDefinition(type, source);
 				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
@@ -580,7 +604,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverters.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 			}
 
-			if (jackson2Present) {
+			if (jacksonPresent) {
+				messageConverters.add(createConverterDefinition(JacksonJsonHttpMessageConverter.class, source));
+			}
+			else if (jackson2Present) {
 				Class<?> type = MappingJackson2HttpMessageConverter.class;
 				RootBeanDefinition jacksonConverterDef = createConverterDefinition(type, source);
 				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
@@ -591,7 +618,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class, source));
 			}
 
-			if (jackson2SmilePresent) {
+			if (jacksonSmilePresent) {
+				messageConverters.add(createConverterDefinition(JacksonSmileHttpMessageConverter.class, source));
+			}
+			else if (jackson2SmilePresent) {
 				Class<?> type = MappingJackson2SmileHttpMessageConverter.class;
 				RootBeanDefinition jacksonConverterDef = createConverterDefinition(type, source);
 				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
@@ -599,7 +629,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
 				messageConverters.add(jacksonConverterDef);
 			}
-			if (jackson2CborPresent) {
+
+			if (jacksonCborPresent) {
+				messageConverters.add(createConverterDefinition(JacksonCborHttpMessageConverter.class, source));
+			}
+			else if (jackson2CborPresent) {
 				Class<?> type = MappingJackson2CborHttpMessageConverter.class;
 				RootBeanDefinition jacksonConverterDef = createConverterDefinition(type, source);
 				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
@@ -607,7 +641,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
 				messageConverters.add(jacksonConverterDef);
 			}
-			if(jackson2YamlPresent) {
+
+			if (jacksonYamlPresent) {
+				messageConverters.add(createConverterDefinition(JacksonYamlHttpMessageConverter.class, source));
+			}
+			else if (jackson2YamlPresent) {
 				Class<?> type = MappingJackson2YamlHttpMessageConverter.class;
 				RootBeanDefinition jacksonConverterDef = createConverterDefinition(type, source);
 				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
