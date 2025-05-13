@@ -93,7 +93,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate value class`() {
 		val constructor = BeanUtils.findPrimaryConstructor(ValueClass::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = "Hello value class!"
 		val instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(ValueClass(value))
@@ -102,7 +101,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate value class with multiple constructors`() {
 		val constructor = BeanUtils.findPrimaryConstructor(ValueClassWithMultipleConstructors::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = "Hello value class!"
 		val instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(ValueClassWithMultipleConstructors(value))
@@ -111,7 +109,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate class with value class parameter`() {
 		val constructor = BeanUtils.findPrimaryConstructor(ConstructorWithValueClass::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = ValueClass("Hello value class!")
 		val instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(ConstructorWithValueClass(value))
@@ -120,7 +117,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate class with nullable value class parameter`() {
 		val constructor = BeanUtils.findPrimaryConstructor(ConstructorWithNullableValueClass::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = ValueClass("Hello value class!")
 		var instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(ConstructorWithNullableValueClass(value))
@@ -131,7 +127,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate primitive value class`() {
 		val constructor = BeanUtils.findPrimaryConstructor(PrimitiveValueClass::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = 0
 		val instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(PrimitiveValueClass(value))
@@ -140,7 +135,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate class with primitive value class parameter`() {
 		val constructor = BeanUtils.findPrimaryConstructor(ConstructorWithPrimitiveValueClass::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = PrimitiveValueClass(0)
 		val instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(ConstructorWithPrimitiveValueClass(value))
@@ -149,7 +143,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate class with nullable primitive value class parameter`() {
 		val constructor = BeanUtils.findPrimaryConstructor(ConstructorWithNullablePrimitiveValueClass::class.java)!!
-		assertThat(constructor).isNotNull()
 		val value = PrimitiveValueClass(0)
 		var instance = BeanUtils.instantiateClass(constructor, value)
 		assertThat(instance).isEqualTo(ConstructorWithNullablePrimitiveValueClass(value))
@@ -189,7 +182,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithValueClass`() {
 		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithValueClass::class.java)!!
-		assertThat(ctor).isNotNull()
 		val names = BeanUtils.getParameterNames(ctor)
 		assertThat(names).containsExactly("value")
 	}
@@ -197,7 +189,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithNullableValueClass`() {
 		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithNullableValueClass::class.java)!!
-		assertThat(ctor).isNotNull()
 		val names = BeanUtils.getParameterNames(ctor)
 		assertThat(names).containsExactly("value")
 	}
@@ -205,7 +196,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithPrimitiveValueClass`() {
 		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithPrimitiveValueClass::class.java)!!
-		assertThat(ctor).isNotNull()
 		val names = BeanUtils.getParameterNames(ctor)
 		assertThat(names).containsExactly("value")
 	}
@@ -213,7 +203,6 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithNullablePrimitiveValueClass`() {
 		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithNullablePrimitiveValueClass::class.java)!!
-		assertThat(ctor).isNotNull()
 		val names = BeanUtils.getParameterNames(ctor)
 		assertThat(names).containsExactly("value")
 	}
