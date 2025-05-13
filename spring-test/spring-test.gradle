@@ -81,6 +81,7 @@ dependencies {
 	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.junit.platform:junit-platform-testkit")
+	testImplementation("tools.jackson.core:jackson-databind")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("org.glassfish:jakarta.el")

@@ -36,7 +36,6 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.json.JacksonJsonView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -96,7 +95,7 @@ class ViewResolutionTests {
 		marshaller.setClassesToBeBound(Person.class);
 
 		List<View> viewList = new ArrayList<>();
-		viewList.add(new MappingJackson2JsonView());
+		viewList.add(new JacksonJsonView());
 		viewList.add(new MarshallingView(marshaller));
 
 		ContentNegotiationManager manager = new ContentNegotiationManager(
