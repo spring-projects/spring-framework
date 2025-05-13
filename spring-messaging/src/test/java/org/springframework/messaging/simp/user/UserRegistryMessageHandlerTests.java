@@ -29,7 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -59,7 +59,7 @@ class UserRegistryMessageHandlerTests {
 
 	private MultiServerUserRegistry multiServerRegistry = new MultiServerUserRegistry(this.localRegistry);
 
-	private MessageConverter converter = new MappingJackson2MessageConverter();
+	private MessageConverter converter = new JacksonJsonMessageConverter();
 
 	private UserRegistryMessageHandler handler;
 

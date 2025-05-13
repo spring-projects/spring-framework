@@ -40,8 +40,8 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -288,9 +288,9 @@ class MessageBrokerConfigurationTests {
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
 		assertThat(converters).hasExactlyElementsOfTypes(StringMessageConverter.class, ByteArrayMessageConverter.class,
-				KotlinSerializationJsonMessageConverter.class, MappingJackson2MessageConverter.class);
+				KotlinSerializationJsonMessageConverter.class, JacksonJsonMessageConverter.class);
 
-		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(3)).getContentTypeResolver();
+		ContentTypeResolver resolver = ((JacksonJsonMessageConverter) converters.get(3)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
@@ -349,7 +349,7 @@ class MessageBrokerConfigurationTests {
 		assertThat(iterator.next()).isInstanceOf(StringMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(ByteArrayMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(KotlinSerializationJsonMessageConverter.class);
-		assertThat(iterator.next()).isInstanceOf(MappingJackson2MessageConverter.class);
+		assertThat(iterator.next()).isInstanceOf(JacksonJsonMessageConverter.class);
 	}
 
 	@Test

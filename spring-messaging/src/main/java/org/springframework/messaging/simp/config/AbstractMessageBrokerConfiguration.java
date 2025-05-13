@@ -37,6 +37,7 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.GsonMessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.JsonbMessageConverter;
 import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -103,6 +104,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
+	private static final boolean jacksonPresent;
+
 	private static final boolean jackson2Present;
 
 	private static final boolean gsonPresent;
@@ -114,6 +117,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	static {
 		ClassLoader classLoader = AbstractMessageBrokerConfiguration.class.getClassLoader();
+		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
@@ -501,7 +505,10 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			if (kotlinSerializationJsonPresent) {
 				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
-			if (jackson2Present) {
+			if (jacksonPresent) {
+				converters.add(createJacksonJsonConverter());
+			}
+			else if (jackson2Present) {
 				converters.add(createJacksonConverter());
 			}
 			else if (gsonPresent) {
@@ -514,6 +521,20 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return new CompositeMessageConverter(converters);
 	}
 
+	/**
+	 * Allow to customize Jackson 3.x JSON converter.
+	 */
+	protected JacksonJsonMessageConverter createJacksonJsonConverter() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
+		converter.setContentTypeResolver(resolver);
+		return converter;
+	}
+
+	/**
+	 * Allow to customize Jackson 2.x JSON converter.
+	 */
 	protected MappingJackson2MessageConverter createJacksonConverter() {
 		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);

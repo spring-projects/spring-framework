@@ -25,7 +25,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +43,7 @@ class MultiServerUserRegistryTests {
 
 	private final MultiServerUserRegistry registry = new MultiServerUserRegistry(this.localRegistry);
 
-	private final MessageConverter converter = new MappingJackson2MessageConverter();
+	private final MessageConverter converter = new JacksonJsonMessageConverter();
 
 
 	@Test

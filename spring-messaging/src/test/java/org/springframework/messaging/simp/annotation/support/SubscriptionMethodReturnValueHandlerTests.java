@@ -33,7 +33,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -92,7 +92,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		this.handler = new SubscriptionMethodReturnValueHandler(messagingTemplate);
 
 		SimpMessagingTemplate jsonMessagingTemplate = new SimpMessagingTemplate(this.messageChannel);
-		jsonMessagingTemplate.setMessageConverter(new MappingJackson2MessageConverter());
+		jsonMessagingTemplate.setMessageConverter(new JacksonJsonMessageConverter());
 		this.jsonHandler = new SubscriptionMethodReturnValueHandler(jsonMessagingTemplate);
 
 		Method method = this.getClass().getDeclaredMethod("getData");
