@@ -14,76 +14,82 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.json;
+package org.springframework.web.servlet.view;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
+import tools.jackson.core.JsonEncoding;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ser.FilterProvider;
 
-import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.view.AbstractView;
 
 /**
- * Abstract base class for Jackson 2.x based and content type independent
+ * Abstract base class for Jackson 3.x based and content type independent
  * {@link AbstractView} implementations.
  *
- * @author Jeremy Grelle
- * @author Arjen Poutsma
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
+ * <p>The following special model entries are supported:
+ * <ul>
+ *     <li>A JSON view with a <code>com.fasterxml.jackson.annotation.JsonView</code>
+ *         key and the class name of the JSON view as value.</li>
+ *     <li>A filter provider with a <code>tools.jackson.databind.ser.FilterProvider</code>
+ *         key and the filter provider class name as value.</li>
+ * </ul>
+ *
  * @author Sebastien Deleuze
- * @since 4.1
+ * @since 7.0
  */
-public abstract class AbstractJackson2View extends AbstractView {
+public abstract class AbstractJacksonView extends AbstractView {
 
-	private ObjectMapper objectMapper;
+	protected static final String JSON_VIEW_HINT = JsonView.class.getName();
+
+	protected static final String FILTER_PROVIDER_HINT = FilterProvider.class.getName();
+
+	private static volatile @Nullable List<JacksonModule> modules = null;
+
+	private final ObjectMapper objectMapper;
 
 	private JsonEncoding encoding = JsonEncoding.UTF8;
-
-	private @Nullable Boolean prettyPrint;
 
 	private boolean disableCaching = true;
 
 	protected boolean updateContentLength = false;
 
 
-	protected AbstractJackson2View(ObjectMapper objectMapper, String contentType) {
-		this.objectMapper = objectMapper;
-		configurePrettyPrint();
+	protected AbstractJacksonView(MapperBuilder<?, ?> builder, String contentType) {
+		this.objectMapper = builder.addModules(initModules()).build();
 		setContentType(contentType);
 		setExposePathVariables(false);
 	}
 
-	/**
-	 * Set the {@code ObjectMapper} for this view.
-	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} will be used.
-	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of
-	 * the JSON serialization process. The other option is to use Jackson's provided annotations
-	 * on the types to be serialized, in which case a custom-configured ObjectMapper is unnecessary.
-	 */
-	public void setObjectMapper(ObjectMapper objectMapper) {
+	protected AbstractJacksonView(ObjectMapper objectMapper, String contentType) {
 		this.objectMapper = objectMapper;
-		configurePrettyPrint();
+		setContentType(contentType);
+		setExposePathVariables(false);
 	}
 
-	/**
-	 * Return the {@code ObjectMapper} for this view.
-	 */
-	public final ObjectMapper getObjectMapper() {
-		return this.objectMapper;
+	private List<JacksonModule> initModules() {
+		if (modules == null) {
+			modules = MapperBuilder.findModules(AbstractJacksonHttpMessageConverter.class.getClassLoader());
+
+		}
+		return Objects.requireNonNull(modules);
 	}
 
 	/**
@@ -100,26 +106,6 @@ public abstract class AbstractJackson2View extends AbstractView {
 	 */
 	public final JsonEncoding getEncoding() {
 		return this.encoding;
-	}
-
-	/**
-	 * Whether to use the default pretty printer when writing the output.
-	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre class="code">
-	 * ObjectMapper mapper = new ObjectMapper();
-	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-	 * </pre>
-	 * <p>The default value is {@code false}.
-	 */
-	public void setPrettyPrint(boolean prettyPrint) {
-		this.prettyPrint = prettyPrint;
-		configurePrettyPrint();
-	}
-
-	private void configurePrettyPrint() {
-		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
-		}
 	}
 
 	/**
@@ -164,8 +150,23 @@ public abstract class AbstractJackson2View extends AbstractView {
 			stream = response.getOutputStream();
 		}
 
-		Object value = filterAndWrapModel(model, request);
-		writeContent(stream, value);
+		Object value = filterModel(model, request);
+		Map<String, Object> hints = null;
+		boolean containsFilterProviderHint = model.containsKey(FILTER_PROVIDER_HINT);
+		if (model.containsKey(JSON_VIEW_HINT)) {
+			if (containsFilterProviderHint) {
+				hints = new HashMap<>(2);
+				hints.put(JSON_VIEW_HINT, model.get(JSON_VIEW_HINT));
+				hints.put(FILTER_PROVIDER_HINT, model.get(FILTER_PROVIDER_HINT));
+			}
+			else {
+				hints = Collections.singletonMap(JSON_VIEW_HINT, model.get(JSON_VIEW_HINT));
+			}
+		}
+		else if (containsFilterProviderHint) {
+			hints = Collections.singletonMap(FILTER_PROVIDER_HINT, model.get(FILTER_PROVIDER_HINT));
+		}
+		writeContent(stream, value, hints);
 
 		if (temporaryStream != null) {
 			writeToResponse(response, temporaryStream);
@@ -173,46 +174,21 @@ public abstract class AbstractJackson2View extends AbstractView {
 	}
 
 	/**
-	 * Filter and optionally wrap the model in {@link MappingJacksonValue} container.
-	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
-	 * @param request current HTTP request
-	 * @return the wrapped or unwrapped value to be rendered
-	 */
-	protected Object filterAndWrapModel(Map<String, Object> model, HttpServletRequest request) {
-		Object value = filterModel(model);
-		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
-		FilterProvider filters = (FilterProvider) model.get(FilterProvider.class.getName());
-		if (serializationView != null || filters != null) {
-			MappingJacksonValue container = new MappingJacksonValue(value);
-			if (serializationView != null) {
-				container.setSerializationView(serializationView);
-			}
-			if (filters != null) {
-				container.setFilters(filters);
-			}
-			value = container;
-		}
-		return value;
-	}
-
-	/**
 	 * Write the actual JSON content to the stream.
 	 * @param stream the output stream to use
 	 * @param object the value to be rendered, as returned from {@link #filterModel}
+	 * @param hints additional information about how to serialize the data
 	 * @throws IOException if writing failed
 	 */
-	protected void writeContent(OutputStream stream, Object object) throws IOException {
-		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(stream, this.encoding)) {
+	protected void writeContent(OutputStream stream, Object object, @Nullable Map<String, Object> hints) throws IOException {
+		try (JsonGenerator generator = this.objectMapper.createGenerator(stream, this.encoding)) {
 			writePrefix(generator, object);
 
-			Object value = object;
 			Class<?> serializationView = null;
 			FilterProvider filters = null;
-
-			if (value instanceof MappingJacksonValue container) {
-				value = container.getValue();
-				serializationView = container.getSerializationView();
-				filters = container.getFilters();
+			if (hints != null) {
+				serializationView = (Class<?>) hints.get(JSON_VIEW_HINT);
+				filters = (FilterProvider) hints.get(FILTER_PROVIDER_HINT);
 			}
 
 			ObjectWriter objectWriter = (serializationView != null ?
@@ -220,7 +196,7 @@ public abstract class AbstractJackson2View extends AbstractView {
 			if (filters != null) {
 				objectWriter = objectWriter.with(filters);
 			}
-			objectWriter.writeValue(generator, value);
+			objectWriter.writeValue(generator, object);
 
 			writeSuffix(generator, object);
 			generator.flush();
@@ -238,9 +214,10 @@ public abstract class AbstractJackson2View extends AbstractView {
 	 * Filter out undesired attributes from the given model.
 	 * The return value can be either another {@link Map} or a single value object.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
+	 * @param request current HTTP request
 	 * @return the value to be rendered
 	 */
-	protected abstract Object filterModel(Map<String, Object> model);
+	protected abstract Object filterModel(Map<String, Object> model, HttpServletRequest request);
 
 	/**
 	 * Write a prefix before the main content.

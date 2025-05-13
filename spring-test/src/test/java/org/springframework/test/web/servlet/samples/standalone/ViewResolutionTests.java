@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
@@ -70,7 +71,7 @@ class ViewResolutionTests {
 
 	@Test
 	void jsonOnly() throws Exception {
-		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
+		standaloneSetup(new PersonController()).setSingleView(new JacksonJsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
