@@ -99,7 +99,7 @@ xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[config
 [[mvc-ann-async-webasynctask]]
 == `WebAsyncTask`
 
-`WebAsyncTask` is a holder/wrapper for a `java.util.concurrent.Callable` that allows you set a custom asynchronous request   timeout value and a custom `AsyncTaskExecutor` for executing the `java.util.concurrent.Callable` if you want to use a     different `AsyncTaskExecutor` than the default one used by Spring MVC. Below is an example of using `WebAsyncTask`:
+`WebAsyncTask` is a holder/wrapper for a `java.util.concurrent.Callable` that allows you to set a custom asynchronous request timeout value and a custom `AsyncTaskExecutor` for executing the `java.util.concurrent.Callable` if you want to use a different `AsyncTaskExecutor` than the default one used by Spring MVC. Below is an example of using `WebAsyncTask`:
 
 [tabs]
 ======
