@@ -4,7 +4,7 @@
 Spring MVC has an extensive integration with Servlet asynchronous request
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-processing[processing]:
 
-* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`]
+* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`],xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-webasynctask[`WebAsyncTask`](holder/wrapper for Callable)
 return values in controller methods provide basic support for a single asynchronous
 return value.
 * Controllers can xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[stream] multiple values, including
@@ -93,6 +93,42 @@ Kotlin::
 
 The return value can then be obtained by running the given task through the
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `AsyncTaskExecutor`.
+
+
+
+[[mvc-ann-async-webasynctask]]
+== `WebAsyncTask`
+
+`WebAsyncTask` is a holder/wrapper for a `java.util.concurrent.Callable` that allows you set a custom asynchronous request   timeout value and a custom `AsyncTaskExecutor` for executing the `java.util.concurrent.Callable` if you want to use a     different `AsyncTaskExecutor` than the default one used by Spring MVC. Below is an example of using `WebAsyncTask`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping("/callable")
+	WebAsyncTask<String> asynchronousRequestProcessingWithCallableWrappedInaWebAsyncTask() {
+		return new WebAsyncTask<String>(20000L,()->{
+			Thread.sleep(10000); //simulate long running task
+			return "asynchronous request completed";
+		});
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@GetMapping("/callable")
+fun asynchronousRequestProcessingWithCallableWrappedInWebAsyncTask(): WebAsyncTask<String> {
+    return WebAsyncTask(20000L) {
+        Thread.sleep(10000) // simulate long-running task
+        "asynchronous request completed"
+    }
+}
+----
+======
 
 
 
