@@ -27,7 +27,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class HttpMessageWriterViewTests {
 
-	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
+	private HttpMessageWriterView view = new HttpMessageWriterView(new JacksonJsonEncoder());
 
 	private final Map<String, Object> model = new HashMap<>();
 

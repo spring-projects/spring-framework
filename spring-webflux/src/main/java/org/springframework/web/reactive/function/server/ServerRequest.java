@@ -40,7 +40,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.json.Jackson2CodecSupport;
+import org.springframework.http.codec.JacksonCodecSupport;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -142,7 +142,7 @@ public interface ServerRequest {
 	/**
 	 * Extract the body with the given {@code BodyExtractor} and hints.
 	 * @param extractor the {@code BodyExtractor} that reads from the request
-	 * @param hints the map of hints like {@link Jackson2CodecSupport#JSON_VIEW_HINT}
+	 * @param hints the map of hints like {@link JacksonCodecSupport#JSON_VIEW_HINT}
 	 * to use to customize body extraction
 	 * @param <T> the type of the body returned
 	 * @return the extracted body

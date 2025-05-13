@@ -18,39 +18,55 @@ package org.springframework.http.codec.cbor;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.dataformat.cbor.CBORMapper;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.AbstractJackson2Encoder;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.util.Assert;
+import org.springframework.http.codec.AbstractJacksonEncoder;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from an {@code Object} to bytes of CBOR objects using Jackson 2.x.
+ * Encode from an {@code Object} to bytes of CBOR objects using Jackson 3.x.
  * Stream encoding is not supported yet.
  *
  * @author Sebastien Deleuze
- * @since 5.2
- * @see Jackson2CborDecoder
+ * @since 7.0
+ * @see JacksonCborDecoder
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
  */
-public class Jackson2CborEncoder extends AbstractJackson2Encoder {
+public class JacksonCborEncoder extends AbstractJacksonEncoder {
 
-	public Jackson2CborEncoder() {
-		this(Jackson2ObjectMapperBuilder.cbor().build(), MediaType.APPLICATION_CBOR);
+	/**
+	 * Construct a new instance with a {@link CBORMapper} customized with the
+	 * {@link tools.jackson.databind.JacksonModule}s found by
+	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 */
+	public JacksonCborEncoder() {
+		super(CBORMapper.builder(), MediaType.APPLICATION_CBOR);
 	}
 
-	public Jackson2CborEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	/**
+	 * Construct a new instance with the provided {@link CBORMapper}.
+	 * @see CBORMapper#builder()
+	 * @see MapperBuilder#findAndAddModules(ClassLoader)
+	 */
+	public JacksonCborEncoder(CBORMapper mapper) {
+		super(mapper, MediaType.APPLICATION_CBOR);
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link CBORMapper} and {@link MimeType}s.
+	 * @see CBORMapper#builder()
+	 * @see MapperBuilder#findAndAddModules(ClassLoader)
+	 */
+	public JacksonCborEncoder(CBORMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		Assert.isAssignable(CBORFactory.class, mapper.getFactory().getClass());
 	}
 
 

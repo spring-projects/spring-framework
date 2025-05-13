@@ -767,7 +767,7 @@ class WebClientIntegrationTests {
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertThat(request.getPath()).isEqualTo("/pojo/capitalize");
-			assertThat(request.getBody().readUtf8()).isEqualTo("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}");
+			assertThat(request.getBody().readUtf8()).isEqualTo("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_LENGTH)).isEqualTo("31");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");

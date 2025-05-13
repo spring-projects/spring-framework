@@ -31,6 +31,7 @@ import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.xml.Pojo;
 
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
-	private final Jackson2JsonDecoder jsonDecoder = new Jackson2JsonDecoder();
+	private final JacksonJsonDecoder jsonDecoder = new JacksonJsonDecoder();
 
 	private ServerSentEventHttpMessageReader reader = new ServerSentEventHttpMessageReader(this.jsonDecoder);
 

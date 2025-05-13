@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.codec.json.Jackson2CodecSupport;
+import org.springframework.http.codec.JacksonCodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
@@ -292,7 +292,7 @@ public interface EntityResponse<T> extends ServerResponse {
 		Builder<T> contentType(MediaType contentType);
 
 		/**
-		 * Add a serialization hint like {@link Jackson2CodecSupport#JSON_VIEW_HINT} to
+		 * Add a serialization hint like {@link JacksonCodecSupport#JSON_VIEW_HINT} to
 		 * customize how the body will be serialized.
 		 * @param key the hint key
 		 * @param value the hint value

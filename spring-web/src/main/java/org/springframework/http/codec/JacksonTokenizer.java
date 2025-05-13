@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec.json;
+package org.springframework.http.codec;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.async.ByteArrayFeeder;
-import com.fasterxml.jackson.core.async.ByteBufferFeeder;
-import com.fasterxml.jackson.core.async.NonBlockingInputFeeder;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
-import com.fasterxml.jackson.databind.util.TokenBuffer;
-import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.async.ByteArrayFeeder;
+import tools.jackson.core.async.ByteBufferFeeder;
+import tools.jackson.core.async.NonBlockingInputFeeder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.util.TokenBuffer;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -44,18 +38,14 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 /**
  * {@link Function} to transform a JSON stream of arbitrary size, byte array
  * chunks into a {@code Flux<TokenBuffer>} where each token buffer is a
- * well-formed JSON object with Jackson 2.x.
+ * well-formed JSON object with Jackson 3.x.
  *
- * @author Arjen Poutsma
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @since 5.0
+ * @author Sebastien Deleuze
+ * @since 7.0
  */
-final class Jackson2Tokenizer {
+final class JacksonTokenizer {
 
 	private final JsonParser parser;
-
-	private final DeserializationContext deserializationContext;
 
 	private final NonBlockingInputFeeder inputFeeder;
 
@@ -74,18 +64,14 @@ final class Jackson2Tokenizer {
 	private TokenBuffer tokenBuffer;
 
 
-	private Jackson2Tokenizer(JsonParser parser, DeserializationContext deserializationContext,
-			boolean tokenizeArrayElements, boolean forceUseOfBigDecimal, int maxInMemorySize) {
-
+	private JacksonTokenizer(JsonParser parser, boolean tokenizeArrayElements, boolean forceUseOfBigDecimal, int maxInMemorySize) {
 		this.parser = parser;
-		this.deserializationContext = deserializationContext;
-		this.inputFeeder = this.parser.getNonBlockingInputFeeder();
+		this.inputFeeder = this.parser.nonBlockingInputFeeder();
 		this.tokenizeArrayElements = tokenizeArrayElements;
 		this.forceUseOfBigDecimal = forceUseOfBigDecimal;
 		this.maxInMemorySize = maxInMemorySize;
 		this.tokenBuffer = createToken();
 	}
-
 
 
 	private List<TokenBuffer> tokenize(DataBuffer dataBuffer) {
@@ -109,11 +95,8 @@ final class Jackson2Tokenizer {
 			assertInMemorySize(bufferSize, tokens);
 			return tokens;
 		}
-		catch (JsonProcessingException ex) {
+		catch (JacksonException ex) {
 			throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
-		}
-		catch (IOException ex) {
-			throw Exceptions.propagate(ex);
 		}
 		finally {
 			DataBufferUtils.release(dataBuffer);
@@ -128,16 +111,13 @@ final class Jackson2Tokenizer {
 				parseTokens(tokens);
 				return Flux.fromIterable(tokens);
 			}
-			catch (JsonProcessingException ex) {
+			catch (JacksonException ex) {
 				throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
-			}
-			catch (IOException ex) {
-				throw Exceptions.propagate(ex);
 			}
 		});
 	}
 
-	private void parseTokens(List<TokenBuffer> tokens) throws IOException {
+	private void parseTokens(List<TokenBuffer> tokens) {
 		// SPR-16151: Smile data format uses null to separate documents
 		boolean previousNull = false;
 		while (!this.parser.isClosed()) {
@@ -172,7 +152,7 @@ final class Jackson2Tokenizer {
 		}
 	}
 
-	private void processTokenNormal(JsonToken token, List<TokenBuffer> result) throws IOException {
+	private void processTokenNormal(JsonToken token, List<TokenBuffer> result) {
 		this.tokenBuffer.copyCurrentEvent(this.parser);
 
 		if ((token.isStructEnd() || token.isScalarValue()) && this.objectDepth == 0 && this.arrayDepth == 0) {
@@ -181,7 +161,7 @@ final class Jackson2Tokenizer {
 		}
 	}
 
-	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
+	private void processTokenArray(JsonToken token, List<TokenBuffer> result) {
 		if (!isTopLevelArrayToken(token)) {
 			this.tokenBuffer.copyCurrentEvent(this.parser);
 		}
@@ -194,7 +174,7 @@ final class Jackson2Tokenizer {
 	}
 
 	private TokenBuffer createToken() {
-		TokenBuffer tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
+		TokenBuffer tokenBuffer = TokenBuffer.forBuffering(this.parser, this.parser.objectReadContext());
 		tokenBuffer.forceUseOfBigDecimal(this.forceUseOfBigDecimal);
 		return tokenBuffer;
 	}
@@ -230,7 +210,6 @@ final class Jackson2Tokenizer {
 	/**
 	 * Tokenize the given {@code Flux<DataBuffer>} into {@code Flux<TokenBuffer>}.
 	 * @param dataBuffers the source data buffers
-	 * @param jsonFactory the factory to use
 	 * @param objectMapper the current mapper instance
 	 * @param tokenizeArrays if {@code true} and the "top level" JSON object is
 	 * an array, each element is returned individually immediately after it is received
@@ -239,28 +218,22 @@ final class Jackson2Tokenizer {
 	 * @param maxInMemorySize maximum memory size
 	 * @return the resulting token buffers
 	 */
-	public static Flux<TokenBuffer> tokenize(Flux<DataBuffer> dataBuffers, JsonFactory jsonFactory,
+	public static Flux<TokenBuffer> tokenize(Flux<DataBuffer> dataBuffers,
 			ObjectMapper objectMapper, boolean tokenizeArrays, boolean forceUseOfBigDecimal, int maxInMemorySize) {
 
 		try {
 			JsonParser parser;
-			if (jsonFactory.getFormatName().equals(SmileFactory.FORMAT_NAME_SMILE)) {
-				// ByteBufferFeeder is not supported for Smile
-				parser = jsonFactory.createNonBlockingByteArrayParser();
+			try {
+				parser = objectMapper.createNonBlockingByteBufferParser();
 			}
-			else {
-				parser = jsonFactory.createNonBlockingByteBufferParser();
+			catch (UnsupportedOperationException ex) {
+				parser = objectMapper.createNonBlockingByteArrayParser();
 			}
-			DeserializationContext context = objectMapper.getDeserializationContext();
-			if (context instanceof DefaultDeserializationContext ddc) {
-				context = ddc.createInstance(objectMapper.getDeserializationConfig(),
-						parser, objectMapper.getInjectableValues());
-			}
-			Jackson2Tokenizer tokenizer =
-					new Jackson2Tokenizer(parser, context, tokenizeArrays, forceUseOfBigDecimal, maxInMemorySize);
+			JacksonTokenizer tokenizer =
+					new JacksonTokenizer(parser, tokenizeArrays, forceUseOfBigDecimal, maxInMemorySize);
 			return dataBuffers.concatMapIterable(tokenizer::tokenize).concatWith(tokenizer.endOfInput());
 		}
-		catch (IOException ex) {
+		catch (JacksonException ex) {
 			return Flux.error(ex);
 		}
 	}

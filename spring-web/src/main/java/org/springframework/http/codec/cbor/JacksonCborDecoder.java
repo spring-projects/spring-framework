@@ -18,43 +18,58 @@ package org.springframework.http.codec.cbor;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.dataformat.cbor.CBORMapper;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.AbstractJackson2Decoder;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.util.Assert;
+import org.springframework.http.codec.AbstractJacksonDecoder;
 import org.springframework.util.MimeType;
 
 /**
- * Decode bytes into CBOR and convert to Object's with Jackson 2.x.
+ * Decode bytes into CBOR and convert to Object's with Jackson 3.x.
  * Stream decoding is not supported yet.
  *
  * @author Sebastien Deleuze
- * @since 5.2
- * @see Jackson2CborEncoder
+ * @since 7.0
+ * @see JacksonCborEncoder
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
  */
-public class Jackson2CborDecoder extends AbstractJackson2Decoder {
+public class JacksonCborDecoder extends AbstractJacksonDecoder {
 
-	public Jackson2CborDecoder() {
-		this(Jackson2ObjectMapperBuilder.cbor().build(), MediaType.APPLICATION_CBOR);
+	/**
+	 * Construct a new instance with a {@link CBORMapper} customized with the
+	 * {@link tools.jackson.databind.JacksonModule}s found by
+	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 */
+	public JacksonCborDecoder() {
+		super(CBORMapper.builder(), MediaType.APPLICATION_CBOR);
 	}
 
-	public Jackson2CborDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	/**
+	 * Construct a new instance with the provided {@link CBORMapper}.
+	 */
+	public JacksonCborDecoder(CBORMapper mapper) {
+		super(mapper, MediaType.APPLICATION_CBOR);
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link CBORMapper} and {@link MimeType}s.
+	 * @see CBORMapper#builder()
+	 * @see MapperBuilder#findAndAddModules(ClassLoader)
+	 */
+	public JacksonCborDecoder(CBORMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		Assert.isAssignable(CBORFactory.class, mapper.getFactory().getClass());
 	}
 
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
 		throw new UnsupportedOperationException("Does not support stream decoding yet");
 	}
 

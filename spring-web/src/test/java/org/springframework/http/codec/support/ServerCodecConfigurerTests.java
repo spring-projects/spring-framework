@@ -54,10 +54,8 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.cbor.KotlinSerializationCborDecoder;
 import org.springframework.http.codec.cbor.KotlinSerializationCborEncoder;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.json.Jackson2SmileDecoder;
-import org.springframework.http.codec.json.Jackson2SmileEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
@@ -68,6 +66,8 @@ import org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecode
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
+import org.springframework.http.codec.smile.JacksonSmileDecoder;
+import org.springframework.http.codec.smile.JacksonSmileEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
@@ -79,6 +79,7 @@ import static org.springframework.core.ResolvableType.forClass;
  * Tests for {@link ServerCodecConfigurer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 class ServerCodecConfigurerTests {
 
@@ -104,8 +105,8 @@ class ServerCodecConfigurerTests {
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartEventHttpMessageReader.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationCborDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationProtobufDecoder.class);
-		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jackson2JsonDecoder.class);
-		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jackson2SmileDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonJsonDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonSmileDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jaxb2XmlDecoder.class);
 		assertStringDecoder(getNextDecoder(readers), false);
 	}
@@ -126,26 +127,26 @@ class ServerCodecConfigurerTests {
 		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartHttpMessageWriter.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationProtobufEncoder.class);
-		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2JsonEncoder.class);
-		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2SmileEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonJsonEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonSmileEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jaxb2XmlEncoder.class);
 		assertSseWriter(writers);
 		assertStringEncoder(getNextEncoder(writers), false);
 	}
 
 	@Test
-	void jackson2EncoderOverride() {
-		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
-		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-		this.configurer.defaultCodecs().jackson2JsonDecoder(decoder);
-		this.configurer.defaultCodecs().jackson2JsonEncoder(encoder);
+	void jacksonEncoderOverride() {
+		JacksonJsonDecoder decoder = new JacksonJsonDecoder();
+		JacksonJsonEncoder encoder = new JacksonJsonEncoder();
+		this.configurer.defaultCodecs().jacksonJsonDecoder(decoder);
+		this.configurer.defaultCodecs().jacksonJsonEncoder(encoder);
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		Jackson2JsonDecoder actualDecoder = findCodec(readers, Jackson2JsonDecoder.class);
+		JacksonJsonDecoder actualDecoder = findCodec(readers, JacksonJsonDecoder.class);
 		assertThat(actualDecoder).isSameAs(decoder);
 
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		Jackson2JsonEncoder actualEncoder = findCodec(writers, Jackson2JsonEncoder.class);
+		JacksonJsonEncoder actualEncoder = findCodec(writers, JacksonJsonEncoder.class);
 		assertThat(actualEncoder).isSameAs(encoder);
 		assertThat(findCodec(writers, ServerSentEventHttpMessageWriter.class).getEncoder()).isSameAs(encoder);
 	}
@@ -173,8 +174,8 @@ class ServerCodecConfigurerTests {
 
 		assertThat(((KotlinSerializationCborDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((KotlinSerializationProtobufDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-		assertThat(((Jackson2SmileDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((JacksonJsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((JacksonSmileDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((Jaxb2XmlDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 	}
@@ -189,16 +190,16 @@ class ServerCodecConfigurerTests {
 		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
 		customCodecs.register(new ByteArrayDecoder());
 		customCodecs.registerWithDefaultConfig(new ByteArrayDecoder());
-		customCodecs.register(new Jackson2JsonDecoder());
-		customCodecs.registerWithDefaultConfig(new Jackson2JsonDecoder());
+		customCodecs.register(new JacksonJsonDecoder());
+		customCodecs.registerWithDefaultConfig(new JacksonJsonDecoder());
 
 		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
-		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((JacksonJsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((JacksonJsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 	}
 
 	@Test
@@ -235,7 +236,7 @@ class ServerCodecConfigurerTests {
 		ServerCodecConfigurer clone = this.configurer.clone();
 
 		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new DefaultPartHttpMessageReader());
-		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 		clone.defaultCodecs().multipartReader(reader);
 		clone.defaultCodecs().serverSentEventEncoder(encoder);
 
@@ -319,7 +320,7 @@ class ServerCodecConfigurerTests {
 		assertThat(writer.getClass()).isEqualTo(ServerSentEventHttpMessageWriter.class);
 		Encoder<?> encoder = ((ServerSentEventHttpMessageWriter) writer).getEncoder();
 		assertThat(encoder).isNotNull();
-		assertThat(encoder.getClass()).isEqualTo(Jackson2JsonEncoder.class);
+		assertThat(encoder.getClass()).isEqualTo(JacksonJsonEncoder.class);
 	}
 
 }
