@@ -309,11 +309,11 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		@Test
-		void getAnnotationAttributeVoidType() {
+		void getAnnotationAttributeIntType() {
 			MultiValueMap<String, Object> attributes =
-					get(WithVoidType.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
+					get(WithIntType.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
 			assertThat(attributes).containsOnlyKeys("names", "count", "type", "subAnnotation");
-			assertThat(attributes.get("type")).containsAnyOf(Void.class, void.class);
+			assertThat(attributes.get("type")).contains(int.class);
 		}
 
 		@Test
@@ -460,9 +460,9 @@ public abstract class AbstractAnnotationMetadataTests {
 		public static class WithComplexAttributeTypes {
 		}
 
-		@ComplexAttributes(names = "void", count = TestEnum.ONE, type = void.class,
+		@ComplexAttributes(names = "void", count = TestEnum.ONE, type = int.class,
 				subAnnotation = @SubAnnotation(name="spring"))
-		public static class WithVoidType {
+		public static class WithIntType {
 
 		}
 

@@ -37,7 +37,6 @@ import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Parse {@link RuntimeVisibleAnnotationsAttribute} into {@link MergedAnnotations}
@@ -100,7 +99,7 @@ abstract class ClassFileAnnotationMetadata {
 
 	private static String fromTypeDescriptor(String descriptor) {
 		ClassDesc classDesc = ClassDesc.ofDescriptor(descriptor);
-		return classDesc.isPrimitive() ? "java.lang." + StringUtils.capitalize(classDesc.displayName()) :
+		return classDesc.isPrimitive() ? classDesc.displayName() :
 		classDesc.packageName() + "." + classDesc.displayName();
 	}
 
