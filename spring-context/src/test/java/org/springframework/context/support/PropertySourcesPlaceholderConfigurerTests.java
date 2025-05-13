@@ -16,12 +16,15 @@
 
 package org.springframework.context.support;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +40,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.env.AbstractPropertyResolver;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -47,12 +52,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.env.MockPropertySource;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.util.PlaceholderResolutionException;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
+import static org.springframework.core.env.AbstractPropertyResolver.DEFAULT_PLACEHOLDER_ESCAPE_CHARACTER_PROPERTY_NAME;
 
 /**
  * Tests for {@link PropertySourcesPlaceholderConfigurer}.
@@ -653,6 +661,108 @@ class PropertySourcesPlaceholderConfigurerTests {
 			ppc.postProcessBeanFactory(bf);
 
 			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("X:\\\\${DOMAIN}${enigma}");
+		}
+
+		private static DefaultListableBeanFactory createBeanFactory() {
+			BeanDefinition beanDefinition = genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.property}")
+					.getBeanDefinition();
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			bf.registerBeanDefinition("testBean",beanDefinition);
+			return bf;
+		}
+
+	}
+
+
+	/**
+	 * Tests that globally set the default escape character (or disable it) and
+	 * rely on nested placeholder resolution.
+	 */
+	@Nested
+	class GlobalDefaultEscapeCharacterTests {
+
+		private static final Field defaultEscapeCharacterField =
+				ReflectionUtils.findField(AbstractPropertyResolver.class, "defaultEscapeCharacter");
+
+		static {
+			ReflectionUtils.makeAccessible(defaultEscapeCharacterField);
+		}
+
+
+		@BeforeEach
+		void resetStateBeforeEachTest() {
+			resetState();
+		}
+
+		@AfterAll
+		static void resetState() {
+			ReflectionUtils.setField(defaultEscapeCharacterField, null, Character.MIN_VALUE);
+			setSpringProperty(null);
+		}
+
+
+		@Test  // gh-34865
+		void defaultEscapeCharacterSetToXyz() {
+			setSpringProperty("XYZ");
+
+			assertThatIllegalArgumentException()
+					.isThrownBy(PropertySourcesPlaceholderConfigurer::new)
+					.withMessage("Value [XYZ] for property [%s] must be a single character or an empty string",
+							DEFAULT_PLACEHOLDER_ESCAPE_CHARACTER_PROPERTY_NAME);
+		}
+
+		@Test  // gh-34865
+		void defaultEscapeCharacterDisabled() {
+			setSpringProperty("");
+
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin")
+					.withProperty("my.property", "\\DOMAIN\\${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("\\DOMAIN\\admin");
+		}
+
+		@Test  // gh-34865
+		void defaultEscapeCharacterSetToBackslash() {
+			setSpringProperty("\\");
+
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin")
+					.withProperty("my.property", "\\DOMAIN\\${user.home}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.postProcessBeanFactory(bf);
+
+			// \DOMAIN\${user.home} resolves to \DOMAIN${user.home} instead of \DOMAIN\admin
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("\\DOMAIN${user.home}");
+		}
+
+		@Test  // gh-34865
+		void defaultEscapeCharacterSetToTilde() {
+			setSpringProperty("~");
+
+			MockEnvironment env = new MockEnvironment()
+					.withProperty("user.home", "admin\\~${nested}")
+					.withProperty("my.property", "DOMAIN\\${user.home}\\~${enigma}");
+
+			DefaultListableBeanFactory bf = createBeanFactory();
+			PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+			ppc.setEnvironment(env);
+			ppc.postProcessBeanFactory(bf);
+
+			assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("DOMAIN\\admin\\${nested}\\${enigma}");
+		}
+
+		private static void setSpringProperty(String value) {
+			SpringProperties.setProperty(DEFAULT_PLACEHOLDER_ESCAPE_CHARACTER_PROPERTY_NAME, value);
 		}
 
 		private static DefaultListableBeanFactory createBeanFactory() {

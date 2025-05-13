@@ -22,6 +22,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.core.env.AbstractPropertyResolver;
 import org.springframework.util.StringValueResolver;
 import org.springframework.util.SystemPropertyUtils;
 
@@ -86,6 +87,7 @@ import org.springframework.util.SystemPropertyUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see PropertyPlaceholderConfigurer
  * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
@@ -102,7 +104,11 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Default value separator: {@value}. */
 	public static final String DEFAULT_VALUE_SEPARATOR = SystemPropertyUtils.VALUE_SEPARATOR;
 
-	/** Default escape character: {@code '\'}. */
+	/**
+	 * Default escape character: {@code '\'}.
+	 * @since 6.2
+	 * @see AbstractPropertyResolver#getDefaultEscapeCharacter()
+	 */
 	public static final Character DEFAULT_ESCAPE_CHARACTER = SystemPropertyUtils.ESCAPE_CHARACTER;
 
 
@@ -115,8 +121,10 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
 	protected @Nullable String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
-	/** Defaults to {@link #DEFAULT_ESCAPE_CHARACTER}. */
-	protected @Nullable Character escapeCharacter = DEFAULT_ESCAPE_CHARACTER;
+	/**
+	 * The default is determined by {@link AbstractPropertyResolver#getDefaultEscapeCharacter()}.
+	 */
+	protected @Nullable Character escapeCharacter = AbstractPropertyResolver.getDefaultEscapeCharacter();
 
 	protected boolean trimValues = false;
 
@@ -160,6 +168,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 * {@linkplain #setPlaceholderPrefix(String) placeholder prefix} and the
 	 * {@linkplain #setValueSeparator(String) value separator}, or {@code null}
 	 * if no escaping should take place.
+	 * <p>The default is determined by {@link AbstractPropertyResolver#getDefaultEscapeCharacter()}.
 	 * @since 6.2
 	 */
 	public void setEscapeCharacter(@Nullable Character escapeCharacter) {
