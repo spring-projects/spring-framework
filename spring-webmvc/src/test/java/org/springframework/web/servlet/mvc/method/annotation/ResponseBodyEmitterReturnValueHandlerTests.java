@@ -35,7 +35,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
@@ -63,7 +63,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 class ResponseBodyEmitterReturnValueHandlerTests {
 
 	private final ResponseBodyEmitterReturnValueHandler handler =
-			new ResponseBodyEmitterReturnValueHandler(List.of(new MappingJackson2HttpMessageConverter()));
+			new ResponseBodyEmitterReturnValueHandler(List.of(new JacksonJsonHttpMessageConverter()));
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 

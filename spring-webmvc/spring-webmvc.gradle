@@ -39,6 +39,12 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
 	optional("org.reactivestreams:reactive-streams")
 	optional("org.webjars:webjars-locator-lite")
+	optional("tools.jackson.core:jackson-databind")
+	optional("tools.jackson.dataformat:jackson-dataformat-smile")
+	optional("tools.jackson.dataformat:jackson-dataformat-cbor")
+	optional("tools.jackson.dataformat:jackson-dataformat-smile")
+	optional("tools.jackson.dataformat:jackson-dataformat-xml")
+	optional("tools.jackson.dataformat:jackson-dataformat-yaml")
 	testCompileOnly("com.google.code.findbugs:findbugs") {  // for groovy-templates
 		exclude group: "dom4j", module: "dom4j"
 	}

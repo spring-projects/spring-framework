@@ -47,19 +47,24 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.JacksonCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
+import org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
 import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -96,13 +101,23 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private static final boolean jaxb2Present;
 
+	private static final boolean jacksonPresent;
+
 	private static final boolean jackson2Present;
+
+	private static final boolean jacksonXmlPresent;
 
 	private static final boolean jackson2XmlPresent;
 
+	private static final boolean jacksonSmilePresent;
+
 	private static final boolean jackson2SmilePresent;
 
+	private static final boolean jacksonCborPresent;
+
 	private static final boolean jackson2CborPresent;
+
+	private static final boolean jacksonYamlPresent;
 
 	private static final boolean jackson2YamlPresent;
 
@@ -126,12 +141,17 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", loader);
 		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", loader);
+		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", loader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", loader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", loader);
-		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", loader);
-		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", loader);
-		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", loader);
-		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
+		jacksonXmlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", loader);
+		jackson2XmlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", loader);
+		jacksonSmilePresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", loader);
+		jackson2SmilePresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", loader);
+		jacksonCborPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", loader);
+		jackson2CborPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", loader);
+		jacksonYamlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", loader);
+		jackson2YamlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", loader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", loader);
 		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", loader);
@@ -463,7 +483,10 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				this.messageConverters.add(new RssChannelHttpMessageConverter());
 			}
 
-			if (jackson2XmlPresent) {
+			if (jacksonXmlPresent) {
+				this.messageConverters.add(new JacksonXmlHttpMessageConverter());
+			}
+			else if (jackson2XmlPresent) {
 				this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
 			}
 			else if (jaxb2Present) {
@@ -474,7 +497,10 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				this.messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
 			}
 
-			if (jackson2Present) {
+			if (jacksonPresent) {
+				this.messageConverters.add(new JacksonJsonHttpMessageConverter());
+			}
+			else if (jackson2Present) {
 				this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 			}
 			else if (gsonPresent) {
@@ -487,18 +513,27 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				this.messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 			}
 
+			if (jacksonSmilePresent) {
+				this.messageConverters.add(new JacksonSmileHttpMessageConverter());
+			}
 			if (jackson2SmilePresent) {
 				this.messageConverters.add(new MappingJackson2SmileHttpMessageConverter());
 			}
 
-			if (jackson2CborPresent) {
+			if (jacksonCborPresent) {
+				this.messageConverters.add(new JacksonCborHttpMessageConverter());
+			}
+			else if (jackson2CborPresent) {
 				this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
 			}
 			else if (kotlinSerializationCborPresent) {
 				this.messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
 			}
 
-			if (jackson2YamlPresent) {
+			if (jacksonYamlPresent) {
+				this.messageConverters.add(new JacksonYamlHttpMessageConverter());
+			}
+			else if (jackson2YamlPresent) {
 				this.messageConverters.add(new MappingJackson2YamlHttpMessageConverter());
 			}
 		}
