@@ -40,6 +40,7 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.JacksonJsonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -61,6 +62,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @see org.springframework.web.socket.sockjs.client.Transport
  */
 public class SockJsClient implements WebSocketClient, Lifecycle {
+
+	private static final boolean jacksonPresent = ClassUtils.isPresent(
+			"tools.jackson.databind.ObjectMapper", SockJsClient.class.getClassLoader());
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", SockJsClient.class.getClassLoader());
@@ -97,7 +101,10 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		Assert.notEmpty(transports, "No transports provided");
 		this.transports = new ArrayList<>(transports);
 		this.infoReceiver = initInfoReceiver(transports);
-		if (jackson2Present) {
+		if (jacksonPresent) {
+			this.messageCodec = new JacksonJsonSockJsMessageCodec();
+		}
+		else if (jackson2Present) {
 			this.messageCodec = new Jackson2SockJsMessageCodec();
 		}
 	}

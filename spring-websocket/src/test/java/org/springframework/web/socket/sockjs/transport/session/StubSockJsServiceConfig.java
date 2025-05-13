@@ -18,7 +18,7 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.JacksonJsonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
@@ -33,7 +33,7 @@ public class StubSockJsServiceConfig implements SockJsServiceConfig {
 
 	private TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
-	private SockJsMessageCodec messageCodec = new Jackson2SockJsMessageCodec();
+	private SockJsMessageCodec messageCodec = new JacksonJsonSockJsMessageCodec();
 
 	private int httpMessageCacheSize = 100;
 

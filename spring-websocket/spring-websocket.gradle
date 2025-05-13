@@ -17,6 +17,7 @@ dependencies {
 	}
 	optional("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
 	optional("org.eclipse.jetty:jetty-client")
+	optional("tools.jackson.core:jackson-databind")
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("io.projectreactor.netty:reactor-netty-http")

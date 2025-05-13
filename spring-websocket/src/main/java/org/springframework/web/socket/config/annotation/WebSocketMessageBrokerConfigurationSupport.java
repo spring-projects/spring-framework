@@ -23,8 +23,6 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
@@ -160,19 +158,6 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		stats.setOutboundChannelExecutor(outboundExecutor);
 		stats.setSockJsTaskScheduler(scheduler);
 		return stats;
-	}
-
-	@Override
-	protected MappingJackson2MessageConverter createJacksonConverter() {
-		MappingJackson2MessageConverter messageConverter = super.createJacksonConverter();
-		// Use Jackson builder in order to have well-known modules registered automatically.
-		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
-		ApplicationContext applicationContext = getApplicationContext();
-		if (applicationContext != null) {
-			builder.applicationContext(applicationContext);
-		}
-		messageConverter.setObjectMapper(builder.build());
-		return messageConverter;
 	}
 
 }

@@ -29,7 +29,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.JacksonJsonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 class ClientSockJsSessionTests {
 
-	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
+	private static final JacksonJsonSockJsMessageCodec CODEC = new JacksonJsonSockJsMessageCodec();
 
 	private WebSocketHandler handler = mock();
 

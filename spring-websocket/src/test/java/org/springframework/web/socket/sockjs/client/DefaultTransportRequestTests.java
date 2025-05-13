@@ -30,7 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.JacksonJsonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 class DefaultTransportRequestTests {
 
-	private final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
+	private final JacksonJsonSockJsMessageCodec CODEC = new JacksonJsonSockJsMessageCodec();
 
 	private CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
 

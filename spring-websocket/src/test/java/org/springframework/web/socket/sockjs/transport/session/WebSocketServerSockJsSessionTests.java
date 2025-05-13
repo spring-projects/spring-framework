@@ -16,13 +16,13 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -118,7 +118,7 @@ class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTests<TestW
 		this.session.handleMessage(message, this.webSocketSession);
 
 		this.session.isClosed();
-		verify(this.webSocketHandler).handleTransportError(same(this.session), any(IOException.class));
+		verify(this.webSocketHandler).handleTransportError(same(this.session), any(JacksonException.class));
 		verifyNoMoreInteractions(this.webSocketHandler);
 	}
 

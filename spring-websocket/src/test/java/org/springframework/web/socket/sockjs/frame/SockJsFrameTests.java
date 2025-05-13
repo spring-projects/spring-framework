@@ -49,7 +49,7 @@ class SockJsFrameTests {
 
 	@Test
 	void messageArrayFrame() {
-		SockJsFrame frame = SockJsFrame.messageFrame(new Jackson2SockJsMessageCodec(), "m1", "m2");
+		SockJsFrame frame = SockJsFrame.messageFrame(new JacksonJsonSockJsMessageCodec(), "m1", "m2");
 
 		assertThat(frame.getContent()).isEqualTo("a[\"m1\",\"m2\"]");
 		assertThat(frame.getType()).isEqualTo(SockJsFrameType.MESSAGE);
