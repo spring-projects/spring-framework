@@ -36,7 +36,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.QosSettings;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.JacksonJsonMessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
@@ -299,7 +299,7 @@ class MessagingMessageListenerAdapterTests {
 	@Test
 	void replyJackson() throws JMSException {
 		TextMessage reply = testReplyWithJackson("replyJackson",
-				"{\"counter\":42,\"name\":\"Response\",\"description\":\"lengthy description\"}");
+				"{\"name\":\"Response\",\"description\":\"lengthy description\",\"counter\":42}");
 		verify(reply).setObjectProperty("foo", "bar");
 	}
 
@@ -327,7 +327,7 @@ class MessagingMessageListenerAdapterTests {
 		given(session.createProducer(replyDestination)).willReturn(messageProducer);
 
 		MessagingMessageListenerAdapter listener = getPayloadInstance("Response", methodName, Message.class);
-		MappingJackson2MessageConverter messageConverter = new MappingJackson2MessageConverter();
+		JacksonJsonMessageConverter messageConverter = new JacksonJsonMessageConverter();
 		messageConverter.setTargetType(MessageType.TEXT);
 		listener.setMessageConverter(messageConverter);
 		listener.setDefaultResponseDestination(replyDestination);
