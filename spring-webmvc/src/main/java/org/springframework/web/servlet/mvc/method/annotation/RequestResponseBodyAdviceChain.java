@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
@@ -28,6 +30,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.CollectionUtils;
@@ -36,7 +39,7 @@ import org.springframework.web.method.ControllerAdviceBean;
 /**
  * Invokes {@link RequestBodyAdvice} and {@link ResponseBodyAdvice} where each
  * instance may be (and is most likely) wrapped with
- * {@link org.springframework.web.method.ControllerAdviceBean ControllerAdviceBean}.
+ * {@link ControllerAdviceBean ControllerAdviceBean}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -176,4 +179,38 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 		}
 	}
 
+	@Override
+	public @Nullable Map<String, Object> determineReadHints(MethodParameter parameter, Type targetType, Class<? extends SmartHttpMessageConverter<?>> converterType) {
+		Map<String, Object> hints = null;
+		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
+			if (advice.supports(parameter, targetType, converterType)) {
+				Map<String, Object> adviceHints = advice.determineReadHints(parameter, targetType, converterType);
+				if (adviceHints != null) {
+					if (hints == null) {
+						hints = new HashMap<>(adviceHints.size());
+					}
+					hints.putAll(adviceHints);
+				}
+			}
+		}
+		return hints;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public @Nullable Map<String, Object> determineWriteHints(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType) {
+		Map<String, Object> hints = null;
+		for (ResponseBodyAdvice<?> advice : getMatchingAdvice(returnType, ResponseBodyAdvice.class)) {
+			if (advice.supports(returnType, selectedConverterType)) {
+				Map<String, Object> adviceHints = ((ResponseBodyAdvice<Object>) advice).determineWriteHints(body, returnType, selectedContentType, selectedConverterType);
+				if (adviceHints != null) {
+					if (hints == null) {
+						hints = new HashMap<>(adviceHints.size());
+					}
+					hints.putAll(adviceHints);
+				}
+			}
+		}
+		return hints;
+	}
 }

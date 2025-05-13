@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -39,7 +40,8 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice implements Respon
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-		return AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
+		return AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType) ||
+				AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
 	}
 
 	@Override
@@ -49,6 +51,9 @@ public abstract class AbstractMappingJacksonResponseBodyAdvice implements Respon
 
 		if (body == null) {
 			return null;
+		}
+		if (AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType)) {
+			return body;
 		}
 		MappingJacksonValue container = getOrCreateContainer(body);
 		beforeBodyWriteInternal(container, contentType, returnType, request, response);
