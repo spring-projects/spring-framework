@@ -486,6 +486,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * if configured by the application, to the given codec , including any
 	 * codec it contains.
 	 */
+	@SuppressWarnings("removal")
 	private void initCodec(@Nullable Object codec) {
 		if (codec instanceof DecoderHttpMessageReader<?> decoderHttpMessageReader) {
 			codec = decoderHttpMessageReader.getDecoder();
@@ -612,6 +613,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * Reset and initialize object readers.
 	 * @since 5.3.3
 	 */
+	@SuppressWarnings("removal")
 	protected void initObjectReaders() {
 		this.objectReaders.clear();
 		if (!this.registerDefaults) {
@@ -760,6 +762,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	/**
 	 * Return "base" object writers only, i.e. common to client and server.
 	 */
+	@SuppressWarnings("removal")
 	final List<HttpMessageWriter<?>> getBaseObjectWriters() {
 		List<HttpMessageWriter<?>> writers = new ArrayList<>();
 		if (kotlinSerializationCborPresent) {
@@ -839,6 +842,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		return this.jacksonJsonDecoder;
 	}
 
+	@SuppressWarnings("removal")
 	protected Decoder<?> getJackson2JsonDecoder() {
 		if (this.jackson2JsonDecoder == null) {
 			this.jackson2JsonDecoder = new Jackson2JsonDecoder();
@@ -853,6 +857,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		return this.jacksonJsonEncoder;
 	}
 
+	@SuppressWarnings("removal")
 	protected Encoder<?> getJackson2JsonEncoder() {
 		if (this.jackson2JsonEncoder == null) {
 			this.jackson2JsonEncoder = new Jackson2JsonEncoder();

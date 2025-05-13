@@ -97,6 +97,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * otherwise is defaulted to {@link RestTemplateXhrTransport}.
 	 * @param transports the (non-empty) list of transports to use
 	 */
+	@SuppressWarnings("removal")
 	public SockJsClient(List<Transport> transports) {
 		Assert.notEmpty(transports, "No transports provided");
 		this.transports = new ArrayList<>(transports);

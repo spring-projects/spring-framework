@@ -60,7 +60,9 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1.4
+ * @deprecated since 7.0 in favor of {@link JacksonJsonMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class MappingJackson2MessageConverter implements SmartMessageConverter, BeanClassLoaderAware {
 
 	/**

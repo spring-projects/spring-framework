@@ -40,6 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  *
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("removal")
 class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborDecoder> {
 
 	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");

@@ -61,6 +61,7 @@ import static org.assertj.core.api.Assertions.within;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  */
+@SuppressWarnings("removal")
 class MappingJackson2HttpMessageConverterTests {
 
 	private final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();

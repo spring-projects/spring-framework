@@ -41,7 +41,10 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
  * @author Sebastien Deleuze
  * @since 4.1
  * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
+ * @deprecated since 7.0 in favor of {@link JacksonXmlView}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2XmlView extends AbstractJackson2View {
 
 	/**

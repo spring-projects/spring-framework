@@ -535,6 +535,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	/**
 	 * Allow to customize Jackson 2.x JSON converter.
 	 */
+	@SuppressWarnings("removal")
 	protected MappingJackson2MessageConverter createJacksonConverter() {
 		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);

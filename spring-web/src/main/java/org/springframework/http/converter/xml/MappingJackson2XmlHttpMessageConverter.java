@@ -41,7 +41,10 @@ import org.springframework.util.Assert;
  *
  * @author Sebastien Deleuze
  * @since 4.1
+ * @deprecated since 7.0 in favor of {@link JacksonXmlHttpMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 
 	private static final List<MediaType> problemDetailMediaTypes =

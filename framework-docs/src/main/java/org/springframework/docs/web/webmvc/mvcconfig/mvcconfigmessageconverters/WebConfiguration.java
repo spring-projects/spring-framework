@@ -28,6 +28,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@SuppressWarnings("removal")
 // tag::snippet[]
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {

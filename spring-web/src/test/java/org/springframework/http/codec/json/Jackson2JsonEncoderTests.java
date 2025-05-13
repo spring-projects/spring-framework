@@ -50,12 +50,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
  * Tests for {@link Jackson2JsonEncoder}.
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("removal")
 class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder> {
 
 	public Jackson2JsonEncoderTests() {
@@ -201,7 +201,8 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 		Mono<JacksonViewBean> input = Mono.just(bean);
 
 		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
-		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView1.class);
+		Map<String, Object> hints = singletonMap(org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT,
+				MyJacksonView1.class);
 
 		testEncode(input, type, null, hints, step -> step
 				.consumeNextWith(expectString("{\"withView1\":\"with\"}"))
@@ -218,7 +219,8 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 		Mono<JacksonViewBean> input = Mono.just(bean);
 
 		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
-		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView3.class);
+		Map<String, Object> hints = singletonMap(org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT,
+				MyJacksonView3.class);
 
 		testEncode(input, type, null, hints, step -> step
 				.consumeNextWith(expectString("{\"withoutView\":\"without\"}"))

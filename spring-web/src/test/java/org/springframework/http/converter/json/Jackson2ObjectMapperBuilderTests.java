@@ -98,7 +98,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Eddú Meléndez
  * @author Hyoungjune Kim
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "removal"})
 class Jackson2ObjectMapperBuilderTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";

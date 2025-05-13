@@ -469,6 +469,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return this;
 	}
 
+	@SuppressWarnings("removal")
 	private List<HttpMessageConverter<?>> initMessageConverters() {
 		if (this.messageConverters == null) {
 			this.messageConverters = new ArrayList<>();

@@ -561,6 +561,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return (handlers != null ? extractBeanSubElements(handlers, context) : null);
 	}
 
+	@SuppressWarnings("removal")
 	private ManagedList<?> getMessageConverters(Element element, @Nullable Object source, ParserContext context) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
 		ManagedList<Object> messageConverters = new ManagedList<>();
@@ -657,6 +658,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return messageConverters;
 	}
 
+	@SuppressWarnings("removal")
 	private GenericBeanDefinition createObjectMapperFactoryDefinition(@Nullable Object source) {
 		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
 		beanDefinition.setBeanClass(Jackson2ObjectMapperFactoryBean.class);

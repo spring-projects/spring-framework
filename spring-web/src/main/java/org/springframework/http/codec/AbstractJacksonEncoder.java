@@ -111,6 +111,7 @@ public abstract class AbstractJacksonEncoder extends JacksonCodecSupport impleme
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		if (!supportsMimeType(mimeType)) {
 			return false;

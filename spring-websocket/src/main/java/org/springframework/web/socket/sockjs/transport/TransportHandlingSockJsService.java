@@ -109,6 +109,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	 * initialized at start-up and shuts down when the application stops
 	 * @param handlers one or more {@link TransportHandler} implementations to use
 	 */
+	@SuppressWarnings("removal")
 	public TransportHandlingSockJsService(TaskScheduler scheduler, Collection<TransportHandler> handlers) {
 		super(scheduler);
 

@@ -202,6 +202,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Create a new instance with default settings.
 	 * Default {@link HttpMessageConverter HttpMessageConverters} are initialized.
 	 */
+	@SuppressWarnings("removal")
 	public RestTemplate() {
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());

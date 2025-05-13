@@ -51,6 +51,7 @@ import org.springframework.util.Assert;
  * @see com.fasterxml.jackson.annotation.JsonView
  * @see com.fasterxml.jackson.databind.ObjectMapper#readerWithView(Class)
  */
+@SuppressWarnings("removal")
 public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
 	@Override

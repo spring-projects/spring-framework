@@ -271,6 +271,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
@@ -328,6 +329,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 		return readJavaType(javaType, inputMessage, null);
 	}
 
+	@SuppressWarnings("removal")
 	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage, @Nullable Map<String, Object> hints) throws IOException {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = getCharset(contentType);

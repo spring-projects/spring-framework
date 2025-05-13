@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.within;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("removal")
 class MappingJackson2MessageConverterTests {
 
 	@Test

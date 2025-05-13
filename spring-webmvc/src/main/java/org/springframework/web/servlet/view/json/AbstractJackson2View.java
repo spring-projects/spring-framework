@@ -34,6 +34,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.Assert;
+import org.springframework.web.servlet.view.AbstractJacksonView;
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
@@ -46,7 +47,10 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.1
+ * @deprecated since 7.0 in favor of {@link AbstractJacksonView}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class AbstractJackson2View extends AbstractView {
 
 	private ObjectMapper objectMapper;

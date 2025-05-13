@@ -519,6 +519,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void jackson2JsonViewWithResponseBodyAndJsonMessageConverter() throws Exception {
 		Method method = JacksonController.class.getMethod("handleResponseBody");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
@@ -557,6 +558,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void jackson2JsonViewWithResponseEntityAndJsonMessageConverter() throws Exception {
 		Method method = JacksonController.class.getMethod("handleResponseEntity");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
@@ -595,6 +597,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12149
+	@SuppressWarnings("removal")
 	void jackson2JsonViewWithResponseBodyAndXmlMessageConverter() throws Exception {
 		Method method = JacksonController.class.getMethod("handleResponseBody");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
@@ -633,6 +636,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12149
+	@SuppressWarnings("removal")
 	void jackson2JsonViewWithResponseEntityAndXmlMessageConverter() throws Exception {
 		Method method = JacksonController.class.getMethod("handleResponseEntity");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
@@ -675,6 +679,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
+	@SuppressWarnings("removal")
 	void resolveArgumentWithJackson2JsonView() throws Exception {
 		String content = "{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}";
 		this.servletRequest.setContent(content.getBytes(StandardCharsets.UTF_8));
@@ -723,6 +728,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
+	@SuppressWarnings("removal")
 	void resolveHttpEntityArgumentWithJackson2JsonView() throws Exception {
 		String content = "{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}";
 		this.servletRequest.setContent(content.getBytes(StandardCharsets.UTF_8));
@@ -774,6 +780,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
+	@SuppressWarnings("removal")
 	void resolveArgumentWithJackson2JsonViewAndXmlMessageConverter() throws Exception {
 		String content = "<root>" +
 				"<withView1>with</withView1>" +
@@ -828,6 +835,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12501
+	@SuppressWarnings("removal")
 	void resolveHttpEntityArgumentWithJackson2JsonViewAndXmlMessageConverter() throws Exception {
 		String content = "<root>" +
 				"<withView1>with</withView1>" +
@@ -873,6 +881,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-12811
+	@SuppressWarnings("removal")
 	void jackson2TypeInfoList() throws Exception {
 		Method method = JacksonController.class.getMethod("handleTypeInfoList");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
@@ -907,6 +916,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-13318
+	@SuppressWarnings("removal")
 	void jackson2SubType() throws Exception {
 		Method method = JacksonController.class.getMethod("handleSubType");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
@@ -943,6 +953,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test  // SPR-13318
+	@SuppressWarnings("removal")
 	void jackson2SubTypeList() throws Exception {
 		Method method = JacksonController.class.getMethod("handleSubTypeList");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);

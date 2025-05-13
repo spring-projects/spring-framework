@@ -50,7 +50,9 @@ import org.springframework.core.io.buffer.DataBufferUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 5.0
+ * @deprecated since 7.0 in favor of {@code org.springframework.http.codec.JacksonTokenizer}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 final class Jackson2Tokenizer {
 
 	private final JsonParser parser;

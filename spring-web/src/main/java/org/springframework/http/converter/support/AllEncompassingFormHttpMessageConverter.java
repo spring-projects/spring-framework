@@ -101,6 +101,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 	}
 
 
+	@SuppressWarnings("removal")
 	public AllEncompassingFormHttpMessageConverter() {
 
 		if (jaxb2Present && !jacksonXmlPresent && !jackson2XmlPresent) {

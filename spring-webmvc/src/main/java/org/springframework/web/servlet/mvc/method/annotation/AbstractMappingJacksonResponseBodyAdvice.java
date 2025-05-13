@@ -36,6 +36,7 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Sebastien Deleuze
  * @since 4.1
  */
+@SuppressWarnings("removal")
 public abstract class AbstractMappingJacksonResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
 	@Override

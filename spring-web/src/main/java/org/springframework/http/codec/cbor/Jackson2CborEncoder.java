@@ -41,7 +41,10 @@ import org.springframework.util.MimeType;
  * @since 5.2
  * @see Jackson2CborDecoder
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
+ * @deprecated since 7.0 in favor of {@link JacksonCborEncoder}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2CborEncoder extends AbstractJackson2Encoder {
 
 	public Jackson2CborEncoder() {

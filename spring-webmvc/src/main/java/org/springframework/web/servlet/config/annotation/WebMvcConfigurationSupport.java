@@ -917,6 +917,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Subclasses can call this method from {@link #configureMessageConverters}.
 	 * @param messageConverters the list to add the default message converters to
 	 */
+	@SuppressWarnings("removal")
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());

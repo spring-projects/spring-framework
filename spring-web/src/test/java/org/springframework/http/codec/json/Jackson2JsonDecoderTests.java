@@ -62,6 +62,7 @@ import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("removal")
 class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder> {
 
 	private final Pojo pojo1 = new Pojo("f1", "b1");

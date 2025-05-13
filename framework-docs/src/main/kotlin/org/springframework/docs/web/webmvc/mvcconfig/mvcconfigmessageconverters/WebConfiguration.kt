@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigmessageconverters
 
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule

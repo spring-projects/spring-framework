@@ -48,7 +48,10 @@ import org.springframework.web.servlet.View;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.1.2
+ * @deprecated since 7.0 in favor of {@link JacksonJsonView}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2JsonView extends AbstractJackson2View {
 
 	/**

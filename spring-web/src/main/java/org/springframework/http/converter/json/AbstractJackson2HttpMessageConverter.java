@@ -57,6 +57,7 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -78,7 +79,10 @@ import org.springframework.util.TypeUtils;
  * @author Sam Brannen
  * @since 4.1
  * @see MappingJackson2HttpMessageConverter
+ * @deprecated since 7.0 in favor of {@link AbstractJacksonHttpMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	private static final Map<String, JsonEncoding> ENCODINGS;

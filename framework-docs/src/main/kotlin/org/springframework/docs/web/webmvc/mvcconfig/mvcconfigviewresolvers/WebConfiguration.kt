@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigviewresolvers
 
 import org.springframework.context.annotation.Configuration

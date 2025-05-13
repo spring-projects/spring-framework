@@ -409,6 +409,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@ParameterizedRestTemplateTest
 	@Disabled("Use RestClient + upcoming hint management instead")
+	@SuppressWarnings("removal")
 	void jsonPostForObjectWithJacksonJsonView(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
