@@ -240,7 +240,7 @@ public abstract class StreamUtils {
 	}
 
 
-	private static class NonClosingInputStream extends FilterInputStream {
+	private static final class NonClosingInputStream extends FilterInputStream {
 
 		public NonClosingInputStream(InputStream in) {
 			super(in);
@@ -249,10 +249,30 @@ public abstract class StreamUtils {
 		@Override
 		public void close() throws IOException {
 		}
+
+		@Override
+		public byte[] readAllBytes() throws IOException {
+			return in.readAllBytes();
+		}
+
+		@Override
+		public byte[] readNBytes(int len) throws IOException {
+			return in.readNBytes(len);
+		}
+
+		@Override
+		public int readNBytes(byte[] b, int off, int len) throws IOException {
+			return in.readNBytes(b, off, len);
+		}
+
+		@Override
+		public long transferTo(OutputStream out) throws IOException {
+			return in.transferTo(out);
+		}
 	}
 
 
-	private static class NonClosingOutputStream extends FilterOutputStream {
+	private static final class NonClosingOutputStream extends FilterOutputStream {
 
 		public NonClosingOutputStream(OutputStream out) {
 			super(out);
