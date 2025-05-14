@@ -36,6 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  * Tests for {@link JacksonSmileDecoder}.
  *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class JacksonSmileDecoderTests extends AbstractDecoderTests<JacksonSmileDecoder> {
 
@@ -48,9 +49,11 @@ class JacksonSmileDecoderTests extends AbstractDecoderTests<JacksonSmileDecoder>
 
 	private SmileMapper mapper = SmileMapper.builder().build();
 
-	public JacksonSmileDecoderTests() {
+
+	JacksonSmileDecoderTests() {
 		super(new JacksonSmileDecoder());
 	}
+
 
 	@Override
 	@Test

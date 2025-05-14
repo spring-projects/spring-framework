@@ -23,7 +23,7 @@ import org.springframework.http.codec.AbstractJacksonDecoder;
 import org.springframework.util.MimeType;
 
 /**
- * Decode a byte stream into Smile and convert to Object's with Jackson 3.x,
+ * Decode a byte stream into Smile and convert to Objects with Jackson 3.x,
  * leveraging non-blocking parsing.
  *
  * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
@@ -38,6 +38,7 @@ public class JacksonSmileDecoder extends AbstractJacksonDecoder {
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
 					new MimeType("application", "x-jackson-smile"),
 					new MimeType("application", "*+x-jackson-smile")};
+
 
 	/**
 	 * Construct a new instance with a {@link SmileMapper} customized with the

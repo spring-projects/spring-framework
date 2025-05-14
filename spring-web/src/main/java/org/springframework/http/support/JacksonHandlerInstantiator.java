@@ -35,21 +35,21 @@ import tools.jackson.databind.ser.VirtualBeanPropertyWriter;
 import tools.jackson.databind.util.Converter;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 /**
  * Allows for creating Jackson 3.x ({@link ValueSerializer}, {@link ValueDeserializer},
- * {@link KeyDeserializer}, {@link TypeResolverBuilder}, {@link TypeIdResolver})
- * beans with autowiring against a Spring {@link ApplicationContext}.
+ * {@link KeyDeserializer}, {@link TypeResolverBuilder}, and {@link TypeIdResolver})
+ * beans with autowiring against a Spring {@code ApplicationContext}.
  *
  * <p>Also overrides all factory methods in {@link HandlerInstantiator},
- * including non-abstract ones for {@link ValueInstantiator}, {@link ObjectIdGenerator}, {@link ObjectIdResolver},
- * {@link PropertyNamingStrategy}, {@link Converter}, {@link VirtualBeanPropertyWriter}.
+ * including non-abstract methods for {@link ValueInstantiator}, {@link ObjectIdGenerator},
+ * {@link ObjectIdResolver}, {@link PropertyNamingStrategy}, {@link Converter}, and
+ * {@link VirtualBeanPropertyWriter}.
  *
  * @author Sebastien Deleuze
  * @since 7.0
- * @see ApplicationContext#getAutowireCapableBeanFactory()
+ * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
  * @see tools.jackson.databind.cfg.HandlerInstantiator
  */
 public class JacksonHandlerInstantiator extends HandlerInstantiator {
@@ -58,13 +58,14 @@ public class JacksonHandlerInstantiator extends HandlerInstantiator {
 
 
 	/**
-	 * Create a new AutowiredHandlerInstantiator for the given BeanFactory.
+	 * Create a new {@code JacksonHandlerInstantiator} for the given BeanFactory.
 	 * @param beanFactory the target BeanFactory
 	 */
 	public JacksonHandlerInstantiator(AutowireCapableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
 	}
+
 
 	@Override
 	@Nullable
@@ -94,25 +95,21 @@ public class JacksonHandlerInstantiator extends HandlerInstantiator {
 
 	@Override
 	public ValueInstantiator valueInstantiatorInstance(MapperConfig<?> config, Annotated annotated, Class<?> implClass) {
-
 		return (ValueInstantiator) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
 	public ObjectIdGenerator<?> objectIdGeneratorInstance(MapperConfig<?> config, Annotated annotated, Class<?> implClass) {
-
 		return (ObjectIdGenerator<?>) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
 	public ObjectIdResolver resolverIdGeneratorInstance(MapperConfig<?> config, Annotated annotated, Class<?> implClass) {
-
 		return (ObjectIdResolver) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
 	public PropertyNamingStrategy namingStrategyInstance(MapperConfig<?> config, Annotated annotated, Class<?> implClass) {
-
 		return (PropertyNamingStrategy) this.beanFactory.createBean(implClass);
 	}
 

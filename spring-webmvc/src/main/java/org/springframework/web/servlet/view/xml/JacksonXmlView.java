@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.web.servlet.view.AbstractJacksonView;
  * using <a href="https://github.com/FasterXML/jackson">Jackson 3's</a> {@link XmlMapper}.
  *
  * <p>The Object to be serialized is supplied as a parameter in the model. The first serializable
- * entry is used. Users can either specify a specific entry in the model via the
+ * entry is used. Users can specify a specific entry in the model via the
  * {@link #setModelKey(String) sourceKey} property.
  *
  * <p>The following special model entries are supported:
@@ -51,7 +51,8 @@ import org.springframework.web.servlet.view.AbstractJacksonView;
 public class JacksonXmlView extends AbstractJacksonView {
 
 	/**
-	 * The default content type for the view.
+	 * Default content type: {@value}.
+	 * <p>Overridable through {@link #setContentType(String)}.
 	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
@@ -60,7 +61,7 @@ public class JacksonXmlView extends AbstractJacksonView {
 
 
 	/**
-	 * Construct a new instance with a {@link XmlMapper} customized with
+	 * Construct a new instance with an {@link XmlMapper} customized with
 	 * the {@link tools.jackson.databind.JacksonModule}s found by
 	 * {@link MapperBuilder#findModules(ClassLoader)} and setting
 	 * the content type to {@code application/xml}.

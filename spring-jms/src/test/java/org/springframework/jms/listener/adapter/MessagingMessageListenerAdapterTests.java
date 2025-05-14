@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ class MessagingMessageListenerAdapterTests {
 
 	@BeforeEach
 	void setup() {
-		initializeFactory(factory);
+		factory.setBeanFactory(new StaticListableBeanFactory());
+		factory.afterPropertiesSet();
 	}
 
 	@Test
@@ -403,11 +404,6 @@ class MessagingMessageListenerAdapterTests {
 		};
 		adapter.setHandlerMethod(factory.createInvocableHandlerMethod(sample, method));
 		return adapter;
-	}
-
-	private void initializeFactory(DefaultMessageHandlerMethodFactory factory) {
-		factory.setBeanFactory(new StaticListableBeanFactory());
-		factory.afterPropertiesSet();
 	}
 
 

@@ -60,6 +60,7 @@ import static org.springframework.http.codec.JacksonCodecSupport.JSON_VIEW_HINT;
  * Tests for {@link JacksonJsonDecoder}.
  *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 
@@ -73,8 +74,8 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 	}
 
 
-	@Override
 	@Test
+	@Override
 	public void canDecode() {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_NDJSON)).isTrue();
@@ -109,7 +110,6 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halFormsJsonMediaType)).isFalse();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Map.class), MediaType.APPLICATION_JSON)).isTrue();
-
 	}
 
 	@Test  // SPR-15866
@@ -142,8 +142,8 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 				.containsExactly(mimeType1);
 	}
 
-	@Override
 	@Test
+	@Override
 	protected void decode() {
 		Flux<DataBuffer> input = Flux.concat(
 				stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},"),
@@ -155,8 +155,8 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 				.verifyComplete());
 	}
 
-	@Override
 	@Test
+	@Override
 	protected void decodeToMono() {
 		Flux<DataBuffer> input = Flux.concat(
 				stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},"),
@@ -260,7 +260,7 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 	void codecException() {
 		Flux<DataBuffer> input = Flux.from(stringBuffer("["));
 		ResolvableType elementType = ResolvableType.forClass(BeanWithNoDefaultConstructor.class);
-		Flux<Object> flux = new Jackson2JsonDecoder().decode(input, elementType, null, Collections.emptyMap());
+		Flux<Object> flux = new JacksonJsonDecoder().decode(input, elementType, null, Collections.emptyMap());
 		StepVerifier.create(flux).verifyError(CodecException.class);
 	}
 

@@ -21,10 +21,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
@@ -43,9 +45,9 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -93,8 +95,6 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UrlPathHelper;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME;
 import static org.springframework.web.servlet.DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME;
@@ -174,14 +174,16 @@ class WebMvcConfigurationSupportTests {
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertThat(converters).hasSizeGreaterThanOrEqualTo(13);
 		converters.stream()
-				.filter(AbstractJackson2HttpMessageConverter.class::isInstance)
+				.filter(AbstractJacksonHttpMessageConverter.class::isInstance)
+				.map(AbstractJacksonHttpMessageConverter.class::cast)
 				.forEach(converter -> {
-					ObjectMapper mapper = ((AbstractJackson2HttpMessageConverter) converter).getObjectMapper();
-					assertThat(mapper.getDeserializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION)).isFalse();
-					assertThat(mapper.getSerializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION)).isFalse();
-					assertThat(mapper.getDeserializationConfig().isEnabled(FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-					if (converter instanceof MappingJackson2XmlHttpMessageConverter) {
-						assertThat(mapper.getClass()).isEqualTo(XmlMapper.class);
+					ObjectMapper mapper = converter.getObjectMapper();
+					assertThat(mapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
+					assertThat(mapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+					assertThat(mapper.serializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
+
+					if (converter instanceof JacksonXmlHttpMessageConverter) {
+						assertThat(mapper).isExactlyInstanceOf(XmlMapper.class);
 					}
 				});
 

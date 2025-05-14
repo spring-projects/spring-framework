@@ -98,6 +98,7 @@ class JacksonJsonHttpMessageConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
 		assertThat(converter.canWrite(Map.class, MediaType.APPLICATION_JSON)).isTrue();
@@ -331,8 +332,8 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
+		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
+		List<MyBean> results = (List<MyBean>) converter.read(ResolvableType.forType(beansList), inputMessage, null);
 		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
@@ -343,12 +344,11 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(results, baseList.getType(), MediaType.APPLICATION_JSON, outputMessage);
+		converter.write(results, ResolvableType.forType(baseList), MediaType.APPLICATION_JSON, outputMessage, null);
 		JSONAssert.assertEquals(body, outputMessage.getBodyAsString(StandardCharsets.UTF_8), true);
 	}
 
-	// gh-24498
-	@Test
+	@Test  // gh-24498
 	void writeOptional() throws IOException {
 		ParameterizedTypeReference<Optional<MyParent>> optionalParent = new ParameterizedTypeReference<>() {};
 		Optional<MyParent> result = Optional.of(new Impl1());
@@ -356,8 +356,7 @@ class JacksonJsonHttpMessageConverterTests {
 		converter.write(result, ResolvableType.forType(optionalParent.getType()),
 				MediaType.APPLICATION_JSON, outputMessage, null);
 
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8))
-				.contains("@type");
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).contains("@type");
 	}
 
 	@Test

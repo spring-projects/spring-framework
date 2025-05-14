@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.within;
  * Jackson 3.x XML converter tests.
  *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class JacksonXmlHttpMessageConverterTests {
 
@@ -313,6 +314,7 @@ class JacksonXmlHttpMessageConverterTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MyXmlMapper extends XmlMapper {
 	}
 

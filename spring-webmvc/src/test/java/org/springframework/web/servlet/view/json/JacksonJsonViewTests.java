@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ class JacksonJsonViewTests {
 		assertThat(response.getHeader("Cache-Control")).isEqualTo("no-store");
 
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
-		assertThat(mediaType.isCompatibleWith(MediaType.parseMediaType(MappingJackson2JsonView.DEFAULT_CONTENT_TYPE))).isTrue();
+		assertThat(mediaType.isCompatibleWith(MediaType.parseMediaType(JacksonJsonView.DEFAULT_CONTENT_TYPE))).isTrue();
 
 		String jsonResult = response.getContentAsString();
 		assertThat(jsonResult).isNotEmpty();

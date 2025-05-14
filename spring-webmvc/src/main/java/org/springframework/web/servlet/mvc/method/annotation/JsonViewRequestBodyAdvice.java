@@ -90,4 +90,5 @@ public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
 		}
 		return classes[0];
 	}
+
 }

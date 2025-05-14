@@ -33,7 +33,8 @@ import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} to bytes of CBOR objects using Jackson 3.x.
- * Stream encoding is not supported yet.
+ *
+ * <p>Stream encoding is currently not supported.
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -73,7 +74,8 @@ public class JacksonCborEncoder extends AbstractJacksonEncoder {
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-		throw new UnsupportedOperationException("Does not support stream encoding yet");
+
+		throw new UnsupportedOperationException("Stream encoding is currently not supported");
 	}
 
 }

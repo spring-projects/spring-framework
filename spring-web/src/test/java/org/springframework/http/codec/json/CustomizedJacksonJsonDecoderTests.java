@@ -34,6 +34,7 @@ import org.springframework.core.testfixture.codec.AbstractDecoderTests;
  * Tests for a customized {@link JacksonJsonDecoder}.
  *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class CustomizedJacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 

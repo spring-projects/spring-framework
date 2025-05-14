@@ -30,8 +30,9 @@ import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of Smile objects using Jackson 3.x.
- * For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
- * before serialization for performance reason.
+ *
+ * <p>For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
+ * before serialization for performance reasons.
  *
  * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
  * found by {@link MapperBuilder#findModules(ClassLoader)}.
@@ -98,4 +99,5 @@ public class JacksonSmileEncoder extends AbstractJacksonEncoder {
 		}
 		return null;
 	}
+
 }

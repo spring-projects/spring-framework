@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.within;
  * Jackson 3.x Smile converter tests.
  *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class JacksonSmileHttpMessageConverterTests {
 

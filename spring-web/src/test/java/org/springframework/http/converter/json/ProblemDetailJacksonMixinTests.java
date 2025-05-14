@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.http.converter.json;
 
 import java.net.URI;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -36,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ProblemDetailJacksonMixinTests {
 
-	private final ObjectMapper mapper = new Jackson2ObjectMapperBuilder().build();
+	private final ObjectMapper mapper = JsonMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class).build();
 
 
 	@Test
@@ -92,7 +94,7 @@ class ProblemDetailJacksonMixinTests {
 
 	@Test
 	void readCustomPropertyFromXml() throws Exception {
-		ObjectMapper xmlMapper = new Jackson2ObjectMapperBuilder().createXmlMapper(true).build();
+		ObjectMapper xmlMapper = XmlMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class).build();
 		ProblemDetail detail = xmlMapper.readValue("""
 				<problem xmlns="urn:ietf:rfc:7807">
 					<type>about:blank</type>

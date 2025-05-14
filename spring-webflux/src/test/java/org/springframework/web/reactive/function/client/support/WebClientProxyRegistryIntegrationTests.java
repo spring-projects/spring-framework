@@ -143,7 +143,8 @@ public class WebClientProxyRegistryIntegrationTests {
 	private static class ManualListingConfig extends BaseEchoConfig {
 	}
 
-	private static class ManualListingRegistrar extends AbstractHttpServiceRegistrar {
+
+	static class ManualListingRegistrar extends AbstractHttpServiceRegistrar {
 
 		public ManualListingRegistrar() {
 			setDefaultClientType(ClientType.WEB_CLIENT);

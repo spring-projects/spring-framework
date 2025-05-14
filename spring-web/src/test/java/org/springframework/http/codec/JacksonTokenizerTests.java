@@ -24,7 +24,6 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import org.json.JSONException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Flux;
@@ -50,16 +49,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link JacksonTokenizer}.
  *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class JacksonTokenizerTests extends AbstractLeakCheckingTests {
 
-	private ObjectMapper objectMapper;
-
-
-	@BeforeEach
-	void createParser() {
-		this.objectMapper = JsonMapper.builder().build();
-	}
+	private final ObjectMapper objectMapper = JsonMapper.builder().build();
 
 
 	@Test

@@ -111,7 +111,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 
 
 	/**
-	 * Construct a new instance with a provided {@link MapperBuilder builder}
+	 * Construct a new instance with the provided {@link MapperBuilder builder}
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)}.
 	 */
@@ -141,7 +141,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	}
 
 	/**
-	 * Construct a new instance with a provided {@link ObjectMapper}.
+	 * Construct a new instance with the provided {@link ObjectMapper}.
 	 */
 	protected AbstractJacksonHttpMessageConverter(ObjectMapper objectMapper) {
 		this.defaultObjectMapper = objectMapper;
@@ -367,10 +367,10 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	}
 
 	/**
-	 * Subclasses can use this method to customize {@link ObjectReader} used
+	 * Subclasses can use this method to customize the {@link ObjectReader} used
 	 * for reading values.
 	 * @param reader the reader instance to customize
-	 * @param javaType the target type of element values to read to
+	 * @param javaType the type of element values to read
 	 * @return the customized {@link ObjectReader}
 	 */
 	protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
@@ -380,7 +380,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	/**
 	 * Determine the charset to use for JSON input.
 	 * <p>By default this is either the charset from the input {@code MediaType}
-	 * or otherwise falling back on {@code UTF-8}. Can be overridden in subclasses.
+	 * or otherwise {@code UTF-8}. Can be overridden in subclasses.
 	 * @param contentType the content type of the HTTP input message
 	 * @return the charset to use
 	 */
@@ -448,7 +448,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	}
 
 	/**
-	 * Subclasses can use this method to customize {@link ObjectWriter} used
+	 * Subclasses can use this method to customize the {@link ObjectWriter} used
 	 * for writing values.
 	 * @param writer the writer instance to customize
 	 * @param javaType the type of element values to write
@@ -464,7 +464,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	/**
 	 * Write a prefix before the main content.
 	 * @param generator the generator to use for writing content.
-	 * @param object the object to write to the output message.
+	 * @param object the object to write to the output message
 	 */
 	protected void writePrefix(JsonGenerator generator, Object object) {
 	}
@@ -472,7 +472,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	/**
 	 * Write a suffix after the main content.
 	 * @param generator the generator to use for writing content.
-	 * @param object the object to write to the output message.
+	 * @param object the object to write to the output message
 	 */
 	protected void writeSuffix(JsonGenerator generator, Object object) {
 	}
@@ -508,4 +508,5 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}
+
 }

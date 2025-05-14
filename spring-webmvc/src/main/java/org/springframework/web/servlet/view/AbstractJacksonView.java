@@ -61,7 +61,9 @@ public abstract class AbstractJacksonView extends AbstractView {
 
 	protected static final String FILTER_PROVIDER_HINT = FilterProvider.class.getName();
 
-	private static volatile @Nullable List<JacksonModule> modules = null;
+
+	private static volatile @Nullable List<JacksonModule> modules;
+
 
 	private final ObjectMapper objectMapper;
 
@@ -84,6 +86,7 @@ public abstract class AbstractJacksonView extends AbstractView {
 		setExposePathVariables(false);
 	}
 
+
 	private List<JacksonModule> initModules() {
 		if (modules == null) {
 			modules = MapperBuilder.findModules(AbstractJacksonHttpMessageConverter.class.getClassLoader());
@@ -94,7 +97,7 @@ public abstract class AbstractJacksonView extends AbstractView {
 
 	/**
 	 * Set the {@code JsonEncoding} for this view.
-	 * By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used.
+	 * <p>Default is {@linkplain JsonEncoding#UTF8 UTF-8}.
 	 */
 	public void setEncoding(JsonEncoding encoding) {
 		Assert.notNull(encoding, "'encoding' must not be null");
@@ -110,7 +113,8 @@ public abstract class AbstractJacksonView extends AbstractView {
 
 	/**
 	 * Disables caching of the generated JSON.
-	 * <p>Default is {@code true}, which will prevent the client from caching the generated JSON.
+	 * <p>Default is {@code true}, which will prevent the client from caching the
+	 * generated JSON.
 	 */
 	public void setDisableCaching(boolean disableCaching) {
 		this.disableCaching = disableCaching;
@@ -206,13 +210,13 @@ public abstract class AbstractJacksonView extends AbstractView {
 
 	/**
 	 * Set the attribute in the model that should be rendered by this view.
-	 * When set, all other model attributes will be ignored.
+	 * <p>When set, all other model attributes will be ignored.
 	 */
 	public abstract void setModelKey(String modelKey);
 
 	/**
 	 * Filter out undesired attributes from the given model.
-	 * The return value can be either another {@link Map} or a single value object.
+	 * <p>The return value can be either another {@link Map} or a single value object.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @param request current HTTP request
 	 * @return the value to be rendered
@@ -221,16 +225,16 @@ public abstract class AbstractJacksonView extends AbstractView {
 
 	/**
 	 * Write a prefix before the main content.
-	 * @param generator the generator to use for writing content.
-	 * @param object the object to write to the output message.
+	 * @param generator the generator to use for writing content
+	 * @param object the object to write to the output message
 	 */
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
 	}
 
 	/**
 	 * Write a suffix after the main content.
-	 * @param generator the generator to use for writing content.
-	 * @param object the object to write to the output message.
+	 * @param generator the generator to use for writing content
+	 * @param object the object to write to the output message
 	 */
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
 	}

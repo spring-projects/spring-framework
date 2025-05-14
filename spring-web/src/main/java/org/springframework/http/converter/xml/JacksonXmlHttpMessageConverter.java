@@ -65,7 +65,7 @@ public class JacksonXmlHttpMessageConverter extends AbstractJacksonHttpMessageCo
 	};
 
 	/**
-	 * Construct a new instance with a {@link XmlMapper} created from
+	 * Construct a new instance with an {@link XmlMapper} created from
 	 * {@link #defensiveXmlFactory} and customized with the
 	 * {@link tools.jackson.databind.JacksonModule}s found by
 	 * {@link MapperBuilder#findModules(ClassLoader)} and

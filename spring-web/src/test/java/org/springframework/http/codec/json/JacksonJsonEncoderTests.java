@@ -55,7 +55,9 @@ import static org.springframework.http.codec.JacksonCodecSupport.JSON_VIEW_HINT;
 
 /**
  * Tests for {@link JacksonJsonEncoder}.
+ *
  * @author Sebastien Deleuze
+ * @since 7.0
  */
 class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
@@ -63,8 +65,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		super(new JacksonJsonEncoder());
 	}
 
-	@Override
 	@Test
+	@Override
+	@SuppressWarnings("removal")
 	public void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_JSON)).isTrue();
@@ -88,8 +91,8 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 				.isInstanceOf(UnsupportedOperationException.class);
 	}
 
-	@Override
 	@Test
+	@Override
 	public void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),

@@ -79,4 +79,5 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 		}
 		return classes[0];
 	}
+
 }

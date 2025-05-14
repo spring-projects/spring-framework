@@ -55,10 +55,11 @@ import org.springframework.web.servlet.view.AbstractJacksonView;
 public class JacksonJsonView extends AbstractJacksonView {
 
 	/**
-	 * Default content type: "application/json".
-	 * Overridable through {@link #setContentType}.
+	 * Default content type: {@value}.
+	 * <p>Overridable through {@link #setContentType(String)}.
 	 */
 	public static final String DEFAULT_CONTENT_TYPE = "application/json";
+
 
 	private @Nullable String jsonPrefix;
 
@@ -79,7 +80,7 @@ public class JacksonJsonView extends AbstractJacksonView {
 
 	/**
 	 * Construct a new instance using the provided {@link ObjectMapper}
-	 * and setting the content type to {@code application/json}.
+	 * and setting the content type to {@value #DEFAULT_CONTENT_TYPE}.
 	 */
 	public JacksonJsonView(ObjectMapper objectMapper) {
 		super(objectMapper, DEFAULT_CONTENT_TYPE);
@@ -88,7 +89,7 @@ public class JacksonJsonView extends AbstractJacksonView {
 
 	/**
 	 * Specify a custom prefix to use for this view's JSON output.
-	 * Default is none.
+	 * <p>Default is none.
 	 * @see #setPrefixJson
 	 */
 	public void setJsonPrefix(String jsonPrefix) {
@@ -97,7 +98,7 @@ public class JacksonJsonView extends AbstractJacksonView {
 
 	/**
 	 * Indicates whether the JSON output by this view should be prefixed with <code>")]}', "</code>.
-	 * Default is {@code false}.
+	 * <p>Default is {@code false}.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix should be stripped before parsing the string as JSON.
@@ -114,7 +115,7 @@ public class JacksonJsonView extends AbstractJacksonView {
 
 	/**
 	 * Set the attributes in the model that should be rendered by this view.
-	 * When set, all other model attributes will be ignored.
+	 * <p>When set, all other model attributes will be ignored.
 	 */
 	public void setModelKeys(@Nullable Set<String> modelKeys) {
 		this.modelKeys = modelKeys;
@@ -141,7 +142,7 @@ public class JacksonJsonView extends AbstractJacksonView {
 
 	/**
 	 * Filter out undesired attributes from the given model.
-	 * The return value can be either another {@link Map} or a single value object.
+	 * <p>The return value can be either another {@link Map} or a single value object.
 	 * <p>The default implementation removes {@link BindingResult} instances and entries
 	 * not included in the {@link #setModelKeys modelKeys} property.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}

@@ -31,8 +31,9 @@ import org.springframework.http.codec.AbstractJacksonDecoder;
 import org.springframework.util.MimeType;
 
 /**
- * Decode bytes into CBOR and convert to Object's with Jackson 3.x.
- * Stream decoding is not supported yet.
+ * Decode bytes into CBOR and convert to Objects with Jackson 3.x.
+ *
+ * <p>Stream decoding is currently not supported.
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -70,7 +71,8 @@ public class JacksonCborDecoder extends AbstractJacksonDecoder {
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
-		throw new UnsupportedOperationException("Does not support stream decoding yet");
+
+		throw new UnsupportedOperationException("Stream decoding is currently not supported");
 	}
 
 }

@@ -30,6 +30,7 @@ import org.springframework.http.server.ServerHttpResponse;
 /**
  * A convenient base class for {@code ResponseBodyAdvice} implementations
  * that customize the response before JSON serialization with
+ * {@link AbstractJacksonHttpMessageConverter}'s and
  * {@link AbstractJackson2HttpMessageConverter}'s concrete subclasses.
  *
  * @author Rossen Stoyanchev
