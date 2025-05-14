@@ -516,6 +516,7 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (for example, "'myString'"),
 	 * or {@code null} if the input was {@code null}
 	 */
+	@Contract("null -> null; !null -> !null")
 	public static @Nullable String quote(@Nullable String str) {
 		return (str != null ? "'" + str + "'" : null);
 	}
@@ -618,6 +619,7 @@ public abstract class StringUtils {
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename, or {@code null} if none
 	 */
+	@Contract("null -> null; !null -> !null")
 	public static @Nullable String getFilename(@Nullable String path) {
 		if (path == null) {
 			return null;
