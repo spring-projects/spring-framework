@@ -13,6 +13,11 @@ Please, see also related content in:
 to map requests to annotated controller methods
 - Configure API versioning in xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config]
 
+TIP: API versioning is also supported on the client side in `RestClient`, `WebClient`, and
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Service] clients, as well as
+for testing with `WebTestClient`.
+
+
 
 
 [[webflux-versioning-strategy]]

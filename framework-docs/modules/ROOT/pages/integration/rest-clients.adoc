@@ -23,7 +23,8 @@ It also exposes a `builder()` with further options:
 - select the HTTP library to use, see <<rest-request-factories>>
 - configure message converters, see <<rest-message-conversion>>
 - set a baseUrl
-- set default request headers, cookies, path variables
+- set default request headers, cookies, path variables, API version
+- configure an `ApiVersionInserter`
 - register interceptors
 - register request initializers
 
@@ -46,6 +47,8 @@ Java::
 		.defaultUriVariables(Map.of("variable", "foo"))
 		.defaultHeader("My-Header", "Foo")
 		.defaultCookie("My-Cookie", "Bar")
+		.defaultVersion("1.2")
+		.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 		.requestInterceptor(myCustomInterceptor)
 		.requestInitializer(myCustomInitializer)
 		.build();
@@ -64,6 +67,8 @@ Kotlin::
 		.defaultUriVariables(mapOf("variable" to "foo"))
 		.defaultHeader("My-Header", "Foo")
 		.defaultCookie("My-Cookie", "Bar")
+        .defaultVersion("1.2")
+        .apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 		.requestInterceptor(myCustomInterceptor)
 		.requestInitializer(myCustomInitializer)
 		.build()
@@ -115,6 +120,7 @@ For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-
 
 If necessary, the HTTP request can be manipulated by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
 For HTTP requests that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
+You can set an API version for the request if the client is configured with `ApiVersionInserter`.
 
 The request body itself can be set by `body(Object)`, which internally uses <<rest-message-conversion>>.
 Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.
