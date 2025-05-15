@@ -48,7 +48,7 @@ _When instructed to execute `./gradlew` from the command line, be sure to execut
 1. While JUnit tests pass from the command line with Gradle, some may fail when run from
    the IDE.
    - Resolving this is a work in progress.
-   - If attempting to run all JUnit tests from within the IDE, you may need to set the following VM options to avoid out of memory errors: `-XX:MaxPermSize=2048m -Xmx2048m -XX:MaxHeapSize=2048m`
+   - If attempting to run all JUnit tests from within the IDE, you may need to set the following VM options to avoid out of memory errors: `-XX:MaxPermSize=2g -Xmx2g -XX:MaxHeapSize=2g`
 
 ## Tips
 
