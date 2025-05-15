@@ -94,10 +94,6 @@ class ApplicationContextExpressionTests {
 					return null;
 				}
 			}
-			@Override
-			public String getConversationId() {
-				return null;
-			}
 		});
 
 		ac.getBeanFactory().setConversionService(new DefaultConversionService());
