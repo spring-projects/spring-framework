@@ -67,13 +67,15 @@ public class SampleTests {
 	@Test
 	public void performGet() {
 
-		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+		String responseBody = """
+				{"name" : "Ludwig van Beethoven", "someDouble" : "1.6035"}""";
 
 		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
 		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		assertThat(ludwig.getName()).isEqualTo("Ludwig van Beethoven");
+		assertThat(ludwig.getSomeDouble()).isEqualTo(1.6035);
 
 		// We are only validating the request. The response is mocked out.
 		// hotel.getId() == 42
@@ -90,8 +92,9 @@ public class SampleTests {
 		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
 		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		assertThat(ludwig.getName()).isEqualTo("Ludwig van Beethoven");
+		assertThat(ludwig.getSomeDouble()).isEqualTo(1.6035);
 
 		// We are only validating the request. The response is mocked out.
 		// hotel.getId() == 42
@@ -142,11 +145,9 @@ public class SampleTests {
 		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
 		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
-
-		// hotel.getId() == 42
-		// hotel.getName().equals("Holiday Inn")
+		assertThat(ludwig.getName()).isEqualTo("Ludwig van Beethoven");
+		assertThat(ludwig.getSomeDouble()).isEqualTo(1.6035);
 
 		this.mockServer.verify();
 	}
@@ -166,13 +167,8 @@ public class SampleTests {
 		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
 
-		@SuppressWarnings("unused")
-		String result1 = this.restTemplate.getForObject("/number", String.class);
-		// result1 == "1"
-
-		@SuppressWarnings("unused")
-		String result2 = this.restTemplate.getForObject("/number", String.class);
-		// result == "2"
+		assertThat(this.restTemplate.getForObject("/number", String.class)).isEqualTo("1");
+		assertThat(this.restTemplate.getForObject("/number", String.class)).isEqualTo("2");
 
 		try {
 			this.mockServer.verify();

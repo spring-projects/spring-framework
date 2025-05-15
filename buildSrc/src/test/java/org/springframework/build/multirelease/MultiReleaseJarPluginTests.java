@@ -104,7 +104,7 @@ public class MultiReleaseJarPluginTests {
 		writeClass("src/main/java17", "Main.java", """
 				public class Main {}
 				""");
-		BuildResult buildResult = runGradle("assemble");
+		runGradle("assemble");
 		File file = new File(this.projectDir, "/build/libs/" + this.projectDir.getName() + "-1.2.3.jar");
 		assertThat(file).exists();
 		try (JarFile jar = new JarFile(file)) {
