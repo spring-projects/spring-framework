@@ -707,22 +707,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		logger.debug("Executing prepared SQL query");
 
-		return execute(psc, new PreparedStatementCallback<>() {
-			@Override
-			public @Nullable T doInPreparedStatement(PreparedStatement ps) throws SQLException {
-				ResultSet rs = null;
-				try {
-					if (pss != null) {
-						pss.setValues(ps);
-					}
-					rs = ps.executeQuery();
-					return rse.extractData(rs);
+		return execute(psc, (PreparedStatementCallback<T>) ps -> {
+			ResultSet rs = null;
+			try {
+				if (pss != null) {
+					pss.setValues(ps);
 				}
-				finally {
-					JdbcUtils.closeResultSet(rs);
-					if (pss instanceof ParameterDisposer parameterDisposer) {
-						parameterDisposer.cleanupParameters();
-					}
+				rs = ps.executeQuery();
+				return rse.extractData(rs);
+			}
+			finally {
+				JdbcUtils.closeResultSet(rs);
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 			}
 		}, true);
