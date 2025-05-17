@@ -348,8 +348,9 @@ public class HttpRequestValues {
 		 * Add the given header name and values.
 		 */
 		public Builder addHeader(String headerName, String... headerValues) {
+			HttpHeaders headers = initHeaders();
 			for (String headerValue : headerValues) {
-				initHeaders().add(headerName, headerValue);
+				headers.add(headerName, headerValue);
 			}
 			return this;
 		}
@@ -373,8 +374,9 @@ public class HttpRequestValues {
 		 * Add the given cookie name and values.
 		 */
 		public Builder addCookie(String name, String... values) {
+			MultiValueMap<String, String> cookies = initCookies();
 			for (String value : values) {
-				initCookies().add(name, value);
+				cookies.add(name, value);
 			}
 			return this;
 		}
@@ -402,8 +404,9 @@ public class HttpRequestValues {
 		 * parameters.
 		 */
 		public Builder addRequestParameter(String name, String... values) {
+			MultiValueMap<String, String> requestParams = initRequestParams();
 			for (String value : values) {
-				initRequestParams().add(name, value);
+				requestParams.add(name, value);
 			}
 			return this;
 		}
