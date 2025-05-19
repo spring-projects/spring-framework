@@ -18,7 +18,9 @@ package org.springframework.util;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
@@ -815,6 +817,38 @@ class StringUtilsTests {
 	)
 	void truncate(String text, String truncated) {
 		assertThat(StringUtils.truncate(text, 10)).isEqualTo(truncated);
+	}
+
+	@Test
+	void resizeConsecutiveChars() {
+
+		assertThat(StringUtils.resizeConsecutiveChars("11111 111111 111111    111111", '1', 1, false, false)).isEqualTo("1 1 1    1");
+
+		assertThat(StringUtils.resizeConsecutiveChars("aaabbbcc", 'a', 2, false, false)).isEqualTo("aabbbcc");
+
+		assertThat(StringUtils.resizeConsecutiveChars("111111", '1', null, false, false)).isEqualTo("1");
+
+		assertThat(StringUtils.resizeConsecutiveChars(".....$$$42....1424.1.....2.5.12..$!@..$!@%$...", '.', 1, false, false)).isEqualTo(".$$$42.1424.1.2.5.12.$!@.$!@%$.");
+
+		assertThat(StringUtils.resizeConsecutiveChars("1ewjaoij1 a11w11111e11o11iw11 12113121 1", '1', 1, false, false)).isEqualTo("1ewjaoij1 a1w1e1o1iw1 1213121 1");
+
+
+		// resizes whitespaces
+		Map<String, String> cases = new LinkedHashMap<>();
+		cases.put(null, null);
+		cases.put("", "");
+		cases.put("   ", "");
+		cases.put("Hello", "Hello");
+		cases.put("Hello, World!", "Hello, World!");
+		cases.put("Hello,   World!", "Hello, World!");
+		cases.put("a  a       ", "a a");
+		cases.put("  a   c b  ncw   a  c j j j j      j", "a c b ncw a c j j j j j");
+
+		for (Map.Entry<String, String> entry : cases.entrySet()) {
+			String input = entry.getKey();
+			String expected = entry.getValue();
+			assertThat(StringUtils.resizeToOneWhitespace(input, true)).as("actual ").isEqualTo(expected);
+		}
 	}
 
 }
