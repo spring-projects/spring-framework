@@ -119,7 +119,7 @@ public class WebClientProxyRegistryIntegrationTests {
 		@Bean
 		public WebClientHttpServiceGroupConfigurer groupConfigurer() {
 			return groups -> groups.filterByName("echo", "greeting")
-					.configureClient((group, builder) -> builder.baseUrl("http://localhost:9090"));
+					.forEachClient((group, builder) -> builder.baseUrl("http://localhost:9090"));
 		}
 	}
 

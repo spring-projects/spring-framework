@@ -92,7 +92,7 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		@Override
 		public void configureGroups(Groups<RestClient.Builder> groups) {
 			filters.forEach(filter -> groups.filter(filter)
-					.configureClient((group, builder) -> invocations.add(filter, group.name())));
+					.forEachClient((group, builder) -> invocations.add(filter, group.name())));
 		}
 	}
 
