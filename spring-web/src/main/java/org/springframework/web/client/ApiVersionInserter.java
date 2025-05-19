@@ -53,27 +53,34 @@ public interface ApiVersionInserter {
 
 
 	/**
-	 * Create a builder for an inserter that sets a header.
+	 * Create an inserter that sets a header.
 	 * @param header the name of a header to hold the version
 	 */
-	static Builder fromHeader(@Nullable String header) {
-		return new DefaultApiVersionInserterBuilder(header, null, null);
+	static ApiVersionInserter useHeader(@Nullable String header) {
+		return new DefaultApiVersionInserterBuilder(header, null, null).build();
 	}
 
 	/**
-	 * Create a builder for an inserter that sets a query parameter.
+	 * Create an inserter that sets a query parameter.
 	 * @param queryParam the name of a query parameter to hold the version
 	 */
-	static Builder fromQueryParam(@Nullable String queryParam) {
-		return new DefaultApiVersionInserterBuilder(null, queryParam, null);
+	static ApiVersionInserter useQueryParam(@Nullable String queryParam) {
+		return new DefaultApiVersionInserterBuilder(null, queryParam, null).build();
 	}
 
 	/**
-	 * Create a builder for an inserter that inserts a path segment.
+	 * Create an inserter that inserts a path segment.
 	 * @param pathSegmentIndex the index of the path segment to hold the version
 	 */
-	static Builder fromPathSegment(@Nullable Integer pathSegmentIndex) {
-		return new DefaultApiVersionInserterBuilder(null, null, pathSegmentIndex);
+	static ApiVersionInserter usePathSegment(@Nullable Integer pathSegmentIndex) {
+		return new DefaultApiVersionInserterBuilder(null, null, pathSegmentIndex).build();
+	}
+
+	/**
+	 * Create a builder for an {@link ApiVersionInserter}.
+	 */
+	static Builder builder() {
+		return new DefaultApiVersionInserterBuilder(null, null, null);
 	}
 
 
@@ -86,19 +93,19 @@ public interface ApiVersionInserter {
 		 * Configure the inserter to set a header.
 		 * @param header the name of the header to hold the version
 		 */
-		Builder fromHeader(@Nullable String header);
+		Builder useHeader(@Nullable String header);
 
 		/**
 		 * Configure the inserter to set a query parameter.
 		 * @param queryParam the name of the query parameter to hold the version
 		 */
-		Builder fromQueryParam(@Nullable String queryParam);
+		Builder useQueryParam(@Nullable String queryParam);
 
 		/**
 		 * Configure the inserter to insert a path segment.
 		 * @param pathSegmentIndex the index of the path segment to hold the version
 		 */
-		Builder fromPathSegment(@Nullable Integer pathSegmentIndex);
+		Builder usePathSegment(@Nullable Integer pathSegmentIndex);
 
 		/**
 		 * Format the version Object into a String using the given {@link ApiVersionFormatter}.

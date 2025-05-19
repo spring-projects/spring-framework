@@ -23,9 +23,9 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 7.0
- * @see ApiVersionInserter#fromHeader(String)
- * @see ApiVersionInserter#fromQueryParam(String)
- * @see ApiVersionInserter#fromPathSegment(Integer)
+ * @see ApiVersionInserter#useHeader(String)
+ * @see ApiVersionInserter#useQueryParam(String)
+ * @see ApiVersionInserter#usePathSegment(Integer)
  */
 final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Builder {
 
@@ -50,7 +50,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to set a header.
 	 * @param header the name of the header to hold the version
 	 */
-	public ApiVersionInserter.Builder fromHeader(@Nullable String header) {
+	public ApiVersionInserter.Builder useHeader(@Nullable String header) {
 		this.header = header;
 		return this;
 	}
@@ -59,7 +59,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to set a query parameter.
 	 * @param queryParam the name of the query parameter to hold the version
 	 */
-	public ApiVersionInserter.Builder fromQueryParam(@Nullable String queryParam) {
+	public ApiVersionInserter.Builder useQueryParam(@Nullable String queryParam) {
 		this.queryParam = queryParam;
 		return this;
 	}
@@ -68,7 +68,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to insert a path segment.
 	 * @param pathSegmentIndex the index of the path segment to hold the version
 	 */
-	public ApiVersionInserter.Builder fromPathSegment(@Nullable Integer pathSegmentIndex) {
+	public ApiVersionInserter.Builder usePathSegment(@Nullable Integer pathSegmentIndex) {
 		this.pathSegmentIndex = pathSegmentIndex;
 		return this;
 	}

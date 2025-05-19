@@ -41,19 +41,19 @@ public class ApiVersionTests {
 
 	@Test
 	void header() {
-		Map<String, String> result = performRequest(ApiVersionInserter.fromHeader("X-API-Version").build());
+		Map<String, String> result = performRequest(ApiVersionInserter.useHeader("X-API-Version"));
 		assertThat(result.get(HEADER_NAME)).isEqualTo("1.2");
 	}
 
 	@Test
 	void queryParam() {
-		Map<String, String> result = performRequest(ApiVersionInserter.fromQueryParam("api-version").build());
+		Map<String, String> result = performRequest(ApiVersionInserter.useQueryParam("api-version"));
 		assertThat(result.get("query")).isEqualTo("api-version=1.2");
 	}
 
 	@Test
 	void pathSegment() {
-		Map<String, String> result = performRequest(ApiVersionInserter.fromPathSegment(0).build());
+		Map<String, String> result = performRequest(ApiVersionInserter.usePathSegment(0));
 		assertThat(result.get("path")).isEqualTo("/1.2/path");
 	}
 
