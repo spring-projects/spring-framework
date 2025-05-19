@@ -36,6 +36,7 @@ import org.springframework.http.support.JacksonHandlerInstantiator;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -72,6 +73,18 @@ class StandaloneMockMvcBuilderTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(((HandlerMethod) chain.getHandler()).getMethod().getName()).isEqualTo("handleWithPlaceholders");
+	}
+
+	@Test
+	void apiVersionStrategySet() {
+		ApiVersionStrategy versionStrategy = mock(ApiVersionStrategy.class);
+
+		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder();
+		builder.setApiVersionStrategy(versionStrategy);
+		builder.build();
+
+		assertThat(builder.wac.getBean(RequestMappingHandlerMapping.class).getApiVersionStrategy())
+				.isSameAs(versionStrategy);
 	}
 
 	@Test  // SPR-12553
