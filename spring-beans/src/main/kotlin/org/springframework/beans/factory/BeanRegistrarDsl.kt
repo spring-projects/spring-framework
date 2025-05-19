@@ -111,8 +111,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	}
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the related [resolvable constructor]
+	 * Register a bean of type [T] which will be instantiated using the
+	 * related [resolvable constructor]
 	 * [org.springframework.beans.BeanUtils.getResolvableConstructor] if any.
 	 * @param T the bean type
 	 * @param name the name of the bean
@@ -177,8 +177,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	}
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the related [resolvable constructor]
+	 * Register a bean of type [T] which will be instantiated using the
+	 * related [resolvable constructor]
 	 * [org.springframework.beans.BeanUtils.getResolvableConstructor]
 	 * if any.
 	 * @param T the bean type
@@ -243,8 +243,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	}
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the provided [supplier].
+	 * Register a bean of type [T] which will be instantiated using the
+	 * provided [supplier].
 	 * @param T the bean type
 	 * @param name the name of the bean
 	 * @param autowirable set whether this bean is a candidate for getting
@@ -323,8 +323,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 											  prototype: Boolean = false,
 											  crossinline supplier: (SupplierContextDsl<T>.() -> T)): String {
 		/**
-		 * Register a bean from the given bean class, which will be instantiated
-		 * using the provided [supplier].
+		 * Register a bean of type [T] which will be instantiated using the
+		 * provided [supplier].
 		 * @param T the bean type
 		 * @param autowirable set whether this bean is a candidate for getting
 		 * autowired into some other bean
