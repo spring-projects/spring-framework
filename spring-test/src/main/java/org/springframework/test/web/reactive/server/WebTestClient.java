@@ -48,6 +48,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.client.ApiVersionFormatter;
 import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.BlockingExecutionConfigurer;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
@@ -345,6 +346,12 @@ public interface WebTestClient {
 		 * @see WebFluxConfigurer#getValidator()
 		 */
 		ControllerSpec validator(Validator validator);
+
+		/**
+		 * Configure API versioning for mapping requests to controller methods.
+		 * @since 7.0
+		 */
+		ControllerSpec apiVersioning(Consumer<ApiVersionConfigurer> configurer);
 
 		/**
 		 * Configure view resolution.
