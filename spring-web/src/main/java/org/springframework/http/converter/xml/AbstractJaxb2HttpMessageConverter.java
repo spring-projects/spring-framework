@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter.xml;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,7 +25,10 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverters}
@@ -114,6 +118,22 @@ public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHt
 						"Could not create JAXBContext for class [" + clazz + "]: " + ex.getMessage(), ex);
 			}
 		});
+	}
+
+	/**
+	 * Detect the charset from the given {@link HttpHeaders#getContentType()}.
+	 * @param httpHeaders the current HTTP headers
+	 * @return the charset defined in the content type header, or {@code null} if not found
+	 */
+	@Nullable
+	protected Charset detectCharset(HttpHeaders httpHeaders) {
+		MediaType contentType = httpHeaders.getContentType();
+		if (contentType != null && contentType.getCharset() != null) {
+			return contentType.getCharset();
+		}
+		else {
+			return null;
+		}
 	}
 
 }
