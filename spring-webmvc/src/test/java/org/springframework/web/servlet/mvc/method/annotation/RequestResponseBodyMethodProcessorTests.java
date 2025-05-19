@@ -29,7 +29,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.xmlunit.assertj.XmlAssert;
@@ -413,7 +412,6 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
-	@Disabled("https://github.com/FasterXML/jackson-dataformat-xml/issues/757")
 	void problemDetailWhenProblemXmlRequested() throws Exception {
 		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_PROBLEM_XML_VALUE);
 		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_XML_VALUE);
