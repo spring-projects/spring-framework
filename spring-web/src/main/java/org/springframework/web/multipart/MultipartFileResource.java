@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * @since 5.1
  * @see MultipartFile#getResource()
  */
-class MultipartFileResource extends AbstractResource {
+public class MultipartFileResource extends AbstractResource {
 
 	private final MultipartFile multipartFile;
 
