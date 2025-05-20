@@ -49,9 +49,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	public TransactionAttribute parseTransactionAnnotation(jakarta.ejb.TransactionAttribute ann) {

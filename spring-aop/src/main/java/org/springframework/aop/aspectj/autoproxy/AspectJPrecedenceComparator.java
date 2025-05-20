@@ -102,9 +102,7 @@ class AspectJPrecedenceComparator implements Comparator<Advisor> {
 			else if (adviceDeclarationOrderDelta == 0) {
 				return SAME_PRECEDENCE;
 			}
-			else {
-				return HIGHER_PRECEDENCE;
-			}
+			return HIGHER_PRECEDENCE;
 		}
 		else {
 			// the advice declared first has higher precedence

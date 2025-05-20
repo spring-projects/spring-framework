@@ -72,9 +72,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
 			return cbf.getBeanClassLoader();
 		}
-		else {
-			return ClassUtils.getDefaultClassLoader();
-		}
+        return ClassUtils.getDefaultClassLoader();
 	}
 
 	@Override

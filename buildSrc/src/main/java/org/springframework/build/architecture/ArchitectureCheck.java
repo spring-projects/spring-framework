@@ -94,9 +94,7 @@ public abstract class ArchitectureCheck extends DefaultTask {
 					StandardOpenOption.TRUNCATE_EXISTING);
 			throw new GradleException("Architecture check failed. See '" + outputFile + "' for details.");
 		}
-		else {
-			outputFile.createNewFile();
-		}
+		outputFile.createNewFile();
 	}
 
 	public void setClasses(FileCollection classes) {

@@ -234,12 +234,10 @@ public class TransactionSynchronizationManager {
 		if (synchs.isEmpty()) {
 			return Collections.emptyList();
 		}
-		else {
-			// Sort lazily here, not in registerSynchronization.
-			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
-			AnnotationAwareOrderComparator.sort(sortedSynchs);
-			return Collections.unmodifiableList(sortedSynchs);
-		}
+		// Sort lazily here, not in registerSynchronization.
+		List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
+		AnnotationAwareOrderComparator.sort(sortedSynchs);
+		return Collections.unmodifiableList(sortedSynchs);
 	}
 
 	/**

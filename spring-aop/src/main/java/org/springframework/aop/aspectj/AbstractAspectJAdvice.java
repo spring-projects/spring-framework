@@ -300,17 +300,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		// name could be a variable or a type...
 		if (isVariableName(name)) {
 			this.returningName = name;
+			return;
 		}
-		else {
-			// assume a type
-			try {
-				this.discoveredReturningType = ClassUtils.forName(name, getAspectClassLoader());
-			}
-			catch (Throwable ex) {
-				throw new IllegalArgumentException("Returning name '" + name +
-						"' is neither a valid argument name nor the fully-qualified " +
-						"name of a Java type on the classpath. Root cause: " + ex);
-			}
+		// assume a type
+		try {
+			this.discoveredReturningType = ClassUtils.forName(name, getAspectClassLoader());
+		}
+		catch (Throwable ex) {
+			throw new IllegalArgumentException("Returning name '" + name +
+					"' is neither a valid argument name nor the fully-qualified " +
+					"name of a Java type on the classpath. Root cause: " + ex);
 		}
 	}
 
@@ -334,17 +333,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		// name could be a variable or a type...
 		if (isVariableName(name)) {
 			this.throwingName = name;
+			return;
 		}
-		else {
-			// assume a type
-			try {
-				this.discoveredThrowingType = ClassUtils.forName(name, getAspectClassLoader());
-			}
-			catch (Throwable ex) {
-				throw new IllegalArgumentException("Throwing name '" + name +
-						"' is neither a valid argument name nor the fully-qualified " +
-						"name of a Java type on the classpath. Root cause: " + ex);
-			}
+		// assume a type
+		try {
+			this.discoveredThrowingType = ClassUtils.forName(name, getAspectClassLoader());
+		}
+		catch (Throwable ex) {
+			throw new IllegalArgumentException("Throwing name '" + name +
+					"' is neither a valid argument name nor the fully-qualified " +
+					"name of a Java type on the classpath. Root cause: " + ex);
 		}
 	}
 
@@ -397,9 +395,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			this.joinPointArgumentIndex = 0;
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	private boolean maybeBindProceedingJoinPoint(Class<?> candidateParameterType) {
@@ -410,9 +406,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			this.joinPointArgumentIndex = 0;
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	protected boolean supportsProceedingJoinPoint() {
@@ -424,9 +418,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			this.joinPointStaticPartArgumentIndex = 0;
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	private void bindArgumentsByName(int numArgumentsExpectingToBind) {

@@ -258,24 +258,18 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			if (this.raiseExceptions) {
 				throw ex;
 			}
-			else {
-				return null;
-			}
+			return null;
 		}
 
 		if (this.numberOfRemainingUnboundArguments == 0) {
 			return this.parameterNameBindings;
 		}
-		else {
-			if (this.raiseExceptions) {
-				throw new IllegalStateException("Failed to bind all argument names: " +
-						this.numberOfRemainingUnboundArguments + " argument(s) could not be bound");
-			}
-			else {
-				// convention for failing is to return null, allowing participation in a chain of responsibility
-				return null;
-			}
+		if (this.raiseExceptions) {
+			throw new IllegalStateException("Failed to bind all argument names: " +
+					this.numberOfRemainingUnboundArguments + " argument(s) could not be bound");
 		}
+		// convention for failing is to return null, allowing participation in a chain of responsibility
+		return null;
 	}
 
 	/**

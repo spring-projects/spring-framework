@@ -118,24 +118,22 @@ public abstract class AbstractFallbackTransactionAttributeSource
 		if (cached != null) {
 			return (cached != NULL_TRANSACTION_ATTRIBUTE ? cached : null);
 		}
-		else {
-			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
-			if (txAttr != null) {
-				String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
-				if (txAttr instanceof DefaultTransactionAttribute dta) {
-					dta.setDescriptor(methodIdentification);
-					dta.resolveAttributeStrings(this.embeddedValueResolver);
-				}
-				if (logger.isTraceEnabled()) {
-					logger.trace("Adding transactional method '" + methodIdentification + "' with attribute: " + txAttr);
-				}
-				this.attributeCache.put(cacheKey, txAttr);
+		TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
+		if (txAttr != null) {
+			String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
+			if (txAttr instanceof DefaultTransactionAttribute dta) {
+				dta.setDescriptor(methodIdentification);
+				dta.resolveAttributeStrings(this.embeddedValueResolver);
 			}
-			else if (cacheNull) {
-				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Adding transactional method '" + methodIdentification + "' with attribute: " + txAttr);
 			}
-			return txAttr;
+			this.attributeCache.put(cacheKey, txAttr);
 		}
+		else if (cacheNull) {
+			this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
+		}
+		return txAttr;
 	}
 
 	/**

@@ -139,23 +139,21 @@ public class PersistenceExceptionTranslationInterceptor
 			if (!this.alwaysTranslate && ReflectionUtils.declaresException(mi.getMethod(), ex.getClass())) {
 				throw ex;
 			}
-			else {
-				PersistenceExceptionTranslator translator = this.persistenceExceptionTranslator;
-				if (translator == null) {
-					Assert.state(this.beanFactory != null,
-							"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
-					try {
-						translator = detectPersistenceExceptionTranslators(this.beanFactory);
-					}
-					catch (BeanCreationNotAllowedException ex2) {
-						// Cannot create PersistenceExceptionTranslator bean on shutdown:
-						// fall back to rethrowing original exception without translation
-						throw ex;
-					}
-					this.persistenceExceptionTranslator = translator;
+			PersistenceExceptionTranslator translator = this.persistenceExceptionTranslator;
+			if (translator == null) {
+				Assert.state(this.beanFactory != null,
+						"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
+				try {
+					translator = detectPersistenceExceptionTranslators(this.beanFactory);
 				}
-				throw DataAccessUtils.translateIfNecessary(ex, translator);
+				catch (BeanCreationNotAllowedException ex2) {
+					// Cannot create PersistenceExceptionTranslator bean on shutdown:
+					// fall back to rethrowing original exception without translation
+					throw ex;
+				}
+				this.persistenceExceptionTranslator = translator;
 			}
+			throw DataAccessUtils.translateIfNecessary(ex, translator);
 		}
 	}
 

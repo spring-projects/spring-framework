@@ -195,10 +195,8 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 		if (this.pointcut != null) {
 			return new DefaultPointcutAdvisor(this.pointcut, this.transactionInterceptor);
 		}
-		else {
-			// Rely on default pointcut.
-			return new TransactionAttributeSourceAdvisor(this.transactionInterceptor);
-		}
+        // Rely on default pointcut.
+        return new TransactionAttributeSourceAdvisor(this.transactionInterceptor);
 	}
 
 	/**

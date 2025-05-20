@@ -540,9 +540,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		if (transactionManager instanceof UserTransaction ut) {
 			return ut;
 		}
-		else {
-			return new UserTransactionAdapter(transactionManager);
-		}
+		return new UserTransactionAdapter(transactionManager);
 	}
 
 	/**

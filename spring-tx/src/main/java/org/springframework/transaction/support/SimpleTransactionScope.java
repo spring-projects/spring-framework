@@ -68,9 +68,7 @@ public class SimpleTransactionScope implements Scope {
 			scopedObjects.destructionCallbacks.remove(name);
 			return scopedObjects.scopedInstances.remove(name);
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	@Override

@@ -262,11 +262,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		if (!(aNode instanceof Element)) {
 			return false;
 		}
-		else {
-			String name = parserContext.getDelegate().getLocalName(aNode);
-			return (BEFORE.equals(name) || AFTER.equals(name) || AFTER_RETURNING_ELEMENT.equals(name) ||
-					AFTER_THROWING_ELEMENT.equals(name) || AROUND.equals(name));
-		}
+		String name = parserContext.getDelegate().getLocalName(aNode);
+		return (BEFORE.equals(name) || AFTER.equals(name) || AFTER_RETURNING_ELEMENT.equals(name) ||
+				AFTER_THROWING_ELEMENT.equals(name) || AROUND.equals(name));
 	}
 
 	/**
@@ -475,12 +473,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			return pointcutRef;
 		}
-		else {
-			parserContext.getReaderContext().error(
-					"Must define one of 'pointcut' or 'pointcut-ref' on <advisor> tag.",
-					element, this.parseState.snapshot());
-			return null;
-		}
+		parserContext.getReaderContext().error(
+				"Must define one of 'pointcut' or 'pointcut-ref' on <advisor> tag.",
+				element, this.parseState.snapshot());
+		return null;
 	}
 
 	/**

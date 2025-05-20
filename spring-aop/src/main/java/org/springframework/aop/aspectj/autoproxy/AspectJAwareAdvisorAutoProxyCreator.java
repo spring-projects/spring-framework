@@ -84,9 +84,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			}
 			return result;
 		}
-		else {
-			return super.sortAdvisors(advisors);
-		}
+        return super.sortAdvisors(advisors);
 	}
 
 	/**

@@ -297,12 +297,10 @@ public abstract class TransactionSynchronizationManager {
 		else if (synchs.size() == 1) {
 			return Collections.singletonList(synchs.iterator().next());
 		}
-		else {
-			// Sort lazily here, not in registerSynchronization.
-			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
-			OrderComparator.sort(sortedSynchs);
-			return Collections.unmodifiableList(sortedSynchs);
-		}
+		// Sort lazily here, not in registerSynchronization.
+		List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
+		OrderComparator.sort(sortedSynchs);
+		return Collections.unmodifiableList(sortedSynchs);
 	}
 
 	/**

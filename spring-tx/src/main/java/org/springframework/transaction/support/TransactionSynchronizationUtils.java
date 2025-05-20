@@ -218,9 +218,7 @@ public abstract class TransactionSynchronizationUtils {
 			if (resource instanceof ScopedObject scopedObject) {
 				return scopedObject.getTargetObject();
 			}
-			else {
-				return resource;
-			}
+			return resource;
 		}
 	}
 

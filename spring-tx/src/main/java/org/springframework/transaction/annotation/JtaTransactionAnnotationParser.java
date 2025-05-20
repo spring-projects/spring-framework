@@ -54,9 +54,7 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 		if (attributes != null) {
 			return parseTransactionAnnotation(attributes);
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	public TransactionAttribute parseTransactionAnnotation(jakarta.transaction.Transactional ann) {

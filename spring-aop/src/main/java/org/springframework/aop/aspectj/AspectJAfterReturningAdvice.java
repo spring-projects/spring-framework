@@ -103,9 +103,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 		else if (Object.class == type && void.class == method.getReturnType()) {
 			return true;
 		}
-		else {
-			return ClassUtils.isAssignable(type, method.getReturnType());
-		}
+		return ClassUtils.isAssignable(type, method.getReturnType());
 	}
 
 }

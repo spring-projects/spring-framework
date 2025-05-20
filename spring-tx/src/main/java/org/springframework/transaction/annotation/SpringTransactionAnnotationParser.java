@@ -58,9 +58,7 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		if (attributes != null) {
 			return parseTransactionAnnotation(attributes);
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	public TransactionAttribute parseTransactionAnnotation(Transactional ann) {

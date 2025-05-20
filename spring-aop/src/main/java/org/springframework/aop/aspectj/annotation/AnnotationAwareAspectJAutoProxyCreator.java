@@ -119,14 +119,12 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 		if (this.includePatterns == null) {
 			return true;
 		}
-		else {
-			for (Pattern pattern : this.includePatterns) {
-				if (pattern.matcher(beanName).matches()) {
-					return true;
-				}
+		for (Pattern pattern : this.includePatterns) {
+			if (pattern.matcher(beanName).matches()) {
+				return true;
 			}
-			return false;
 		}
+		return false;
 	}
 
 

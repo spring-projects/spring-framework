@@ -409,15 +409,13 @@ public abstract class AbstractPlatformTransactionManager
 				throw ex;
 			}
 		}
-		else {
-			// Create "empty" transaction: no actual transaction, but potentially synchronization.
-			if (def.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
-				logger.warn("Custom isolation level specified but no actual transaction initiated; " +
-						"isolation level will effectively be ignored: " + def);
-			}
-			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-			return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, null);
+		// Create "empty" transaction: no actual transaction, but potentially synchronization.
+		if (def.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
+			logger.warn("Custom isolation level specified but no actual transaction initiated; " +
+					"isolation level will effectively be ignored: " + def);
 		}
+		boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+		return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, null);
 	}
 
 	/**
@@ -483,12 +481,10 @@ public abstract class AbstractPlatformTransactionManager
 				this.transactionExecutionListeners.forEach(listener -> listener.afterBegin(status, null));
 				return status;
 			}
-			else {
-				// Nested transaction through nested begin and commit/rollback calls.
-				// Usually only for JTA: Spring synchronization might get activated here
-				// in case of a pre-existing JTA transaction.
-				return startTransaction(definition, transaction, true, debugEnabled, null);
-			}
+			// Nested transaction through nested begin and commit/rollback calls.
+			// Usually only for JTA: Spring synchronization might get activated here
+			// in case of a pre-existing JTA transaction.
+			return startTransaction(definition, transaction, true, debugEnabled, null);
 		}
 
 		// PROPAGATION_REQUIRED, PROPAGATION_SUPPORTS, PROPAGATION_MANDATORY:
@@ -641,10 +637,8 @@ public abstract class AbstractPlatformTransactionManager
 			Object suspendedResources = doSuspend(transaction);
 			return new SuspendedResourcesHolder(suspendedResources);
 		}
-		else {
-			// Neither transaction nor synchronization active.
-			return null;
-		}
+		// Neither transaction nor synchronization active.
+		return null;
 	}
 
 	/**

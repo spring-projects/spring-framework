@@ -168,14 +168,12 @@ public abstract class AbstractReactiveTransactionManager
 											.then(Mono.error(ex)));
 						}));
 			}
-			else {
-				// Create "empty" transaction: no actual transaction, but potentially synchronization.
-				if (def.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
-					logger.warn("Custom isolation level specified but no actual transaction initiated; " +
-							"isolation level will effectively be ignored: " + def);
-				}
-				return Mono.just(prepareReactiveTransaction(synchronizationManager, def, null, true, debugEnabled, null));
+			// Create "empty" transaction: no actual transaction, but potentially synchronization.
+			if (def.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
+				logger.warn("Custom isolation level specified but no actual transaction initiated; " +
+						"isolation level will effectively be ignored: " + def);
 			}
+			return Mono.just(prepareReactiveTransaction(synchronizationManager, def, null, true, debugEnabled, null));
 		});
 	}
 
@@ -332,10 +330,8 @@ public abstract class AbstractReactiveTransactionManager
 					doSuspend(synchronizationManager, transaction).map(Optional::of).defaultIfEmpty(Optional.empty());
 			return suspendedResources.map(it -> new SuspendedResourcesHolder(it.orElse(null)));
 		}
-		else {
-			// Neither transaction nor synchronization active.
-			return Mono.empty();
-		}
+		// Neither transaction nor synchronization active.
+		return Mono.empty();
 	}
 
 	/**
@@ -553,20 +549,18 @@ public abstract class AbstractReactiveTransactionManager
 				this.transactionExecutionListeners.forEach(listener -> listener.beforeRollback(status));
 				return doRollback(synchronizationManager, status);
 			}
-			else {
-				Mono<Void> beforeCompletion = Mono.empty();
-				// Participating in larger transaction
-				if (status.hasTransaction()) {
-					if (status.isDebug()) {
-						logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
-					}
-					beforeCompletion = doSetRollbackOnly(synchronizationManager, status);
+			Mono<Void> beforeCompletion = Mono.empty();
+			// Participating in larger transaction
+			if (status.hasTransaction()) {
+				if (status.isDebug()) {
+					logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
 				}
-				else {
-					logger.debug("Should roll back transaction but cannot - no transaction available");
-				}
-				return beforeCompletion;
+				beforeCompletion = doSetRollbackOnly(synchronizationManager, status);
 			}
+			else {
+				logger.debug("Should roll back transaction but cannot - no transaction available");
+			}
+			return beforeCompletion;
 		})).onErrorResume(ErrorPredicates.RUNTIME_OR_ERROR, ex ->
 						triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN)
 						.then(Mono.defer(() -> {

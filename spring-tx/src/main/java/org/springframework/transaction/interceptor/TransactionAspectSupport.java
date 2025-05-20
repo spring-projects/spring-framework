@@ -406,66 +406,60 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return retVal;
 		}
 
-		else {
-			Object result;
-			final ThrowableHolder throwableHolder = new ThrowableHolder();
+		Object result;
+		final ThrowableHolder throwableHolder = new ThrowableHolder();
 
-			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
-			try {
-				result = cpptm.execute(txAttr, status -> {
-					TransactionInfo txInfo = prepareTransactionInfo(ptm, txAttr, joinpointIdentification, status);
-					try {
-						Object retVal = invocation.proceedWithInvocation();
-						if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
-							// Set rollback-only in case of Vavr failure matching our rollback rules...
-							retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
-						}
-						return retVal;
+		// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
+		try {
+			result = cpptm.execute(txAttr, status -> {
+				TransactionInfo txInfo = prepareTransactionInfo(ptm, txAttr, joinpointIdentification, status);
+				try {
+					Object retVal = invocation.proceedWithInvocation();
+					if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+						// Set rollback-only in case of Vavr failure matching our rollback rules...
+						retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
 					}
-					catch (Throwable ex) {
-						if (txAttr.rollbackOn(ex)) {
-							// A RuntimeException: will lead to a rollback.
-							if (ex instanceof RuntimeException runtimeException) {
-								throw runtimeException;
-							}
-							else {
-								throw new ThrowableHolderException(ex);
-							}
-						}
-						else {
-							// A normal return value: will lead to a commit.
-							throwableHolder.throwable = ex;
-							return null;
-						}
-					}
-					finally {
-						cleanupTransactionInfo(txInfo);
-					}
-				});
-			}
-			catch (ThrowableHolderException ex) {
-				throw ex.getCause();
-			}
-			catch (TransactionSystemException ex2) {
-				if (throwableHolder.throwable != null) {
-					logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
-					ex2.initApplicationException(throwableHolder.throwable);
+					return retVal;
 				}
-				throw ex2;
-			}
-			catch (Throwable ex2) {
-				if (throwableHolder.throwable != null) {
-					logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+				catch (Throwable ex) {
+					if (txAttr.rollbackOn(ex)) {
+						// A RuntimeException: will lead to a rollback.
+						if (ex instanceof RuntimeException runtimeException) {
+							throw runtimeException;
+						}
+						throw new ThrowableHolderException(ex);
+					}
+					// A normal return value: will lead to a commit.
+					throwableHolder.throwable = ex;
+					return null;
 				}
-				throw ex2;
-			}
-
-			// Check result state: It might indicate a Throwable to rethrow.
-			if (throwableHolder.throwable != null) {
-				throw throwableHolder.throwable;
-			}
-			return result;
+				finally {
+					cleanupTransactionInfo(txInfo);
+				}
+			});
 		}
+		catch (ThrowableHolderException ex) {
+			throw ex.getCause();
+		}
+		catch (TransactionSystemException ex2) {
+			if (throwableHolder.throwable != null) {
+				logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+				ex2.initApplicationException(throwableHolder.throwable);
+			}
+			throw ex2;
+		}
+		catch (Throwable ex2) {
+			if (throwableHolder.throwable != null) {
+				logger.error("Application exception overridden by commit exception", throwableHolder.throwable);
+			}
+			throw ex2;
+		}
+
+		// Check result state: It might indicate a Throwable to rethrow.
+		if (throwableHolder.throwable != null) {
+			throw throwableHolder.throwable;
+		}
+		return result;
 	}
 
 	/**
@@ -515,18 +509,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (StringUtils.hasText(this.transactionManagerBeanName)) {
 			return determineQualifiedTransactionManager(this.beanFactory, this.transactionManagerBeanName);
 		}
-		else {
-			TransactionManager defaultTransactionManager = getTransactionManager();
+		TransactionManager defaultTransactionManager = getTransactionManager();
+		if (defaultTransactionManager == null) {
+			defaultTransactionManager = this.transactionManagerCache.get(DEFAULT_TRANSACTION_MANAGER_KEY);
 			if (defaultTransactionManager == null) {
-				defaultTransactionManager = this.transactionManagerCache.get(DEFAULT_TRANSACTION_MANAGER_KEY);
-				if (defaultTransactionManager == null) {
-					defaultTransactionManager = this.beanFactory.getBean(TransactionManager.class);
-					this.transactionManagerCache.putIfAbsent(
-							DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
-				}
+				defaultTransactionManager = this.beanFactory.getBean(TransactionManager.class);
+				this.transactionManagerCache.putIfAbsent(
+						DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
 			}
-			return defaultTransactionManager;
 		}
+		return defaultTransactionManager;
 	}
 
 	/**
@@ -555,10 +547,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (transactionManager instanceof PlatformTransactionManager ptm) {
 			return ptm;
 		}
-		else {
-			throw new IllegalStateException(
-					"Specified transaction manager is not a PlatformTransactionManager: " + transactionManager);
-		}
+		throw new IllegalStateException(
+				"Specified transaction manager is not a PlatformTransactionManager: " + transactionManager);
 	}
 
 	private String methodIdentification(Method method, @Nullable Class<?> targetClass,
@@ -1021,21 +1011,19 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 							}
 					);
 				}
-				else {
-					// We don't roll back on this exception.
-					// Will still roll back if TransactionStatus.isRollbackOnly() is true.
-					return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction()).onErrorMap(ex2 -> {
-								logger.error("Application exception overridden by commit exception", ex);
-								if (ex2 instanceof TransactionSystemException systemException) {
-									systemException.initApplicationException(ex);
-								}
-								else {
-									ex2.addSuppressed(ex);
-								}
-								return ex2;
+				// We don't roll back on this exception.
+				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
+				return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction()).onErrorMap(ex2 -> {
+							logger.error("Application exception overridden by commit exception", ex);
+							if (ex2 instanceof TransactionSystemException systemException) {
+								systemException.initApplicationException(ex);
 							}
-					);
-				}
+							else {
+								ex2.addSuppressed(ex);
+							}
+							return ex2;
+						}
+				);
 			}
 			return Mono.empty();
 		}
