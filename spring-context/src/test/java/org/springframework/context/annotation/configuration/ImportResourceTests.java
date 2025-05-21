@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -109,6 +110,13 @@ class ImportResourceTests {
 		}
 	}
 
+	@Test
+	void importResourceWithPrivateReader() {
+		try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportWithPrivateReaderConfig.class)) {
+			assertThat(ctx.containsBean("propertiesDeclaredBean")).isTrue();
+		}
+	}
+
 
 	@Configuration
 	@ImportResource("classpath:org/springframework/context/annotation/configuration/ImportXmlConfig-context.xml")
@@ -171,6 +179,22 @@ class ImportResourceTests {
 	@ImportResource(locations = "org/springframework/context/annotation/configuration/ImportNonXmlResourceConfig.properties",
 			reader = org.springframework.beans.factory.support.PropertiesBeanDefinitionReader.class)
 	static class ImportNonXmlResourceConfig {
+	}
+
+	@SuppressWarnings("deprecation")
+	@Configuration
+	@ImportResource(locations = "org/springframework/context/annotation/configuration/ImportNonXmlResourceConfig.properties",
+			reader = PrivatePropertiesBeanDefinitionReader.class)
+	static class ImportWithPrivateReaderConfig {
+	}
+
+	@SuppressWarnings("deprecation")
+	private static class PrivatePropertiesBeanDefinitionReader
+			extends org.springframework.beans.factory.support.PropertiesBeanDefinitionReader {
+
+		PrivatePropertiesBeanDefinitionReader(BeanDefinitionRegistry registry) {
+			super(registry);
+		}
 	}
 
 }

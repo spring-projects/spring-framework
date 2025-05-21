@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -371,9 +373,11 @@ class ConfigurationClassBeanDefinitionReader {
 			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
 			if (reader == null) {
 				try {
+					Constructor<? extends BeanDefinitionReader> constructor =
+							readerClass.getDeclaredConstructor(BeanDefinitionRegistry.class);
 					// Instantiate the specified BeanDefinitionReader
-					reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-					// Delegate the current ResourceLoader to it if possible
+					reader = BeanUtils.instantiateClass(constructor, this.registry);
+					// Delegate the current ResourceLoader and Environment to it if possible
 					if (reader instanceof AbstractBeanDefinitionReader abdr) {
 						abdr.setResourceLoader(this.resourceLoader);
 						abdr.setEnvironment(this.environment);
@@ -382,7 +386,7 @@ class ConfigurationClassBeanDefinitionReader {
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException(
-							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]", ex);
 				}
 			}
 			reader.loadBeanDefinitions(resource);

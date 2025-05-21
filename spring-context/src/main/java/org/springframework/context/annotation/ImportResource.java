@@ -80,6 +80,10 @@ public @interface ImportResource {
 	 * {@link BeanDefinitionReader} implementation to use when processing
 	 * resources specified via the {@link #locations() locations} or
 	 * {@link #value() value} attribute.
+	 * <p>The configured {@code BeanDefinitionReader} type must declare a
+	 * constructor that accepts a single
+	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry
+	 * BeanDefinitionRegistry} argument.
 	 * <p>By default, the reader will be adapted to the resource path specified:
 	 * {@code ".groovy"} files will be processed with a
 	 * {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader
