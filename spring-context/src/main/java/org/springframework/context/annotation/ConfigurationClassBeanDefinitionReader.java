@@ -286,8 +286,8 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Registering bean definition for @Bean method %s.%s()",
-					configClass.getMetadata().getClassName(), beanName));
+			logger.trace("Registering bean definition for @Bean method %s.%s()"
+					.formatted(configClass.getMetadata().getClassName(), beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
@@ -344,9 +344,8 @@ class ConfigurationClassBeanDefinitionReader {
 					"@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Skipping bean definition for %s: a definition for bean '%s' " +
-					"already exists. This top-level bean definition is considered as an override.",
-					beanMethod, beanName));
+			logger.debug("Skipping bean definition for %s: a definition for bean '%s' already exists. " +
+					"This top-level bean definition is considered as an override.".formatted(beanMethod, beanName));
 		}
 		return true;
 	}
