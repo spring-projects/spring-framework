@@ -614,10 +614,18 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Extract the filename from the given Java resource path,
-	 * for example, {@code "mypath/myfile.txt" &rarr; "myfile.txt"}.
+	 * Extract the filename from the given Java resource path.
+	 * <p>Examples:
+	 * <ul>
+	 * <li>{@code "my/path/myfile.txt"} &rarr; {@code "myfile.txt"}
+	 * <li>{@code "myfolder"} &rarr; {@code "myfolder"}
+	 * <li>{@code "myfile.txt"} &rarr; {@code "myfile.txt"}
+	 * <li>{@code ""} &rarr; {@code ""}
+	 * <li>{@code null} &rarr; {@code null}
+	 * </ul>
 	 * @param path the file path (may be {@code null})
-	 * @return the extracted filename, or {@code null} if none
+	 * @return the extracted filename, the original path if it does not contain a
+	 * forward slash ({@code "/"}), or {@code null} if the supplied path is {@code null}
 	 */
 	@Contract("null -> null; !null -> !null")
 	public static @Nullable String getFilename(@Nullable String path) {
@@ -630,10 +638,20 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Extract the filename extension from the given Java resource path,
-	 * for example, "mypath/myfile.txt" &rarr; "txt".
+	 * Extract the filename extension from the given Java resource path.
+	 * <p>Examples:
+	 * <ul>
+	 * <li>{@code "my/path/myfile.txt"} &rarr; {@code "txt"}
+	 * <li>{@code "myfile.txt"} &rarr; {@code "txt"}
+	 * <li>{@code "my/path/myfile."} &rarr; {@code ""}
+	 * <li>{@code "myfile"} &rarr; {@code null}
+	 * <li>{@code ""} &rarr; {@code null}
+	 * <li>{@code null} &rarr; {@code null}
+	 * </ul>
 	 * @param path the file path (may be {@code null})
-	 * @return the extracted filename extension, or {@code null} if none
+	 * @return the extracted filename extension (potentially an empty string), or
+	 * {@code null} if the provided path is {@code null} or does not contain a dot
+	 * ({@code "."})
 	 */
 	public static @Nullable String getFilenameExtension(@Nullable String path) {
 		if (path == null) {
