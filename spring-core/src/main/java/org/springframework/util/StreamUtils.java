@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import java.nio.charset.Charset;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Contract;
-
 /**
- * Simple utility methods for dealing with streams. The copy methods of this class are
- * similar to those defined in {@link FileCopyUtils} except that all affected streams are
- * left open when done. All copy methods use a block size of 8192 bytes.
+ * Simple utility methods for dealing with streams.
+ *
+ * <p>The copy methods of this class are similar to those defined in
+ * {@link FileCopyUtils} except that all affected streams are left open when done.
+ * All copy methods use a block size of {@value #BUFFER_SIZE} bytes.
  *
  * <p>Mainly for use within the framework, but also useful for application code.
  *
@@ -191,14 +191,14 @@ public abstract class StreamUtils {
 	}
 
 	/**
-	 * Drain the remaining content of the given InputStream.
-	 * <p>Leaves the InputStream open when done.
-	 * @param in the InputStream to drain
-	 * @return the number of bytes read
+	 * Drain the remaining content of the given {@link InputStream}.
+	 * <p>Leaves the {@code InputStream} open when done.
+	 * @param in the {@code InputStream} to drain
+	 * @return the number of bytes read, or {@code 0} if the supplied
+	 * {@code InputStream} is {@code null} or empty
 	 * @throws IOException in case of I/O errors
 	 * @since 4.3
 	 */
-	@Contract("null -> fail")
 	public static int drain(@Nullable InputStream in) throws IOException {
 		if (in == null) {
 			return 0;
