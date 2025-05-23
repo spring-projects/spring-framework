@@ -172,6 +172,10 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
 			ConfigurablePropertyResolver propertyResolver) throws BeansException {
 
+		if(this.environment instanceof ApplicationServletEnvironment) {
+			propertyResolver.setConversionService(((ApplicationServletEnvironment) this.environment).getConversionService());
+		}
+		
 		propertyResolver.setPlaceholderPrefix(this.placeholderPrefix);
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
 		propertyResolver.setValueSeparator(this.valueSeparator);
