@@ -28,8 +28,8 @@ import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link VersionRequestCondition}.

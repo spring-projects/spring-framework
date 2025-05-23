@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
  * Tests for annotation-based caching methods that use reactive operators.
