@@ -538,6 +538,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// Supported methods and required session
 		checkRequest(request);
 
+		// Apply cache settings, if any
+		prepareResponse(response);
+
 		// Header phase
 		String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
 		long lastModified = (this.isUseLastModified()) ? resource.lastModified() : -1;
@@ -545,9 +548,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			logger.trace("Resource not modified");
 			return;
 		}
-
-		// Apply cache settings, if any
-		prepareResponse(response);
 
 		// Check the media type for the resource
 		MediaType mediaType = getMediaType(request, resource);
