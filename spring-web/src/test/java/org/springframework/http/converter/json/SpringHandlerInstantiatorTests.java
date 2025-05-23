@@ -104,7 +104,7 @@ class SpringHandlerInstantiatorTests {
 	}
 
 	@Test
-	void applicationContextAwaretypeResolverBuilder() throws JsonProcessingException {
+	void applicationContextAwareTypeResolverBuilder() throws JsonProcessingException {
 		this.objectMapper.writeValueAsString(new Group());
 		assertThat(CustomTypeResolverBuilder.isAutowiredFiledInitialized).isTrue();
 	}
