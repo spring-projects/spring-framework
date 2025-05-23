@@ -26,14 +26,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class CacheConfiguration {
 
-	private CacheManager jdkCache() {
-		return null;
-	}
-
-	private CacheManager gemfireCache() {
-		return null;
-	}
-
 	// tag::snippet[]
 	@Bean
 	CacheManager cacheManager(CacheManager jdkCache, CacheManager gemfireCache) {
