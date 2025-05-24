@@ -88,7 +88,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public @Nullable String getContextualName(ClientRequestObservationContext context) {
-		ClientHttpRequest request = context.getCarrier();
+		ClientHttpRequest request = getClientHttpRequest(context);
 		return (request != null ? "http " + request.getMethod().name().toLowerCase(Locale.ROOT) : null);
 	}
 
@@ -111,8 +111,9 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue method(ClientRequestObservationContext context) {
-		if (context.getCarrier() != null) {
-			return KeyValue.of(LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name());
+		ClientHttpRequest request = getClientHttpRequest(context);
+		if (request != null) {
+			return KeyValue.of(LowCardinalityKeyNames.METHOD, request.getMethod().name());
 		}
 		else {
 			return METHOD_NONE;
@@ -120,7 +121,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue status(ClientRequestObservationContext context) {
-		ClientHttpResponse response = context.getResponse();
+		ClientHttpResponse response = getClientHttpResponse(context);
 		if (response == null) {
 			return STATUS_CLIENT_ERROR;
 		}
@@ -133,8 +134,9 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue clientName(ClientRequestObservationContext context) {
-		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
-			return KeyValue.of(LowCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
+		ClientHttpRequest request = getClientHttpRequest(context);
+		if (request != null && request.getURI().getHost() != null) {
+			return KeyValue.of(LowCardinalityKeyNames.CLIENT_NAME, request.getURI().getHost());
 		}
 		return CLIENT_NAME_NONE;
 	}
@@ -150,9 +152,10 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue outcome(ClientRequestObservationContext context) {
-		if (context.getResponse() != null) {
+		ClientHttpResponse response = getClientHttpResponse(context);
+		if (response != null) {
 			try {
-				return HttpOutcome.forStatus(context.getResponse().getStatusCode());
+				return HttpOutcome.forStatus(response.getStatusCode());
 			}
 			catch (IOException ex) {
 				// Continue
@@ -168,12 +171,21 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue requestUri(ClientRequestObservationContext context) {
-		if (context.getCarrier() != null) {
-			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getURI().toASCIIString());
+		ClientHttpRequest request = getClientHttpRequest(context);
+		if (request != null) {
+			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, request.getURI().toASCIIString());
 		}
 		return HTTP_URL_NONE;
 	}
 
+
+	private @Nullable ClientHttpRequest getClientHttpRequest(ClientRequestObservationContext context) {
+		return context.getCarrier();
+	}
+
+	private @Nullable ClientHttpResponse getClientHttpResponse(ClientRequestObservationContext context) {
+		return context.getResponse();
+	}
 
 	static class HttpOutcome {
 
