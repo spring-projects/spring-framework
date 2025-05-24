@@ -88,6 +88,8 @@ import org.springframework.core.annotation.AliasFor;
  * (Servlet-only) to set response headers and content. The ResponseEntity body
  * will be converted and written to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
+ * <li>A {@link org.springframework.http.ProblemDetail} or {@link org.springframework.web.ErrorResponse}
+ * object to render an RFC 9457 error response with details in the body.
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link jakarta.servlet.ServletResponse} / {@link jakarta.servlet.http.HttpServletResponse}
