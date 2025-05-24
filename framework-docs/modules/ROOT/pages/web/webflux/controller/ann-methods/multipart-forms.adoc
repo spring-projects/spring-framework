@@ -19,7 +19,7 @@ Java::
 
 		private String name;
 
-		private MultipartFile file;
+		private FilePart file;
 
 		// ...
 
