@@ -21,8 +21,9 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConverter;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.GenericConverter;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -71,13 +72,30 @@ abstract class ConversionUtils {
 		return false;
 	}
 
-	public static Class<?> getEnumType(Class<?> targetType) {
+	public static @Nullable Class<?> getEnumType(Class<?> targetType) {
 		Class<?> enumType = targetType;
 		while (enumType != null && !enumType.isEnum()) {
 			enumType = enumType.getSuperclass();
 		}
-		Assert.notNull(enumType, () -> "The target type " + targetType.getName() + " does not refer to an enum");
 		return enumType;
 	}
 
+	static class NonConvertableToEnum<T> implements Converter<String, T>, ConditionalConverter {
+
+		private final Class<T> targetType;
+
+		public NonConvertableToEnum(Class<T> targetType) {
+			this.targetType = targetType;
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return false;
+		}
+
+		@Override
+		public @Nullable T convert(String source) {
+			throw new IllegalArgumentException("The target type " + targetType.getName() + " does not refer to an enum");
+		}
+	}
 }
