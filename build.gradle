@@ -77,7 +77,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/latest/runtime-api/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://hc.apache.org/httpcomponents-client-5.4.x/current/httpclient5/apidocs/",
+			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
 			"https://junit.org/junit5/docs/5.12.2/api/",

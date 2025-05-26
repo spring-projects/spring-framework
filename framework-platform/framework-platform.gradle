@@ -98,7 +98,7 @@ dependencies {
 		api("org.apache.derby:derby:10.16.1.1")
 		api("org.apache.derby:derbyclient:10.16.1.1")
 		api("org.apache.derby:derbytools:10.16.1.1")
-		api("org.apache.httpcomponents.client5:httpclient5:5.4.4")
+		api("org.apache.httpcomponents.client5:httpclient5:5.5")
 		api("org.apache.httpcomponents.core5:httpcore5-reactive:5.3.4")
 		api("org.apache.poi:poi-ooxml:5.2.5")
 		api("org.apache.tomcat.embed:tomcat-embed-core:11.0.7")
