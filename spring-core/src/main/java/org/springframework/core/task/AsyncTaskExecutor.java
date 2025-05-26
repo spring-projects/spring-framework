@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,14 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * Constant that indicates immediate execution.
 	 * @deprecated as of 5.3.16 along with {@link #execute(Runnable, long)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3.16")
 	long TIMEOUT_IMMEDIATE = 0;
 
 	/**
 	 * Constant that indicates no time limit.
 	 * @deprecated as of 5.3.16 along with {@link #execute(Runnable, long)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3.16")
 	long TIMEOUT_INDEFINITE = Long.MAX_VALUE;
 
 
@@ -74,7 +74,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @see #execute(Runnable)
 	 * @deprecated as of 5.3.16 since the common executors do not support start timeouts
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3.16")
 	default void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}

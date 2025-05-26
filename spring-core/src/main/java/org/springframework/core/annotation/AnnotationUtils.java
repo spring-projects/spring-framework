@@ -265,7 +265,7 @@ public abstract class AnnotationUtils {
 	 * @see AnnotatedElement#getAnnotations()
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static Annotation @Nullable [] getAnnotations(AnnotatedElement annotatedElement) {
 		try {
 			return synthesizeAnnotationArray(annotatedElement.getAnnotations(), annotatedElement);
@@ -289,7 +289,7 @@ public abstract class AnnotationUtils {
 	 * @see AnnotatedElement#getAnnotations()
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static Annotation @Nullable [] getAnnotations(Method method) {
 		try {
 			return synthesizeAnnotationArray(BridgeMethodResolver.findBridgedMethod(method).getAnnotations(), method);
@@ -328,7 +328,7 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType) {
 
@@ -365,7 +365,7 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerAnnotationType) {
 
@@ -409,7 +409,7 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType) {
 
@@ -446,7 +446,7 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerAnnotationType) {
 
@@ -597,7 +597,7 @@ public abstract class AnnotationUtils {
 	 * @see Class#getDeclaredAnnotations()
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static @Nullable Class<?> findAnnotationDeclaringClass(
 			Class<? extends Annotation> annotationType, @Nullable Class<?> clazz) {
 
@@ -633,7 +633,7 @@ public abstract class AnnotationUtils {
 	 * @see Class#getDeclaredAnnotations()
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static @Nullable Class<?> findAnnotationDeclaringClassForTypes(
 			List<Class<? extends Annotation>> annotationTypes, @Nullable Class<?> clazz) {
 
@@ -686,7 +686,7 @@ public abstract class AnnotationUtils {
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static boolean isAnnotationInherited(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		return MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
 				.stream(annotationType)
@@ -704,7 +704,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2.1
 	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
 			@Nullable Class<? extends Annotation> metaAnnotationType) {
 

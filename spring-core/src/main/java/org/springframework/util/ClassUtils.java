@@ -942,7 +942,7 @@ public abstract class ClassUtils {
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 * such as for a Spring AOP proxy
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static boolean isCglibProxy(Object object) {
 		return isCglibProxyClass(object.getClass());
 	}
@@ -954,7 +954,7 @@ public abstract class ClassUtils {
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
 		return (clazz != null && isCglibProxyClassName(clazz.getName()));
 	}
@@ -966,7 +966,7 @@ public abstract class ClassUtils {
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static boolean isCglibProxyClassName(@Nullable String className) {
 		return (className != null && className.contains(CGLIB_CLASS_SEPARATOR));
 	}
@@ -1388,7 +1388,7 @@ public abstract class ClassUtils {
 	 * @see #getPubliclyAccessibleMethodIfPossible(Method, Class)
 	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static Method getInterfaceMethodIfPossible(Method method) {
 		return getInterfaceMethodIfPossible(method, null);
 	}

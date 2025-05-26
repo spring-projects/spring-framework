@@ -54,7 +54,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 	 * @param introspectedMethod the Method to introspect
 	 * @deprecated since 5.2 in favor of obtaining instances via {@link AnnotationMetadata}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public StandardMethodMetadata(Method introspectedMethod) {
 		this(introspectedMethod, false);
 	}

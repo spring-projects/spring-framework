@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public abstract class SerializationUtils {
 	 * <p>Prefer the use of an external tool (that serializes to JSON, XML, or
 	 * any other format) which is regularly checked and updated for not allowing RCE.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static @Nullable Object deserialize(byte @Nullable [] bytes) {
 		if (bytes == null) {
 			return null;

@@ -117,7 +117,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * {@link #paths(String...)}.
 	 */
 	@SuppressWarnings("removal")
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
 			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
@@ -142,7 +142,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * {@link #paths(String...)}.
 	 */
 	@SuppressWarnings("removal")
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
 			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
@@ -156,7 +156,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * Re-create a RequestMappingInfo with the given custom request condition.
 	 * @deprecated since 5.3 in favor of using {@link #addCustomCondition(RequestCondition)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public RequestMappingInfo(RequestMappingInfo info, @Nullable RequestCondition<?> customRequestCondition) {
 		this(info.name, info.patternsCondition, info.methodsCondition, info.paramsCondition,
 				info.headersCondition, info.consumesCondition, info.producesCondition,
@@ -986,7 +986,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * @deprecated as of 5.3, the path is resolved externally and obtained with
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		}
 
@@ -996,7 +996,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)};
 		 * this method always returns {@link UrlPathHelper#defaultInstance}.
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		public @Nullable UrlPathHelper getUrlPathHelper() {
 			return UrlPathHelper.defaultInstance;
 		}
