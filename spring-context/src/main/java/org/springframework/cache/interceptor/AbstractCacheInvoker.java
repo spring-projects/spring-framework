@@ -122,8 +122,8 @@ public abstract class AbstractCacheInvoker {
 		try {
 			return cache.retrieve(key);
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCacheGetError(ex, cache, key);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCacheGetError(exception, cache, key);
 			return null;
 		}
 	}
