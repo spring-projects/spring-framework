@@ -77,8 +77,8 @@ public abstract class AbstractCacheInvoker {
 		try {
 			return cache.get(key);
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCacheGetError(ex, cache, key);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCacheGetError(exception, cache, key);
 			return null;  // If the exception is handled, return a cache miss
 		}
 	}
@@ -95,16 +95,16 @@ public abstract class AbstractCacheInvoker {
 		try {
 			return cache.get(key, valueLoader);
 		}
-		catch (Cache.ValueRetrievalException ex) {
-			throw ex;
+		catch (Cache.ValueRetrievalException exception) {
+			throw exception;
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCacheGetError(ex, cache, key);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCacheGetError(eexceptionx, cache, key);
 			try {
 				return valueLoader.call();
 			}
-			catch (Exception ex2) {
-				throw new Cache.ValueRetrievalException(key, valueLoader, ex);
+			catch (Exception eexception2) {
+				throw new Cache.ValueRetrievalException(key, valueLoader, exception);
 			}
 		}
 	}
@@ -140,8 +140,8 @@ public abstract class AbstractCacheInvoker {
 		try {
 			return cache.retrieve(key, valueLoader);
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCacheGetError(ex, cache, key);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCacheGetError(exception, cache, key);
 			return valueLoader.get();
 		}
 	}
@@ -154,8 +154,8 @@ public abstract class AbstractCacheInvoker {
 		try {
 			cache.put(key, value);
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCachePutError(ex, cache, key, value);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCachePutError(exception, cache, key, value);
 		}
 	}
 
@@ -172,8 +172,8 @@ public abstract class AbstractCacheInvoker {
 				cache.evict(key);
 			}
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCacheEvictError(ex, cache, key);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCacheEvictError(exception, cache, key);
 		}
 	}
 
@@ -190,8 +190,8 @@ public abstract class AbstractCacheInvoker {
 				cache.clear();
 			}
 		}
-		catch (RuntimeException ex) {
-			getErrorHandler().handleCacheClearError(ex, cache);
+		catch (RuntimeException exception) {
+			getErrorHandler().handleCacheClearError(exception, cache);
 		}
 	}
 
