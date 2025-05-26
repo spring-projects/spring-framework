@@ -302,7 +302,7 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 				it.prototype()
 			}
 			it.supplier {
-				SupplierContextDsl<T>(it).supplier()
+				SupplierContextDsl<T>(it, env).supplier()
 			}
 			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
 			if (resolvableType.hasGenerics()) {
@@ -370,7 +370,7 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 				it.prototype()
 			}
 			it.supplier {
-				SupplierContextDsl<T>(it).supplier()
+				SupplierContextDsl<T>(it, env).supplier()
 			}
 			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
 			if (resolvableType.hasGenerics()) {
@@ -1074,7 +1074,7 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 	 * to bean dependencies.
 	 */
 	@BeanRegistrarDslMarker
-	open class SupplierContextDsl<T>(@PublishedApi internal val context: SupplierContext) {
+	open class SupplierContextDsl<T>(@PublishedApi internal val context: SupplierContext, val env: Environment) {
 
 		/**
 		 * Return the bean instance that uniquely matches the given object type,
