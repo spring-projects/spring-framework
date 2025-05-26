@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public interface AnnotationFilter {
 	 * always ignores lang annotations according to the {@link #PLAIN} filter
 	 * (for efficiency reasons)
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.6")
 	AnnotationFilter NONE = new AnnotationFilter() {
 		@Override
 		public boolean matches(Annotation annotation) {

@@ -60,7 +60,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * @see #StandardAnnotationMetadata(Class, boolean)
 	 * @deprecated since 5.2 in favor of the factory method {@link AnnotationMetadata#introspect(Class)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public StandardAnnotationMetadata(Class<?> introspectedClass) {
 		this(introspectedClass, false);
 	}
@@ -80,7 +80,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * from {@link #getAnnotations()} rather than {@link #getAnnotationAttributes(String)}
 	 * if {@code nestedAnnotationsAsMap} is {@code false}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public StandardAnnotationMetadata(Class<?> introspectedClass, boolean nestedAnnotationsAsMap) {
 		super(introspectedClass);
 		this.mergedAnnotations = MergedAnnotations.from(introspectedClass,

@@ -98,7 +98,7 @@ public abstract class BeanUtils {
 	 * @deprecated as of Spring 5.0, following the deprecation of
 	 * {@link Class#newInstance()} in JDK 9
 	 */
-	@Deprecated
+	@Deprecated(since = "5.0")
 	public static <T> T instantiate(Class<T> clazz) throws BeanInstantiationException {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
