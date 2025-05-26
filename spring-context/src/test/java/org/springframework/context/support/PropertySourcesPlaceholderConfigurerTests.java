@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -70,6 +71,33 @@ class PropertySourcesPlaceholderConfigurerTests {
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("myValue");
 		assertThat(ppc.getAppliedPropertySources()).isNotNull();
+	}
+
+	@Test  // gh-34936
+	void replacementFromEnvironmentPropertiesWithConversion() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.name}")
+					.getBeanDefinition());
+
+		record Point(int x, int y) {
+		}
+
+		Converter<Point, String> pointToStringConverter =
+				point -> "(%d,%d)".formatted(point.x, point.y);
+
+		DefaultConversionService conversionService = new DefaultConversionService();
+		conversionService.addConverter(Point.class, String.class, pointToStringConverter);
+
+		MockEnvironment env = new MockEnvironment();
+		env.setConversionService(conversionService);
+		env.setProperty("my.name", new Point(4,5));
+
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+		ppc.setEnvironment(env);
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("(4,5)");
 	}
 
 	@Test
