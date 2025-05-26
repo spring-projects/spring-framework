@@ -51,14 +51,6 @@ public class MockEnvironment extends AbstractEnvironment {
 	}
 
 	/**
-	 * Set a property on the underlying {@link MockPropertySource} for this environment.
-	 * @see #setProperty(String, Object)
-	 */
-	public void setProperty(String name, String value) {
-		this.propertySource.setProperty(name, value);
-	}
-
-	/**
 	 * Convenient synonym for {@link #setProperty(String, Object)} that returns
 	 * the current instance.
 	 * <p>Useful for method chaining and fluent-style use.
@@ -67,18 +59,6 @@ public class MockEnvironment extends AbstractEnvironment {
 	 * @see MockPropertySource#withProperty(String, Object)
 	 */
 	public MockEnvironment withProperty(String name, Object value) {
-		setProperty(name, value);
-		return this;
-	}
-
-	/**
-	 * Convenient synonym for {@link #setProperty(String, String)} that returns
-	 * the current instance.
-	 * <p>Useful for method chaining and fluent-style use.
-	 * @return this {@link MockEnvironment} instance
-	 * @see #withProperty(String, Object)
-	 */
-	public MockEnvironment withProperty(String name, String value) {
 		setProperty(name, value);
 		return this;
 	}
