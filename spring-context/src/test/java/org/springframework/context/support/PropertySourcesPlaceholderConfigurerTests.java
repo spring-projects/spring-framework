@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,6 +42,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.SpringProperties;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.AbstractPropertyResolver;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -88,6 +91,39 @@ class PropertySourcesPlaceholderConfigurerTests {
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("myValue");
 		assertThat(ppc.getAppliedPropertySources()).isNotNull();
+	}
+
+	/**
+	 * Ensure that a {@link Converter} registered in the {@link ConversionService}
+	 * used by the {@code Environment} is applied during placeholder resolution
+	 * against a {@link PropertySource} registered in the {@code Environment}.
+	 */
+	@Disabled("Disabled until gh-34936 is resolved")
+	@Test  // gh-34936
+	void replacementFromEnvironmentPropertiesWithConversion() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.name}")
+					.getBeanDefinition());
+
+		record Point(int x, int y) {
+		}
+
+		Converter<Point, String> pointToStringConverter =
+				point -> "(%d,%d)".formatted(point.x, point.y);
+
+		DefaultConversionService conversionService = new DefaultConversionService();
+		conversionService.addConverter(Point.class, String.class, pointToStringConverter);
+
+		MockEnvironment env = new MockEnvironment();
+		env.setConversionService(conversionService);
+		env.setProperty("my.name", new Point(4,5));
+
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+		ppc.setEnvironment(env);
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("(4,5)");
 	}
 
 	/**
