@@ -34,6 +34,7 @@ import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Nullness;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
@@ -162,7 +163,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		}
 
 		if (this.field != null) {
-			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
+			return !(this.field.getType() == Optional.class || Nullness.forField(this.field) == Nullness.NULLABLE ||
 					(KotlinDetector.isKotlinType(this.field.getDeclaringClass()) && KotlinDelegate.isNullable(this.field)));
 		}
 		else {

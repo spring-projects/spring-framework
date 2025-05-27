@@ -974,7 +974,9 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean", tb);
 
 		bf.getBean("testBean");
-		assertThat(bf.getBean("annotatedBean", ConstructorWithoutFallbackBean.class).getTestBean3()).isNull();
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> bf.getBean("annotatedBean"))
+				.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
 	}
 
 	@Test
@@ -985,7 +987,9 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean3", tb);
 
 		bf.getBean("testBean3");
-		assertThat(bf.getBean("annotatedBean", ConstructorWithoutFallbackBean.class).getTestBean3()).isNull();
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> bf.getBean("annotatedBean"))
+				.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
 	}
 
 	@Test
@@ -2733,22 +2737,22 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	public static class ResourceInjectionBean {
 
 		@Autowired(required = false)
-		private TestBean testBean;
+		private @Nullable TestBean testBean;
 
-		TestBean testBean2;
+		@Nullable TestBean testBean2;
 
 		@Autowired
-		public void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(@Nullable TestBean testBean2) {
 			Assert.state(this.testBean != null, "Wrong initialization order");
 			Assert.state(this.testBean2 == null, "Already called");
 			this.testBean2 = testBean2;
 		}
 
-		public TestBean getTestBean() {
+		public @Nullable TestBean getTestBean() {
 			return this.testBean;
 		}
 
-		public TestBean getTestBean2() {
+		public @Nullable TestBean getTestBean2() {
 			return this.testBean2;
 		}
 	}
@@ -2757,13 +2761,13 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	static class NonPublicResourceInjectionBean<T> extends ResourceInjectionBean {
 
 		@Autowired
-		public final ITestBean testBean3 = null;
+		public final @Nullable ITestBean testBean3 = null;
 
-		private T nestedTestBean;
+		private @Nullable T nestedTestBean;
 
-		private ITestBean testBean4;
+		private @Nullable ITestBean testBean4;
 
-		protected BeanFactory beanFactory;
+		protected @Nullable BeanFactory beanFactory;
 
 		public boolean baseInjected = false;
 
@@ -2772,18 +2776,18 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Override
 		@Autowired
-		public void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(@Nullable TestBean testBean2) {
 			this.testBean2 = testBean2;
 		}
 
 		@Autowired
-		private void inject(ITestBean testBean4, T nestedTestBean) {
+		private void inject(@Nullable ITestBean testBean4, @Nullable T nestedTestBean) {
 			this.testBean4 = testBean4;
 			this.nestedTestBean = nestedTestBean;
 		}
 
 		@Autowired
-		private void inject(ITestBean testBean4) {
+		private void inject(@Nullable ITestBean testBean4) {
 			this.baseInjected = true;
 		}
 
@@ -2793,11 +2797,11 @@ class AutowiredAnnotationBeanPostProcessorTests {
 			this.beanFactory = beanFactory;
 		}
 
-		public ITestBean getTestBean3() {
+		public @Nullable ITestBean getTestBean3() {
 			return this.testBean3;
 		}
 
-		public ITestBean getTestBean4() {
+		public @Nullable ITestBean getTestBean4() {
 			return this.testBean4;
 		}
 

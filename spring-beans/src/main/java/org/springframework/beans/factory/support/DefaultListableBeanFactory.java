@@ -1656,12 +1656,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						if (autowiredBeanNames != null) {
 							autowiredBeanNames.add(dependencyName);
 						}
-						boolean preExisting = containsSingleton(dependencyName);
 						Object dependencyBean = getBean(dependencyName);
-						if (preExisting && dependencyBean instanceof NullBean) {
-							// for backwards compatibility with addCandidateEntry in the regular code path
-							dependencyBean = null;
-						}
 						return resolveInstance(dependencyBean, descriptor, type, dependencyName);
 					}
 				}
@@ -1972,7 +1967,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else if (containsSingleton(candidateName) ||
 				(descriptor instanceof StreamDependencyDescriptor streamDescriptor && streamDescriptor.isOrdered())) {
 			Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
-			candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
+			candidates.put(candidateName, beanInstance);
 		}
 		else {
 			candidates.put(candidateName, getType(candidateName));
