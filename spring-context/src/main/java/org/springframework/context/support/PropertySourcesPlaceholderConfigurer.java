@@ -26,6 +26,8 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.Environment;
@@ -240,14 +242,35 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		}
 
 		@Override
-		public @Nullable Object getProperty(String name) {
+		// Declare String as covariant return type, since a String is actually required.
+		public @Nullable String getProperty(String name) {
 			for (PropertySource<?> propertySource : super.source.getPropertySources()) {
 				Object candidate = propertySource.getProperty(name);
 				if (candidate != null) {
-					return candidate;
+					return convertToString(candidate);
 				}
 			}
 			return null;
+		}
+
+		/**
+		 * Convert the supplied value to a {@link String} using the {@link ConversionService}
+		 * from the {@link Environment}.
+		 * <p>This is a modified version of
+		 * {@link org.springframework.core.env.AbstractPropertyResolver#convertValueIfNecessary(Object, Class)}.
+		 * @param value the value to convert
+		 * @return the converted value, or the original value if no conversion is necessary
+		 * @since 6.2.8
+		 */
+		private @Nullable String convertToString(Object value) {
+			if (value instanceof String string) {
+				return string;
+			}
+			ConversionService conversionService = super.source.getConversionService();
+			if (conversionService == null) {
+				conversionService = DefaultConversionService.getSharedInstance();
+			}
+			return conversionService.convert(value, String.class);
 		}
 
 		@Override
@@ -275,7 +298,8 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		}
 
 		@Override
-		public @Nullable Object getProperty(String name) {
+		// Declare String as covariant return type, since a String is actually required.
+		public @Nullable String getProperty(String name) {
 			return super.source.getProperty(name);
 		}
 

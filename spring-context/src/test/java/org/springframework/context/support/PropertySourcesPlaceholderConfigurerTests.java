@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -98,7 +97,6 @@ class PropertySourcesPlaceholderConfigurerTests {
 	 * used by the {@code Environment} is applied during placeholder resolution
 	 * against a {@link PropertySource} registered in the {@code Environment}.
 	 */
-	@Disabled("Disabled until gh-34936 is resolved")
 	@Test  // gh-34936
 	void replacementFromEnvironmentPropertiesWithConversion() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
