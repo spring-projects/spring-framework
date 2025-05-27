@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -139,13 +140,19 @@ class ConfigurationClassEnhancer {
 	}
 
 	/**
-	 * Checks whether the given config class relies on package visibility,
-	 * either for the class itself or for any of its {@code @Bean} methods.
+	 * Checks whether the given config class relies on package visibility, either for
+	 * the class and any of its constructors or for any of its {@code @Bean} methods.
 	 */
 	private boolean reliesOnPackageVisibility(Class<?> configSuperClass) {
 		int mod = configSuperClass.getModifiers();
 		if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod)) {
 			return true;
+		}
+		for (Constructor<?> ctor : configSuperClass.getDeclaredConstructors()) {
+			mod = ctor.getModifiers();
+			if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod)) {
+				return true;
+			}
 		}
 		for (Method method : ReflectionUtils.getDeclaredMethods(configSuperClass)) {
 			if (BeanAnnotationHelper.isBeanAnnotated(method)) {
