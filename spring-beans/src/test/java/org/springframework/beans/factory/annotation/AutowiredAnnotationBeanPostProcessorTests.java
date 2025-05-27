@@ -960,9 +960,32 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	void constructorResourceInjectionWithNoCandidatesAndNoFallback() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> bf.getBean("annotatedBean"))
 				.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
+	}
+
+	@Test
+	void constructorResourceInjectionWithCandidateAndNoFallback() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		bf.registerBeanDefinition("testBean", tb);
+
+		bf.getBean("testBean");
+		assertThat(bf.getBean("annotatedBean", ConstructorWithoutFallbackBean.class).getTestBean3()).isNull();
+	}
+
+	@Test
+	void constructorResourceInjectionWithNameMatchingCandidateAndNoFallback() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		bf.registerBeanDefinition("testBean3", tb);
+
+		bf.getBean("testBean3");
+		assertThat(bf.getBean("annotatedBean", ConstructorWithoutFallbackBean.class).getTestBean3()).isNull();
 	}
 
 	@Test
@@ -1193,6 +1216,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	void singleConstructorInjectionWithMissingDependency() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));
+
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> bf.getBean("annotatedBean"));
 	}
@@ -1203,6 +1227,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
 		tb.setFactoryMethodName("createTestBean");
 		bf.registerBeanDefinition("testBean", tb);
+
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> bf.getBean("annotatedBean"));
 	}
@@ -3060,7 +3085,6 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		protected ITestBean testBean3;
 
-		@Autowired(required = false)
 		public ConstructorWithoutFallbackBean(ITestBean testBean3) {
 			this.testBean3 = testBean3;
 		}
@@ -3075,7 +3099,6 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		protected ITestBean testBean3;
 
-		@Autowired(required = false)
 		public ConstructorWithNullableArgument(@Nullable ITestBean testBean3) {
 			this.testBean3 = testBean3;
 		}
