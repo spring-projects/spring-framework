@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -410,6 +411,64 @@ class NamedParameterUtilsTests {
 				.hasSize(1)
 				.containsEntry(0, Parameters.in(String.class));
 	}
+
+	@Test
+	void multipleInParameterReferencesBindsMultiple(){
+		List<String> userIds = List.of("user1", "user2", "user3");
+		String sql = """
+				SELECT * FROM PERSON
+				WHERE name IN (:ids)
+				GROUP BY address
+				UNION
+				SELECT * FROM PERSON
+				WHERE name NOT IN (:ids)
+				""";
+
+		BindMarkersFactory factory = BindMarkersFactory.anonymous("?");
+
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
+				sql, factory, new MapBindParameterSource(
+						Collections.singletonMap("ids", Parameters.in(userIds))));
+
+		assertThat(operation.toQuery()).isEqualTo(
+				"""
+				SELECT * FROM PERSON
+				WHERE name IN (?, ?, ?)
+				GROUP BY address
+				UNION
+				SELECT * FROM PERSON
+				WHERE name NOT IN (?, ?, ?)
+						""");
+		final String[] expectedValues = {"user1", "user2", "user3", "user1", "user2", "user3"};
+		final int[] bindingCount = {0};
+		final boolean[] isBinding = new boolean[6];
+		final String[] bindingValue = new String[6];
+		operation.bindTo(new BindTarget() {
+
+			@Override
+			public void bind(String identifier, Object value) {
+				throw new UnsupportedOperationException();
+			}
+			@Override
+			public void bind(int index, Object value) {
+				bindingCount[0]++;
+				isBinding[index] = true;
+				bindingValue[index] = (String) value;
+			}
+			@Override
+			public void bindNull(String identifier, Class<?> type) {
+				throw new UnsupportedOperationException();
+			}
+			@Override
+			public void bindNull(int index, Class<?> type) {
+				throw new UnsupportedOperationException();
+			}
+		});
+		assertThat(bindingCount[0]).isEqualTo(6);
+		assertThat(isBinding).containsExactly(true, true, true, true, true, true);
+		assertThat(bindingValue).containsExactly(expectedValues);
+	}
+
 
 
 	private static String expand(ParsedSql sql) {
