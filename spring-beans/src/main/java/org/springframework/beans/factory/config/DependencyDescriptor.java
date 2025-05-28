@@ -24,15 +24,12 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Optional;
 
-import kotlin.reflect.KProperty;
-import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Nullness;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -163,8 +160,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		}
 
 		if (this.field != null) {
-			return !(this.field.getType() == Optional.class || Nullness.forField(this.field) == Nullness.NULLABLE ||
-					(KotlinDetector.isKotlinType(this.field.getDeclaringClass()) && KotlinDelegate.isNullable(this.field)));
+			return !(this.field.getType() == Optional.class || Nullness.forField(this.field) == Nullness.NULLABLE);
 		}
 		else {
 			return !obtainMethodParameter().isOptional();
@@ -443,21 +439,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Could not find original class structure", ex);
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		/**
-		 * Check whether the specified {@link Field} represents a nullable Kotlin type or not.
-		 */
-		public static boolean isNullable(Field field) {
-			KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
-			return (property != null && property.getReturnType().isMarkedNullable());
 		}
 	}
 
