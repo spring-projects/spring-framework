@@ -1,0 +1,31 @@
+:noheader:
+[[spring-framework-documentation]]
+= 스프링 프레임워크 문서
+
+[horizontal]
+xref:overview.adoc[개요] :: 히스토리, 설계 철학, 피드백, 시작하기.
+xref:core.adoc[코어] :: IoC 컨테이너, 이벤트, 리소스, 국제화(i18n),
+검증, 데이터 바인딩, 타입 변환, SpEL, AOP, AOT.
+xref:testing.adoc[테스트] :: 목(Mock) 객체, TestContext 프레임워크,
+Spring MVC 테스트, WebTestClient.
+xref:data-access.adoc[데이터 접근] :: 트랜잭션, DAO 지원,
+JDBC, R2DBC, O/R 매핑, XML 마샬링.
+xref:web.adoc[웹 서블릿] :: Spring MVC, WebSocket, SockJS,
+STOMP 메시징.
+xref:web-reactive.adoc[웹 리액티브] :: Spring WebFlux, WebClient,
+WebSocket, RSocket.
+xref:integration.adoc[통합] :: REST 클라이언트, JMS, JCA, JMX,
+이메일, 작업(Task), 스케줄링, 캐싱, 관측 가능성, JVM 체크포인트 복원.
+xref:languages.adoc[언어 지원] :: Kotlin, Groovy, 동적 언어.
+xref:appendix.adoc[부록] :: Spring 프로퍼티.
+{spring-framework-wiki}[위키] :: 새로운 소식,
+업그레이드 안내, 지원 버전, 버전 간 추가 정보.
+
+Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Thomas Risberg,
+Alef Arendsen, Darren Davison, Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin
+Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, Costin Leau, Mark Fisher, Sam
+Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo, Andy Clement, Dave
+Syer, Oliver Gierke, Rossen Stoyanchev, Phillip Webb, Rob Winch, Brian Clozel, Stephane
+Nicoll, Sebastien Deleuze, Jay Bryant, Mark Paluch
+
+이 문서는 개인적인 용도나 타인에게 배포하기 위해 복사할 수 있습니다. 단, 이러한 복사본에 대해 어떠한 비용도 청구하지 않아야 하며, 인쇄 또는 전자 방식과 무관하게 각 사본에는 반드시 저작권 고지를 포함해야 합니다.
