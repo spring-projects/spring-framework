@@ -101,3 +101,10 @@ may preclude WebSocket interactions, either because they are not configured to p
 `Upgrade` header or because they close long-lived connections that appear idle. This
 means that the use of WebSocket for internal applications within the firewall is a more
 straightforward decision than it is for public facing applications.
+
+[[websockets-use-cases]]
+=== Real-World Use Cases for WebSockets
+* **Real-time Chat Applications:** Instant messaging depends on persistent connections for real-time delivery of messages.
+* **Collaborative Tools:** Applications such as shared documents use WebSockets to synchronise changes in real time, allowing multiple users to collaborate simultaneously.
+* **Online Games:** Multiplayer games rely on WebSockets for low-latency, real time communication between clients and servers.
+* **Data Broadcast:** WebSockets provide a reliable and efficient way to push live data to users such as financial market updates and sports scores.
