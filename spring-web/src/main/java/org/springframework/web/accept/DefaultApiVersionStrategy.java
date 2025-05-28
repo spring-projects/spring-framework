@@ -49,8 +49,8 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	/**
 	 * Create an instance.
 	 * @param versionResolvers one or more resolvers to try; the first non-null
-	 * value returned by any resolver becomes the resolved used
-	 * @param versionParser parser for to raw version values
+	 * value returned by any resolver becomes the value used
+	 * @param versionParser parser for raw version values
 	 * @param versionRequired whether a version is required; if a request
 	 * does not have a version, and a {@code defaultVersion} is not specified,
 	 * validation fails with {@link MissingApiVersionException}
