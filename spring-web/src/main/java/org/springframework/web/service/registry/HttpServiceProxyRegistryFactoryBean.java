@@ -194,8 +194,8 @@ public final class HttpServiceProxyRegistryFactoryBean
 		}
 
 		@SuppressWarnings("unchecked")
-		public <CB> void applyConfigurer(HttpServiceGroupConfigurer.ForGroup<CB> configurer) {
-			configurer.configureGroup(this, (CB) this.clientBuilder, this.proxyFactoryBuilder);
+		public <CB> void applyConfigurer(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
+			callback.withGroup(this, (CB) this.clientBuilder, this.proxyFactoryBuilder);
 		}
 
 		public Map<Class<?>, Object> createProxies() {
@@ -247,20 +247,18 @@ public final class HttpServiceProxyRegistryFactoryBean
 		}
 
 		@Override
-		public void forEachClient(HttpServiceGroupConfigurer.ForClient<CB> configurer) {
-			forEachGroup((group, clientBuilder, factoryBuilder) ->
-					configurer.configureClient(group, clientBuilder));
+		public void forEachClient(HttpServiceGroupConfigurer.ClientCallback<CB> callback) {
+			forEachGroup((group, clientBuilder, factoryBuilder) -> callback.withClient(group, clientBuilder));
 		}
 
 		@Override
-		public void forEachProxyFactory(HttpServiceGroupConfigurer.ForProxyFactory configurer) {
-			forEachGroup((group, clientBuilder, factoryBuilder) ->
-					configurer.configureProxyFactory(group, factoryBuilder));
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback callback) {
+			forEachGroup((group, clientBuilder, factoryBuilder) -> callback.withProxyFactory(group, factoryBuilder));
 		}
 
 		@Override
-		public void forEachGroup(HttpServiceGroupConfigurer.ForGroup<CB> configurer) {
-			this.groups.stream().filter(this.filter).forEach(group -> group.applyConfigurer(configurer));
+		public void forEachGroup(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
+			this.groups.stream().filter(this.filter).forEach(group -> group.applyConfigurer(callback));
 			this.filter = this.defaultFilter; // reset the filter (terminal method)
 		}
 	}

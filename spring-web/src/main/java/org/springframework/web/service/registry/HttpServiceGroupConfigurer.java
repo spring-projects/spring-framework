@@ -64,53 +64,54 @@ public interface HttpServiceGroupConfigurer<CB> extends Ordered {
 		Groups<CB> filter(Predicate<HttpServiceGroup> predicate);
 
 		/**
-		 * Configure the client of each {@link #filter(Predicate) filtered} group.
-		 */
-		void forEachClient(ForClient<CB> configurer);
-
-		/**
-		 * Configure the {@code HttpServiceProxyFactory} of each
+		 * Configure the client builder for each
 		 * {@link #filter(Predicate) filtered} group.
 		 */
-		void forEachProxyFactory(ForProxyFactory configurer);
+		void forEachClient(ClientCallback<CB> callback);
 
 		/**
-		 * Configure the client and the {@code HttpServiceProxyFactory} of each
+		 * Configure the {@code HttpServiceProxyFactory} for each
 		 * {@link #filter(Predicate) filtered} group.
 		 */
-		void forEachGroup(ForGroup<CB> groupConfigurer);
+		void forEachProxyFactory(ProxyFactoryCallback callback);
+
+		/**
+		 * Configure the client builder and {@code HttpServiceProxyFactory} for each
+		 * {@link #filter(Predicate) filtered} group.
+		 */
+		void forEachGroup(GroupCallback<CB> callback);
 	}
 
 
 	/**
-	 * Callback to configure the client for a group.
+	 * Callback to configure the client for a given group.
 	 * @param <CB> the type of client builder, i.e. {@code RestClient} or {@code WebClient} builder.
 	 */
 	@FunctionalInterface
-	interface ForClient<CB> {
+	interface ClientCallback<CB> {
 
-		void configureClient(HttpServiceGroup group, CB clientBuilder);
+		void withClient(HttpServiceGroup group, CB clientBuilder);
 	}
 
 
 	/**
-	 * Callback to configure the {@code HttpServiceProxyFactory} for a group.
+	 * Callback to configure the {@code HttpServiceProxyFactory} for a given group.
 	 */
 	@FunctionalInterface
-	interface ForProxyFactory {
+	interface ProxyFactoryCallback {
 
-		void configureProxyFactory(HttpServiceGroup group, HttpServiceProxyFactory.Builder factoryBuilder);
+		void withProxyFactory(HttpServiceGroup group, HttpServiceProxyFactory.Builder factoryBuilder);
 	}
 
 
 	/**
-	 * Callback to configure the client and {@code HttpServiceProxyFactory} for a group.
+	 * Callback to configure the client and {@code HttpServiceProxyFactory} for a given group.
 	 * @param <CB> the type of client builder, i.e. {@code RestClient} or {@code WebClient} builder.
 	 */
 	@FunctionalInterface
-	interface ForGroup<CB> {
+	interface GroupCallback<CB> {
 
-		void configureGroup(HttpServiceGroup group,
+		void withGroup(HttpServiceGroup group,
 				CB clientBuilder, HttpServiceProxyFactory.Builder factoryBuilder);
 	}
 

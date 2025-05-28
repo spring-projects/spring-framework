@@ -26,6 +26,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.registry.echo.EchoA;
 import org.springframework.web.service.registry.echo.EchoB;
 import org.springframework.web.service.registry.greeting.GreetingA;
@@ -93,6 +94,14 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		public void configureGroups(Groups<RestClient.Builder> groups) {
 			filters.forEach(filter -> groups.filter(filter)
 					.forEachClient((group, builder) -> invocations.add(filter, group.name())));
+		}
+	}
+
+	static class MyC implements HttpServiceGroupConfigurer.GroupCallback<RestClient> {
+
+		@Override
+		public void withGroup(HttpServiceGroup group, RestClient clientBuilder, HttpServiceProxyFactory.Builder factoryBuilder) {
+
 		}
 	}
 
