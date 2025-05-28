@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
+import kotlin.jvm.internal.DefaultConstructorMarker;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
@@ -669,7 +670,9 @@ public abstract class BeanUtils {
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 		String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
-		Assert.state(paramNames.length == ctor.getParameterCount(),
+		int parameterCount = (KotlinDetector.isKotlinReflectPresent() && KotlinDelegate.hasDefaultConstructorMarker(ctor) ?
+				ctor.getParameterCount() - 1 : ctor.getParameterCount());
+		Assert.state(paramNames.length == parameterCount,
 				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 		return paramNames;
 	}
@@ -938,6 +941,11 @@ public abstract class BeanUtils {
 				}
 			}
 			return kotlinConstructor.callBy(argParameters);
+		}
+
+		public static boolean hasDefaultConstructorMarker(Constructor<?> ctor) {
+			int parameterCount = ctor.getParameterCount();
+			return parameterCount > 0 && ctor.getParameters()[parameterCount -1].getType() == DefaultConstructorMarker.class;
 		}
 	}
 

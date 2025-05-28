@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,48 @@ class BeanUtilsKotlinTests {
 		assertThat(instance).isEqualTo(ConstructorWithNullablePrimitiveValueClass(null))
 	}
 
+	@Test
+	fun `Get parameter names with Foo`() {
+		val ctor = BeanUtils.findPrimaryConstructor(Foo::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("param1", "param2")
+	}
+
+	@Test
+	fun `Get parameter names filters out DefaultConstructorMarker with ConstructorWithValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithValueClass::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithNullableValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithNullableValueClass::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithPrimitiveValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithPrimitiveValueClass::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames filters out DefaultConstructorMarker with ConstructorWithNullablePrimitiveValueClass`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ConstructorWithNullablePrimitiveValueClass::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).containsExactly("value")
+	}
+
+	@Test
+	fun `getParameterNames with ClassWithZeroParameterCtor`() {
+		val ctor = BeanUtils.findPrimaryConstructor(ClassWithZeroParameterCtor::class.java)!!
+		val names = BeanUtils.getParameterNames(ctor)
+		assertThat(names).isEmpty()
+	}
+
 
 	class Foo(val param1: String, val param2: Int)
 
@@ -215,5 +257,7 @@ class BeanUtilsKotlinTests {
 	data class ConstructorWithPrimitiveValueClass(val value: PrimitiveValueClass)
 
 	data class ConstructorWithNullablePrimitiveValueClass(val value: PrimitiveValueClass?)
+
+	class ClassWithZeroParameterCtor()
 
 }
