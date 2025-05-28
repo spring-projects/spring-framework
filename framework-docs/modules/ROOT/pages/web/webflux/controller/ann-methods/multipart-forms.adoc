@@ -42,7 +42,7 @@ Kotlin::
 ----
 	class MyForm(
 			val name: String,
-			val file: MultipartFile)
+			val file: FilePart)
 
 	@Controller
 	class FileUploadController {
