@@ -141,6 +141,7 @@ public class ResourceHandlerRegistry {
 	 * {@link PathPattern} more tailored for web usage and more efficient.
 	 */
 	public ResourceHandlerRegistration addResourceHandler(ResourceHandlerRegistration registration) {
+		Assert.notNull(registration, "ResourceHandlerRegistration must not be null");
 		this.registrations.add(registration);
 		return registration;
 	}
