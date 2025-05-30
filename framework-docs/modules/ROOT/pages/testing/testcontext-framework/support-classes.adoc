@@ -485,7 +485,8 @@ Kotlin::
 
 [WARNING]
 ====
-JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
+since Spring Framework 7.0 in favor of the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
 and JUnit Jupiter.
 ====
@@ -547,7 +548,8 @@ be configured through `@ContextConfiguration`.
 
 [WARNING]
 ====
-JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
+since Spring Framework 7.0 in favor of the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
 and JUnit Jupiter.
 ====
@@ -623,9 +625,10 @@ Kotlin::
 
 [WARNING]
 ====
-JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
+since Spring Framework 7.0 in favor of the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
-for JUnit Jupiter.
+and JUnit Jupiter.
 ====
 
 The `org.springframework.test.context.junit4` package provides the following support
