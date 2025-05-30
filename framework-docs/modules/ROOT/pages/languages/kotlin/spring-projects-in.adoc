@@ -324,7 +324,7 @@ progresses.
 == Testing
 
 This section addresses testing with the combination of Kotlin and Spring Framework.
-The recommended testing framework is https://junit.org/junit5/[JUnit 5] along with
+The recommended testing framework is https://junit.org/junit5/[JUnit] along with
 https://mockk.io/[Mockk] for mocking.
 
 NOTE: If you are using Spring Boot, see
@@ -335,7 +335,7 @@ NOTE: If you are using Spring Boot, see
 === Constructor injection
 
 As described in the xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[dedicated section],
-JUnit Jupiter (JUnit 5) allows constructor injection of beans which is pretty useful with Kotlin
+JUnit Jupiter allows constructor injection of beans which is pretty useful with Kotlin
 in order to use `val` instead of `lateinit var`. You can use
 {spring-framework-api}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]
 to enable autowiring for all parameters.
@@ -360,7 +360,7 @@ file with a `spring.test.constructor.autowire.mode = all` property.
 === `PER_CLASS` Lifecycle
 
 Kotlin lets you specify meaningful test function names between backticks (```).
-With JUnit Jupiter (JUnit 5), Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
+With JUnit Jupiter, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
 annotation to enable single instantiation of test classes, which allows the use of `@BeforeAll`
 and `@AfterAll` annotations on non-static methods, which is a good fit for Kotlin.
 
@@ -404,8 +404,8 @@ class IntegrationTests {
 [[specification-like-tests]]
 === Specification-like Tests
 
-You can create specification-like tests with JUnit 5 and Kotlin.
-The following example shows how to do so:
+You can create specification-like tests with Kotlin and JUnit Jupiter's `@Nested` test
+class support. The following example shows how to do so:
 
 [source,kotlin,indent=0]
 ----

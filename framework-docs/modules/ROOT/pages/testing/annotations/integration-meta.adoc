@@ -140,8 +140,8 @@ Kotlin::
 ======
 
 If we write tests that use JUnit Jupiter, we can reduce code duplication even further,
-since annotations in JUnit 5 can also be used as meta-annotations. Consider the following
-example:
+since annotations in JUnit Jupiter can also be used as meta-annotations. Consider the
+following example:
 
 [tabs]
 ======
