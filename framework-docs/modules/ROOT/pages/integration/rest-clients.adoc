@@ -1130,3 +1130,139 @@ For more details and options such as suppressing error status codes, see the ref
 documentation for each client, as well as the Javadoc of `defaultStatusHandler` in
 `RestClient.Builder` or `WebClient.Builder`, and the `setErrorHandler` of `RestTemplate`.
 
+
+
+[[rest-http-interface-group-config]]
+=== HTTP Interface Groups
+
+It's trivial to create client proxies with `HttpServiceProxyFactory`, but to have them
+declared as beans leads to repetitive configuration. You may also have multiple
+target hosts, and therefore multiple clients to configure, and even more client proxy
+beans to create.
+
+To make it easier to work with interface clients at scale the Spring Framework provides
+dedicated configuration support. It lets applications focus on identifying HTTP Services
+by group, and customizing the client for each group, while the framework transparently
+creates a registry of client proxies, and declares each proxy as a bean.
+
+An HTTP Service group is simply a set of interfaces that share the same client setup and
+`HttpServiceProxyFactory` instance to create proxies. Typically, that means one group per
+host, but you can have more than one group for the same target host in case the
+underlying client needs to be configured differently.
+
+One way to declare HTTP Service groups is via `@ImportHttpServices` annotations in
+`@Configuration` classes as shown below:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ImportHttpServices(group = "echo", types = {EchoServieA.class, EchoServiceB.class}) // <1>
+	@ImportHttpServices(group = "greeting", basePackageClasses = GreetServiceA.class) // <2>
+	public class ClientConfig {
+	}
+
+----
+<1> Manually list interfaces for group "echo"
+<2> Detect interfaces for group "greeting" under a base package
+
+It is also possible to declare groups programmatically by creating an HTTP Service
+registrar and then importing it:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class MyHttpServiceRegistrar extends AbstractHttpServiceRegistrar { // <1>
+
+		@Override
+		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
+			registry.forGroup("echo").register(EchoServiceA.class, EchoServiceB.class); // <2>
+			registry.forGroup("greeting").detectInBasePackages(GreetServiceA.class); // <3>
+		}
+	}
+
+	@Configuration
+	@Import(MyHttpServiceRegistrar.class) // <4>
+	public class ClientConfig {
+	}
+
+----
+<1> Create extension class of `AbstractHttpServiceRegistrar`
+<2> Manually list interfaces for group "echo"
+<3> Detect interfaces for group "greeting" under a base package
+<4> Import the registrar
+
+TIP: You can mix and match `@ImportHttpService` annotations with programmatic registrars,
+and you can spread the imports across multiple configuration classes. All imports
+contribute collaboratively the same, shared `HttpServiceProxyRegistry` instance.
+
+Once HTTP Service groups are declared, add an `HttpServiceGroupConfigurer` bean to
+customize the client for each group. For example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ImportHttpServices(group = "echo", types = {EchoServiceA.class, EchoServiceB.class})
+	@ImportHttpServices(group = "greeting", basePackageClasses = GreetServiceA.class)
+	public class ClientConfig {
+
+		@Bean
+		public RestClientHttpServiceGroupConfigurer groupConfigurer() {
+			return groups -> {
+				// configure client for group "echo"
+				groups.filterByName("echo").forEachClient((group, clientBuilder) -> ...);
+
+				// configure the clients for all groups
+				groups.forEachClient((group, clientBuilder) -> ...);
+
+				// configure client and proxy factory for each group
+				groups.forEachGroup((group, clientBuilder, factoryBuilder) -> ...);
+			};
+		}
+	}
+----
+
+TIP: Spring Boot uses an `HttpServiceGroupConfigurer` to add support for client properties
+by HTTP Service group, Spring Security to add OAuth support, and Spring Cloud to add load
+balancing.
+
+As a result of the above, each client proxy is available as a bean that you can
+conveniently autowire by type:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@RestController
+	public class EchoController {
+
+		private final EchoService echoService;
+
+		public EchoController(EchoService echoService) {
+			this.echoService = echoService;
+		}
+
+		// ...
+	}
+----
+
+However, if there are multiple client proxies of the same type, e.g. the same interface
+in multiple groups, then there is no unique bean of that type, and you cannot autowire by
+type only. For such cases, you can work directly with the `HttpServiceProxyRegistry` that
+holds all proxies, and obtain the ones you need by group:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@RestController
+	public class EchoController {
+
+		private final EchoService echoService1;
+
+		private final EchoService echoService2;
+
+		public EchoController(HttpServiceProxyRegistry registry) {
+			this.echoService1 = registry.getClient("echo1", EchoService.class); // <1>
+			this.echoService2 = registry.getClient("echo2", EchoService.class); // <2>
+		}
+
+		// ...
+	}
+----
+<1> Access the `EchoService` client proxy for group "echo1"
+<2> Access the `EchoService` client proxy for group "echo2"
