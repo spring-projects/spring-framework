@@ -131,6 +131,21 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
+	 * Add a resource handler to serve static resources. The handler is invoked
+	 * for requests that match one of the specified URL path patterns.
+	 * <p>Patterns such as {@code "/static/**"} or {@code "/css/{filename:\\w+\\.css}"}
+	 * are supported. This method allows users to register a subclass of {@link ResourceHandlerRegistration}.
+	 * <p>For pattern syntax see {@link PathPattern} when parsed patterns
+	 * are {@link PathMatchConfigurer#setPatternParser enabled} or
+	 * {@link AntPathMatcher} otherwise. The syntax is largely the same with
+	 * {@link PathPattern} more tailored for web usage and more efficient.
+	 */
+	public ResourceHandlerRegistration addResourceHandler(ResourceHandlerRegistration registration) {
+		this.registrations.add(registration);
+		return registration;
+	}
+
+	/**
 	 * Whether a resource handler has already been registered for the given path pattern.
 	 */
 	public boolean hasMappingForPattern(String pathPattern) {

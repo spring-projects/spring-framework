@@ -19,11 +19,16 @@ package org.springframework.web.servlet.config.annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
@@ -71,6 +76,8 @@ class ResourceHandlerRegistryTests {
 
 		this.registration = this.registry.addResourceHandler("/resources/**");
 		this.registration.addResourceLocations("classpath:org/springframework/web/servlet/config/annotation/");
+		this.registry.addResourceHandler(new NoExtensionAsHtmlResourceHttpHandlerRegistration("/noext/**"))
+				.addResourceLocations("classpath:org/springframework/web/servlet/config/annotation/noext/");
 		this.response = new MockHttpServletResponse();
 	}
 
@@ -223,5 +230,46 @@ class ResourceHandlerRegistryTests {
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		assertThat(handler.isUseLastModified()).isFalse();
 	}
+
+	@Test
+	void noExtensionResource() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/noExtResource");
+
+		ResourceHttpRequestHandler handler = getHandler("/noext/**");
+		handler.handleRequest(request, this.response);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/html");
+	}
+
+
+	static class NoExtensionAsHtmlResourceHttpHandlerRegistration extends ResourceHandlerRegistration {
+
+		public NoExtensionAsHtmlResourceHttpHandlerRegistration(String... pathPatterns) {
+			super(pathPatterns);
+		}
+
+		@Override
+		protected ResourceHttpRequestHandler createRequestHandler() {
+			return new NoExtensionAsHtmlResourceHttpHandler();
+		}
+	}
+
+	static class NoExtensionAsHtmlResourceHttpHandler extends ResourceHttpRequestHandler {
+
+		@Override
+		protected @Nullable MediaType getMediaType(HttpServletRequest request, Resource resource) {
+			String filename = resource.getFilename();
+			String ext = StringUtils.getFilenameExtension(filename);
+			if (!StringUtils.hasText(ext)) {
+				return MediaType.TEXT_HTML;
+			}
+			else {
+				return super.getMediaType(request, resource);
+			}
+		}
+	}
+
 
 }

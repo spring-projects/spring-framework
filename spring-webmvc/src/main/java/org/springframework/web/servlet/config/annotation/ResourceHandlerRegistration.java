@@ -224,10 +224,18 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
+	 * Create the resource handler.
+	 * Return a {@link ResourceHttpRequestHandler} instance.
+	 */
+	protected ResourceHttpRequestHandler createRequestHandler() {
+		return new ResourceHttpRequestHandler();
+	}
+
+	/**
 	 * Return a {@link ResourceHttpRequestHandler} instance.
 	 */
 	protected ResourceHttpRequestHandler getRequestHandler() {
-		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		ResourceHttpRequestHandler handler = createRequestHandler();
 		if (this.resourceChainRegistration != null) {
 			handler.setResourceResolvers(this.resourceChainRegistration.getResourceResolvers());
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
