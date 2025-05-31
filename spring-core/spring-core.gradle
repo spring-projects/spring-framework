@@ -25,6 +25,9 @@ configurations {
 	objenesis
 	graalvm
 }
+tasks.compileJava {
+	options.errorprone.excludedPaths = ".*/build/generated/.*"
+}
 
 tasks.register('javapoetRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-javapoet-repack'
@@ -67,6 +70,7 @@ tasks.register('objenesisSourceJar', Jar) {
 }
 
 dependencies {
+	annotationProcessor project(":framework-annotation-processor")
 	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	api(files(javapoetRepackJar))
@@ -76,6 +80,9 @@ dependencies {
 	compileOnly("com.google.code.findbugs:jsr305")
 	compileOnly("io.projectreactor.tools:blockhound")
 	compileOnly("org.graalvm.sdk:graal-sdk")
+	compileOnly("guru.mocker.annotation:mixin-annotation:1.1.0")
+	annotationProcessor("guru.mocker.annotation:mixin-annotation-processor:1.1.0")
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
 	optional("io.micrometer:context-propagation")
 	optional("io.netty:netty-buffer")
 	optional("io.projectreactor:reactor-core")
