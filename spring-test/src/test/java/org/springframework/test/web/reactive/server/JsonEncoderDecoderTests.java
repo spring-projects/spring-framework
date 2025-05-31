@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -27,8 +27,8 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,10 +42,10 @@ class JsonEncoderDecoderTests {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	private static final HttpMessageWriter<?> jacksonMessageWriter = new EncoderHttpMessageWriter<>(
-			new Jackson2JsonEncoder(objectMapper));
+			new JacksonJsonEncoder(objectMapper));
 
 	private static final HttpMessageReader<?> jacksonMessageReader = new DecoderHttpMessageReader<>(
-			new Jackson2JsonDecoder(objectMapper));
+			new JacksonJsonDecoder(objectMapper));
 
 	@Test
 	void fromWithEmptyWriters() {
@@ -73,8 +73,8 @@ class JsonEncoderDecoderTests {
 				List.of(new ResourceHttpMessageWriter(), jacksonMessageWriter),
 				List.of(new ResourceHttpMessageReader(), jacksonMessageReader));
 		assertThat(jsonEncoderDecoder).isNotNull();
-		assertThat(jsonEncoderDecoder.encoder()).isInstanceOf(Jackson2JsonEncoder.class);
-		assertThat(jsonEncoderDecoder.decoder()).isInstanceOf(Jackson2JsonDecoder.class);
+		assertThat(jsonEncoderDecoder.encoder()).isInstanceOf(JacksonJsonEncoder.class);
+		assertThat(jsonEncoderDecoder.decoder()).isInstanceOf(JacksonJsonDecoder.class);
 	}
 
 }

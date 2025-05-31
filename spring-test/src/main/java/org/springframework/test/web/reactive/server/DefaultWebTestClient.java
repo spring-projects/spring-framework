@@ -89,6 +89,8 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private final @Nullable Object defaultApiVersion;
+
 	private final @Nullable ApiVersionInserter apiVersionInserter;
 
 	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
@@ -104,7 +106,8 @@ class DefaultWebTestClient implements WebTestClient {
 			ClientHttpConnector connector, ExchangeStrategies exchangeStrategies,
 			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
-			@Nullable ApiVersionInserter apiVersionInserter, Consumer<EntityExchangeResult<?>> entityResultConsumer,
+			@Nullable Object defaultApiVersion, @Nullable ApiVersionInserter apiVersionInserter,
+			Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
 		this.wiretapConnector = new WiretapConnector(connector);
@@ -114,6 +117,7 @@ class DefaultWebTestClient implements WebTestClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;
 		this.defaultCookies = cookies;
+		this.defaultApiVersion = defaultApiVersion;
 		this.apiVersionInserter = apiVersionInserter;
 		this.entityResultConsumer = entityResultConsumer;
 		this.responseTimeout = (responseTimeout != null ? responseTimeout : Duration.ofSeconds(5));
@@ -386,9 +390,10 @@ class DefaultWebTestClient implements WebTestClient {
 						if (!this.headers.isEmpty()) {
 							headersToUse.putAll(this.headers);
 						}
-						if (this.apiVersion != null) {
+						Object version = getApiVersionOrDefault();
+						if (version != null) {
 							Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
-							apiVersionInserter.insertVersion(this.apiVersion, headersToUse);
+							apiVersionInserter.insertVersion(version, headersToUse);
 						}
 					})
 					.cookies(cookiesToUse -> {
@@ -404,11 +409,16 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private URI initUri() {
 			URI uriToUse = this.uri != null ? this.uri : DefaultWebTestClient.this.uriBuilderFactory.expand("");
-			if (this.apiVersion != null) {
+			Object version = getApiVersionOrDefault();
+			if (version != null) {
 				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
-				uriToUse = apiVersionInserter.insertVersion(this.apiVersion, uriToUse);
+				uriToUse = apiVersionInserter.insertVersion(version, uriToUse);
 			}
 			return uriToUse;
+		}
+
+		private @Nullable Object getApiVersionOrDefault() {
+			return (this.apiVersion != null ? this.apiVersion : DefaultWebTestClient.this.defaultApiVersion);
 		}
 
 	}

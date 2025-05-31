@@ -43,7 +43,7 @@ The purpose of this section is to share some guidelines proposed for specifying 
 libraries or applications.
 
 
-[[null-safety-guidelines-jpecify]]
+[[null-safety-guidelines-jspecify]]
 === JSpecify
 
 The key points to understand is that by default, the nullness of types is unknown in Java, and that non-null type

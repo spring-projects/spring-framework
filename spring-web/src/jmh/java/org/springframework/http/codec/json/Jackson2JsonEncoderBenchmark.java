@@ -43,6 +43,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
  * @see AbstractJackson2Encoder
  */
 @BenchmarkMode(Mode.Throughput)
+@SuppressWarnings("removal")
 public class Jackson2JsonEncoderBenchmark {
 
 

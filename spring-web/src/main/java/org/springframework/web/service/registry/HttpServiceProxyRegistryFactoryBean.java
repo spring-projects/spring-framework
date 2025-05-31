@@ -22,8 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -166,7 +164,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private final Object clientBuilder;
 
-		private BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer = (group, builder) -> {};
+		private final HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builder();
 
 		ProxyHttpServiceGroup(HttpServiceGroup group) {
 			this.declaredGroup = group;
@@ -196,20 +194,13 @@ public final class HttpServiceProxyRegistryFactoryBean
 		}
 
 		@SuppressWarnings("unchecked")
-		public <CB> void apply(
-				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
-			clientConfigurer.accept(this, (CB) this.clientBuilder);
-			this.proxyFactoryConfigurer = this.proxyFactoryConfigurer.andThen(proxyFactoryConfigurer);
+		public <CB> void applyConfigurer(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
+			callback.withGroup(this, (CB) this.clientBuilder, this.proxyFactoryBuilder);
 		}
 
 		public Map<Class<?>, Object> createProxies() {
 			Map<Class<?>, Object> map = new LinkedHashMap<>(httpServiceTypes().size());
-			HttpExchangeAdapter exchangeAdapter = initExchangeAdapter();
-			HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builderFor(exchangeAdapter);
-			this.proxyFactoryConfigurer.accept(this, proxyFactoryBuilder);
-			HttpServiceProxyFactory factory = proxyFactoryBuilder.build();
+			HttpServiceProxyFactory factory = this.proxyFactoryBuilder.exchangeAdapter(initExchangeAdapter()).build();
 			httpServiceTypes().forEach(type -> map.put(type, factory.createClient(type)));
 			return map;
 		}
@@ -256,32 +247,19 @@ public final class HttpServiceProxyRegistryFactoryBean
 		}
 
 		@Override
-		public void configureClient(Consumer<CB> clientConfigurer) {
-			configureClient((group, builder) -> clientConfigurer.accept(builder));
+		public void forEachClient(HttpServiceGroupConfigurer.ClientCallback<CB> callback) {
+			forEachGroup((group, clientBuilder, factoryBuilder) -> callback.withClient(group, clientBuilder));
 		}
 
 		@Override
-		public void configureClient(BiConsumer<HttpServiceGroup, CB> clientConfigurer) {
-			configure(clientConfigurer, (group, builder) -> {});
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback callback) {
+			forEachGroup((group, clientBuilder, factoryBuilder) -> callback.withProxyFactory(group, factoryBuilder));
 		}
 
 		@Override
-		public void configureProxyFactory(
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
-			configure((group, builder) -> {}, proxyFactoryConfigurer);
-		}
-
-		@Override
-		public void configure(
-				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
-			this.groups.stream().filter(this.filter)
-					.forEach(group -> group.apply(clientConfigurer, proxyFactoryConfigurer));
-
-			// Reset filter
-			this.filter = this.defaultFilter;
+		public void forEachGroup(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
+			this.groups.stream().filter(this.filter).forEach(group -> group.applyConfigurer(callback));
+			this.filter = this.defaultFilter; // reset the filter (terminal method)
 		}
 	}
 

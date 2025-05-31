@@ -20,6 +20,7 @@ dependencies {
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
+	optional("tools.jackson.core:jackson-databind")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("com.thoughtworks.xstream:xstream")

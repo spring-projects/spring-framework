@@ -420,7 +420,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public void execute(final String sql) throws DataAccessException {
+	public void execute(String sql) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
@@ -442,7 +442,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		Assert.notNull(sql, "SQL must not be null");
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
@@ -535,7 +535,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int update(final String sql) throws DataAccessException {
+	public int update(String sql) throws DataAccessException {
 		Assert.notNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
@@ -561,7 +561,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(final String... sql) throws DataAccessException {
+	public int[] batchUpdate(String... sql) throws DataAccessException {
 		Assert.notEmpty(sql, "SQL array must not be empty");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
@@ -701,28 +701,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @throws DataAccessException if there is any problem
 	 */
 	public <T> @Nullable T query(
-			PreparedStatementCreator psc, final @Nullable PreparedStatementSetter pss, final ResultSetExtractor<T> rse)
+			PreparedStatementCreator psc, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		logger.debug("Executing prepared SQL query");
 
-		return execute(psc, new PreparedStatementCallback<>() {
-			@Override
-			public @Nullable T doInPreparedStatement(PreparedStatement ps) throws SQLException {
-				ResultSet rs = null;
-				try {
-					if (pss != null) {
-						pss.setValues(ps);
-					}
-					rs = ps.executeQuery();
-					return rse.extractData(rs);
+		return execute(psc, (PreparedStatementCallback<T>) ps -> {
+			ResultSet rs = null;
+			try {
+				if (pss != null) {
+					pss.setValues(ps);
 				}
-				finally {
-					JdbcUtils.closeResultSet(rs);
-					if (pss instanceof ParameterDisposer parameterDisposer) {
-						parameterDisposer.cleanupParameters();
-					}
+				rs = ps.executeQuery();
+				return rse.extractData(rs);
+			}
+			finally {
+				JdbcUtils.closeResultSet(rs);
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 			}
 		}, true);
@@ -939,7 +936,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result(query(sql, newArgPreparedStatementSetter(args), new SqlRowSetResultSetExtractor()));
 	}
 
-	protected int update(final PreparedStatementCreator psc, final @Nullable PreparedStatementSetter pss)
+	protected int update(PreparedStatementCreator psc, @Nullable PreparedStatementSetter pss)
 			throws DataAccessException {
 
 		logger.debug("Executing prepared SQL update");
@@ -969,7 +966,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int update(final PreparedStatementCreator psc, final KeyHolder generatedKeyHolder)
+	public int update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder)
 			throws DataAccessException {
 
 		Assert.notNull(generatedKeyHolder, "KeyHolder must not be null");
@@ -1002,8 +999,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(final PreparedStatementCreator psc, final BatchPreparedStatementSetter pss,
-			final KeyHolder generatedKeyHolder) throws DataAccessException {
+	public int[] batchUpdate(PreparedStatementCreator psc, BatchPreparedStatementSetter pss,
+			KeyHolder generatedKeyHolder) throws DataAccessException {
 
 		int[] result = execute(psc, getPreparedStatementCallback(pss, generatedKeyHolder));
 
@@ -1012,7 +1009,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, final BatchPreparedStatementSetter pss) throws DataAccessException {
+	public int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "]");
 		}
@@ -1032,7 +1029,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<Object[]> batchArgs, final int[] argTypes) throws DataAccessException {
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException {
 		if (batchArgs.isEmpty()) {
 			return new int[0];
 		}
@@ -1069,8 +1066,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize,
-			final ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException {
+	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
+			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "] with a batch size of " + batchSize);

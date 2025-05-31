@@ -25,6 +25,7 @@ import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.web.context.WebApplicationContext;
 
+@SuppressWarnings("removal")
 // tag::snippet[]
 @SpringJUnitWebConfig(ApplicationWebConfiguration.class)
 class AccountControllerIntegrationTests {

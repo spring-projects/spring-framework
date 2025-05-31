@@ -250,7 +250,7 @@ Java::
 	@SqlGroup({
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
-	)}
+	})
 	void userTest() {
 		// run code that uses the test schema and test data
 	}

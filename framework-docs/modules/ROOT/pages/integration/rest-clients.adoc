@@ -12,17 +12,25 @@ The Spring Framework provides the following choices for making calls to REST end
 [[rest-restclient]]
 == `RestClient`
 
-The `RestClient` is a synchronous HTTP client that offers a modern, fluent API.
-It offers an abstraction over HTTP libraries that allows for convenient conversion from a Java object to an HTTP request, and the creation of objects from an HTTP response.
+`RestClient` is a synchronous HTTP client that provides a fluent API to perform requests.
+It serves as an abstraction over HTTP libraries, and handles conversion of HTTP request and response content to and from higher level Java objects.
 
-=== Creating a `RestClient`
+=== Create a `RestClient`
 
-The `RestClient` is created using one of the static `create` methods.
-You can also use `builder()` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
+`RestClient` has static `create` shortcut methods.
+It also exposes a `builder()` with further options:
 
-Once created (or built), the `RestClient` can be used safely by multiple threads.
+- select the HTTP library to use, see <<rest-request-factories>>
+- configure message converters, see <<rest-message-conversion>>
+- set a baseUrl
+- set default request headers, cookies, path variables, API version
+- configure an `ApiVersionInserter`
+- register interceptors
+- register request initializers
 
-The following sample shows how to create a default `RestClient`, and how to build a custom one.
+Once created, a `RestClient` is safe to use in multiple threads.
+
+The below shows how to create or build a `RestClient`:
 
 [tabs]
 ======
@@ -39,6 +47,8 @@ Java::
 		.defaultUriVariables(Map.of("variable", "foo"))
 		.defaultHeader("My-Header", "Foo")
 		.defaultCookie("My-Cookie", "Bar")
+		.defaultVersion("1.2")
+		.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 		.requestInterceptor(myCustomInterceptor)
 		.requestInitializer(myCustomInitializer)
 		.build();
@@ -57,23 +67,25 @@ Kotlin::
 		.defaultUriVariables(mapOf("variable" to "foo"))
 		.defaultHeader("My-Header", "Foo")
 		.defaultCookie("My-Cookie", "Bar")
+        .defaultVersion("1.2")
+        .apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 		.requestInterceptor(myCustomInterceptor)
 		.requestInitializer(myCustomInitializer)
 		.build()
 ----
 ======
 
-=== Using the `RestClient`
+=== Use the `RestClient`
 
-When making an HTTP request with the `RestClient`, the first thing to specify is which HTTP method to use.
-This can be done with `method(HttpMethod)` or with the convenience methods `get()`, `head()`, `post()`, and so on.
+To perform an HTTP request, first specify the HTTP method to use.
+Use the convenience methods like `get()`, `head()`, `post()`, and others, or `method(HttpMethod)`.
 
 ==== Request URL
 
-Next, the request URI can be specified with the `uri` methods.
-This step is optional and can be skipped if the `RestClient` is configured with a default URI.
+Next, specify the request URI with the `uri` methods.
+This is optional, and you can skip this step if you configured a baseUrl through the builder.
 The URL is typically specified as a `String`, with optional URI template variables.
-The following example configures a GET request to `https://example.com/orders/42`:
+The following shows how to perform a request:
 
 [tabs]
 ======
@@ -108,6 +120,7 @@ For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-
 
 If necessary, the HTTP request can be manipulated by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
 For HTTP requests that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
+You can set an API version for the request if the client is configured with `ApiVersionInserter`.
 
 The request body itself can be set by `body(Object)`, which internally uses <<rest-message-conversion>>.
 Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.

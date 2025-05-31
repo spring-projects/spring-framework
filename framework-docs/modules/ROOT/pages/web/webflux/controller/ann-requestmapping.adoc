@@ -408,6 +408,85 @@ Kotlin::
 ======
 
 
+[[webflux-ann-requestmapping-version]]
+== API Version
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-version[See equivalent in the Servlet stack]#
+
+There is no standard way to specify an API version, so you need to configure that first
+through the xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config] along with other
+config options. This results in the creation of an
+xref:web/webflux-versioning.adoc#webflux-versioning-strategy[ApiVersionStrategy] that in
+supports request mapping.
+
+Once API versioning is enabled, you can begin to map requests with versions.
+The `@RequestMapping` version attribute supports the following:
+
+- No value -- match any version
+- Fixed version ("1.2") -- match the given version only
+- Baseline version ("1.2+") -- match the given version and above
+
+If multiple controller methods have a version less than or equal to the request version,
+the one closest to the request version is considered for mapping purposes,
+in effect superseding the rest.
+
+To illustrate this, consider the following controller mappings:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@RestController
+	@RequestMapping("/account/{id}")
+	public class AccountController {
+
+		@GetMapping // <1>
+		public Account getAccount() {
+		}
+
+		@GetMapping(version = "1.1") // <2>
+		public Account getAccount1_1() {
+		}
+
+		@GetMapping(version = "1.2+") // <3>
+		public Account getAccount1_2() {
+		}
+
+		@GetMapping(version = "1.5") // <4>
+		public Account getAccount1_5() {
+		}
+	}
+----
+<1> match any version
+<2> match version 1.1
+<3> match version 1.2 and above
+<4> match version 1.5
+======
+
+For request with version `"1.3"`:
+
+- (1) matches as it matches any version
+- (2) does not match
+- (3) matches as it matches 1.2 and above, and is *chosen* as the highest match
+- (4) is higher and does not match
+
+For request with version `"1.5"`:
+
+- (1) matches as it matches any version
+- (2) does not match
+- (3) matches as it matches 1.2 and above
+- (4) matches and is *chosen* as the highest match
+
+A request with version `"1.6"` does not have a match. (1) and (3) do match, but are
+superseded by (4), which does not match. In this scenario, `NotAcceptableApiVersionException`
+is raised resulting in a 400 response.
+
+NOTE: The above assumes the request version is a "supported" versions. If not it would
+fail xref:web/webflux-versioning.adoc#webflux-versioning-validation[Validation].
+
+
+
 
 [[webflux-ann-requestmapping-head-options]]
 == HTTP HEAD, OPTIONS

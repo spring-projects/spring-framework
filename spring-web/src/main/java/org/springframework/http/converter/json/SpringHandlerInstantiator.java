@@ -38,7 +38,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 /**
- * Allows for creating Jackson ({@link JsonSerializer}, {@link JsonDeserializer},
+ * Allows for creating Jackson 2.x ({@link JsonSerializer}, {@link JsonDeserializer},
  * {@link KeyDeserializer}, {@link TypeResolverBuilder}, {@link TypeIdResolver})
  * beans with autowiring against a Spring {@link ApplicationContext}.
  *
@@ -53,7 +53,9 @@ import org.springframework.util.Assert;
  * @see Jackson2ObjectMapperBuilder#handlerInstantiator(HandlerInstantiator)
  * @see ApplicationContext#getAutowireCapableBeanFactory()
  * @see HandlerInstantiator
+ * @deprecated since 7.0 in favor of {@link org.springframework.http.support.JacksonHandlerInstantiator}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class SpringHandlerInstantiator extends HandlerInstantiator {
 
 	private final AutowireCapableBeanFactory beanFactory;

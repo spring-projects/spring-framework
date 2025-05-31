@@ -48,6 +48,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.client.ApiVersionFormatter;
 import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.BlockingExecutionConfigurer;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
@@ -347,6 +348,12 @@ public interface WebTestClient {
 		ControllerSpec validator(Validator validator);
 
 		/**
+		 * Configure API versioning for mapping requests to controller methods.
+		 * @since 7.0
+		 */
+		ControllerSpec apiVersioning(Consumer<ApiVersionConfigurer> configurer);
+
+		/**
 		 * Configure view resolution.
 		 * @see WebFluxConfigurer#configureViewResolvers
 		 */
@@ -429,6 +436,15 @@ public interface WebTestClient {
 		 * @return this builder
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Global option to specify an API version to add to every request,
+		 * if not already set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder defaultApiVersion(Object version);
 
 		/**
 		 * Configure an {@link ApiVersionInserter} to abstract how an API version

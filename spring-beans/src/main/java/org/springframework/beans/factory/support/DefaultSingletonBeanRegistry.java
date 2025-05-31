@@ -269,13 +269,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 						// Fallback as of 6.2: process given singleton bean outside of singleton lock.
 						// Thread-safe exposure is still guaranteed, there is just a risk of collisions
 						// when triggering creation of other beans as dependencies of the current bean.
-						if (logger.isInfoEnabled()) {
-							logger.info("Obtaining singleton bean '" + beanName + "' in thread \"" +
-									Thread.currentThread().getName() + "\" while other thread holds " +
-									"singleton lock for other beans " + this.singletonsCurrentlyInCreation);
-						}
 						this.lenientCreationLock.lock();
 						try {
+							if (logger.isInfoEnabled()) {
+								Set<String> lockedBeans = new HashSet<>(this.singletonsCurrentlyInCreation);
+								lockedBeans.removeAll(this.singletonsInLenientCreation);
+								logger.info("Obtaining singleton bean '" + beanName + "' in thread \"" +
+										currentThread.getName() + "\" while other thread holds singleton " +
+										"lock for other beans " + lockedBeans);
+							}
 							this.singletonsInLenientCreation.add(beanName);
 						}
 						finally {

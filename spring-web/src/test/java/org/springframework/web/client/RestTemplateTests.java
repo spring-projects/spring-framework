@@ -53,8 +53,8 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -113,7 +113,7 @@ class RestTemplateTests {
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
 		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(
-			MappingJackson2HttpMessageConverter.class
+			JacksonJsonHttpMessageConverter.class
 		);
 		assertThat(httpMessageConverters).extracting("class").doesNotContain(
 				KotlinSerializationJsonHttpMessageConverter.class

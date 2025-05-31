@@ -1,0 +1,85 @@
+[[mvc-versioning]]
+= API Versioning
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webflux-versioning.adoc[See equivalent in the Reactive stack]#
+
+Spring MVC supports API versioning. This section provides an overview of the support
+and underlying strategies.
+
+Please, see also related content in:
+
+- Use xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-version[API Version]
+to map requests to annotated controller methods
+- Configure API versioning in xref:web/webmvc/mvc-config/api-version.adoc[MVC Config]
+
+TIP: API versioning is also supported on the client side in `RestClient`, `WebClient`, and
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Service] clients, as well as
+for testing with `WebTestClient`.
+
+
+
+
+[[mvc-versioning-strategy]]
+== ApiVersionStrategy
+[.small]#xref:web/webflux-versioning.adoc#webflux-versioning-strategy[See equivalent in the Reactive stack]#
+
+This strategy holds all application preferences about how to manage versioning.
+It delegates to xref:#mvc-versioning-resolver[ApiVersionResolver] to resolve versions
+from requests, and to xref:#mvc-versioning-parser[ApiVersionParser] to parse raw version
+values into `Comparable<?>`. It also helps to xref:#mvc-versioning-validation[validate]
+request versions.
+
+NOTE: `ApiVersionStrategy` helps to map requests to `@RequestMapping` controller methods,
+and is initialized by the MVC config. Typically, applications do not interact directly with it.
+
+
+
+
+[[mvc-versioning-resolver]]
+== ApiVersionResolver
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-resolver[See equivalent in the Reactive stack]#
+
+This strategy resolves the API version from a request. The MVC config provides built-in
+options to resolve from a header, from a request parameter, or from the URL path.
+You can also use a custom `ApiVersionResolver`.
+
+
+
+
+[[mvc-versioning-parser]]
+== ApiVersionParser
+[.small]#xref:web/webflux-versioning.adoc#webflux-versioning-parser[See equivalent in the Reactive stack]#
+
+This strategy helps to parse raw version values into `Comparable<?>`, which helps to
+compare, sort, and select versions. By default, the built-in `SemanticApiVersionParser`
+parses a version into `major`, `minor`, and `patch` integer values. Minor and patch
+values are set to 0 if not present.
+
+
+
+
+[[mvc-versioning-validation]]
+== Validation
+[.small]#xref:web/webflux-versioning.adoc#webflux-versioning-validation[See equivalent in the Reactive stack]#
+
+If a request version is not supported, `InvalidApiVersionException` is raised resulting
+in a 400 response. By default, the list of supported versions is initialized from declared
+versions in annotated controller mappings. You can add to that list, or set it explicitly
+to a fixed set of versions (i.e. ignoring declared ones) through the MVC config.
+
+By default, a version is required when API versioning is enabled, but you can turn that
+off in which case the highest available version is used. You can also specify a default
+version. `MissingApiVersionException` is raised resulting in a 400 response when a
+version is required but not present.
+
+
+
+
+[[mvc-versioning-mapping]]
+== Request Mapping
+[.small]#xref:web/webflux-versioning.adoc#webflux-versioning-mapping[See equivalent in the Reactive stack]#
+
+`ApiVersionStrategy` supports the mapping of requests to annotated controller methods.
+See xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-version[API Version]
+for more details.

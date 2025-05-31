@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.junit.jupiter.api.condition.EnabledOnOs @EnabledOnOs(MAC)} support
  * in JUnit Jupiter.
  *
- * <p>Since JUnit 5.7, JUnit Jupiter also has a condition annotation named
+ * <p>JUnit Jupiter also has a condition annotation named
  * {@link org.junit.jupiter.api.condition.EnabledIf @EnabledIf}. Thus, if you
  * wish to use Spring's {@code @EnabledIf} support make sure you import the
  * annotation type from the correct package.

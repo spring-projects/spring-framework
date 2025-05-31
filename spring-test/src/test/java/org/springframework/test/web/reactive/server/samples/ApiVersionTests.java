@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.ApiVersionInserter;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,35 +38,49 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ApiVersionTests {
 
-	private static final String HEADER_NAME = "X-API-Version";
-
-
 	@Test
 	void header() {
-		Map<String, String> result = performRequest(ApiVersionInserter.fromHeader("X-API-Version").build());
-		assertThat(result.get(HEADER_NAME)).isEqualTo("1.2");
+		String header = "X-API-Version";
+
+		Map<String, String> result = performRequest(
+				configurer -> configurer.useRequestHeader(header),
+				ApiVersionInserter.useHeader(header));
+
+		assertThat(result.get(header)).isEqualTo("1.2");
 	}
 
 	@Test
 	void queryParam() {
-		Map<String, String> result = performRequest(ApiVersionInserter.fromQueryParam("api-version").build());
-		assertThat(result.get("query")).isEqualTo("api-version=1.2");
+		String param = "api-version";
+
+		Map<String, String> result = performRequest(
+				configurer -> configurer.useRequestParam(param),
+				ApiVersionInserter.useQueryParam(param));
+
+		assertThat(result.get("query")).isEqualTo(param + "=1.2");
 	}
 
 	@Test
 	void pathSegment() {
-		Map<String, String> result = performRequest(ApiVersionInserter.fromPathSegment(0).build());
+		Map<String, String> result = performRequest(
+				configurer -> configurer.usePathSegment(0),
+				ApiVersionInserter.usePathSegment(0));
+
 		assertThat(result.get("path")).isEqualTo("/1.2/path");
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, String> performRequest(ApiVersionInserter inserter) {
-		return WebTestClient.bindToController(new TestController())
+	private Map<String, String> performRequest(
+			Consumer<ApiVersionConfigurer> versionConfigurer, ApiVersionInserter inserter) {
+
+		WebTestClient client = WebTestClient.bindToController(new TestController())
+				.apiVersioning(versionConfigurer)
 				.configureClient()
 				.baseUrl("/path")
 				.apiVersionInserter(inserter)
-				.build()
-				.get()
+				.build();
+
+		return client.get()
 				.apiVersion(1.2)
 				.exchange()
 				.returnResult(Map.class)
@@ -76,14 +92,16 @@ public class ApiVersionTests {
 	@RestController
 	static class TestController {
 
-		@GetMapping("/**")
+		private static final String HEADER = "X-API-Version";
+
+		@GetMapping(path = "/**", version = "1.2")
 		Map<String, String> handle(ServerHttpRequest request) {
 			URI uri = request.getURI();
 			String query = uri.getQuery();
-			String header = request.getHeaders().getFirst(HEADER_NAME);
+			String versionHeader = request.getHeaders().getFirst(HEADER);
 			return Map.of("path", uri.getRawPath(),
 					"query", (query != null ? query : ""),
-					HEADER_NAME, (header != null ? header : ""));
+					HEADER, (versionHeader != null ? versionHeader : ""));
 		}
 	}
 

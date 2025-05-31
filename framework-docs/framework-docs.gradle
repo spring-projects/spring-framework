@@ -63,6 +63,7 @@ dependencies {
 
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
+	implementation("com.github.ben-manes.caffeine:caffeine")
 	implementation("com.mchange:c3p0:0.9.5.5")
 	implementation("com.oracle.database.jdbc:ojdbc11")
 	implementation("io.projectreactor.netty:reactor-netty-http")

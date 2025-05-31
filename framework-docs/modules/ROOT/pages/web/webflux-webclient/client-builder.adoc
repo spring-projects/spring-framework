@@ -1,7 +1,7 @@
 [[webflux-client-builder]]
 = Configuration
 
-The simplest way to create a `WebClient` is through one of the static factory methods:
+The simplest way to create `WebClient` is through one of the static factory methods:
 
 * `WebClient.create()`
 * `WebClient.create(String baseUrl)`
@@ -12,10 +12,12 @@ You can also use `WebClient.builder()` with further options:
 * `defaultUriVariables`: default values to use when expanding URI templates.
 * `defaultHeader`: Headers for every request.
 * `defaultCookie`: Cookies for every request.
+* `defaultApiVersion`: API version for every request.
 * `defaultRequest`: `Consumer` to customize every request.
 * `filter`: Client filter for every request.
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
+* `apiVersionInserter`: to insert API version values in the request
 * `observationRegistry`: the registry to use for enabling xref:integration/observability.adoc#http-client.webclient[Observability support].
 * `observationConvention`: xref:integration/observability.adoc#config[an optional, custom convention to extract metadata] for recorded observations.
 

@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.smile.JacksonSmileEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -37,7 +38,10 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @since 5.0
  * @see Jackson2SmileDecoder
+ * @deprecated since 7.0 in favor of {@link JacksonSmileEncoder}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {

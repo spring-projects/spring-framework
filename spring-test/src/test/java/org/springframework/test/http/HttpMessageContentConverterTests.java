@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.util.StreamUtils;
@@ -57,8 +56,7 @@ class HttpMessageContentConverterTests {
 
 	private static final ResolvableType listOfIntegers = ResolvableType.forClassWithGenerics(List.class, Integer.class);
 
-	private static final MappingJackson2HttpMessageConverter jacksonMessageConverter =
-			new MappingJackson2HttpMessageConverter(new ObjectMapper());
+	private static final JacksonJsonHttpMessageConverter jacksonMessageConverter = new JacksonJsonHttpMessageConverter();
 
 	@Test
 	void createInstanceWithEmptyIterable() {

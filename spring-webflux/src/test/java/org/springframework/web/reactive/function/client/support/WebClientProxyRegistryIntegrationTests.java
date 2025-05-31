@@ -119,7 +119,7 @@ public class WebClientProxyRegistryIntegrationTests {
 		@Bean
 		public WebClientHttpServiceGroupConfigurer groupConfigurer() {
 			return groups -> groups.filterByName("echo", "greeting")
-					.configureClient((group, builder) -> builder.baseUrl("http://localhost:9090"));
+					.forEachClient((group, builder) -> builder.baseUrl("http://localhost:9090"));
 		}
 	}
 
@@ -143,7 +143,8 @@ public class WebClientProxyRegistryIntegrationTests {
 	private static class ManualListingConfig extends BaseEchoConfig {
 	}
 
-	private static class ManualListingRegistrar extends AbstractHttpServiceRegistrar {
+
+	static class ManualListingRegistrar extends AbstractHttpServiceRegistrar {
 
 		public ManualListingRegistrar() {
 			setDefaultClientType(ClientType.WEB_CLIENT);

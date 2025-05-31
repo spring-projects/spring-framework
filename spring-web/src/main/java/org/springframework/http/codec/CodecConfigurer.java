@@ -23,6 +23,8 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.smile.JacksonSmileDecoder;
+import org.springframework.http.codec.smile.JacksonSmileEncoder;
 
 /**
  * Defines a common interface for configuring either client or server HTTP
@@ -109,7 +111,16 @@ public interface CodecConfigurer {
 	interface DefaultCodecs {
 
 		/**
-		 * Override the default Jackson JSON {@code Decoder}.
+		 * Override the default Jackson 3.x JSON {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
+		 * @param decoder the decoder instance to use
+		 * @see org.springframework.http.codec.json.JacksonJsonDecoder
+		 */
+		void jacksonJsonDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Jackson 2.x JSON {@code Decoder}.
 		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
 		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
@@ -118,14 +129,30 @@ public interface CodecConfigurer {
 		void jackson2JsonDecoder(Decoder<?> decoder);
 
 		/**
-		 * Override the default Jackson JSON {@code Encoder}.
+		 * Override the default Jackson 3.x JSON {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @see org.springframework.http.codec.json.JacksonJsonEncoder
+		 */
+		void jacksonJsonEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Jackson 2.x JSON {@code Encoder}.
 		 * @param encoder the encoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonEncoder
 		 */
 		void jackson2JsonEncoder(Encoder<?> encoder);
 
 		/**
-		 * Override the default Jackson Smile {@code Decoder}.
+		 * Override the default Jackson 3.x Smile {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
+		 * @param decoder the decoder instance to use
+		 * @see JacksonSmileDecoder
+		 */
+		void jacksonSmileDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Jackson 2.x Smile {@code Decoder}.
 		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
 		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
@@ -134,7 +161,14 @@ public interface CodecConfigurer {
 		void jackson2SmileDecoder(Decoder<?> decoder);
 
 		/**
-		 * Override the default Jackson Smile {@code Encoder}.
+		 * Override the default Jackson 3.x Smile {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @see JacksonSmileEncoder
+		 */
+		void jacksonSmileEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Jackson 2.x Smile {@code Encoder}.
 		 * @param encoder the encoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2SmileEncoder
 		 */

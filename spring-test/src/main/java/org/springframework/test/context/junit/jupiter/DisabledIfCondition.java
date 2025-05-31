@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 /**
  * {@code DisabledIfCondition} is an {@link org.junit.jupiter.api.extension.ExecutionCondition}
  * that supports the {@link DisabledIf @DisabledIf} annotation when using the <em>Spring
- * TestContext Framework</em> in conjunction with JUnit 5's <em>Jupiter</em> programming model.
+ * TestContext Framework</em> in conjunction with the JUnit Jupiter testing framework.
  *
  * <p>Any attempt to use the {@code DisabledIfCondition} without the presence of
  * {@link DisabledIf @DisabledIf} will result in an <em>enabled</em>

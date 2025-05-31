@@ -77,10 +77,10 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/latest/runtime-api/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://hc.apache.org/httpcomponents-client-5.4.x/current/httpclient5/apidocs/",
+			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://junit.org/junit5/docs/5.12.2/api/",
+			"https://junit.org/junit5/docs/5.13.0/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
@@ -88,7 +88,9 @@ configure([rootProject] + javaProjects) { project ->
 			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
 			// JakartaEE equivalents in the jakarta.annotation package.
 			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
-			"https://jspecify.dev/docs/api/"
+			"https://jspecify.dev/docs/api/",
+			"https://www.javadoc.io/doc/tools.jackson.core/jackson-databind/3.0.0-rc4/"
+
 	] as String[]
 }
 

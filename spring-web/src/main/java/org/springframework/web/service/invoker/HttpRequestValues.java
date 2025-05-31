@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -69,7 +70,7 @@ public class HttpRequestValues {
 
 	private final MultiValueMap<String, String> cookies;
 
-	private @Nullable Object version;
+	private final @Nullable Object version;
 
 	private final Map<String, Object> attributes;
 
@@ -347,9 +348,20 @@ public class HttpRequestValues {
 		 * Add the given header name and values.
 		 */
 		public Builder addHeader(String headerName, String... headerValues) {
+			HttpHeaders headers = initHeaders();
 			for (String headerValue : headerValues) {
-				initHeaders().add(headerName, headerValue);
+				headers.add(headerName, headerValue);
 			}
+			return this;
+		}
+
+		/**
+		 * Provide access to every header configured so far with the option to
+		 * add, replace, or remove values.
+		 * @since 7.0
+		 */
+		public Builder configureHeaders(Consumer<HttpHeaders> consumer) {
+			consumer.accept(initHeaders());
 			return this;
 		}
 
@@ -362,11 +374,26 @@ public class HttpRequestValues {
 		 * Add the given cookie name and values.
 		 */
 		public Builder addCookie(String name, String... values) {
-			this.cookies = (this.cookies != null ? this.cookies : new LinkedMultiValueMap<>());
+			MultiValueMap<String, String> cookies = initCookies();
 			for (String value : values) {
-				this.cookies.add(name, value);
+				cookies.add(name, value);
 			}
 			return this;
+		}
+
+		/**
+		 * Provide access to every cookie configured so far with the option to
+		 * add, replace, or remove values.
+		 * @since 7.0
+		 */
+		public Builder configureCookies(Consumer<MultiValueMap<String, String>> consumer) {
+			consumer.accept(initCookies());
+			return this;
+		}
+
+		private MultiValueMap<String, String> initCookies() {
+			this.cookies = (this.cookies != null ? this.cookies : new LinkedMultiValueMap<>());
+			return this.cookies;
 		}
 
 		/**
@@ -377,11 +404,26 @@ public class HttpRequestValues {
 		 * parameters.
 		 */
 		public Builder addRequestParameter(String name, String... values) {
-			this.requestParams = (this.requestParams != null ? this.requestParams : new LinkedMultiValueMap<>());
+			MultiValueMap<String, String> requestParams = initRequestParams();
 			for (String value : values) {
-				this.requestParams.add(name, value);
+				requestParams.add(name, value);
 			}
 			return this;
+		}
+
+		/**
+		 * Provide access to every request parameter configured so far with the
+		 * option to add, replace, or remove values.
+		 * @since 7.0
+		 */
+		public Builder configureRequestParams(Consumer<MultiValueMap<String, String>> consumer) {
+			consumer.accept(initRequestParams());
+			return this;
+		}
+
+		private MultiValueMap<String, String> initRequestParams() {
+			this.requestParams = (this.requestParams != null ? this.requestParams : new LinkedMultiValueMap<>());
+			return this.requestParams;
 		}
 
 		/**
@@ -420,9 +462,23 @@ public class HttpRequestValues {
 		 * @param value the attribute value
 		 */
 		public Builder addAttribute(String name, Object value) {
-			this.attributes = (this.attributes != null ? this.attributes : new HashMap<>());
-			this.attributes.put(name, value);
+			initAttributes().put(name, value);
 			return this;
+		}
+
+		/**
+		 * Provide access to every attribute configured so far with the option
+		 * to add, replace, or remove values.
+		 * @since 7.0
+		 */
+		public Builder configureAttributes(Consumer<Map<String, Object>> consumer) {
+			consumer.accept(initAttributes());
+			return this;
+		}
+
+		private Map<String, Object> initAttributes() {
+			this.attributes = (this.attributes != null ? this.attributes : new HashMap<>());
+			return this.attributes;
 		}
 
 		/**

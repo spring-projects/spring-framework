@@ -56,7 +56,9 @@ import org.springframework.util.MimeType;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.0
+ * @deprecated since 7.0 in favor of {@link JacksonJsonMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	private static final MimeType[] DEFAULT_MIME_TYPES = new MimeType[] {

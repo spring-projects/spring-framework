@@ -34,6 +34,8 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("org.webjars:webjars-locator-lite")
+	optional("tools.jackson.core:jackson-databind")
+	optional("tools.jackson.dataformat:jackson-dataformat-smile")
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))

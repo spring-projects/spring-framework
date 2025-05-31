@@ -14,6 +14,7 @@ dependencies {
 	optional("io.micrometer:micrometer-jakarta9")
 	optional("jakarta.resource:jakarta.resource-api")
 	optional("jakarta.transaction:jakarta.transaction-api")
+	optional("tools.jackson.core:jackson-databind")
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-tx")))
 	testImplementation("jakarta.jms:jakarta.jms-api")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.springframework.test.web.reactive.server;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.TypeRef;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +39,7 @@ class EncoderDecoderMappingProviderTests {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final EncoderDecoderMappingProvider mappingProvider = new EncoderDecoderMappingProvider(
-			new Jackson2JsonEncoder(objectMapper), new Jackson2JsonDecoder(objectMapper));
+			new JacksonJsonEncoder(objectMapper), new JacksonJsonDecoder(objectMapper));
 
 
 	@Test

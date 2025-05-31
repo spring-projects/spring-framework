@@ -21,6 +21,7 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+@SuppressWarnings("removal")
 // tag::snippet[]
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {

@@ -23,6 +23,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+@SuppressWarnings("removal")
 // tag::snippet[]
 @Configuration
 public class FreeMarkerConfiguration implements WebMvcConfigurer {

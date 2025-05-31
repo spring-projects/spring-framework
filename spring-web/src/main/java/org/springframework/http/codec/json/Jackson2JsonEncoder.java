@@ -44,7 +44,10 @@ import org.springframework.util.MimeType;
  * @author Arjen Poutsma
  * @since 5.0
  * @see Jackson2JsonDecoder
+ * @deprecated since 7.0 in favor of {@link JacksonJsonEncoder}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 
 	private static final List<MimeType> problemDetailMimeTypes =

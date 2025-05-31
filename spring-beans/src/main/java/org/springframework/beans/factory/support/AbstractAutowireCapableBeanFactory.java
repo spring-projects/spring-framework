@@ -990,9 +990,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * that we couldn't obtain a shortcut FactoryBean instance
 	 */
 	private @Nullable FactoryBean<?> getSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
-		boolean locked = this.singletonLock.tryLock();
-		if (!locked) {
-			return null;
+		Boolean lockFlag = isCurrentThreadAllowedToHoldSingletonLock();
+		if (lockFlag == null) {
+			this.singletonLock.lock();
+		}
+		else {
+			boolean locked = (lockFlag && this.singletonLock.tryLock());
+			if (!locked) {
+				// Avoid shortcut FactoryBean instance but allow for subsequent type-based resolution.
+				resolveBeanClass(mbd, beanName);
+				return null;
+			}
 		}
 
 		try {

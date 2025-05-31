@@ -9,7 +9,7 @@ in JUnit and TestNG.
 == SpringExtension for JUnit Jupiter
 
 The Spring TestContext Framework offers full integration with the JUnit Jupiter testing
-framework, introduced in JUnit 5. By annotating test classes with
+framework, originally introduced in JUnit 5. By annotating test classes with
 `@ExtendWith(SpringExtension.class)`, you can implement standard JUnit Jupiter-based unit
 and integration tests and simultaneously reap the benefits of the TestContext framework,
 such as support for loading application contexts, dependency injection of test instances,
@@ -72,8 +72,8 @@ Kotlin::
 ----
 ======
 
-Since you can also use annotations in JUnit 5 as meta-annotations, Spring provides the
-`@SpringJUnitConfig` and `@SpringJUnitWebConfig` composed annotations to simplify the
+Since you can also use annotations in JUnit Jupiter as meta-annotations, Spring provides
+the `@SpringJUnitConfig` and `@SpringJUnitWebConfig` composed annotations to simplify the
 configuration of the test `ApplicationContext` and JUnit Jupiter.
 
 The following example uses `@SpringJUnitConfig` to reduce the amount of configuration
@@ -485,7 +485,8 @@ Kotlin::
 
 [WARNING]
 ====
-JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
+since Spring Framework 7.0 in favor of the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
 and JUnit Jupiter.
 ====
@@ -547,7 +548,8 @@ be configured through `@ContextConfiguration`.
 
 [WARNING]
 ====
-JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
+since Spring Framework 7.0 in favor of the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
 and JUnit Jupiter.
 ====
@@ -623,9 +625,10 @@ Kotlin::
 
 [WARNING]
 ====
-JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
+since Spring Framework 7.0 in favor of the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
-for JUnit Jupiter.
+and JUnit Jupiter.
 ====
 
 The `org.springframework.test.context.junit4` package provides the following support

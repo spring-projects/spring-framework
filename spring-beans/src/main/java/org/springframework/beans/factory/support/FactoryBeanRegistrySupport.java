@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,15 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 */
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		if (factory.isSingleton() && containsSingleton(beanName)) {
-			this.singletonLock.lock();
+			Boolean lockFlag = isCurrentThreadAllowedToHoldSingletonLock();
+			boolean locked;
+			if (lockFlag == null) {
+				this.singletonLock.lock();
+				locked = true;
+			}
+			else {
+				locked = (lockFlag && this.singletonLock.tryLock());
+			}
 			try {
 				Object object = this.factoryBeanObjectCache.get(beanName);
 				if (object == null) {
@@ -130,11 +138,13 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 					}
 					else {
 						if (shouldPostProcess) {
-							if (isSingletonCurrentlyInCreation(beanName)) {
-								// Temporarily return non-post-processed object, not storing it yet
-								return object;
+							if (locked) {
+								if (isSingletonCurrentlyInCreation(beanName)) {
+									// Temporarily return non-post-processed object, not storing it yet
+									return object;
+								}
+								beforeSingletonCreation(beanName);
 							}
-							beforeSingletonCreation(beanName);
 							try {
 								object = postProcessObjectFromFactoryBean(object, beanName);
 							}
@@ -143,7 +153,9 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 										"Post-processing of FactoryBean's singleton object failed", ex);
 							}
 							finally {
-								afterSingletonCreation(beanName);
+								if (locked) {
+									afterSingletonCreation(beanName);
+								}
 							}
 						}
 						if (containsSingleton(beanName)) {
@@ -154,7 +166,9 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				return object;
 			}
 			finally {
-				this.singletonLock.unlock();
+				if (locked) {
+					this.singletonLock.unlock();
+				}
 			}
 		}
 		else {

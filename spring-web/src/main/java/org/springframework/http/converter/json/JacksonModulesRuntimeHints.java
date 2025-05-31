@@ -35,6 +35,7 @@ import org.springframework.aot.hint.TypeHint.Builder;
  */
 class JacksonModulesRuntimeHints implements RuntimeHintsRegistrar {
 
+	@SuppressWarnings("removal")
 	private static final Consumer<Builder> asJacksonModule = builder ->
 			builder.onReachableType(Jackson2ObjectMapperBuilder.class)
 					.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);

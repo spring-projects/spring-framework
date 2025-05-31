@@ -33,7 +33,9 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @deprecated since 7.0 in favor of using {@link org.springframework.http.converter.SmartHttpMessageConverter} hints
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class MappingJacksonValue {
 
 	private Object value;
