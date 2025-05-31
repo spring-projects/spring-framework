@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -89,6 +90,7 @@ import org.springframework.web.servlet.view.FragmentsRendering;
  * </ul>
  *
  * @author Rossen Stoyanchev
+ * @author Réda Housni Alaoui
  * @since 4.2
  */
 public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodReturnValueHandler {
@@ -101,6 +103,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	private final LocaleResolver localeResolver;
 
+	@Nullable
+	private final SseEmitterHeartbeatExecutor sseEmitterHeartbeatExecutor;
 
 	/**
 	 * Simple constructor with reactive type support based on a default instance of
@@ -143,11 +147,32 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager,
 			List<ViewResolver> viewResolvers, @Nullable LocaleResolver localeResolver) {
 
+		this(messageConverters, registry, executor, manager, viewResolvers, localeResolver, null);
+	}
+
+	/**
+	 * Constructor that with added arguments for view rendering.
+	 * @param messageConverters converters to write emitted objects with
+	 * @param registry for reactive return value type support
+	 * @param executor for blocking I/O writes of items emitted from reactive types
+	 * @param manager for detecting streaming media types
+	 * @param viewResolvers resolvers for fragment stream rendering
+	 * @param localeResolver the {@link LocaleResolver} for fragment stream rendering
+	 * @param sseEmitterHeartbeatExecutor for sending periodic events to SSE clients
+	 * @since 6.2
+	 */
+	public ResponseBodyEmitterReturnValueHandler(
+			List<HttpMessageConverter<?>> messageConverters,
+			ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager,
+			List<ViewResolver> viewResolvers, @Nullable LocaleResolver localeResolver,
+			@Nullable SseEmitterHeartbeatExecutor sseEmitterHeartbeatExecutor) {
+
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.sseMessageConverters = initSseConverters(messageConverters);
 		this.reactiveHandler = new ReactiveTypeHandler(registry, executor, manager, null);
 		this.viewResolvers = viewResolvers;
 		this.localeResolver = (localeResolver != null ? localeResolver : new AcceptHeaderLocaleResolver());
+		this.sseEmitterHeartbeatExecutor = sseEmitterHeartbeatExecutor;
 	}
 
 	private static List<HttpMessageConverter<?>> initSseConverters(List<HttpMessageConverter<?>> converters) {
@@ -239,6 +264,9 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		}
 
 		emitter.initialize(emitterHandler);
+		if (emitter instanceof SseEmitter sseEmitter) {
+			Optional.ofNullable(sseEmitterHeartbeatExecutor).ifPresent(handler -> handler.register(sseEmitter));
+		}
 	}
 
 
