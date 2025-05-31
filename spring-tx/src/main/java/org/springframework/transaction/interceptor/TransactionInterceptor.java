@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @deprecated as of 5.2.5, in favor of
 	 * {@link #TransactionInterceptor(TransactionManager, TransactionAttributeSource)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.5")
 	public TransactionInterceptor(PlatformTransactionManager ptm, TransactionAttributeSource tas) {
 		setTransactionManager(ptm);
 		setTransactionAttributeSource(tas);
@@ -100,7 +100,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @see #setTransactionAttributes(java.util.Properties)
 	 * @deprecated as of 5.2.5, in favor of {@link #setTransactionAttributes(Properties)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.5")
 	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {
 		setTransactionManager(ptm);
 		setTransactionAttributes(attributes);

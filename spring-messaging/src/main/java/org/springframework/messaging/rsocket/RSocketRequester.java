@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,7 +312,7 @@ public interface RSocketRequester extends Disposable {
 		 * @see TcpClientTransport
 		 * @deprecated as of 5.3 in favor of {@link #tcp(String, int)}
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		Mono<RSocketRequester> connectTcp(String host, int port);
 
 		/**
@@ -322,7 +322,7 @@ public interface RSocketRequester extends Disposable {
 		 * @see WebsocketClientTransport
 		 * @deprecated as of 5.3 in favor of {@link #websocket(URI)}
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		Mono<RSocketRequester> connectWebSocket(URI uri);
 
 		/**
@@ -331,7 +331,7 @@ public interface RSocketRequester extends Disposable {
 		 * @return an {@code RSocketRequester} for the connection
 		 * @deprecated as of 5.3 in favor of {@link #transport(ClientTransport)}
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		Mono<RSocketRequester> connect(ClientTransport transport);
 
 	}

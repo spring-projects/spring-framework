@@ -266,7 +266,7 @@ public abstract class DataSourceUtils {
 	 * @deprecated as of 5.1.11, in favor of
 	 * {@link #resetConnectionAfterTransaction(Connection, Integer, boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.1.11")
 	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
 		try {

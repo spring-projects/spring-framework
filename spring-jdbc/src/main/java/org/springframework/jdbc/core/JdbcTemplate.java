@@ -740,7 +740,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
-	@Deprecated
+	@Deprecated(since = "5.3")
 	@Override
 	public <T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
@@ -766,7 +766,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		query(sql, newArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
-	@Deprecated
+	@Deprecated(since = "5.3")
 	@Override
 	public void query(String sql, @Nullable Object @Nullable [] args, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, newArgPreparedStatementSetter(args), rch);
@@ -792,7 +792,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
-	@Deprecated
+	@Deprecated(since = "5.3")
 	@Override
 	public <T> List<T> query(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper)));
@@ -859,7 +859,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return DataAccessUtils.nullableSingleResult(results);
 	}
 
-	@Deprecated
+	@Deprecated(since = "5.3")
 	@Override
 	public <T> @Nullable T queryForObject(String sql,@Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 1));
@@ -879,7 +879,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
 	}
 
-	@Deprecated
+	@Deprecated(since = "5.3")
 	@Override
 	public <T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, getSingleColumnRowMapper(requiredType), args);
@@ -905,7 +905,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
-	@Deprecated
+	@Deprecated(since = "5.3")
 	@Override
 	public <T> List<T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), getSingleColumnRowMapper(elementType));

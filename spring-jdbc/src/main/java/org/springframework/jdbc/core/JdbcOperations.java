@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,7 +369,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @deprecated as of 5.3, in favor of {@link #query(String, ResultSetExtractor, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	<T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
@@ -440,7 +440,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @deprecated as of 5.3, in favor of {@link #query(String, RowCallbackHandler, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	void query(String sql, @Nullable Object @Nullable [] args, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
@@ -516,7 +516,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @deprecated as of 5.3, in favor of {@link #query(String, RowMapper, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	<T> List<T> query(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -623,7 +623,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, RowMapper, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	<T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -687,7 +687,7 @@ public interface JdbcOperations {
 	 * @see #queryForObject(String, Class)
 	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, Class, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	<T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, Class<T> requiredType) throws DataAccessException;
 
 	/**
@@ -791,7 +791,7 @@ public interface JdbcOperations {
 	 * @see SingleColumnRowMapper
 	 * @deprecated as of 5.3, in favor of {@link #queryForList(String, Class, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	<T> List<T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException;
 
 	/**

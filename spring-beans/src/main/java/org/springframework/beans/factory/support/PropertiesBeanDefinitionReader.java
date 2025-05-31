@@ -78,7 +78,7 @@ import org.springframework.util.StringUtils;
  * @deprecated as of 5.3, in favor of Spring's common bean definition formats
  * and/or custom reader implementations
  */
-@Deprecated
+@Deprecated(since = "5.3")
 public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**

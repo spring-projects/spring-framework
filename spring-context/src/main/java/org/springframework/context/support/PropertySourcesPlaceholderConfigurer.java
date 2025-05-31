@@ -200,7 +200,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * {@link #processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)}
 	 */
 	@Override
-	@Deprecated
+	@Deprecated(since = "3.1")
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) {
 		throw new UnsupportedOperationException(
 				"Call processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver) instead");

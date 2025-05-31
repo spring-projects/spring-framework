@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -379,7 +379,7 @@ public abstract class JdbcUtils {
 	 * {@link #extractDatabaseMetaData(DataSource, DatabaseMetaDataCallback)}
 	 * with a lambda expression or method reference and a generically typed result
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.9")
 	@SuppressWarnings("unchecked")
 	public static <T> T extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
 			throws MetaDataAccessException {
