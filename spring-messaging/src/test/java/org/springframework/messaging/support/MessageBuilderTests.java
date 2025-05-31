@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Mengqi Xu
  */
 class MessageBuilderTests {
 
@@ -236,6 +237,23 @@ class MessageBuilderTests {
 		assertThat(message1.getHeaders().get("foo")).isEqualTo("bar1");
 		assertThat(message2.getHeaders().get("foo")).isEqualTo("bar2");
 		assertThat(message3.getHeaders().get("foo")).isEqualTo("bar3");
+	}
+
+	@Test
+	void buildReplyChannelHeaderMessage() {
+		MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
+		MessageBuilder<?> messageBuilder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
+
+		headerAccessor.setHeader("replyChannel", "foo");
+		Message<?> message1 = messageBuilder.build();
+
+		headerAccessor.setHeader("hannel", 0);
+		Message<?> message2 = messageBuilder.build();
+
+		assertThat(message1.getHeaders().get("replyChannel")).isEqualTo("foo");
+		assertThat(message2.getHeaders().get("hannel")).isEqualTo(0);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> headerAccessor.setHeader("replyChannel", 0));
 	}
 
 }
