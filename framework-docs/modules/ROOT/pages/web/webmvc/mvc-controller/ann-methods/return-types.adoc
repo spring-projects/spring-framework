@@ -77,6 +77,9 @@ supported for all return values.
 | Produce any of the above return values asynchronously in a Spring MVC-managed thread.
   See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`].
 
+| `WebAsyncTask<V>`
+| This is a holder for a `Callable` which allows you to set a custom asynchronous request timeout value and a custom  `AsyncTaskExecutor` if you want the `Callable` to be executed by a different `AsyncTaskExecutor` than the one used by default by Spring MVC.
+
 | `ListenableFuture<V>`,
   `java.util.concurrent.CompletionStage<V>`,
   `java.util.concurrent.CompletableFuture<V>`
