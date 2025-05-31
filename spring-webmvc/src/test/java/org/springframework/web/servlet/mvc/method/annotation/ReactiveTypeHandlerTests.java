@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -240,6 +241,22 @@ class ReactiveTypeHandlerTests {
 		testSseResponse(false);
 	}
 
+	@Test
+	void mediaTypesWithCharset() throws Exception {
+
+		// Media type from request
+		this.servletRequest.addHeader("Accept", "text/event-stream;charset=UTF-8");
+		testSseResponse(true);
+
+		// Media type from "produces" attribute
+		Set<MediaType> types = Collections.singleton(new MediaType("text", "event-stream", StandardCharsets.UTF_8));
+		this.servletRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, types);
+		testSseResponse(true);
+
+		// No media type preferences
+		testSseResponse(false);
+	}
+
 	private void testSseResponse(boolean expectSseEmitter) throws Exception {
 		ResponseBodyEmitter emitter = handleValue(Flux.empty(), Flux.class, forClass(String.class));
 		Object actual = emitter instanceof SseEmitter;
@@ -262,6 +279,53 @@ class ReactiveTypeHandlerTests {
 		sink.tryEmitNext("baz");
 		sink.tryEmitComplete();
 
+		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
+	}
+
+	@Test
+	void writeServerSentEventsWhenAcceptIsNotSseMediaType() throws Exception {
+
+		//  Media type from request
+		this.servletRequest.addHeader("Accept", "application/json;charset=UTF-8");
+
+		// When `Accept` isn't `text/event-stream`, but elementClass is ServerSentEvent.
+		// We want to get `SseEmitter`.
+		testSseResponseForServerSentEvent(true);
+
+		// No media type preferences
+		testSseResponse(false);
+	}
+
+	private void testSseResponseForServerSentEvent(boolean expectSseEmitter) throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class);
+		ResponseBodyEmitter emitter = handleValue(Flux.empty(), Flux.class, type);
+		Object actual = emitter instanceof SseEmitter;
+		assertThat(actual).isEqualTo(expectSseEmitter);
+		resetRequest();
+	}
+
+	@Test
+	void writeServerSentEventsWithCharset() throws Exception {
+
+		this.servletRequest.addHeader("Accept", "text/event-stream");
+		Set<MediaType> types = Collections.singleton(new MediaType("text", "event-stream", StandardCharsets.UTF_8));
+		this.servletRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, types);
+
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+		SseEmitter sseEmitter = (SseEmitter) handleValue(sink.asFlux(), Flux.class, forClass(String.class));
+
+		EmitterHandler emitterHandler = new EmitterHandler();
+		sseEmitter.initialize(emitterHandler);
+
+		ServletServerHttpResponse message = new ServletServerHttpResponse(this.servletResponse);
+		sseEmitter.extendResponse(message);
+
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
+
+		assertThat(message.getHeaders().getContentType()).hasToString("text/event-stream;charset=UTF-8");
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
 

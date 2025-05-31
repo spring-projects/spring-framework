@@ -160,7 +160,11 @@ class ReactiveTypeHandler {
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
 					ServerSentEvent.class.isAssignableFrom(elementClass)) {
-				SseEmitter emitter = new SseEmitter(STREAMING_TIMEOUT_VALUE);
+				SseEmitter emitter = getSseEmitter(mediaType
+						// When `mediaType` isn't TEXT_EVENT_STREAM, but elementClass is ServerSentEvent,
+						// the `mediaType` will return null.
+						.filter(MediaType.TEXT_EVENT_STREAM::includes)
+						.orElse(null));
 				new SseEmitterSubscriber(emitter, this.taskExecutor, taskDecorator).connect(adapter, returnValue);
 				return emitter;
 			}
@@ -235,6 +239,20 @@ class ReactiveTypeHandler {
 			@Override
 			protected void extendResponse(ServerHttpResponse outputMessage) {
 				outputMessage.getHeaders().setContentType(mediaType);
+			}
+		};
+	}
+
+	private SseEmitter getSseEmitter(@Nullable MediaType mediaType) {
+		return new SseEmitter(STREAMING_TIMEOUT_VALUE) {
+			@Override
+			protected void extendResponse(ServerHttpResponse outputMessage) {
+				super.extendResponse(outputMessage);
+				// The super class sets the content type to TEXT_EVENT_STREAM.
+				// If we don't want to override it, we set `mediaType` to null.
+				if (mediaType != null) {
+					outputMessage.getHeaders().setContentType(mediaType);
+				}
 			}
 		};
 	}
