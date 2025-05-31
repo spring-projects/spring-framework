@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.util.ErrorHandler;
-import org.springframework.util.backoff.BackOff;
-import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.util.backoff.BackOffPolicy;
+import org.springframework.util.backoff.FixedBackOffPolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -57,6 +57,7 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Christian Dupuis
  * @author Stephane Nicoll
+ * @author Mahmoud Ben Hassine
  */
 class JmsNamespaceHandlerTests {
 
@@ -151,7 +152,7 @@ class JmsNamespaceHandlerTests {
 		assertThat(container.getMaxConcurrentConsumers()).as("wrong concurrency").isEqualTo(5);
 		assertThat(container.getMaxMessagesPerTask()).as("wrong prefetch").isEqualTo(50);
 		assertThat(container.getPhase()).as("Wrong phase").isEqualTo(99);
-		assertThat(new DirectFieldAccessor(container).getPropertyValue("backOff")).isSameAs(context.getBean("testBackOff"));
+		assertThat(new DirectFieldAccessor(container).getPropertyValue("backOffPolicy")).isSameAs(context.getBean("testBackOff"));
 	}
 
 	@Test
@@ -205,8 +206,8 @@ class JmsNamespaceHandlerTests {
 	@Test
 	void testRecoveryInterval() {
 		Object testBackOff = context.getBean("testBackOff");
-		BackOff backOff1 = getBackOff("listener1");
-		BackOff backOff2 = getBackOff("listener2");
+		BackOffPolicy backOff1 = getBackOffPolicy("listener1");
+		BackOffPolicy backOff2 = getBackOffPolicy("listener2");
 		long recoveryInterval3 = getRecoveryInterval(DefaultMessageListenerContainer.class.getName() + "#0");
 
 		assertThat(backOff1).isSameAs(testBackOff);
@@ -330,15 +331,15 @@ class JmsNamespaceHandlerTests {
 		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
 	}
 
-	private BackOff getBackOff(String containerBeanName) {
+	private BackOffPolicy getBackOffPolicy(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
-		return (BackOff) new DirectFieldAccessor(container).getPropertyValue("backOff");
+		return (BackOffPolicy) new DirectFieldAccessor(container).getPropertyValue("backOffPolicy");
 	}
 
 	private long getRecoveryInterval(String containerBeanName) {
-		BackOff backOff = getBackOff(containerBeanName);
-		assertThat(backOff.getClass()).isEqualTo(FixedBackOff.class);
-		return ((FixedBackOff)backOff).getInterval();
+		BackOffPolicy backOffPolicy = getBackOffPolicy(containerBeanName);
+		assertThat(backOffPolicy.getClass()).isEqualTo(FixedBackOffPolicy.class);
+		return ((FixedBackOffPolicy)backOffPolicy).getInterval();
 	}
 
 	private int getPhase(String containerBeanName) {

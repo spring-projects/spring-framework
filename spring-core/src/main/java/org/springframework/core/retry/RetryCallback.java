@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.util.backoff;
+package org.springframework.core.retry;
 
 /**
- * Represent a particular back-off execution.
+ * Callback interface for a retryable piece of code. Used in conjunction with {@link RetryOperations}.
  *
- * <p>Implementations do not need to be thread safe.
- *
- * @author Stephane Nicoll
- * @since 4.1
- * @see BackOffPolicy
+ * @author Mahmoud Ben Hassine
+ * @since 7.0
+ * @param <R> the type of the result
+ * @see RetryOperations
  */
-@FunctionalInterface
-public interface BackOffExecution {
+public interface RetryCallback<R> {
 
 	/**
-	 * Return value of {@link #nextBackOff()} that indicates that the operation
-	 * should not be retried.
+	 * Method to execute and retry if needed.
+	 * @return the result of the callback
+	 * @throws Throwable if an error occurs during the execution of the callback
 	 */
-	long STOP = -1;
+	R run() throws Throwable;
 
 	/**
-	 * Return the number of milliseconds to wait before retrying the operation
-	 * or {@link #STOP} ({@value #STOP}) to indicate that no further attempt
-	 * should be made for the operation.
+	 * A unique logical name for this callback to distinguish retries around
+	 * business operations.
+	 * @return the name of the callback
 	 */
-	long nextBackOff();
-
+	String getName();
 }

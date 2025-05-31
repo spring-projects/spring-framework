@@ -40,12 +40,16 @@ package org.springframework.util.backoff;
  *
  * @author Stephane Nicoll
  * @author Mahmoud Ben Hassine
- * @since 4.1
+ * @since 7.0
  * @see BackOffExecution
- * @deprecated Since 7.0, use {@link BackOffPolicy} instead.
  */
-@Deprecated(since = "7.0")
 @FunctionalInterface
-public interface BackOff extends BackOffPolicy {
+public interface BackOffPolicy {
+
+	/**
+	 * Start a new back off execution.
+	 * @return a fresh {@link BackOffExecution} ready to be used
+	 */
+	BackOffExecution start();
 
 }
