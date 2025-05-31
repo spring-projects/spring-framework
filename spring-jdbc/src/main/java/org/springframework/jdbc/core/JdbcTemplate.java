@@ -102,6 +102,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
+ * @author Yanming Zhou
  * @since May 3, 2001
  * @see JdbcOperations
  * @see PreparedStatementCreator
@@ -473,12 +474,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public void query(String sql, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, new RowCallbackHandlerResultSetExtractor(rch));
+		query(sql, new RowCallbackHandlerResultSetExtractor(rch, this.maxRows));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
-		return result(query(sql, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
@@ -488,7 +489,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public Stream<T> doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = stmt.executeQuery(sql);
 				Connection con = stmt.getConnection();
-				return new ResultSetSpliterator<>(rs, rowMapper).stream().onClose(() -> {
+				return new ResultSetSpliterator<>(rs, rowMapper, JdbcTemplate.this.maxRows).stream().onClose(() -> {
 					JdbcUtils.closeResultSet(rs);
 					JdbcUtils.closeStatement(stmt);
 					DataSourceUtils.releaseConnection(con, getDataSource());
@@ -753,12 +754,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
-		query(psc, new RowCallbackHandlerResultSetExtractor(rch));
+		query(psc, new RowCallbackHandlerResultSetExtractor(rch, this.maxRows));
 	}
 
 	@Override
 	public void query(String sql, @Nullable PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
+		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch, this.maxRows));
 	}
 
 	@Override
@@ -779,28 +780,28 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public <T> List<T> query(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
-		return result(query(psc, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(psc, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, @Nullable PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
-		return result(query(sql, pss, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, pss, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException {
-		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Deprecated
 	@Override
 	public <T> List<T> query(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
-		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
-		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper)));
+		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	/**
@@ -825,7 +826,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 			ResultSet rs = ps.executeQuery();
 			Connection con = ps.getConnection();
-			return new ResultSetSpliterator<>(rs, rowMapper).stream().onClose(() -> {
+			return new ResultSetSpliterator<>(rs, rowMapper, this.maxRows).stream().onClose(() -> {
 				JdbcUtils.closeResultSet(rs);
 				if (pss instanceof ParameterDisposer parameterDisposer) {
 					parameterDisposer.cleanupParameters();
@@ -1344,7 +1345,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				else if (param.getRowCallbackHandler() != null) {
 					RowCallbackHandler rch = param.getRowCallbackHandler();
-					(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rs);
+					(new RowCallbackHandlerResultSetExtractor(rch, -1)).extractData(rs);
 					return Collections.singletonMap(param.getName(),
 							"ResultSet returned from stored procedure was processed");
 				}
@@ -1727,13 +1728,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		private final RowCallbackHandler rch;
 
-		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch) {
+		private final int maxRows;
+
+		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch, int maxRows) {
 			this.rch = rch;
+			this.maxRows = maxRows;
 		}
 
 		@Override
 		public @Nullable Object extractData(ResultSet rs) throws SQLException {
-			while (rs.next()) {
+			int processed = 0;
+			while (rs.next() && (this.maxRows == -1 || (processed++) < this.maxRows)) {
 				this.rch.processRow(rs);
 			}
 			return null;
@@ -1751,17 +1756,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		private final RowMapper<T> rowMapper;
 
+		private final int maxRows;
+
 		private int rowNum = 0;
 
-		public ResultSetSpliterator(ResultSet rs, RowMapper<T> rowMapper) {
+		public ResultSetSpliterator(ResultSet rs, RowMapper<T> rowMapper, int maxRows) {
 			this.rs = rs;
 			this.rowMapper = rowMapper;
+			this.maxRows = maxRows;
 		}
 
 		@Override
 		public boolean tryAdvance(Consumer<? super T> action) {
 			try {
-				if (this.rs.next()) {
+				if (this.rs.next() && (this.maxRows == -1 || this.rowNum < this.maxRows)) {
 					action.accept(this.rowMapper.mapRow(this.rs, this.rowNum++));
 					return true;
 				}
