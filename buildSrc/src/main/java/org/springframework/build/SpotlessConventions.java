@@ -23,7 +23,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.plugins.JavaBasePlugin;
-import org.gradle.api.plugins.quality.Checkstyle;
+import org.gradle.api.plugins.quality.Spotless;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.api.plugins.quality.CheckstylePlugin;
 
@@ -39,7 +39,7 @@ import java.util.List;
 public class SpotlessConventions {
 
 	/**
-	 * Applies the Spring Java Format and Checkstyle plugins with the project conventions.
+	 * Applies the Spring Java Format and Spotless plugins with the project conventions.
 	 * @param project the current project
 	 */
 	public void apply(Project project) {
@@ -48,7 +48,7 @@ public class SpotlessConventions {
 				configureNoHttpPlugin(project);
 			}
 			project.getPlugins().apply(SpotlessPlugin.class);
-			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
+			project.getTasks().withType(Spotless.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
 			checkstyle.setToolVersion("10.23.1");
 			checkstyle.getConfigDirectory().set(project.getRootProject().file("src/checkstyle"));
