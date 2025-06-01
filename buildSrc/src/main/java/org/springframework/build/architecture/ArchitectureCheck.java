@@ -16,6 +16,13 @@
 
 package org.springframework.build.architecture;
 
+import static org.springframework.build.architecture.ArchitectureRules.allPackagesShouldBeFreeOfTangles;
+import static org.springframework.build.architecture.ArchitectureRules.classesShouldNotImportForbiddenTypes;
+import static org.springframework.build.architecture.ArchitectureRules.javaClassesShouldNotImportKotlinAnnotations;
+import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToLowerCaseWithoutLocale;
+import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToUpperCaseWithoutLocale;
+import static org.springframework.build.architecture.ArchitectureRules.packageInfoShouldBeNullMarked;
+
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
@@ -44,13 +51,6 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 
-import static org.springframework.build.architecture.ArchitectureRules.allPackagesShouldBeFreeOfTangles;
-import static org.springframework.build.architecture.ArchitectureRules.classesShouldNotImportForbiddenTypes;
-import static org.springframework.build.architecture.ArchitectureRules.javaClassesShouldNotImportKotlinAnnotations;
-import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToLowerCaseWithoutLocale;
-import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToUpperCaseWithoutLocale;
-import static org.springframework.build.architecture.ArchitectureRules.packageInfoShouldBeNullMarked;
-
 /**
  * {@link Task} that checks for architecture problems.
  *
@@ -59,79 +59,85 @@ import static org.springframework.build.architecture.ArchitectureRules.packageIn
  */
 public abstract class ArchitectureCheck extends DefaultTask {
 
-	private FileCollection classes;
+  private FileCollection classes;
 
-	public ArchitectureCheck() {
-		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
-		getProhibitObjectsRequireNonNull().convention(true);
-		getRules().addAll(packageInfoShouldBeNullMarked(),
-				classesShouldNotImportForbiddenTypes(),
-				javaClassesShouldNotImportKotlinAnnotations(),
-				allPackagesShouldBeFreeOfTangles(),
-				noClassesShouldCallStringToLowerCaseWithoutLocale(),
-				noClassesShouldCallStringToUpperCaseWithoutLocale());
-		getRuleDescriptions().set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).toList()));
-	}
+  public ArchitectureCheck() {
+    getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
+    getProhibitObjectsRequireNonNull().convention(true);
+    getRules()
+        .addAll(
+            packageInfoShouldBeNullMarked(),
+            classesShouldNotImportForbiddenTypes(),
+            javaClassesShouldNotImportKotlinAnnotations(),
+            allPackagesShouldBeFreeOfTangles(),
+            noClassesShouldCallStringToLowerCaseWithoutLocale(),
+            noClassesShouldCallStringToUpperCaseWithoutLocale());
+    getRuleDescriptions()
+        .set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).toList()));
+  }
 
-	@TaskAction
-	void checkArchitecture() throws IOException {
-		JavaClasses javaClasses = new ClassFileImporter()
-				.importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
-		List<EvaluationResult> violations = getRules().get()
-				.stream()
-				.map((rule) -> rule.evaluate(javaClasses))
-				.filter(EvaluationResult::hasViolation)
-				.toList();
-		File outputFile = getOutputDirectory().file("failure-report.txt").get().getAsFile();
-		outputFile.getParentFile().mkdirs();
-		if (!violations.isEmpty()) {
-			StringBuilder report = new StringBuilder();
-			for (EvaluationResult violation : violations) {
-				report.append(violation.getFailureReport());
-				report.append(String.format("%n"));
-			}
-			Files.writeString(outputFile.toPath(), report.toString(), StandardOpenOption.CREATE,
-					StandardOpenOption.TRUNCATE_EXISTING);
-			throw new GradleException("Architecture check failed. See '" + outputFile + "' for details.");
-		}
-		else {
-			outputFile.createNewFile();
-		}
-	}
+  @TaskAction
+  void checkArchitecture() throws IOException {
+    JavaClasses javaClasses =
+        new ClassFileImporter()
+            .importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
+    List<EvaluationResult> violations =
+        getRules().get().stream()
+            .map((rule) -> rule.evaluate(javaClasses))
+            .filter(EvaluationResult::hasViolation)
+            .toList();
+    File outputFile = getOutputDirectory().file("failure-report.txt").get().getAsFile();
+    outputFile.getParentFile().mkdirs();
+    if (!violations.isEmpty()) {
+      StringBuilder report = new StringBuilder();
+      for (EvaluationResult violation : violations) {
+        report.append(violation.getFailureReport());
+        report.append(String.format("%n"));
+      }
+      Files.writeString(
+          outputFile.toPath(),
+          report.toString(),
+          StandardOpenOption.CREATE,
+          StandardOpenOption.TRUNCATE_EXISTING);
+      throw new GradleException("Architecture check failed. See '" + outputFile + "' for details.");
+    } else {
+      outputFile.createNewFile();
+    }
+  }
 
-	public void setClasses(FileCollection classes) {
-		this.classes = classes;
-	}
+  public void setClasses(FileCollection classes) {
+    this.classes = classes;
+  }
 
-	@Internal
-	public FileCollection getClasses() {
-		return this.classes;
-	}
+  @Internal
+  public FileCollection getClasses() {
+    return this.classes;
+  }
 
-	@InputFiles
-	@SkipWhenEmpty
-	@IgnoreEmptyDirectories
-	@PathSensitive(PathSensitivity.RELATIVE)
-	final FileTree getInputClasses() {
-		return this.classes.getAsFileTree();
-	}
+  @InputFiles
+  @SkipWhenEmpty
+  @IgnoreEmptyDirectories
+  @PathSensitive(PathSensitivity.RELATIVE)
+  final FileTree getInputClasses() {
+    return this.classes.getAsFileTree();
+  }
 
-	@Optional
-	@InputFiles
-	@PathSensitive(PathSensitivity.RELATIVE)
-	public abstract DirectoryProperty getResourcesDirectory();
+  @Optional
+  @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
+  public abstract DirectoryProperty getResourcesDirectory();
 
-	@OutputDirectory
-	public abstract DirectoryProperty getOutputDirectory();
+  @OutputDirectory
+  public abstract DirectoryProperty getOutputDirectory();
 
-	@Internal
-	public abstract ListProperty<ArchRule> getRules();
+  @Internal
+  public abstract ListProperty<ArchRule> getRules();
 
-	@Internal
-	public abstract Property<Boolean> getProhibitObjectsRequireNonNull();
+  @Internal
+  public abstract Property<Boolean> getProhibitObjectsRequireNonNull();
 
-	@Input
-	// The rules themselves can't be an input as they aren't serializable so we use
-	// their descriptions instead
-	abstract ListProperty<String> getRuleDescriptions();
+  @Input
+  // The rules themselves can't be an input as they aren't serializable so we use
+  // their descriptions instead
+  abstract ListProperty<String> getRuleDescriptions();
 }

@@ -16,6 +16,7 @@
 
 package org.springframework.build.hint;
 
+import java.util.Collections;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -31,8 +32,6 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.base.TestingExtension;
 
-import java.util.Collections;
-
 /**
  * {@link Plugin} that configures the {@code RuntimeHints} Java agent to test tasks.
  *
@@ -41,61 +40,94 @@ import java.util.Collections;
  */
 public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 
-	public static final String RUNTIMEHINTS_TEST_TASK = "runtimeHintsTest";
-	private static final String EXTENSION_NAME = "runtimeHintsAgent";
-	private static final String CONFIGURATION_NAME = "testRuntimeHintsAgentJar";
+  public static final String RUNTIMEHINTS_TEST_TASK = "runtimeHintsTest";
+  private static final String EXTENSION_NAME = "runtimeHintsAgent";
+  private static final String CONFIGURATION_NAME = "testRuntimeHintsAgentJar";
 
+  @Override
+  public void apply(Project project) {
 
-	@Override
-	public void apply(Project project) {
+    project
+        .getPlugins()
+        .withType(
+            JavaPlugin.class,
+            javaPlugin -> {
+              TestingExtension testing = project.getExtensions().getByType(TestingExtension.class);
+              JvmTestSuite jvmTestSuite = (JvmTestSuite) testing.getSuites().getByName("test");
+              RuntimeHintsAgentExtension agentExtension = createRuntimeHintsAgentExtension(project);
+              TaskProvider<Test> agentTest =
+                  project
+                      .getTasks()
+                      .register(
+                          RUNTIMEHINTS_TEST_TASK,
+                          Test.class,
+                          test -> {
+                            test.useJUnitPlatform(
+                                options -> {
+                                  options.includeTags("RuntimeHintsTests");
+                                });
+                            test.include("**/*Tests.class", "**/*Test.class");
+                            test.systemProperty("java.awt.headless", "true");
+                            test.systemProperty("org.graalvm.nativeimage.imagecode", "runtime");
+                            test.setTestClassesDirs(
+                                jvmTestSuite.getSources().getOutput().getClassesDirs());
+                            test.setClasspath(jvmTestSuite.getSources().getRuntimeClasspath());
+                            test.getJvmArgumentProviders()
+                                .add(
+                                    createRuntimeHintsAgentArgumentProvider(
+                                        project, agentExtension));
+                          });
+              project.getTasks().named("check", task -> task.dependsOn(agentTest));
+              project
+                  .getDependencies()
+                  .add(CONFIGURATION_NAME, project.project(":spring-core-test"));
+            });
+  }
 
-		project.getPlugins().withType(JavaPlugin.class, javaPlugin -> {
-			TestingExtension testing = project.getExtensions().getByType(TestingExtension.class);
-			JvmTestSuite jvmTestSuite = (JvmTestSuite) testing.getSuites().getByName("test");
-			RuntimeHintsAgentExtension agentExtension = createRuntimeHintsAgentExtension(project);
-			TaskProvider<Test> agentTest = project.getTasks().register(RUNTIMEHINTS_TEST_TASK, Test.class, test -> {
-				test.useJUnitPlatform(options -> {
-					options.includeTags("RuntimeHintsTests");
-				});
-				test.include("**/*Tests.class", "**/*Test.class");
-				test.systemProperty("java.awt.headless", "true");
-				test.systemProperty("org.graalvm.nativeimage.imagecode", "runtime");
-				test.setTestClassesDirs(jvmTestSuite.getSources().getOutput().getClassesDirs());
-				test.setClasspath(jvmTestSuite.getSources().getRuntimeClasspath());
-				test.getJvmArgumentProviders().add(createRuntimeHintsAgentArgumentProvider(project, agentExtension));
-			});
-			project.getTasks().named("check", task -> task.dependsOn(agentTest));
-			project.getDependencies().add(CONFIGURATION_NAME, project.project(":spring-core-test"));
-		});
-	}
+  private static RuntimeHintsAgentExtension createRuntimeHintsAgentExtension(Project project) {
+    RuntimeHintsAgentExtension agentExtension =
+        project.getExtensions().create(EXTENSION_NAME, RuntimeHintsAgentExtension.class);
+    agentExtension.getIncludedPackages().convention(Collections.singleton("org.springframework"));
+    agentExtension.getExcludedPackages().convention(Collections.emptySet());
+    return agentExtension;
+  }
 
-	private static RuntimeHintsAgentExtension createRuntimeHintsAgentExtension(Project project) {
-		RuntimeHintsAgentExtension agentExtension = project.getExtensions().create(EXTENSION_NAME, RuntimeHintsAgentExtension.class);
-		agentExtension.getIncludedPackages().convention(Collections.singleton("org.springframework"));
-		agentExtension.getExcludedPackages().convention(Collections.emptySet());
-		return agentExtension;
-	}
+  private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(
+      Project project, RuntimeHintsAgentExtension agentExtension) {
+    RuntimeHintsAgentArgumentProvider agentArgumentProvider =
+        project.getObjects().newInstance(RuntimeHintsAgentArgumentProvider.class);
+    agentArgumentProvider.getAgentJar().from(createRuntimeHintsAgentConfiguration(project));
+    agentArgumentProvider.getIncludedPackages().set(agentExtension.getIncludedPackages());
+    agentArgumentProvider.getExcludedPackages().set(agentExtension.getExcludedPackages());
+    return agentArgumentProvider;
+  }
 
-	private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(
-			Project project, RuntimeHintsAgentExtension agentExtension) {
-		RuntimeHintsAgentArgumentProvider agentArgumentProvider = project.getObjects().newInstance(RuntimeHintsAgentArgumentProvider.class);
-		agentArgumentProvider.getAgentJar().from(createRuntimeHintsAgentConfiguration(project));
-		agentArgumentProvider.getIncludedPackages().set(agentExtension.getIncludedPackages());
-		agentArgumentProvider.getExcludedPackages().set(agentExtension.getExcludedPackages());
-		return agentArgumentProvider;
-	}
-
-	private static Configuration createRuntimeHintsAgentConfiguration(Project project) {
-		return project.getConfigurations().create(CONFIGURATION_NAME, configuration -> {
-			configuration.setCanBeConsumed(false);
-			configuration.setTransitive(false); // Only the built artifact is required
-			configuration.attributes(attributes -> {
-				attributes.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
-				attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.getObjects().named(Category.class, Category.LIBRARY));
-				attributes.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.getObjects().named(LibraryElements.class, LibraryElements.JAR));
-				attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, Integer.valueOf(JavaVersion.current().getMajorVersion()));
-				attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
-			});
-		});
-	}
+  private static Configuration createRuntimeHintsAgentConfiguration(Project project) {
+    return project
+        .getConfigurations()
+        .create(
+            CONFIGURATION_NAME,
+            configuration -> {
+              configuration.setCanBeConsumed(false);
+              configuration.setTransitive(false); // Only the built artifact is required
+              configuration.attributes(
+                  attributes -> {
+                    attributes.attribute(
+                        Bundling.BUNDLING_ATTRIBUTE,
+                        project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
+                    attributes.attribute(
+                        Category.CATEGORY_ATTRIBUTE,
+                        project.getObjects().named(Category.class, Category.LIBRARY));
+                    attributes.attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        project.getObjects().named(LibraryElements.class, LibraryElements.JAR));
+                    attributes.attribute(
+                        TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE,
+                        Integer.valueOf(JavaVersion.current().getMajorVersion()));
+                    attributes.attribute(
+                        Usage.USAGE_ATTRIBUTE,
+                        project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
+                  });
+            });
+  }
 }
