@@ -37,26 +37,26 @@ import org.gradle.jvm.toolchain.JavaToolchainService;
  */
 public class MultiReleaseJarPlugin implements Plugin<Project> {
 
-  @Inject
-  protected JavaToolchainService getToolchains() {
-    throw new UnsupportedOperationException();
-  }
+    @Inject
+    protected JavaToolchainService getToolchains() {
+        throw new UnsupportedOperationException();
+    }
 
-  public void apply(Project project) {
-    project.getPlugins().apply(JavaPlugin.class);
-    ExtensionContainer extensions = project.getExtensions();
-    JavaPluginExtension javaPluginExtension = extensions.getByType(JavaPluginExtension.class);
-    ConfigurationContainer configurations = project.getConfigurations();
-    TaskContainer tasks = project.getTasks();
-    DependencyHandler dependencies = project.getDependencies();
-    ObjectFactory objects = project.getObjects();
-    extensions.create(
-        "multiRelease",
-        MultiReleaseExtension.class,
-        javaPluginExtension.getSourceSets(),
-        configurations,
-        tasks,
-        dependencies,
-        objects);
-  }
+    public void apply(Project project) {
+        project.getPlugins().apply(JavaPlugin.class);
+        ExtensionContainer extensions = project.getExtensions();
+        JavaPluginExtension javaPluginExtension = extensions.getByType(JavaPluginExtension.class);
+        ConfigurationContainer configurations = project.getConfigurations();
+        TaskContainer tasks = project.getTasks();
+        DependencyHandler dependencies = project.getDependencies();
+        ObjectFactory objects = project.getObjects();
+        extensions.create(
+                "multiRelease",
+                MultiReleaseExtension.class,
+                javaPluginExtension.getSourceSets(),
+                configurations,
+                tasks,
+                dependencies,
+                objects);
+    }
 }

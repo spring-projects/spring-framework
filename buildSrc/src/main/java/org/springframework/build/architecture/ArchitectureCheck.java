@@ -59,85 +59,85 @@ import org.gradle.api.tasks.TaskAction;
  */
 public abstract class ArchitectureCheck extends DefaultTask {
 
-  private FileCollection classes;
+    private FileCollection classes;
 
-  public ArchitectureCheck() {
-    getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
-    getProhibitObjectsRequireNonNull().convention(true);
-    getRules()
-        .addAll(
-            packageInfoShouldBeNullMarked(),
-            classesShouldNotImportForbiddenTypes(),
-            javaClassesShouldNotImportKotlinAnnotations(),
-            allPackagesShouldBeFreeOfTangles(),
-            noClassesShouldCallStringToLowerCaseWithoutLocale(),
-            noClassesShouldCallStringToUpperCaseWithoutLocale());
-    getRuleDescriptions()
-        .set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).toList()));
-  }
-
-  @TaskAction
-  void checkArchitecture() throws IOException {
-    JavaClasses javaClasses =
-        new ClassFileImporter()
-            .importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
-    List<EvaluationResult> violations =
-        getRules().get().stream()
-            .map((rule) -> rule.evaluate(javaClasses))
-            .filter(EvaluationResult::hasViolation)
-            .toList();
-    File outputFile = getOutputDirectory().file("failure-report.txt").get().getAsFile();
-    outputFile.getParentFile().mkdirs();
-    if (!violations.isEmpty()) {
-      StringBuilder report = new StringBuilder();
-      for (EvaluationResult violation : violations) {
-        report.append(violation.getFailureReport());
-        report.append(String.format("%n"));
-      }
-      Files.writeString(
-          outputFile.toPath(),
-          report.toString(),
-          StandardOpenOption.CREATE,
-          StandardOpenOption.TRUNCATE_EXISTING);
-      throw new GradleException("Architecture check failed. See '" + outputFile + "' for details.");
-    } else {
-      outputFile.createNewFile();
+    public ArchitectureCheck() {
+        getOutputDirectory()
+                .convention(getProject().getLayout().getBuildDirectory().dir(getName()));
+        getProhibitObjectsRequireNonNull().convention(true);
+        getRules()
+                .addAll(
+                        packageInfoShouldBeNullMarked(),
+                        classesShouldNotImportForbiddenTypes(),
+                        javaClassesShouldNotImportKotlinAnnotations(),
+                        allPackagesShouldBeFreeOfTangles(),
+                        noClassesShouldCallStringToLowerCaseWithoutLocale(),
+                        noClassesShouldCallStringToUpperCaseWithoutLocale());
+        getRuleDescriptions().set(getRules().map((rules) -> rules.stream()
+                .map(ArchRule::getDescription)
+                .toList()));
     }
-  }
 
-  public void setClasses(FileCollection classes) {
-    this.classes = classes;
-  }
+    @TaskAction
+    void checkArchitecture() throws IOException {
+        JavaClasses javaClasses = new ClassFileImporter()
+                .importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
+        List<EvaluationResult> violations = getRules().get().stream()
+                .map((rule) -> rule.evaluate(javaClasses))
+                .filter(EvaluationResult::hasViolation)
+                .toList();
+        File outputFile = getOutputDirectory().file("failure-report.txt").get().getAsFile();
+        outputFile.getParentFile().mkdirs();
+        if (!violations.isEmpty()) {
+            StringBuilder report = new StringBuilder();
+            for (EvaluationResult violation : violations) {
+                report.append(violation.getFailureReport());
+                report.append(String.format("%n"));
+            }
+            Files.writeString(
+                    outputFile.toPath(),
+                    report.toString(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
+            throw new GradleException("Architecture check failed. See '" + outputFile + "' for details.");
+        } else {
+            outputFile.createNewFile();
+        }
+    }
 
-  @Internal
-  public FileCollection getClasses() {
-    return this.classes;
-  }
+    public void setClasses(FileCollection classes) {
+        this.classes = classes;
+    }
 
-  @InputFiles
-  @SkipWhenEmpty
-  @IgnoreEmptyDirectories
-  @PathSensitive(PathSensitivity.RELATIVE)
-  final FileTree getInputClasses() {
-    return this.classes.getAsFileTree();
-  }
+    @Internal
+    public FileCollection getClasses() {
+        return this.classes;
+    }
 
-  @Optional
-  @InputFiles
-  @PathSensitive(PathSensitivity.RELATIVE)
-  public abstract DirectoryProperty getResourcesDirectory();
+    @InputFiles
+    @SkipWhenEmpty
+    @IgnoreEmptyDirectories
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final FileTree getInputClasses() {
+        return this.classes.getAsFileTree();
+    }
 
-  @OutputDirectory
-  public abstract DirectoryProperty getOutputDirectory();
+    @Optional
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getResourcesDirectory();
 
-  @Internal
-  public abstract ListProperty<ArchRule> getRules();
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDirectory();
 
-  @Internal
-  public abstract Property<Boolean> getProhibitObjectsRequireNonNull();
+    @Internal
+    public abstract ListProperty<ArchRule> getRules();
 
-  @Input
-  // The rules themselves can't be an input as they aren't serializable so we use
-  // their descriptions instead
-  abstract ListProperty<String> getRuleDescriptions();
+    @Internal
+    public abstract Property<Boolean> getProhibitObjectsRequireNonNull();
+
+    @Input
+    // The rules themselves can't be an input as they aren't serializable so we use
+    // their descriptions instead
+    abstract ListProperty<String> getRuleDescriptions();
 }

@@ -27,30 +27,25 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile;
  */
 public class KotlinConventions {
 
-  void apply(Project project) {
-    project
-        .getPlugins()
-        .withId(
-            "org.jetbrains.kotlin.jvm",
-            (plugin) -> project.getTasks().withType(KotlinCompile.class, this::configure));
-  }
+    void apply(Project project) {
+        project.getPlugins().withId("org.jetbrains.kotlin.jvm", (plugin) -> project.getTasks()
+                .withType(KotlinCompile.class, this::configure));
+    }
 
-  private void configure(KotlinCompile compile) {
-    compile.compilerOptions(
-        options -> {
-          options.getApiVersion().set(KotlinVersion.KOTLIN_2_1);
-          options.getLanguageVersion().set(KotlinVersion.KOTLIN_2_1);
-          options.getJvmTarget().set(JvmTarget.JVM_17);
-          options.getJavaParameters().set(true);
-          options.getAllWarningsAsErrors().set(true);
-          options
-              .getFreeCompilerArgs()
-              .addAll(
-                  "-Xsuppress-version-warnings",
-                  "-Xjsr305=strict", // For dependencies using JSR 305
-                  "-opt-in=kotlin.RequiresOptIn",
-                  "-Xjdk-release=17" // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
-                  );
+    private void configure(KotlinCompile compile) {
+        compile.compilerOptions(options -> {
+            options.getApiVersion().set(KotlinVersion.KOTLIN_2_1);
+            options.getLanguageVersion().set(KotlinVersion.KOTLIN_2_1);
+            options.getJvmTarget().set(JvmTarget.JVM_17);
+            options.getJavaParameters().set(true);
+            options.getAllWarningsAsErrors().set(true);
+            options.getFreeCompilerArgs()
+                    .addAll(
+                            "-Xsuppress-version-warnings",
+                            "-Xjsr305=strict", // For dependencies using JSR 305
+                            "-opt-in=kotlin.RequiresOptIn",
+                            "-Xjdk-release=17" // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
+                            );
         });
-  }
+    }
 }

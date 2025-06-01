@@ -40,59 +40,46 @@ import org.gradle.testretry.TestRetryTaskExtension;
  */
 class TestConventions {
 
-  void apply(Project project) {
-    project
-        .getPlugins()
-        .withType(JavaBasePlugin.class, (java) -> configureTestConventions(project));
-  }
-
-  private void configureTestConventions(Project project) {
-    project
-        .getTasks()
-        .withType(
-            Test.class,
-            test -> {
-              configureTests(project, test);
-              configureTestRetryPlugin(project, test);
-            });
-  }
-
-  private void configureTests(Project project, Test test) {
-    TestFrameworkOptions existingOptions = test.getOptions();
-    test.useJUnitPlatform(
-        options -> {
-          if (existingOptions instanceof JUnitPlatformOptions junitPlatformOptions) {
-            options.copyFrom(junitPlatformOptions);
-          }
-        });
-    test.include("**/*Tests.class", "**/*Test.class");
-    test.setSystemProperties(
-        Map.of(
-            "java.awt.headless", "true",
-            "io.netty.leakDetection.level", "paranoid"));
-    if (project.hasProperty("testGroups")) {
-      test.systemProperty("testGroups", project.getProperties().get("testGroups"));
+    void apply(Project project) {
+        project.getPlugins().withType(JavaBasePlugin.class, (java) -> configureTestConventions(project));
     }
-    test.jvmArgs(
-        "--add-opens=java.base/java.lang=ALL-UNNAMED",
-        "--add-opens=java.base/java.util=ALL-UNNAMED",
-        "-Xshare:off");
-  }
 
-  private void configureTestRetryPlugin(Project project, Test test) {
-    project
-        .getPlugins()
-        .withType(
-            TestRetryPlugin.class,
-            testRetryPlugin -> {
-              TestRetryTaskExtension testRetry =
-                  test.getExtensions().getByType(TestRetryTaskExtension.class);
-              testRetry.getFailOnPassedAfterRetry().set(true);
-              testRetry.getMaxRetries().set(isCi() ? 3 : 0);
-            });
-  }
+    private void configureTestConventions(Project project) {
+        project.getTasks().withType(Test.class, test -> {
+            configureTests(project, test);
+            configureTestRetryPlugin(project, test);
+        });
+    }
 
-  private boolean isCi() {
-    return Boolean.parseBoolean(System.getenv("CI"));
-  }
+    private void configureTests(Project project, Test test) {
+        TestFrameworkOptions existingOptions = test.getOptions();
+        test.useJUnitPlatform(options -> {
+            if (existingOptions instanceof JUnitPlatformOptions junitPlatformOptions) {
+                options.copyFrom(junitPlatformOptions);
+            }
+        });
+        test.include("**/*Tests.class", "**/*Test.class");
+        test.setSystemProperties(Map.of(
+                "java.awt.headless", "true",
+                "io.netty.leakDetection.level", "paranoid"));
+        if (project.hasProperty("testGroups")) {
+            test.systemProperty("testGroups", project.getProperties().get("testGroups"));
+        }
+        test.jvmArgs(
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "-Xshare:off");
+    }
+
+    private void configureTestRetryPlugin(Project project, Test test) {
+        project.getPlugins().withType(TestRetryPlugin.class, testRetryPlugin -> {
+            TestRetryTaskExtension testRetry = test.getExtensions().getByType(TestRetryTaskExtension.class);
+            testRetry.getFailOnPassedAfterRetry().set(true);
+            testRetry.getMaxRetries().set(isCi() ? 3 : 0);
+        });
+    }
+
+    private boolean isCi() {
+        return Boolean.parseBoolean(System.getenv("CI"));
+    }
 }

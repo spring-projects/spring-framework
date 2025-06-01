@@ -26,32 +26,28 @@ import org.gradle.process.CommandLineArgumentProvider;
 
 public class SpringFrameworkExtension {
 
-  private final Property<Boolean> enableJavaPreviewFeatures;
+    private final Property<Boolean> enableJavaPreviewFeatures;
 
-  public SpringFrameworkExtension(Project project) {
-    this.enableJavaPreviewFeatures = project.getObjects().property(Boolean.class);
-    project
-        .getTasks()
-        .withType(JavaCompile.class)
-        .configureEach(
-            javaCompile ->
-                javaCompile.getOptions().getCompilerArgumentProviders().add(asArgumentProvider()));
-    project
-        .getTasks()
-        .withType(Test.class)
-        .configureEach(test -> test.getJvmArgumentProviders().add(asArgumentProvider()));
-  }
+    public SpringFrameworkExtension(Project project) {
+        this.enableJavaPreviewFeatures = project.getObjects().property(Boolean.class);
+        project.getTasks()
+                .withType(JavaCompile.class)
+                .configureEach(javaCompile ->
+                        javaCompile.getOptions().getCompilerArgumentProviders().add(asArgumentProvider()));
+        project.getTasks().withType(Test.class).configureEach(test -> test.getJvmArgumentProviders()
+                .add(asArgumentProvider()));
+    }
 
-  public Property<Boolean> getEnableJavaPreviewFeatures() {
-    return this.enableJavaPreviewFeatures;
-  }
+    public Property<Boolean> getEnableJavaPreviewFeatures() {
+        return this.enableJavaPreviewFeatures;
+    }
 
-  private CommandLineArgumentProvider asArgumentProvider() {
-    return () -> {
-      if (getEnableJavaPreviewFeatures().getOrElse(false)) {
-        return List.of("--enable-preview");
-      }
-      return Collections.emptyList();
-    };
-  }
+    private CommandLineArgumentProvider asArgumentProvider() {
+        return () -> {
+            if (getEnableJavaPreviewFeatures().getOrElse(false)) {
+                return List.of("--enable-preview");
+            }
+            return Collections.emptyList();
+        };
+    }
 }

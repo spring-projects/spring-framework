@@ -27,26 +27,24 @@ import org.gradle.api.plugins.JavaBasePlugin;
  */
 public class LocalDevelopmentPlugin implements Plugin<Project> {
 
-  private static final String SKIP_DOCS_PROPERTY = "skipDocs";
+    private static final String SKIP_DOCS_PROPERTY = "skipDocs";
 
-  @Override
-  public void apply(Project target) {
-    if (target.hasProperty(SKIP_DOCS_PROPERTY)) {
-      skipDocumentationTasks(target);
-      target.subprojects(this::skipDocumentationTasks);
+    @Override
+    public void apply(Project target) {
+        if (target.hasProperty(SKIP_DOCS_PROPERTY)) {
+            skipDocumentationTasks(target);
+            target.subprojects(this::skipDocumentationTasks);
+        }
     }
-  }
 
-  private void skipDocumentationTasks(Project project) {
-    project.afterEvaluate(
-        p -> {
-          p.getTasks()
-              .matching(
-                  task -> {
-                    return JavaBasePlugin.DOCUMENTATION_GROUP.equals(task.getGroup())
-                        || "distribution".equals(task.getGroup());
-                  })
-              .forEach(task -> task.setEnabled(false));
+    private void skipDocumentationTasks(Project project) {
+        project.afterEvaluate(p -> {
+            p.getTasks()
+                    .matching(task -> {
+                        return JavaBasePlugin.DOCUMENTATION_GROUP.equals(task.getGroup())
+                                || "distribution".equals(task.getGroup());
+                    })
+                    .forEach(task -> task.setEnabled(false));
         });
-  }
+    }
 }

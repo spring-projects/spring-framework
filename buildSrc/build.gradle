@@ -5,8 +5,7 @@ plugins {
 spotless {
 	java {
 		removeUnusedImports()
-		googleJavaFormat()
-//		palantirJavaFormat()
+		palantirJavaFormat()
 	}
 }
 repositories {

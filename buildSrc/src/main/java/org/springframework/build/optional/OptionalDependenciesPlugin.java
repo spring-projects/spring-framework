@@ -32,32 +32,25 @@ import org.gradle.api.tasks.SourceSetContainer;
  */
 public class OptionalDependenciesPlugin implements Plugin<Project> {
 
-  /** Name of the {@code optional} configuration. */
-  public static final String OPTIONAL_CONFIGURATION_NAME = "optional";
+    /** Name of the {@code optional} configuration. */
+    public static final String OPTIONAL_CONFIGURATION_NAME = "optional";
 
-  @Override
-  public void apply(Project project) {
-    Configuration optional = project.getConfigurations().create(OPTIONAL_CONFIGURATION_NAME);
-    optional.setCanBeConsumed(false);
-    optional.setCanBeResolved(false);
-    project
-        .getPlugins()
-        .withType(
-            JavaBasePlugin.class,
-            (javaBasePlugin) -> {
-              SourceSetContainer sourceSets =
-                  project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
-              sourceSets.all(
-                  (sourceSet) -> {
-                    project
-                        .getConfigurations()
+    @Override
+    public void apply(Project project) {
+        Configuration optional = project.getConfigurations().create(OPTIONAL_CONFIGURATION_NAME);
+        optional.setCanBeConsumed(false);
+        optional.setCanBeResolved(false);
+        project.getPlugins().withType(JavaBasePlugin.class, (javaBasePlugin) -> {
+            SourceSetContainer sourceSets =
+                    project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
+            sourceSets.all((sourceSet) -> {
+                project.getConfigurations()
                         .getByName(sourceSet.getCompileClasspathConfigurationName())
                         .extendsFrom(optional);
-                    project
-                        .getConfigurations()
+                project.getConfigurations()
                         .getByName(sourceSet.getRuntimeClasspathConfigurationName())
                         .extendsFrom(optional);
-                  });
             });
-  }
+        });
+    }
 }

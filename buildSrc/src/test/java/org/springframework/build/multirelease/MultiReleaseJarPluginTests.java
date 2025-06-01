@@ -35,20 +35,20 @@ import org.junit.jupiter.api.io.TempDir;
 /** Tests for {@link MultiReleaseJarPlugin} */
 public class MultiReleaseJarPluginTests {
 
-  private File projectDir;
+    private File projectDir;
 
-  private File buildFile;
+    private File buildFile;
 
-  @BeforeEach
-  void setup(@TempDir File projectDir) {
-    this.projectDir = projectDir;
-    this.buildFile = new File(this.projectDir, "build.gradle");
-  }
+    @BeforeEach
+    void setup(@TempDir File projectDir) {
+        this.projectDir = projectDir;
+        this.buildFile = new File(this.projectDir, "build.gradle");
+    }
 
-  @Test
-  void configureSourceSets() throws IOException {
-    writeBuildFile(
-        """
+    @Test
+    void configureSourceSets() throws IOException {
+        writeBuildFile(
+                """
 				plugins {
 					id 'java'
 					id 'org.springframework.build.multiReleaseJar'
@@ -60,15 +60,14 @@ public class MultiReleaseJarPluginTests {
 					}
 				}
 				""");
-    BuildResult buildResult = runGradle("printSourceSets");
-    assertThat(buildResult.getOutput())
-        .contains("main", "test", "java21", "java21Test", "java24", "java24Test");
-  }
+        BuildResult buildResult = runGradle("printSourceSets");
+        assertThat(buildResult.getOutput()).contains("main", "test", "java21", "java21Test", "java24", "java24Test");
+    }
 
-  @Test
-  void configureToolchainReleaseVersion() throws IOException {
-    writeBuildFile(
-        """
+    @Test
+    void configureToolchainReleaseVersion() throws IOException {
+        writeBuildFile(
+                """
 				plugins {
 					id 'java'
 					id 'org.springframework.build.multiReleaseJar'
@@ -87,16 +86,16 @@ public class MultiReleaseJarPluginTests {
 				}
 				""");
 
-    BuildResult buildResult = runGradle("printReleaseVersion");
-    assertThat(buildResult.getOutput())
-        .contains("compileJava21Java releaseVersion: 21")
-        .contains("compileJava21TestJava releaseVersion: 21");
-  }
+        BuildResult buildResult = runGradle("printReleaseVersion");
+        assertThat(buildResult.getOutput())
+                .contains("compileJava21Java releaseVersion: 21")
+                .contains("compileJava21TestJava releaseVersion: 21");
+    }
 
-  @Test
-  void packageInJar() throws IOException {
-    writeBuildFile(
-        """
+    @Test
+    void packageInJar() throws IOException {
+        writeBuildFile(
+                """
 				plugins {
 					id 'java'
 					id 'org.springframework.build.multiReleaseJar'
@@ -104,45 +103,40 @@ public class MultiReleaseJarPluginTests {
 				version = '1.2.3'
 				multiRelease { releaseVersions 17 }
 				""");
-    writeClass(
-        "src/main/java17",
-        "Main.java",
-        """
+        writeClass("src/main/java17", "Main.java", """
 				public class Main {}
 				""");
-    BuildResult buildResult = runGradle("assemble");
-    File file =
-        new File(this.projectDir, "/build/libs/" + this.projectDir.getName() + "-1.2.3.jar");
-    assertThat(file).exists();
-    try (JarFile jar = new JarFile(file)) {
-      Attributes mainAttributes = jar.getManifest().getMainAttributes();
-      assertThat(mainAttributes.getValue("Multi-Release")).isEqualTo("true");
+        BuildResult buildResult = runGradle("assemble");
+        File file = new File(this.projectDir, "/build/libs/" + this.projectDir.getName() + "-1.2.3.jar");
+        assertThat(file).exists();
+        try (JarFile jar = new JarFile(file)) {
+            Attributes mainAttributes = jar.getManifest().getMainAttributes();
+            assertThat(mainAttributes.getValue("Multi-Release")).isEqualTo("true");
 
-      assertThat(jar.entries().asIterator())
-          .toIterable()
-          .anyMatch(entry -> entry.getName().equals("META-INF/versions/17/Main.class"));
+            assertThat(jar.entries().asIterator()).toIterable().anyMatch(entry -> entry.getName()
+                    .equals("META-INF/versions/17/Main.class"));
+        }
     }
-  }
 
-  private void writeBuildFile(String buildContent) throws IOException {
-    try (PrintWriter out = new PrintWriter(new FileWriter(this.buildFile))) {
-      out.print(buildContent);
+    private void writeBuildFile(String buildContent) throws IOException {
+        try (PrintWriter out = new PrintWriter(new FileWriter(this.buildFile))) {
+            out.print(buildContent);
+        }
     }
-  }
 
-  private void writeClass(String path, String fileName, String fileContent) throws IOException {
-    Path folder = this.projectDir.toPath().resolve(path);
-    Files.createDirectories(folder);
-    Path filePath = folder.resolve(fileName);
-    Files.createFile(filePath);
-    Files.writeString(filePath, fileContent);
-  }
+    private void writeClass(String path, String fileName, String fileContent) throws IOException {
+        Path folder = this.projectDir.toPath().resolve(path);
+        Files.createDirectories(folder);
+        Path filePath = folder.resolve(fileName);
+        Files.createFile(filePath);
+        Files.writeString(filePath, fileContent);
+    }
 
-  private BuildResult runGradle(String... args) {
-    return GradleRunner.create()
-        .withProjectDir(this.projectDir)
-        .withArguments(args)
-        .withPluginClasspath()
-        .build();
-  }
+    private BuildResult runGradle(String... args) {
+        return GradleRunner.create()
+                .withProjectDir(this.projectDir)
+                .withArguments(args)
+                .withPluginClasspath()
+                .build();
+    }
 }

@@ -35,12 +35,12 @@ import org.springframework.build.architecture.ArchitecturePlugin;
  */
 public class ConventionsPlugin implements Plugin<Project> {
 
-  @Override
-  public void apply(Project project) {
-    project.getExtensions().create("springFramework", SpringFrameworkExtension.class);
-    new ArchitecturePlugin().apply(project);
-    new JavaConventions().apply(project);
-    new KotlinConventions().apply(project);
-    new TestConventions().apply(project);
-  }
+    @Override
+    public void apply(Project project) {
+        project.getExtensions().create("springFramework", SpringFrameworkExtension.class);
+        new ArchitecturePlugin().apply(project);
+        new JavaConventions().apply(project);
+        new KotlinConventions().apply(project);
+        new TestConventions().apply(project);
+    }
 }
