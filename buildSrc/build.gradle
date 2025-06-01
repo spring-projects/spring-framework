@@ -27,6 +27,7 @@ ext {
 dependencies {
 	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
 	implementation "com.tngtech.archunit:archunit:1.4.0"
+	implementation "com.diffplug.spotless:spotless-plugin-gradle:7.0.4"
 	implementation "org.gradle:test-retry-gradle-plugin:1.6.2"
 	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
 	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
