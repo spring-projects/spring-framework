@@ -48,7 +48,6 @@ public class CheckstyleConventions {
 				configureNoHttpPlugin(project);
 			}
 			project.getPlugins().apply(CheckstylePlugin.class);
-			project.getPlugins().apply(SpotlessPlugin.class);
 			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
 			checkstyle.setToolVersion("10.23.1");

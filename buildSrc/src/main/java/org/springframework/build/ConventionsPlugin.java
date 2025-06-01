@@ -41,7 +41,8 @@ public class ConventionsPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		project.getExtensions().create("springFramework", SpringFrameworkExtension.class);
 		new ArchitecturePlugin().apply(project);
-		new CheckstyleConventions().apply(project);
+//		new CheckstyleConventions().apply(project);
+		new SpotlessConventions().apply(project);
 		new JavaConventions().apply(project);
 		new KotlinConventions().apply(project);
 		new TestConventions().apply(project);
