@@ -6,6 +6,7 @@ spotless {
 	java {
 		removeUnusedImports()
 		googleJavaFormat()
+//		palantirJavaFormat()
 	}
 }
 repositories {
