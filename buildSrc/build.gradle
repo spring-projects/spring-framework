@@ -2,10 +2,12 @@ plugins {
 	id 'java-gradle-plugin'
 	id 'com.diffplug.spotless' version '7.0.4'
 }
-spotless {
-	java {
-		removeUnusedImports()
-		palantirJavaFormat()
+allprojects {
+	spotless {
+		java {
+			removeUnusedImports()
+			palantirJavaFormat()
+		}
 	}
 }
 repositories {
