@@ -23,9 +23,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.plugins.JavaBasePlugin;
-import org.gradle.api.plugins.quality.Spotless;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
-import org.gradle.api.plugins.quality.CheckstylePlugin;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -47,7 +45,7 @@ public class SpotlessConventions {
 			if (project.getRootProject() == project) {
 				configureNoHttpPlugin(project);
 			}
-			project.getPlugins().apply(SpotlessPlugin.class);
+			project.getPlugins().apply(com.diffplug.gradle.spotless.SpotlessPlugin.class);
 			project.getTasks().withType(Spotless.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
 			checkstyle.setToolVersion("10.23.1");
