@@ -1,6 +1,7 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
+	id 'com.diffplug.gradle.spotless' version '7.0.4'
 }
 
 repositories {
