@@ -2211,7 +2211,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * i.e. whether the candidate points back to the original bean or to a factory method
 	 * on the original bean.
 	 */
-	@Contract("null, _ -> false;_, null -> false;")
+	@Contract("null, _ -> false; _, null -> false;")
 	private boolean isSelfReference(@Nullable String beanName, @Nullable String candidateName) {
 		return (beanName != null && candidateName != null &&
 				(beanName.equals(candidateName) || (containsBeanDefinition(candidateName) &&
