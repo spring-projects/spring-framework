@@ -1156,7 +1156,7 @@ One way to declare HTTP Service groups is via `@ImportHttpServices` annotations 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@ImportHttpServices(group = "echo", types = {EchoServieA.class, EchoServiceB.class}) // <1>
+	@ImportHttpServices(group = "echo", types = {EchoServiceA.class, EchoServiceB.class}) // <1>
 	@ImportHttpServices(group = "greeting", basePackageClasses = GreetServiceA.class) // <2>
 	public class ClientConfig {
 	}
