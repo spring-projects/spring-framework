@@ -243,7 +243,7 @@ Kotlin::
 ======
 
 If there is no `BindingResult` parameter after the `@ModelAttribute`, then
-`MethodArgumentNotValueException` is raised with the validation errors. However, if method
+a `MethodArgumentNotValidException` is raised with the validation errors. However, if method
 validation applies because other parameters have `@jakarta.validation.Constraint` annotations,
 then `HandlerMethodValidationException` is raised instead. For more details, see the section
 xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
