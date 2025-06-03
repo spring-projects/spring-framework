@@ -213,6 +213,11 @@ class ControllerMappingReflectiveProcessorTests {
 		void post(@RequestBody Request request) {
 		}
 
+		@QueryMapping
+		Response query(@RequestBody Request request) {
+			return new Response("response");
+		}
+
 		@PostMapping
 		void postForm(@ModelAttribute Request request) {
 		}
@@ -245,6 +250,17 @@ class ControllerMappingReflectiveProcessorTests {
 
 		@PostMapping
 		void postPartToConvert(@RequestPart Request request) {
+		}
+
+		@QueryMapping
+		HttpEntity<Response> querytHttpEntity(HttpEntity<Request> entity) {
+			return new HttpEntity<>(new Response("response"));
+		}
+
+		@QueryMapping
+		@SuppressWarnings("rawtypes")
+		HttpEntity queryRawHttpEntity(HttpEntity entity) {
+			return new HttpEntity(new Response("response"));
 		}
 
 	}

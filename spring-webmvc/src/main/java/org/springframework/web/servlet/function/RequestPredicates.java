@@ -266,6 +266,18 @@ public abstract class RequestPredicates {
 	}
 
 	/**
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code QUERY}
+	 * and the given {@code pattern} matches against the request path.
+	 * @param pattern the path pattern to match against
+	 * @return a predicate that matches if the request method is QUERY and if the given pattern
+	 * matches against the request path
+	 * @see org.springframework.web.util.pattern.PathPattern
+	 */
+	public static RequestPredicate QUERY(String pattern) {
+		return method(HttpMethod.QUERY).and(path(pattern));
+	}
+
+	/**
 	 * Return a {@code RequestPredicate} that matches if the request's path has the given extension.
 	 * @param extension the path extension to match against, ignoring case
 	 * @return a predicate that matches if the request's path has the given file extension
