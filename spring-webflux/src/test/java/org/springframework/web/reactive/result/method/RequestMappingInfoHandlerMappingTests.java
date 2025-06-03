@@ -377,7 +377,7 @@ class RequestMappingInfoHandlerMappingTests {
 				.isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
-	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods, @Nullable MediaType acceptPatch) {
+	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods, @Nullable MediaType acceptMediaType) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options(requestURI));
 		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
@@ -395,9 +395,15 @@ class RequestMappingInfoHandlerMappingTests {
 		HttpHeaders headers = (HttpHeaders) value;
 		assertThat(headers.getAllow()).hasSameElementsAs(allowedMethods);
 
-		if (acceptPatch != null && headers.getAllow().contains(HttpMethod.PATCH) ) {
-			assertThat(headers.getAcceptPatch()).containsExactly(acceptPatch);
+		if (acceptMediaType != null) {
+			if (headers.getAllow().contains(HttpMethod.PATCH)) {
+				assertThat(headers.getAcceptPatch()).containsExactly(acceptMediaType);
+			}
+			if (headers.getAllow().contains(HttpMethod.QUERY)) {
+				assertThat(headers.getAcceptQuery()).containsExactly(acceptMediaType);
+			}
 		}
+
 	}
 
 	private void testMediaTypeNotAcceptable(String url) {

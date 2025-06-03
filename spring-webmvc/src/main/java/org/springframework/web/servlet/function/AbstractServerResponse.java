@@ -43,7 +43,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 
-	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
 
 	private final HttpStatusCode statusCode;
 

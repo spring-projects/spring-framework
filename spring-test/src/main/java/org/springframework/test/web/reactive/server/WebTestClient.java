@@ -147,6 +147,12 @@ public interface WebTestClient {
 	RequestHeadersUriSpec<?> options();
 
 	/**
+	 * Prepare an HTTP QUERY request.
+	 * @return a spec for specifying the target URL
+	 */
+	RequestBodyUriSpec query();
+
+	/**
 	 * Prepare a request for the specified {@code HttpMethod}.
 	 * @return a spec for specifying the target URL
 	 */

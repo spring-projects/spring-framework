@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-present the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,33 +25,33 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation for mapping HTTP {@code GET} requests onto specific handler
+ * Annotation for mapping HTTP {@code QUERY} requests onto specific handler
  * methods.
  *
- * <p>Specifically, {@code @GetMapping} is a <em>composed annotation</em> that
- * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.GET)}.
+ * <p>Specifically, {@code @QueryMapping} is a <em>composed annotation</em> that
+ * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.QUERY)}.
  *
  * <p><strong>NOTE:</strong> This annotation cannot be used in conjunction with
  * other {@code @RequestMapping} annotations that are declared on the same method.
  * If multiple {@code @RequestMapping} annotations are detected on the same method,
  * a warning will be logged, and only the first mapping will be used. This applies
  * to {@code @RequestMapping} as well as composed {@code @RequestMapping} annotations
- * such as {@code @PutMapping}, {@code @PostMapping}, etc.
+ * such as {@code @GetMapping}, {@code @PutMapping}, etc.
  *
- * @author Sam Brannen
- * @since 4.3
- * @see PostMapping
+ * @author Mario Ruiz
+ * @since x.x.x
+ * @see GetMapping
  * @see PutMapping
+ * @see PostMapping
  * @see DeleteMapping
  * @see PatchMapping
- * @see QueryMapping
  * @see RequestMapping
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@RequestMapping(method = RequestMethod.GET)
-public @interface GetMapping {
+@RequestMapping(method = RequestMethod.QUERY)
+public @interface QueryMapping {
 
 	/**
 	 * Alias for {@link RequestMapping#name}.
@@ -85,7 +85,6 @@ public @interface GetMapping {
 
 	/**
 	 * Alias for {@link RequestMapping#consumes}.
-	 * @since 4.3.5
 	 */
 	@AliasFor(annotation = RequestMapping.class)
 	String[] consumes() default {};

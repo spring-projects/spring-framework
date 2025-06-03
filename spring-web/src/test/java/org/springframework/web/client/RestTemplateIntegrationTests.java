@@ -290,7 +290,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		Set<HttpMethod> allowed = template.optionsForAllow(URI.create(baseUrl + "/get"));
-		assertThat(allowed).as("Invalid response").isEqualTo(Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
+		assertThat(allowed).as("Invalid response").isEqualTo(Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
 	}
 
 	@ParameterizedRestTemplateTest

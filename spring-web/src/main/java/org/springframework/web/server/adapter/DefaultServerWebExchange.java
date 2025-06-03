@@ -66,7 +66,7 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
 
-	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
 
 	private static final ResolvableType FORM_DATA_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
