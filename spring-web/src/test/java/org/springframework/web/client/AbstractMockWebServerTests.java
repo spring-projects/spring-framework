@@ -75,7 +75,7 @@ abstract class AbstractMockWebServerTests {
 
 	private MockResponse getRequest(RecordedRequest request, byte[] body, @Nullable String contentType) {
 		if (request.getMethod().equals("OPTIONS")) {
-			return new MockResponse.Builder().code(200).setHeader("Allow", "GET, OPTIONS, HEAD, TRACE").build();
+			return new MockResponse.Builder().code(200).setHeader("Allow", "GET, QUERY, OPTIONS, HEAD, TRACE").build();
 		}
 		Buffer buf = new Buffer();
 		buf.write(body);
@@ -240,6 +240,29 @@ abstract class AbstractMockWebServerTests {
 		return new MockResponse.Builder().code(202).build();
 	}
 
+	private MockResponse queryRequest(RecordedRequest request, String expectedRequestContent,
+									  String contentType, byte[] responseBody) {
+
+		assertThat(request.getHeaders().values(CONTENT_LENGTH)).hasSize(1);
+		assertThat(Integer.parseInt(request.getHeaders().get(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
+		String requestContentType = request.getHeaders().get(CONTENT_TYPE);
+		assertThat(requestContentType).as("No content-type").isNotNull();
+		Charset charset = StandardCharsets.ISO_8859_1;
+		if (requestContentType.contains("charset=")) {
+			String charsetName = requestContentType.split("charset=")[1];
+			charset = Charset.forName(charsetName);
+		}
+		assertThat(request.getBody().string(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
+		Buffer buf = new Buffer();
+		buf.write(responseBody);
+		return new MockResponse.Builder()
+				.setHeader(CONTENT_TYPE, contentType)
+				.setHeader(CONTENT_LENGTH, responseBody.length)
+				.body(buf)
+				.code(200)
+				.build();
+	}
+
 
 	protected class TestDispatcher extends Dispatcher {
 
@@ -301,6 +324,9 @@ abstract class AbstractMockWebServerTests {
 				}
 				else if (request.getTarget().equals("/put")) {
 					return putRequest(request, helloWorld);
+				}
+				else if (request.getTarget().equals("/query")) {
+					return queryRequest(request, helloWorld, textContentType.toString(), helloWorldBytes);
 				}
 				return new MockResponse.Builder().code(404).build();
 			}

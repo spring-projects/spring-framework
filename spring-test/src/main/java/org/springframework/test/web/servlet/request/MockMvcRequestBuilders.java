@@ -176,6 +176,24 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a QUERY request.
+	 * @param uriTemplate a URI template; the resulting URI will be encoded
+	 * @param uriVariables zero or more URI variables
+	 */
+	public static MockHttpServletRequestBuilder query(String uriTemplate, @Nullable Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.QUERY).uri(uriTemplate, uriVariables);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a QUERY request.
+	 * @param uri the URI
+	 * @since x.x.x
+	 */
+	public static MockHttpServletRequestBuilder query(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.QUERY).uri(uri);
+	}
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
 	 * @param method the HTTP method (GET, POST, etc.)
 	 * @param uriTemplate a URI template; the resulting URI will be encoded
