@@ -206,13 +206,22 @@ public class ImportSelectorTests {
 
 	@Test
 	void importAnnotationOnImplementedInterfaceIsRespected() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(InterfaceBasedConfig.class);
-		context.refresh();
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				InterfaceBasedConfig.class);
 
 		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
 		assertThat(context.getBean(ImportedBean.class)).isNotNull();
 		assertThat(context.getBean(ImportedBean.class).name()).isEqualTo("imported");
+	}
+
+	@Test
+	void localImportShouldOverrideInterfaceImport() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				OverridingConfig.class);
+
+		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
+		assertThat(context.getBean(ImportedBean.class)).isNotNull();
+		assertThat(context.getBean(ImportedBean.class).name()).isEqualTo("from class");
 	}
 
 	@Import(ImportedConfig.class)
@@ -223,9 +232,28 @@ public class ImportSelectorTests {
 	static class InterfaceBasedConfig implements ConfigImportMarker {
 	}
 
+	@Configuration
+	static class OverridingConfig implements ConfigImportMarker {
+		@Bean
+		ImportedBean importedBean() {
+			return new ImportedBean("from class");
+		}
+	}
+
 	static class ImportedBean {
+
+		private final String name;
+
+		ImportedBean() {
+			this.name = "imported";
+		}
+
+		ImportedBean(String name) {
+			this.name = name;
+		}
+
 		String name() {
-			return "imported";
+			return name;
 		}
 	}
 

@@ -550,7 +550,7 @@ class ConfigurationClassParser {
 	 * <p>For example, it is common for a {@code @Configuration} class to declare direct
 	 * {@code @Import}s in addition to meta-imports originating from an {@code @Enable}
 	 * annotation.
-	 * <p>In addition, {@code @Import} annotations declared on interfaces implemented by
+	 * <p>As of Spring Framework 7.0, {@code @Import} annotations declared on interfaces implemented by
 	 * the configuration class are also considered. This allows imports to be triggered
 	 * indirectly via marker interfaces or shared base interfaces.
 	 * @param sourceClass the class to search
@@ -562,6 +562,9 @@ class ConfigurationClassParser {
 			throws IOException {
 
 		if (visited.add(sourceClass)) {
+			for (SourceClass ifc : sourceClass.getInterfaces()) {
+				collectImports(ifc, imports, visited);
+			}
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
 				if (!annName.equals(Import.class.getName())) {
@@ -569,10 +572,6 @@ class ConfigurationClassParser {
 				}
 			}
 			imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
-
-			for (SourceClass ifc : sourceClass.getInterfaces()) {
-				collectImports(ifc, imports, visited);
-			}
 		}
 	}
 
