@@ -97,6 +97,13 @@ public class JacksonJsonMessageConverter extends AbstractMessageConverter {
 		this.objectMapper = objectMapper;
 	}
 
+	/**
+	 * Return the underlying {@code ObjectMapper} for this converter.
+	 */
+	protected ObjectMapper getObjectMapper() {
+		return this.objectMapper;
+	}
+
 	@Override
 	protected boolean canConvertFrom(Message<?> message, @Nullable Class<?> targetClass) {
 		return targetClass != null && supportsMimeType(message.getHeaders());
