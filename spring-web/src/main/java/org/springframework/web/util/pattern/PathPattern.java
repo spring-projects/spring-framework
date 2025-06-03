@@ -397,6 +397,15 @@ public class PathPattern implements Comparable<PathPattern> {
 					this.patternString.substring(0, this.patternString.length() - 2),
 					pattern2string.patternString));
 		}
+		
+		if (this.patternString.endsWith("/*")) {
+			String base = this.patternString.substring(0, this.patternString.length() - 2);
+			if (pattern2string.patternString.contains("/")) {
+				throw new IllegalArgumentException("Cannot combine single-segment wildcard '/*' with multi-segment path '" +
+				pattern2string.patternString + "'");
+			}
+			return this.parser.parse(concat(base, "/" + pattern2string.patternString));
+		}
 
 		// /hotels + /booking => /hotels/booking
 		// /hotels + booking => /hotels/booking
