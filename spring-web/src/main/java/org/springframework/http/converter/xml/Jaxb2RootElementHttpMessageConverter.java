@@ -160,6 +160,13 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		}
 	}
 
+	/**
+	 * Process {@code source} with {@code charset}.
+	 * @param source source to process
+	 * @param charset charset to use
+	 * @return source
+	 * @since 6.2.8
+	 */
 	protected Source processSource(Source source, @Nullable Charset charset) {
 		if (source instanceof StreamSource streamSource) {
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
