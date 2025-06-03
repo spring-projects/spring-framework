@@ -167,62 +167,21 @@ class RestClientAdapterTests {
 				.hasLowCardinalityKeyValue("uri", "none");
 	}
 
-	@ParameterizedAdapterTest
-	void postWithHeader(MockWebServer server, Service service) throws Exception {
-		service.postWithHeader("testHeader", "testBody");
+	@Test
+	void greetingWithApiVersion() throws Exception {
+		RestClient restClient = RestClient.builder()
+				.baseUrl(anotherServer.url("/").toString())
+				.apiVersionInserter(ApiVersionInserter.useHeader("X-API-Version"))
+				.build();
 
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/greeting");
-		assertThat(request.getHeaders().get("testHeaderName")).isEqualTo("testHeader");
-		assertThat(request.getBody().readUtf8()).isEqualTo("testBody");
-	}
+		RestClientAdapter adapter = RestClientAdapter.create(restClient);
+		Service service = HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
 
-	@ParameterizedAdapterTest
-	void formData(MockWebServer server, Service service) throws Exception {
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("param1", "value 1");
-		map.add("param2", "value 2");
+		String response = service.getGreetingWithVersion();
 
-		service.postForm(map);
-
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
-		assertThat(request.getBody().readUtf8()).isEqualTo("param1=value+1&param2=value+2");
-	}
-
-	@ParameterizedAdapterTest // gh-30342
-	void multipart(MockWebServer server, Service service) throws Exception {
-		MultipartFile file = new MockMultipartFile(
-				"testFileName", "originalTestFileName", MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
-
-		service.postMultipart(file, "test2");
-
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
-		assertThat(request.getBody().readUtf8()).containsSubsequence(
-				"Content-Disposition: form-data; name=\"file\"; filename=\"originalTestFileName\"",
-				"Content-Type: application/json", "Content-Length: 4", "test",
-				"Content-Disposition: form-data; name=\"anotherPart\"", "Content-Type: text/plain;charset=UTF-8",
-				"Content-Length: 5", "test2");
-	}
-
-	@ParameterizedAdapterTest
-	void putWithCookies(MockWebServer server, Service service) throws Exception {
-		service.putWithCookies("test1", "test2");
-
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getMethod()).isEqualTo("PUT");
-		assertThat(request.getHeader("Cookie")).isEqualTo("firstCookie=test1; secondCookie=test2");
-	}
-
-	@ParameterizedAdapterTest
-	void putWithSameNameCookies(MockWebServer server, Service service) throws Exception {
-		service.putWithSameNameCookies("test1", "test2");
-
-		RecordedRequest request = server.takeRequest();
-		assertThat(request.getMethod()).isEqualTo("PUT");
-		assertThat(request.getHeader("Cookie")).isEqualTo("testCookie=test1; testCookie=test2");
+		RecordedRequest request = anotherServer.takeRequest();
+		assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2");
+		assertThat(response).isEqualTo("Hello Spring 2!");
 	}
 
 	@ParameterizedAdapterTest
@@ -270,20 +229,44 @@ class RestClientAdapterTests {
 		assertThat(this.anotherServer.getRequestCount()).isEqualTo(0);
 	}
 
-	@Test
-	void apiVersion() throws Exception {
-		RestClient restClient = RestClient.builder()
-				.baseUrl(anotherServer.url("/").toString())
-				.apiVersionInserter(ApiVersionInserter.useHeader("X-API-Version"))
-				.build();
+	@ParameterizedAdapterTest
+	void postWithHeader(MockWebServer server, Service service) throws Exception {
+		service.postWithHeader("testHeader", "testBody");
 
-		RestClientAdapter adapter = RestClientAdapter.create(restClient);
-		Service service = HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("POST");
+		assertThat(request.getPath()).isEqualTo("/greeting");
+		assertThat(request.getHeaders().get("testHeaderName")).isEqualTo("testHeader");
+		assertThat(request.getBody().readUtf8()).isEqualTo("testBody");
+	}
 
-		service.getGreetingWithVersion();
+	@ParameterizedAdapterTest
+	void postFormData(MockWebServer server, Service service) throws Exception {
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("param1", "value 1");
+		map.add("param2", "value 2");
 
-		RecordedRequest request = anotherServer.takeRequest();
-		assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2");
+		service.postForm(map);
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
+		assertThat(request.getBody().readUtf8()).isEqualTo("param1=value+1&param2=value+2");
+	}
+
+	@ParameterizedAdapterTest // gh-30342
+	void postMultipart(MockWebServer server, Service service) throws Exception {
+		MultipartFile file = new MockMultipartFile(
+				"testFileName", "originalTestFileName", MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
+
+		service.postMultipart(file, "test2");
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
+		assertThat(request.getBody().readUtf8()).containsSubsequence(
+				"Content-Disposition: form-data; name=\"file\"; filename=\"originalTestFileName\"",
+				"Content-Type: application/json", "Content-Length: 4", "test",
+				"Content-Disposition: form-data; name=\"anotherPart\"", "Content-Type: text/plain;charset=UTF-8",
+				"Content-Length: 5", "test2");
 	}
 
 	@ParameterizedAdapterTest // gh-34793
@@ -297,6 +280,24 @@ class RestClientAdapterTests {
 		assertThat(request.getMethod()).isEqualTo("POST");
 		assertThat(request.getPath()).isEqualTo("/persons");
 		assertThat(request.getBody().readUtf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
+	}
+
+	@ParameterizedAdapterTest
+	void putWithCookies(MockWebServer server, Service service) throws Exception {
+		service.putWithCookies("test1", "test2");
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("PUT");
+		assertThat(request.getHeader("Cookie")).isEqualTo("firstCookie=test1; secondCookie=test2");
+	}
+
+	@ParameterizedAdapterTest
+	void putWithSameNameCookies(MockWebServer server, Service service) throws Exception {
+		service.putWithSameNameCookies("test1", "test2");
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("PUT");
+		assertThat(request.getHeader("Cookie")).isEqualTo("testCookie=test1; testCookie=test2");
 	}
 
 
@@ -323,6 +324,16 @@ class RestClientAdapterTests {
 		@GetExchange(url = "/greeting", version = "1.2")
 		String getGreetingWithVersion();
 
+		@GetExchange("/greeting")
+		ResponseEntity<String> getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+
+		@GetExchange("/greeting/{id}")
+		ResponseEntity<String> getWithUriBuilderFactory(
+				UriBuilderFactory uriBuilderFactory, @PathVariable String id, @RequestParam String param);
+
+		@GetExchange("/greeting")
+		ResponseEntity<String> getWithIgnoredUriBuilderFactory(URI uri, UriBuilderFactory uriBuilderFactory);
+
 		@PostExchange("/greeting")
 		void postWithHeader(@RequestHeader("testHeaderName") String testHeader, @RequestBody String requestBody);
 
@@ -342,30 +353,10 @@ class RestClientAdapterTests {
 		void putWithSameNameCookies(
 				@CookieValue("testCookie") String firstCookie, @CookieValue("testCookie") String secondCookie);
 
-		@GetExchange("/greeting")
-		ResponseEntity<String> getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
-
-		@GetExchange("/greeting/{id}")
-		ResponseEntity<String> getWithUriBuilderFactory(
-				UriBuilderFactory uriBuilderFactory, @PathVariable String id, @RequestParam String param);
-
-		@GetExchange("/greeting")
-		ResponseEntity<String> getWithIgnoredUriBuilderFactory(URI uri, UriBuilderFactory uriBuilderFactory);
 	}
 
 
-	static final class Person {
-
-		private final String name;
-
-		Person(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
+	record Person(String name) {
 	}
 
 }
