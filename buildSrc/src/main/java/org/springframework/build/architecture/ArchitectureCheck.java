@@ -75,6 +75,12 @@ public abstract class ArchitectureCheck extends DefaultTask {
 
 	@TaskAction
 	void checkArchitecture() throws IOException {
+
+		if (this.classes == null) {
+			getLogger().error("Error: No classes were set to be checked.");
+			throw new GradleException("No classes were set to be checked. Please provide input class files.");
+		}
+
 		JavaClasses javaClasses = new ClassFileImporter()
 				.importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
 		List<EvaluationResult> violations = getRules().get()
