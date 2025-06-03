@@ -4,11 +4,13 @@
 Spring MVC has an extensive integration with Servlet asynchronous request
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-processing[processing]:
 
-* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`]
-return values in controller methods provide basic support for a single asynchronous
-return value.
+* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`],
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`], and
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-webasynctask[`WebAsyncTask`] return values
+in controller methods provide support for a single asynchronous return value.
 * Controllers can xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[stream] multiple values, including
-xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-sse[SSE] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-output-stream[raw data].
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-sse[SSE] and
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-output-stream[raw data].
 * Controllers can use reactive clients and return
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive types] for response handling.
 
@@ -93,6 +95,47 @@ Kotlin::
 
 The return value can then be obtained by running the given task through the
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `AsyncTaskExecutor`.
+
+
+
+
+[[mvc-ann-async-webasynctask]]
+== `WebAsyncTask`
+
+`WebAsyncTask` is comparable to using xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[Callable]
+but allows customizing additional settings such a request timeout value, and the
+`AsyncTaskExecutor` to execute the `java.util.concurrent.Callable` with instead
+of the defaults set up globally for Spring MVC. Below is an example of using `WebAsyncTask`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping("/callable")
+	WebAsyncTask<String> handle() {
+		return new WebAsyncTask<String>(20000L,()->{
+			Thread.sleep(10000); //simulate long-running task
+			return "asynchronous request completed";
+		});
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@GetMapping("/callable")
+fun handle(): WebAsyncTask<String> {
+    return WebAsyncTask(20000L) {
+        Thread.sleep(10000) // simulate long-running task
+        "asynchronous request completed"
+    }
+}
+----
+======
+
 
 
 
@@ -390,7 +433,7 @@ reactive types from the controller method.
 Reactive return values are handled as follows:
 
 * A single-value promise is adapted to, similar to using `DeferredResult`. Examples
-include `Mono` (Reactor) or `Single` (RxJava).
+include `CompletionStage` (JDK), Mono` (Reactor), and `Single` (RxJava).
 * A multi-value stream with a streaming media type (such as `application/x-ndjson`
 or `text/event-stream`) is adapted to, similar to using `ResponseBodyEmitter` or
 `SseEmitter`. Examples include `Flux` (Reactor) or `Observable` (RxJava).
