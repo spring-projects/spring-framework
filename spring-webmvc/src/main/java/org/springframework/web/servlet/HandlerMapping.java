@@ -68,7 +68,7 @@ public interface HandlerMapping {
 	 * {@link org.springframework.web.util.UrlPathHelper} could be the full path
 	 * or without the context path, decoded or not, etc.
 	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of
+	 * @deprecated in favor of
 	 * {@link org.springframework.web.util.UrlPathHelper#PATH_ATTRIBUTE} and
 	 * {@link org.springframework.web.util.ServletRequestPathUtils#PATH_ATTRIBUTE}.
 	 * To access the cached path used for request mapping, use

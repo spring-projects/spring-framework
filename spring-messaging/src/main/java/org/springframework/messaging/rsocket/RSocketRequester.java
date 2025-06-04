@@ -310,7 +310,7 @@ public interface RSocketRequester extends Disposable {
 		 * @param port the server port
 		 * @return an {@code RSocketRequester} for the connection
 		 * @see TcpClientTransport
-		 * @deprecated as of 5.3 in favor of {@link #tcp(String, int)}
+		 * @deprecated in favor of {@link #tcp(String, int)}
 		 */
 		@Deprecated(since = "5.3")
 		Mono<RSocketRequester> connectTcp(String host, int port);
@@ -320,7 +320,7 @@ public interface RSocketRequester extends Disposable {
 		 * @param uri the RSocket server endpoint URI
 		 * @return an {@code RSocketRequester} for the connection
 		 * @see WebsocketClientTransport
-		 * @deprecated as of 5.3 in favor of {@link #websocket(URI)}
+		 * @deprecated in favor of {@link #websocket(URI)}
 		 */
 		@Deprecated(since = "5.3")
 		Mono<RSocketRequester> connectWebSocket(URI uri);
@@ -329,7 +329,7 @@ public interface RSocketRequester extends Disposable {
 		 * Connect to the server with the given {@code ClientTransport}.
 		 * @param transport the client transport to use
 		 * @return an {@code RSocketRequester} for the connection
-		 * @deprecated as of 5.3 in favor of {@link #transport(ClientTransport)}
+		 * @deprecated in favor of {@link #transport(ClientTransport)}
 		 */
 		@Deprecated(since = "5.3")
 		Mono<RSocketRequester> connect(ClientTransport transport);

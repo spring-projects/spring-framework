@@ -42,7 +42,7 @@ import javax.annotation.meta.TypeQualifierNickname;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
- * @deprecated since 7.0; use {@link org.jspecify.annotations.Nullable} instead
+ * @deprecated use {@link org.jspecify.annotations.Nullable} instead
  * @see NonNullApi
  * @see NonNullFields
  * @see NonNull

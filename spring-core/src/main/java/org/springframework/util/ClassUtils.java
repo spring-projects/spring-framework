@@ -939,7 +939,7 @@ public abstract class ClassUtils {
 	 * Check whether the given object is a CGLIB proxy.
 	 * @param object the object to check
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
-	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * @deprecated in favor of custom (possibly narrower) checks
 	 * such as for a Spring AOP proxy
 	 */
 	@Deprecated(since = "5.2")
@@ -951,7 +951,7 @@ public abstract class ClassUtils {
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 * @see #getUserClass(Class)
-	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * @deprecated in favor of custom (possibly narrower) checks
 	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
 	@Deprecated(since = "5.2")
@@ -963,7 +963,7 @@ public abstract class ClassUtils {
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
 	 * @see #CGLIB_CLASS_SEPARATOR
-	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * @deprecated in favor of custom (possibly narrower) checks
 	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
 	@Deprecated(since = "5.2")

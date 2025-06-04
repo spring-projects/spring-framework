@@ -130,8 +130,7 @@ public interface Environment extends PropertyResolver {
 	 * @see #getDefaultProfiles
 	 * @see #matchesProfiles(String...)
 	 * @see #acceptsProfiles(Profiles)
-	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)} or
-	 * {@link #matchesProfiles(String...)}
+	 * @deprecated in favor of {@link #acceptsProfiles(Profiles)} or {@link #matchesProfiles(String...)}
 	 */
 	@Deprecated(since = "5.1")
 	boolean acceptsProfiles(String... profiles);

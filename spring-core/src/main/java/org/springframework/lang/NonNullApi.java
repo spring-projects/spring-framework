@@ -38,7 +38,7 @@ import javax.annotation.meta.TypeQualifierDefault;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
- * @deprecated since 7.0; use {@link org.jspecify.annotations.NullMarked} instead
+ * @deprecated use {@link org.jspecify.annotations.NullMarked} instead
  * @see NonNullFields
  * @see Nullable
  * @see NonNull

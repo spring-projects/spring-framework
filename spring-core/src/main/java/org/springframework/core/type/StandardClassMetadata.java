@@ -40,7 +40,7 @@ public class StandardClassMetadata implements ClassMetadata {
 	/**
 	 * Create a new StandardClassMetadata wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
-	 * @deprecated since 5.2 in favor of {@link StandardAnnotationMetadata}
+	 * @deprecated in favor of {@link StandardAnnotationMetadata}
 	 */
 	@Deprecated(since = "5.2")
 	public StandardClassMetadata(Class<?> introspectedClass) {

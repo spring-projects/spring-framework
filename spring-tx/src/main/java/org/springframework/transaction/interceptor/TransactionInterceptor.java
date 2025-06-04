@@ -83,7 +83,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @param tas the attribute source to be used to find transaction attributes
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributeSource
-	 * @deprecated as of 5.2.5, in favor of
+	 * @deprecated in favor of
 	 * {@link #TransactionInterceptor(TransactionManager, TransactionAttributeSource)}
 	 */
 	@Deprecated(since = "5.2.5")
@@ -98,7 +98,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @param attributes the transaction attributes in properties format
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributes(java.util.Properties)
-	 * @deprecated as of 5.2.5, in favor of {@link #setTransactionAttributes(Properties)}
+	 * @deprecated in favor of {@link #setTransactionAttributes(Properties)}
 	 */
 	@Deprecated(since = "5.2.5")
 	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {

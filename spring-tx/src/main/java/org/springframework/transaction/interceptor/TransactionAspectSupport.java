@@ -531,7 +531,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Determine the specific transaction manager to use for the given transaction.
-	 * @deprecated as of 6.2, in favor of {@link #determineTransactionManager(TransactionAttribute, Class)}
+	 * @deprecated in favor of {@link #determineTransactionManager(TransactionAttribute, Class)}
 	 */
 	@Deprecated(since = "6.2")
 	protected @Nullable TransactionManager determineTransactionManager(@Nullable TransactionAttribute txAttr) {

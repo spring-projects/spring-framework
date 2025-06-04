@@ -97,7 +97,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 
 	/**
 	 * How to decode a {@code DataBuffer} to the target element type.
-	 * @deprecated as of 5.2, please implement
+	 * @deprecated in favor of implementing
 	 * {@link #decode(DataBuffer, ResolvableType, MimeType, Map)} instead
 	 */
 	@Deprecated(since = "5.2")

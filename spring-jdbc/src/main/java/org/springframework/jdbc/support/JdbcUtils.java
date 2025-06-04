@@ -375,7 +375,7 @@ public abstract class JdbcUtils {
 	 * @throws MetaDataAccessException if we couldn't access the DatabaseMetaData
 	 * or failed to invoke the specified method
 	 * @see java.sql.DatabaseMetaData
-	 * @deprecated as of 5.2.9, in favor of
+	 * @deprecated in favor of
 	 * {@link #extractDatabaseMetaData(DataSource, DatabaseMetaDataCallback)}
 	 * with a lambda expression or method reference and a generically typed result
 	 */

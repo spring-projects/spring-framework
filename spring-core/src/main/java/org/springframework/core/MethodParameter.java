@@ -264,7 +264,7 @@ public class MethodParameter {
 	/**
 	 * Increase this parameter's nesting level.
 	 * @see #getNestingLevel()
-	 * @deprecated since 5.2 in favor of {@link #nested(Integer)}
+	 * @deprecated in favor of {@link #nested(Integer)}
 	 */
 	@Deprecated(since = "5.2")
 	public void increaseNestingLevel() {
@@ -274,7 +274,7 @@ public class MethodParameter {
 	/**
 	 * Decrease this parameter's nesting level.
 	 * @see #getNestingLevel()
-	 * @deprecated since 5.2 in favor of retaining the original MethodParameter and
+	 * @deprecated in favor of retaining the original MethodParameter and
 	 * using {@link #nested(Integer)} if nesting is required
 	 */
 	@Deprecated(since = "5.2")
@@ -307,7 +307,7 @@ public class MethodParameter {
 	 * @param typeIndex the corresponding type index
 	 * (or {@code null} for the default type index)
 	 * @see #getNestingLevel()
-	 * @deprecated since 5.2 in favor of {@link #withTypeIndex}
+	 * @deprecated in favor of {@link #withTypeIndex}
 	 */
 	@Deprecated(since = "5.2")
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
@@ -758,7 +758,7 @@ public class MethodParameter {
 	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 * @return the corresponding MethodParameter instance
-	 * @deprecated as of 5.0, in favor of {@link #forExecutable}
+	 * @deprecated in favor of {@link #forExecutable}
 	 */
 	@Deprecated(since = "5.0")
 	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {

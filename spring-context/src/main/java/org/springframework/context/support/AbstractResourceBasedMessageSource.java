@@ -156,7 +156,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return whether to fall back to the system Locale if no files for a specific
 	 * Locale have been found.
 	 * @since 4.3
-	 * @deprecated as of 5.2.2, in favor of {@link #getDefaultLocale()}
+	 * @deprecated in favor of {@link #getDefaultLocale()}
 	 */
 	@Deprecated(since = "5.2.2")
 	protected boolean isFallbackToSystemLocale() {

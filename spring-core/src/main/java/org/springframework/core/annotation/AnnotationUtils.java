@@ -263,7 +263,7 @@ public abstract class AnnotationUtils {
 	 * failed to resolve at runtime)
 	 * @since 4.0.8
 	 * @see AnnotatedElement#getAnnotations()
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static Annotation @Nullable [] getAnnotations(AnnotatedElement annotatedElement) {
@@ -287,7 +287,7 @@ public abstract class AnnotationUtils {
 	 * failed to resolve at runtime)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 * @see AnnotatedElement#getAnnotations()
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static Annotation @Nullable [] getAnnotations(Method method) {
@@ -326,7 +326,7 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
@@ -363,7 +363,7 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
@@ -407,7 +407,7 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
@@ -444,7 +444,7 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
@@ -595,7 +595,7 @@ public abstract class AnnotationUtils {
 	 * or {@code null} if not found
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static @Nullable Class<?> findAnnotationDeclaringClass(
@@ -631,7 +631,7 @@ public abstract class AnnotationUtils {
 	 * @since 3.2.2
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static @Nullable Class<?> findAnnotationDeclaringClassForTypes(
@@ -684,7 +684,7 @@ public abstract class AnnotationUtils {
 	 * is <em>present</em> and <em>inherited</em>
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static boolean isAnnotationInherited(Class<? extends Annotation> annotationType, Class<?> clazz) {
@@ -702,7 +702,7 @@ public abstract class AnnotationUtils {
 	 * @param metaAnnotationType the type of meta-annotation to search for
 	 * @return {@code true} if such an annotation is meta-present
 	 * @since 4.2.1
-	 * @deprecated as of 5.2 since it is superseded by the {@link MergedAnnotations} API
+	 * @deprecated since it is superseded by the {@link MergedAnnotations} API
 	 */
 	@Deprecated(since = "5.2")
 	public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,

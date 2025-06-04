@@ -23,7 +23,7 @@ package org.springframework.core.task;
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see AsyncTaskExecutor#execute(Runnable, long)
- * @deprecated as of 5.3.16 since the common executors do not support start timeouts
+ * @deprecated since the common executors do not support start timeouts
  */
 @Deprecated(since = "5.3.16")
 @SuppressWarnings("serial")

@@ -299,8 +299,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	/**
 	 * Return the current setting for the remove-on-cancel mode.
 	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
-	 * @deprecated as of 5.3.9, in favor of direct
-	 * {@link #getScheduledThreadPoolExecutor()} access
+	 * @deprecated in favor of direct {@link #getScheduledThreadPoolExecutor()} access
 	 */
 	@Deprecated(since = "5.3.9")
 	public boolean isRemoveOnCancelPolicy() {

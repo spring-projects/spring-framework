@@ -108,7 +108,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Shortcut to the
 	 * {@link org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 * same property} on the configured {@code UrlPathHelper}.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * @deprecated the path is resolved externally and obtained with
 	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
 	@Deprecated(since = "5.3")
@@ -119,7 +119,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Shortcut to the
 	 * {@link org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 * same property} on the configured {@code UrlPathHelper}.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * @deprecated the path is resolved externally and obtained with
 	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
 	@Deprecated(since = "5.3")
@@ -128,7 +128,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 	/**
 	 * Set the UrlPathHelper to use for resolution of lookup paths.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * @deprecated the path is resolved externally and obtained with
 	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
 	@Deprecated(since = "5.3")

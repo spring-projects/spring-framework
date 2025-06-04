@@ -46,14 +46,14 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 
 	/**
 	 * Constant that indicates immediate execution.
-	 * @deprecated as of 5.3.16 along with {@link #execute(Runnable, long)}
+	 * @deprecated along with {@link #execute(Runnable, long)}
 	 */
 	@Deprecated(since = "5.3.16")
 	long TIMEOUT_IMMEDIATE = 0;
 
 	/**
 	 * Constant that indicates no time limit.
-	 * @deprecated as of 5.3.16 along with {@link #execute(Runnable, long)}
+	 * @deprecated along with {@link #execute(Runnable, long)}
 	 */
 	@Deprecated(since = "5.3.16")
 	long TIMEOUT_INDEFINITE = Long.MAX_VALUE;
@@ -72,7 +72,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * of the timeout (i.e. it cannot be started in time)
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @see #execute(Runnable)
-	 * @deprecated as of 5.3.16 since the common executors do not support start timeouts
+	 * @deprecated since the common executors do not support start timeouts
 	 */
 	@Deprecated(since = "5.3.16")
 	default void execute(Runnable task, long startTimeout) {

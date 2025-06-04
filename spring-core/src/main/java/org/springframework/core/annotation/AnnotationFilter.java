@@ -75,9 +75,8 @@ public interface AnnotationFilter {
 	 * {@link AnnotationFilter} that never matches and can be used when no
 	 * filtering is needed (allowing for any annotation types to be present).
 	 * @see #PLAIN
-	 * @deprecated as of 5.2.6 since the {@link MergedAnnotations} model
-	 * always ignores lang annotations according to the {@link #PLAIN} filter
-	 * (for efficiency reasons)
+	 * @deprecated since the {@link MergedAnnotations} model always ignores lang
+	 * annotations according to the {@link #PLAIN} filter, for efficiency reasons
 	 */
 	@Deprecated(since = "5.2.6")
 	AnnotationFilter NONE = new AnnotationFilter() {

@@ -367,7 +367,7 @@ public interface JdbcOperations {
 	 * @param rse a callback that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
-	 * @deprecated as of 5.3, in favor of {@link #query(String, ResultSetExtractor, Object...)}
+	 * @deprecated in favor of {@link #query(String, ResultSetExtractor, Object...)}
 	 */
 	@Deprecated(since = "5.3")
 	<T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse) throws DataAccessException;
@@ -438,7 +438,7 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rch a callback that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
-	 * @deprecated as of 5.3, in favor of {@link #query(String, RowCallbackHandler, Object...)}
+	 * @deprecated in favor of {@link #query(String, RowCallbackHandler, Object...)}
 	 */
 	@Deprecated(since = "5.3")
 	void query(String sql, @Nullable Object @Nullable [] args, RowCallbackHandler rch) throws DataAccessException;
@@ -514,7 +514,7 @@ public interface JdbcOperations {
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
-	 * @deprecated as of 5.3, in favor of {@link #query(String, RowMapper, Object...)}
+	 * @deprecated in favor of {@link #query(String, RowMapper, Object...)}
 	 */
 	@Deprecated(since = "5.3")
 	<T> List<T> query(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException;
@@ -621,7 +621,7 @@ public interface JdbcOperations {
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
-	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, RowMapper, Object...)}
+	 * @deprecated in favor of {@link #queryForObject(String, RowMapper, Object...)}
 	 */
 	@Deprecated(since = "5.3")
 	<T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException;
@@ -685,7 +685,7 @@ public interface JdbcOperations {
 	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForObject(String, Class)
-	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, Class, Object...)}
+	 * @deprecated in favor of {@link #queryForObject(String, Class, Object...)}
 	 */
 	@Deprecated(since = "5.3")
 	<T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, Class<T> requiredType) throws DataAccessException;
@@ -789,7 +789,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
-	 * @deprecated as of 5.3, in favor of {@link #queryForList(String, Class, Object...)}
+	 * @deprecated in favor of {@link #queryForList(String, Class, Object...)}
 	 */
 	@Deprecated(since = "5.3")
 	<T> List<T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException;

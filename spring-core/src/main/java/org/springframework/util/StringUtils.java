@@ -105,8 +105,8 @@ public abstract class StringUtils {
 	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
 	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
-	 * @deprecated as of 5.3, in favor of {@link #hasLength(String)} and
-	 * {@link #hasText(String)} (or {@link ObjectUtils#isEmpty(Object)})
+	 * @deprecated in favor of {@link #hasLength(String)} and {@link #hasText(String)}
+	 * (or {@link ObjectUtils#isEmpty(Object)})
 	 */
 	@Deprecated(since = "5.3")
 	public static boolean isEmpty(@Nullable Object str) {
