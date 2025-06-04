@@ -694,34 +694,25 @@ class PathPatternTests {
 	}
 
 	@Test
-	void combine() {
+	void combineEmptyPatternsShouldReturnEmpty() {
 		TestPathCombiner pathMatcher = new TestPathCombiner();
 		assertThat(pathMatcher.combine("", "")).isEmpty();
+	}
+
+	@Test
+	void combineWithEmptyPatternShouldReturnPattern() {
+		TestPathCombiner pathMatcher = new TestPathCombiner();
 		assertThat(pathMatcher.combine("/hotels", "")).isEqualTo("/hotels");
 		assertThat(pathMatcher.combine("", "/hotels")).isEqualTo("/hotels");
-		assertThat(pathMatcher.combine("/hotels/*", "booking")).isEqualTo("/hotels/booking");
-		assertThat(pathMatcher.combine("/hotels/*", "/booking")).isEqualTo("/hotels/booking");
+	}
+
+	@Test
+	void combineStaticPatternsShouldConcatenate() {
+		TestPathCombiner pathMatcher = new TestPathCombiner();
 		assertThat(pathMatcher.combine("/hotels", "/booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels", "booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels/", "booking")).isEqualTo("/hotels/booking");
-		assertThat(pathMatcher.combine("/hotels/*", "{hotel}")).isEqualTo("/hotels/{hotel}");
-		assertThat(pathMatcher.combine("/hotels", "{hotel}")).isEqualTo("/hotels/{hotel}");
-		assertThat(pathMatcher.combine("/hotels", "{hotel}.*")).isEqualTo("/hotels/{hotel}.*");
-		assertThat(pathMatcher.combine("/hotels/*/booking", "{booking}")).isEqualTo("/hotels/*/booking/{booking}");
-		assertThat(pathMatcher.combine("/*.html", "/hotel.html")).isEqualTo("/hotel.html");
-		assertThat(pathMatcher.combine("/*.html", "/hotel")).isEqualTo("/hotel.html");
-		assertThat(pathMatcher.combine("/*.html", "/hotel.*")).isEqualTo("/hotel.html");
-		// TODO this seems rather bogus, should we eagerly show an error?
-		assertThat(pathMatcher.combine("/a/b/c/*.html", "/d/e/f/hotel.*")).isEqualTo("/d/e/f/hotel.html");
-		assertThat(pathMatcher.combine("/**", "/*.html")).isEqualTo("/*.html");
-		assertThat(pathMatcher.combine("/*", "/*.html")).isEqualTo("/*.html");
-		assertThat(pathMatcher.combine("/*.*", "/*.html")).isEqualTo("/*.html");
-		// SPR-8858
-		assertThat(pathMatcher.combine("/{foo}", "/bar")).isEqualTo("/{foo}/bar");
-		// SPR-7970
-		assertThat(pathMatcher.combine("/user", "/user")).isEqualTo("/user/user");
 		// SPR-10062
-		assertThat(pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")).isEqualTo("/{foo:.*[^0-9].*}/edit/");
 		assertThat(pathMatcher.combine("/1.0", "/foo/test")).isEqualTo("/1.0/foo/test");
 		// SPR-10554
 		// SPR-12975
@@ -730,14 +721,56 @@ class PathPatternTests {
 		assertThat(pathMatcher.combine("/hotel/", "/booking")).isEqualTo("/hotel/booking");
 		assertThat(pathMatcher.combine("", "/hotel")).isEqualTo("/hotel");
 		assertThat(pathMatcher.combine("/hotel", "")).isEqualTo("/hotel");
-		// TODO Do we need special handling when patterns contain multiple dots?
+		// SPR-7970
+		assertThat(pathMatcher.combine("/user", "/user")).isEqualTo("/user/user");
 	}
 
 	@Test
-	void combineWithTwoFileExtensionPatterns() {
+	void combineStaticWithMatchingShouldConcatenate() {
 		TestPathCombiner pathMatcher = new TestPathCombiner();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				pathMatcher.combine("/*.html", "/*.txt"));
+		assertThat(pathMatcher.combine("/hotels", "*")).isEqualTo("/hotels/*");
+		assertThat(pathMatcher.combine("/hotels", "{hotel}")).isEqualTo("/hotels/{hotel}");
+		assertThat(pathMatcher.combine("/hotels", "{hotel}.*")).isEqualTo("/hotels/{hotel}.*");
+	}
+
+	@Test
+	void combineMatchingWithStaticShouldMergeWhenWildcardMatch() {
+		TestPathCombiner pathMatcher = new TestPathCombiner();
+		assertThat(pathMatcher.combine("/hotels/*", "booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels/*", "/booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels/**", "/booking/rooms")).isEqualTo("/hotels/booking/rooms");
+		assertThat(pathMatcher.combine("/*.html", "/hotel.html")).isEqualTo("/hotel.html");
+		assertThat(pathMatcher.combine("/*.html", "/hotel")).isEqualTo("/hotel.html");
+		// gh-34986
+		assertThat(pathMatcher.combine("/*", "/foo/bar")).isEqualTo("/foo/bar");
+		assertThat(pathMatcher.combine("/*", "foo/bar")).isEqualTo("/foo/bar");
+	}
+
+	@Test
+	void combineMatchingWithStaticShouldConcatenateWhenNoWildcardMatch() {
+		TestPathCombiner pathMatcher = new TestPathCombiner();
+		// SPR-10062
+		assertThat(pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")).isEqualTo("/{foo:.*[^0-9].*}/edit/");
+		// SPR-8858
+		assertThat(pathMatcher.combine("/{foo}", "/bar")).isEqualTo("/{foo}/bar");
+	}
+
+	@Test
+	void combineMatchingPatternsShouldMergeWhenMatch() {
+		TestPathCombiner pathMatcher = new TestPathCombiner();
+		assertThat(pathMatcher.combine("/hotels/*/booking", "{booking}")).isEqualTo("/hotels/*/booking/{booking}");
+		assertThat(pathMatcher.combine("/hotels/*", "{hotel}")).isEqualTo("/hotels/{hotel}");
+		assertThat(pathMatcher.combine("/*.html", "/hotel.*")).isEqualTo("/hotel.html");
+		assertThat(pathMatcher.combine("/**", "/*.html")).isEqualTo("/*.html");
+		assertThat(pathMatcher.combine("/*", "/*.html")).isEqualTo("/*.html");
+		assertThat(pathMatcher.combine("/*.*", "/*.html")).isEqualTo("/*.html");
+	}
+
+	@Test
+	void combineMatchingPatternsShouldFailWhenNoMatch() {
+		TestPathCombiner pathMatcher = new TestPathCombiner();
+		pathMatcher.combineFails("/*.html", "/*.txt");
+		pathMatcher.combineFails("/a/b/c/*.html", "/d/e/f/hotel.*");
 	}
 
 	@Test
@@ -1051,6 +1084,12 @@ class PathPatternTests {
 			PathPattern pattern1 = pp.parse(string1);
 			PathPattern pattern2 = pp.parse(string2);
 			return pattern1.combine(pattern2).getPatternString();
+		}
+
+		public void combineFails(String string1, String string2) {
+			PathPattern pattern1 = pp.parse(string1);
+			PathPattern pattern2 = pp.parse(string2);
+			assertThatIllegalArgumentException().isThrownBy(() -> pattern1.combine(pattern2));
 		}
 
 	}
