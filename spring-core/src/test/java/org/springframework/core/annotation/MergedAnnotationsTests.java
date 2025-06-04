@@ -984,7 +984,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getDirectFromClassGetDirectFromClassMetaMetaAnnotatedClass() {
+	void getDirectFromClassWithMetaMetaAnnotatedClass() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				MetaMetaAnnotatedClass.class, SearchStrategy.TYPE_HIERARCHY).get(Component.class);
 		assertThat(annotation.getString("value")).isEqualTo("meta2");
