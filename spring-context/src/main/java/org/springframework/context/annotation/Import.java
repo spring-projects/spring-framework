@@ -47,6 +47,12 @@ import org.springframework.beans.factory.BeanRegistrar;
  * directly declared imports to override beans registered via {@code @Import}
  * meta-annotations.
  *
+ * <p>As of Spring Framework 7.0, {@code @Import} annotations declared on interfaces
+ * implemented by {@code @Configuration} classes are also supported. Locally declared
+ * {@code @Import} annotations are processed after {@code @Import} annotations on
+ * interfaces, which allows local imports to override beans registered via
+ * {@code @Import} annotations inherited from interfaces.
+ *
  * <p>If XML or other non-{@code @Configuration} bean definition resources need to be
  * imported, use the {@link ImportResource @ImportResource} annotation instead.
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Daeho Kwon
  */
 class ImportTests {
 
@@ -389,6 +390,62 @@ class ImportTests {
 		assertThat(ctx.getBean("b-imports-a")).isEqualTo("valueFromBR");
 		assertThat(ctx.getBeansOfType(SiblingImportingConfigA.class)).hasSize(1);
 		assertThat(ctx.getBeansOfType(SiblingImportingConfigB.class)).hasSize(1);
+	}
+
+	@Test  // gh-34820
+	void importAnnotationOnImplementedInterfaceIsRespected() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(InterfaceBasedConfig.class);
+
+		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
+		assertThat(context.getBean(ImportedBean.class)).hasFieldOrPropertyWithValue("name", "imported");
+
+		context.close();
+	}
+
+	@Test  // gh-34820
+	void localImportShouldOverrideInterfaceImport() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(OverridingConfig.class);
+
+		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
+		assertThat(context.getBean(OverridingImportedConfig.class)).isNotNull();
+		assertThat(context.getBean(ImportedBean.class)).hasFieldOrPropertyWithValue("name", "from class");
+
+		context.close();
+	}
+
+
+	record ImportedBean(String name) {
+	}
+
+	@Configuration
+	static class ImportedConfig {
+
+		@Bean
+		ImportedBean importedBean() {
+			return new ImportedBean("imported");
+		}
+	}
+
+	@Configuration
+	static class OverridingImportedConfig {
+
+		@Bean
+		ImportedBean importedBean() {
+			return new ImportedBean("from class");
+		}
+	}
+
+	@Import(ImportedConfig.class)
+	interface ConfigImportMarker {
+	}
+
+	@Configuration
+	static class InterfaceBasedConfig implements ConfigImportMarker {
+	}
+
+	@Configuration
+	@Import(OverridingImportedConfig.class)
+	static class OverridingConfig implements ConfigImportMarker {
 	}
 
 }

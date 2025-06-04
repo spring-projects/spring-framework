@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ import static org.mockito.Mockito.spy;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
- * @author Daeho Kwon
  */
 @SuppressWarnings("resource")
 public class ImportSelectorTests {
@@ -204,71 +203,6 @@ public class ImportSelectorTests {
 		assertThat(TestImportGroup.environment).isEqualTo(context.getEnvironment());
 	}
 
-	@Test
-	void importAnnotationOnImplementedInterfaceIsRespected() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				InterfaceBasedConfig.class);
-
-		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
-		assertThat(context.getBean(ImportedBean.class)).isNotNull();
-		assertThat(context.getBean(ImportedBean.class).name()).isEqualTo("imported");
-	}
-
-	@Test
-	void localImportShouldOverrideInterfaceImport() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				OverridingConfig.class);
-
-		assertThat(context.getBean(ImportedConfig.class)).isNotNull();
-		assertThat(context.getBean(ImportedBean.class)).isNotNull();
-		assertThat(context.getBean(ImportedBean.class).name()).isEqualTo("from class");
-	}
-
-	@Import(ImportedConfig.class)
-	interface ConfigImportMarker {
-	}
-
-	@Configuration
-	static class InterfaceBasedConfig implements ConfigImportMarker {
-	}
-
-	@Configuration
-	@Import(OverridingImportedConfig.class)
-	static class OverridingConfig implements ConfigImportMarker {
-	}
-
-	@Configuration
-	static class OverridingImportedConfig {
-		@Bean
-		ImportedBean importedBean() {
-			return new ImportedBean("from class");
-		}
-	}
-
-	static class ImportedBean {
-
-		private final String name;
-
-		ImportedBean() {
-			this.name = "imported";
-		}
-
-		ImportedBean(String name) {
-			this.name = name;
-		}
-
-		String name() {
-			return name;
-		}
-	}
-
-	@Configuration
-	static class ImportedConfig {
-		@Bean
-		ImportedBean importedBean() {
-			return new ImportedBean();
-		}
-	}
 
 	@Configuration
 	@Import(SampleImportSelector.class)
