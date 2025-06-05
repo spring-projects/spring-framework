@@ -9,8 +9,8 @@ javaPlatform {
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.18.4"))
 	api(platform("io.micrometer:micrometer-bom:1.15.0"))
-	api(platform("io.netty:netty-bom:4.1.121.Final"))
-	api(platform("io.projectreactor:reactor-bom:2025.0.0-M3"))
+	api(platform("io.netty:netty-bom:4.2.2.Final"))
+	api(platform("io.projectreactor:reactor-bom:2025.0.0-SNAPSHOT"))
 	api(platform("io.rsocket:rsocket-bom:1.1.5"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.26"))
 	api(platform("org.apache.logging.log4j:log4j-bom:3.0.0-beta3"))
