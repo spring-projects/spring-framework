@@ -70,6 +70,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 	public void canDecode() {
 		assertThat(this.decoder.canDecode(forClass(Msg.class), null)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_PROTOBUF)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf"))).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
 		assertThat(this.decoder.canDecode(forClass(Object.class), MediaType.APPLICATION_PROTOBUF)).isFalse();

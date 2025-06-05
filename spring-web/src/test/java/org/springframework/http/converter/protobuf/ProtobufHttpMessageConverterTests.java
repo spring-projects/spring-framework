@@ -45,10 +45,10 @@ class ProtobufHttpMessageConverterTests {
 
 	private ProtobufHttpMessageConverter converter = new ProtobufHttpMessageConverter();
 
-	private ExtensionRegistry extensionRegistry = mock();
+	private final ExtensionRegistry extensionRegistry = mock();
 
-	private Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
-	private MediaType testPlusProtoMediaType = MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf");
+	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
+	private final MediaType testPlusProtoMediaType = MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf");
 
 
 	@Test

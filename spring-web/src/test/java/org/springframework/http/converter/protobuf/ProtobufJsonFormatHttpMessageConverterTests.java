@@ -42,7 +42,7 @@ class ProtobufJsonFormatHttpMessageConverterTests {
 			JsonFormat.parser(), JsonFormat.printer());
 
 	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
-	private MediaType testPlusProtoMediaType = MediaType.parseMediaType("application/vnd.examle.public.v1+x-protobuf");
+	private final MediaType testPlusProtoMediaType = MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf");
 
 
 	@Test
