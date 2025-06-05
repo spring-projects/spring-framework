@@ -80,6 +80,8 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinRequestBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -204,9 +206,11 @@ class WebMvcConfigurationSupportTests {
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 		@SuppressWarnings("unchecked")
 		List<Object> bodyAdvice = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
-		assertThat(bodyAdvice).hasSize(2);
+		assertThat(bodyAdvice).hasSize(4);
 		assertThat(bodyAdvice.get(0).getClass()).isEqualTo(JsonViewRequestBodyAdvice.class);
-		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(KotlinRequestBodyAdvice.class);
+		assertThat(bodyAdvice.get(2).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(bodyAdvice.get(3).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
 	}
 
 	@Test
@@ -238,8 +242,9 @@ class WebMvcConfigurationSupportTests {
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(eher);
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
-		assertThat(interceptors).hasSize(1);
+		assertThat(interceptors).hasSize(2);
 		assertThat(interceptors.get(0).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(interceptors.get(1).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
 
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
 		try {

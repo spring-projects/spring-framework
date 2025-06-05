@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -106,8 +105,12 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinRequestBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
@@ -225,6 +228,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationPresent;
+
 	private static final boolean kotlinSerializationCborPresent;
 
 	private static final boolean kotlinSerializationJsonPresent;
@@ -248,9 +253,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		jackson2YamlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
-		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
-		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+		kotlinSerializationPresent = ClassUtils.isPresent("kotlinx.serialization.Serializable", classLoader);
+		kotlinSerializationCborPresent = kotlinSerializationPresent && ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
+		kotlinSerializationJsonPresent = kotlinSerializationPresent && ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		kotlinSerializationProtobufPresent = kotlinSerializationPresent && ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -699,9 +705,19 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 		adapter.setErrorResponseInterceptors(getErrorResponseInterceptors());
 
-		if (jacksonPresent || jackson2Present) {
-			adapter.setRequestBodyAdvice(Collections.singletonList(new JsonViewRequestBodyAdvice()));
-			adapter.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
+		if (jacksonPresent || jackson2Present || kotlinSerializationPresent) {
+			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<>(2);
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
+			if (jacksonPresent || jackson2Present) {
+				requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
+				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
+			}
+			if (kotlinSerializationPresent) {
+				requestBodyAdvices.add(new KotlinRequestBodyAdvice());
+				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
+			}
+			adapter.setRequestBodyAdvice(requestBodyAdvices);
+			adapter.setResponseBodyAdvice(responseBodyAdvices);
 		}
 
 		AsyncSupportConfigurer configurer = getAsyncSupportConfigurer();
@@ -1122,9 +1138,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		exceptionHandlerResolver.setErrorResponseInterceptors(getErrorResponseInterceptors());
-		if (jacksonPresent || jackson2Present) {
-			exceptionHandlerResolver.setResponseBodyAdvice(
-					Collections.singletonList(new JsonViewResponseBodyAdvice()));
+		if (jacksonPresent || jackson2Present || kotlinSerializationPresent) {
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
+			if (jacksonPresent || jackson2Present) {
+				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
+			}
+			if (kotlinSerializationPresent) {
+				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
+			}
+			exceptionHandlerResolver.setResponseBodyAdvice(responseBodyAdvices);
 		}
 		if (this.applicationContext != null) {
 			exceptionHandlerResolver.setApplicationContext(this.applicationContext);

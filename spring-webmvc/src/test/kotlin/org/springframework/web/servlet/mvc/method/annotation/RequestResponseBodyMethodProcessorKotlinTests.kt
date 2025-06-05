@@ -34,6 +34,7 @@ import org.springframework.web.method.support.ModelAndViewContainer
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse
 import java.nio.charset.StandardCharsets
+import kotlin.collections.mapOf
 import kotlin.reflect.jvm.javaMethod
 
 /**
@@ -85,6 +86,22 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 	}
 
 	@Test
+	fun writeNullableMapWithKotlinSerializationJsonMessageConverter() {
+		val method = SampleController::writeNullableMap::javaMethod.get()!!
+		val handlerMethod = HandlerMethod(SampleController(), method)
+		val methodReturnType = handlerMethod.returnType
+
+		val converters = listOf(KotlinSerializationJsonHttpMessageConverter())
+		val processor = RequestResponseBodyMethodProcessor(converters, null, listOf(KotlinResponseBodyAdvice()))
+
+		val returnValue: Any = SampleController().writeNullableMap()
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request)
+
+		Assertions.assertThat(this.servletResponse.contentAsString)
+			.isEqualTo("""{"value":null}""")
+	}
+
+	@Test
 	fun readWithKotlinSerializationJsonMessageConverter() {
 		val content = "{\"value\" : \"foo\"}"
 		this.servletRequest.setContent(content.toByteArray(StandardCharsets.UTF_8))
@@ -119,6 +136,24 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 		Assertions.assertThat(result).containsExactly(Message("foo"), Message("bar"))
 	}
 
+	@Suppress("UNCHECKED_CAST")
+	@Test
+	fun readNullableMapWithKotlinSerializationJsonMessageConverter() {
+		val content = "{\"value\" : null}"
+		this.servletRequest.setContent(content.toByteArray(StandardCharsets.UTF_8))
+		this.servletRequest.setContentType("application/json")
+
+		val converters = listOf(StringHttpMessageConverter(), KotlinSerializationJsonHttpMessageConverter())
+		val processor = RequestResponseBodyMethodProcessor(converters, null, listOf(KotlinRequestBodyAdvice()))
+
+		val method = SampleController::readNullableMap::javaMethod.get()!!
+		val methodParameter = MethodParameter(method, 0)
+
+		val result = processor.resolveArgument(methodParameter, container, request, factory) as Map<String, String ?>
+
+		Assertions.assertThat(result).isEqualTo(mapOf("value" to null))
+	}
+
 
 	private class SampleController {
 
@@ -135,7 +170,20 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 		fun readMessage(message: Message) = message.value
 
 		@RequestMapping
-		@ResponseBody fun readMessages(messages: List<Message>) = messages.map { it.value }.reduce { acc, string -> "$acc $string" }
+		@ResponseBody
+		fun readMessages(messages: List<Message>) = messages.map { it.value }.reduce { acc, string -> "$acc $string" }
+
+		@RequestMapping
+		@ResponseBody
+		fun writeNullableMap(): Map<String, String?> {
+			return mapOf("value" to null)
+		}
+
+		@RequestMapping
+		@ResponseBody
+		fun readNullableMap(map: Map<String, String?>): String {
+			return map.toString()
+		}
 
 	}
 
