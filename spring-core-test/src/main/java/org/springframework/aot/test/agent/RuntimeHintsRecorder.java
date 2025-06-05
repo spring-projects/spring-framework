@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @deprecated as of 7.0 in favor of the {@code -XX:MissingRegistrationReportingMode=Warn} and
  * {@code -XX:MissingRegistrationReportingMode=Exit} JVM flags with GraalVM.
  */
-@Deprecated(forRemoval = true)
+@Deprecated(since = "7.0", forRemoval = true)
 @SuppressWarnings("removal")
 public final class RuntimeHintsRecorder {
 

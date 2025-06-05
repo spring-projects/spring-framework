@@ -616,14 +616,14 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		@Deprecated
+		@Deprecated(since = "4.0") // deprecated by AspectJ
 		public boolean couldMatchJoinPointsInType(Class someClass) {
 			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		@Deprecated
+		@Deprecated(since = "4.0") // deprecated by AspectJ
 		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
 			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}

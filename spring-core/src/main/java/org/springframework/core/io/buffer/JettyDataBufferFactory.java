@@ -65,7 +65,7 @@ public class JettyDataBufferFactory implements DataBufferFactory {
 
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public JettyDataBuffer allocateBuffer() {
 		DefaultDataBuffer delegate = this.delegate.allocateBuffer();
 		return new JettyDataBuffer(this, delegate);

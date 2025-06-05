@@ -138,7 +138,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DataBuffer capacity(int capacity) {
 		this.delegate.capacity(capacity);
 		return this;
@@ -225,7 +225,7 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DataBuffer slice(int index, int length) {
 		DefaultDataBuffer delegateSlice = this.delegate.slice(index, length);
 		if (this.chunk != null) {
@@ -250,19 +250,19 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer() {
 		return this.delegate.asByteBuffer();
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer(int index, int length) {
 		return this.delegate.asByteBuffer(index, length);
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0.5")
 	public ByteBuffer toByteBuffer(int index, int length) {
 		return this.delegate.toByteBuffer(index, length);
 	}

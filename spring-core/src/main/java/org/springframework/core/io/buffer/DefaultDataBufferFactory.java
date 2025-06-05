@@ -85,7 +85,7 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DefaultDataBuffer allocateBuffer() {
 		return allocateBuffer(this.defaultInitialCapacity);
 	}
