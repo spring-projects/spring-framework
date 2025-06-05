@@ -19,7 +19,7 @@ package org.springframework.core.retry;
 import java.io.Serial;
 
 /**
- * Exception class for exhausted retries.
+ * Exception thrown when a {@link RetryPolicy} has been exhausted.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
@@ -30,18 +30,19 @@ public class RetryException extends Exception {
 	@Serial
 	private static final long serialVersionUID = 5439915454935047936L;
 
+
 	/**
-	 * Create a new exception with a message.
-	 * @param message the exception's message
+	 * Create a new {@code RetryException} for the supplied message.
+	 * @param message the detail message
 	 */
 	public RetryException(String message) {
 		super(message);
 	}
 
 	/**
-	 * Create a new exception with a message and a cause.
-	 * @param message the exception's message
-	 * @param cause the exception's cause
+	 * Create a new {@code RetryException} for the supplied message and cause.
+	 * @param message the detail message
+	 * @param cause the root cause
 	 */
 	public RetryException(String message, Throwable cause) {
 		super(message, cause);

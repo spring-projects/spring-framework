@@ -22,7 +22,7 @@ import org.springframework.core.retry.RetryExecution;
 import org.springframework.core.retry.RetryPolicy;
 
 /**
- * A {@link RetryPolicy} based on a predicate.
+ * A {@link RetryPolicy} based on a {@link Predicate}.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
@@ -31,18 +31,18 @@ public class PredicateRetryPolicy implements RetryPolicy {
 
 	private final Predicate<Throwable> predicate;
 
+
 	/**
-	 * Create a new {@link PredicateRetryPolicy} with the given predicate.
-	 * @param predicate the predicate to use for determining whether to retry the exception or not
+	 * Create a new {@code PredicateRetryPolicy} with the given predicate.
+	 * @param predicate the predicate to use for determining whether to retry an
+	 * operation based on a given {@link Throwable}
 	 */
 	public PredicateRetryPolicy(Predicate<Throwable> predicate) {
 		this.predicate = predicate;
 	}
 
-	/**
-	 * Start a new retry execution.
-	 * @return a fresh {@link RetryExecution} ready to be used
-	 */
+
+	@Override
 	public RetryExecution start() {
 		return this.predicate::test;
 	}

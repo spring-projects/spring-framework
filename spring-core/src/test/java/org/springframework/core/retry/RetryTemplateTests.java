@@ -16,27 +16,31 @@
 
 package org.springframework.core.retry;
 
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.retry.support.MaxRetryAttemptsPolicy;
 import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link RetryTemplate}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
+ * @since 7.0
  */
 class RetryTemplateTests {
 
+	private final RetryTemplate retryTemplate = new RetryTemplate();
+
 	@Test
-	void testRetryWithSuccess() throws Exception {
-		// given
+	void retryWithSuccess() throws Exception {
 		RetryCallback<String> retryCallback = new RetryCallback<>() {
+
 			int failure;
+
 			@Override
 			public String run() throws Exception {
 				if (failure++ < 2) {
@@ -50,21 +54,16 @@ class RetryTemplateTests {
 				return "greeting service";
 			}
 		};
-		RetryTemplate retryTemplate = new RetryTemplate();
-		retryTemplate.setRetryPolicy(new MaxRetryAttemptsPolicy());
-		retryTemplate.setBackOffPolicy(new FixedBackOff());
 
-		// when
-		String result = retryTemplate.execute(retryCallback);
+		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
 
-		// then
-		assertThat(result).isEqualTo("hello world");
+		assertThat(retryTemplate.execute(retryCallback)).isEqualTo("hello world");
 	}
 
 	@Test
-	void testRetryWithFailure() {
-		// given
+	void retryWithFailure() {
 		Exception exception = new Exception("Error while invoking greeting service");
+
 		RetryCallback<String> retryCallback = new RetryCallback<>() {
 			@Override
 			public String run() throws Exception {
@@ -76,31 +75,27 @@ class RetryTemplateTests {
 				return "greeting service";
 			}
 		};
-		RetryTemplate retryTemplate = new RetryTemplate();
-		retryTemplate.setRetryPolicy(new MaxRetryAttemptsPolicy());
-		retryTemplate.setBackOffPolicy(new FixedBackOff());
 
-		// when
-		ThrowingCallable throwingCallable = () -> retryTemplate.execute(retryCallback);
+		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
 
-		// then
-		assertThatThrownBy(throwingCallable)
-				.isInstanceOf(RetryException.class)
-				.hasMessage("Retry policy for callback 'greeting service' exhausted, aborting execution")
-				.hasCause(exception);
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryCallback))
+				.withMessage("Retry policy for callback 'greeting service' exhausted; aborting execution")
+				.withCause(exception);
 	}
 
 	@Test
-	void testRetrySpecificException() {
-		// given
+	void retrySpecificException() {
+
+		@SuppressWarnings("serial")
 		class TechnicalException extends Exception {
-			@java.io.Serial
-			private static final long serialVersionUID = 1L;
 			public TechnicalException(String message) {
 				super(message);
 			}
 		}
-		final TechnicalException technicalException = new TechnicalException("Error while invoking greeting service");
+
+		TechnicalException technicalException = new TechnicalException("Error while invoking greeting service");
+
 		RetryCallback<String> retryCallback = new RetryCallback<>() {
 			@Override
 			public String run() throws TechnicalException {
@@ -112,11 +107,14 @@ class RetryTemplateTests {
 				return "greeting service";
 			}
 		};
+
 		MaxRetryAttemptsPolicy retryPolicy = new MaxRetryAttemptsPolicy() {
 			@Override
 			public RetryExecution start() {
 				return new RetryExecution() {
+
 					int retryAttempts;
+
 					@Override
 					public boolean shouldRetry(Throwable throwable) {
 						return this.retryAttempts++ < 3 && throwable instanceof TechnicalException;
@@ -124,18 +122,13 @@ class RetryTemplateTests {
 				};
 			}
 		};
-		RetryTemplate retryTemplate = new RetryTemplate();
 		retryTemplate.setRetryPolicy(retryPolicy);
-		retryTemplate.setBackOffPolicy(new FixedBackOff());
+		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
 
-		// when
-		ThrowingCallable throwingCallable = () -> retryTemplate.execute(retryCallback);
-
-		// then
-		assertThatThrownBy(throwingCallable)
-				.isInstanceOf(RetryException.class)
-				.hasMessage("Retry policy for callback 'greeting service' exhausted, aborting execution")
-				.hasCause(technicalException);
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryCallback))
+				.withMessage("Retry policy for callback 'greeting service' exhausted; aborting execution")
+				.withCause(technicalException);
 	}
 
 }

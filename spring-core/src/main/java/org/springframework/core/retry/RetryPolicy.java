@@ -25,8 +25,8 @@ package org.springframework.core.retry;
 public interface RetryPolicy {
 
 	/**
-	 * Start a new retry execution.
-	 * @return a fresh {@link RetryExecution} ready to be used
+	 * Start a new execution for this retry policy.
+	 * @return a new {@link RetryExecution}
 	 */
 	RetryExecution start();
 

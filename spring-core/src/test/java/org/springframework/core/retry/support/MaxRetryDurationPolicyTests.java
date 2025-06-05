@@ -20,7 +20,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link MaxRetryDurationPolicy}.
@@ -30,8 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class MaxRetryDurationPolicyTests {
 
 	@Test
-	void testInvalidMaxRetryDuration() {
-		assertThatThrownBy(() -> new MaxRetryDurationPolicy(Duration.ZERO))
-				.hasMessage("Max retry duration must be positive");
+	void invalidMaxRetryDuration() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new MaxRetryDurationPolicy(Duration.ZERO))
+				.withMessage("Max retry duration must be positive");
 	}
+
 }

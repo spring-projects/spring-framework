@@ -17,7 +17,8 @@
 package org.springframework.core.retry;
 
 /**
- * Strategy interface to define a retry execution.
+ * Strategy interface to define a retry execution created for a given
+ * {@link RetryPolicy}.
  *
  * <p>Implementations may be stateful but do not need to be thread-safe.
  *

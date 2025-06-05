@@ -76,4 +76,5 @@ class ComposedRetryListenerTests {
 		verify(this.listener1).onRetryPolicyExhaustion(retryExecution, exception);
 		verify(this.listener2).onRetryPolicyExhaustion(retryExecution, exception);
 	}
+
 }

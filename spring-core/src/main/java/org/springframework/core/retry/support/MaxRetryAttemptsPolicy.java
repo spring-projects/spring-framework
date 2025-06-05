@@ -21,7 +21,8 @@ import org.springframework.core.retry.RetryPolicy;
 import org.springframework.util.Assert;
 
 /**
- * A {@link RetryPolicy} based on a number of attempts that should not exceed a maximum number.
+ * A {@link RetryPolicy} based on a number of attempts that should not exceed a
+ * configured maximum number.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
@@ -29,30 +30,32 @@ import org.springframework.util.Assert;
 public class MaxRetryAttemptsPolicy implements RetryPolicy {
 
 	/**
-	 * The default maximum number of retry attempts.
+	 * The default maximum number of retry attempts: {@value}.
 	 */
 	public static final int DEFAULT_MAX_RETRY_ATTEMPTS = 3;
 
+
 	private int maxRetryAttempts = DEFAULT_MAX_RETRY_ATTEMPTS;
 
+
 	/**
-	 * Create a new {@link MaxRetryAttemptsPolicy} with the default maximum number of retry attempts.
+	 * Create a new {@code MaxRetryAttemptsPolicy} with the default maximum number
+	 * of retry attempts.
+	 * @see #DEFAULT_MAX_RETRY_ATTEMPTS
 	 */
 	public MaxRetryAttemptsPolicy() {
 	}
 
 	/**
-	 * Create a new {@link MaxRetryAttemptsPolicy} with the specified maximum number of retry attempts.
-	 * @param maxRetryAttempts the maximum number of retry attempts. Must be greater than zero.
+	 * Create a new {@code MaxRetryAttemptsPolicy} with the specified maximum number
+	 * of retry attempts.
+	 * @param maxRetryAttempts the maximum number of retry attempts; must be greater
+	 * than zero
 	 */
 	public MaxRetryAttemptsPolicy(int maxRetryAttempts) {
 		setMaxRetryAttempts(maxRetryAttempts);
 	}
 
-	/**
-	 * Start a new retry execution.
-	 * @return a fresh {@link MaxRetryAttemptsPolicyExecution} ready to be used
-	 */
 	@Override
 	public RetryExecution start() {
 		return new MaxRetryAttemptsPolicyExecution();
@@ -60,12 +63,14 @@ public class MaxRetryAttemptsPolicy implements RetryPolicy {
 
 	/**
 	 * Set the maximum number of retry attempts.
-	 * @param maxRetryAttempts the maximum number of retry attempts. Must be greater than zero.
+	 * @param maxRetryAttempts the maximum number of retry attempts; must be greater
+	 * than zero
 	 */
 	public void setMaxRetryAttempts(int maxRetryAttempts) {
 		Assert.isTrue(maxRetryAttempts > 0, "Max retry attempts must be greater than zero");
 		this.maxRetryAttempts = maxRetryAttempts;
 	}
+
 
 	/**
 	 * A {@link RetryExecution} based on a maximum number of retry attempts.
@@ -76,9 +81,8 @@ public class MaxRetryAttemptsPolicy implements RetryPolicy {
 
 		@Override
 		public boolean shouldRetry(Throwable throwable) {
-			return this.retryAttempts++ < MaxRetryAttemptsPolicy.this.maxRetryAttempts;
+			return (this.retryAttempts++ < MaxRetryAttemptsPolicy.this.maxRetryAttempts);
 		}
-
 	}
 
 }

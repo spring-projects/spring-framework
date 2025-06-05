@@ -24,7 +24,7 @@ import org.springframework.core.retry.RetryPolicy;
 import org.springframework.util.Assert;
 
 /**
- * A {@link RetryPolicy} based on a timeout.
+ * A {@link RetryPolicy} based on a maximum retry duration.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
@@ -32,30 +32,31 @@ import org.springframework.util.Assert;
 public class MaxRetryDurationPolicy implements RetryPolicy {
 
 	/**
-	 * The default maximum retry duration.
+	 * The default maximum retry duration: 3 seconds.
 	 */
 	public static final Duration DEFAULT_MAX_RETRY_DURATION = Duration.ofSeconds(3);
 
+
 	private Duration maxRetryDuration = DEFAULT_MAX_RETRY_DURATION;
 
+
 	/**
-	 * Create a new {@link MaxRetryDurationPolicy} with the default maximum retry duration.
+	 * Create a new {@code MaxRetryDurationPolicy} with the default maximum retry
+	 * duration.
+	 * @see #DEFAULT_MAX_RETRY_DURATION
 	 */
 	public MaxRetryDurationPolicy() {
 	}
 
 	/**
-	 * Create a new {@link MaxRetryDurationPolicy} with the specified maximum retry duration.
-	 * @param maxRetryDuration the maximum retry duration. Must be positive.
+	 * Create a new {@code MaxRetryDurationPolicy} with the specified maximum retry
+	 * duration.
+	 * @param maxRetryDuration the maximum retry duration; must be positive
 	 */
 	public MaxRetryDurationPolicy(Duration maxRetryDuration) {
 		setMaxRetryDuration(maxRetryDuration);
 	}
 
-	/**
-	 * Start a new retry execution.
-	 * @return a fresh {@link MaxRetryDurationPolicyExecution} ready to be used
-	 */
 	@Override
 	public RetryExecution start() {
 		return new MaxRetryDurationPolicyExecution();
@@ -63,7 +64,7 @@ public class MaxRetryDurationPolicy implements RetryPolicy {
 
 	/**
 	 * Set the maximum retry duration.
-	 * @param maxRetryDuration the maximum retry duration. Must be positive.
+	 * @param maxRetryDuration the maximum retry duration; must be positive
 	 */
 	public void setMaxRetryDuration(Duration maxRetryDuration) {
 		Assert.isTrue(!maxRetryDuration.isNegative() && !maxRetryDuration.isZero(),
@@ -83,6 +84,6 @@ public class MaxRetryDurationPolicy implements RetryPolicy {
 			Duration currentRetryDuration = Duration.between(this.retryStartTime, LocalDateTime.now());
 			return currentRetryDuration.compareTo(MaxRetryDurationPolicy.this.maxRetryDuration) <= 0;
 		}
-
 	}
+
 }

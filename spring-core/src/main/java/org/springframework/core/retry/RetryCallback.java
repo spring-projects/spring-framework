@@ -17,7 +17,9 @@
 package org.springframework.core.retry;
 
 /**
- * Callback interface for a retryable piece of code. Used in conjunction with {@link RetryOperations}.
+ * Callback interface for a retryable block of code.
+ *
+ * <p>Used in conjunction with {@link RetryOperations}.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
@@ -35,11 +37,13 @@ public interface RetryCallback<R> {
 	R run() throws Throwable;
 
 	/**
-	 * A unique logical name for this callback to distinguish retries around
-	 * business operations.
-	 * @return the name of the callback. Defaults to the class name.
+	 * A unique, logical name for this callback, used to distinguish retries for
+	 * different business operations.
+	 * <p>Defaults to the fully-qualified class name.
+	 * @return the name of the callback
 	 */
 	default String getName() {
 		return getClass().getName();
 	}
+
 }

@@ -48,15 +48,15 @@ public interface RetryListener {
 	/**
 	 * Called every time a retry attempt fails.
 	 * @param retryExecution the retry execution
-	 * @param throwable the throwable thrown by the callback
+	 * @param throwable the exception thrown by the callback
 	 */
 	default void onRetryFailure(RetryExecution retryExecution, Throwable throwable) {
 	}
 
 	/**
-	 * Called once the retry policy is exhausted.
+	 * Called if the {@link RetryPolicy} is exhausted.
 	 * @param retryExecution the retry execution
-	 * @param throwable the last throwable thrown by the callback
+	 * @param throwable the last exception thrown by the {@link RetryCallback}
 	 */
 	default void onRetryPolicyExhaustion(RetryExecution retryExecution, Throwable throwable) {
 	}

@@ -32,13 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PredicateRetryPolicyTests {
 
 	@Test
-	void testPredicateRetryPolicy() {
+	void predicateRetryPolicy() {
 		// given
 		class MyException extends Exception {
 			@java.io.Serial
 			private static final long serialVersionUID = 1L;
 		}
-		Predicate<Throwable> predicate = throwable -> throwable instanceof MyException;
+		Predicate<Throwable> predicate = MyException.class::isInstance;
 		PredicateRetryPolicy retryPolicy = new PredicateRetryPolicy(predicate);
 
 		// when

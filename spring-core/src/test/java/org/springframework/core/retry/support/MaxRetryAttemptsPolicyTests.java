@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.retry.RetryExecution;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
 class MaxRetryAttemptsPolicyTests {
 
 	@Test
-	void testDefaultMaxRetryAttempts() {
+	void defaultMaxRetryAttempts() {
 		// given
 		MaxRetryAttemptsPolicy retryPolicy = new MaxRetryAttemptsPolicy();
 		Throwable throwable = mock();
@@ -48,8 +48,10 @@ class MaxRetryAttemptsPolicyTests {
 	}
 
 	@Test
-	void testInvalidMaxRetryAttempts() {
-		assertThatThrownBy(() -> new MaxRetryAttemptsPolicy(-1))
-				.hasMessage("Max retry attempts must be greater than zero");
+	void invalidMaxRetryAttempts() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new MaxRetryAttemptsPolicy(-1))
+				.withMessage("Max retry attempts must be greater than zero");
 	}
+
 }

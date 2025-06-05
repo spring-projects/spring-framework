@@ -19,7 +19,7 @@ package org.springframework.core.retry;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Main entry point to the core retry functionality. Defines a set of retryable operations.
+ * Interface specifying basic retry operations.
  *
  * <p>Implemented by {@link RetryTemplate}. Not often used directly, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
@@ -31,15 +31,16 @@ import org.jspecify.annotations.Nullable;
 public interface RetryOperations {
 
 	/**
-	 * Retry the given callback (according to the retry policy configured at the implementation level)
-	 * until it succeeds or eventually throw an exception if the retry policy is exhausted.
+	 * Execute the given callback (according to the {@link RetryPolicy} configured
+	 * at the implementation level) until it succeeds, or eventually throw an
+	 * exception if the {@code RetryPolicy} is exhausted.
 	 * @param retryCallback the callback to call initially and retry if needed
-	 * @param <R> the type of the callback's result
-	 * @return the callback's result
-	 * @throws RetryException thrown if the retry policy is exhausted. All attempt exceptions
-	 * should be added as suppressed exceptions to the final exception.
+	 * @param <R> the type of the result
+	 * @return the result of the callback, if any
+	 * @throws RetryException if the {@code RetryPolicy} is exhausted; exceptions
+	 * encountered during retry attempts should be made available as suppressed
+	 * exceptions
 	 */
 	<R extends @Nullable Object> R execute(RetryCallback<R> retryCallback) throws RetryException;
 
 }
-

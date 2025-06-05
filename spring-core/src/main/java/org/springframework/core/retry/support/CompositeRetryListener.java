@@ -25,8 +25,9 @@ import org.springframework.core.retry.RetryTemplate;
 import org.springframework.util.Assert;
 
 /**
- * A composite implementation of the {@link RetryListener} interface. This class
- * is used to compose multiple listeners within a {@link RetryTemplate}.
+ * A composite implementation of the {@link RetryListener} interface.
+ *
+ * <p>This class is used to compose multiple listeners within a {@link RetryTemplate}.
  *
  * <p>Delegate listeners will be called in their registration order.
  *
@@ -35,30 +36,30 @@ import org.springframework.util.Assert;
  */
 public class CompositeRetryListener implements RetryListener {
 
-	private final List<RetryListener> listeners;
+	private final List<RetryListener> listeners = new LinkedList<>();
+
 
 	/**
-	 * Create a new {@link CompositeRetryListener}.
+	 * Create a new {@code CompositeRetryListener}.
 	 */
 	public CompositeRetryListener() {
-		this.listeners = new LinkedList<>();
 	}
 
 	/**
-	 * Create a new {@link CompositeRetryListener} with a list of delegates.
-	 * @param listeners the delegate listeners to register. Must not be empty.
+	 * Create a new {@code CompositeRetryListener} with the supplied list of
+	 * delegates.
+	 * @param listeners the list of delegate listeners to register; must not be empty
 	 */
 	public CompositeRetryListener(List<RetryListener> listeners) {
 		Assert.notEmpty(listeners, "RetryListener List must not be empty");
-		this.listeners = List.copyOf(listeners);
+		this.listeners.addAll(listeners);
 	}
 
 	/**
 	 * Add a new listener to the list of delegates.
-	 * @param listener the listener to add. Must not be <code>null</code>.
+	 * @param listener the listener to add
 	 */
 	public void addListener(RetryListener listener) {
-		Assert.notNull(listener, "Retry listener must not be null");
 		this.listeners.add(listener);
 	}
 
