@@ -24,6 +24,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,6 +66,11 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 	@Override
 	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
+
+		if (parameter.getParameterType().equals(StreamingHttpOutputMessage.Body.class)) {
+			requestValues.setBodyValue(argument);
+			return true;
+		}
 
 		RequestBody annot = parameter.getParameterAnnotation(RequestBody.class);
 		if (annot == null) {

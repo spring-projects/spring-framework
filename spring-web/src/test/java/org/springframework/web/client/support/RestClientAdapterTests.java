@@ -17,11 +17,13 @@
 package org.springframework.web.client.support;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -41,8 +43,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -300,6 +304,25 @@ class RestClientAdapterTests {
 		assertThat(request.getHeader("Cookie")).isEqualTo("testCookie=test1; testCookie=test2");
 	}
 
+	@Test
+	void getInputStream() throws Exception {
+		InputStream inputStream = initService().getInputStream();
+
+		RecordedRequest request = this.anotherServer.takeRequest();
+		assertThat(request.getPath()).isEqualTo("/input-stream");
+		assertThat(StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8)).isEqualTo("Hello Spring 2!");
+	}
+
+	@Test
+	void postOutputStream() throws Exception {
+		String body = "test stream";
+		initService().postOutputStream(outputStream -> outputStream.write(body.getBytes()));
+
+		RecordedRequest request = this.anotherServer.takeRequest();
+		assertThat(request.getPath()).isEqualTo("/output-stream");
+		assertThat(request.getBody().readUtf8()).isEqualTo(body);
+	}
+
 
 	private static MockWebServer anotherServer() {
 		MockWebServer server = new MockWebServer();
@@ -307,6 +330,13 @@ class RestClientAdapterTests {
 		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!");
 		server.enqueue(response);
 		return server;
+	}
+
+	private Service initService() {
+		String url = this.anotherServer.url("/").toString();
+		RestClient restClient = RestClient.builder().baseUrl(url).build();
+		RestClientAdapter adapter = RestClientAdapter.create(restClient);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
 	}
 
 
@@ -352,6 +382,12 @@ class RestClientAdapterTests {
 		@PutExchange
 		void putWithSameNameCookies(
 				@CookieValue("testCookie") String firstCookie, @CookieValue("testCookie") String secondCookie);
+
+		@GetExchange(url = "/input-stream")
+		InputStream getInputStream();
+
+		@PostExchange(url = "/output-stream")
+		void postOutputStream(StreamingHttpOutputMessage.Body body);
 
 	}
 

@@ -999,6 +999,10 @@ Method parameters cannot be `null` unless the `required` attribute (where availa
 parameter annotation) is set to `false`, or the parameter is marked optional as determined by
 {spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
 
+`RestClientAdapter` provides additional support for a method parameter of type
+`StreamingHttpOutputMessage.Body` that allows sending the request body by writing to an
+`OutputStream`.
+
 
 
 [[rest-http-interface.custom-resolver]]
@@ -1093,6 +1097,11 @@ By default, the timeout for synchronous return values with `ReactorHttpExchangeA
 depends on how the underlying HTTP client is configured. You can set a `blockTimeout`
 value on the adapter level as well, but we recommend relying on timeout settings of the
 underlying HTTP client, which operates at a lower level and provides more control.
+
+`RestClientAdapter` provides supports additional support for a return value of type
+`InputStream` or `ResponseEntity<InputStream>` that provides access to the raw response
+body content.
+
 
 
 [[rest-http-interface-exceptions]]

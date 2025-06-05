@@ -16,6 +16,7 @@
 
 package org.springframework.web.client.support;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -70,8 +72,12 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		return newRequest(values).retrieve().toBodilessEntity().getHeaders();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> @Nullable T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+		if (bodyType.getType().equals(InputStream.class)) {
+			return (T) newRequest(values).exchange((request, response) -> response.getBody(), false);
+		}
 		return newRequest(values).retrieve().body(bodyType);
 	}
 
@@ -80,8 +86,15 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		return newRequest(values).retrieve().toBodilessEntity();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
+		if (bodyType.getType().equals(InputStream.class)) {
+			return (ResponseEntity<T>) newRequest(values).exchangeForRequiredValue((request, response) ->
+					ResponseEntity.status(response.getStatusCode())
+							.headers(response.getHeaders())
+							.body(response.getBody()), false);
+		}
 		return newRequest(values).retrieve().toEntity(bodyType);
 	}
 
@@ -130,7 +143,10 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		B body = (B) values.getBodyValue();
 		if (body != null) {
-			if (values.getBodyValueType() != null) {
+			if (body instanceof StreamingHttpOutputMessage.Body streamingBody) {
+				bodySpec.body(streamingBody);
+			}
+			else if (values.getBodyValueType() != null) {
 				bodySpec.body(body, (ParameterizedTypeReference<? super B>) values.getBodyValueType());
 			}
 			else {
