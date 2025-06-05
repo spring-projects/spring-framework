@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,6 +75,11 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	protected AbstractKotlinSerializationHttpMessageConverter(T format, MediaType... supportedMediaTypes) {
 		super(supportedMediaTypes);
 		this.format = format;
+	}
+
+	@Override
+	public List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
+		return getSupportedMediaTypes();
 	}
 
 	@Override
