@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,21 @@ package org.springframework.web.servlet.mvc.method.annotation
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.core.MethodParameter
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.method.support.ModelAndViewContainer
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse
+import java.nio.charset.StandardCharsets
 import kotlin.reflect.jvm.javaMethod
 
 /**
@@ -43,6 +48,8 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 	private val servletResponse = MockHttpServletResponse()
 
 	private val request: NativeWebRequest = ServletWebRequest(servletRequest, servletResponse)
+
+	private val factory = ValidatingBinderFactory()
 
 	@Test
 	fun writeWithKotlinSerializationJsonMessageConverter() {
@@ -79,33 +86,37 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 
 	@Test
 	fun readWithKotlinSerializationJsonMessageConverter() {
-		val method = SampleController::readMessage::javaMethod.get()!!
-		val handlerMethod = HandlerMethod(SampleController(), method)
-		val methodReturnType = handlerMethod.returnType
+		val content = "{\"value\" : \"foo\"}"
+		this.servletRequest.setContent(content.toByteArray(StandardCharsets.UTF_8))
+		this.servletRequest.setContentType("application/json")
 
 		val converters = listOf(StringHttpMessageConverter(), KotlinSerializationJsonHttpMessageConverter())
 		val processor = RequestResponseBodyMethodProcessor(converters, null, null)
 
-		val returnValue: Any = SampleController().readMessage(Message("foo"))
-		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request)
+		val method = SampleController::readMessage::javaMethod.get()!!
+		val methodParameter = MethodParameter(method, 0)
 
-		Assertions.assertThat(this.servletResponse.contentAsString).isEqualTo("foo")
+		val result = processor.resolveArgument(methodParameter, container, request, factory) as Message
+
+		Assertions.assertThat(result).isEqualTo(Message("foo"))
 	}
 
+	@Suppress("UNCHECKED_CAST")
 	@Test
 	fun readGenericTypeWithKotlinSerializationJsonMessageConverter() {
-		val method = SampleController::readMessages::javaMethod.get()!!
-		val handlerMethod = HandlerMethod(SampleController(), method)
-		val methodReturnType = handlerMethod.returnType
+		val content = "[{\"value\" : \"foo\"}, {\"value\" : \"bar\"}]"
+		this.servletRequest.setContent(content.toByteArray(StandardCharsets.UTF_8))
+		this.servletRequest.setContentType("application/json")
 
 		val converters = listOf(StringHttpMessageConverter(), KotlinSerializationJsonHttpMessageConverter())
 		val processor = RequestResponseBodyMethodProcessor(converters, null, null)
 
-		val returnValue: Any = SampleController().readMessages(listOf(Message("foo"), Message("bar")))
-		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request)
+		val method = SampleController::readMessages::javaMethod.get()!!
+		val methodParameter = MethodParameter(method, 0)
 
-		Assertions.assertThat(this.servletResponse.contentAsString)
-			.isEqualTo("foo bar")
+		val result = processor.resolveArgument(methodParameter, container, request, factory) as List<Message>
+
+		Assertions.assertThat(result).containsExactly(Message("foo"), Message("bar"))
 	}
 
 
@@ -130,4 +141,15 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 
 	@Serializable
 	data class Message(val value: String)
+
+	private class ValidatingBinderFactory : WebDataBinderFactory {
+		override fun createBinder(request: NativeWebRequest, target: Any?, objectName: String): WebDataBinder {
+			val validator = LocalValidatorFactoryBean()
+			validator.afterPropertiesSet()
+			val dataBinder = WebDataBinder(target, objectName)
+			dataBinder.setValidator(validator)
+			return dataBinder
+		}
+	}
+
 }
