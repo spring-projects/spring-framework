@@ -19,6 +19,7 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 import kotlin.reflect.KFunction;
@@ -74,6 +75,11 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	protected AbstractKotlinSerializationHttpMessageConverter(T format, MediaType... supportedMediaTypes) {
 		super(supportedMediaTypes);
 		this.format = format;
+	}
+
+	@Override
+	public List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
+		return getSupportedMediaTypes();
 	}
 
 	@Override
