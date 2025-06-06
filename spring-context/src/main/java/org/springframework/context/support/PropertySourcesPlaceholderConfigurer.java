@@ -27,7 +27,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.Environment;
@@ -266,11 +265,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			if (value instanceof String string) {
 				return string;
 			}
-			ConversionService conversionService = super.source.getConversionService();
-			if (conversionService == null) {
-				conversionService = DefaultConversionService.getSharedInstance();
-			}
-			return conversionService.convert(value, String.class);
+			return super.source.getConversionService().convert(value, String.class);
 		}
 
 		@Override
