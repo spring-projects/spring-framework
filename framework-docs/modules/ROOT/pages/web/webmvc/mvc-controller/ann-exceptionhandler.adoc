@@ -177,13 +177,9 @@ the content negotiation during the error handling phase will decide which conten
   be converted through `HttpMessageConverter` instances and written to the response.
   See xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[ResponseEntity].
 
-| `ErrorResponse`
+| `ErrorResponse`, `ProblemDetail`
 | To render an RFC 9457 error response with details in the body,
-see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
-
-| `ProblemDetail`
-| To render an RFC 9457 error response with details in the body,
-see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
+  see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the
