@@ -25,6 +25,8 @@ import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
+
 /**
  * Static utilities for serialization and deserialization using
  * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/serialization/"
@@ -47,6 +49,7 @@ public abstract class SerializationUtils {
 	 * @param object the object to serialize
 	 * @return an array of bytes representing the object in a portable fashion
 	 */
+	@Contract("null -> null")
 	public static byte @Nullable [] serialize(@Nullable Object object) {
 		if (object == null) {
 			return null;
@@ -73,6 +76,7 @@ public abstract class SerializationUtils {
 	 * any other format) which is regularly checked and updated for not allowing RCE.
 	 */
 	@Deprecated(since = "6.0")
+	@Contract("null -> null")
 	public static @Nullable Object deserialize(byte @Nullable [] bytes) {
 		if (bytes == null) {
 			return null;

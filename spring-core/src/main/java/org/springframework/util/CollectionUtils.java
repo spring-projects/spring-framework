@@ -200,6 +200,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
 	 */
+	@Contract("null, _ -> false")
 	public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
 		if (iterator != null) {
 			while (iterator.hasNext()) {
@@ -218,6 +219,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
 	 */
+	@Contract("null, _ -> false")
 	public static boolean contains(@Nullable Enumeration<?> enumeration, Object element) {
 		if (enumeration != null) {
 			while (enumeration.hasMoreElements()) {
@@ -238,6 +240,7 @@ public abstract class CollectionUtils {
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
 	 */
+	@Contract("null, _ -> false")
 	public static boolean containsInstance(@Nullable Collection<?> collection, Object element) {
 		if (collection != null) {
 			for (Object candidate : collection) {
@@ -289,6 +292,7 @@ public abstract class CollectionUtils {
 	 * or {@code null} if none or more than one such value found
 	 */
 	@SuppressWarnings("unchecked")
+	@Contract("null, _ -> null")
 	public static <T> @Nullable T findValueOfType(@Nullable Collection<?> collection, @Nullable Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
@@ -386,6 +390,7 @@ public abstract class CollectionUtils {
 	 * @see LinkedHashMap#keySet()
 	 * @see java.util.LinkedHashSet
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T firstElement(@Nullable Set<T> set) {
 		if (isEmpty(set)) {
 			return null;
@@ -408,6 +413,7 @@ public abstract class CollectionUtils {
 	 * @return the first element, or {@code null} if none
 	 * @since 5.2.3
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T firstElement(@Nullable List<T> list) {
 		if (isEmpty(list)) {
 			return null;
@@ -425,6 +431,7 @@ public abstract class CollectionUtils {
 	 * @see LinkedHashMap#keySet()
 	 * @see java.util.LinkedHashSet
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T lastElement(@Nullable Set<T> set) {
 		if (isEmpty(set)) {
 			return null;
@@ -448,6 +455,7 @@ public abstract class CollectionUtils {
 	 * @return the last element, or {@code null} if none
 	 * @since 5.0.3
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T lastElement(@Nullable List<T> list) {
 		if (isEmpty(list)) {
 			return null;

@@ -180,27 +180,29 @@ class CollectionUtilsTests {
 
 	@Test
 	void findValueOfType() {
-		List<Integer> integerList = new ArrayList<>();
-		integerList.add(1);
-		assertThat(CollectionUtils.findValueOfType(integerList, Integer.class)).isEqualTo(1);
+		assertThat(CollectionUtils.findValueOfType(List.of(1), Integer.class)).isEqualTo(1);
 
-		Set<Integer> integerSet = new HashSet<>();
-		integerSet.add(2);
-		assertThat(CollectionUtils.findValueOfType(integerSet, Integer.class)).isEqualTo(2);
+		assertThat(CollectionUtils.findValueOfType(Set.of(2), Integer.class)).isEqualTo(2);
+	}
+
+	@Test
+	void findValueOfTypeWithNullType() {
+		assertThat(CollectionUtils.findValueOfType(List.of(1), (Class<?>) null)).isEqualTo(1);
+	}
+
+	@Test
+	void findValueOfTypeWithNullCollection() {
+		assertThat(CollectionUtils.findValueOfType(null, Integer.class)).isNull();
 	}
 
 	@Test
 	void findValueOfTypeWithEmptyCollection() {
-		List<Integer> emptyList = new ArrayList<>();
-		assertThat(CollectionUtils.findValueOfType(emptyList, Integer.class)).isNull();
+		assertThat(CollectionUtils.findValueOfType(List.of(), Integer.class)).isNull();
 	}
 
 	@Test
 	void findValueOfTypeWithMoreThanOneValue() {
-		List<Integer> integerList = new ArrayList<>();
-		integerList.add(1);
-		integerList.add(2);
-		assertThat(CollectionUtils.findValueOfType(integerList, Integer.class)).isNull();
+		assertThat(CollectionUtils.findValueOfType(List.of(1, 2), Integer.class)).isNull();
 	}
 
 	@Test

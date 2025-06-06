@@ -49,6 +49,7 @@ public abstract class SupplierUtils {
 	 * @return a supplier's result or the given Object as-is
 	 * @since 6.1.4
 	 */
+	@Contract("null -> null")
 	public static @Nullable Object resolve(@Nullable Object candidate) {
 		return (candidate instanceof Supplier<?> supplier ? supplier.get() : candidate);
 	}
