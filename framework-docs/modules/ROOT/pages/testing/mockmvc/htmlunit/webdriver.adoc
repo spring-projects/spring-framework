@@ -166,7 +166,7 @@ following sections to make this pattern much easier to implement.
 == MockMvc and WebDriver Setup
 
 To use Selenium WebDriver with `MockMvc`, make sure that your project includes a test
-dependency on `org.seleniumhq.selenium:selenium-htmlunit3-driver`.
+dependency on `org.seleniumhq.selenium:htmlunit3-driver`.
 
 We can easily create a Selenium WebDriver that integrates with MockMvc by using the
 `MockMvcHtmlUnitDriverBuilder` as the following example shows:
