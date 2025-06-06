@@ -28,9 +28,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -523,6 +525,35 @@ class RestClientIntegrationTests {
 		expectRequest(request -> {
 			assertThat(request.getPath()).isEqualTo("/pojo/capitalize");
 			assertThat(request.getBody().readUtf8()).isEqualTo("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	void postUserAsJsonWithJsonView(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "application/json")
+				.setBody("{\"username\":\"USERNAME\"}"));
+
+		User result = this.restClient.post()
+				.uri("/user/capitalize")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.hint(JsonView.class.getName(), PublicView.class)
+				.body(new User("username", "password"))
+				.retrieve()
+				.body(User.class);
+
+		assertThat(result).isNotNull();
+		assertThat(result.username()).isEqualTo("USERNAME");
+		assertThat(result.password()).isNull();
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/user/capitalize");
+			assertThat(request.getBody().readUtf8()).isEqualTo("{\"username\":\"username\"}");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});
@@ -1149,5 +1180,9 @@ class RestClientIntegrationTests {
 			this.containerValue = containerValue;
 		}
 	}
+
+	interface PublicView {}
+
+	record User(@JsonView(PublicView.class) String username, @Nullable String password) {}
 
 }

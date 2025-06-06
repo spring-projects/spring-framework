@@ -927,6 +927,17 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		RequestBodySpec body(StreamingHttpOutputMessage.Body body);
+
+		/**
+		 * Set the hint with the given name to the given value for
+		 * {@link org.springframework.http.converter.SmartHttpMessageConverter}s
+		 * supporting them.
+		 * @param key the key of the hint to add
+		 * @param value the value of the hint to add
+		 * @return this builder
+		 * @since 7.0
+		 */
+		RequestBodySpec hint(String key, Object value);
 	}
 
 
@@ -1025,6 +1036,17 @@ public interface RestClient {
 		 * handling.
 		 */
 		ResponseEntity<Void> toBodilessEntity();
+
+		/**
+		 * Set the hint with the given name to the given value for
+		 * {@link org.springframework.http.converter.SmartHttpMessageConverter}s
+		 * supporting them.
+		 * @param key the key of the hint to add
+		 * @param value the value of the hint to add
+		 * @return this builder
+		 * @since 7.0
+		 */
+		ResponseSpec hint(String key, Object value);
 
 
 		/**
