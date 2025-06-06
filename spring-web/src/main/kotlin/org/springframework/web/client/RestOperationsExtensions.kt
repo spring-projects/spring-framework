@@ -18,9 +18,11 @@ package org.springframework.web.client
 
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.queryForEntity
 import java.lang.Class
 import java.net.URI
 import kotlin.reflect.KClass
@@ -291,3 +293,45 @@ inline fun <reified T : Any> RestOperations.exchange(url: URI, method: HttpMetho
 @Throws(RestClientException::class)
 inline fun <reified T : Any> RestOperations.exchange(requestEntity: RequestEntity<*>): ResponseEntity<T> =
 		exchange(requestEntity, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
+ *
+ * @author Mario Ruiz
+ * @since x.x.x
+ */
+@Throws(RestClientException::class)
+inline fun <reified T : Any> RestOperations.queryForEntity(url: String, request: Any? = null,
+														  vararg uriVariables: Any?): ResponseEntity<T> =
+	exchange(url = url, method =  HttpMethod.QUERY, requestEntity = HttpEntity(request, null as (HttpHeaders?) ), uriVariables= uriVariables)
+
+/**
+ * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
+ *
+ * @author Mario Ruiz
+ * @since x.x.x
+ */
+@Throws(RestClientException::class)
+inline fun <reified T : Any> RestOperations.queryForEntity(url: String, request: Any? = null,
+														  uriVariables: Map<String, *>): ResponseEntity<T> =
+	exchange(url = url, method =  HttpMethod.QUERY, requestEntity = HttpEntity(request, null as (HttpHeaders?) ), uriVariables= uriVariables)
+
+/**
+ * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
+ * variant leveraging Kotlin reified type parameters. Like the original Java method, this
+ * extension is subject to type erasure. Use [exchange] if you need to retain actual
+ * generic type arguments.
+ *
+ * @author Mario Ruiz
+ * @since x.x.x
+ */
+@Throws(RestClientException::class)
+inline fun <reified T: Any> RestOperations.queryForEntity(url: URI, request: Any? = null): ResponseEntity<T> =
+	exchange(url = url, method =  HttpMethod.QUERY, requestEntity = HttpEntity(request, null as (HttpHeaders?) ))
+
