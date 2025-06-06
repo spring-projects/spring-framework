@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.util.StreamUtils;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -197,16 +196,16 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
 
-		Throwable throwable = catchThrowable(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response));
-
-		// validate exception
-		assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
-		HttpClientErrorException actualHttpClientErrorException = (HttpClientErrorException) throwable;
-		assertThat(actualHttpClientErrorException.getStatusCode()).isEqualTo(statusCode);
-		assertThat(actualHttpClientErrorException.getStatusText()).isEqualTo(statusText);
-		assertThat(actualHttpClientErrorException.getResponseHeaders()).isEqualTo(headers);
-		assertThat(actualHttpClientErrorException.getMessage()).contains(responseBody);
-		assertThat(actualHttpClientErrorException.getResponseBodyAsString()).isEqualTo(responseBody);
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response))
+				.satisfies(ex -> {
+					// validate exception
+					assertThat(ex.getStatusCode()).isEqualTo(statusCode);
+					assertThat(ex.getStatusText()).isEqualTo(statusText);
+					assertThat(ex.getResponseHeaders()).isEqualTo(headers);
+					assertThat(ex.getMessage()).contains(responseBody);
+					assertThat(ex.getResponseBodyAsString()).isEqualTo(responseBody);
+				});
 	}
 
 	@Test  // SPR-17461
@@ -237,16 +236,16 @@ class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
 
-		Throwable throwable = catchThrowable(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response));
-
-		// validate exception
-		assertThat(throwable).isInstanceOf(HttpServerErrorException.class);
-		HttpServerErrorException actualHttpServerErrorException = (HttpServerErrorException) throwable;
-		assertThat(actualHttpServerErrorException.getStatusCode()).isEqualTo(statusCode);
-		assertThat(actualHttpServerErrorException.getStatusText()).isEqualTo(statusText);
-		assertThat(actualHttpServerErrorException.getResponseHeaders()).isEqualTo(headers);
-		assertThat(actualHttpServerErrorException.getMessage()).contains(responseBody);
-		assertThat(actualHttpServerErrorException.getResponseBodyAsString()).isEqualTo(responseBody);
+		assertThatExceptionOfType(HttpServerErrorException.class)
+				.isThrownBy(() -> handler.handleError(URI.create("/"), HttpMethod.GET, response))
+				.satisfies(ex -> {
+					// validate exception
+					assertThat(ex.getStatusCode()).isEqualTo(statusCode);
+					assertThat(ex.getStatusText()).isEqualTo(statusText);
+					assertThat(ex.getResponseHeaders()).isEqualTo(headers);
+					assertThat(ex.getMessage()).contains(responseBody);
+					assertThat(ex.getResponseBodyAsString()).isEqualTo(responseBody);
+				});
 	}
 
 	@Test  // SPR-16604

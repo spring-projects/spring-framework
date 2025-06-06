@@ -43,7 +43,6 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
  * Tests for annotation-based caching methods that use reactive operators.
@@ -154,16 +153,15 @@ class ReactiveCachingTests {
 				ExceptionCacheManager.class, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
-		Throwable completableFutureThrowable = catchThrowable(() -> service.cacheFuture(new Object()).join());
-		assertThat(completableFutureThrowable).isInstanceOf(CompletionException.class)
-				.extracting(Throwable::getCause)
-				.isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(CompletionException.class)
+				.isThrownBy(() -> service.cacheFuture(new Object()).join())
+				.withCauseInstanceOf(UnsupportedOperationException.class);
 
-		Throwable monoThrowable = catchThrowable(() -> service.cacheMono(new Object()).block());
-		assertThat(monoThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheMono(new Object()).block());
 
-		Throwable fluxThrowable = catchThrowable(() -> service.cacheFlux(new Object()).blockFirst());
-		assertThat(fluxThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheFlux(new Object()).blockFirst());
 	}
 
 	@Test
@@ -172,16 +170,15 @@ class ReactiveCachingTests {
 				ExceptionCacheManager.class, ReactiveSyncCacheableService.class);
 		ReactiveSyncCacheableService service = ctx.getBean(ReactiveSyncCacheableService.class);
 
-		Throwable completableFutureThrowable = catchThrowable(() -> service.cacheFuture(new Object()).join());
-		assertThat(completableFutureThrowable).isInstanceOf(CompletionException.class)
-				.extracting(Throwable::getCause)
-				.isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(CompletionException.class)
+				.isThrownBy(() -> service.cacheFuture(new Object()).join())
+				.withCauseInstanceOf(UnsupportedOperationException.class);
 
-		Throwable monoThrowable = catchThrowable(() -> service.cacheMono(new Object()).block());
-		assertThat(monoThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheMono(new Object()).block());
 
-		Throwable fluxThrowable = catchThrowable(() -> service.cacheFlux(new Object()).blockFirst());
-		assertThat(fluxThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheFlux(new Object()).blockFirst());
 	}
 
 	@Test
