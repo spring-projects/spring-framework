@@ -39,6 +39,7 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 	private AtomicReference<DisposableServer> serverRef = new AtomicReference<>();
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void initServer() throws Exception {
 		SelfSignedCertificate cert = new SelfSignedCertificate();
