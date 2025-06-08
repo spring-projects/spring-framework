@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.scheduler.Schedulers;
+import reactor.test.StepVerifier;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.web.server.WebSession;
@@ -155,6 +156,25 @@ class InMemoryWebSessionStoreTests {
 		assertThatIllegalStateException()
 				.isThrownBy(this::insertSession)
 				.withMessage("Max sessions limit reached: 10");
+	}
+
+	@Test
+	void updateSession() {
+		WebSession oneWebSession = insertSession();
+
+		StepVerifier.create(oneWebSession.save())
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void updateSession_whenMaxSessionsReached() {
+		WebSession onceWebSession = insertSession();
+		IntStream.range(1, 10000).forEach(i -> insertSession());
+
+		StepVerifier.create(onceWebSession.save())
+				.expectComplete()
+				.verify();
 	}
 
 
