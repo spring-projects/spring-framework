@@ -94,6 +94,16 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithNullableParameterPreservesNull() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithOptionalParameterAndDefaultValue", String::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunctionPreserveNulls(Dispatchers.Unconfined, method, this, null, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
+
+	@Test
 	fun invokePrivateSuspendingFunction() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("privateSuspendingFunction", String::class.java, Continuation::class.java)
 		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo")
@@ -299,6 +309,12 @@ class CoroutinesUtilsTests {
 		delay(1)
 		return value
 	}
+
+	suspend fun suspendingFunctionWithOptionalParameterAndDefaultValue(value: String? = "foo"): String? {
+		delay(1)
+		return value
+	}
+
 
 	suspend fun suspendingFunctionWithMono(): Mono<String> {
 		delay(1)
