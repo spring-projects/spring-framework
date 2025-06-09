@@ -30,6 +30,7 @@ import org.springframework.web.server.WebSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import reactor.test.StepVerifier;
 
 /**
  * Tests for {@link InMemoryWebSessionStore}.
@@ -157,6 +158,25 @@ class InMemoryWebSessionStoreTests {
 		assertThatIllegalStateException().isThrownBy(
 				this::insertSession)
 			.withMessage("Max sessions limit reached: 10000");
+	}
+
+	@Test
+	void updateSession() {
+		WebSession oneWebSession = insertSession();
+
+		StepVerifier.create(oneWebSession.save())
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void updateSession_whenMaxSessionsReached() {
+		WebSession onceWebSession = insertSession();
+		IntStream.range(1, 10000).forEach(i -> insertSession());
+
+		StepVerifier.create(onceWebSession.save())
+				.expectComplete()
+				.verify();
 	}
 
 	private WebSession insertSession() {
