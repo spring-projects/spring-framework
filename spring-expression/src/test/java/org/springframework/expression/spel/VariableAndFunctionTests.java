@@ -276,7 +276,7 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	void functionMethodMustBeStatic() throws Exception {
-		context.registerFunction("nonStatic", this.getClass().getMethod("nonStatic"));
+		context.registerFunction("nonStatic", getClass().getMethod("nonStatic"));
 		SpelExpression expression = parser.parseRaw("#nonStatic()");
 		assertThatExceptionOfType(SpelEvaluationException.class)
 				.isThrownBy(() -> expression.getValue(context))

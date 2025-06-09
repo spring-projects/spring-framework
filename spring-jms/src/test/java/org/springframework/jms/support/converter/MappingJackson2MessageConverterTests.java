@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ class MappingJackson2MessageConverterTests {
 
 	@Test
 	void toTextMessageWithReturnType() throws JMSException, NoSuchMethodException {
-		Method method = this.getClass().getDeclaredMethod("summary");
+		Method method = getClass().getDeclaredMethod("summary");
 		MethodParameter returnType = new MethodParameter(method, -1);
 		testToTextMessageWithReturnType(returnType);
 		verify(sessionMock).createTextMessage("{\"name\":\"test\"}");
@@ -188,7 +188,7 @@ class MappingJackson2MessageConverterTests {
 
 	@Test
 	void toTextMessageWithReturnTypeAndNoJsonView() throws JMSException, NoSuchMethodException {
-		Method method = this.getClass().getDeclaredMethod("none");
+		Method method = getClass().getDeclaredMethod("none");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
 		testToTextMessageWithReturnType(returnType);
@@ -197,7 +197,7 @@ class MappingJackson2MessageConverterTests {
 
 	@Test
 	void toTextMessageWithReturnTypeAndMultipleJsonViews() throws NoSuchMethodException {
-		Method method = this.getClass().getDeclaredMethod("invalid");
+		Method method = getClass().getDeclaredMethod("invalid");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
 		assertThatIllegalArgumentException().isThrownBy(() ->

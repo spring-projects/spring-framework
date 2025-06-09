@@ -170,7 +170,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 					.getBeanDefinition());
 
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
-		Resource resource = new ClassPathResource("PropertySourcesPlaceholderConfigurerTests.properties", this.getClass());
+		Resource resource = new ClassPathResource("PropertySourcesPlaceholderConfigurerTests.properties", getClass());
 		ppc.setLocation(resource);
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("foo");

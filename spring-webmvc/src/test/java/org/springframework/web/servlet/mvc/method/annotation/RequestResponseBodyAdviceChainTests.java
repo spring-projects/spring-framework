@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,8 @@ class RequestResponseBodyAdviceChainTests {
 
 	private Class<? extends HttpMessageConverter<?>> converterType = StringHttpMessageConverter.class;
 
-	private MethodParameter paramType = new MethodParameter(ClassUtils.getMethod(this.getClass(), "handle", String.class), 0);
-	private MethodParameter returnType = new MethodParameter(ClassUtils.getMethod(this.getClass(), "handle", String.class), -1);
+	private MethodParameter paramType = new MethodParameter(ClassUtils.getMethod(getClass(), "handle", String.class), 0);
+	private MethodParameter returnType = new MethodParameter(ClassUtils.getMethod(getClass(), "handle", String.class), -1);
 
 	private ServerHttpRequest request = new ServletServerHttpRequest(new MockHttpServletRequest());
 	private ServerHttpResponse response = new ServletServerHttpResponse(new MockHttpServletResponse());
