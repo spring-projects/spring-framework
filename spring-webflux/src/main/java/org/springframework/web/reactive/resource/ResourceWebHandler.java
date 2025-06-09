@@ -417,7 +417,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public Mono<Void> handle(ServerWebExchange exchange) {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
-					logger.debug(exchange.getLogPrefix() + "Resource not found");
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "Resource not found");
+					}
 					return Mono.error(new NoResourceFoundException(getResourcePath(exchange)));
 				}))
 				.flatMap(resource -> {
@@ -435,10 +437,12 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						}
 
 						// Header phase
-						String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
+						String eTagValue = (getEtagGenerator() != null) ? getEtagGenerator().apply(resource) : null;
 						Instant lastModified = isUseLastModified() ? Instant.ofEpochMilli(resource.lastModified()) : Instant.MIN;
 						if (exchange.checkNotModified(eTagValue, lastModified)) {
-							logger.trace(exchange.getLogPrefix() + "Resource not modified");
+							if (logger.isTraceEnabled()) {
+								logger.trace(exchange.getLogPrefix() + "Resource not modified");
+							}
 							return Mono.empty();
 						}
 

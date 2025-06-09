@@ -542,8 +542,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		prepareResponse(response);
 
 		// Header phase
-		String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
-		long lastModified = (this.isUseLastModified()) ? resource.lastModified() : -1;
+		String eTagValue = (getEtagGenerator() != null ? getEtagGenerator().apply(resource) : null);
+		long lastModified = (isUseLastModified() ? resource.lastModified() : -1);
 		if (new ServletWebRequest(request, response).checkNotModified(eTagValue, lastModified)) {
 			logger.trace("Resource not modified");
 			return;

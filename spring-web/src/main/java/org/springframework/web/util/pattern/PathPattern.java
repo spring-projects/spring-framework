@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -425,7 +425,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		if (this.endsWithSeparatorWildcard) {
 			String prefix = this.patternString.length() > 2 ?
 					this.patternString.substring(0, this.patternString.length() - 2) :
-					String.valueOf(this.getSeparator());
+					String.valueOf(getSeparator());
 			return this.parser.parse(concat(prefix, otherPattern.patternString));
 		}
 
@@ -455,8 +455,8 @@ public class PathPattern implements Comparable<PathPattern> {
 					"Cannot combine patterns: " + this.patternString + " and " + otherPattern);
 		}
 
-		String firstPath = this.patternString.substring(0, this.patternString.lastIndexOf(this.getSeparator()));
-		String secondPath = otherPattern.patternString.substring(0, otherPattern.patternString.lastIndexOf(this.getSeparator()));
+		String firstPath = this.patternString.substring(0, this.patternString.lastIndexOf(getSeparator()));
+		String secondPath = otherPattern.patternString.substring(0, otherPattern.patternString.lastIndexOf(getSeparator()));
 		if (!this.parser.parse(firstPath).matches(PathContainer.parsePath(secondPath))) {
 			throw new IllegalArgumentException(
 					"Cannot combine patterns: " + this.patternString + " and " + otherPattern);

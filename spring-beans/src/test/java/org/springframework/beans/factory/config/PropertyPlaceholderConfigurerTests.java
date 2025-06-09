@@ -84,7 +84,7 @@ class PropertyPlaceholderConfigurerTests {
 					.getBeanDefinition());
 
 		PropertyPlaceholderConfigurer pc = new PropertyPlaceholderConfigurer();
-		Resource resource = new ClassPathResource("PropertyPlaceholderConfigurerTests.properties", this.getClass());
+		Resource resource = new ClassPathResource("PropertyPlaceholderConfigurerTests.properties", getClass());
 		pc.setLocation(resource);
 		pc.postProcessBeanFactory(bf);
 	}

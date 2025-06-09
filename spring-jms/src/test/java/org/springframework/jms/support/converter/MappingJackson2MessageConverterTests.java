@@ -175,7 +175,7 @@ class MappingJackson2MessageConverterTests {
 
 	@Test
 	void toTextMessageWithReturnType() throws JMSException, NoSuchMethodException {
-		Method method = this.getClass().getDeclaredMethod("summary");
+		Method method = getClass().getDeclaredMethod("summary");
 		MethodParameter returnType = new MethodParameter(method, -1);
 		testToTextMessageWithReturnType(returnType);
 		verify(sessionMock).createTextMessage("{\"name\":\"test\"}");
@@ -189,7 +189,7 @@ class MappingJackson2MessageConverterTests {
 
 	@Test
 	void toTextMessageWithReturnTypeAndNoJsonView() throws JMSException, NoSuchMethodException {
-		Method method = this.getClass().getDeclaredMethod("none");
+		Method method = getClass().getDeclaredMethod("none");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
 		testToTextMessageWithReturnType(returnType);
@@ -198,7 +198,7 @@ class MappingJackson2MessageConverterTests {
 
 	@Test
 	void toTextMessageWithReturnTypeAndMultipleJsonViews() throws NoSuchMethodException {
-		Method method = this.getClass().getDeclaredMethod("invalid");
+		Method method = getClass().getDeclaredMethod("invalid");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
 		assertThatIllegalArgumentException().isThrownBy(() ->

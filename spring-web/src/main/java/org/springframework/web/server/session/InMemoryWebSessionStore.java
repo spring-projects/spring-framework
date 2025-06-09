@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 						InMemoryWebSessionStore.this.sessions.remove(currentId);
 						String newId = String.valueOf(idGenerator.generateId());
 						this.id.set(newId);
-						InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
+						InMemoryWebSessionStore.this.sessions.put(this.id.get(), this);
 						return Mono.empty();
 					})
 					.subscribeOn(Schedulers.boundedElastic())
@@ -266,11 +266,11 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 			if (isStarted()) {
 				// Save
-				InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
+				InMemoryWebSessionStore.this.sessions.put(this.id.get(), this);
 
 				// Unless it was invalidated
 				if (this.state.get().equals(State.EXPIRED)) {
-					InMemoryWebSessionStore.this.sessions.remove(this.getId());
+					InMemoryWebSessionStore.this.sessions.remove(this.id.get());
 					return Mono.error(new IllegalStateException("Session was invalidated"));
 				}
 			}

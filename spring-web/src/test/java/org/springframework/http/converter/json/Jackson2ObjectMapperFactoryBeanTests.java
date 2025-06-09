@@ -358,7 +358,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		@Override
 		public String getModuleName() {
-			return this.getClass().getSimpleName();
+			return getClass().getSimpleName();
 		}
 
 		@Override
