@@ -31,16 +31,16 @@ import org.jspecify.annotations.Nullable;
 public interface RetryOperations {
 
 	/**
-	 * Execute the given callback (according to the {@link RetryPolicy} configured
-	 * at the implementation level) until it succeeds, or eventually throw an
-	 * exception if the {@code RetryPolicy} is exhausted.
-	 * @param retryCallback the callback to call initially and retry if needed
+	 * Execute the given {@link Retryable} (according to the {@link RetryPolicy}
+	 * configured at the implementation level) until it succeeds, or eventually
+	 * throw an exception if the {@code RetryPolicy} is exhausted.
+	 * @param retryable the {@code Retryable} to execute and retry if needed
 	 * @param <R> the type of the result
-	 * @return the result of the callback, if any
+	 * @return the result of the {@code Retryable}, if any
 	 * @throws RetryException if the {@code RetryPolicy} is exhausted; exceptions
 	 * encountered during retry attempts should be made available as suppressed
 	 * exceptions
 	 */
-	<R extends @Nullable Object> R execute(RetryCallback<R> retryCallback) throws RetryException;
+	<R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException;
 
 }

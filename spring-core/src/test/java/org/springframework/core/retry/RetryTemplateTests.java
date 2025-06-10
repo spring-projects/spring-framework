@@ -37,7 +37,7 @@ class RetryTemplateTests {
 
 	@Test
 	void retryWithSuccess() throws Exception {
-		RetryCallback<String> retryCallback = new RetryCallback<>() {
+		Retryable<String> retryable = new Retryable<>() {
 
 			int failure;
 
@@ -57,14 +57,14 @@ class RetryTemplateTests {
 
 		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
 
-		assertThat(retryTemplate.execute(retryCallback)).isEqualTo("hello world");
+		assertThat(retryTemplate.execute(retryable)).isEqualTo("hello world");
 	}
 
 	@Test
 	void retryWithFailure() {
 		Exception exception = new Exception("Error while invoking greeting service");
 
-		RetryCallback<String> retryCallback = new RetryCallback<>() {
+		Retryable<String> retryable = new Retryable<>() {
 			@Override
 			public String run() throws Exception {
 				throw exception;
@@ -79,8 +79,8 @@ class RetryTemplateTests {
 		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
 
 		assertThatExceptionOfType(RetryException.class)
-				.isThrownBy(() -> retryTemplate.execute(retryCallback))
-				.withMessage("Retry policy for callback 'greeting service' exhausted; aborting execution")
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessage("Retry policy for operation 'greeting service' exhausted; aborting execution")
 				.withCause(exception);
 	}
 
@@ -96,7 +96,7 @@ class RetryTemplateTests {
 
 		TechnicalException technicalException = new TechnicalException("Error while invoking greeting service");
 
-		RetryCallback<String> retryCallback = new RetryCallback<>() {
+		Retryable<String> retryable = new Retryable<>() {
 			@Override
 			public String run() throws TechnicalException {
 				throw technicalException;
@@ -126,8 +126,8 @@ class RetryTemplateTests {
 		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
 
 		assertThatExceptionOfType(RetryException.class)
-				.isThrownBy(() -> retryTemplate.execute(retryCallback))
-				.withMessage("Retry policy for callback 'greeting service' exhausted; aborting execution")
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessage("Retry policy for operation 'greeting service' exhausted; aborting execution")
 				.withCause(technicalException);
 	}
 

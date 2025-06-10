@@ -17,30 +17,32 @@
 package org.springframework.core.retry;
 
 /**
- * Callback interface for a retryable block of code.
+ * {@code Retryable} is a functional interface that can be used to implement any
+ * generic block of code that can potentially be retried.
  *
  * <p>Used in conjunction with {@link RetryOperations}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
  * @since 7.0
  * @param <R> the type of the result
  * @see RetryOperations
  */
 @FunctionalInterface
-public interface RetryCallback<R> {
+public interface Retryable<R> {
 
 	/**
 	 * Method to execute and retry if needed.
-	 * @return the result of the callback
-	 * @throws Throwable if an error occurs during the execution of the callback
+	 * @return the result of the operation
+	 * @throws Throwable if an error occurs during the execution of the operation
 	 */
 	R run() throws Throwable;
 
 	/**
-	 * A unique, logical name for this callback, used to distinguish retries for
-	 * different business operations.
-	 * <p>Defaults to the fully-qualified class name.
-	 * @return the name of the callback
+	 * A unique, logical name for this retryable operation, used to distinguish
+	 * between retries for different business operations.
+	 * <p>Defaults to the fully-qualified class name of the implementation class.
+	 * @return the name of this retryable operation
 	 */
 	default String getName() {
 		return getClass().getName();

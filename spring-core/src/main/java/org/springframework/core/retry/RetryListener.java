@@ -40,7 +40,7 @@ public interface RetryListener {
 	/**
 	 * Called after the first successful retry attempt.
 	 * @param retryExecution the retry execution
-	 * @param result the result of the callback
+	 * @param result the result of the {@link Retryable}
 	 */
 	default void onRetrySuccess(RetryExecution retryExecution, Object result) {
 	}
@@ -48,7 +48,7 @@ public interface RetryListener {
 	/**
 	 * Called every time a retry attempt fails.
 	 * @param retryExecution the retry execution
-	 * @param throwable the exception thrown by the callback
+	 * @param throwable the exception thrown by the {@link Retryable}
 	 */
 	default void onRetryFailure(RetryExecution retryExecution, Throwable throwable) {
 	}
@@ -56,7 +56,7 @@ public interface RetryListener {
 	/**
 	 * Called if the {@link RetryPolicy} is exhausted.
 	 * @param retryExecution the retry execution
-	 * @param throwable the last exception thrown by the {@link RetryCallback}
+	 * @param throwable the last exception thrown by the {@link Retryable}
 	 */
 	default void onRetryPolicyExhaustion(RetryExecution retryExecution, Throwable throwable) {
 	}

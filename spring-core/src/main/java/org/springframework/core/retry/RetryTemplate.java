@@ -32,11 +32,11 @@ import org.springframework.util.backoff.FixedBackOff;
 
 /**
  * A basic implementation of {@link RetryOperations} that invokes and potentially
- * retries a {@link RetryCallback} based on a configured {@link RetryPolicy} and
- * {@link BackOff} policy.
+ * retries a {@link Retryable} operation based on a configured {@link RetryPolicy}
+ * and {@link BackOff} policy.
  *
- * <p>By default, a callback will be invoked at most 3 times with a fixed backoff
- * of 1 second.
+ * <p>By default, a retryable operation will be invoked at most 3 times with a
+ * fixed backoff of 1 second.
  *
  * <p>A {@link RetryListener} can be {@linkplain #setRetryListener(RetryListener)
  * registered} to intercept and inject behavior during key retry phases (before a
@@ -52,7 +52,7 @@ import org.springframework.util.backoff.FixedBackOff;
  * @see RetryPolicy
  * @see BackOff
  * @see RetryListener
- * @see RetryCallback
+ * @see Retryable
  */
 public class RetryTemplate implements RetryOperations {
 
@@ -128,29 +128,30 @@ public class RetryTemplate implements RetryOperations {
 	}
 
 	/**
-	 * Execute the supplied {@link RetryCallback} according to the configured
-	 * retry and backoff policies.
-	 * <p>If the callback succeeds, its result will be returned. Otherwise, a
-	 * {@link RetryException} will be thrown to the caller.
-	 * @param retryCallback the callback to call initially and retry if needed
+	 * Execute the supplied {@link Retryable} according to the configured retry
+	 * and backoff policies.
+	 * <p>If the {@code Retryable} succeeds, its result will be returned. Otherwise,
+	 * a {@link RetryException} will be thrown to the caller.
+	 * @param retryable the {@code Retryable} to execute and retry if needed
 	 * @param <R> the type of the result
-	 * @return the result of the callback, if any
+	 * @return the result of the {@code Retryable}, if any
 	 * @throws RetryException if the {@code RetryPolicy} is exhausted; exceptions
 	 * encountered during retry attempts are available as suppressed exceptions
 	 */
 	@Override
-	public <R extends @Nullable Object> R execute(RetryCallback<R> retryCallback) throws RetryException {
-		String callbackName = retryCallback.getName();
+	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
+		String retryableName = retryable.getName();
 		// Initial attempt
 		try {
-			logger.debug(() -> "Preparing to execute callback '" + callbackName + "'");
-			R result = retryCallback.run();
-			logger.debug(() -> "Callback '" + callbackName + "' completed successfully");
+			logger.debug(() -> "Preparing to execute retryable operation '%s'".formatted(retryableName));
+			R result = retryable.run();
+			logger.debug(() -> "Retryable operation '%s' completed successfully".formatted(retryableName));
 			return result;
 		}
 		catch (Throwable initialException) {
 			logger.debug(initialException,
-					() -> "Execution of callback '" + callbackName + "' failed; initiating the retry process");
+					() -> "Execution of retryable operation '%s' failed; initiating the retry process"
+							.formatted(retryableName));
 			// Retry process starts here
 			RetryExecution retryExecution = this.retryPolicy.start();
 			BackOffExecution backOffExecution = this.backOffPolicy.start();
@@ -158,25 +159,27 @@ public class RetryTemplate implements RetryOperations {
 
 			Throwable retryException = initialException;
 			while (retryExecution.shouldRetry(retryException)) {
-				logger.debug(() -> "Preparing to retry callback '" + callbackName + "'");
+				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
 					this.retryListener.beforeRetry(retryExecution);
-					R result = retryCallback.run();
+					R result = retryable.run();
 					this.retryListener.onRetrySuccess(retryExecution, result);
-					logger.debug(() -> "Callback '" + callbackName + "' completed successfully after retry");
+					logger.debug(() -> "Retryable operation '%s' completed successfully after retry"
+							.formatted(retryableName));
 					return result;
 				}
 				catch (Throwable currentAttemptException) {
 					this.retryListener.onRetryFailure(retryExecution, currentAttemptException);
 					try {
 						long duration = backOffExecution.nextBackOff();
-						logger.debug(() -> "Retry callback '" + callbackName + "' failed due to '" +
-								currentAttemptException.getMessage() + "'; backing off for " + duration + "ms");
+						logger.debug(() -> "Retryable operation '%s' failed due to '%s'; backing off for %dms"
+									.formatted(retryableName, currentAttemptException.getMessage(), duration));
 						Thread.sleep(duration);
 					}
 					catch (InterruptedException interruptedException) {
 						Thread.currentThread().interrupt();
-						throw new RetryException("Unable to back off for retry callback '" + callbackName + "'",
+						throw new RetryException(
+								"Unable to back off for retryable operation '%s'".formatted(retryableName),
 								interruptedException);
 					}
 					suppressedExceptions.add(currentAttemptException);
@@ -185,8 +188,9 @@ public class RetryTemplate implements RetryOperations {
 			}
 			// The RetryPolicy has exhausted at this point, so we throw a RetryException with the
 			// initial exception as the cause and remaining exceptions as suppressed exceptions.
-			RetryException finalException = new RetryException("Retry policy for callback '" + callbackName +
-					"' exhausted; aborting execution", initialException);
+			RetryException finalException = new RetryException(
+					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
+					initialException);
 			suppressedExceptions.forEach(finalException::addSuppressed);
 			this.retryListener.onRetryPolicyExhaustion(retryExecution, finalException);
 			throw finalException;
