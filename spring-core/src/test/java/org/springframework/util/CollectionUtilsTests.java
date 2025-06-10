@@ -18,10 +18,10 @@ package org.springframework.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 class CollectionUtilsTests {
 
@@ -100,19 +101,24 @@ class CollectionUtilsTests {
 	}
 
 	@Test
-	void contains() {
+	void containsWithIterator() {
 		assertThat(CollectionUtils.contains((Iterator<String>) null, "myElement")).isFalse();
-		assertThat(CollectionUtils.contains((Enumeration<String>) null, "myElement")).isFalse();
-		assertThat(CollectionUtils.contains(new ArrayList<String>().iterator(), "myElement")).isFalse();
-		assertThat(CollectionUtils.contains(new Hashtable<String, Object>().keys(), "myElement")).isFalse();
+		assertThat(CollectionUtils.contains(List.of().iterator(), "myElement")).isFalse();
 
-		List<String> list = new ArrayList<>();
-		list.add("myElement");
+		List<String> list = Arrays.asList("myElement", null);
 		assertThat(CollectionUtils.contains(list.iterator(), "myElement")).isTrue();
+		assertThat(CollectionUtils.contains(list.iterator(), null)).isTrue();
+	}
 
-		Hashtable<String, String> ht = new Hashtable<>();
-		ht.put("myElement", "myValue");
-		assertThat(CollectionUtils.contains(ht.keys(), "myElement")).isTrue();
+	@Test
+	void containsWithEnumeration() {
+		assertThat(CollectionUtils.contains((Enumeration<String>) null, "myElement")).isFalse();
+		assertThat(CollectionUtils.contains(Collections.enumeration(List.of()), "myElement")).isFalse();
+
+		List<String> list = Arrays.asList("myElement", null);
+		Enumeration<String> enumeration = Collections.enumeration(list);
+		assertThat(CollectionUtils.contains(enumeration, "myElement")).isTrue();
+		assertThat(CollectionUtils.contains(enumeration, null)).isTrue();
 	}
 
 	@Test
@@ -128,39 +134,49 @@ class CollectionUtilsTests {
 		candidates.add("abc");
 
 		assertThat(CollectionUtils.containsAny(source, candidates)).isTrue();
+
 		candidates.remove("def");
 		assertThat(CollectionUtils.containsAny(source, candidates)).isTrue();
+
 		candidates.remove("abc");
 		assertThat(CollectionUtils.containsAny(source, candidates)).isFalse();
+
+		source.add(null);
+		assertThat(CollectionUtils.containsAny(source, candidates)).isFalse();
+
+		candidates.add(null);
+		assertThat(CollectionUtils.containsAny(source, candidates)).isTrue();
 	}
 
 	@Test
 	void containsInstanceWithNullCollection() {
-		assertThat(CollectionUtils.containsInstance(null, this)).as("Must return false if supplied Collection argument is null").isFalse();
+		assertThat(CollectionUtils.containsInstance(null, this)).isFalse();
 	}
 
 	@Test
 	void containsInstanceWithInstancesThatAreEqualButDistinct() {
-		List<Instance> list = new ArrayList<>();
-		list.add(new Instance("fiona"));
-		assertThat(CollectionUtils.containsInstance(list, new Instance("fiona"))).as("Must return false if instance is not in the supplied Collection argument").isFalse();
+		List<Instance> list = List.of(new Instance("fiona"));
+		assertThat(CollectionUtils.containsInstance(list, new Instance("fiona"))).isFalse();
 	}
 
 	@Test
 	void containsInstanceWithSameInstance() {
-		List<Instance> list = new ArrayList<>();
-		list.add(new Instance("apple"));
-		Instance instance = new Instance("fiona");
-		list.add(instance);
-		assertThat(CollectionUtils.containsInstance(list, instance)).as("Must return true if instance is in the supplied Collection argument").isTrue();
+		Instance fiona = new Instance("fiona");
+		Instance apple = new Instance("apple");
+
+		List<Instance> list = List.of(fiona, apple);
+		assertThat(CollectionUtils.containsInstance(list, fiona)).isTrue();
 	}
 
 	@Test
 	void containsInstanceWithNullInstance() {
-		List<Instance> list = new ArrayList<>();
-		list.add(new Instance("apple"));
-		list.add(new Instance("fiona"));
-		assertThat(CollectionUtils.containsInstance(list, null)).as("Must return false if null instance is supplied").isFalse();
+		Instance fiona = new Instance("fiona");
+
+		List<Instance> list = List.of(fiona);
+		assertThat(CollectionUtils.containsInstance(list, null)).isFalse();
+
+		list = Arrays.asList(fiona, null);
+		assertThat(CollectionUtils.containsInstance(list, null)).isTrue();
 	}
 
 	@Test
@@ -176,6 +192,13 @@ class CollectionUtilsTests {
 		candidates.add("abc");
 
 		assertThat(CollectionUtils.findFirstMatch(source, candidates)).isEqualTo("def");
+
+		source.clear();
+		source.add(null);
+		assertThat(CollectionUtils.findFirstMatch(source, candidates)).isNull();
+
+		candidates.add(null);
+		assertThat(CollectionUtils.findFirstMatch(source, candidates)).isNull();
 	}
 
 	@Test
