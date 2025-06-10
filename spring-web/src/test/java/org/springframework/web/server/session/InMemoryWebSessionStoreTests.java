@@ -53,7 +53,8 @@ class InMemoryWebSessionStoreTests {
 	void startsSessionImplicitly() {
 		WebSession session = this.store.createWebSession().block();
 		assertThat(session).isNotNull();
-		session.start();
+		// We intentionally do not invoke start().
+		// session.start();
 		session.getAttributes().put("foo", "bar");
 		assertThat(session.isStarted()).isTrue();
 	}
