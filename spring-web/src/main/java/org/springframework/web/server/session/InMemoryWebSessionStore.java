@@ -283,7 +283,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		private void checkMaxSessionsLimit() {
 			if (sessions.size() >= maxSessions) {
 				expiredSessionChecker.removeExpiredSessions(clock.instant());
-				if (sessions.size() >= maxSessions && !sessions.containsKey(this.getId())) {
+				if (sessions.size() >= maxSessions && !sessions.containsKey(this.id.get())) {
 					throw new IllegalStateException("Max sessions limit reached: " + sessions.size());
 				}
 			}
