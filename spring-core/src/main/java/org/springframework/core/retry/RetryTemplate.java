@@ -35,15 +35,15 @@ import org.springframework.util.backoff.FixedBackOff;
  * retries a {@link Retryable} operation based on a configured {@link RetryPolicy}
  * and {@link BackOff} policy.
  *
- * <p>By default, a retryable operation will be invoked at most 3 times with a
+ * <p>By default, a retryable operation will be retried at most 3 times with a
  * fixed backoff of 1 second.
  *
  * <p>A {@link RetryListener} can be {@linkplain #setRetryListener(RetryListener)
  * registered} to intercept and inject behavior during key retry phases (before a
  * retry attempt, after a retry attempt, etc.).
  *
- * <p>All retry operations performed by this class are logged at debug level,
- * using {@code "org.springframework.core.retry.RetryTemplate"} as the log category.
+ * <p>All retry actions performed by this template are logged at debug level, using
+ * {@code "org.springframework.core.retry.RetryTemplate"} as the log category.
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
