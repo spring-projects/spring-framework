@@ -160,21 +160,40 @@ class InMemoryWebSessionStoreTests {
 
 	@Test
 	void updateSession() {
-		WebSession oneWebSession = insertSession();
+		WebSession session = insertSession();
 
-		StepVerifier.create(oneWebSession.save())
+		StepVerifier.create(session.save())
 				.expectComplete()
 				.verify();
 	}
 
-	@Test
-	void updateSession_whenMaxSessionsReached() {
-		WebSession onceWebSession = insertSession();
-		IntStream.range(1, 10000).forEach(i -> insertSession());
+	@Test  // gh-35013
+	void updateSessionAfterMaxSessionLimitIsExceeded() {
+		this.store.setMaxSessions(10);
 
-		StepVerifier.create(onceWebSession.save())
+		WebSession session = insertSession();
+		assertNumSessions(1);
+
+		IntStream.rangeClosed(1, 9).forEach(i -> insertSession());
+		assertNumSessions(10);
+
+		// Updating an existing session should succeed.
+		StepVerifier.create(session.save())
 				.expectComplete()
 				.verify();
+		assertNumSessions(10);
+
+		// Saving an additional new session should fail.
+		assertThatIllegalStateException()
+				.isThrownBy(this::insertSession)
+				.withMessage("Max sessions limit reached: 10");
+		assertNumSessions(10);
+
+		// Updating an existing session again should still succeed.
+		StepVerifier.create(session.save())
+				.expectComplete()
+				.verify();
+		assertNumSessions(10);
 	}
 
 
