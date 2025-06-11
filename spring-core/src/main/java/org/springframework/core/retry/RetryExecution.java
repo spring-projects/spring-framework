@@ -20,6 +20,9 @@ package org.springframework.core.retry;
  * Strategy interface to define a retry execution created for a given
  * {@link RetryPolicy}.
  *
+ * <p>A {@code RetryExecution} is effectively an executable instance of a given
+ * {@code RetryPolicy}.
+ *
  * <p>Implementations may be stateful but do not need to be thread-safe.
  *
  * @author Mahmoud Ben Hassine

@@ -1,5 +1,5 @@
 /**
- * Support package for the core retry functionality containing common retry policies.
+ * Support package for the core retry functionality.
  */
 @NullMarked
 package org.springframework.core.retry.support;

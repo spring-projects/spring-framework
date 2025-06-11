@@ -66,6 +66,7 @@ public class RetryTemplate implements RetryOperations {
 	protected RetryListener retryListener = new RetryListener() {
 	};
 
+
 	/**
 	 * Create a new {@code RetryTemplate} with maximum 3 retry attempts and a
 	 * fixed backoff of 1 second.
@@ -95,6 +96,7 @@ public class RetryTemplate implements RetryOperations {
 		this.backOffPolicy = backOffPolicy;
 	}
 
+
 	/**
 	 * Set the {@link RetryPolicy} to use.
 	 * <p>Defaults to {@code new MaxRetryAttemptsPolicy()}.
@@ -108,7 +110,7 @@ public class RetryTemplate implements RetryOperations {
 
 	/**
 	 * Set the {@link BackOff} policy to use.
-	 * <p>Defaults to {@code new FixedBackOff(1000, Long.MAX_VALUE))}.
+	 * <p>Defaults to {@code new FixedBackOff(Duration.ofSeconds(1))}.
 	 * @param backOffPolicy the backoff policy to use
 	 * @see FixedBackOff
 	 */
