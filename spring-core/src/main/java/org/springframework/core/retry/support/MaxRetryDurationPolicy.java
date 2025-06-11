@@ -24,9 +24,10 @@ import org.springframework.core.retry.RetryPolicy;
 import org.springframework.util.Assert;
 
 /**
- * A {@link RetryPolicy} based on a maximum retry duration.
+ * A {@link RetryPolicy} based on a maximum retry {@link Duration}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
  * @since 7.0
  */
 public class MaxRetryDurationPolicy implements RetryPolicy {
@@ -42,7 +43,7 @@ public class MaxRetryDurationPolicy implements RetryPolicy {
 
 	/**
 	 * Create a new {@code MaxRetryDurationPolicy} with the default maximum retry
-	 * duration.
+	 * {@link Duration}.
 	 * @see #DEFAULT_MAX_RETRY_DURATION
 	 */
 	public MaxRetryDurationPolicy() {
@@ -50,20 +51,15 @@ public class MaxRetryDurationPolicy implements RetryPolicy {
 
 	/**
 	 * Create a new {@code MaxRetryDurationPolicy} with the specified maximum retry
-	 * duration.
+	 * {@link Duration}.
 	 * @param maxRetryDuration the maximum retry duration; must be positive
 	 */
 	public MaxRetryDurationPolicy(Duration maxRetryDuration) {
 		setMaxRetryDuration(maxRetryDuration);
 	}
 
-	@Override
-	public RetryExecution start() {
-		return new MaxRetryDurationPolicyExecution();
-	}
-
 	/**
-	 * Set the maximum retry duration.
+	 * Set the maximum retry {@link Duration}.
 	 * @param maxRetryDuration the maximum retry duration; must be positive
 	 */
 	public void setMaxRetryDuration(Duration maxRetryDuration) {
@@ -71,6 +67,17 @@ public class MaxRetryDurationPolicy implements RetryPolicy {
 				"Max retry duration must be positive");
 		this.maxRetryDuration = maxRetryDuration;
 	}
+
+	@Override
+	public RetryExecution start() {
+		return new MaxRetryDurationPolicyExecution();
+	}
+
+	@Override
+	public String toString() {
+		return "MaxRetryDurationPolicy[maxRetryDuration=%dms]".formatted(this.maxRetryDuration.toMillis());
+	}
+
 
 	/**
 	 * A {@link RetryExecution} based on a maximum retry duration.
@@ -84,6 +91,13 @@ public class MaxRetryDurationPolicy implements RetryPolicy {
 			Duration currentRetryDuration = Duration.between(this.retryStartTime, LocalDateTime.now());
 			return currentRetryDuration.compareTo(MaxRetryDurationPolicy.this.maxRetryDuration) <= 0;
 		}
+
+		@Override
+		public String toString() {
+			return "MaxRetryDurationPolicyExecution[retryStartTime=%s, maxRetryDuration=%dms]"
+					.formatted(this.retryStartTime, MaxRetryDurationPolicy.this.maxRetryDuration.toMillis());
+		}
+
 	}
 
 }

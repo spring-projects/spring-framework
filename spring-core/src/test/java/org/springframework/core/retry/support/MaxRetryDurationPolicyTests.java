@@ -20,12 +20,17 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.retry.RetryExecution;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link MaxRetryDurationPolicy}.
+ * Tests for {@link MaxRetryDurationPolicy} and its {@link RetryExecution}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
+ * @since 7.0
  */
 class MaxRetryDurationPolicyTests {
 
@@ -34,6 +39,20 @@ class MaxRetryDurationPolicyTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new MaxRetryDurationPolicy(Duration.ZERO))
 				.withMessage("Max retry duration must be positive");
+	}
+
+	@Test
+	void toStringImplementations() {
+		MaxRetryDurationPolicy policy1 = new MaxRetryDurationPolicy();
+		MaxRetryDurationPolicy policy2 = new MaxRetryDurationPolicy(Duration.ofSeconds(1));
+
+		assertThat(policy1).asString().isEqualTo("MaxRetryDurationPolicy[maxRetryDuration=3000ms]");
+		assertThat(policy2).asString().isEqualTo("MaxRetryDurationPolicy[maxRetryDuration=1000ms]");
+
+		assertThat(policy1.start()).asString()
+				.matches("MaxRetryDurationPolicyExecution\\[retryStartTime=.+, maxRetryDuration=3000ms\\]");
+		assertThat(policy2.start()).asString()
+				.matches("MaxRetryDurationPolicyExecution\\[retryStartTime=.+, maxRetryDuration=1000ms\\]");
 	}
 
 }

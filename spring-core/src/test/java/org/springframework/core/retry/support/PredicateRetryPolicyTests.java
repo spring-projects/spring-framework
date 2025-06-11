@@ -25,28 +25,46 @@ import org.springframework.core.retry.RetryExecution;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link PredicateRetryPolicy}.
+ * Tests for {@link PredicateRetryPolicy} and its {@link RetryExecution}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
+ * @since 7.0
  */
 class PredicateRetryPolicyTests {
 
 	@Test
 	void predicateRetryPolicy() {
-		// given
-		class MyException extends Exception {
-			@java.io.Serial
-			private static final long serialVersionUID = 1L;
-		}
-		Predicate<Throwable> predicate = MyException.class::isInstance;
+		Predicate<Throwable> predicate = NumberFormatException.class::isInstance;
 		PredicateRetryPolicy retryPolicy = new PredicateRetryPolicy(predicate);
 
-		// when
 		RetryExecution retryExecution = retryPolicy.start();
 
-		// then
-		assertThat(retryExecution.shouldRetry(new MyException())).isTrue();
+		assertThat(retryExecution.shouldRetry(new NumberFormatException())).isTrue();
 		assertThat(retryExecution.shouldRetry(new IllegalStateException())).isFalse();
+	}
+
+	@Test
+	void toStringImplementations() {
+		PredicateRetryPolicy policy1 = new PredicateRetryPolicy(NumberFormatException.class::isInstance);
+		PredicateRetryPolicy policy2 = new PredicateRetryPolicy(new NumberFormatExceptionMatcher());
+
+		assertThat(policy1).asString().matches("PredicateRetryPolicy\\[predicate=PredicateRetryPolicyTests.+?Lambda.+?\\]");
+		assertThat(policy2).asString().isEqualTo("PredicateRetryPolicy[predicate=NumberFormatExceptionMatcher]");
+
+		assertThat(policy1.start()).asString()
+				.matches("PredicateRetryPolicyExecution\\[predicate=PredicateRetryPolicyTests.+?Lambda.+?\\]");
+		assertThat(policy2.start()).asString()
+				.isEqualTo("PredicateRetryPolicyExecution[predicate=NumberFormatExceptionMatcher]");
+	}
+
+
+	private static class NumberFormatExceptionMatcher implements Predicate<Throwable> {
+
+		@Override
+		public boolean test(Throwable throwable) {
+			return (throwable instanceof NumberFormatException);
+		}
 	}
 
 }

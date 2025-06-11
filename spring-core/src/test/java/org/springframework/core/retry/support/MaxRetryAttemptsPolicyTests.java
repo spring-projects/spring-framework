@@ -25,9 +25,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests for {@link MaxRetryAttemptsPolicy}.
+ * Tests for {@link MaxRetryAttemptsPolicy} and its {@link RetryExecution}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
+ * @since 7.0
  */
 class MaxRetryAttemptsPolicyTests {
 
@@ -44,14 +46,69 @@ class MaxRetryAttemptsPolicyTests {
 		assertThat(retryExecution.shouldRetry(throwable)).isTrue();
 		assertThat(retryExecution.shouldRetry(throwable)).isTrue();
 		assertThat(retryExecution.shouldRetry(throwable)).isTrue();
+
+		assertThat(retryExecution.shouldRetry(throwable)).isFalse();
+		assertThat(retryExecution.shouldRetry(throwable)).isFalse();
+	}
+
+	@Test
+	void customMaxRetryAttempts() {
+		// given
+		MaxRetryAttemptsPolicy retryPolicy = new MaxRetryAttemptsPolicy(2);
+		Throwable throwable = mock();
+
+		// when
+		RetryExecution retryExecution = retryPolicy.start();
+
+		// then
+		assertThat(retryExecution.shouldRetry(throwable)).isTrue();
+		assertThat(retryExecution.shouldRetry(throwable)).isTrue();
+
+		assertThat(retryExecution.shouldRetry(throwable)).isFalse();
 		assertThat(retryExecution.shouldRetry(throwable)).isFalse();
 	}
 
 	@Test
 	void invalidMaxRetryAttempts() {
 		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new MaxRetryAttemptsPolicy(0))
+				.withMessage("Max retry attempts must be greater than zero");
+		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new MaxRetryAttemptsPolicy(-1))
 				.withMessage("Max retry attempts must be greater than zero");
+	}
+
+	@Test
+	void toStringImplementations() {
+		MaxRetryAttemptsPolicy policy1 = new MaxRetryAttemptsPolicy();
+		MaxRetryAttemptsPolicy policy2 = new MaxRetryAttemptsPolicy(1);
+
+		assertThat(policy1).asString().isEqualTo("MaxRetryAttemptsPolicy[maxRetryAttempts=3]");
+		assertThat(policy2).asString().isEqualTo("MaxRetryAttemptsPolicy[maxRetryAttempts=1]");
+
+		RetryExecution retryExecution = policy1.start();
+		assertThat(retryExecution).asString()
+				.isEqualTo("MaxRetryAttemptsPolicyExecution[retryAttempts=0, maxRetryAttempts=3]");
+
+		assertThat(retryExecution.shouldRetry(mock())).isTrue();
+		assertThat(retryExecution).asString()
+				.isEqualTo("MaxRetryAttemptsPolicyExecution[retryAttempts=1, maxRetryAttempts=3]");
+
+		assertThat(retryExecution.shouldRetry(mock())).isTrue();
+		assertThat(retryExecution).asString()
+				.isEqualTo("MaxRetryAttemptsPolicyExecution[retryAttempts=2, maxRetryAttempts=3]");
+
+		assertThat(retryExecution.shouldRetry(mock())).isTrue();
+		assertThat(retryExecution).asString()
+				.isEqualTo("MaxRetryAttemptsPolicyExecution[retryAttempts=3, maxRetryAttempts=3]");
+
+		assertThat(retryExecution.shouldRetry(mock())).isFalse();
+		assertThat(retryExecution).asString()
+				.isEqualTo("MaxRetryAttemptsPolicyExecution[retryAttempts=4, maxRetryAttempts=3]");
+
+		assertThat(retryExecution.shouldRetry(mock())).isFalse();
+		assertThat(retryExecution).asString()
+				.isEqualTo("MaxRetryAttemptsPolicyExecution[retryAttempts=5, maxRetryAttempts=3]");
 	}
 
 }

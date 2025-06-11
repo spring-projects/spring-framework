@@ -21,10 +21,10 @@ import org.springframework.core.retry.RetryPolicy;
 import org.springframework.util.Assert;
 
 /**
- * A {@link RetryPolicy} based on a number of attempts that should not exceed a
- * configured maximum number.
+ * A {@link RetryPolicy} based on a maximum number of retry attempts.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
  * @since 7.0
  */
 public class MaxRetryAttemptsPolicy implements RetryPolicy {
@@ -56,11 +56,6 @@ public class MaxRetryAttemptsPolicy implements RetryPolicy {
 		setMaxRetryAttempts(maxRetryAttempts);
 	}
 
-	@Override
-	public RetryExecution start() {
-		return new MaxRetryAttemptsPolicyExecution();
-	}
-
 	/**
 	 * Set the maximum number of retry attempts.
 	 * @param maxRetryAttempts the maximum number of retry attempts; must be greater
@@ -69,6 +64,16 @@ public class MaxRetryAttemptsPolicy implements RetryPolicy {
 	public void setMaxRetryAttempts(int maxRetryAttempts) {
 		Assert.isTrue(maxRetryAttempts > 0, "Max retry attempts must be greater than zero");
 		this.maxRetryAttempts = maxRetryAttempts;
+	}
+
+	@Override
+	public RetryExecution start() {
+		return new MaxRetryAttemptsPolicyExecution();
+	}
+
+	@Override
+	public String toString() {
+		return "MaxRetryAttemptsPolicy[maxRetryAttempts=%d]".formatted(this.maxRetryAttempts);
 	}
 
 
@@ -83,6 +88,13 @@ public class MaxRetryAttemptsPolicy implements RetryPolicy {
 		public boolean shouldRetry(Throwable throwable) {
 			return (this.retryAttempts++ < MaxRetryAttemptsPolicy.this.maxRetryAttempts);
 		}
+
+		@Override
+		public String toString() {
+			return "MaxRetryAttemptsPolicyExecution[retryAttempts=%d, maxRetryAttempts=%d]"
+					.formatted(this.retryAttempts, MaxRetryAttemptsPolicy.this.maxRetryAttempts);
+		}
+
 	}
 
 }

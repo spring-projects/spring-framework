@@ -25,6 +25,7 @@ import org.springframework.core.retry.RetryPolicy;
  * A {@link RetryPolicy} based on a {@link Predicate}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
  * @since 7.0
  */
 public class PredicateRetryPolicy implements RetryPolicy {
@@ -44,7 +45,31 @@ public class PredicateRetryPolicy implements RetryPolicy {
 
 	@Override
 	public RetryExecution start() {
-		return this.predicate::test;
+		return new PredicateRetryPolicyExecution();
+	}
+
+	@Override
+	public String toString() {
+		return "PredicateRetryPolicy[predicate=%s]".formatted(this.predicate.getClass().getSimpleName());
+	}
+
+
+	/**
+	 * A {@link RetryExecution} based on a {@link Predicate}.
+	 */
+	private class PredicateRetryPolicyExecution implements RetryExecution {
+
+		@Override
+		public boolean shouldRetry(Throwable throwable) {
+			return PredicateRetryPolicy.this.predicate.test(throwable);
+		}
+
+		@Override
+		public String toString() {
+			return "PredicateRetryPolicyExecution[predicate=%s]"
+					.formatted(PredicateRetryPolicy.this.predicate.getClass().getSimpleName());
+		}
+
 	}
 
 }
