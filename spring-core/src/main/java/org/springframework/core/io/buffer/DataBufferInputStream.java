@@ -124,7 +124,7 @@ final class DataBufferInputStream extends InputStream {
 			return 0L;
 		}
 		int skipped = Math.min(available(), n > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) n);
-		this.dataBuffer.readPosition(Math.min(this.end, this.dataBuffer.readPosition() + skipped));
+		this.dataBuffer.readPosition(this.dataBuffer.readPosition() + skipped);
 		return skipped;
 	}
 
