@@ -142,7 +142,7 @@ public class RetryTemplate implements RetryOperations {
 	 * encountered during retry attempts are available as suppressed exceptions
 	 */
 	@Override
-	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
+	public <R> @Nullable R execute(Retryable<? extends @Nullable R> retryable) throws RetryException {
 		String retryableName = retryable.getName();
 		// Initial attempt
 		try {

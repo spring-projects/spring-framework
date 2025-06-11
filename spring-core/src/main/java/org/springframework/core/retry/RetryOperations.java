@@ -41,6 +41,6 @@ public interface RetryOperations {
 	 * encountered during retry attempts should be made available as suppressed
 	 * exceptions
 	 */
-	<R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException;
+	<R> @Nullable R execute(Retryable<? extends @Nullable R> retryable) throws RetryException;
 
 }
