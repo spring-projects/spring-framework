@@ -42,15 +42,17 @@ public class FixedBackOff implements BackOff {
 
 
 	/**
-	 * Create an instance with an interval of {@value #DEFAULT_INTERVAL}
-	 * ms and an unlimited number of attempts.
+	 * Create an instance with an interval of {@value #DEFAULT_INTERVAL} ms and
+	 * an unlimited number of attempts.
+	 * @see #setInterval(long)
+	 * @see #setMaxAttempts(long)
 	 */
 	public FixedBackOff() {
 	}
 
 	/**
-	 * Create an instance.
-	 * @param interval the interval between two attempts
+	 * Create an instance with the supplied interval and maximum number of attempts.
+	 * @param interval the interval between two attempts in milliseconds
 	 * @param maxAttempts the maximum number of attempts
 	 */
 	public FixedBackOff(long interval, long maxAttempts) {
