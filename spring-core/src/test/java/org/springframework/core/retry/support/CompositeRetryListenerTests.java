@@ -16,7 +16,7 @@
 
 package org.springframework.core.retry.support;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,51 +30,51 @@ import static org.mockito.Mockito.verify;
  * Tests for {@link CompositeRetryListener}.
  *
  * @author Mahmoud Ben Hassine
+ * @since 7.0
  */
-class ComposedRetryListenerTests {
+class CompositeRetryListenerTests {
 
 	private final RetryListener listener1 = mock();
 	private final RetryListener listener2 = mock();
+	private final RetryExecution retryExecution = mock();
 
-	private final CompositeRetryListener composedRetryListener = new CompositeRetryListener(Arrays.asList(listener1, listener2));
+	private final CompositeRetryListener compositeRetryListener =
+			new CompositeRetryListener(List.of(listener1, listener2));
+
 
 	@Test
 	void beforeRetry() {
-		RetryExecution retryExecution = mock();
-		this.composedRetryListener.beforeRetry(retryExecution);
+		compositeRetryListener.beforeRetry(retryExecution);
 
-		verify(this.listener1).beforeRetry(retryExecution);
-		verify(this.listener2).beforeRetry(retryExecution);
+		verify(listener1).beforeRetry(retryExecution);
+		verify(listener2).beforeRetry(retryExecution);
 	}
 
 	@Test
-	void onSuccess() {
+	void onRetrySuccess() {
 		Object result = new Object();
-		RetryExecution retryExecution = mock();
-		this.composedRetryListener.onRetrySuccess(retryExecution, result);
+		compositeRetryListener.onRetrySuccess(retryExecution, result);
 
-		verify(this.listener1).onRetrySuccess(retryExecution, result);
-		verify(this.listener2).onRetrySuccess(retryExecution, result);
+		verify(listener1).onRetrySuccess(retryExecution, result);
+		verify(listener2).onRetrySuccess(retryExecution, result);
 	}
 
 	@Test
-	void onFailure() {
+	void onRetryFailure() {
 		Exception exception = new Exception();
-		RetryExecution retryExecution = mock();
-		this.composedRetryListener.onRetryFailure(retryExecution, exception);
+		compositeRetryListener.onRetryFailure(retryExecution, exception);
 
-		verify(this.listener1).onRetryFailure(retryExecution, exception);
-		verify(this.listener2).onRetryFailure(retryExecution, exception);
+		verify(listener1).onRetryFailure(retryExecution, exception);
+		verify(listener2).onRetryFailure(retryExecution, exception);
 	}
 
 	@Test
-	void onMaxAttempts() {
+	void onRetryPolicyExhaustion() {
 		Exception exception = new Exception();
-		RetryExecution retryExecution = mock();
-		this.composedRetryListener.onRetryPolicyExhaustion(retryExecution, exception);
+		compositeRetryListener.onRetryPolicyExhaustion(retryExecution, exception);
 
-		verify(this.listener1).onRetryPolicyExhaustion(retryExecution, exception);
-		verify(this.listener2).onRetryPolicyExhaustion(retryExecution, exception);
+		verify(listener1).onRetryPolicyExhaustion(retryExecution, exception);
+		verify(listener2).onRetryPolicyExhaustion(retryExecution, exception);
 	}
 
 }
