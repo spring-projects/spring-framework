@@ -16,6 +16,7 @@
 
 package org.springframework.core.retry;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class RetryTemplate implements RetryOperations {
 
 	protected RetryPolicy retryPolicy = new MaxRetryAttemptsPolicy();
 
-	protected BackOff backOffPolicy = new FixedBackOff(1000, Long.MAX_VALUE);
+	protected BackOff backOffPolicy = new FixedBackOff(Duration.ofSeconds(1));
 
 	protected RetryListener retryListener = new RetryListener() {
 	};

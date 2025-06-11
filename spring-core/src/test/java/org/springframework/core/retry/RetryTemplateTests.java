@@ -16,6 +16,8 @@
 
 package org.springframework.core.retry;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.retry.support.MaxRetryAttemptsPolicy;
@@ -55,7 +57,7 @@ class RetryTemplateTests {
 			}
 		};
 
-		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
+		retryTemplate.setBackOffPolicy(new FixedBackOff(Duration.ofMillis(10)));
 
 		assertThat(retryTemplate.execute(retryable)).isEqualTo("hello world");
 	}
@@ -76,7 +78,7 @@ class RetryTemplateTests {
 			}
 		};
 
-		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
+		retryTemplate.setBackOffPolicy(new FixedBackOff(Duration.ofMillis(10)));
 
 		assertThatExceptionOfType(RetryException.class)
 				.isThrownBy(() -> retryTemplate.execute(retryable))
@@ -123,7 +125,7 @@ class RetryTemplateTests {
 			}
 		};
 		retryTemplate.setRetryPolicy(retryPolicy);
-		retryTemplate.setBackOffPolicy(new FixedBackOff(100, Long.MAX_VALUE));
+		retryTemplate.setBackOffPolicy(new FixedBackOff(Duration.ofMillis(10)));
 
 		assertThatExceptionOfType(RetryException.class)
 				.isThrownBy(() -> retryTemplate.execute(retryable))
