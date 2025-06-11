@@ -32,7 +32,7 @@ import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.FixedBackOff;
 
 /**
- * A basic implementation of {@link RetryOperations} that invokes and potentially
+ * A basic implementation of {@link RetryOperations} that executes and potentially
  * retries a {@link Retryable} operation based on a configured {@link RetryPolicy}
  * and {@link BackOff} policy.
  *
@@ -147,7 +147,7 @@ public class RetryTemplate implements RetryOperations {
 		// Initial attempt
 		try {
 			logger.debug(() -> "Preparing to execute retryable operation '%s'".formatted(retryableName));
-			R result = retryable.run();
+			R result = retryable.execute();
 			logger.debug(() -> "Retryable operation '%s' completed successfully".formatted(retryableName));
 			return result;
 		}
@@ -165,7 +165,7 @@ public class RetryTemplate implements RetryOperations {
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
 					this.retryListener.beforeRetry(retryExecution);
-					R result = retryable.run();
+					R result = retryable.execute();
 					this.retryListener.onRetrySuccess(retryExecution, result);
 					logger.debug(() -> "Retryable operation '%s' completed successfully after retry"
 							.formatted(retryableName));

@@ -44,7 +44,7 @@ class RetryTemplateTests {
 			int failure;
 
 			@Override
-			public String run() throws Exception {
+			public String execute() throws Exception {
 				if (failure++ < 2) {
 					throw new Exception("Error while invoking greeting service");
 				}
@@ -68,7 +68,7 @@ class RetryTemplateTests {
 
 		Retryable<String> retryable = new Retryable<>() {
 			@Override
-			public String run() throws Exception {
+			public String execute() throws Exception {
 				throw exception;
 			}
 
@@ -100,7 +100,7 @@ class RetryTemplateTests {
 
 		Retryable<String> retryable = new Retryable<>() {
 			@Override
-			public String run() throws TechnicalException {
+			public String execute() throws TechnicalException {
 				throw technicalException;
 			}
 

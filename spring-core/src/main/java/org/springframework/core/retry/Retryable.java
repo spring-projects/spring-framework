@@ -36,7 +36,7 @@ public interface Retryable<R> {
 	 * @return the result of the operation
 	 * @throws Throwable if an error occurs during the execution of the operation
 	 */
-	R run() throws Throwable;
+	R execute() throws Throwable;
 
 	/**
 	 * A unique, logical name for this retryable operation, used to distinguish
