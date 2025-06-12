@@ -34,7 +34,7 @@ public final class PredicateRetryPolicy implements RetryPolicy {
 
 
 	/**
-	 * Create a new {@code PredicateRetryPolicy} with the given predicate.
+	 * Create a new {@code PredicateRetryPolicy} with the given {@link Predicate}.
 	 * @param predicate the predicate to use for determining whether to retry an
 	 * operation based on a given {@link Throwable}
 	 */
