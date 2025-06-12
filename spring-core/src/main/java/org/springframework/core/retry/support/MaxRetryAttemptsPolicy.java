@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 7.0
  */
-public class MaxRetryAttemptsPolicy implements RetryPolicy {
+public final class MaxRetryAttemptsPolicy implements RetryPolicy {
 
 	/**
 	 * The default maximum number of retry attempts: {@value}.

@@ -20,7 +20,6 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.retry.support.MaxRetryAttemptsPolicy;
 import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,20 +109,15 @@ class RetryTemplateTests {
 			}
 		};
 
-		MaxRetryAttemptsPolicy retryPolicy = new MaxRetryAttemptsPolicy() {
+		RetryPolicy retryPolicy = () -> new RetryExecution() {
+			int retryAttempts;
+
 			@Override
-			public RetryExecution start() {
-				return new RetryExecution() {
-
-					int retryAttempts;
-
-					@Override
-					public boolean shouldRetry(Throwable throwable) {
-						return this.retryAttempts++ < 3 && throwable instanceof TechnicalException;
-					}
-				};
+			public boolean shouldRetry(Throwable throwable) {
+				return (this.retryAttempts++ < 3 && throwable instanceof TechnicalException);
 			}
 		};
+
 		retryTemplate.setRetryPolicy(retryPolicy);
 		retryTemplate.setBackOffPolicy(new FixedBackOff(Duration.ofMillis(10)));
 

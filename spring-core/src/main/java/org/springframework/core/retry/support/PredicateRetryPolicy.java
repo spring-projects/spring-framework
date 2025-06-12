@@ -28,7 +28,7 @@ import org.springframework.core.retry.RetryPolicy;
  * @author Sam Brannen
  * @since 7.0
  */
-public class PredicateRetryPolicy implements RetryPolicy {
+public final class PredicateRetryPolicy implements RetryPolicy {
 
 	private final Predicate<Throwable> predicate;
 

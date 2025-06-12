@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 7.0
  */
-public class MaxRetryDurationPolicy implements RetryPolicy {
+public final class MaxRetryDurationPolicy implements RetryPolicy {
 
 	/**
 	 * The default maximum retry duration: 3 seconds.
