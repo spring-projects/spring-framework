@@ -3,7 +3,8 @@ org.springframework.http.HttpMimeTypesRuntimeHints,\
 org.springframework.http.codec.CodecConfigurerRuntimeHints,\
 org.springframework.http.converter.json.JacksonModulesRuntimeHints,\
 org.springframework.http.converter.json.ProblemDetailRuntimeHints,\
-org.springframework.web.util.WebUtilRuntimeHints
+org.springframework.web.util.WebUtilRuntimeHints,\
+org.springframework.web.client.support.RestClientHttpServiceGroupAdapterRuntimeHints
 
 org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
 org.springframework.web.service.annotation.HttpExchangeBeanRegistrationAotProcessor,\
