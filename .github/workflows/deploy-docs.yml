@@ -25,9 +25,9 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'liberica'
-        java-version: '17'
+        java-version: '24'
     - name: Set Up Gradle
-      uses: gradle/actions/setup-gradle@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3.5.0
+      uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
       with:
         cache-read-only: false
     - name: Set up refname build
@@ -41,14 +41,14 @@ jobs:
     - name: Copy the cache to be included in the site
       run: cp -rf build/antora/inject-collector-cache-config-extension/.cache build/site/
     - name: Publish Docs
-      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.16
+      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.20
       with:
         docs-username: ${{ secrets.DOCS_USERNAME }}
         docs-host: ${{ secrets.DOCS_HOST }}
         docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
         docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
     - name: Bust Cloudflare Cache
-      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.16
+      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.20
       with:
         context-root: spring-framework
         cloudflare-zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
