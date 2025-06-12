@@ -27,6 +27,10 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -126,14 +130,15 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 	private static class GroupAdapterInitializer {
 
+		private static final String REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER = "org.springframework.web.client.support.RestClientHttpServiceGroupAdapter";
+
+		private static final String WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER = "org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapter";
+
 		static Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> initGroupAdapters() {
 			Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> map = new LinkedHashMap<>(2);
 
-			addGroupAdapter(map, HttpServiceGroup.ClientType.REST_CLIENT,
-					"org.springframework.web.client.support.RestClientHttpServiceGroupAdapter");
-
-			addGroupAdapter(map, HttpServiceGroup.ClientType.WEB_CLIENT,
-					"org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapter");
+			addGroupAdapter(map, HttpServiceGroup.ClientType.REST_CLIENT, REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER);
+			addGroupAdapter(map, HttpServiceGroup.ClientType.WEB_CLIENT, WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER);
 
 			return map;
 		}
@@ -312,6 +317,19 @@ public final class HttpServiceProxyRegistryFactoryBean
 			Assert.notNull(map, "No group with name '" + groupName + "'");
 			return map;
 		}
+	}
+
+	static class HttpServiceProxyRegistryRuntimeHints implements RuntimeHintsRegistrar {
+
+		@Override
+		public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+			hints.reflection()
+					.registerType(TypeReference.of(GroupAdapterInitializer.REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER),
+							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS)
+					.registerTypeIfPresent(classLoader, GroupAdapterInitializer.WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER,
+							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+		}
+
 	}
 
 }
