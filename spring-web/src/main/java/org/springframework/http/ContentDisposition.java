@@ -68,6 +68,7 @@ public final class ContentDisposition {
 		for (int i=33; i<= 126; i++) {
 			PRINTABLE.set(i);
 		}
+		PRINTABLE.set(34, false); // "
 		PRINTABLE.set(61, false); // =
 		PRINTABLE.set(63, false); // ?
 		PRINTABLE.set(95, false); // _

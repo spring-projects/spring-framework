@@ -314,6 +314,13 @@ class ContentDispositionTests {
 	}
 
 	@Test
+	void formatWithUtf8FilenameWithQuotes() {
+		String filename = "\"中文.txt";
+		assertThat(ContentDisposition.formData().filename(filename, StandardCharsets.UTF_8).build().toString())
+				.isEqualTo("form-data; filename=\"=?UTF-8?Q?=22=E4=B8=AD=E6=96=87.txt?=\"; filename*=UTF-8''%22%E4%B8%AD%E6%96%87.txt");
+	}
+
+	@Test
 	void formatWithEncodedFilenameUsingInvalidCharset() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ContentDisposition.formData()
