@@ -25,12 +25,14 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.reactive.accept.ApiVersionResolver;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
+import org.springframework.web.reactive.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.reactive.accept.PathApiVersionResolver;
 
 /**
@@ -79,6 +81,18 @@ public class ApiVersionConfigurer {
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));
+		return this;
+	}
+
+	/**
+	 * Add resolver to extract the version from a media type parameter found in
+	 * the Accept or Content-Type headers.
+	 * @param compatibleMediaType the media type to extract the parameter from with
+	 * the match established via {@link MediaType#isCompatibleWith(MediaType)}
+	 * @param paramName the name of the parameter
+	 */
+	public ApiVersionConfigurer useMediaTypeParameter(MediaType compatibleMediaType, String paramName) {
+		this.versionResolvers.add(new MediaTypeParamApiVersionResolver(compatibleMediaType, paramName));
 		return this;
 	}
 

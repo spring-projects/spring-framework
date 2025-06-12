@@ -25,10 +25,12 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.accept.PathApiVersionResolver;
 import org.springframework.web.accept.SemanticApiVersionParser;
 
@@ -52,7 +54,7 @@ public class ApiVersionConfigurer {
 
 
 	/**
-	 * Add a resolver that extracts the API version from a request header.
+	 * Add resolver to extract the version from a request header.
 	 * @param headerName the header name to check
 	 */
 	public ApiVersionConfigurer useRequestHeader(String headerName) {
@@ -61,7 +63,7 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Add a resolver that extracts the API version from a request parameter.
+	 * Add resolver to extract the version from a request parameter.
 	 * @param paramName the parameter name to check
 	 */
 	public ApiVersionConfigurer useRequestParam(String paramName) {
@@ -70,12 +72,24 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Add a resolver that extracts the API version from a path segment.
+	 * Add resolver to extract the version from a path segment.
 	 * @param index the index of the path segment to check; e.g. for URL's like
 	 * "/{version}/..." use index 0, for "/api/{version}/..." index 1.
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));
+		return this;
+	}
+
+	/**
+	 * Add resolver to extract the version from a media type parameter found in
+	 * the Accept or Content-Type headers.
+	 * @param compatibleMediaType the media type to extract the parameter from with
+	 * the match established via {@link MediaType#isCompatibleWith(MediaType)}
+	 * @param paramName the name of the parameter
+	 */
+	public ApiVersionConfigurer useMediaTypeParameter(MediaType compatibleMediaType, String paramName) {
+		this.versionResolvers.add(new MediaTypeParamApiVersionResolver(compatibleMediaType, paramName));
 		return this;
 	}
 
