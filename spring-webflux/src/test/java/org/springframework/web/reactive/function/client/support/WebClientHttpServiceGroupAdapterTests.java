@@ -16,43 +16,32 @@
 
 package org.springframework.web.reactive.function.client.support;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
-import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link WebClientHttpServiceGroupAdapterRuntimeHints}.
+ * Tests for {@link WebClientHttpServiceGroupAdapter}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Stephane Nicoll
  */
-class WebClientHttpServiceGroupAdapterRuntimeHintsTests {
-
-	private RuntimeHints hints;
-
-	@BeforeEach
-	void setUp() {
-		this.hints = new RuntimeHints();
-		SpringFactoriesLoader.forResourceLocation("META-INF/spring/aot.factories")
-				.load(RuntimeHintsRegistrar.class)
-				.forEach(registrar ->
-						registrar.registerHints(this.hints, ClassUtils.getDefaultClassLoader()));
-	}
+class WebClientHttpServiceGroupAdapterTests {
 
 	@Test
-	void shouldRegisterHintsForAdapter() {
+	void registerInstantiationHints() throws Exception {
+		RuntimeHints hints = new RuntimeHints();
+		AotServices.factories().load(RuntimeHintsRegistrar.class)
+				.forEach(registrar -> registrar.registerHints(hints,
+						ClassUtils.getDefaultClassLoader()));
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onType(WebClientHttpServiceGroupAdapter.class)
-				.withMemberCategory(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
-				.accepts(this.hints);
-
+				.onConstructorInvocation(WebClientHttpServiceGroupAdapter.class.getConstructor())).accepts(hints);
 	}
 
 }

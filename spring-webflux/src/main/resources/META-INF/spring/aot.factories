@@ -1,2 +1,0 @@
-org.springframework.aot.hint.RuntimeHintsRegistrar= \
-org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapterRuntimeHints
