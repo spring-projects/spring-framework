@@ -253,8 +253,7 @@ public abstract class ScriptUtils {
 					blockCommentEndDelimiter, statements);
 
 			int stmtNumber = 0;
-			Statement stmt = connection.createStatement();
-			try {
+			try (Statement stmt = connection.createStatement()) {
 				for (String statement : statements) {
 					stmtNumber++;
 					try {
@@ -270,27 +269,19 @@ public abstract class ScriptUtils {
 								warningToLog = warningToLog.getNextWarning();
 							}
 						}
-					}
-					catch (SQLException ex) {
+					} catch (SQLException ex) {
 						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 						if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 							if (logger.isDebugEnabled()) {
 								logger.debug(ScriptStatementFailedException.buildErrorMessage(statement, stmtNumber, resource), ex);
 							}
-						}
-						else {
+						} else {
 							throw new ScriptStatementFailedException(statement, stmtNumber, resource, ex);
 						}
 					}
 				}
-			}
-			finally {
-				try {
-					stmt.close();
-				}
-				catch (Throwable ex) {
-					logger.trace("Could not close JDBC Statement", ex);
-				}
+			} catch (Throwable ex) {
+				logger.trace("Could not close JDBC Statement", ex);
 			}
 
 			long elapsedTime = System.currentTimeMillis() - startTime;

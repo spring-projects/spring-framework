@@ -153,8 +153,7 @@ public abstract class AbstractResource implements Resource {
 	 */
 	@Override
 	public long contentLength() throws IOException {
-		InputStream is = getInputStream();
-		try {
+		try (InputStream is = getInputStream()) {
 			long size = 0;
 			byte[] buf = new byte[256];
 			int read;
@@ -162,14 +161,6 @@ public abstract class AbstractResource implements Resource {
 				size += read;
 			}
 			return size;
-		}
-		finally {
-			try {
-				is.close();
-			}
-			catch (IOException ex) {
-				debug(() -> "Could not close content-length InputStream for " + getDescription(), ex);
-			}
 		}
 	}
 

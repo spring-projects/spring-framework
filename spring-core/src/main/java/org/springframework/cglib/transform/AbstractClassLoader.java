@@ -61,20 +61,16 @@ abstract public class AbstractClassLoader extends ClassLoader {
                        name.replace('.','/') + ".class"
                   );
 
-           if (is == null) {
+			try (is) {
+				if (is == null) {
 
-              throw new ClassNotFoundException(name);
+					throw new ClassNotFoundException(name);
 
-           }
-           try {
+				}
 
-              r = new ClassReader(is);
+				r = new ClassReader(is);
 
-           } finally {
-
-              is.close();
-
-           }
+			}
         } catch (IOException e) {
             throw new ClassNotFoundException(name + ":" + e.getMessage());
         }

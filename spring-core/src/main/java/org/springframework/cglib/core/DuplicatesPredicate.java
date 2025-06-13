@@ -89,14 +89,12 @@ public class DuplicatesPredicate implements Predicate {
             continue;
           }
           InputStream is = cl.getResourceAsStream(c.getName().replace('.', '/') + ".class");
-          if (is == null) {
-            continue;
-          }
-          try {
-            new ClassReader(is).accept(finder, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-          } finally {
-            is.close();
-          }
+			try (is) {
+				if (is == null) {
+					continue;
+				}
+				new ClassReader(is).accept(finder, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+			}
         } catch (IOException ignored) {
         }
       }

@@ -63,16 +63,14 @@ class BridgeMethodResolver {
             Set bridges = (Set) entry.getValue();
             try {
                 InputStream is = classLoader.getResourceAsStream(owner.getName().replace('.', '/') + ".class");
-                if (is == null) {
-                    return resolved;
-                }
-                try {
-                    new ClassReader(is)
-                            .accept(new BridgedFinder(bridges, resolved),
-                                    ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-                } finally {
-                    is.close();
-                }
+				try (is) {
+					if (is == null) {
+						return resolved;
+					}
+					new ClassReader(is)
+							.accept(new BridgedFinder(bridges, resolved),
+									ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+				}
             } catch (IOException ignored) {}
         }
         return resolved;

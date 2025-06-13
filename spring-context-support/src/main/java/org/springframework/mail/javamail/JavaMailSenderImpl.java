@@ -342,14 +342,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * for. Throws a {@link MessagingException} if the connection attempt failed.
 	 */
 	public void testConnection() throws MessagingException {
-		Transport transport = null;
-		try {
-			transport = connectTransport();
-		}
-		finally {
-			if (transport != null) {
-				transport.close();
-			}
+		try (Transport ignored = connectTransport()) {
 		}
 	}
 

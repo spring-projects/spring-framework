@@ -316,21 +316,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				boolean exposeResource = (!transactional && isExposeListenerSession() &&
 						!TransactionSynchronizationManager.hasResource(obtainConnectionFactory()));
 				Observation observation = createObservation(message).start();
-				Observation.Scope scope = observation.openScope();
-				if (logger.isDebugEnabled()) {
-					logger.debug("Received message of type [" + message.getClass() + "] from consumer [" +
-							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
-							sessionToUse + "]");
-				}
-				try {
+				try (Observation.Scope ignored = observation.openScope()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Received message of type [" + message.getClass() + "] from consumer [" +
+								consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
+								sessionToUse + "]");
+					}
 					messageReceived(invoker, sessionToUse);
 					if (exposeResource) {
 						TransactionSynchronizationManager.bindResource(
 								obtainConnectionFactory(), new LocallyExposedJmsResourceHolder(sessionToUse));
 					}
 					doExecuteListener(sessionToUse, message);
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					if (status != null) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
@@ -339,8 +337,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 					}
 					try {
 						handleListenerException(ex);
-					}
-					catch (Throwable throwable) {
+					} catch (Throwable throwable) {
 						observation.error(throwable);
 						throw throwable;
 					}
@@ -349,13 +346,11 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 					if (ex instanceof JMSException jmsException) {
 						throw jmsException;
 					}
-				}
-				finally {
+				} finally {
 					if (exposeResource) {
 						TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
 					}
 					observation.stop();
-					scope.close();
 				}
 				// Indicate that a message has been received.
 				return true;

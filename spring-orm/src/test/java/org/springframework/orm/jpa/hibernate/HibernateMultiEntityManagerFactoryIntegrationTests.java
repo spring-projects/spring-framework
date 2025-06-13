@@ -58,13 +58,9 @@ class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContain
 
 	@Test
 	void testEntityManagerFactory2() {
-		EntityManager em = this.entityManagerFactory2.createEntityManager();
-		try {
+		try (EntityManager em = this.entityManagerFactory2.createEntityManager()) {
 			assertThatIllegalArgumentException().isThrownBy(() ->
 					em.createQuery("select tb from TestBean"));
-		}
-		finally {
-			em.close();
 		}
 	}
 
