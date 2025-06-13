@@ -24,7 +24,6 @@ import java.util.Iterator;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.log.LogAccessor;
-import org.springframework.core.retry.support.MaxRetryAttemptsPolicy;
 import org.springframework.util.Assert;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
@@ -59,7 +58,8 @@ public class RetryTemplate implements RetryOperations {
 
 	private static final LogAccessor logger = new LogAccessor(RetryTemplate.class);
 
-	private RetryPolicy retryPolicy = new MaxRetryAttemptsPolicy();
+
+	private RetryPolicy retryPolicy = RetryPolicy.withMaxAttempts(3);
 
 	private BackOff backOffPolicy = new FixedBackOff(Duration.ofSeconds(1));
 
@@ -98,9 +98,11 @@ public class RetryTemplate implements RetryOperations {
 
 	/**
 	 * Set the {@link RetryPolicy} to use.
-	 * <p>Defaults to {@code new MaxRetryAttemptsPolicy()}.
+	 * <p>Defaults to {@code RetryPolicy.withMaxAttempts(3)}.
 	 * @param retryPolicy the retry policy to use
-	 * @see MaxRetryAttemptsPolicy
+	 * @see RetryPolicy#withMaxAttempts(int)
+	 * @see RetryPolicy#withMaxDuration(Duration)
+	 * @see RetryPolicy#builder()
 	 */
 	public void setRetryPolicy(RetryPolicy retryPolicy) {
 		Assert.notNull(retryPolicy, "Retry policy must not be null");
