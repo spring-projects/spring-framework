@@ -439,8 +439,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				// ignore
 			}
 			@Override
-			public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
-				// ignore
+			public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ignored) {
 			}
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {

@@ -77,8 +77,7 @@ abstract class WebClientUtils {
 			try {
 				uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
 			}
-			catch (URISyntaxException ex) {
-				// ignore
+			catch (URISyntaxException ignored) {
 			}
 		}
 		return httpMethod.name() + " " + uri;

@@ -1000,8 +1000,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				URI uri = ResourceUtils.toURI(elementNamespace);
 				return uri.getHost();
 			}
-			catch (URISyntaxException ex) {
-				// ignore
+			catch (URISyntaxException ignored) {
 			}
 			return dataHandler.getName();
 		}

@@ -526,8 +526,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			try {
 				conn.close();
 			}
-			catch (Throwable ex) {
-				// ignore
+			catch (Throwable ignored) {
 			}
 		}
 	}

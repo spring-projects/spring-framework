@@ -191,8 +191,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		try {
 			body.close();
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 	}
 

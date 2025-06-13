@@ -611,8 +611,7 @@ class ExceptionHandlerExceptionResolverTests {
 
 		@ExceptionHandler(SocketTimeoutException.class)
 		@ResponseStatus(code = HttpStatus.GATEWAY_TIMEOUT, reason = "gateway.timeout")
-		public void handleException(SocketTimeoutException ex) {
-
+		public void handleException(SocketTimeoutException ignored) {
 		}
 	}
 

@@ -1223,8 +1223,7 @@ public class HttpHeaders implements Serializable {
 			try {
 				port = Integer.parseInt(portString);
 			}
-			catch (NumberFormatException ex) {
-				// ignore
+			catch (NumberFormatException ignored) {
 			}
 		}
 

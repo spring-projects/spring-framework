@@ -158,8 +158,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 		try {
 			rb.echoException(new ServletException());
 		}
-		catch (ServletException ex) {
-
+		catch (ServletException ignored) {
 		}
 		assertThat(txMan.commits).as("Transaction counts match").isEqualTo(1);
 	}
@@ -272,7 +271,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 					TransactionInterceptor.currentTransactionStatus();
 					throw new RuntimeException("Shouldn't have a transaction");
 				}
-				catch (NoTransactionException ex) {
+				catch (NoTransactionException ignored) {
 					// this is Ok
 				}
 			}

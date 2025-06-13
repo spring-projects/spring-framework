@@ -622,8 +622,7 @@ public class MvcUriComponentsBuilder {
 			try {
 				return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore
+			catch (NoSuchBeanDefinitionException ignored) {
 			}
 		}
 		return defaultUriComponentsContributor;

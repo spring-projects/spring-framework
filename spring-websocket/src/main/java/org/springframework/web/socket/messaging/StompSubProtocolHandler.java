@@ -412,8 +412,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			try {
 				session.close(CloseStatus.PROTOCOL_ERROR);
 			}
-			catch (IOException ex) {
-				// Ignore
+			catch (IOException ignored) {
 			}
 		}
 	}
