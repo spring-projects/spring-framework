@@ -156,5 +156,123 @@ class ResourceHttpMessageConverterTests {
 
 		assertThat(outputMessage.getHeaders().getContentLength()).isEqualTo(0);
 	}
+	@Test
+	void canReadWithNullMediaType() {
+		assertThat(converter.canRead(Resource.class, null)).isTrue();
+	}
+
+	@Test
+	void canWriteWithNullMediaType() {
+		assertThat(converter.canWrite(Resource.class, null)).isTrue();
+	}
+
+	@Test
+	void shouldReadWithNullContentDisposition() throws IOException {
+		byte[] body = FileCopyUtils.copyToByteArray(getClass().getResourceAsStream("logo.jpg"));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
+		inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
+		Resource actualResource = converter.read(Resource.class, inputMessage);
+		assertThat(FileCopyUtils.copyToByteArray(actualResource.getInputStream())).isEqualTo(body);
+		assertThat(actualResource.getFilename()).isNull();
+	}
+
+	@Test
+	void getContentLengthWithInputStreamResource() throws IOException {
+		try (InputStream body = getClass().getResourceAsStream("logo.jpg")) {
+			InputStreamResource resource = new InputStreamResource(body);
+			Long contentLength = converter.getContentLength(resource, MediaType.IMAGE_JPEG);
+			assertThat(contentLength).isNull();
+		}
+	}
+
+	@Test
+	void getContentLengthWithByteArrayResource() throws IOException {
+		byte[] bytes = new byte[100];
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+		Long contentLength = converter.getContentLength(resource, MediaType.APPLICATION_OCTET_STREAM);
+		assertThat(contentLength).isEqualTo(100);
+	}
+
+	@Test
+	void supportsRepeatableWritesWithInputStreamResource() {
+		InputStreamResource resource = new InputStreamResource(mock(InputStream.class));
+		assertThat(converter.supportsRepeatableWrites(resource)).isFalse();
+	}
+
+	@Test
+	void supportsRepeatableWritesWithByteArrayResource() {
+		ByteArrayResource resource = new ByteArrayResource(new byte[0]);
+		assertThat(converter.supportsRepeatableWrites(resource)).isTrue();
+	}
+
+	@Test
+	void getDefaultContentTypeWithKnownExtension() throws IOException {
+		Resource resource = new ClassPathResource("logo.jpg", getClass());
+		MediaType mediaType = converter.getDefaultContentType(resource);
+		assertThat(mediaType).isEqualTo(MediaType.IMAGE_JPEG);
+	}
+
+	@Test
+	void getDefaultContentTypeWithUnknownExtension() throws IOException {
+		Resource resource = new ByteArrayResource(new byte[0]) {
+			@Override
+			public String getFilename() {
+				return "test.unknown";
+			}
+		};
+		MediaType mediaType = converter.getDefaultContentType(resource);
+		assertThat(mediaType).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+	@Test
+	void getContentLengthWithUnknownLengthShouldReturnNull() throws IOException {
+		Resource resource = new ByteArrayResource(new byte[0]) {
+			@Override
+			public long contentLength() {
+				return -1;
+			}
+		};
+		assertThat(converter.getContentLength(resource, MediaType.APPLICATION_OCTET_STREAM)).isNull();
+	}
+
+	@Test
+	void getDefaultContentTypeWithNoFilenameShouldFallbackToOctetStream() {
+		Resource resource = new ByteArrayResource(new byte[0]) {
+			@Override
+			public String getFilename() {
+				return null;
+			}
+		};
+		assertThat(converter.getDefaultContentType(resource)).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+	@Test
+	void supportsWithNonResourceClassShouldReturnFalse() {
+		assertThat(converter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).isFalse();
+		assertThat(converter.canWrite(String.class, MediaType.APPLICATION_OCTET_STREAM)).isFalse();
+	}
+
+	@Test
+	void shouldWriteWithCustomContentDisposition() throws IOException {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		Resource body = new ClassPathResource("logo.jpg", getClass());
+		ContentDisposition contentDisposition = ContentDisposition.inline()
+				.filename("custom_logo.jpg")
+				.build();
+		outputMessage.getHeaders().setContentDisposition(contentDisposition);
+
+		converter.write(body, null, outputMessage);
+
+		assertThat(outputMessage.getHeaders().getContentDisposition().getFilename())
+				.isEqualTo("custom_logo.jpg");
+	}
+
+	@Test
+	void writeContentWhenInputStreamIsEmpty() throws IOException {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		Resource resource = new ByteArrayResource(new byte[0]);
+		converter.write(resource, MediaType.APPLICATION_OCTET_STREAM, outputMessage);
+		assertThat(outputMessage.getBodyAsBytes()).isEmpty();
+	}
 
 }

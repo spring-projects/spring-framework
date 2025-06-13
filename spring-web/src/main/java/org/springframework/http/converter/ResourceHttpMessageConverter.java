@@ -16,10 +16,8 @@
 
 package org.springframework.http.converter;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -147,31 +145,14 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
-
-		// We cannot use try-with-resources here for the InputStream, since we have
-		// custom handling of the close() method in a finally-block.
-		try {
-			InputStream in = resource.getInputStream();
-			try {
-				OutputStream out = outputMessage.getBody();
-				in.transferTo(out);
-				out.flush();
-			}
-			catch (NullPointerException ex) {
-				// ignore, see SPR-13620
-			}
-			finally {
-				try {
-					in.close();
-				}
-				catch (Throwable ex) {
-					// ignore, see SPR-12999
-				}
-			}
+			throws HttpMessageNotWritableException {
+		try (InputStream in = resource.getInputStream()) {
+			var body = outputMessage.getBody();
+			in.transferTo(body);
+			body.flush();
 		}
-		catch (FileNotFoundException ex) {
-			// ignore, see SPR-12999
+		catch (Throwable ignored) {
+			// see SPR-12999, SPR-13620
 		}
 	}
 
