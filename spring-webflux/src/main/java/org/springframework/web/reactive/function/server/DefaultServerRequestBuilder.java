@@ -357,8 +357,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.cache();
 				}
 			}
-			catch (InvalidMediaTypeException ex) {
-				// Ignore
+			catch (InvalidMediaTypeException ignored) {
 			}
 			return EMPTY_FORM_DATA;
 		}
@@ -379,8 +378,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.cache();
 				}
 			}
-			catch (InvalidMediaTypeException ex) {
-				// Ignore
+			catch (InvalidMediaTypeException ignored) {
 			}
 			return EMPTY_MULTIPART_DATA;
 		}

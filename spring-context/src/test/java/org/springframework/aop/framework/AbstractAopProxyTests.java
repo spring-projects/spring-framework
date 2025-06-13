@@ -233,8 +233,7 @@ abstract class AbstractAopProxyTests {
 		try {
 			p2.echo(new IOException());
 		}
-		catch (IOException ex) {
-
+		catch (IOException ignored) {
 		}
 		assertThat(cta.getCalls()).isEqualTo(2);
 	}

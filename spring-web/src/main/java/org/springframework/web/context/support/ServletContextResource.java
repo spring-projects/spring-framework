@@ -122,8 +122,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 			try {
 				is.close();
 			}
-			catch (IOException ex) {
-				// ignore
+			catch (IOException ignored) {
 			}
 			return true;
 		}

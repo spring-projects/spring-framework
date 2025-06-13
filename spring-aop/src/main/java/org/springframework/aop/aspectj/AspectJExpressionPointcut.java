@@ -453,9 +453,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 							ClassUtils.toClassArray(ifcs), targetClass.getClassLoader());
 					targetMethod = ClassUtils.getMostSpecificMethod(targetMethod, compositeInterface);
 				}
-				catch (IllegalArgumentException ex) {
-					// Implemented interfaces probably expose conflicting method signatures...
-					// Proceed with original target method.
+				// Implemented interfaces probably expose conflicting method signatures...
+				// Proceed with original target method.
+				catch (IllegalArgumentException ignored) {
 				}
 			}
 		}
@@ -478,7 +478,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 					try {
 						shadowMatch = pointcutExpression.matchesMethodExecution(methodToMatch);
 					}
-					catch (ReflectionWorldException ex) {
+					catch (ReflectionWorldException ignored) {
 						// Failed to introspect target method, probably because it has been loaded
 						// in a special ClassLoader. Let's try the declaring ClassLoader instead...
 						try {
@@ -501,7 +501,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 						try {
 							shadowMatch = pointcutExpression.matchesMethodExecution(methodToMatch);
 						}
-						catch (ReflectionWorldException ex) {
+						catch (ReflectionWorldException ignored) {
 							// Could neither introspect the target class nor the proxy class ->
 							// let's try the original method's declaring class before we give up...
 							try {

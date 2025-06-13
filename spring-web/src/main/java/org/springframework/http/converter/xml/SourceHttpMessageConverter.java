@@ -270,8 +270,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 				transform(t, new StreamResult(os));
 				return os.count;
 			}
-			catch (TransformerException ex) {
-				// ignore
+			catch (TransformerException ignored) {
 			}
 		}
 		return null;

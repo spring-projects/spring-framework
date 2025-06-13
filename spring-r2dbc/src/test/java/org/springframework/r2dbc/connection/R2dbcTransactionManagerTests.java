@@ -710,8 +710,7 @@ class R2dbcTransactionManagerTests {
 			try {
 				return Mono.fromRunnable(() -> doAfterCompletion(status));
 			}
-			catch (Throwable ex) {
-				// ignore
+			catch (Throwable ignored) {
 			}
 
 			return Mono.empty();
