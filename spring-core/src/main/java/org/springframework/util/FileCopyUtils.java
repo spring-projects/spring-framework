@@ -229,8 +229,7 @@ public abstract class FileCopyUtils {
 		try {
 			closeable.close();
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 	}
 

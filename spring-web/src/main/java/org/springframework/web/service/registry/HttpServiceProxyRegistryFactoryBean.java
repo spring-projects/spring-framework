@@ -151,8 +151,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 				Class<?> clazz = ClassUtils.forName(className, HttpServiceGroupAdapter.class.getClassLoader());
 				groupAdapters.put(clientType, (HttpServiceGroupAdapter<?>) BeanUtils.instantiateClass(clazz));
 			}
-			catch (ClassNotFoundException ex) {
-				// ignore
+			catch (ClassNotFoundException ignored) {
 			}
 		}
 	}

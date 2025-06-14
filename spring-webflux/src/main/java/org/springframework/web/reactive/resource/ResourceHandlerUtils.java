@@ -76,8 +76,7 @@ public abstract class ResourceHandlerUtils {
 			Assert.isTrue(path.endsWith(FOLDER_SEPARATOR) || path.endsWith(WINDOWS_FOLDER_SEPARATOR),
 					"Resource location does not end with slash: " + path);
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 	}
 

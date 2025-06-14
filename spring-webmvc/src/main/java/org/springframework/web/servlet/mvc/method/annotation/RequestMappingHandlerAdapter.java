@@ -788,8 +788,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				return getBeanFactory().getBean(
 						DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// ignore
+			catch (NoSuchBeanDefinitionException ignored) {
 			}
 		}
 		return null;

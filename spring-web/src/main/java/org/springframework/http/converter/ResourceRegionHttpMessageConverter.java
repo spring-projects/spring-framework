@@ -183,8 +183,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			try {
 				in.close();
 			}
-			catch (IOException ex) {
-				// ignore
+			catch (IOException ignored) {
 			}
 		}
 	}
@@ -244,8 +243,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 					in.close();
 				}
 			}
-			catch (IOException ex) {
-				// ignore
+			catch (IOException ignored) {
 			}
 		}
 

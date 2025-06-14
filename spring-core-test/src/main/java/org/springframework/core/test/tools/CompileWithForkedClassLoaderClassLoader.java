@@ -84,8 +84,7 @@ final class CompileWithForkedClassLoaderClassLoader extends ClassLoader {
 			try (stream) {
 				return stream.readAllBytes();
 			}
-			catch (IOException ex) {
-				// ignore
+			catch (IOException ignored) {
 			}
 		}
 		return null;

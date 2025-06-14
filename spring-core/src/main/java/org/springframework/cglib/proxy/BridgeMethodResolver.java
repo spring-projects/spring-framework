@@ -73,7 +73,8 @@ class BridgeMethodResolver {
                 } finally {
                     is.close();
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+			}
         }
         return resolved;
     }

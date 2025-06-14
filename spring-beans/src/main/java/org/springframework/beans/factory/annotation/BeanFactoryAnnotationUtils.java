@@ -208,8 +208,8 @@ public abstract class BeanFactoryAnnotationUtils {
 					}
 				}
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore - can't compare qualifiers for a manually registered singleton object
+			catch (NoSuchBeanDefinitionException ignored) {
+				// can't compare qualifiers for a manually registered singleton object
 			}
 		}
 		return false;

@@ -113,8 +113,7 @@ class CallableInterceptorChain {
 			try {
 				future.cancel(true);
 			}
-			catch (Throwable ex) {
-				// Ignore
+			catch (Throwable ignored) {
 			}
 		}
 	}

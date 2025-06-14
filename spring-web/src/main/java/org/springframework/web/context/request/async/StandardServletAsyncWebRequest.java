@@ -235,8 +235,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 					break;
 				}
 			}
-			catch (InterruptedException ex) {
-				// ignore
+			catch (InterruptedException ignored) {
 			}
 		}
 

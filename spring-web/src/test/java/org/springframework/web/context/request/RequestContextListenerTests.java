@@ -93,7 +93,7 @@ class RequestContextListenerTests {
 		try {
 			thread.join();
 		}
-		catch (InterruptedException ex) {
+		catch (InterruptedException ignored) {
 		}
 		// Still bound to original thread, but at least completed.
 		assertThat(RequestContextHolder.getRequestAttributes()).isNotNull();

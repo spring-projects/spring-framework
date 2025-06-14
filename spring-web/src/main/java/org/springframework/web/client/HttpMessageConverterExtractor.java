@@ -152,8 +152,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		try {
 			return FileCopyUtils.copyToByteArray(response.getBody());
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 		return new byte[0];
 	}

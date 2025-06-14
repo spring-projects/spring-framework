@@ -119,8 +119,7 @@ class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 				ZonedDateTime expiresDate = ZonedDateTime.parse(expiresAttribute, DateTimeFormatter.RFC_1123_DATE_TIME);
 				return Duration.between(ZonedDateTime.now(expiresDate.getZone()), expiresDate).toSeconds();
 			}
-			catch (DateTimeParseException ex) {
-				// ignore
+			catch (DateTimeParseException ignored) {
 			}
 		}
 		return -1;

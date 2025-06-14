@@ -309,8 +309,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			try {
 				listener.onTimeout(event);
 			}
-			catch (Exception ex) {
-				// Ignore
+			catch (Exception ignored) {
 			}
 		}
 
@@ -318,8 +317,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			try {
 				listener.onError(event);
 			}
-			catch (Exception ex) {
-				// Ignore
+			catch (Exception ignored) {
 			}
 		}
 
@@ -327,8 +325,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			try {
 				listener.onComplete(event);
 			}
-			catch (Exception ex) {
-				// Ignore
+			catch (Exception ignored) {
 			}
 		}
 

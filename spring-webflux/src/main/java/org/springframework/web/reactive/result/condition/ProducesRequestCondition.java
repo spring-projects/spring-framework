@@ -211,8 +211,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 					return EMPTY_CONDITION;
 				}
 			}
-			catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ex) {
-				// Ignore
+			catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ignored) {
 			}
 		}
 		return null;

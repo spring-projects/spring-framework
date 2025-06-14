@@ -438,8 +438,7 @@ public class SpringFactoriesLoader {
 					return constructor;
 				}
 			}
-			catch (UnsupportedOperationException ex) {
-				// ignore
+			catch (UnsupportedOperationException ignored) {
 			}
 			return null;
 		}
