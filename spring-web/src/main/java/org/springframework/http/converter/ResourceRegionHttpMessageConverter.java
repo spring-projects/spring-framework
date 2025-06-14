@@ -38,9 +38,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
-import static java.lang.Math.min;
-import static org.springframework.util.StreamUtils.copyRange;
-
 /**
  * Implementation of {@link HttpMessageConverter} that can write a single
  * {@link ResourceRegion} or Collections of {@link ResourceRegion ResourceRegions}.
@@ -166,18 +163,29 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage) throws IOException {
 		Assert.notNull(region, "ResourceRegion must not be null");
+		HttpHeaders responseHeaders = outputMessage.getHeaders();
 
-		var start = region.getPosition();
-		var resourceLength = region.getResource().contentLength();
-		var end = min(start + region.getCount() - 1, resourceLength - 1);
-		var responseHeaders = outputMessage.getHeaders();
-		responseHeaders.setContentLength(end - start + 1);
+		long start = region.getPosition();
+		long end = start + region.getCount() - 1;
+		long resourceLength = region.getResource().contentLength();
+		end = Math.min(end, resourceLength - 1);
+		long rangeLength = end - start + 1;
 		responseHeaders.add("Content-Range", "bytes " + start + '-' + end + '/' + resourceLength);
+		responseHeaders.setContentLength(rangeLength);
 
-		try (var in = region.getResource().getInputStream()) {
-			copyRange(in, outputMessage.getBody(), start, end);
+		InputStream in = region.getResource().getInputStream();
+		// We cannot use try-with-resources here for the InputStream, since we have
+		// custom handling of the close() method in a finally-block.
+		try {
+			StreamUtils.copyRange(in, outputMessage.getBody(), start, end);
 		}
-		catch (IOException ignored) {
+		finally {
+			try {
+				in.close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
 		}
 	}
 
@@ -219,14 +227,14 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 					println(out);
 				}
 				long resourceLength = region.getResource().contentLength();
-				end = min(end, resourceLength - inputStreamPosition - 1);
+				end = Math.min(end, resourceLength - inputStreamPosition - 1);
 				print(out, "Content-Range: bytes " +
 						region.getPosition() + '-' + (region.getPosition() + region.getCount() - 1) +
 						'/' + resourceLength);
 				println(out);
 				println(out);
 				// Printing content
-				copyRange(in, out, start, end);
+				StreamUtils.copyRange(in, out, start, end);
 				inputStreamPosition += (end + 1);
 			}
 		}
