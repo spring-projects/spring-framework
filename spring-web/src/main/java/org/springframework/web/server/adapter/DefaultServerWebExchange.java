@@ -151,7 +151,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			return EMPTY_FORM_DATA;
 		}
 
-		HttpMessageReader<MultiValueMap<String, String>> reader = getReader(configurer, contentType, FORM_DATA_TYPE);
+		HttpMessageReader<MultiValueMap<String, String>> reader = getReader(configurer, MediaType.APPLICATION_FORM_URLENCODED, FORM_DATA_TYPE);
 		if (reader == null) {
 			return Mono.error(new IllegalStateException("No HttpMessageReader for " + contentType));
 		}
