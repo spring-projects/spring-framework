@@ -100,14 +100,14 @@ public class FixedBackOff implements BackOff {
 	}
 
 	/**
-	 * Set the maximum number of attempts in milliseconds.
+	 * Set the maximum number of attempts.
 	 */
 	public void setMaxAttempts(long maxAttempts) {
 		this.maxAttempts = maxAttempts;
 	}
 
 	/**
-	 * Return the maximum number of attempts in milliseconds.
+	 * Return the maximum number of attempts.
 	 */
 	public long getMaxAttempts() {
 		return this.maxAttempts;
