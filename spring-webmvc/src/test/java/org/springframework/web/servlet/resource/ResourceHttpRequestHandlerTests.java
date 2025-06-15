@@ -115,7 +115,7 @@ class ResourceHttpRequestHandlerTests {
 			this.handler.handleRequest(this.request, this.response);
 
 			assertThat(this.response.getStatus()).isEqualTo(200);
-			assertThat(this.response.getHeader("Allow")).isEqualTo("GET,HEAD,OPTIONS");
+			assertThat(this.response.getHeader("Allow")).isEqualTo("GET,QUERY,HEAD,OPTIONS");
 		}
 
 		@Test
