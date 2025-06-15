@@ -30,6 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
@@ -319,6 +320,7 @@ class ResourceHttpRequestHandlerTests {
 			this.handler.handleRequest(this.request, this.response);
 
 			assertThat(this.response.getStatus()).isEqualTo(416);
+			assertThat(this.response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_TYPE);
 			assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes */10");
 			assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 			assertThat(this.response.getHeaders("Accept-Ranges")).hasSize(1);

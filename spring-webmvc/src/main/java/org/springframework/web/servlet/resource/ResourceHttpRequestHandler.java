@@ -573,6 +573,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 						HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
 			}
 			catch (IllegalArgumentException ex) {
+				response.setContentType(null);
 				response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
 				response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
