@@ -18,6 +18,7 @@ package org.springframework.core.retry.support;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.retry.RetryExecution;
@@ -30,17 +31,24 @@ import static org.mockito.Mockito.verify;
  * Tests for {@link CompositeRetryListener}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Sam Brannen
  * @since 7.0
  */
 class CompositeRetryListenerTests {
 
 	private final RetryListener listener1 = mock();
 	private final RetryListener listener2 = mock();
+	private final RetryListener listener3 = mock();
 	private final RetryExecution retryExecution = mock();
 
 	private final CompositeRetryListener compositeRetryListener =
 			new CompositeRetryListener(List.of(listener1, listener2));
 
+
+	@BeforeEach
+	void addListener() {
+		compositeRetryListener.addListener(listener3);
+	}
 
 	@Test
 	void beforeRetry() {
@@ -48,6 +56,7 @@ class CompositeRetryListenerTests {
 
 		verify(listener1).beforeRetry(retryExecution);
 		verify(listener2).beforeRetry(retryExecution);
+		verify(listener3).beforeRetry(retryExecution);
 	}
 
 	@Test
@@ -57,6 +66,7 @@ class CompositeRetryListenerTests {
 
 		verify(listener1).onRetrySuccess(retryExecution, result);
 		verify(listener2).onRetrySuccess(retryExecution, result);
+		verify(listener3).onRetrySuccess(retryExecution, result);
 	}
 
 	@Test
@@ -66,6 +76,7 @@ class CompositeRetryListenerTests {
 
 		verify(listener1).onRetryFailure(retryExecution, exception);
 		verify(listener2).onRetryFailure(retryExecution, exception);
+		verify(listener3).onRetryFailure(retryExecution, exception);
 	}
 
 	@Test
@@ -75,6 +86,7 @@ class CompositeRetryListenerTests {
 
 		verify(listener1).onRetryPolicyExhaustion(retryExecution, exception);
 		verify(listener2).onRetryPolicyExhaustion(retryExecution, exception);
+		verify(listener3).onRetryPolicyExhaustion(retryExecution, exception);
 	}
 
 }
