@@ -39,6 +39,9 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.AvoidNestedBlocksCheck"/>
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyCatchBlockCheck">
+			<property name="exceptionVariableName" value="expected|ignore"/>
+		</module>
 
 		<!-- Class Design -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck"/>

@@ -48,7 +48,7 @@ final class Target_Introspector {
 				} while (!c.getName().equals("java.lang.Object"));
 			}
 		}
-		catch (Exception exception) {
+		catch (Exception ignored) {
 		}
 		return null;
 	}
