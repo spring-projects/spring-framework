@@ -17,14 +17,13 @@
 package org.springframework.core.retry;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
 
-import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.log.LogAccessor;
-import org.springframework.core.retry.support.CompositeRetryListener;
 import org.springframework.core.retry.support.MaxRetryAttemptsPolicy;
 import org.springframework.util.Assert;
 import org.springframework.util.backoff.BackOff;
@@ -48,6 +47,7 @@ import org.springframework.util.backoff.FixedBackOff;
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 7.0
  * @see RetryOperations
  * @see RetryPolicy
@@ -57,14 +57,13 @@ import org.springframework.util.backoff.FixedBackOff;
  */
 public class RetryTemplate implements RetryOperations {
 
-	protected final LogAccessor logger = new LogAccessor(LogFactory.getLog(getClass()));
+	private static final LogAccessor logger = new LogAccessor(RetryTemplate.class);
 
-	protected RetryPolicy retryPolicy = new MaxRetryAttemptsPolicy();
+	private RetryPolicy retryPolicy = new MaxRetryAttemptsPolicy();
 
-	protected BackOff backOffPolicy = new FixedBackOff(Duration.ofSeconds(1));
+	private BackOff backOffPolicy = new FixedBackOff(Duration.ofSeconds(1));
 
-	protected RetryListener retryListener = new RetryListener() {
-	};
+	private RetryListener retryListener = new RetryListener() {};
 
 
 	/**
@@ -121,7 +120,8 @@ public class RetryTemplate implements RetryOperations {
 
 	/**
 	 * Set the {@link RetryListener} to use.
-	 * <p>If multiple listeners are needed, use a {@link CompositeRetryListener}.
+	 * <p>If multiple listeners are needed, use a
+	 * {@link org.springframework.core.retry.support.CompositeRetryListener}.
 	 * <p>Defaults to a <em>no-op</em> implementation.
 	 * @param retryListener the retry listener to use
 	 */
@@ -158,10 +158,26 @@ public class RetryTemplate implements RetryOperations {
 			// Retry process starts here
 			RetryExecution retryExecution = this.retryPolicy.start();
 			BackOffExecution backOffExecution = this.backOffPolicy.start();
-			List<Throwable> suppressedExceptions = new ArrayList<>();
+			Deque<Throwable> exceptions = new ArrayDeque<>();
+			exceptions.add(initialException);
 
 			Throwable retryException = initialException;
 			while (retryExecution.shouldRetry(retryException)) {
+				try {
+					long duration = backOffExecution.nextBackOff();
+					if (duration == BackOffExecution.STOP) {
+						break;
+					}
+					logger.debug(() -> "Backing off for %dms after retryable operation '%s'"
+							.formatted(duration, retryableName));
+					Thread.sleep(duration);
+				}
+				catch (InterruptedException interruptedException) {
+					Thread.currentThread().interrupt();
+					throw new RetryException(
+							"Unable to back off for retryable operation '%s'".formatted(retryableName),
+							interruptedException);
+				}
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
 					this.retryListener.beforeRetry(retryExecution);
@@ -172,29 +188,22 @@ public class RetryTemplate implements RetryOperations {
 					return result;
 				}
 				catch (Throwable currentAttemptException) {
+					logger.debug(() -> "Retry attempt for operation '%s' failed due to '%s'"
+							.formatted(retryableName, currentAttemptException));
 					this.retryListener.onRetryFailure(retryExecution, currentAttemptException);
-					try {
-						long duration = backOffExecution.nextBackOff();
-						logger.debug(() -> "Retryable operation '%s' failed due to '%s'; backing off for %dms"
-									.formatted(retryableName, currentAttemptException.getMessage(), duration));
-						Thread.sleep(duration);
-					}
-					catch (InterruptedException interruptedException) {
-						Thread.currentThread().interrupt();
-						throw new RetryException(
-								"Unable to back off for retryable operation '%s'".formatted(retryableName),
-								interruptedException);
-					}
-					suppressedExceptions.add(currentAttemptException);
+					exceptions.add(currentAttemptException);
 					retryException = currentAttemptException;
 				}
 			}
+
 			// The RetryPolicy has exhausted at this point, so we throw a RetryException with the
 			// initial exception as the cause and remaining exceptions as suppressed exceptions.
 			RetryException finalException = new RetryException(
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
-					initialException);
-			suppressedExceptions.forEach(finalException::addSuppressed);
+					exceptions.removeLast());
+			for (Iterator<Throwable> it = exceptions.descendingIterator(); it.hasNext();) {
+				finalException.addSuppressed(it.next());
+			}
 			this.retryListener.onRetryPolicyExhaustion(retryExecution, finalException);
 			throw finalException;
 		}

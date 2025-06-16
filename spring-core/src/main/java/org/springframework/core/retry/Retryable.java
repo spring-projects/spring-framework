@@ -16,6 +16,8 @@
 
 package org.springframework.core.retry;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * {@code Retryable} is a functional interface that can be used to implement any
  * generic block of code that can potentially be retried.
@@ -36,7 +38,7 @@ public interface Retryable<R> {
 	 * @return the result of the operation
 	 * @throws Throwable if an error occurs during the execution of the operation
 	 */
-	R execute() throws Throwable;
+	@Nullable R execute() throws Throwable;
 
 	/**
 	 * A unique, logical name for this retryable operation, used to distinguish

@@ -16,6 +16,8 @@
 
 package org.springframework.core.retry;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.retry.support.CompositeRetryListener;
 
 /**
@@ -42,7 +44,7 @@ public interface RetryListener {
 	 * @param retryExecution the retry execution
 	 * @param result the result of the {@link Retryable}
 	 */
-	default void onRetrySuccess(RetryExecution retryExecution, Object result) {
+	default void onRetrySuccess(RetryExecution retryExecution, @Nullable Object result) {
 	}
 
 	/**

@@ -19,6 +19,8 @@ package org.springframework.core.retry.support;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.retry.RetryExecution;
 import org.springframework.core.retry.RetryListener;
 import org.springframework.core.retry.RetryTemplate;
@@ -26,10 +28,9 @@ import org.springframework.util.Assert;
 
 /**
  * A composite implementation of the {@link RetryListener} interface.
+ * Delegate listeners will be called in their registration order.
  *
  * <p>This class is used to compose multiple listeners within a {@link RetryTemplate}.
- *
- * <p>Delegate listeners will be called in their registration order.
  *
  * @author Mahmoud Ben Hassine
  * @since 7.0
@@ -63,13 +64,14 @@ public class CompositeRetryListener implements RetryListener {
 		this.listeners.add(listener);
 	}
 
+
 	@Override
 	public void beforeRetry(RetryExecution retryExecution) {
 		this.listeners.forEach(retryListener -> retryListener.beforeRetry(retryExecution));
 	}
 
 	@Override
-	public void onRetrySuccess(RetryExecution retryExecution, Object result) {
+	public void onRetrySuccess(RetryExecution retryExecution, @Nullable Object result) {
 		this.listeners.forEach(listener -> listener.onRetrySuccess(retryExecution, result));
 	}
 
