@@ -4,8 +4,31 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
     <description>Programmatic approach to maintain code quality on large scale.</description>
-    <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />
-    <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
+	 <rule ref="category/java/bestpractices.xml/UnusedAssignment" />
+	 <rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
+	 <rule ref="category/java/bestpractices.xml/UnusedLocalVariable" />
+	 <rule ref="category/java/bestpractices.xml/UnusedPrivateField" />
+	 <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
+	 <rule ref="category/java/bestpractices.xml/UseTryWithResources" />
+	 <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryAnnotationValueElement" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryBoxing" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryCast" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryConstructor" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryLocalBeforeReturn" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
+	 <rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
+	 <rule ref="category/java/codestyle.xml/UnnecessarySemicolon" />
+	 <rule ref="category/java/codestyle.xml/UnusedImports" />
+	 <rule ref="category/java/codestyle.xml/UselessParentheses" />
+	 <rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
+	 <rule ref="category/java/design.xml/AvoidCatchingGenericException" />
+	 <rule ref="category/java/design.xml/AvoidThrowingRawExceptionTypes" />
+	<rule ref="category/java/bestpractices.xml/MissingOverride" />
+	<rule ref="category/java/bestpractices.xml/UnusedPrivateField" />
 	<rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
-<!--	<rule ref="category/java/bestpractices.xml/UnusedPrivateField" />-->
+    <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
+    <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />
 </ruleset>

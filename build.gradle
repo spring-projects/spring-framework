@@ -38,6 +38,8 @@ configure(allprojects) { project ->
 	}
 	pmd {
 		ruleSetFiles = files(".pmd/ruleset.xml")
+//		ruleSets = ["category/java/errorprone.xml"]
+//		ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
 	}
 }
 
