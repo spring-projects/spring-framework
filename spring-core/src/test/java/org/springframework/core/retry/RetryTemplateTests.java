@@ -139,7 +139,7 @@ class RetryTemplateTests {
 	}
 
 	@Test
-	void retryWithExceptionIncludes() throws Exception {
+	void retryWithExceptionIncludes() {
 		var invocationCount = new AtomicInteger();
 
 		var retryable = new Retryable<>() {
@@ -181,7 +181,49 @@ class RetryTemplateTests {
 	}
 
 	@Test
-	void retryWithExceptionExcludes() throws Exception {
+	void retryWithExceptionExcludes() {
+		var invocationCount = new AtomicInteger();
+
+		var retryable = new Retryable<>() {
+			@Override
+			public String execute() throws Exception {
+				return switch (invocationCount.incrementAndGet()) {
+					case 1 -> throw new IOException();
+					case 2 -> throw new IOException();
+					case 3 -> throw new CustomFileNotFoundException();
+					default -> "success";
+				};
+			}
+
+			@Override
+			public String getName() {
+				return "test";
+			}
+		};
+
+		var retryPolicy = RetryPolicy.builder()
+				.maxAttempts(Integer.MAX_VALUE)
+				.excludes(FileNotFoundException.class)
+				.build();
+
+		retryTemplate.setRetryPolicy(retryPolicy);
+
+		assertThat(invocationCount).hasValue(0);
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
+				.withCauseExactlyInstanceOf(CustomFileNotFoundException.class)
+				.extracting(Throwable::getSuppressed, array(Throwable[].class))
+				.satisfiesExactly(
+					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
+					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
+				);
+		// 3 = 1 initial invocation + 2 retry attempts
+		assertThat(invocationCount).hasValue(3);
+	}
+
+	@Test
+	void retryWithExceptionIncludesAndExcludes() {
 		var invocationCount = new AtomicInteger();
 
 		var retryable = new Retryable<>() {
@@ -222,6 +264,7 @@ class RetryTemplateTests {
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class CustomFileNotFoundException extends FileNotFoundException {
