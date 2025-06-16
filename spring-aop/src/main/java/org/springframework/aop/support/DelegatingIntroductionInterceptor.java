@@ -18,13 +18,12 @@ package org.springframework.aop.support;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.util.Assert;
 
-import static java.util.Objects.requireNonNull;
+import java.util.Objects;
 
 /**
  * Convenient implementation of the
@@ -112,7 +111,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (requireNonNull(retVal).equals(this.delegate) && mi instanceof ProxyMethodInvocation pmi) {
+			if (Objects.requireNonNull(retVal).equals(this.delegate) && mi instanceof ProxyMethodInvocation pmi) {
 				Object proxy = pmi.getProxy();
 				if (mi.getMethod().getReturnType().isInstance(proxy)) {
 					retVal = proxy;
