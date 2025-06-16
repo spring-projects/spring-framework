@@ -1,7 +1,7 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
-//	id 'pmd'
+	id 'pmd'
 }
 
 repositories {
@@ -68,5 +68,5 @@ test {
 jar.dependsOn check
 
 pmd {
-	ruleSets = ["category/java/bestpractices.xml"]
+	ruleSetFiles = files(".pmd/ruleset.xml")
 }

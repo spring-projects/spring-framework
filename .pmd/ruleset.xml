@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Definition of Done"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    <description>Programmatic approach to maintain code quality on large scale.</description>
+<!--    <exclude-pattern>.*/io.quarkus.analytics.dto.*</exclude-pattern>-->
+<!--    <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />-->
+    <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
+</ruleset>
