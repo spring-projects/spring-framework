@@ -64,7 +64,7 @@ class ProtobufHttpMessageConverterTests {
 	void canWrite() {
 		assertThat(this.converter.canWrite(Msg.class, null)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
-		assertThat(this.converter.canRead(Msg.class, this.testPlusProtoMediaType)).isTrue();
+		assertThat(this.converter.canWrite(Msg.class, this.testPlusProtoMediaType)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
 	}
