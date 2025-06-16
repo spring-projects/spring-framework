@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -360,29 +360,39 @@ public abstract class UriUtils {
 
 
 	/**
-	 * Decode the given encoded URI component.
-	 * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
-	 * @param source the encoded String
-	 * @param encoding the character encoding to use
+	 * Decode the given encoded URI component value by replacing each
+	 * "<i>{@code %xy}</i>" sequence with a hexadecimal representation of the
+	 * character in the specified character encoding, leaving other characters
+	 * unmodified.
+	 * @param source the encoded URI component value
+	 * @param encoding the character encoding to use to decode the "<i>{@code %xy}</i>"
+	 * sequences
 	 * @return the decoded value
-	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @throws IllegalArgumentException if the given source contains invalid encoded
+	 * sequences
 	 * @see StringUtils#uriDecode(String, Charset)
-	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String, String) java.net.URLDecoder#decode
+	 * for HTML form decoding
 	 */
 	public static String decode(String source, String encoding) {
 		return StringUtils.uriDecode(source, Charset.forName(encoding));
 	}
 
 	/**
-	 * Decode the given encoded URI component.
-	 * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
-	 * @param source the encoded String
-	 * @param charset the character encoding to use
+	 * Decode the given encoded URI component value by replacing each
+	 * "<i>{@code %xy}</i>" sequence with a hexadecimal representation of the
+	 * character in the specified character encoding, leaving other characters
+	 * unmodified.
+	 * @param source the encoded URI component value
+	 * @param charset the character encoding to use to decode the "<i>{@code %xy}</i>"
+	 * sequences
 	 * @return the decoded value
-	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @throws IllegalArgumentException if the given source contains invalid encoded
+	 * sequences
 	 * @since 5.0
 	 * @see StringUtils#uriDecode(String, Charset)
-	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String, String) java.net.URLDecoder#decode
+	 * for HTML form decoding
 	 */
 	public static String decode(String source, Charset charset) {
 		return StringUtils.uriDecode(source, charset);

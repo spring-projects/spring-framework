@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -59,6 +61,7 @@ import org.springframework.web.testfixture.xml.Pojo;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
@@ -521,7 +524,36 @@ class RestClientIntegrationTests {
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertThat(request.getPath()).isEqualTo("/pojo/capitalize");
-			assertThat(request.getBody().readUtf8()).isEqualTo("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}");
+			assertThat(request.getBody().readUtf8()).isEqualTo("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	void postUserAsJsonWithJsonView(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "application/json")
+				.setBody("{\"username\":\"USERNAME\"}"));
+
+		User result = this.restClient.post()
+				.uri("/user/capitalize")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.hint(JsonView.class.getName(), PublicView.class)
+				.body(new User("username", "password"))
+				.retrieve()
+				.body(User.class);
+
+		assertThat(result).isNotNull();
+		assertThat(result.username()).isEqualTo("USERNAME");
+		assertThat(result.password()).isNull();
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/user/capitalize");
+			assertThat(request.getBody().readUtf8()).isEqualTo("{\"username\":\"username\"}");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});
@@ -763,6 +795,39 @@ class RestClientIntegrationTests {
 
 		expectRequestCount(1);
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
+	}
+
+	@ParameterizedRestClientTest
+	void exchangeForRequiredValue(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setBody("Hello Spring!"));
+
+		String result = this.restClient.get()
+				.uri("/greeting")
+				.header("X-Test-Header", "testvalue")
+				.exchangeForRequiredValue((request, response) -> new String(RestClientUtils.getBody(response), UTF_8));
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeader("X-Test-Header")).isEqualTo("testvalue");
+			assertThat(request.getPath()).isEqualTo("/greeting");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	@SuppressWarnings("DataFlowIssue")
+	void exchangeForNullRequiredValue(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setBody("Hello Spring!"));
+
+		assertThatIllegalStateException().isThrownBy(() -> this.restClient.get()
+				.uri("/greeting")
+				.header("X-Test-Header", "testvalue")
+				.exchangeForRequiredValue((request, response) -> null));
 	}
 
 	@ParameterizedRestClientTest
@@ -1115,5 +1180,9 @@ class RestClientIntegrationTests {
 			this.containerValue = containerValue;
 		}
 	}
+
+	interface PublicView {}
+
+	record User(@JsonView(PublicView.class) String username, @Nullable String password) {}
 
 }

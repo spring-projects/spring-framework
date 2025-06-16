@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
@@ -204,7 +205,7 @@ class FormHttpMessageConverterTests {
 		parameters.put("charset", UTF_8.name());
 		parameters.put("foo", "bar");
 
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		StreamingMockHttpOutputMessage outputMessage = new StreamingMockHttpOutputMessage();
 		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -248,6 +249,8 @@ class FormHttpMessageConverterTests {
 		item = items.get(5);
 		assertThat(item.getFieldName()).isEqualTo("json");
 		assertThat(item.getContentType()).isEqualTo("application/json");
+
+		assertThat(outputMessage.wasRepeatable()).isTrue();
 	}
 
 	@Test
@@ -286,7 +289,7 @@ class FormHttpMessageConverterTests {
 		parameters.put("charset", UTF_8.name());
 		parameters.put("foo", "bar");
 
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		StreamingMockHttpOutputMessage outputMessage = new StreamingMockHttpOutputMessage();
 		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -330,6 +333,8 @@ class FormHttpMessageConverterTests {
 		item = items.get(5);
 		assertThat(item.getFieldName()).isEqualTo("xml");
 		assertThat(item.getContentType()).isEqualTo("text/xml");
+
+		assertThat(outputMessage.wasRepeatable()).isFalse();
 	}
 
 	@Test  // SPR-13309
@@ -441,6 +446,27 @@ class FormHttpMessageConverterTests {
 				.isInstanceOf(HttpMessageNotReadableException.class)
 				.hasCauseInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Could not decode HTTP form payload");
+	}
+
+
+	private static class StreamingMockHttpOutputMessage extends MockHttpOutputMessage implements StreamingHttpOutputMessage {
+
+		private boolean repeatable;
+
+		public boolean wasRepeatable() {
+			return this.repeatable;
+		}
+
+		@Override
+		public void setBody(Body body) {
+			try {
+				this.repeatable = body.repeatable();
+				body.writeTo(getBody());
+			}
+			catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 	}
 
 

@@ -43,6 +43,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  *
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("removal")
 class Jackson2CborEncoderTests extends AbstractLeakCheckingTests {
 
 	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");

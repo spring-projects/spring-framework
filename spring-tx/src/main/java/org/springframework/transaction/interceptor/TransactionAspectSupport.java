@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -531,9 +531,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Determine the specific transaction manager to use for the given transaction.
-	 * @deprecated as of 6.2, in favor of {@link #determineTransactionManager(TransactionAttribute, Class)}
+	 * @deprecated in favor of {@link #determineTransactionManager(TransactionAttribute, Class)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.2")
 	protected @Nullable TransactionManager determineTransactionManager(@Nullable TransactionAttribute txAttr) {
 		return null;
 	}

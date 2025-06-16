@@ -333,6 +333,24 @@ public interface RestClient {
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
+		 * Global option to specify an API version to be added to every request,
+		 * if not explicitly set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder defaultApiVersion(Object version);
+
+		/**
+		 * Configure an {@link ApiVersionInserter} to abstract how an API version
+		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
+		 * is inserted into the request.
+		 * @param apiVersionInserter the inserter to use
+		 * @since 7.0
+		 */
+		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
+
+		/**
 		 * Provide a consumer to customize every request being built.
 		 * @param defaultRequest the consumer to use for modifying requests
 		 * @return this builder
@@ -485,6 +503,7 @@ public interface RestClient {
 
 	/**
 	 * Contract for specifying the URI for a request.
+	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
@@ -528,6 +547,7 @@ public interface RestClient {
 
 	/**
 	 * Contract for specifying request headers leading up to the exchange.
+	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
@@ -597,6 +617,17 @@ public interface RestClient {
 		S headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
+		 * Set an API version for the request. The version is inserted into the
+		 * request by the {@link Builder#apiVersionInserter(ApiVersionInserter)
+		 * configured} {@code ApiVersionInserter}.
+		 * @param version the API version of the request; this can be a String or
+		 * some Object that can be formatted the inserter, e.g. through an
+		 * {@link ApiVersionFormatter}.
+		 * @since 7.0
+		 */
+		S apiVersion(Object version);
+
+		/**
 		 * Set the attribute with the given name to the given value.
 		 * @param name the name of the attribute to add
 		 * @param value the value of the attribute to add
@@ -659,8 +690,8 @@ public interface RestClient {
 		ResponseSpec retrieve();
 
 		/**
-		 * Exchange the {@link ClientHttpResponse} for a type {@code T}. This
-		 * can be useful for advanced scenarios, for example to decode the
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
 		 * response differently depending on the response status:
 		 * <pre class="code">
 		 * Person person = client.get()
@@ -680,15 +711,45 @@ public interface RestClient {
 		 * function has been invoked.
 		 * @param exchangeFunction the function to handle the response with
 		 * @param <T> the type the response will be transformed to
-		 * @return the value returned from the exchange function
+		 * @return the value returned from the exchange function, potentially {@code null}
+		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction)
 		 */
 		default <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
 
 		/**
-		 * Exchange the {@link ClientHttpResponse} for a type {@code T}. This
-		 * can be useful for advanced scenarios, for example to decode the
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
+		 * response differently depending on the response status:
+		 * <pre class="code">
+		 * Person person = client.get()
+		 *     .uri("/people/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchange((request, response) -&gt; {
+		 *         if (response.getStatusCode().equals(HttpStatus.OK)) {
+		 *             return deserialize(response.getBody());
+		 *         }
+		 *         else {
+		 *             throw new BusinessException();
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> The response is
+		 * {@linkplain ClientHttpResponse#close() closed} after the exchange
+		 * function has been invoked.
+		 * @param exchangeFunction the function to handle the response with
+		 * @param <T> the type the response will be transformed to
+		 * @return the value returned from the exchange function, never {@code null}
+		 * @since 6.2.6
+		 */
+		default <T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction) {
+			return exchangeForRequiredValue(exchangeFunction, true);
+		}
+
+		/**
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
 		 * response differently depending on the response status:
 		 * <pre class="code">
 		 * Person person = client.get()
@@ -711,28 +772,79 @@ public interface RestClient {
 		 * @param close {@code true} to close the response after
 		 * {@code exchangeFunction} is invoked, {@code false} to keep it open
 		 * @param <T> the type the response will be transformed to
-		 * @return the value returned from the exchange function
+		 * @return the value returned from the exchange function, potentially {@code null}
+		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction, boolean)
 		 */
 		<T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
+
+		/**
+		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
+		 * This can be useful for advanced scenarios, for example to decode the
+		 * response differently depending on the response status:
+		 * <pre class="code">
+		 * Person person = client.get()
+		 *     .uri("/people/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchange((request, response) -&gt; {
+		 *         if (response.getStatusCode().equals(HttpStatus.OK)) {
+		 *             return deserialize(response.getBody());
+		 *         }
+		 *         else {
+		 *             throw new BusinessException();
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> If {@code close} is {@code true},
+		 * then the response is {@linkplain ClientHttpResponse#close() closed}
+		 * after the exchange function has been invoked. When set to
+		 * {@code false}, the caller is responsible for closing the response.
+		 * @param exchangeFunction the function to handle the response with
+		 * @param close {@code true} to close the response after
+		 * {@code exchangeFunction} is invoked, {@code false} to keep it open
+		 * @param <T> the type the response will be transformed to
+		 * @return the value returned from the exchange function, never {@code null}
+		 * @since 6.2.6
+		 */
+		<T> T exchangeForRequiredValue(RequiredValueExchangeFunction<T> exchangeFunction, boolean close);
 
 
 		/**
 		 * Defines the contract for {@link #exchange(ExchangeFunction)}.
+		 *
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
 		interface ExchangeFunction<T> {
 
 			/**
-			 * Exchange the given response into a type {@code T}.
+			 * Exchange the given response into a value of type {@code T}.
 			 * @param clientRequest the request
 			 * @param clientResponse the response
-			 * @return the exchanged type
+			 * @return the exchanged value, potentially {@code null}
 			 * @throws IOException in case of I/O errors
 			 */
 			@Nullable T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
+		/**
+		 * Variant of {@link ExchangeFunction} returning a non-null required value.
+		 *
+		 * @since 6.2.6
+		 * @param <T> the type the response will be transformed to
+		 */
+		@FunctionalInterface
+		interface RequiredValueExchangeFunction<T> extends ExchangeFunction<T> {
+
+			/**
+			 * Exchange the given response into a value of type {@code T}.
+			 * @param clientRequest the request
+			 * @param clientResponse the response
+			 * @return the exchanged value, never {@code null}
+			 * @throws IOException in case of I/O errors
+			 */
+			@Override
+			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+		}
 
 		/**
 		 * Extension of {@link ClientHttpResponse} that can convert the body.
@@ -754,7 +866,6 @@ public interface RestClient {
 			 * @return the body, or {@code null} if no response body was available
 			 */
 			<T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType);
-
 		}
 	}
 
@@ -816,6 +927,17 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		RequestBodySpec body(StreamingHttpOutputMessage.Body body);
+
+		/**
+		 * Set the hint with the given name to the given value for
+		 * {@link org.springframework.http.converter.SmartHttpMessageConverter}s
+		 * supporting them.
+		 * @param key the key of the hint to add
+		 * @param value the value of the hint to add
+		 * @return this builder
+		 * @since 7.0
+		 */
+		RequestBodySpec hint(String key, Object value);
 	}
 
 
@@ -915,6 +1037,17 @@ public interface RestClient {
 		 */
 		ResponseEntity<Void> toBodilessEntity();
 
+		/**
+		 * Set the hint with the given name to the given value for
+		 * {@link org.springframework.http.converter.SmartHttpMessageConverter}s
+		 * supporting them.
+		 * @param key the key of the hint to add
+		 * @param value the value of the hint to add
+		 * @return this builder
+		 * @since 7.0
+		 */
+		ResponseSpec hint(String key, Object value);
+
 
 		/**
 		 * Used in {@link #onStatus(Predicate, ErrorHandler)}.
@@ -934,6 +1067,7 @@ public interface RestClient {
 
 	/**
 	 * Contract for specifying request headers and URI for a request.
+	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>> extends UriSpec<S>, RequestHeadersSpec<S> {
@@ -945,6 +1079,5 @@ public interface RestClient {
 	 */
 	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
 	}
-
 
 }

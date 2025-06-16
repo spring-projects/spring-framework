@@ -82,7 +82,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		}
 
 		return new TestBeanOverrideHandler(
-				field, ResolvableType.forField(field, testClass), beanName, strategy, factoryMethod);
+				field, ResolvableType.forField(field, testClass), beanName, testBean.contextName(), strategy, factoryMethod);
 	}
 
 	/**

@@ -26,7 +26,6 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
-import org.gradle.jvm.toolchain.JvmVendorSpec;
 
 /**
  * {@link Plugin} that applies conventions for compiling Java sources in Spring Framework.
@@ -42,12 +41,15 @@ public class JavaConventions {
 	private static final List<String> TEST_COMPILER_ARGS;
 
 	/**
-	 * The Java version we should use as the JVM baseline for building the project
+	 * The Java version we should use as the JVM baseline for building the project.
+	 * <p>NOTE: If you update this value, you should also update the value used in
+	 * the {@code javadoc} task in {@code framework-api.gradle}.
 	 */
 	private static final JavaLanguageVersion DEFAULT_LANGUAGE_VERSION = JavaLanguageVersion.of(24);
 
 	/**
-	 * The Java version we should use as the baseline for the compiled bytecode (the "-release" compiler argument)
+	 * The Java version we should use as the baseline for the compiled bytecode
+	 * (the "-release" compiler argument).
 	 */
 	private static final JavaLanguageVersion DEFAULT_RELEASE_VERSION = JavaLanguageVersion.of(17);
 
@@ -83,7 +85,6 @@ public class JavaConventions {
 	 */
 	private static void applyToolchainConventions(Project project) {
 		project.getExtensions().getByType(JavaPluginExtension.class).toolchain(toolchain -> {
-			toolchain.getVendor().set(JvmVendorSpec.BELLSOFT);
 			toolchain.getLanguageVersion().set(DEFAULT_LANGUAGE_VERSION);
 		});
 	}

@@ -75,6 +75,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>{@link BootstrapWith @BootstrapWith}</li>
  * <li>{@link TestExecutionListeners @TestExecutionListeners}</li>
+ * <li>{@link ContextCustomizerFactories @ContextCustomizerFactories}</li>
  * <li>{@link ContextConfiguration @ContextConfiguration}</li>
  * <li>{@link ContextHierarchy @ContextHierarchy}</li>
  * <li>{@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}</li>

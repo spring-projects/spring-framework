@@ -241,7 +241,7 @@ public abstract class BodyInserters {
 	 * @param eventsPublisher the {@code ServerSentEvent} publisher to write to the response body
 	 * @param <T> the type of the data elements in the {@link ServerSentEvent}
 	 * @return the inserter to write a {@code ServerSentEvent} publisher
-	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
+	 * @see <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events</a>
 	 */
 	// Parameterized for server-side use
 	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(

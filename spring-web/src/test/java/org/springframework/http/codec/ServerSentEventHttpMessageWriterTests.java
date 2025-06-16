@@ -22,19 +22,19 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.xml.Pojo;
 
@@ -54,7 +54,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	private static final Map<String, Object> HINTS = Collections.emptyMap();
 
 	private ServerSentEventHttpMessageWriter messageWriter =
-			new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
+			new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder());
 
 
 	@ParameterizedDataBufferAllocatingTest
@@ -151,10 +151,10 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(stringConsumer("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
+				.consumeNextWith(stringConsumer("{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}"))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
 				.verify();
@@ -164,8 +164,8 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	void writePojoWithPrettyPrint(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
-		this.messageWriter = new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder(mapper));
+		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		this.messageWriter = new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder(mapper));
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
@@ -175,15 +175,15 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.consumeNextWith(stringConsumer("data:"))
 				.consumeNextWith(stringConsumer("""
 						{
-						data:  "foo" : "foofoo",
-						data:  "bar" : "barbar"
+						data:  "bar" : "barbar",
+						data:  "foo" : "foofoo"
 						data:}"""))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.consumeNextWith(stringConsumer("data:"))
 				.consumeNextWith(stringConsumer("""
 						{
-						data:  "foo" : "foofoofoo",
-						data:  "bar" : "barbarbar"
+						data:  "bar" : "barbarbar",
+						data:  "foo" : "foofoofoo"
 						data:}"""))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
@@ -203,7 +203,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(stringConsumer("data:", charset))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}", charset))
+				.consumeNextWith(stringConsumer("{\"bar\":\"bar\uD834\uDD1E\",\"foo\":\"foo\uD834\uDD1E\"}", charset))
 				.consumeNextWith(stringConsumer("\n\n", charset))
 				.expectComplete()
 				.verify();

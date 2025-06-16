@@ -39,7 +39,10 @@ import org.springframework.util.Assert;
  *
  * @author Sebastien Deleuze
  * @since 5.0
+ * @deprecated since 7.0 in favor of {@link JacksonCborHttpMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2CborHttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 
 	/**

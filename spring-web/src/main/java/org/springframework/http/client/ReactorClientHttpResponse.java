@@ -108,8 +108,7 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 			StreamUtils.drain(body);
 			body.close();
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 	}
 

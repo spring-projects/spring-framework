@@ -42,19 +42,25 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	public @Nullable BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
+		// Base the context name on the "closest" @ContextConfiguration declaration
+		// within the type and enclosing class hierarchies of the test class.
+		String contextName = configAttributes.get(0).getName();
 		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>();
-		findBeanOverrideHandlers(testClass, handlers);
+		findBeanOverrideHandlers(testClass, contextName, handlers);
 		if (handlers.isEmpty()) {
 			return null;
 		}
 		return new BeanOverrideContextCustomizer(handlers);
 	}
 
-	private void findBeanOverrideHandlers(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
-		BeanOverrideHandler.findAllHandlers(testClass).forEach(handler ->
-				Assert.state(handlers.add(handler), () ->
-						"Duplicate BeanOverrideHandler discovered in test class %s: %s"
-							.formatted(testClass.getName(), handler)));
+	private void findBeanOverrideHandlers(Class<?> testClass, @Nullable String contextName, Set<BeanOverrideHandler> handlers) {
+		BeanOverrideHandler.findAllHandlers(testClass).stream()
+				// If a handler does not specify a context name, it always gets applied.
+				// Otherwise, the handler's context name must match the current context name.
+				.filter(handler -> handler.getContextName().isEmpty() || handler.getContextName().equals(contextName))
+				.forEach(handler -> Assert.state(handlers.add(handler),
+						() -> "Duplicate BeanOverrideHandler discovered in test class %s: %s"
+								.formatted(testClass.getName(), handler)));
 	}
 
 }

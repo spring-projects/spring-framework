@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.jspecify.annotations.Nullable;
@@ -32,10 +31,11 @@ import org.springframework.cglib.core.internal.Function;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.json.AbstractJsonContentAssert;
@@ -62,8 +62,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 class MockMvcTesterTests {
 
-	private static final MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
-			new MappingJackson2HttpMessageConverter(new ObjectMapper());
+	private static final JacksonJsonHttpMessageConverter jsonHttpMessageConverter =
+			new JacksonJsonHttpMessageConverter();
 
 	private final ServletContext servletContext = new MockServletContext();
 
@@ -128,7 +128,7 @@ class MockMvcTesterTests {
 
 	@Test
 	void withHttpMessageConverterUsesConverter() {
-		MappingJackson2HttpMessageConverter converter = spy(jsonHttpMessageConverter);
+		JacksonJsonHttpMessageConverter converter = spy(jsonHttpMessageConverter);
 		MockMvcTester mockMvc = MockMvcTester.of(HelloController.class)
 				.withHttpMessageConverters(List.of(mock(), mock(), converter));
 		assertThat(mockMvc.perform(get("/json"))).hasStatusOk().bodyJson()
@@ -136,7 +136,7 @@ class MockMvcTesterTests {
 					assertThat(message.message()).isEqualTo("Hello World");
 					assertThat(message.counter()).isEqualTo(42);
 				});
-		verify(converter).canWrite(LinkedHashMap.class, LinkedHashMap.class, MediaType.APPLICATION_JSON);
+		verify(converter).canWrite(ResolvableType.forClass(LinkedHashMap.class), LinkedHashMap.class, MediaType.APPLICATION_JSON);
 	}
 
 	@Test

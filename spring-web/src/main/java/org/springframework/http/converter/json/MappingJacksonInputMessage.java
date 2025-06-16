@@ -30,7 +30,9 @@ import org.springframework.http.HttpInputMessage;
  *
  * @author Sebastien Deleuze
  * @since 4.2
+ * @deprecated since 7.0 in favor of using {@link org.springframework.http.converter.SmartHttpMessageConverter} hints
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public class MappingJacksonInputMessage implements HttpInputMessage {
 
 	private final InputStream body;

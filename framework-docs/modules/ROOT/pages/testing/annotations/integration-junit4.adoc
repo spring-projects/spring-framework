@@ -1,9 +1,17 @@
 [[integration-testing-annotations-junit4]]
 = Spring JUnit 4 Testing Annotations
 
+[WARNING]
+====
+JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+and JUnit Jupiter.
+====
+
 The following annotations are supported only when used in conjunction with the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner], xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules]
-, or xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner],
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules], or
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
 
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-ifprofilevalue[`@IfProfileValue`]
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-profilevaluesourceconfiguration[`@ProfileValueSourceConfiguration`]
@@ -205,6 +213,3 @@ Kotlin::
 ----
 <1> Repeat this test ten times.
 ======
-
-
-

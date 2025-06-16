@@ -687,9 +687,8 @@ public class CodeFlow implements Opcodes {
 	 * Determine whether the given number is to be considered as an integer
 	 * for the purposes of a numeric operation at the bytecode level.
 	 * @param number the number to check
-	 * @return {@code true} if it is an {@link Integer}, {@link Short} or {@link Byte}
+	 * @return {@code true} if it is an {@link Integer}, {@link Short}, or {@link Byte}
 	 */
-	@Contract("null -> false")
 	public static boolean isIntegerForNumericOp(Number number) {
 		return (number instanceof Integer || number instanceof Short || number instanceof Byte);
 	}

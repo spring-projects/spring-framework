@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,6 +263,8 @@ class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test // gh-15486
+	@SuppressWarnings("removal")
+	// TODO Migrate from MappingJackson2HttpMessageConverter and MappingJacksonValue to JacksonJsonHttpMessageConverter.
 	public void responseBodyAdvice() throws Exception {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
@@ -424,6 +426,7 @@ class RequestMappingHandlerAdapterTests {
 			extends AbstractMappingJacksonResponseBodyAdvice implements RequestBodyAdvice {
 
 		@Override
+		@SuppressWarnings("removal")
 		protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 

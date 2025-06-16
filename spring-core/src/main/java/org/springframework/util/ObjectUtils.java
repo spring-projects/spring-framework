@@ -172,6 +172,7 @@ public abstract class ObjectUtils {
 	 * if the {@code Optional} is empty, or simply the given object as-is
 	 * @since 5.0
 	 */
+	@Contract("null -> null")
 	public static @Nullable Object unwrapOptional(@Nullable Object obj) {
 		if (obj instanceof Optional<?> optional) {
 			Object result = optional.orElse(null);
@@ -188,6 +189,7 @@ public abstract class ObjectUtils {
 	 * @param element the element to check for
 	 * @return whether the element has been found in the given array
 	 */
+	@Contract("null, _ -> false")
 	public static boolean containsElement(@Nullable Object @Nullable [] array, @Nullable Object element) {
 		if (array == null) {
 			return false;
@@ -410,10 +412,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a hash code for the given object; typically the value of
-	 * {@code Object#hashCode()}}. If the object is an array,
-	 * this method will delegate to any of the {@code Arrays.hashCode}
-	 * methods. If the object is {@code null}, this method returns 0.
+	 * Return a hash code for the given object, typically the value of
+	 * {@link Object#hashCode()}. If the object is an array, this method
+	 * will delegate to one of the {@code Arrays.hashCode} methods. If
+	 * the object is {@code null}, this method returns {@code 0}.
 	 * @see Object#hashCode()
 	 * @see Arrays
 	 */

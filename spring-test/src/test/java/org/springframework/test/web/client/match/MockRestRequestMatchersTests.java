@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,7 +287,6 @@ class MockRestRequestMatchersTests {
 			.withMessageContaining("was \"bar\"");
 	}
 
-
 	@Test
 	void queryParamListMissing() {
 		assertThatAssertionError()
@@ -352,6 +351,34 @@ class MockRestRequestMatchersTests {
 						"Expected: \"bar\"",
 						"but: was <[bar, baz]>");
 	}
+
+	@Test  // gh-34703
+	void queryParamCount() throws Exception {
+		this.request.setURI(URI.create("http://www.foo.example/a"));
+		MockRestRequestMatchers.queryParamCount(0).match(this.request);
+
+		this.request.setURI(URI.create("http://www.foo.example/a?"));
+		MockRestRequestMatchers.queryParamCount(0).match(this.request);
+
+		this.request.setURI(URI.create("http://www.foo.example/a?foo=1"));
+		MockRestRequestMatchers.queryParamCount(1).match(this.request);
+
+		this.request.setURI(URI.create("http://www.foo.example/a?foo=1&foo=2"));
+		MockRestRequestMatchers.queryParamCount(1).match(this.request);
+
+		this.request.setURI(URI.create("http://www.foo.example/a?foo=1&baz=2"));
+		MockRestRequestMatchers.queryParamCount(2).match(this.request);
+	}
+
+	@Test  // gh-34703
+	void queryParamCountMismatch() {
+		this.request.setURI(URI.create("http://www.foo.example/a?foo=1&baz=2"));
+
+		assertThatAssertionError()
+				.isThrownBy(() -> MockRestRequestMatchers.queryParamCount(1).match(this.request))
+				.withMessage("Expected 1 query parameter(s) but found 2: [foo, baz]");
+	}
+
 
 	private static ThrowableTypeAssert<AssertionError> assertThatAssertionError() {
 		return assertThatExceptionOfType(AssertionError.class);

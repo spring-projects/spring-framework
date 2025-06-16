@@ -77,7 +77,6 @@ import org.springframework.beans.testfixture.beans.NestedTestBean;
 import org.springframework.beans.testfixture.beans.SideEffectBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -261,6 +260,32 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
 		assertThat(lbf.getType("&x1")).isEqualTo(DummyFactory.class);
 		assertThat(DummyFactory.wasPrototypeCreated()).as("prototype not instantiated").isFalse();
+	}
+
+	@Test
+	void nonInitializedFactoryBeanIgnoredByEagerTypeMatching() {
+		RootBeanDefinition bd = new RootBeanDefinition(DummyFactory.class);
+		bd.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, String.class);
+		lbf.registerBeanDefinition("x1", bd);
+
+		assertBeanNamesForType(TestBean.class, false, true);
+		assertThat(lbf.getBeanNamesForAnnotation(SuppressWarnings.class)).isEmpty();
+
+		assertThat(lbf.containsSingleton("x1")).isFalse();
+		assertThat(lbf.containsBean("x1")).isTrue();
+		assertThat(lbf.containsBean("&x1")).isTrue();
+		assertThat(lbf.isSingleton("x1")).isTrue();
+		assertThat(lbf.isSingleton("&x1")).isTrue();
+		assertThat(lbf.isPrototype("x1")).isFalse();
+		assertThat(lbf.isPrototype("&x1")).isFalse();
+		assertThat(lbf.isTypeMatch("x1", TestBean.class)).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", TestBean.class)).isFalse();
+		assertThat(lbf.isTypeMatch("&x1", DummyFactory.class)).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", ResolvableType.forClass(DummyFactory.class))).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class))).isTrue();
+		assertThat(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, String.class))).isFalse();
+		assertThat(lbf.getType("x1")).isEqualTo(TestBean.class);
+		assertThat(lbf.getType("&x1")).isEqualTo(DummyFactory.class);
 	}
 
 	@Test
@@ -1393,7 +1418,6 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("rod", bd);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		lbf.registerBeanDefinition("rod2", bd2);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> lbf.autowire(ConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false))
@@ -1464,7 +1488,6 @@ class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorDependenciesBean.class);
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		lbf.registerBeanDefinition("bean", bd);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		ConstructorDependenciesBean bean = lbf.getBean(ConstructorDependenciesBean.class);
 		Object spouse1 = lbf.getBean("spouse1");
@@ -1482,7 +1505,6 @@ class DefaultListableBeanFactoryTests {
 		bd.setAttribute(GenericBeanDefinition.PREFERRED_CONSTRUCTORS_ATTRIBUTE,
 				ConstructorDependenciesBean.class.getConstructors());
 		lbf.registerBeanDefinition("bean", bd);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		ConstructorDependenciesBean bean = lbf.getBean(ConstructorDependenciesBean.class);
 		Object spouse1 = lbf.getBean("spouse1");
@@ -1500,7 +1522,6 @@ class DefaultListableBeanFactoryTests {
 		bd.setAttribute(GenericBeanDefinition.PREFERRED_CONSTRUCTORS_ATTRIBUTE,
 				ConstructorDependenciesBean.class.getConstructor(TestBean.class));
 		lbf.registerBeanDefinition("bean", bd);
-		lbf.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		ConstructorDependenciesBean bean = lbf.getBean(ConstructorDependenciesBean.class);
 		Object spouse = lbf.getBean("spouse1");

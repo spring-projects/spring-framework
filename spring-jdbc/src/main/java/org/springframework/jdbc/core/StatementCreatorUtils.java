@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public abstract class StatementCreatorUtils {
 
 	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<>(64);
 
-	static @Nullable Boolean shouldIgnoreGetParameterType;
+	static @Nullable Boolean shouldIgnoreGetParameterType = SpringProperties.checkFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
 
 	static {
 		javaTypeToSqlTypeMap.put(boolean.class, Types.BOOLEAN);
@@ -114,11 +114,6 @@ public abstract class StatementCreatorUtils {
 		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);
 		javaTypeToSqlTypeMap.put(Blob.class, Types.BLOB);
 		javaTypeToSqlTypeMap.put(Clob.class, Types.CLOB);
-
-		String flag = SpringProperties.getProperty(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
-		if (flag != null) {
-			shouldIgnoreGetParameterType = Boolean.valueOf(flag);
-		}
 	}
 
 

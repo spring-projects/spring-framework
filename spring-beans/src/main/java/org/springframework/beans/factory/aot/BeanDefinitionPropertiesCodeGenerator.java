@@ -38,7 +38,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
-import org.springframework.aot.generate.ValueCodeGeneratorDelegates;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -103,12 +102,12 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 		this.hints = hints;
 		this.attributeFilter = attributeFilter;
-		List<Delegate> allDelegates = new ArrayList<>();
-		allDelegates.add((valueCodeGenerator, value) -> customValueCodeGenerator.apply(PropertyNamesStack.peek(), value));
-		allDelegates.addAll(additionalDelegates);
-		allDelegates.addAll(BeanDefinitionPropertyValueCodeGeneratorDelegates.INSTANCES);
-		allDelegates.addAll(ValueCodeGeneratorDelegates.INSTANCES);
-		this.valueCodeGenerator = ValueCodeGenerator.with(allDelegates).scoped(generatedMethods);
+		List<Delegate> customDelegates = new ArrayList<>();
+		customDelegates.add((valueCodeGenerator, value) ->
+				customValueCodeGenerator.apply(PropertyNamesStack.peek(), value));
+		customDelegates.addAll(additionalDelegates);
+		this.valueCodeGenerator = BeanDefinitionPropertyValueCodeGeneratorDelegates
+				.createValueCodeGenerator(generatedMethods, customDelegates);
 	}
 
 	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128

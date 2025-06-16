@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -39,6 +41,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,8 +93,7 @@ class WebClientAdapterTests {
 
 	@Test
 	void greeting() {
-		prepareResponse(response ->
-				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		StepVerifier.create(initService().getGreeting())
 				.expectNext("Hello Spring!")
@@ -111,8 +113,7 @@ class WebClientAdapterTests {
 				})
 				.build();
 
-		prepareResponse(response ->
-				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		StepVerifier.create(initService(webClient).getGreetingWithAttribute("myAttributeValue"))
 				.expectNext("Hello Spring!")
@@ -154,8 +155,8 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.setResponseCode(201));
 		String fileName = "testFileName";
 		String originalFileName = "originalTestFileName";
-		MultipartFile file = new MockMultipartFile(fileName, originalFileName,
-				MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
+		MultipartFile file = new MockMultipartFile(
+				fileName, originalFileName, MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
 
 		initService().postMultipart(file, "test2");
 
@@ -166,6 +167,22 @@ class WebClientAdapterTests {
 						"Content-Type: application/json", "Content-Length: 4", "test",
 						"Content-Disposition: form-data; name=\"anotherPart\"",
 						"Content-Type: text/plain;charset=UTF-8", "Content-Length: 5", "test2");
+	}
+
+	@Test // gh-34793
+	void postSet() throws InterruptedException {
+		prepareResponse(response -> response.setResponseCode(201));
+
+		Set<Person> persons = new LinkedHashSet<>();
+		persons.add(new Person("John"));
+		persons.add(new Person("Richard"));
+
+		initService().postPersonSet(persons);
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("POST");
+		assertThat(request.getPath()).isEqualTo("/persons");
+		assertThat(request.getBody().readUtf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
 	}
 
 	@Test
@@ -251,15 +268,32 @@ class WebClientAdapterTests {
 		@PostExchange
 		void postMultipart(MultipartFile file, @RequestPart String anotherPart);
 
+		@PostExchange("/persons")
+		void postPersonSet(@RequestBody Set<Person> set);
+
 		@GetExchange("/greeting")
 		String getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		@GetExchange("/greeting/{id}")
-		String getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory,
-				@PathVariable String id, @RequestParam String param);
+		String getWithUriBuilderFactory(
+				UriBuilderFactory uriBuilderFactory, @PathVariable String id, @RequestParam String param);
 
 		@GetExchange("/greeting")
 		String getWithIgnoredUriBuilderFactory(URI uri, UriBuilderFactory uriBuilderFactory);
+	}
+
+
+	static final class Person {
+
+		private final String name;
+
+		Person(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
 
 	}
 

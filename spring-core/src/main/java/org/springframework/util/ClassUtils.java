@@ -54,6 +54,8 @@ import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
+
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
  *
@@ -246,6 +248,7 @@ public abstract class ClassUtils {
 	 * @param classLoaderToUse the actual ClassLoader to use for the thread context
 	 * @return the original thread context ClassLoader, or {@code null} if not overridden
 	 */
+	@Contract("null -> null")
 	public static @Nullable ClassLoader overrideThreadContextClassLoader(@Nullable ClassLoader classLoaderToUse) {
 		Thread currentThread = Thread.currentThread();
 		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
@@ -386,6 +389,7 @@ public abstract class ClassUtils {
 	 * @param classLoader the ClassLoader to check against
 	 * (can be {@code null} in which case this method will always return {@code true})
 	 */
+	@Contract("_, null -> true")
 	public static boolean isVisible(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		if (classLoader == null) {
 			return true;
@@ -473,6 +477,7 @@ public abstract class ClassUtils {
 	 * @return the primitive class, or {@code null} if the name does not denote
 	 * a primitive class or primitive array class
 	 */
+	@Contract("null -> null")
 	public static @Nullable Class<?> resolvePrimitiveClassName(@Nullable String name) {
 		Class<?> result = null;
 		// Most class names will be quite long, considering that they
@@ -552,6 +557,7 @@ public abstract class ClassUtils {
 	 * @see Void
 	 * @see Void#TYPE
 	 */
+	@Contract("null -> false")
 	public static boolean isVoidType(@Nullable Class<?> type) {
 		return (type == void.class || type == Void.class);
 	}
@@ -614,10 +620,11 @@ public abstract class ClassUtils {
 			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
 			return (lhsType == resolvedPrimitive);
 		}
-		else {
+		else if (rhsType.isPrimitive()) {
 			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
 			return (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper));
 		}
+		return false;
 	}
 
 	/**
@@ -860,6 +867,7 @@ public abstract class ClassUtils {
 	 * given classes is {@code null}, the other class will be returned.
 	 * @since 3.2.6
 	 */
+	@Contract("null, _ -> param2; _, null -> param1")
 	public static @Nullable Class<?> determineCommonAncestor(@Nullable Class<?> clazz1, @Nullable Class<?> clazz2) {
 		if (clazz1 == null) {
 			return clazz2;
@@ -938,10 +946,10 @@ public abstract class ClassUtils {
 	 * Check whether the given object is a CGLIB proxy.
 	 * @param object the object to check
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
-	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * @deprecated in favor of custom (possibly narrower) checks
 	 * such as for a Spring AOP proxy
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static boolean isCglibProxy(Object object) {
 		return isCglibProxyClass(object.getClass());
 	}
@@ -950,10 +958,11 @@ public abstract class ClassUtils {
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 * @see #getUserClass(Class)
-	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * @deprecated in favor of custom (possibly narrower) checks
 	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
+	@Contract("null -> false")
 	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
 		return (clazz != null && isCglibProxyClassName(clazz.getName()));
 	}
@@ -962,10 +971,11 @@ public abstract class ClassUtils {
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
 	 * @see #CGLIB_CLASS_SEPARATOR
-	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * @deprecated in favor of custom (possibly narrower) checks
 	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
+	@Contract("null -> false")
 	public static boolean isCglibProxyClassName(@Nullable String className) {
 		return (className != null && className.contains(CGLIB_CLASS_SEPARATOR));
 	}
@@ -1006,6 +1016,7 @@ public abstract class ClassUtils {
 	 * @param value the value to introspect
 	 * @return the qualified name of the class
 	 */
+	@Contract("null -> null")
 	public static @Nullable String getDescriptiveType(@Nullable Object value) {
 		if (value == null) {
 			return null;
@@ -1029,6 +1040,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @param typeName the type name to match
 	 */
+	@Contract("_, null -> false")
 	public static boolean matchesTypeName(Class<?> clazz, @Nullable String typeName) {
 		return (typeName != null &&
 				(typeName.equals(clazz.getTypeName()) || typeName.equals(clazz.getSimpleName())));
@@ -1387,7 +1399,7 @@ public abstract class ClassUtils {
 	 * @see #getPubliclyAccessibleMethodIfPossible(Method, Class)
 	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static Method getInterfaceMethodIfPossible(Method method) {
 		return getInterfaceMethodIfPossible(method, null);
 	}

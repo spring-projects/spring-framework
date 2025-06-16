@@ -215,45 +215,43 @@ For suspending functions, a `TransactionalOperator.executeAndAwait` extension is
 
 [source,kotlin,indent=0]
 ----
-    import org.springframework.transaction.reactive.executeAndAwait
+	import org.springframework.transaction.reactive.executeAndAwait
 
-    class PersonRepository(private val operator: TransactionalOperator) {
+	class PersonRepository(private val operator: TransactionalOperator) {
 
-        suspend fun initDatabase() = operator.executeAndAwait {
-            insertPerson1()
-            insertPerson2()
-        }
+		suspend fun initDatabase() = operator.executeAndAwait {
+			insertPerson1()
+			insertPerson2()
+		}
 
-        private suspend fun insertPerson1() {
-            // INSERT SQL statement
-        }
+		private suspend fun insertPerson1() {
+			// INSERT SQL statement
+		}
 
-        private suspend fun insertPerson2() {
-            // INSERT SQL statement
-        }
-    }
+		private suspend fun insertPerson2() {
+			// INSERT SQL statement
+		}
+	}
 ----
 
 For Kotlin `Flow`, a  `Flow<T>.transactional` extension is provided.
 
 [source,kotlin,indent=0]
 ----
-    import org.springframework.transaction.reactive.transactional
+	import org.springframework.transaction.reactive.transactional
 
-    class PersonRepository(private val operator: TransactionalOperator) {
+	class PersonRepository(private val operator: TransactionalOperator) {
 
-        fun updatePeople() = findPeople().map(::updatePerson).transactional(operator)
+		fun updatePeople() = findPeople().map(::updatePerson).transactional(operator)
 
-        private fun findPeople(): Flow<Person> {
-            // SELECT SQL statement
-        }
+		private fun findPeople(): Flow<Person> {
+			// SELECT SQL statement
+		}
 
-        private suspend fun updatePerson(person: Person): Person {
-            // UPDATE SQL statement
-        }
-    }
+		private suspend fun updatePerson(person: Person): Person {
+			// UPDATE SQL statement
+		}
+	}
 ----
-
-
 
 

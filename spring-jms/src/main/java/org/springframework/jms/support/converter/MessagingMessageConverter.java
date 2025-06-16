@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	/**
 	 * Create a JMS message for the specified payload and conversionHint.
 	 * The conversion hint is an extra object passed to the {@link MessageConverter},
-	 * for example, the associated {@code MethodParameter} (may be {@code null}}.
+	 * for example, the associated {@code MethodParameter} (may be {@code null}).
 	 * @since 4.3
 	 * @see MessageConverter#toMessage(Object, Session)
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -69,7 +69,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
+import static org.springframework.http.codec.JacksonCodecSupport.JSON_VIEW_HINT;
 
 /**
  * @author Arjen Poutsma
@@ -89,7 +89,7 @@ class BodyInsertersTests {
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		messageWriters.add(new ResourceHttpMessageWriter());
 		messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
+		JacksonJsonEncoder jsonEncoder = new JacksonJsonEncoder();
 		messageWriters.add(new EncoderHttpMessageWriter<>(jsonEncoder));
 		messageWriters.add(new ServerSentEventHttpMessageWriter(jsonEncoder));
 		messageWriters.add(new FormHttpMessageWriter());
@@ -140,7 +140,7 @@ class BodyInsertersTests {
 		StepVerifier.create(result).expectComplete().verify();
 
 		StepVerifier.create(response.getBodyAsString())
-				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectNext("{\"password\":\"bar\",\"username\":\"foo\"}")
 				.expectComplete()
 				.verify();
 	}
@@ -169,7 +169,7 @@ class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBodyAsString())
-				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectNext("{\"password\":\"bar\",\"username\":\"foo\"}")
 				.expectComplete()
 				.verify();
 	}
@@ -200,7 +200,7 @@ class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBodyAsString())
-				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectNext("{\"password\":\"bar\",\"username\":\"foo\"}")
 				.expectComplete()
 				.verify();
 	}

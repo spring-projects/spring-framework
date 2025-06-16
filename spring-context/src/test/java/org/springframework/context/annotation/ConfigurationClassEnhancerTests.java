@@ -76,7 +76,7 @@ class ConfigurationClassEnhancerTests {
 		classLoader = new BasicSmartClassLoader(getClass().getClassLoader());
 		enhancedClass = configurationClassEnhancer.enhance(MyConfigWithPublicClass.class, classLoader);
 		assertThat(MyConfigWithPublicClass.class).isAssignableFrom(enhancedClass);
-		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader.getParent());
+		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader);
 	}
 
 	@Test
@@ -105,13 +105,38 @@ class ConfigurationClassEnhancerTests {
 	}
 
 	@Test
+	void withNonPublicConstructor() {
+		ConfigurationClassEnhancer configurationClassEnhancer = new ConfigurationClassEnhancer();
+
+		ClassLoader classLoader = new URLClassLoader(new URL[0], getClass().getClassLoader());
+		Class<?> enhancedClass = configurationClassEnhancer.enhance(MyConfigWithNonPublicConstructor.class, classLoader);
+		assertThat(MyConfigWithNonPublicConstructor.class).isAssignableFrom(enhancedClass);
+		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader.getParent());
+
+		classLoader = new OverridingClassLoader(getClass().getClassLoader());
+		enhancedClass = configurationClassEnhancer.enhance(MyConfigWithNonPublicConstructor.class, classLoader);
+		assertThat(MyConfigWithNonPublicConstructor.class).isAssignableFrom(enhancedClass);
+		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader.getParent());
+
+		classLoader = new CustomSmartClassLoader(getClass().getClassLoader());
+		enhancedClass = configurationClassEnhancer.enhance(MyConfigWithNonPublicConstructor.class, classLoader);
+		assertThat(MyConfigWithNonPublicConstructor.class).isAssignableFrom(enhancedClass);
+		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader.getParent());
+
+		classLoader = new BasicSmartClassLoader(getClass().getClassLoader());
+		enhancedClass = configurationClassEnhancer.enhance(MyConfigWithNonPublicConstructor.class, classLoader);
+		assertThat(MyConfigWithNonPublicConstructor.class).isAssignableFrom(enhancedClass);
+		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader.getParent());
+	}
+
+	@Test
 	void withNonPublicMethod() {
 		ConfigurationClassEnhancer configurationClassEnhancer = new ConfigurationClassEnhancer();
 
 		ClassLoader classLoader = new URLClassLoader(new URL[0], getClass().getClassLoader());
 		Class<?> enhancedClass = configurationClassEnhancer.enhance(MyConfigWithNonPublicMethod.class, classLoader);
 		assertThat(MyConfigWithNonPublicMethod.class).isAssignableFrom(enhancedClass);
-		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader);
+		assertThat(enhancedClass.getClassLoader()).isEqualTo(classLoader.getParent());
 
 		classLoader = new OverridingClassLoader(getClass().getClassLoader());
 		enhancedClass = configurationClassEnhancer.enhance(MyConfigWithNonPublicMethod.class, classLoader);
@@ -152,6 +177,19 @@ class ConfigurationClassEnhancerTests {
 
 	@Configuration
 	static class MyConfigWithNonPublicClass {
+
+		@Bean
+		public String myBean() {
+			return "bean";
+		}
+	}
+
+
+	@Configuration
+	public static class MyConfigWithNonPublicConstructor {
+
+		MyConfigWithNonPublicConstructor() {
+		}
 
 		@Bean
 		public String myBean() {

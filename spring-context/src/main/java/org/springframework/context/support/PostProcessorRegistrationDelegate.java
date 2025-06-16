@@ -523,8 +523,7 @@ final class PostProcessorRegistrationDelegate {
 			try {
 				typedStringValue.resolveTargetType(this.beanFactory.getBeanClassLoader());
 			}
-			catch (ClassNotFoundException ex) {
-				// ignore
+			catch (ClassNotFoundException ignored) {
 			}
 		}
 

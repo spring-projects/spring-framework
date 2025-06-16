@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,8 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	private long taskTerminationTimeout;
 
 	private @Nullable Set<Thread> activeThreads;
+
+	private boolean rejectTasksWhenLimitReached = false;
 
 	private volatile boolean active = true;
 
@@ -185,6 +187,17 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	}
 
 	/**
+	 * Specify whether to reject tasks when the concurrency limit has been reached,
+	 * throwing {@link TaskRejectedException} on any further submission attempts.
+	 * <p>The default is {@code false}, blocking the caller until the submission can
+	 * be accepted. Switch this to {@code true} for immediate rejection instead.
+	 * @since 6.2.6
+	 */
+	public void setRejectTasksWhenLimitReached(boolean rejectTasksWhenLimitReached) {
+		this.rejectTasksWhenLimitReached = rejectTasksWhenLimitReached;
+	}
+
+	/**
 	 * Set the maximum number of parallel task executions allowed.
 	 * The default of -1 indicates no concurrency limit at all.
 	 * <p>This is the equivalent of a maximum pool size in a thread pool,
@@ -251,7 +264,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * @see #TIMEOUT_IMMEDIATE
 	 * @see #doExecute(Runnable)
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3.16")
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");
@@ -350,11 +363,19 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * making {@code beforeAccess()} and {@code afterAccess()}
 	 * visible to the surrounding class.
 	 */
-	private static class ConcurrencyThrottleAdapter extends ConcurrencyThrottleSupport {
+	private class ConcurrencyThrottleAdapter extends ConcurrencyThrottleSupport {
 
 		@Override
 		protected void beforeAccess() {
 			super.beforeAccess();
+		}
+
+		@Override
+		protected void onLimitReached() {
+			if (rejectTasksWhenLimitReached) {
+				throw new TaskRejectedException("Concurrency limit reached: " + getConcurrencyLimit());
+			}
+			super.onLimitReached();
 		}
 
 		@Override

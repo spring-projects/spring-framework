@@ -59,9 +59,10 @@ import org.springframework.util.ObjectUtils;
 public class HttpEntity<T> {
 
 	/**
-	 * The empty {@code HttpEntity}, with no body or headers.
+	 * An {@code HttpEntity} instance with a {@code null} body and
+	 * {@link HttpHeaders#EMPTY empty headers}.
 	 */
-	public static final HttpEntity<?> EMPTY = new HttpEntity<>();
+	public static final HttpEntity<?> EMPTY = new HttpEntity<>(HttpHeaders.EMPTY);
 
 
 	private final HttpHeaders headers;

@@ -40,7 +40,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2CodecSupport;
+import org.springframework.http.codec.JacksonCodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.ErrorResponse;
@@ -385,7 +385,7 @@ public interface ServerResponse {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Add a serialization hint like {@link Jackson2CodecSupport#JSON_VIEW_HINT}
+		 * Add a serialization hint like {@link JacksonCodecSupport#JSON_VIEW_HINT}
 		 * to customize how the body will be serialized.
 		 * @param key the hint key
 		 * @param value the hint value

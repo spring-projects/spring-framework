@@ -39,7 +39,10 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @deprecated since 7.0 in favor of {@link JacksonJsonSockJsMessageCodec}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2SockJsMessageCodec extends AbstractSockJsMessageCodec {
 
 	private final ObjectMapper objectMapper;

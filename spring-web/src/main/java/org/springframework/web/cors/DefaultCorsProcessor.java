@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ import org.springframework.util.CollectionUtils;
  * <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
  *
  * <p>Note that when the supplied {@link CorsConfiguration} is {@code null}, this
- * implementation does not reject simple or actual requests outright but simply
- * avoids adding CORS headers to the response. CORS processing is also skipped
- * if the response already contains CORS headers.
+ * implementation does not reject CORS requests outright but simply avoids adding
+ * CORS headers to the response. CORS processing is also skipped if the response
+ * already contains CORS headers.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -71,6 +71,10 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	@SuppressWarnings("resource")
 	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
+
+		if (config == null) {
+			return true;
+		}
 
 		Collection<String> varyHeaders = response.getHeaders(HttpHeaders.VARY);
 		if (!varyHeaders.contains(HttpHeaders.ORIGIN)) {
@@ -99,18 +103,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			return true;
 		}
 
-		boolean preFlightRequest = CorsUtils.isPreFlightRequest(request);
-		if (config == null) {
-			if (preFlightRequest) {
-				rejectRequest(new ServletServerHttpResponse(response));
-				return false;
-			}
-			else {
-				return true;
-			}
-		}
-
-		return handleInternal(new ServletServerHttpRequest(request), new ServletServerHttpResponse(response), config, preFlightRequest);
+		return handleInternal(new ServletServerHttpRequest(request),
+				new ServletServerHttpResponse(response), config, CorsUtils.isPreFlightRequest(request));
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 
 import static java.time.Instant.MAX;
 import static java.time.Instant.MIN;
@@ -91,7 +92,7 @@ class InstantFormatterTests {
 		private static final Random random = new Random();
 
 		@Override
-		public final Stream<Arguments> provideArguments(ExtensionContext context) {
+		public final Stream<Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
 			return provideArguments().map(Arguments::of).limit(DATA_SET_SIZE);
 		}
 
@@ -137,7 +138,7 @@ class InstantFormatterTests {
 		private static final Random random = new Random();
 
 		@Override
-		public Stream<Arguments> provideArguments(ExtensionContext context) {
+		public Stream<Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
 			return random.longs(DATA_SET_SIZE, Long.MIN_VALUE, Long.MAX_VALUE)
 					.mapToObj(Instant::ofEpochMilli)
 					.map(instant -> instant.truncatedTo(ChronoUnit.MILLIS))

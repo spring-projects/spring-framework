@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.StringUtils;
 
@@ -206,7 +206,7 @@ class JsonPathValueAssertTests {
 	class ConvertToTests {
 
 		private static final HttpMessageContentConverter jsonContentConverter = HttpMessageContentConverter.of(
-				new MappingJackson2HttpMessageConverter(new ObjectMapper()));
+				new JacksonJsonHttpMessageConverter(new ObjectMapper()));
 
 		@Test
 		void convertToWithoutHttpMessageConverter() {

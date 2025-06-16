@@ -45,7 +45,10 @@ import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
+import org.springframework.web.client.ApiVersionFormatter;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.BlockingExecutionConfigurer;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
@@ -345,6 +348,12 @@ public interface WebTestClient {
 		ControllerSpec validator(Validator validator);
 
 		/**
+		 * Configure API versioning for mapping requests to controller methods.
+		 * @since 7.0
+		 */
+		ControllerSpec apiVersioning(Consumer<ApiVersionConfigurer> configurer);
+
+		/**
 		 * Configure view resolution.
 		 * @see WebFluxConfigurer#configureViewResolvers
 		 */
@@ -427,6 +436,24 @@ public interface WebTestClient {
 		 * @return this builder
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Global option to specify an API version to add to every request,
+		 * if not already set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder defaultApiVersion(Object version);
+
+		/**
+		 * Configure an {@link ApiVersionInserter} to abstract how an API version
+		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
+		 * is inserted into the request.
+		 * @param apiVersionInserter the inserter to use
+		 * @since 7.0
+		 */
+		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Add the given filter to the filter chain.
@@ -642,6 +669,17 @@ public interface WebTestClient {
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set an API version for the request. The version is inserted into the
+		 * request by the {@linkplain Builder#apiVersionInserter(ApiVersionInserter)
+		 * configured} {@code ApiVersionInserter}.
+		 * @param version the API version of the request; this can be a String or
+		 * some Object that can be formatted by the inserter &mdash; for example,
+		 * through an {@link ApiVersionFormatter}
+		 * @since 7.0
+		 */
+		S apiVersion(Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.

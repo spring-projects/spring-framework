@@ -18,9 +18,9 @@ Do not run tests in parallel if the tests:
 * Use Spring Framework's `@DirtiesContext` support.
 * Use Spring Framework's `@MockitoBean` or `@MockitoSpyBean` support.
 * Use Spring Boot's `@MockBean` or `@SpyBean` support.
-* Use JUnit 4's `@FixMethodOrder` support or any testing framework feature
-  that is designed to ensure that test methods run in a particular order. Note,
-  however, that this does not apply if entire test classes are run in parallel.
+* Use JUnit Jupiter's `@TestMethodOrder` support or any testing framework feature that is
+  designed to ensure that test methods run in a particular order. Note, however, that
+  this does not apply if entire test classes are run in parallel.
 * Change the state of shared services or systems such as a database, message broker,
   filesystem, and others. This applies to both embedded and external systems.
 

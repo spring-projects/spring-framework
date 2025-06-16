@@ -30,8 +30,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link VersionRequestCondition}.
@@ -50,7 +50,7 @@ public class VersionRequestConditionTests {
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
 		return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				new SemanticApiVersionParser(), true, defaultValue, false);
 	}
 
 	@Test

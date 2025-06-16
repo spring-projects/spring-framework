@@ -21,6 +21,8 @@ import java.util.Map;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.api.tasks.testing.TestFrameworkOptions;
+import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions;
 import org.gradle.testretry.TestRetryPlugin;
 import org.gradle.testretry.TestRetryTaskExtension;
 
@@ -34,6 +36,7 @@ import org.gradle.testretry.TestRetryTaskExtension;
  *
  * @author Brian Clozel
  * @author Andy Wilkinson
+ * @author Sam Brannen
  */
 class TestConventions {
 
@@ -50,7 +53,12 @@ class TestConventions {
 	}
 
 	private void configureTests(Project project, Test test) {
-		test.useJUnitPlatform();
+		TestFrameworkOptions existingOptions = test.getOptions();
+		test.useJUnitPlatform(options -> {
+			if (existingOptions instanceof JUnitPlatformOptions junitPlatformOptions) {
+				options.copyFrom(junitPlatformOptions);
+			}
+		});
 		test.include("**/*Tests.class", "**/*Test.class");
 		test.setSystemProperties(Map.of(
 				"java.awt.headless", "true",

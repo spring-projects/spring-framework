@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -46,13 +45,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.FileCopyUtils;
 
@@ -86,7 +86,7 @@ class AbstractJsonContentAssertTests {
 	private static final String DIFFERENT = loadJson("different.json");
 
 	private static final HttpMessageContentConverter jsonContentConverter = HttpMessageContentConverter.of(
-			new MappingJackson2HttpMessageConverter(new ObjectMapper()));
+			new JacksonJsonHttpMessageConverter(new ObjectMapper()));
 
 	private static final JsonComparator comparator = JsonAssert.comparator(JsonCompareMode.LENIENT);
 
@@ -111,15 +111,6 @@ class AbstractJsonContentAssertTests {
 			assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.convertTo(Family.class)
 					.satisfies(family -> assertThat(family.familyMembers()).hasSize(5));
-		}
-
-		@Test
-		void convertToIncompatibleTargetTypeShouldFail() {
-			AbstractJsonContentAssert<?> jsonAssert = assertThat(forJson(SIMPSONS, jsonContentConverter));
-			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> jsonAssert.convertTo(Member.class))
-					.withMessageContainingAll("To convert successfully to:",
-							Member.class.getName(), "But it failed:");
 		}
 
 		@Test

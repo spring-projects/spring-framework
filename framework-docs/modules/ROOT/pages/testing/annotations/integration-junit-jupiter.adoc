@@ -2,8 +2,8 @@
 = Spring JUnit Jupiter Testing Annotations
 
 The following annotations are supported when used in conjunction with the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`] and JUnit Jupiter
-(that is, the programming model in JUnit 5):
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+and JUnit Jupiter (that is, the programming model in JUnit):
 
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitconfig[`@SpringJUnitConfig`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitwebconfig[`@SpringJUnitWebConfig`]

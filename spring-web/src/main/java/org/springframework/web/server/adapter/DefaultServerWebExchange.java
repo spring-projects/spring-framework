@@ -147,7 +147,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			ServerCodecConfigurer configurer, String logPrefix) {
 
 		MediaType contentType = getContentType(request);
-		if (contentType == null || !contentType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
+		if (contentType == null || !contentType.isConcrete() || !contentType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
 			return EMPTY_FORM_DATA;
 		}
 
@@ -165,7 +165,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private Mono<MultiValueMap<String, Part>> initMultipartData(ServerCodecConfigurer configurer, String logPrefix) {
 
 		MediaType contentType = getContentType(this.request);
-		if (contentType == null || !contentType.getType().equalsIgnoreCase("multipart")) {
+		if (contentType == null || !contentType.isConcrete() || !contentType.getType().equalsIgnoreCase("multipart")) {
 			return EMPTY_MULTIPART_DATA;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public interface SmartMessageConverter extends MessageConverter {
 	 * @param object the object to convert
 	 * @param session the Session to use for creating a JMS Message
 	 * @param conversionHint an extra object passed to the {@link MessageConverter},
-	 * for example, the associated {@code MethodParameter} (may be {@code null}}
+	 * for example, the associated {@code MethodParameter} (may be {@code null})
 	 * @return the JMS Message
 	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure

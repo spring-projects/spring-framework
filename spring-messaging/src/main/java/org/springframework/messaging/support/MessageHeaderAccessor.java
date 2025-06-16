@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,7 +331,7 @@ public class MessageHeaderAccessor {
 	protected void verifyType(@Nullable String headerName, @Nullable Object headerValue) {
 		if (headerName != null && headerValue != null) {
 			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
-					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+					MessageHeaders.REPLY_CHANNEL.equals(headerName)) {
 				if (!(headerValue instanceof MessageChannel || headerValue instanceof String)) {
 					throw new IllegalArgumentException(
 							"'" + headerName + "' header value must be a MessageChannel or String");

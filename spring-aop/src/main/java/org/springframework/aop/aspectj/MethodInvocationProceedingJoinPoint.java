@@ -319,7 +319,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "4.0") // deprecated by AspectJ
 		public int getColumn() {
 			throw new UnsupportedOperationException();
 		}

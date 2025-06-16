@@ -21,6 +21,7 @@ import java.lang.classfile.Annotation;
 import java.lang.classfile.AnnotationElement;
 import java.lang.classfile.AnnotationValue;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
+import java.lang.constant.ClassDesc;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -97,8 +98,9 @@ abstract class ClassFileAnnotationMetadata {
 	}
 
 	private static String fromTypeDescriptor(String descriptor) {
-		return descriptor.substring(1, descriptor.length() - 1)
-				.replace('/', '.');
+		ClassDesc classDesc = ClassDesc.ofDescriptor(descriptor);
+		return classDesc.isPrimitive() ? classDesc.displayName() :
+		classDesc.packageName() + "." + classDesc.displayName();
 	}
 
 	private static Object parseArrayValue(String className, @org.jetbrains.annotations.Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {

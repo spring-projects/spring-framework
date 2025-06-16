@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -32,6 +33,23 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class SimpleAsyncTaskExecutorTests {
 
 	@Test
+	void isActiveUntilClose() {
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
+		assertThat(executor.isActive()).isTrue();
+		assertThat(executor.isThrottleActive()).isFalse();
+		executor.close();
+		assertThat(executor.isActive()).isFalse();
+		assertThat(executor.isThrottleActive()).isFalse();
+	}
+
+	@Test
+	void throwsExceptionWhenSuppliedWithNullRunnable() {
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			assertThatIllegalArgumentException().isThrownBy(() -> executor.execute(null));
+		}
+	}
+
+	@Test
 	void cannotExecuteWhenConcurrencyIsSwitchedOff() {
 		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
 			executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
@@ -41,35 +59,34 @@ class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	void throttleIsNotActiveByDefault() {
+	void taskRejectedWhenConcurrencyLimitReached() {
 		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
-			assertThat(executor.isThrottleActive()).as("Concurrency throttle must not default to being active (on)").isFalse();
+			executor.setConcurrencyLimit(1);
+			executor.setRejectTasksWhenLimitReached(true);
+			assertThat(executor.isThrottleActive()).isTrue();
+			executor.execute(new NoOpRunnable());
+			assertThatExceptionOfType(TaskRejectedException.class).isThrownBy(() -> executor.execute(new NoOpRunnable()));
 		}
 	}
 
 	@Test
 	void threadNameGetsSetCorrectly() {
-		final String customPrefix = "chankPop#";
-		final Object monitor = new Object();
-		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(customPrefix);
-		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
-		executeAndWait(executor, task, monitor);
-		assertThat(task.getThreadName()).startsWith(customPrefix);
+		String customPrefix = "chankPop#";
+		Object monitor = new Object();
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(customPrefix)) {
+			ThreadNameHarvester task = new ThreadNameHarvester(monitor);
+			executeAndWait(executor, task, monitor);
+			assertThat(task.getThreadName()).startsWith(customPrefix);
+		}
 	}
 
 	@Test
 	void threadFactoryOverridesDefaults() {
-		final Object monitor = new Object();
-		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(runnable -> new Thread(runnable, "test"));
-		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
-		executeAndWait(executor, task, monitor);
-		assertThat(task.getThreadName()).isEqualTo("test");
-	}
-
-	@Test
-	void throwsExceptionWhenSuppliedWithNullRunnable() {
-		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
-			assertThatIllegalArgumentException().isThrownBy(() -> executor.execute(null));
+		Object monitor = new Object();
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(runnable -> new Thread(runnable, "test"))) {
+			ThreadNameHarvester task = new ThreadNameHarvester(monitor);
+			executeAndWait(executor, task, monitor);
+			assertThat(task.getThreadName()).isEqualTo("test");
 		}
 	}
 
@@ -89,7 +106,12 @@ class SimpleAsyncTaskExecutorTests {
 
 		@Override
 		public void run() {
-			// no-op
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 

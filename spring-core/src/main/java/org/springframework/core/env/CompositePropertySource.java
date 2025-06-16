@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,10 @@ import org.springframework.util.StringUtils;
  *
  * <p>As of Spring 4.1.2, this class extends {@link EnumerablePropertySource} instead
  * of plain {@link PropertySource}, exposing {@link #getPropertyNames()} based on the
- * accumulated property names from all contained sources (as far as possible).
+ * accumulated property names from all contained sources - and failing with an
+ * {@code IllegalStateException} against any non-{@code EnumerablePropertySource}.
+ * <b>When used through the {@code EnumerablePropertySource} contract, all contained
+ * sources are expected to be of type {@code EnumerablePropertySource} as well.</b>
  *
  * @author Chris Beams
  * @author Juergen Hoeller

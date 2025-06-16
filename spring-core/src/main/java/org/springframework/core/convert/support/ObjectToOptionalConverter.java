@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,14 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Convert an Object to {@code java.util.Optional<T>} if necessary using the
+ * Convert an Object to a {@code java.util.Optional<T>}, if necessary using the
  * {@code ConversionService} to convert the source Object to the generic type
  * of Optional when known.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.1
+ * @see OptionalToObjectConverter
  */
 final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 

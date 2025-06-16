@@ -1,5 +1,5 @@
 [[testcontext-context-customizers]]
-= Configuration Configuration with Context Customizers
+= Context Configuration with Context Customizers
 
 A `ContextCustomizer` is responsible for customizing the supplied
 `ConfigurableApplicationContext` after bean definitions have been loaded into the context

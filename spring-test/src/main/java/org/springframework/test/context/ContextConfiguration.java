@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,9 +75,8 @@ import org.springframework.core.annotation.AliasFor;
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
- * <p>As of Spring Framework 5.3, this annotation will be inherited from an
- * enclosing test class by default. See
- * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ * <p>This annotation will be inherited from an enclosing test class by default.
+ * See {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -292,13 +291,18 @@ public @interface ContextConfiguration {
 	 * <p>If not specified the name will be inferred based on the numerical level
 	 * within all declared contexts within the hierarchy.
 	 * <p>This attribute is only applicable when used within a test class hierarchy
-	 * or enclosing class hierarchy that is configured using
-	 * {@code @ContextHierarchy}, in which case the name can be used for
-	 * <em>merging</em> or <em>overriding</em> this configuration with configuration
-	 * of the same name in hierarchy levels defined in superclasses or enclosing
-	 * classes. See the Javadoc for {@link ContextHierarchy @ContextHierarchy} for
-	 * details.
+	 * or enclosing class hierarchy that is configured using {@code @ContextHierarchy},
+	 * in which case the name can be used for <em>merging</em> or <em>overriding</em>
+	 * this configuration with configuration of the same name in hierarchy levels
+	 * defined in superclasses or enclosing classes. As of Spring Framework 6.2.6,
+	 * the name can also be used to identify the configuration in which a
+	 * <em>Bean Override</em> should be applied &mdash; for example,
+	 * {@code @MockitoBean(contextName = "child")}. See the Javadoc for
+	 * {@link ContextHierarchy @ContextHierarchy} for details.
 	 * @since 3.2.2
+	 * @see org.springframework.test.context.bean.override.mockito.MockitoBean#contextName @MockitoBean(contextName = ...)
+	 * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean#contextName @MockitoSpyBean(contextName = ...)
+	 * @see org.springframework.test.context.bean.override.convention.TestBean#contextName @TestBean(contextName = ...)
 	 */
 	String name() default "";
 

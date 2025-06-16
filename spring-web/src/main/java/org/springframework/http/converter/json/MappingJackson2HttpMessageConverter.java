@@ -44,7 +44,10 @@ import org.springframework.http.MediaType;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.1.2
+ * @deprecated since 7.0 in favor of {@link JacksonJsonHttpMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 
 	private static final List<MediaType> problemDetailMediaTypes =

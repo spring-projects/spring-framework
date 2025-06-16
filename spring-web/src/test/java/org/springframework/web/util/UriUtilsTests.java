@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,12 +107,21 @@ class UriUtilsTests {
 		assertThat(UriUtils.decode("T%C5%8Dky%C5%8D", CHARSET)).as("Invalid encoded result").isEqualTo("T\u014dky\u014d");
 		assertThat(UriUtils.decode("/Z%C3%BCrich", CHARSET)).as("Invalid encoded result").isEqualTo("/Z\u00fcrich");
 		assertThat(UriUtils.decode("T\u014dky\u014d", CHARSET)).as("Invalid encoded result").isEqualTo("T\u014dky\u014d");
+		assertThat(UriUtils.decode("%20\u2019", CHARSET)).as("Invalid encoded result").isEqualTo(" \u2019");
+		assertThat(UriUtils.decode("\u015bp\u0159\u00ec\u0144\u0121", CHARSET)).as("Invalid encoded result").isEqualTo("śpřìńġ");
+		assertThat(UriUtils.decode("%20\u015bp\u0159\u00ec\u0144\u0121", CHARSET)).as("Invalid encoded result").isEqualTo(" śpřìńġ");
 	}
 
 	@Test
 	void decodeInvalidSequence() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				UriUtils.decode("foo%2", CHARSET));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriUtils.decode("foo%", CHARSET));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriUtils.decode("%", CHARSET));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriUtils.decode("%zz", CHARSET));
 	}
 
 	@Test

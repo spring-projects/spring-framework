@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.junit.platform.suite.api.Suite;
 
 /**
  * JUnit Platform based test suite for tests that involve the Spring TestContext
- * Framework and JUnit Jupiter (i.e., JUnit 5's programming model).
+ * Framework and JUnit Jupiter.
  *
  * <p><strong>This suite is only intended to be used manually within an IDE.</strong>
  *

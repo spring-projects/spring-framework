@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
@@ -141,6 +144,86 @@ class JdbcClientIntegrationTests {
 		assertThat(generatedKeyHolder.getKey()).isEqualTo(expectedId);
 		assertNumUsers(2);
 		assertUser(expectedId, firstName, lastName);
+	}
+
+
+	@Nested  // gh-34768
+	class ReusedNamedParameterTests {
+
+		private static final String QUERY1 = """
+				select * from users
+					where
+						first_name in ('Bogus', :name) or
+						last_name in (:name, 'Bogus')
+					order by last_name
+				""";
+
+		private static final String QUERY2 = """
+				select * from users
+					where
+						first_name in (:names) or
+						last_name in (:names)
+					order by last_name
+				""";
+
+
+		@BeforeEach
+		void insertTestUsers() {
+			jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "John").update();
+			jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("John", "Smith").update();
+			jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Smith", "Smith").update();
+			assertNumUsers(4);
+		}
+
+		@Test
+		void selectWithReusedNamedParameter() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.param("name", "John")
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
+		void selectWithReusedNamedParameterFromBeanProperties() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.paramSource(new Name("John"))
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
+		void selectWithReusedNamedParameterList() {
+			List<User> users = jdbcClient.sql(QUERY2)
+					.param("names", List.of("John", "Bogus"))
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
+		void selectWithReusedNamedParameterListFromBeanProperties() {
+			List<User> users = jdbcClient.sql(QUERY2)
+					.paramSource(new Names(List.of("John", "Bogus")))
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+
+		private static void assertResults(List<User> users) {
+			assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
+		}
+
+		record Name(String name) {}
+
+		record Names(List<String> names) {}
+
 	}
 
 

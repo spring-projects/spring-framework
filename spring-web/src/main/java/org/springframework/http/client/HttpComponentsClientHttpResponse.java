@@ -89,8 +89,7 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 				this.httpResponse.close();
 			}
 		}
-		catch (IOException ex) {
-			// Ignore exception on close...
+		catch (IOException ignored) {
 		}
 	}
 

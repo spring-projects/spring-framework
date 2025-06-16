@@ -265,6 +265,7 @@ Java::
 	client = WebTestClient.bindToController(new TestController())
 			.configureClient()
 			.baseUrl("/test")
+			.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 			.build();
 ----
 
@@ -275,6 +276,7 @@ Kotlin::
 	client = WebTestClient.bindToController(TestController())
 			.configureClient()
 			.baseUrl("/test")
+			.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 			.build()
 ----
 ======
@@ -396,7 +398,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.test.web.reactive.server.expectBody
+	import org.springframework.test.web.reactive.server.expectBody
 
 	client.get().uri("/persons/1")
 			.exchange()

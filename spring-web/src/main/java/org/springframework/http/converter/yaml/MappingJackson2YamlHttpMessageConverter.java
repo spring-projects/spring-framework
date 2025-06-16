@@ -39,7 +39,10 @@ import org.springframework.util.Assert;
  *
  * @author Hyoungjune Kim
  * @since 6.2
+ * @deprecated since 7.0 in favor of {@link JacksonYamlHttpMessageConverter}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2YamlHttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 
 	/**

@@ -4,7 +4,7 @@
 Once the TestContext framework loads an `ApplicationContext` (or `WebApplicationContext`)
 for a test, that context is cached and reused for all subsequent tests that declare the
 same unique context configuration within the same test suite. To understand how caching
-works, it is important to understand what is meant by "`unique`" and "`test suite.`"
+works, it is important to understand what is meant by "unique" and "test suite."
 
 An `ApplicationContext` can be uniquely identified by the combination of configuration
 parameters that is used to load it. Consequently, the unique combination of configuration
@@ -15,8 +15,8 @@ framework uses the following configuration parameters to build the context cache
 * `classes` (from `@ContextConfiguration`)
 * `contextInitializerClasses` (from `@ContextConfiguration`)
 * `contextCustomizers` (from `ContextCustomizerFactory`) – this includes
-  `@DynamicPropertySource` methods as well as various features from Spring Boot's
-  testing support such as `@MockBean` and `@SpyBean`.
+  `@DynamicPropertySource` methods, bean overrides (such as `@TestBean`, `@MockitoBean`,
+  `@MockitoSpyBean` etc.), as well as various features from Spring Boot's testing support.
 * `contextLoader` (from `@ContextConfiguration`)
 * `parent` (from `@ContextHierarchy`)
 * `activeProfiles` (from `@ActiveProfiles`)

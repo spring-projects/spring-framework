@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,18 +53,22 @@ class PatternMatchUtilsTests {
 		assertMatches(new String[] { null, "" }, "");
 		assertMatches(new String[] { null, "123" }, "123");
 		assertMatches(new String[] { null, "*" }, "123");
+
+		testMixedCaseMatch("abC", "Abc");
 	}
 
 	@Test
 	void startsWith() {
 		assertMatches("get*", "getMe");
 		assertDoesNotMatch("get*", "setMe");
+		testMixedCaseMatch("geT*", "GetMe");
 	}
 
 	@Test
 	void endsWith() {
 		assertMatches("*Test", "getMeTest");
 		assertDoesNotMatch("*Test", "setMe");
+		testMixedCaseMatch("*TeSt", "getMeTesT");
 	}
 
 	@Test
@@ -74,6 +78,10 @@ class PatternMatchUtilsTests {
 		assertMatches("*stuff*", "stuffTest");
 		assertMatches("*stuff*", "getstuff");
 		assertMatches("*stuff*", "stuff");
+		testMixedCaseMatch("*stuff*", "getStuffTest");
+		testMixedCaseMatch("*stuff*", "StuffTest");
+		testMixedCaseMatch("*stuff*", "getStuff");
+		testMixedCaseMatch("*stuff*", "Stuff");
 	}
 
 	@Test
@@ -82,6 +90,8 @@ class PatternMatchUtilsTests {
 		assertMatches("on*Event", "onEvent");
 		assertDoesNotMatch("3*3", "3");
 		assertMatches("3*3", "33");
+		testMixedCaseMatch("on*Event", "OnMyEvenT");
+		testMixedCaseMatch("on*Event", "OnEvenT");
 	}
 
 	@Test
@@ -122,18 +132,27 @@ class PatternMatchUtilsTests {
 
 	private void assertMatches(String pattern, String str) {
 		assertThat(PatternMatchUtils.simpleMatch(pattern, str)).isTrue();
+		assertThat(PatternMatchUtils.simpleMatchIgnoreCase(pattern, str)).isTrue();
 	}
 
 	private void assertDoesNotMatch(String pattern, String str) {
 		assertThat(PatternMatchUtils.simpleMatch(pattern, str)).isFalse();
+		assertThat(PatternMatchUtils.simpleMatchIgnoreCase(pattern, str)).isFalse();
+	}
+
+	private void testMixedCaseMatch(String pattern, String str) {
+		assertThat(PatternMatchUtils.simpleMatch(pattern, str)).isFalse();
+		assertThat(PatternMatchUtils.simpleMatchIgnoreCase(pattern, str)).isTrue();
 	}
 
 	private void assertMatches(String[] patterns, String str) {
 		assertThat(PatternMatchUtils.simpleMatch(patterns, str)).isTrue();
+		assertThat(PatternMatchUtils.simpleMatchIgnoreCase(patterns, str)).isTrue();
 	}
 
 	private void assertDoesNotMatch(String[] patterns, String str) {
 		assertThat(PatternMatchUtils.simpleMatch(patterns, str)).isFalse();
+		assertThat(PatternMatchUtils.simpleMatchIgnoreCase(patterns, str)).isFalse();
 	}
 
 }

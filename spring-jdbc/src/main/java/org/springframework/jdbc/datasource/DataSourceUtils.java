@@ -263,10 +263,9 @@ public abstract class DataSourceUtils {
 	 * regarding read-only flag and isolation level.
 	 * @param con the Connection to reset
 	 * @param previousIsolationLevel the isolation level to restore, if any
-	 * @deprecated as of 5.1.11, in favor of
-	 * {@link #resetConnectionAfterTransaction(Connection, Integer, boolean)}
+	 * @deprecated in favor of {@link #resetConnectionAfterTransaction(Connection, Integer, boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.1.11")
 	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
 		try {

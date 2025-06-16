@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * @deprecated This class should only be used by the runtime-hints agent when instrumenting bytecode
  * and is not considered public API.
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public abstract class InstrumentedBridgeMethods {
 
 	private InstrumentedBridgeMethods() {

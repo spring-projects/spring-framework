@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	 * @param executor for blocking I/O writes of items emitted from reactive types
 	 * @param manager for detecting streaming media types
 	 * @param viewResolvers resolvers for fragment stream rendering
-	 * @param localeResolver localeResolver for fragment stream rendering
+	 * @param localeResolver the {@link LocaleResolver} for fragment stream rendering
 	 * @since 6.2
 	 */
 	public ResponseBodyEmitterReturnValueHandler(
@@ -404,7 +404,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 				throw ex;
 			}
 			catch (Exception ex) {
-				throw new RuntimeException("Failed to render " + modelAndView, ex);
+				throw new IllegalStateException("Failed to render " + modelAndView, ex);
 			}
 			finally {
 				RequestContextHolder.resetRequestAttributes();

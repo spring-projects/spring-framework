@@ -42,12 +42,14 @@ class ProtobufJsonFormatHttpMessageConverterTests {
 			JsonFormat.parser(), JsonFormat.printer());
 
 	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
+	private final MediaType testPlusProtoMediaType = MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf");
 
 
 	@Test
 	void canRead() {
 		assertThat(this.converter.canRead(Msg.class, null)).isTrue();
 		assertThat(this.converter.canRead(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
+		assertThat(this.converter.canRead(Msg.class, this.testPlusProtoMediaType)).isTrue();
 		assertThat(this.converter.canRead(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
 		assertThat(this.converter.canRead(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
 	}
@@ -56,6 +58,7 @@ class ProtobufJsonFormatHttpMessageConverterTests {
 	void canWrite() {
 		assertThat(this.converter.canWrite(Msg.class, null)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, ProtobufHttpMessageConverter.PROTOBUF)).isTrue();
+		assertThat(this.converter.canWrite(Msg.class, this.testPlusProtoMediaType)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, MediaType.APPLICATION_JSON)).isTrue();
 		assertThat(this.converter.canWrite(Msg.class, MediaType.TEXT_PLAIN)).isTrue();
 	}

@@ -106,8 +106,7 @@ final class MetadataEncoder {
 		Matcher matcher = VARS_PATTERN.matcher(route);
 		while (matcher.find()) {
 			Assert.isTrue(index < routeVars.length, () -> "No value for variable '" + matcher.group(1) + "'");
-			String value = routeVars[index].toString();
-			value = value.contains(".") ? value.replaceAll("\\.", "%2E") : value;
+			String value = routeVars[index].toString().replace(".", "%2E");
 			matcher.appendReplacement(sb, value);
 			index++;
 		}

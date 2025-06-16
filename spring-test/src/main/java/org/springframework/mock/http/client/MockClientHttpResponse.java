@@ -100,8 +100,7 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 		try {
 			getBody().close();
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 	}
 

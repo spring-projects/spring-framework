@@ -27,6 +27,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck"/>
+		<module name="io.spring.javaformat.checkstyle.check.SpringDeprecatedCheck" />
 
 		<!-- Block Checks -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyBlockCheck">
@@ -38,6 +39,9 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.AvoidNestedBlocksCheck"/>
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyCatchBlockCheck">
+			<property name="exceptionVariableName" value="expected|ignore"/>
+		</module>
 
 		<!-- Class Design -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck"/>

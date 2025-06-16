@@ -61,7 +61,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public NettyDataBuffer allocateBuffer() {
 		ByteBuf byteBuf = this.byteBufAllocator.buffer();
 		return new NettyDataBuffer(byteBuf, this);

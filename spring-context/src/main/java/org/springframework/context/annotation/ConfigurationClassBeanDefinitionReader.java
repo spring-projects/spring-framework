@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -290,8 +292,8 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Registering bean definition for @Bean method %s.%s()",
-					configClass.getMetadata().getClassName(), beanName));
+			logger.trace("Registering bean definition for @Bean method %s.%s()"
+					.formatted(configClass.getMetadata().getClassName(), beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
@@ -351,9 +353,8 @@ class ConfigurationClassBeanDefinitionReader {
 					"@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Skipping bean definition for %s: a definition for bean '%s' " +
-					"already exists. This top-level bean definition is considered as an override.",
-					beanMethod, beanName));
+			logger.debug("Skipping bean definition for %s: a definition for bean '%s' already exists. " +
+					"This top-level bean definition is considered as an override.".formatted(beanMethod, beanName));
 		}
 		return true;
 	}
@@ -379,9 +380,11 @@ class ConfigurationClassBeanDefinitionReader {
 			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
 			if (reader == null) {
 				try {
+					Constructor<? extends BeanDefinitionReader> constructor =
+							readerClass.getDeclaredConstructor(BeanDefinitionRegistry.class);
 					// Instantiate the specified BeanDefinitionReader
-					reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-					// Delegate the current ResourceLoader to it if possible
+					reader = BeanUtils.instantiateClass(constructor, this.registry);
+					// Delegate the current ResourceLoader and Environment to it if possible
 					if (reader instanceof AbstractBeanDefinitionReader abdr) {
 						abdr.setResourceLoader(this.resourceLoader);
 						abdr.setEnvironment(this.environment);
@@ -390,11 +393,9 @@ class ConfigurationClassBeanDefinitionReader {
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException(
-							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]", ex);
 				}
 			}
-
-			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
 			reader.loadBeanDefinitions(resource);
 		});
 	}

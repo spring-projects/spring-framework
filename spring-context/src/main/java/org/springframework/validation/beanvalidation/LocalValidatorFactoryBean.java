@@ -266,8 +266,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				Method eclMethod = configuration.getClass().getMethod("externalClassLoader", ClassLoader.class);
 				ReflectionUtils.invokeMethod(eclMethod, configuration, this.applicationContext.getClassLoader());
 			}
-			catch (NoSuchMethodException ex) {
-				// Ignore - no Hibernate Validator 5.2+ or similar provider
+			catch (NoSuchMethodException ignored) {
+				// no Hibernate Validator 5.2+ or similar provider
 			}
 		}
 
@@ -417,8 +417,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			try {
 				return super.unwrap(type);
 			}
-			catch (ValidationException ex) {
-				// Ignore - we'll try ValidatorFactory unwrapping next
+			catch (ValidationException ignored) {
+				// we'll try ValidatorFactory unwrapping next
 			}
 		}
 		if (this.validatorFactory != null) {

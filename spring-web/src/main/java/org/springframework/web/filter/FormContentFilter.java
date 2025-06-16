@@ -116,7 +116,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
 				return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
 			}
-			catch (IllegalArgumentException ex) {
+			catch (IllegalArgumentException ignored) {
 			}
 		}
 		return false;

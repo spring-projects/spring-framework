@@ -204,9 +204,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 		final Supplier<ScheduledTaskObservationContext> contextSupplier;
 
 		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock,
-							@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
-							String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
-							Supplier<ScheduledTaskObservationContext> contextSupplier) {
+				@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
+				String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
+				Supplier<ScheduledTaskObservationContext> contextSupplier) {
 
 			this.publisher = publisher;
 			this.shouldBlock = shouldBlock;
@@ -234,7 +234,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					latch.await();
 				}
 				catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
+					Thread.currentThread().interrupt();
 				}
 			}
 			else {
