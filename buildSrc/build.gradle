@@ -67,6 +67,6 @@ test {
 
 jar.dependsOn check
 
-//pmd {
-//	ruleSets = ["category/java/bestpractices.xml"]
-//}
+pmd {
+	ruleSets = ["category/java/bestpractices.xml"]
+}
