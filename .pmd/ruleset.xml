@@ -6,4 +6,6 @@
     <description>Programmatic approach to maintain code quality on large scale.</description>
     <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />
     <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
+	<rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
+<!--	<rule ref="category/java/bestpractices.xml/UnusedPrivateField" />-->
 </ruleset>
