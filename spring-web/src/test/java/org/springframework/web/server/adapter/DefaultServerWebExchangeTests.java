@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
@@ -60,14 +61,25 @@ class DefaultServerWebExchangeTests {
 	}
 
 	@Test // gh-34660
-	void useFormDataMessageReaderWhenAllContentType() {
+	void shouldNotDecodeFormDataWhenContentTypeNotConcrete() {
 		MockServerHttpRequest request = MockServerHttpRequest
 				.post("https://example.com")
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.ALL_VALUE)
 				.body("project=spring");
 		ServerWebExchange exchange = createExchange(request);
 		MultiValueMap<String, String> body = exchange.getFormData().block();
-		assertThat(body.get("project")).contains("spring");
+		assertThat(body).isEmpty();
+	}
+
+	@Test // gh-34660
+	void shouldNotDecodeMultipartWhenContentTypeNotConcrete() {
+		MockServerHttpRequest request = MockServerHttpRequest
+				.post("https://example.com")
+				.header(HttpHeaders.CONTENT_TYPE, "multipart/*")
+				.body("project=spring");
+		ServerWebExchange exchange = createExchange(request);
+		MultiValueMap<String, Part> body = exchange.getMultipartData().block();
+		assertThat(body).isEmpty();
 	}
 
 
