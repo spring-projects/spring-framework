@@ -3,7 +3,9 @@ plugins {
 	id 'checkstyle'
 	id 'pmd'
 }
-
+subprojects {
+	apply plugin: 'pmd'
+}
 repositories {
 	mavenCentral()
 	gradlePluginPortal()

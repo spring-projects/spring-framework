@@ -3,7 +3,6 @@ import org.springframework.build.shadow.ShadowSource
 
 plugins {
 	id 'org.springframework.build.multiReleaseJar'
-	id 'pmd'
 }
 
 description = "Spring Core"
@@ -163,7 +162,3 @@ eclipse {
 }
 
 tasks['eclipse'].dependsOn(javapoetRepackJar, javapoetSourceJar, objenesisRepackJar, objenesisSourceJar)
-
-pmd {
-	ruleSets = ["category/java/bestpractices.xml"]
-}
