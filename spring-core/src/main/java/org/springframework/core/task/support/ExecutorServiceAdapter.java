@@ -91,7 +91,6 @@ public class ExecutorServiceAdapter extends AbstractExecutorService {
 	}
 
 	// @Override on JDK 19
-	@Override
 	public void close() {
 		// no-op in order to avoid container-triggered shutdown call which would lead to exception logging
 	}

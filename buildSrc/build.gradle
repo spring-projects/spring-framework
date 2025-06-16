@@ -1,13 +1,8 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
-	id 'pmd'
 }
-//check.dependsOn(pmdMain)
-subprojects {
-	apply plugin: 'pmd'
-	check.dependsOn(pmdMain)
-}
+
 repositories {
 	mavenCentral()
 	gradlePluginPortal()

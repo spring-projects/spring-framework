@@ -24,6 +24,8 @@ import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.util.Assert;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Convenient implementation of the
  * {@link org.springframework.aop.IntroductionInterceptor} interface.
@@ -110,7 +112,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (retVal.equals(this.delegate) && mi instanceof ProxyMethodInvocation pmi) {
+			if (requireNonNull(retVal).equals(this.delegate) && mi instanceof ProxyMethodInvocation pmi) {
 				Object proxy = pmi.getProxy();
 				if (mi.getMethod().getReturnType().isInstance(proxy)) {
 					retVal = proxy;
