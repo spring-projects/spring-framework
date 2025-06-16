@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
+import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +34,6 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.InstanceOfAssertFactories.array;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
@@ -176,11 +177,10 @@ class RetryTemplateTests {
 				.isThrownBy(() -> retryTemplate.execute(retryable))
 				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
 				.withCauseExactlyInstanceOf(IllegalStateException.class)
-				.extracting(Throwable::getSuppressed, array(Throwable[].class))
-				.satisfiesExactly(
+				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
 					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
 					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(FileNotFoundException.class)
-				);
+				));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
 	}
@@ -228,13 +228,19 @@ class RetryTemplateTests {
 				.isThrownBy(() -> retryTemplate.execute(retryable))
 				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
 				.withCauseExactlyInstanceOf(CustomFileNotFoundException.class)
-				.extracting(Throwable::getSuppressed, array(Throwable[].class))
-				.satisfiesExactly(
+				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
 					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
 					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
-				);
+				));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
+	}
+
+
+	@SafeVarargs
+	private static final Consumer<Throwable> hasSuppressedExceptionsSatisfyingExactly(
+			ThrowingConsumer<? super Throwable>... requirements) {
+		return throwable -> assertThat(throwable.getSuppressed()).satisfiesExactly(requirements);
 	}
 
 
