@@ -19,16 +19,21 @@ package org.springframework.core.retry;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
+import org.junit.jupiter.params.provider.FieldSource;
 
 import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.array;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Tests for {@link RetryTemplate}.
@@ -180,8 +185,25 @@ class RetryTemplateTests {
 		assertThat(invocationCount).hasValue(3);
 	}
 
-	@Test
-	void retryWithExceptionExcludes() {
+	static final List<ArgumentSet> includesAndExcludesRetryPolicies = List.of(
+			argumentSet("Excludes",
+						RetryPolicy.builder()
+							.maxAttempts(Integer.MAX_VALUE)
+							.excludes(FileNotFoundException.class)
+							.build()),
+			argumentSet("Includes & Excludes",
+						RetryPolicy.builder()
+							.maxAttempts(Integer.MAX_VALUE)
+							.includes(IOException.class)
+							.excludes(FileNotFoundException.class)
+							.build())
+		);
+
+	@ParameterizedTest
+	@FieldSource("includesAndExcludesRetryPolicies")
+	void retryWithIncludesAndExcludesRetryPolicies(RetryPolicy retryPolicy) {
+		retryTemplate.setRetryPolicy(retryPolicy);
+
 		var invocationCount = new AtomicInteger();
 
 		var retryable = new Retryable<>() {
@@ -200,56 +222,6 @@ class RetryTemplateTests {
 				return "test";
 			}
 		};
-
-		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(Integer.MAX_VALUE)
-				.excludes(FileNotFoundException.class)
-				.build();
-
-		retryTemplate.setRetryPolicy(retryPolicy);
-
-		assertThat(invocationCount).hasValue(0);
-		assertThatExceptionOfType(RetryException.class)
-				.isThrownBy(() -> retryTemplate.execute(retryable))
-				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
-				.withCauseExactlyInstanceOf(CustomFileNotFoundException.class)
-				.extracting(Throwable::getSuppressed, array(Throwable[].class))
-				.satisfiesExactly(
-					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
-					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
-				);
-		// 3 = 1 initial invocation + 2 retry attempts
-		assertThat(invocationCount).hasValue(3);
-	}
-
-	@Test
-	void retryWithExceptionIncludesAndExcludes() {
-		var invocationCount = new AtomicInteger();
-
-		var retryable = new Retryable<>() {
-			@Override
-			public String execute() throws Exception {
-				return switch (invocationCount.incrementAndGet()) {
-					case 1 -> throw new IOException();
-					case 2 -> throw new IOException();
-					case 3 -> throw new CustomFileNotFoundException();
-					default -> "success";
-				};
-			}
-
-			@Override
-			public String getName() {
-				return "test";
-			}
-		};
-
-		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(Integer.MAX_VALUE)
-				.includes(IOException.class)
-				.excludes(FileNotFoundException.class)
-				.build();
-
-		retryTemplate.setRetryPolicy(retryPolicy);
 
 		assertThat(invocationCount).hasValue(0);
 		assertThatExceptionOfType(RetryException.class)
