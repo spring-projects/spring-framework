@@ -7,6 +7,7 @@ plugins {
 	id 'io.github.goooler.shadow' version '8.1.8' apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id "io.spring.nullability" version "0.0.1" apply false
+	id 'pmd'
 }
 
 ext {
@@ -18,6 +19,7 @@ description = "Spring Framework"
 
 configure(allprojects) { project ->
 	apply plugin: "org.springframework.build.localdev"
+	apply plugin: "pmd"
 	group = "org.springframework"
 	repositories {
 		mavenCentral()
@@ -33,6 +35,9 @@ configure(allprojects) { project ->
 			cacheChangingModulesFor 0, "seconds"
 			cacheDynamicVersionsFor 0, "seconds"
 		}
+	}
+	pmd {
+		ruleSetFiles = files(".pmd/ruleset.xml")
 	}
 }
 

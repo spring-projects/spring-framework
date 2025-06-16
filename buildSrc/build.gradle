@@ -6,7 +6,7 @@ plugins {
 //check.dependsOn(pmdMain)
 subprojects {
 	apply plugin: 'pmd'
-//	check.dependsOn(pmdMain)
+	check.dependsOn(pmdMain)
 }
 repositories {
 	mavenCentral()
@@ -69,11 +69,4 @@ test {
 	useJUnitPlatform()
 }
 
-check {
-	pmdMain()
-}
-
-pmd {
-	ruleSetFiles = files(".pmd/ruleset.xml")
-}
 jar.dependsOn check
