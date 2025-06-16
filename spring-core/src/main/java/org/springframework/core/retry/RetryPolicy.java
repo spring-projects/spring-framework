@@ -99,6 +99,8 @@ public interface RetryPolicy {
 
 		/**
 		 * Specify the maximum number of retry attempts.
+		 * <p>If a {@code maxAttempts} value has already been configured, the
+		 * supplied value will override the existing value.
 		 * @param maxAttempts the maximum number of retry attempts; must be
 		 * greater than zero
 		 * @return this {@code Builder} instance for chained method invocations
@@ -111,6 +113,8 @@ public interface RetryPolicy {
 
 		/**
 		 * Specify the maximum retry {@link Duration}.
+		 * <p>If a {@code maxDuration} value has already been configured, the
+		 * supplied value will override the existing value.
 		 * @param maxDuration the maximum retry duration; must be positive
 		 * @return this {@code Builder} instance for chained method invocations
 		 */
@@ -123,6 +127,9 @@ public interface RetryPolicy {
 		/**
 		 * Specify the types of exceptions for which the {@link RetryPolicy}
 		 * should retry a failed operation.
+		 * <p>Defaults to all exception types.
+		 * <p>If included exception types have already been configured, the supplied
+		 * types will be added to the existing list of included types.
 		 * <p>This can be combined with {@link #excludes(Class...)} and
 		 * {@link #predicate(Predicate)}.
 		 * @param types the types of exceptions to include in the policy
@@ -138,6 +145,8 @@ public interface RetryPolicy {
 		/**
 		 * Specify the types of exceptions for which the {@link RetryPolicy}
 		 * should not retry a failed operation.
+		 * <p>If excluded exception types have already been configured, the supplied
+		 * types will be added to the existing list of excluded types.
 		 * <p>This can be combined with {@link #includes(Class...)} and
 		 * {@link #predicate(Predicate)}.
 		 * @param types the types of exceptions to exclude from the policy
