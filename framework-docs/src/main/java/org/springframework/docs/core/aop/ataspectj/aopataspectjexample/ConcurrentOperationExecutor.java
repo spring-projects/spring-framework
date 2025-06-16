@@ -36,6 +36,7 @@ public class ConcurrentOperationExecutor implements Ordered {
 		this.maxRetries = maxRetries;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}

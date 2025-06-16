@@ -678,6 +678,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		// @Override - on Servlet 6.1
+		@Override
 		public void sendRedirect(String location, int sc, boolean clearBuffer) throws IOException {
 			throw new UnsupportedOperationException();
 		}

@@ -43,6 +43,7 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void apply(Project project) {
 		project.getPlugins().apply(JavaPlugin.class);
 		ExtensionContainer extensions = project.getExtensions();

@@ -643,6 +643,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	// @Override - on Servlet 6.1
+	@Override
 	public void sendRedirect(String url, int sc, boolean clearBuffer) throws IOException {
 		Assert.state(!isCommitted(), "Cannot send redirect - response is already committed");
 		Assert.notNull(url, "Redirect URL must not be null");

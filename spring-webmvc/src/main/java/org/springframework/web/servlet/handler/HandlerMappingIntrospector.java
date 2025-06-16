@@ -222,6 +222,7 @@ public class HandlerMappingIntrospector
 	 * @throws NoHandlerFoundException if no handler matches the request
 	 * @since 6.2
 	 */
+	@Override
 	public void handlePreFlight(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		Assert.state(this.handlerMappings != null, "Not yet initialized via afterPropertiesSet.");
 		Assert.state(CorsUtils.isPreFlightRequest(request), "Not a pre-flight request.");

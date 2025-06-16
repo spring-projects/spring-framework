@@ -24,6 +24,7 @@ import jakarta.jms.TextMessage;
 // tag::snippet[]
 public class ExampleListener implements MessageListener {
 
+	@Override
 	public void onMessage(Message message) {
 		if (message instanceof TextMessage textMessage) {
 			try {

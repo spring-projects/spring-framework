@@ -110,7 +110,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation pmi) {
+			if (retVal.equals(this.delegate) && mi instanceof ProxyMethodInvocation pmi) {
 				Object proxy = pmi.getProxy();
 				if (mi.getMethod().getReturnType().isInstance(proxy)) {
 					retVal = proxy;

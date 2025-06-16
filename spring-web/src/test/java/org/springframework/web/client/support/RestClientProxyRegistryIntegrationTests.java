@@ -119,6 +119,7 @@ public class RestClientProxyRegistryIntegrationTests {
 	void beansAreCreatedUsingBeanClassLoader() {
 		ClassLoader beanClassLoader = new OverridingClassLoader(getClass().getClassLoader()) {
 
+			@Override
 			protected boolean isEligibleForOverriding(String className) {
 				return className.contains("EchoA");
 			};

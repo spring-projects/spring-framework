@@ -469,14 +469,16 @@ private static final long serialVersionUID = 0L;
      * <code>optional string foo = 1;</code>
      * @return Whether the foo field is set.
      */
-    public boolean hasFoo() {
+    @Override
+	public boolean hasFoo() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional string foo = 1;</code>
      * @return The foo.
      */
-    public java.lang.String getFoo() {
+    @Override
+	public java.lang.String getFoo() {
       java.lang.Object ref = foo_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
@@ -494,7 +496,8 @@ private static final long serialVersionUID = 0L;
      * <code>optional string foo = 1;</code>
      * @return The bytes for foo.
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getFooBytes() {
       java.lang.Object ref = foo_;
       if (ref instanceof String) {
@@ -551,14 +554,16 @@ private static final long serialVersionUID = 0L;
      * <code>optional .SecondMsg blah = 2;</code>
      * @return Whether the blah field is set.
      */
-    public boolean hasBlah() {
+    @Override
+	public boolean hasBlah() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional .SecondMsg blah = 2;</code>
      * @return The blah.
      */
-    public org.springframework.protobuf.SecondMsg getBlah() {
+    @Override
+	public org.springframework.protobuf.SecondMsg getBlah() {
       if (blahBuilder_ == null) {
         return blah_ == null ? org.springframework.protobuf.SecondMsg.getDefaultInstance() : blah_;
       } else {
@@ -640,7 +645,8 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>optional .SecondMsg blah = 2;</code>
      */
-    public org.springframework.protobuf.SecondMsgOrBuilder getBlahOrBuilder() {
+    @Override
+	public org.springframework.protobuf.SecondMsgOrBuilder getBlahOrBuilder() {
       if (blahBuilder_ != null) {
         return blahBuilder_.getMessageOrBuilder();
       } else {

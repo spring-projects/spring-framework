@@ -50,6 +50,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to set a header.
 	 * @param header the name of the header to hold the version
 	 */
+	@Override
 	public ApiVersionInserter.Builder useHeader(@Nullable String header) {
 		this.header = header;
 		return this;
@@ -59,6 +60,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to set a query parameter.
 	 * @param queryParam the name of the query parameter to hold the version
 	 */
+	@Override
 	public ApiVersionInserter.Builder useQueryParam(@Nullable String queryParam) {
 		this.queryParam = queryParam;
 		return this;
@@ -68,6 +70,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to insert a path segment.
 	 * @param pathSegmentIndex the index of the path segment to hold the version
 	 */
+	@Override
 	public ApiVersionInserter.Builder usePathSegment(@Nullable Integer pathSegmentIndex) {
 		this.pathSegmentIndex = pathSegmentIndex;
 		return this;
@@ -78,6 +81,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * <p>By default, the version is formatted with {@link Object#toString()}.
 	 * @param versionFormatter the formatter to use
 	 */
+	@Override
 	public ApiVersionInserter.Builder withVersionFormatter(ApiVersionFormatter versionFormatter) {
 		this.versionFormatter = versionFormatter;
 		return this;
@@ -86,6 +90,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	/**
 	 * Build the inserter.
 	 */
+	@Override
 	public ApiVersionInserter build() {
 		return new DefaultApiVersionInserter(
 				this.header, this.queryParam, this.pathSegmentIndex, this.versionFormatter);

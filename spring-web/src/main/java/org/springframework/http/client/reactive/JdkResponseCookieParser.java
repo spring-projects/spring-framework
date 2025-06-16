@@ -39,6 +39,7 @@ final class JdkResponseCookieParser implements ResponseCookie.Parser {
 	/**
 	 * Parse the given headers.
 	 */
+	@Override
 	public List<ResponseCookie> parse(String header) {
 		Matcher matcher = SAME_SITE_PATTERN.matcher(header);
 		String sameSite = (matcher.matches() ? matcher.group(1) : null);

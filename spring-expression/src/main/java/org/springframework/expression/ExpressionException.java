@@ -121,6 +121,7 @@ public class ExpressionException extends RuntimeException {
 	 * @see #getSimpleMessage()
 	 * @see java.lang.Throwable#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		return toDetailedString();
 	}

@@ -26,9 +26,12 @@
 	 <rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
 	 <rule ref="category/java/design.xml/AvoidCatchingGenericException" />
 	 <rule ref="category/java/design.xml/AvoidThrowingRawExceptionTypes" />
+<!--	<rule ref="category/java/bestpractices.xml"/>-->
 	<rule ref="category/java/bestpractices.xml/MissingOverride" />
 	<rule ref="category/java/bestpractices.xml/UnusedPrivateField" />
 	<rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
+<!--	<rule ref="category/java/codestyle.xml"/>-->
+<!--	<rule ref="category/java/errorprone.xml"/>-->
     <rule ref="category/java/codestyle.xml/EmptyControlStatement" />
     <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName" />
 </ruleset>

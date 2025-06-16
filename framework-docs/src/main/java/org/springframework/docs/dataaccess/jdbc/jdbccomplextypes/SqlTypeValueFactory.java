@@ -35,6 +35,7 @@ class SqlTypeValueFactory {
 				new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
 
 		SqlTypeValue value = new AbstractSqlTypeValue() {
+			@Override
 			protected Object createTypeValue(Connection connection, int sqlType, String typeName) throws SQLException {
 				Object[] item = new Object[] { testItem.getId(), testItem.getDescription(),
 						new java.sql.Date(testItem.getExpirationDate().getTime()) };
@@ -49,6 +50,7 @@ class SqlTypeValueFactory {
 		Long[] ids = new Long[] {1L, 2L};
 
 		SqlTypeValue value = new AbstractSqlTypeValue() {
+			@Override
 			protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
 				return conn.unwrap(OracleConnection.class).createOracleArray(typeName, ids);
 			}
