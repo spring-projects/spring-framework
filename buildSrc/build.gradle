@@ -3,8 +3,10 @@ plugins {
 	id 'checkstyle'
 	id 'pmd'
 }
+//check.dependsOn(pmdMain)
 subprojects {
 	apply plugin: 'pmd'
+//	check.dependsOn(pmdMain)
 }
 repositories {
 	mavenCentral()
@@ -67,8 +69,11 @@ test {
 	useJUnitPlatform()
 }
 
-jar.dependsOn check
+check {
+	pmdMain()
+}
 
 pmd {
 	ruleSetFiles = files(".pmd/ruleset.xml")
 }
+jar.dependsOn check
