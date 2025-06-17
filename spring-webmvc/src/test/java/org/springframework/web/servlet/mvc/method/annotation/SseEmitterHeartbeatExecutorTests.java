@@ -43,28 +43,26 @@ import org.springframework.scheduling.Trigger;
 /**
  * @author Réda Housni Alaoui
  */
-class DefaultSseEmitterHeartbeatExecutorTests {
+class SseEmitterHeartbeatExecutorTests {
 
 	private static final MediaType TEXT_PLAIN_UTF8 = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
 	private TestTaskScheduler taskScheduler;
-	private DefaultSseEmitterHeartbeatExecutor executor;
 
 	@BeforeEach
 	void beforeEach() {
 		this.taskScheduler = new TestTaskScheduler();
-		executor = new DefaultSseEmitterHeartbeatExecutor(taskScheduler);
 	}
 
 	@Test
 	@DisplayName("It sends heartbeat at a fixed rate")
 	void test1() {
-		executor.start();
-		assertThat(taskScheduler.fixedRateTask).isNotNull();
-		assertThat(taskScheduler.fixedRatePeriod).isEqualTo(Duration.ofSeconds(5));
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(5));
 
 		TestEmitter emitter = createEmitter();
 		executor.register(emitter.emitter());
+		assertThat(taskScheduler.fixedRateTask).isNotNull();
+		assertThat(taskScheduler.fixedRatePeriod).isEqualTo(Duration.ofSeconds(5));
 		taskScheduler.fixedRateTask.run();
 
 		emitter.handler.assertSentObjectCount(3);
@@ -77,7 +75,7 @@ class DefaultSseEmitterHeartbeatExecutorTests {
 	@Test
 	@DisplayName("Emitter is unregistered on completion")
 	void test2() {
-		executor.start();
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(5));
 
 		TestEmitter emitter = createEmitter();
 		executor.register(emitter.emitter());
@@ -90,7 +88,7 @@ class DefaultSseEmitterHeartbeatExecutorTests {
 	@Test
 	@DisplayName("Emitter is unregistered on error")
 	void test3() {
-		executor.start();
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(5));
 
 		TestEmitter emitter = createEmitter();
 		executor.register(emitter.emitter());
@@ -103,7 +101,7 @@ class DefaultSseEmitterHeartbeatExecutorTests {
 	@Test
 	@DisplayName("Emitter is unregistered on timeout")
 	void test4() {
-		executor.start();
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(5));
 
 		TestEmitter emitter = createEmitter();
 		executor.register(emitter.emitter());
@@ -116,33 +114,22 @@ class DefaultSseEmitterHeartbeatExecutorTests {
 	@Test
 	@DisplayName("Emitters are unregistered on executor shutdown")
 	void test5() {
-		executor.start();
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(5));
 
 		TestEmitter emitter = createEmitter();
 		executor.register(emitter.emitter());
 
 		assertThat(executor.isRegistered(emitter.emitter)).isTrue();
-		executor.stop();
-		assertThat(executor.isRegistered(emitter.emitter)).isFalse();
-	}
-
-	@Test
-	@DisplayName("The task schedule is canceled on executor shutdown")
-	void test6() {
-		executor.start();
-		executor.stop();
-		assertThat(taskScheduler.fixedRateFuture.canceled).isTrue();
-		assertThat(taskScheduler.fixedRateFuture.interrupted).isTrue();
 	}
 
 	@Test
 	@DisplayName("The task never throws")
-	void test7() {
-		executor.start();
-		assertThat(taskScheduler.fixedRateTask).isNotNull();
+	void test6() {
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(5));
 
 		TestEmitter emitter = createEmitter();
 		executor.register(emitter.emitter());
+		assertThat(taskScheduler.fixedRateTask).isNotNull();
 		emitter.handler.exceptionToThrowOnSend = new RuntimeException();
 
 		assertThatCode(() -> taskScheduler.fixedRateTask.run()).doesNotThrowAnyException();
@@ -150,47 +137,12 @@ class DefaultSseEmitterHeartbeatExecutorTests {
 
 	@Test
 	@DisplayName("The heartbeat rate can be customized")
-	void test8() {
-		executor.setPeriod(Duration.ofSeconds(30));
-		executor.start();
+	void test7() {
+		SseEmitterHeartbeatExecutor executor = new SseEmitterHeartbeatExecutor(taskScheduler, Duration.ofSeconds(30));
+		TestEmitter emitter = createEmitter();
+		executor.register(emitter.emitter());
 		assertThat(taskScheduler.fixedRateTask).isNotNull();
 		assertThat(taskScheduler.fixedRatePeriod).isEqualTo(Duration.ofSeconds(30));
-	}
-
-	@Test
-	@DisplayName("The heartbeat event name can be customized")
-	void test9() {
-		executor.setEventName("foo");
-		executor.start();
-		assertThat(taskScheduler.fixedRateTask).isNotNull();
-
-		TestEmitter emitter = createEmitter();
-		executor.register(emitter.emitter());
-		taskScheduler.fixedRateTask.run();
-
-		emitter.handler.assertSentObjectCount(3);
-		emitter.handler.assertObject(0, "event:foo\ndata:", TEXT_PLAIN_UTF8);
-		emitter.handler.assertObject(1, "ping", MediaType.TEXT_PLAIN);
-		emitter.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
-		emitter.handler.assertWriteCount(1);
-	}
-
-	@Test
-	@DisplayName("The heartbeat event object can be customized")
-	void test10() {
-		executor.setEventObject("foo");
-		executor.start();
-		assertThat(taskScheduler.fixedRateTask).isNotNull();
-
-		TestEmitter emitter = createEmitter();
-		executor.register(emitter.emitter());
-		taskScheduler.fixedRateTask.run();
-
-		emitter.handler.assertSentObjectCount(3);
-		emitter.handler.assertObject(0, "event:ping\ndata:", TEXT_PLAIN_UTF8);
-		emitter.handler.assertObject(1, "foo", MediaType.TEXT_PLAIN);
-		emitter.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
-		emitter.handler.assertWriteCount(1);
 	}
 
 	private TestEmitter createEmitter() {

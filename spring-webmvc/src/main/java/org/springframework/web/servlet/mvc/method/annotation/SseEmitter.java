@@ -18,14 +18,18 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jspecify.annotations.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
@@ -41,9 +45,12 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Réda Housni Alaoui
  * @since 4.2
  */
 public class SseEmitter extends ResponseBodyEmitter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SseEmitter.class);
 
 	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
@@ -51,6 +58,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * Guards access to write operations on the response.
 	 */
 	private final Lock writeLock = new ReentrantLock();
+
+	private volatile @Nullable Long lastEmissionNanoTime;
 
 	/**
 	 * Create a new SseEmitter instance.
@@ -134,9 +143,28 @@ public class SseEmitter extends ResponseBodyEmitter {
 		this.writeLock.lock();
 		try {
 			super.send(dataToSend);
+			this.lastEmissionNanoTime = System.nanoTime();
 		}
 		finally {
 			this.writeLock.unlock();
+		}
+	}
+
+	void notifyOfHeartbeatTick(Duration heartbeatPeriod) {
+		boolean skip = Optional.ofNullable(lastEmissionNanoTime)
+				.map(lastEmissionNanoTime -> System.nanoTime() - lastEmissionNanoTime)
+				.map(nanoTimeElapsedSinceLastEmission -> nanoTimeElapsedSinceLastEmission < heartbeatPeriod.toNanos())
+				.orElse(false);
+		if (skip) {
+			return;
+		}
+		LOGGER.trace("Sending heartbeat to {}", this);
+		SseEmitter.SseEventBuilder eventBuilder = SseEmitter.event().name("ping").data("ping", MediaType.TEXT_PLAIN);
+		try {
+			send(eventBuilder);
+		} catch (IOException | RuntimeException e) {
+			// According to SseEmitter's Javadoc, the container itself will call SseEmitter#completeWithError
+			LOGGER.debug(e.getMessage());
 		}
 	}
 

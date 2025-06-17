@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.ServletContext;
 import org.jspecify.annotations.Nullable;
@@ -693,6 +694,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 		adapter.setCallableInterceptors(configurer.getCallableInterceptors());
 		adapter.setDeferredResultInterceptors(configurer.getDeferredResultInterceptors());
+		Optional.ofNullable(configurer.getSseHeartbeatPeriod()).ifPresent(adapter::setSseHeartbeatPeriod);
 
 		return adapter;
 	}
