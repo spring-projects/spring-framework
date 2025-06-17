@@ -149,37 +149,37 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			}
 		});
 
-		switch (this.method.name()) {
-			case "GET" :
-				builder.GET();
-				break;
-			case "DELETE" :
-				builder.DELETE();
-				break;
-			default :
-				builder.method(this.method.name(), bodyPublisher(headers, body));
+		if (body != null) {
+			builder.method(this.method.name(), bodyPublisher(headers, body));
+		}
+		else {
+			switch (this.method.name()) {
+				case "GET" :
+					builder.GET();
+					break;
+				case "DELETE" :
+					builder.DELETE();
+					break;
+				default :
+					builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
+			}
 		}
 		return builder.build();
 	}
 
-	private HttpRequest.BodyPublisher bodyPublisher(HttpHeaders headers, @Nullable Body body) {
-		if (body != null) {
-			Flow.Publisher<ByteBuffer> publisher = new OutputStreamPublisher<>(
-					os -> body.writeTo(StreamUtils.nonClosing(os)), BYTE_MAPPER, this.executor, null);
+	private HttpRequest.BodyPublisher bodyPublisher(HttpHeaders headers, Body body) {
+		Flow.Publisher<ByteBuffer> publisher = new OutputStreamPublisher<>(
+				os -> body.writeTo(StreamUtils.nonClosing(os)), BYTE_MAPPER, this.executor, null);
 
-			long contentLength = headers.getContentLength();
-			if (contentLength > 0) {
-				return HttpRequest.BodyPublishers.fromPublisher(publisher, contentLength);
-			}
-			else if (contentLength == 0) {
-				return HttpRequest.BodyPublishers.noBody();
-			}
-			else {
-				return HttpRequest.BodyPublishers.fromPublisher(publisher);
-			}
+		long contentLength = headers.getContentLength();
+		if (contentLength > 0) {
+			return HttpRequest.BodyPublishers.fromPublisher(publisher, contentLength);
+		}
+		else if (contentLength == 0) {
+			return HttpRequest.BodyPublishers.noBody();
 		}
 		else {
-			return HttpRequest.BodyPublishers.noBody();
+			return HttpRequest.BodyPublishers.fromPublisher(publisher);
 		}
 	}
 

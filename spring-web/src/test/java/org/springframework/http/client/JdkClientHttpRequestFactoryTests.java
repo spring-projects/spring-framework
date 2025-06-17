@@ -96,10 +96,21 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		}
 	}
 
+	@Test // gh-35068
+	void deleteRequestWithBody() throws Exception {
+		URI uri = URI.create(baseUrl + "/echo");
+		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.DELETE);
+		StreamUtils.copy("body", StandardCharsets.ISO_8859_1, request.getBody());
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.ISO_8859_1))
+					.as("Invalid request body").isEqualTo("body");
+		}
+	}
 
 	@Test // gh-34971
 	@EnabledForJreRange(min = JRE.JAVA_19) // behavior fixed in Java 19
-	void requestContentLengthHeader() throws Exception {
+	void requestContentLengthHeaderWhenNoBody() throws Exception {
 		URI uri = URI.create(baseUrl + "/header/Content-Length");
 		assertNoContentLength(uri, HttpMethod.GET);
 		assertNoContentLength(uri, HttpMethod.DELETE);
