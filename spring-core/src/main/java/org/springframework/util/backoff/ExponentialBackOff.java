@@ -21,10 +21,10 @@ import java.util.StringJoiner;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link BackOff} that increases the back off period for each
- * retry attempt. When the interval has reached the {@linkplain #setMaxInterval
- * max interval}, it is no longer increased. Stops retrying once the
- * {@linkplain #setMaxElapsedTime max elapsed time} has been reached.
+ * Implementation of {@link BackOff} that increases the back-off period for each attempt.
+ * When the interval has reached the {@linkplain #setMaxInterval max interval}, it is no
+ * longer increased. Stops once the {@linkplain #setMaxElapsedTime max elapsed time} or
+ * {@linkplain #setMaxAttempts max attempts} has been reached.
  *
  * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms;
  * the default multiplier is {@value #DEFAULT_MULTIPLIER}; and the default max
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * as follows:
  *
  * <pre>
- * request#     back off
+ * request#     back-off
  *
  *  1              2000
  *  2              3000
@@ -55,14 +55,21 @@ import org.springframework.util.Assert;
  *
  * @author Stephane Nicoll
  * @author Gary Russell
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class ExponentialBackOff implements BackOff {
 
 	/**
-	 * The default initial interval.
+	 * The default initial interval: 2000 ms.
 	 */
 	public static final long DEFAULT_INITIAL_INTERVAL = 2000L;
+
+	/**
+	 * The default jitter range for each interval: 0 ms.
+	 * @since 7.0
+	 */
+	public static final long DEFAULT_JITTER = 0;
 
 	/**
 	 * The default multiplier (increases the interval by 50%).
@@ -70,23 +77,25 @@ public class ExponentialBackOff implements BackOff {
 	public static final double DEFAULT_MULTIPLIER = 1.5;
 
 	/**
-	 * The default maximum back off time.
+	 * The default maximum back-off time: 30000 ms.
 	 */
 	public static final long DEFAULT_MAX_INTERVAL = 30000L;
 
 	/**
-	 * The default maximum elapsed time.
+	 * The default maximum elapsed time: unlimited.
 	 */
 	public static final long DEFAULT_MAX_ELAPSED_TIME = Long.MAX_VALUE;
 
 	/**
-	 * The default maximum attempts.
+	 * The default maximum attempts: unlimited.
 	 * @since 6.1
 	 */
 	public static final int DEFAULT_MAX_ATTEMPTS = Integer.MAX_VALUE;
 
 
 	private long initialInterval = DEFAULT_INITIAL_INTERVAL;
+
+	private long jitter = DEFAULT_JITTER;
 
 	private double multiplier = DEFAULT_MULTIPLIER;
 
@@ -100,6 +109,7 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * Create an instance with the default settings.
 	 * @see #DEFAULT_INITIAL_INTERVAL
+	 * @see #DEFAULT_JITTER
 	 * @see #DEFAULT_MULTIPLIER
 	 * @see #DEFAULT_MAX_INTERVAL
 	 * @see #DEFAULT_MAX_ELAPSED_TIME
@@ -135,29 +145,57 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * Set the value to multiply the current interval by for each retry attempt.
+	 * Set the jitter range (ms) to apply for each interval, leading to random
+	 * milliseconds within the range to be subtracted or added, resulting in a
+	 * value between {@code interval - jitter} and {@code interval + jitter}
+	 * but never below {@code initialInterval} or above {@code maxInterval}.
+	 * If a multiplier is specified, it applies to the jitter range as well.
+	 * @since 7.0
+	 */
+	public void setJitter(long jitter) {
+		Assert.isTrue(jitter >= 0, () -> "Invalid jitter '" + jitter + "': Must be >=0.");
+		this.jitter = jitter;
+	}
+
+	/**
+	 * Return the jitter range to apply for each interval.
+	 * @since 7.0
+	 */
+	public long getJitter() {
+		return this.jitter;
+	}
+
+	/**
+	 * Set the value to multiply the current interval by for each attempt.
+	 * <p>This applies to the {@linkplain #setInitialInterval initial interval}
+	 * as well as the {@linkplain #setJitter jitter range}.
 	 */
 	public void setMultiplier(double multiplier) {
 		checkMultiplier(multiplier);
 		this.multiplier = multiplier;
 	}
 
+	private void checkMultiplier(double multiplier) {
+		Assert.isTrue(multiplier >= 1, () -> "Invalid multiplier '" + multiplier + "': " +
+				"Should be greater than or equal to 1. A multiplier of 1 is equivalent to a fixed interval.");
+	}
+
 	/**
-	 * Return the value to multiply the current interval by for each retry attempt.
+	 * Return the value to multiply the current interval by for each attempt.
 	 */
 	public double getMultiplier() {
 		return this.multiplier;
 	}
 
 	/**
-	 * Set the maximum back off time in milliseconds.
+	 * Set the maximum back-off time in milliseconds.
 	 */
 	public void setMaxInterval(long maxInterval) {
 		this.maxInterval = maxInterval;
 	}
 
 	/**
-	 * Return the maximum back off time in milliseconds.
+	 * Return the maximum back-off time in milliseconds.
 	 */
 	public long getMaxInterval() {
 		return this.maxInterval;
@@ -211,15 +249,11 @@ public class ExponentialBackOff implements BackOff {
 		return new ExponentialBackOffExecution();
 	}
 
-	private void checkMultiplier(double multiplier) {
-		Assert.isTrue(multiplier >= 1, () -> "Invalid multiplier '" + multiplier + "'. Should be greater than " +
-					"or equal to 1. A multiplier of 1 is equivalent to a fixed interval.");
-	}
-
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", ExponentialBackOff.class.getSimpleName() + "{", "}")
 				.add("initialInterval=" + this.initialInterval)
+				.add("jitter=" + this.jitter)
 				.add("multiplier=" + this.multiplier)
 				.add("maxInterval=" + this.maxInterval)
 				.add("maxElapsedTime=" + this.maxElapsedTime)
@@ -234,7 +268,7 @@ public class ExponentialBackOff implements BackOff {
 
 		private long currentElapsedTime = 0;
 
-		private int attempts;
+		private int attempts = 0;
 
 		@Override
 		public long nextBackOff() {
@@ -249,23 +283,30 @@ public class ExponentialBackOff implements BackOff {
 
 		private long computeNextInterval() {
 			long maxInterval = getMaxInterval();
-			if (this.currentInterval >= maxInterval) {
-				return maxInterval;
+			long nextInterval;
+			if (this.currentInterval < 0) {
+				nextInterval = getInitialInterval();
 			}
-			else if (this.currentInterval < 0) {
-				long initialInterval = getInitialInterval();
-				this.currentInterval = Math.min(initialInterval, maxInterval);
+			else if (this.currentInterval >= maxInterval) {
+				nextInterval = maxInterval;
 			}
 			else {
-				this.currentInterval = multiplyInterval(maxInterval);
+				nextInterval = Math.min((long) (this.currentInterval * getMultiplier()), maxInterval);
 			}
-			return this.currentInterval;
+			this.currentInterval = nextInterval;
+			return Math.min(applyJitter(nextInterval), maxInterval);
 		}
 
-		private long multiplyInterval(long maxInterval) {
-			long i = this.currentInterval;
-			i *= getMultiplier();
-			return Math.min(i, maxInterval);
+		private long applyJitter(long interval) {
+			long jitter = getJitter();
+			if (jitter > 0) {
+				long initialInterval = getInitialInterval();
+				long applicableJitter = jitter * (interval / initialInterval);
+				long min = Math.max(interval - applicableJitter, initialInterval);
+				long max = Math.min(interval + applicableJitter, getMaxInterval());
+				return min + (long) (Math.random() * (max - min));
+			}
+			return interval;
 		}
 
 		@Override
