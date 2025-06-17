@@ -136,6 +136,8 @@ public final class HttpServiceProxyFactory {
 
 		private @Nullable HttpExchangeAdapter exchangeAdapter;
 
+		private Function<HttpExchangeAdapter, HttpExchangeAdapter> exchangeAdapterDecorator = Function.identity();
+
 		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
 		private final List<HttpRequestValues.Processor> requestValuesProcessors = new ArrayList<>();
@@ -155,6 +157,17 @@ public final class HttpServiceProxyFactory {
 		 */
 		public Builder exchangeAdapter(HttpExchangeAdapter adapter) {
 			this.exchangeAdapter = adapter;
+			return this;
+		}
+
+		/**
+		 * Provide a function to wrap the configured {@code HttpExchangeAdapter}.
+		 * @param decorator a client adapted to {@link HttpExchangeAdapter}
+		 * @return this same builder instance
+		 * @since 7.0
+		 */
+		public Builder exchangeAdapterDecorator(Function<HttpExchangeAdapter, HttpExchangeAdapter> decorator) {
+			this.exchangeAdapterDecorator = this.exchangeAdapterDecorator.andThen(decorator);
 			return this;
 		}
 
@@ -207,9 +220,10 @@ public final class HttpServiceProxyFactory {
 		 */
 		public HttpServiceProxyFactory build() {
 			Assert.notNull(this.exchangeAdapter, "HttpClientAdapter is required");
+			HttpExchangeAdapter adapterToUse = this.exchangeAdapterDecorator.apply(this.exchangeAdapter);
 
 			return new HttpServiceProxyFactory(
-					this.exchangeAdapter, initArgumentResolvers(), this.requestValuesProcessors,
+					adapterToUse, initArgumentResolvers(), this.requestValuesProcessors,
 					this.embeddedValueResolver);
 		}
 
