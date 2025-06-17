@@ -57,7 +57,7 @@ public @interface Retryable {
 	Class<? extends Throwable>[] value() default {};
 
 	/**
-	 * Applicable exceptions types to attempt a retry for. This attribute
+	 * Applicable exception types to attempt a retry for. This attribute
 	 * allows for the convenient specification of assignable exception types.
 	 * <p>The default is empty, leading to a retry attempt for any exception.
 	 * @see #excludes()
@@ -67,7 +67,7 @@ public @interface Retryable {
 	Class<? extends Throwable>[] includes() default {};
 
 	/**
-	 * Non-applicable exceptions types to avoid a retry for. This attribute
+	 * Non-applicable exception types to avoid a retry for. This attribute
 	 * allows for the convenient specification of assignable exception types.
 	 * <p>The default is empty, leading to a retry attempt for any exception.
 	 * @see #includes()
@@ -117,7 +117,7 @@ public @interface Retryable {
 	 * A multiplier for a delay for the next retry attempt, applied
 	 * to the previous delay (starting with {@link #delay()}) as well
 	 * as to the applicable {@link #jitterDelay()} for each attempt.
-	 * <p>The default is 1.0, effectively leading to a fixed delay.
+	 * <p>The default is 1.0, effectively resulting in a fixed delay.
 	 * @see #delay()
 	 * @see #jitterDelay()
 	 * @see #maxDelay()
@@ -127,7 +127,7 @@ public @interface Retryable {
 	/**
 	 * The maximum delay for any retry attempt (in milliseconds), limiting
 	 * how far {@link #jitterDelay()} and {@link #delayMultiplier()} can
-	 * increase {@link #delay()}.
+	 * increase the {@linkplain #delay() delay}.
 	 * <p>The default is unlimited.
 	 * @see #delay()
 	 * @see #jitterDelay()

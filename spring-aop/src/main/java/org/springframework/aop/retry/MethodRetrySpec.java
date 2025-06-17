@@ -26,8 +26,8 @@ import java.util.Collections;
  *
  * @author Juergen Hoeller
  * @since 7.0
- * @param includes applicable exceptions types to attempt a retry for
- * @param excludes non-applicable exceptions types to avoid a retry for
+ * @param includes applicable exception types to attempt a retry for
+ * @param excludes non-applicable exception types to avoid a retry for
  * @param predicate a predicate for filtering exceptions from applicable methods
  * @param maxAttempts the maximum number of retry attempts
  * @param delay the base delay after the initial invocation (in milliseconds)
@@ -49,7 +49,7 @@ public record MethodRetrySpec(
 		long maxDelay) {
 
 	public MethodRetrySpec(MethodRetryPredicate predicate, int maxAttempts, long delay) {
-		this(predicate, maxAttempts, delay, 0,1.0, Integer.MAX_VALUE);
+		this(predicate, maxAttempts, delay, 0, 1.0, Integer.MAX_VALUE);
 	}
 
 	public MethodRetrySpec(MethodRetryPredicate predicate, int maxAttempts, long delay,

@@ -118,7 +118,6 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				}
 				@Override
 				public String getName() {
-					Object target = invocation.getThis();
 					return ClassUtils.getQualifiedMethodName(method, (target != null ? target.getClass() : null));
 				}
 			});

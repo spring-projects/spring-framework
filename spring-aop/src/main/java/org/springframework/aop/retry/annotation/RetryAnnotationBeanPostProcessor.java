@@ -21,10 +21,10 @@ import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvis
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
- * A convenient {@link BeanPostProcessor} that applies {@link RetryAnnotationInterceptor}
+ * A convenient {@link org.springframework.beans.factory.config.BeanPostProcessor
+ * BeanPostProcessor} that applies {@link RetryAnnotationInterceptor}
  * to all bean methods annotated with {@link Retryable} annotations.
  *
  * @author Juergen Hoeller
