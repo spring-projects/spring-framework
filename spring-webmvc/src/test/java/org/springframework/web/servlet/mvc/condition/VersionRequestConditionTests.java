@@ -70,32 +70,31 @@ public class VersionRequestConditionTests {
 
 	@Test
 	void fixedVersionMatch() {
-		String conditionVersion = "1.2";
+		VersionRequestCondition condition = condition("1.2");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, true);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, true); // match initially, reject if chosen
 	}
 
 	@Test
 	void baselineVersionMatch() {
-		String conditionVersion = "1.2+";
+		VersionRequestCondition condition = condition("1.2+");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, false);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, false);
 	}
 
 	private void testMatch(
-			String requestVersion, String conditionVersion, boolean notCompatible, boolean notAcceptable) {
+			String requestVersion, VersionRequestCondition condition, boolean matches, boolean notAcceptable) {
 
 		MockHttpServletRequest request = requestWithVersion(requestVersion);
-		VersionRequestCondition condition = condition(conditionVersion);
 		VersionRequestCondition match = condition.getMatchingCondition(request);
 
-		if (notCompatible) {
+		if (!matches) {
 			assertThat(match).isNull();
 			return;
 		}
@@ -155,7 +154,7 @@ public class VersionRequestConditionTests {
 	}
 
 	private VersionRequestCondition emptyCondition() {
-		return new VersionRequestCondition();
+		return new VersionRequestCondition(null, this.strategy);
 	}
 
 	private MockHttpServletRequest requestWithVersion(String v) {

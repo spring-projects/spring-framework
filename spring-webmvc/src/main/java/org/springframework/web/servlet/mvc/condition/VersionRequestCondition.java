@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
@@ -57,20 +58,24 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 	private final Set<String> content;
 
 
-	public VersionRequestCondition() {
-		this.versionValue = null;
-		this.version = null;
-		this.baselineVersion = false;
-		this.versionStrategy = NO_OP_VERSION_STRATEGY;
-		this.content = Collections.emptySet();
-	}
-
-	public VersionRequestCondition(String configuredVersion, ApiVersionStrategy versionStrategy) {
-		this.baselineVersion = configuredVersion.endsWith("+");
-		this.versionValue = updateVersion(configuredVersion, this.baselineVersion);
-		this.version = versionStrategy.parseVersion(this.versionValue);
-		this.versionStrategy = versionStrategy;
-		this.content = Set.of(configuredVersion);
+	/**
+	 * Constructor with the version, if set on the {@code @RequestMapping}, and
+	 * the {@code ApiVersionStrategy}, if API versioning is enabled.
+	 */
+	public VersionRequestCondition(@Nullable String version, @Nullable ApiVersionStrategy strategy) {
+		this.versionStrategy = (strategy != null ? strategy : NO_OP_VERSION_STRATEGY);
+		if (StringUtils.hasText(version)) {
+			this.baselineVersion = version.endsWith("+");
+			this.versionValue = updateVersion(version, this.baselineVersion);
+			this.version = this.versionStrategy.parseVersion(this.versionValue);
+			this.content = Set.of(version);
+		}
+		else {
+			this.versionValue = null;
+			this.version = null;
+			this.baselineVersion = false;
+			this.content = Collections.emptySet();
+		}
 	}
 
 	private static String updateVersion(String version, boolean baselineVersion) {
@@ -103,23 +108,23 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 			return this;
 		}
 
-		Comparable<?> version = (Comparable<?>) request.getAttribute(VERSION_ATTRIBUTE_NAME);
-		if (version == null) {
+		Comparable<?> requestVersion = (Comparable<?>) request.getAttribute(VERSION_ATTRIBUTE_NAME);
+		if (requestVersion == null) {
 			String value = this.versionStrategy.resolveVersion(request);
-			version = (value != null ? parseVersion(value) : this.versionStrategy.getDefaultVersion());
-			this.versionStrategy.validateVersion(version, request);
-			version = (version != null ? version : NO_VERSION_ATTRIBUTE);
-			request.setAttribute(VERSION_ATTRIBUTE_NAME, (version));
+			requestVersion = (value != null ? parseVersion(value) : this.versionStrategy.getDefaultVersion());
+			this.versionStrategy.validateVersion(requestVersion, request);
+			requestVersion = (requestVersion != null ? requestVersion : NO_VERSION_ATTRIBUTE);
+			request.setAttribute(VERSION_ATTRIBUTE_NAME, (requestVersion));
 		}
 
-		if (version == NO_VERSION_ATTRIBUTE) {
+		if (requestVersion == NO_VERSION_ATTRIBUTE) {
 			return this;
 		}
 
 		// At this stage, match all versions as baseline versions.
 		// Strict matching for fixed versions is enforced at the end in handleMatch.
 
-		int result = compareVersions(this.version, version);
+		int result = compareVersions(this.version, requestVersion);
 		return (result <= 0 ? this : null);
 	}
 
