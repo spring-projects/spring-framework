@@ -352,6 +352,12 @@ public class HandlerMethod extends AnnotatedMethod {
 		return (this.bean.hashCode() * 31 + super.hashCode());
 	}
 
+	/**
+	 * Returns a concise description of this {@code HandlerMethod}, which is used
+	 * in log and error messages.
+	 * <p>The description should typically include the method signature of the
+	 * underlying handler method for clarity and debugging purposes.
+	 */
 	@Override
 	public String toString() {
 		return this.description;
