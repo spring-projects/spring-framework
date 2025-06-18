@@ -130,14 +130,13 @@ public class ReflectiveRuntimeHintsRegistrar {
 
 	private ReflectiveProcessor instantiateClass(Class<? extends ReflectiveProcessor> type) {
 		try {
-			Constructor<? extends ReflectiveProcessor> constructor = type.getDeclaredConstructor();
-			ReflectionUtils.makeAccessible(constructor);
-			return constructor.newInstance();
+			return ReflectionUtils.accessibleConstructor(type).newInstance();
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException("Failed to instantiate " + type, ex);
 		}
 	}
+
 
 	private static class DelegatingReflectiveProcessor implements ReflectiveProcessor {
 
@@ -151,9 +150,10 @@ public class ReflectiveRuntimeHintsRegistrar {
 		public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
 			this.processors.forEach(processor -> processor.registerReflectionHints(hints, element));
 		}
-
 	}
 
-	private record Entry(AnnotatedElement element, ReflectiveProcessor processor) {}
+
+	private record Entry(AnnotatedElement element, ReflectiveProcessor processor) {
+	}
 
 }

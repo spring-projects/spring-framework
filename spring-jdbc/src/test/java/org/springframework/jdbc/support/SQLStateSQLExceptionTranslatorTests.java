@@ -27,6 +27,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
@@ -107,6 +108,11 @@ class SQLStateSQLExceptionTranslatorTests {
 	@Test
 	void translateCannotAcquireLock() {
 		assertTranslation("40001", CannotAcquireLockException.class);
+	}
+
+	@Test
+	void translateQueryTimeout() {
+		assertTranslation("57014", QueryTimeoutException.class);
 	}
 
 	@Test

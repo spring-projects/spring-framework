@@ -453,7 +453,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 						() -> {
 							CompletableFuture<?> invokeResult = ((CompletableFuture<?>) invokeOperation(invoker));
 							if (invokeResult == null) {
-								return null;
+								throw new IllegalStateException("Returned CompletableFuture must not be null: " + method);
 							}
 							return invokeResult.exceptionallyCompose(ex -> {
 								invokeFailure.set(true);
