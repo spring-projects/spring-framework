@@ -353,10 +353,10 @@ public class HandlerMethod extends AnnotatedMethod {
 	}
 
 	/**
-	 * Returns the description of this handler method.
-	 * This method is used in log and error messages,
-	 * so the returned description should typically include the method signature
-	 * of the underlying handler method for clarity and debugging purposes.
+	 * Returns a concise description of this {@code HandlerMethod}, which is used
+	 * in log and error messages.
+	 * <p>The description should typically include the method signature of the
+	 * underlying handler method for clarity and debugging purposes.
 	 */
 	@Override
 	public String toString() {
