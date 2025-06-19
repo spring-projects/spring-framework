@@ -23,6 +23,8 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
@@ -88,6 +90,21 @@ public class VersionRequestConditionTests {
 		testMatch("v1.1", condition, false, false);
 		testMatch("v1.2", condition, true, false);
 		testMatch("v1.3", condition, true, false);
+	}
+
+	@Test
+	void notVersionedMatch() {
+		VersionRequestCondition condition = new VersionRequestCondition(null, this.strategy);
+		this.strategy.addSupportedVersion("1.1", "1.3");
+
+		testMatch("v1.1", condition, true, false);
+		testMatch("v1.3", condition, true, false);
+
+		assertThatThrownBy(() -> condition.getMatchingCondition(exchangeWithVersion("1.2")))
+				.isInstanceOf(InvalidApiVersionException.class);
+
+		assertThatThrownBy(() -> condition.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/"))))
+				.isInstanceOf(MissingApiVersionException.class);
 	}
 
 	private void testMatch(

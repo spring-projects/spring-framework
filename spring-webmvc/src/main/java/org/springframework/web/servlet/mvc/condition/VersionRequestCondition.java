@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -104,10 +105,6 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 
 	@Override
 	public @Nullable VersionRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (this.version == null) {
-			return this;
-		}
-
 		Comparable<?> requestVersion = (Comparable<?>) request.getAttribute(VERSION_ATTRIBUTE_NAME);
 		if (requestVersion == null) {
 			String value = this.versionStrategy.resolveVersion(request);
@@ -117,7 +114,7 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 			request.setAttribute(VERSION_ATTRIBUTE_NAME, (requestVersion));
 		}
 
-		if (requestVersion == NO_VERSION_ATTRIBUTE) {
+		if (this.version == null || requestVersion == NO_VERSION_ATTRIBUTE) {
 			return this;
 		}
 

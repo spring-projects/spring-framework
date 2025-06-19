@@ -105,10 +105,6 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 
 	@Override
 	public @Nullable VersionRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (this.version == null) {
-			return this;
-		}
-
 		Comparable<?> requestVersion = exchange.getAttribute(VERSION_ATTRIBUTE_NAME);
 		if (requestVersion == null) {
 			String value = this.versionStrategy.resolveVersion(exchange);
@@ -118,7 +114,7 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 			exchange.getAttributes().put(VERSION_ATTRIBUTE_NAME, (requestVersion));
 		}
 
-		if (requestVersion == NO_VERSION_ATTRIBUTE) {
+		if (this.version == null || requestVersion == NO_VERSION_ATTRIBUTE) {
 			return this;
 		}
 
