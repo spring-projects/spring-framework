@@ -16,12 +16,13 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,24 +35,18 @@ import org.springframework.web.reactive.config.EnableWebFlux;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ApplicationContextTests {
+@SpringJUnitConfig
+class ApplicationContextTests {
 
-	private WebTestClient client;
+	@Autowired
+	ApplicationContext context;
 
-
-	@BeforeEach
-	public void setUp() throws Exception {
-
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(WebConfig.class);
-		context.refresh();
-
-		this.client = WebTestClient.bindToApplicationContext(context).build();
-	}
 
 	@Test
-	public void test() throws Exception {
-		this.client.get().uri("/test")
+	void buildWithDefaults() {
+		var client = WebTestClient.bindToApplicationContext(context).build();
+
+		client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("It works!");
@@ -60,20 +55,15 @@ public class ApplicationContextTests {
 
 	@Configuration
 	@EnableWebFlux
-	static class WebConfig {
-
-		@Bean
-		public TestController controller() {
-			return new TestController();
-		}
-
+	@Import(TestController.class)
+	static class WebFluxConfig {
 	}
 
 	@RestController
 	static class TestController {
 
 		@GetMapping("/test")
-		public String handle() {
+		String test() {
 			return "It works!";
 		}
 	}
