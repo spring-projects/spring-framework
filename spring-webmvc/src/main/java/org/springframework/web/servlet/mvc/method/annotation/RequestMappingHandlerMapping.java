@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +30,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotatedMethod;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -415,13 +416,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private void updateConsumesCondition(RequestMappingInfo info, Method method) {
 		ConsumesRequestCondition condition = info.getConsumesCondition();
-		if (!condition.isEmpty()) {
-			for (Parameter parameter : method.getParameters()) {
-				MergedAnnotation<RequestBody> annot = MergedAnnotations.from(parameter).get(RequestBody.class);
-				if (annot.isPresent()) {
-					condition.setBodyRequired(annot.getBoolean("required"));
-					break;
-				}
+		if (condition.isEmpty()) {
+			return;
+		}
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+
+		for (MethodParameter parameter : annotatedMethod.getMethodParameters()) {
+			RequestBody requestBody = parameter.getParameterAnnotation(RequestBody.class);
+			if (requestBody != null) {
+				condition.setBodyRequired(requestBody.required());
+				break;
 			}
 		}
 	}

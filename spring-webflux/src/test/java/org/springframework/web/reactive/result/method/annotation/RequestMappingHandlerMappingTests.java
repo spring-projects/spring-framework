@@ -323,6 +323,48 @@ class RequestMappingHandlerMappingTests {
 				.containsExactly("h1=hv1", "!h2");
 	}
 
+	@Test
+	void requestBodyAnnotationFromInterfaceIsRespected() {
+		this.handlerMapping.afterPropertiesSet();
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		Class<InterfaceControllerImpl> clazz = InterfaceControllerImpl.class;
+		Method method = ReflectionUtils.findMethod(clazz, "post", Foo.class);
+		assertThat(method).isNotNull();
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, clazz);
+		assertThat(info).isNotNull();
+
+		mapping.registerHandlerMethod(new InterfaceControllerImpl(), method, info);
+		assertThat(info.getConsumesCondition()).isNotNull();
+		assertThat(info.getConsumesCondition().isBodyRequired()).isFalse();
+		assertThat(info.getConsumesCondition().getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void requestBodyAnnotationFromImplementationOverridesInterface() {
+		this.handlerMapping.afterPropertiesSet();
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		Class<InterfaceControllerImplOverridesRequestBody> clazz = InterfaceControllerImplOverridesRequestBody.class;
+		Method method = ReflectionUtils.findMethod(clazz, "post", Foo.class);
+		assertThat(method).isNotNull();
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, clazz);
+		assertThat(info).isNotNull();
+
+		mapping.registerHandlerMethod(new InterfaceControllerImplOverridesRequestBody(), method, info);
+		assertThat(info.getConsumesCondition()).isNotNull();
+		assertThat(info.getConsumesCondition().isBodyRequired()).isTrue();
+		assertThat(info.getConsumesCondition().getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_JSON);
+	}
+
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
@@ -501,6 +543,22 @@ class RequestMappingHandlerMappingTests {
 		public void post() {}
 	}
 
+	@Controller
+	@RequestMapping(value = "/controller", consumes = { "application/json" })
+	interface InterfaceController {
+		@PostMapping("/postMapping")
+		void post(@RequestBody(required = false) Foo foo);
+	}
+
+	static class InterfaceControllerImpl implements InterfaceController {
+		@Override
+		public void post(Foo foo) {}
+	}
+
+	static class InterfaceControllerImplOverridesRequestBody implements InterfaceController {
+		@Override
+		public void post(@RequestBody(required = true) Foo foo) {}
+	}
 
 	@HttpExchange
 	@Target(ElementType.TYPE)
