@@ -55,6 +55,7 @@ import org.springframework.web.reactive.result.condition.ConsumesRequestConditio
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -356,6 +357,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private static RequestMethod[] toMethodArray(String method) {
 		return (StringUtils.hasText(method) ?
 				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
+	}
+
+	@Override
+	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod, ServerWebExchange exchange) {
+		super.handleMatch(info, handlerMethod, exchange);
+
+		Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+		if (version != null) {
+			Assert.state(this.apiVersionStrategy != null, "No ApiVersionStrategy");
+			this.apiVersionStrategy.handleDeprecations(version, exchange);
+		}
 	}
 
 	@Override

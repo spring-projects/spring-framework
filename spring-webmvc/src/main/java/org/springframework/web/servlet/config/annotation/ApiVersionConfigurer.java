@@ -26,6 +26,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.accept.ApiDeprecationHandler;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
@@ -33,6 +34,7 @@ import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.accept.PathApiVersionResolver;
 import org.springframework.web.accept.SemanticApiVersionParser;
+import org.springframework.web.accept.StandardApiDeprecationHandler;
 
 /**
  * Configure API versioning.
@@ -49,6 +51,8 @@ public class ApiVersionConfigurer {
 	private boolean versionRequired = true;
 
 	private @Nullable String defaultVersion;
+
+	private @Nullable ApiDeprecationHandler deprecationHandler;
 
 	private final Set<String> supportedVersions = new LinkedHashSet<>();
 
@@ -139,6 +143,18 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
+	 * Configure a handler to add handling for requests with a deprecated API
+	 * version. Typically, this involves sending hints and information about
+	 * the deprecation in response headers.
+	 * @param handler the handler to use
+	 * @see StandardApiDeprecationHandler
+	 */
+	public ApiVersionConfigurer setDeprecationHandler(ApiDeprecationHandler handler) {
+		this.deprecationHandler = handler;
+		return this;
+	}
+
+	/**
 	 * Add to the list of supported versions to validate request versions against.
 	 * Request versions that are not supported result in
 	 * {@link org.springframework.web.accept.InvalidApiVersionException}.
@@ -160,7 +176,7 @@ public class ApiVersionConfigurer {
 
 		DefaultApiVersionStrategy strategy = new DefaultApiVersionStrategy(this.versionResolvers,
 				(this.versionParser != null ? this.versionParser : new SemanticApiVersionParser()),
-				this.versionRequired, this.defaultVersion);
+				this.versionRequired, this.defaultVersion, this.deprecationHandler);
 
 		this.supportedVersions.forEach(strategy::addSupportedVersion);
 

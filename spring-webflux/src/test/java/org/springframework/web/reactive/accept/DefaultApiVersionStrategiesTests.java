@@ -89,7 +89,7 @@ public class DefaultApiVersionStrategiesTests {
 
 			return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				parser, true, defaultValue, detectSupportedVersions);
+				parser, true, defaultValue, detectSupportedVersions, null);
 	}
 
 	private static void validateVersion(String version, DefaultApiVersionStrategy strategy) {

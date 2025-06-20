@@ -22,13 +22,14 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link ApiVersionStrategy} that delegates to the
- * configured version resolvers and version parser.
+ * configured version resolvers, version parser, and deprecation handler.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -43,6 +44,8 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 
 	private final @Nullable Comparable<?> defaultVersion;
 
+	private final @Nullable ApiDeprecationHandler deprecationHandler;
+
 	private final Set<Comparable<?>> supportedVersions = new TreeSet<>();
 
 
@@ -56,10 +59,13 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	 * validation fails with {@link MissingApiVersionException}
 	 * @param defaultVersion a default version to assign to requests that
 	 * don't specify one
+	 * @param deprecationHandler handler to send hints and information about
+	 * deprecated API versions to clients
 	 */
 	public DefaultApiVersionStrategy(
 			List<ApiVersionResolver> versionResolvers, ApiVersionParser<?> versionParser,
-			boolean versionRequired, @Nullable String defaultVersion) {
+			boolean versionRequired, @Nullable String defaultVersion,
+			@Nullable ApiDeprecationHandler deprecationHandler) {
 
 		Assert.notEmpty(versionResolvers, "At least one ApiVersionResolver is required");
 		Assert.notNull(versionParser, "ApiVersionParser is required");
@@ -68,6 +74,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		this.versionParser = versionParser;
 		this.versionRequired = (versionRequired && defaultVersion == null);
 		this.defaultVersion = (defaultVersion != null ? versionParser.parseVersion(defaultVersion) : null);
+		this.deprecationHandler = deprecationHandler;
 	}
 
 
@@ -117,6 +124,13 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 
 		if (!this.supportedVersions.contains(requestVersion)) {
 			throw new InvalidApiVersionException(requestVersion.toString());
+		}
+	}
+
+	@Override
+	public void handleDeprecations(Comparable<?> version, HttpServletRequest request, HttpServletResponse response) {
+		if (this.deprecationHandler != null) {
+			this.deprecationHandler.handleVersion(version, request, response);
 		}
 	}
 

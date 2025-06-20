@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -64,14 +65,16 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 	 * the {@code ApiVersionStrategy}, if API versioning is enabled.
 	 */
 	public VersionRequestCondition(@Nullable String version, @Nullable ApiVersionStrategy strategy) {
-		this.versionStrategy = (strategy != null ? strategy : NO_OP_VERSION_STRATEGY);
 		if (StringUtils.hasText(version)) {
+			Assert.isTrue(strategy != null, "ApiVersionStrategy is required for mapping by version");
+			this.versionStrategy = strategy;
 			this.baselineVersion = version.endsWith("+");
 			this.versionValue = updateVersion(version, this.baselineVersion);
 			this.version = this.versionStrategy.parseVersion(this.versionValue);
 			this.content = Set.of(version);
 		}
 		else {
+			this.versionStrategy = (strategy != null ? strategy : NO_OP_VERSION_STRATEGY);
 			this.versionValue = null;
 			this.version = null;
 			this.baselineVersion = false;
@@ -94,6 +97,9 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 		return " && ";
 	}
 
+	/**
+	 * Return the raw version value.
+	 */
 	public @Nullable String getVersion() {
 		return this.versionValue;
 	}
@@ -111,12 +117,14 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 			requestVersion = (value != null ? parseVersion(value) : this.versionStrategy.getDefaultVersion());
 			this.versionStrategy.validateVersion(requestVersion, exchange);
 			requestVersion = (requestVersion != null ? requestVersion : NO_VERSION_ATTRIBUTE);
-			exchange.getAttributes().put(VERSION_ATTRIBUTE_NAME, (requestVersion));
+			exchange.getAttributes().put(VERSION_ATTRIBUTE_NAME, requestVersion);
 		}
 
 		if (this.version == null || requestVersion == NO_VERSION_ATTRIBUTE) {
 			return this;
 		}
+
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, requestVersion);
 
 		// At this stage, match all versions as baseline versions.
 		// Strict matching for fixed versions is enforced at the end in handleMatch.
@@ -198,6 +206,10 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 		@Override
 		public @Nullable Comparable<?> getDefaultVersion() {
 			return null;
+		}
+
+		@Override
+		public void handleDeprecations(Comparable<?> version, ServerWebExchange exchange) {
 		}
 	}
 

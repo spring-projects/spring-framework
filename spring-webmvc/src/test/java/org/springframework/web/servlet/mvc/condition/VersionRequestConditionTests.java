@@ -50,7 +50,7 @@ public class VersionRequestConditionTests {
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				new SemanticApiVersionParser(), true, defaultValue, null);
 	}
 
 	@Test
