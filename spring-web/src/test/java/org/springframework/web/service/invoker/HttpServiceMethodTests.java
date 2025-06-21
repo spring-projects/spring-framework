@@ -23,6 +23,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
@@ -61,6 +63,7 @@ import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
  * @author Sam Brannen
+ * @author Mengqi Xu
  */
 class HttpServiceMethodTests {
 
@@ -100,6 +103,34 @@ class HttpServiceMethodTests {
 		assertThat(voidEntity.getBody()).isNull();
 
 		List<String> list = service.getList();
+		assertThat(list).containsOnly("exchangeForBody");
+	}
+
+	@Test  // gh-34748
+	void completableFutureService() throws ExecutionException, InterruptedException {
+		CompletableFutureService service = this.proxyFactory.createClient(CompletableFutureService.class);
+
+		service.execute();
+
+		HttpHeaders headers = service.getHeaders().get();
+		assertThat(headers).isNotNull();
+
+		String body = service.getBody().get();
+		assertThat(body).isEqualTo(this.client.getInvokedMethodName());
+
+		Optional<String> optional = service.getBodyOptional().get();
+		assertThat(optional.get()).isEqualTo("exchangeForBody");
+
+		ResponseEntity<String> entity = service.getEntity().get();
+		assertThat(entity.getBody()).isEqualTo("exchangeForEntity");
+
+		Optional<ResponseEntity<String>> entityOptional = service.getEntityOptional().get();
+		assertThat(entityOptional.get().getBody()).isEqualTo("exchangeForEntity");
+
+		ResponseEntity<Void> voidEntity = service.getVoidEntity().get();
+		assertThat(voidEntity.getBody()).isNull();
+
+		List<String> list = service.getList().get();
 		assertThat(list).containsOnly("exchangeForBody");
 	}
 
@@ -291,6 +322,35 @@ class HttpServiceMethodTests {
 
 		@GetExchange
 		List<String> getList();
+
+	}
+
+	@SuppressWarnings("unused")
+	private interface CompletableFutureService {
+
+		@GetExchange
+		CompletableFuture<Void> execute();
+
+		@GetExchange
+		CompletableFuture<HttpHeaders> getHeaders();
+
+		@GetExchange
+		CompletableFuture<String> getBody();
+
+		@GetExchange
+		CompletableFuture<Optional<String>> getBodyOptional();
+
+		@GetExchange
+		CompletableFuture<ResponseEntity<Void>> getVoidEntity();
+
+		@GetExchange
+		CompletableFuture<ResponseEntity<String>> getEntity();
+
+		@GetExchange
+		CompletableFuture<Optional<ResponseEntity<String>>> getEntityOptional();
+
+		@GetExchange
+		CompletableFuture<List<String>> getList();
 
 	}
 

@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -63,6 +64,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * @author Sebastien Deleuze
  * @author Olga Maciaszek-Sharma
  * @author Sam Brannen
+ * @author Mengqi Xu
  * @since 6.0
  */
 final class HttpServiceMethod {
@@ -412,7 +414,29 @@ final class HttpServiceMethod {
 						"Kotlin Coroutines are only supported with reactive implementations");
 			}
 
-			MethodParameter param = new MethodParameter(method, -1).nestedIfOptional();
+			MethodParameter param = new MethodParameter(method, -1);
+			Class<?> paramType = param.getNestedParameterType();
+
+			Function<HttpRequestValues, @Nullable Object> responseFunction;
+			if (paramType.equals(CompletableFuture.class)) {
+				MethodParameter bodyParam = param.nested();
+				MethodParameter nestedParamIfOptional = bodyParam.getNestedParameterType().equals(Optional.class) ?
+						bodyParam.nested() : bodyParam;
+				responseFunction = request ->
+						CompletableFuture.supplyAsync(() ->
+								asOptionalIfNecessary(buildResponseFunction(client, nestedParamIfOptional).apply(request),
+										bodyParam.getNestedParameterType()));
+			}
+			else {
+				responseFunction = request ->
+						asOptionalIfNecessary(buildResponseFunction(client, param.nestedIfOptional()).apply(request),
+								param.getParameterType());
+			}
+
+			return new ExchangeResponseFunction(responseFunction);
+		}
+
+		private static Function<HttpRequestValues, @Nullable Object> buildResponseFunction(HttpExchangeAdapter client, MethodParameter param) {
 			Class<?> paramType = param.getNestedParameterType();
 
 			Function<HttpRequestValues, @Nullable Object> responseFunction;
@@ -423,33 +447,30 @@ final class HttpServiceMethod {
 				};
 			}
 			else if (paramType.equals(HttpHeaders.class)) {
-				responseFunction = request -> asOptionalIfNecessary(client.exchangeForHeaders(request), param);
+				responseFunction = client::exchangeForHeaders;
 			}
 			else if (paramType.equals(ResponseEntity.class)) {
 				MethodParameter bodyParam = param.nested();
 				if (bodyParam.getNestedParameterType().equals(Void.class)) {
-					responseFunction = request ->
-							asOptionalIfNecessary(client.exchangeForBodilessEntity(request), param);
+					responseFunction = client::exchangeForBodilessEntity;
 				}
 				else {
 					ParameterizedTypeReference<?> bodyTypeRef =
 							ParameterizedTypeReference.forType(bodyParam.getNestedGenericParameterType());
-					responseFunction = request ->
-							asOptionalIfNecessary(client.exchangeForEntity(request, bodyTypeRef), param);
+					responseFunction = request -> client.exchangeForEntity(request, bodyTypeRef);
 				}
 			}
 			else {
 				ParameterizedTypeReference<?> bodyTypeRef =
 						ParameterizedTypeReference.forType(param.getNestedGenericParameterType());
-				responseFunction = request ->
-						asOptionalIfNecessary(client.exchangeForBody(request, bodyTypeRef), param);
+				responseFunction = request -> client.exchangeForBody(request, bodyTypeRef);
 			}
 
-			return new ExchangeResponseFunction(responseFunction);
+			return responseFunction;
 		}
 
-		private static @Nullable Object asOptionalIfNecessary(@Nullable Object response, MethodParameter param) {
-			return param.getParameterType().equals(Optional.class) ? Optional.ofNullable(response) : response;
+		private static @Nullable Object asOptionalIfNecessary(@Nullable Object response, Class<?> type) {
+			return type.equals(Optional.class) ? Optional.ofNullable(response) : response;
 		}
 	}
 
