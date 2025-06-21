@@ -184,12 +184,12 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		ConstructorArgumentValues cav = bd.getConstructorArgumentValues();
 		int constructorArgNum = 0;
 		if (StringUtils.hasLength(engine)) {
-			cav.addIndexedArgumentValue(constructorArgNum++, engine);
+			cav.addIndexedArgumentValue(++constructorArgNum, engine);
 		}
-		cav.addIndexedArgumentValue(constructorArgNum++, value);
+		cav.addIndexedArgumentValue(++constructorArgNum, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
 			cav.addIndexedArgumentValue(
-					constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE), "java.lang.Class[]");
+					++constructorArgNum, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE), "java.lang.Class[]");
 		}
 
 		// This is used for Groovy. It's a bean reference to a customizer bean.
@@ -199,7 +199,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 				parserContext.getReaderContext().error("Attribute 'customizer-ref' has empty value", element);
 			}
 			else {
-				cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
+				cav.addIndexedArgumentValue(++constructorArgNum, new RuntimeBeanReference(customizerBeanName));
 			}
 		}
 

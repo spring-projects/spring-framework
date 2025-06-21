@@ -60,9 +60,15 @@ public abstract class DomUtils {
 	public static List<Element> getChildElementsByTagName(Element ele, String... childEleNames) {
 		Assert.notNull(ele, "Element must not be null");
 		Assert.notNull(childEleNames, "Element names collection must not be null");
+
 		List<String> childEleNameList = Arrays.asList(childEleNames);
 		NodeList nl = ele.getChildNodes();
 		List<Element> childEles = new ArrayList<>();
+
+		if (nl == null) {
+			return childEles; // Return empty list if there are no child nodes
+		}
+
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element element && nodeNameMatch(node, childEleNameList)) {
