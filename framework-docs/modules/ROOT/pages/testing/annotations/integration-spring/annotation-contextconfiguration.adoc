@@ -137,6 +137,6 @@ configuration classes as well as context initializers that are declared by super
 or enclosing classes.
 
 See xref:testing/testcontext-framework/ctx-management.adoc[Context Management],
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the `@ContextConfiguration`
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the {spring-framework-api}/test/context/ContextConfiguration.html[`@ContextConfiguration`]
 javadocs for further details.
 
