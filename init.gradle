@@ -1,0 +1,23 @@
+initscript {
+	repositories {
+		maven { url "https://plugins.gradle.org/m2" }
+	}
+	dependencies { classpath("org.openrewrite:plugin:7.8.0") }
+}
+rootProject {
+	plugins.apply(org.openrewrite.gradle.RewritePlugin)
+	dependencies {
+		rewrite("org.openrewrite.recipe:rewrite-testing-frameworks:3.10.0")
+	}
+	rewrite {
+		activeRecipe("org.openrewrite.java.testing.assertj.JUnitToAssertj")
+		setExportDatatables(true)
+	}
+	afterEvaluate {
+		if (repositories.isEmpty()) {
+			repositories {
+				mavenCentral()
+			}
+		}
+	}
+}

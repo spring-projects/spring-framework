@@ -1,7 +1,9 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
+	id 'io.spring.javaformat'
 }
+apply plugin: 'io.spring.javaformat'
 
 repositories {
 	mavenCentral()
