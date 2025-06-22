@@ -90,7 +90,7 @@ abstract class MultipartUtils {
 				channel.close();
 			}
 		}
-		catch (IOException ignore) {
+		catch (IOException ignored) {
 		}
 	}
 
@@ -98,7 +98,7 @@ abstract class MultipartUtils {
 		try {
 			Files.delete(file);
 		}
-		catch (IOException ignore) {
+		catch (IOException ignored) {
 		}
 	}
 

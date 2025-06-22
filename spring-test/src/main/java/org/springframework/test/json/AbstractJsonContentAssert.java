@@ -551,7 +551,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 				read();
 				throw failure(new JsonPathNotExpected(this.json, this.path));
 			}
-			catch (PathNotFoundException ignore) {
+			catch (PathNotFoundException ignored) {
 			}
 		}
 

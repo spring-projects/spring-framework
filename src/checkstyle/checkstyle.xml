@@ -40,7 +40,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.AvoidNestedBlocksCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyCatchBlockCheck">
-			<property name="exceptionVariableName" value="expected|ignore"/>
+			<property name="exceptionVariableName" value="expected|ignored"/>
 		</module>
 
 		<!-- Class Design -->

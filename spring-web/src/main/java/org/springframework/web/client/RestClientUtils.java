@@ -39,7 +39,7 @@ abstract class RestClientUtils {
 		try {
 			return FileCopyUtils.copyToByteArray(message.getBody());
 		}
-		catch (IOException ignore) {
+		catch (IOException ignored) {
 		}
 		return new byte[0];
 	}

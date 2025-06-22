@@ -334,7 +334,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			try {
 				this.source.close();
 			}
-			catch (IOException ignore) {
+			catch (IOException ignored) {
 			}
 		}
 
