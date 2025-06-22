@@ -199,7 +199,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 				parserContext.getReaderContext().error("Attribute 'customizer-ref' has empty value", element);
 			}
 			else {
-				cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
+				cav.addIndexedArgumentValue(constructorArgNum, new RuntimeBeanReference(customizerBeanName));
 			}
 		}
 
